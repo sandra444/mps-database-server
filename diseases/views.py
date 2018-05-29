@@ -1,9 +1,10 @@
 from django.views.generic import ListView, DetailView, CreateView
+from django.template.defaulttags import register
 from mps.mixins import SpecificGroupRequiredMixin
 # from forms import DiseaseForm
 from django.shortcuts import render
-from models import Disease, DiseaseBiologyOtherResources, DiseaseClinicalTrial
-from assays.models import AssayStudy, AssayMatrixItem
+from models import Disease
+from assays.models import AssayStudy, AssayMatrixItem, AssayDataPoint
 from microdevices.models import OrganModel
 from drugtrials.models import FindingResult
 
@@ -15,6 +16,17 @@ from assays.views import get_queryset_with_organ_model_map, get_queryset_with_nu
 class DiseaseList(ListView):
     model = Disease
     template_name = 'diseases/disease_list.html'
+
+    def get_queryset(self):
+        queryset = Disease.objects.all()
+        for disease in queryset:
+            disease.trials = FindingResult.objects.filter(drug_trial__disease__name=disease)
+            disease.models = OrganModel.objects.filter(disease__name=disease)
+            disease.studies = get_user_accessible_studies(self.request.user).filter(
+                assaymatrixitem__organ_model_id__in=disease.models
+            ).distinct()
+            disease.datapoints = AssayDataPoint.objects.filter(study_id__in=disease.studies).count()
+        return queryset
 
 
 class DiseaseOverview(DetailView):
@@ -35,7 +47,6 @@ class DiseaseBiology(DetailView):
         context = {}
         context['disease'] = Disease.objects.get(pk=self.kwargs['pk'])
         disease = context['disease']
-        context['biology_other_resources'] = DiseaseBiologyOtherResources.objects.filter(disease=disease)
         return context
 
 

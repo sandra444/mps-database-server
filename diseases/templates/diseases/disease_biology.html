@@ -98,8 +98,8 @@
             </div>
         </div>
         {% if disease.biology_kegg_pathway_map %}
-            <div class="col-md-4 thumbnail text-center row-center"> <h4><strong><a target="_blank" href="http://www.genome.jp/dbget-bin/www_bget?ds:H01333">KEGG: {{disease.name}} Pathway Map</a></strong></h4>
-                <img src="{{disease.biology_kegg_pathway_map.url}}" class="img-responsive"> KEGG is a database resource for understanding high-level functions and utilities of the biological system.
+            <div class="col-md-4 thumbnail text-center row-center"> <h4><strong><a target="_blank" href="{{disease.biology_kegg_pathway_url}}">KEGG: {{disease.name}} Pathway Map</a></strong></h4>
+                <a target="_blank" href="{{disease.biology_kegg_pathway_map.url}}"><img src="{{disease.biology_kegg_pathway_map.url}}" class="img-responsive"></a> KEGG is a database resource for understanding high-level functions and utilities of the biological system.
             </div>
         {% endif %}
     </div>

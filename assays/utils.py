@@ -228,7 +228,7 @@ class UnicodeWriter:
 
 def get_user_accessible_studies(user):
     """This function acquires a queryset of all studies the user has access to
-    
+
     Params:
     user - Django user instance
     """
@@ -291,7 +291,7 @@ def get_user_accessible_studies(user):
                queryset.filter(**unrestricted_filter).exclude(**unsigned_off_filter).exclude(
                    **missing_stakeholder_filter)
 
-    combined = combined.distinct()
+    combined = combined.distinct().prefetch_related('created_by', 'modified_by', 'signed_off_by')
 
     return combined
 

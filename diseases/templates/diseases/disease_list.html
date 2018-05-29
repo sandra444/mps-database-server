@@ -26,9 +26,9 @@
                 <tr>
                     <th>View</th>
                     <th>Disease</th>
-                    <th>Biology</th>
-                    <th>Clinical Data</th>
-                    <th>Models</th>
+                    {# <th>Biology</th>#}
+                    <th>Clinical Findings</th>
+                    <th>MPS Models</th>
                     <th>Studies</th>
                     <th>Data Points</th>
                     <th>Description</th>
@@ -37,16 +37,18 @@
 
             <tbody>
             {% for disease in object_list %}
+                {# {% for key, value in stat %}#}
                  <tr class="disease" id={{ disease.id }} name={{ disease.name }}>
                     <td><a class="btn btn-primary" href="{{ disease.id }}">View</a></td>
                     <td>{{ disease.name }}</td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td>{{disease.description}}</td>
+                    {# <td></td>#}
+                    <td>{{ disease.trials.count|default:0 }}</td>
+                    <td>{{ disease.models.count|default:0 }}</td>
+                    <td>{{ disease.studies.count|default:0 }}</td>
+                    <td>{{ disease.datapoints|default:0 }}</td>
+                    <td>{{ disease.description }}</td>
                 </tr>
+                {# {% endfor %}#}
             {% endfor %}
             </tbody>
         </table>

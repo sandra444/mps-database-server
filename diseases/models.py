@@ -1,5 +1,8 @@
 from django.db import models
 from mps.base.models import LockableModel
+from microdevices.models import OrganModel
+import drugtrials
+from assays.utils import get_user_accessible_studies
 
 
 class Disease(models.Model):
@@ -31,6 +34,7 @@ class Disease(models.Model):
     biology_blurb = models.TextField(default='', blank=True)
     biology_image = models.ImageField(upload_to='disease_images', null=True, blank=True)
     biology_kegg_pathway_map = models.ImageField(upload_to='disease_images', null=True, blank=True)
+    biology_kegg_pathway_url = models.CharField(max_length=200, null=True, blank=True)
 
     biology_genomic_geo_url = models.CharField(max_length=200, null=True, blank=True)
     biology_genomic_omim_url = models.CharField(max_length=200, null=True, blank=True)
@@ -52,22 +56,22 @@ class Disease(models.Model):
         return self.name
 
 
-class DiseaseBiologyOtherResources(models.Model):
-    disease = models.ForeignKey(Disease, on_delete=models.CASCADE)
-    name = models.CharField(max_length=200, null=True, blank=True)
-    description = models.TextField(default='', blank=True)
-    url = models.CharField(max_length=200, null=True, blank=True)
-
-
-class DiseaseClinicalTrial(models.Model):
-    disease = models.ForeignKey(Disease, on_delete=models.CASCADE)
-    trial_id = models.CharField(max_length=200, null=True, blank=True)
-    trial_name = models.CharField(max_length=200, null=True, blank=True)
-    phase = models.CharField(max_length=20, null=True, blank=True)
-    status = models.CharField(max_length=200, null=True, blank=True)
-    results = models.BooleanField(default=False)
-    institution = models.CharField(max_length=200, null=True, blank=True)
-    drugs = models.CharField(max_length=200, null=True, blank=True)
-
-    def __unicode__(self):
-        return "{} - {}".format(self.disease, self.trial_id)
+# class DiseaseBiologyOtherResources(models.Model):
+#     disease = models.ForeignKey(Disease, on_delete=models.CASCADE)
+#     name = models.CharField(max_length=200, null=True, blank=True)
+#     description = models.TextField(default='', blank=True)
+#     url = models.CharField(max_length=200, null=True, blank=True)
+#
+#
+# class DiseaseClinicalTrial(models.Model):
+#     disease = models.ForeignKey(Disease, on_delete=models.CASCADE)
+#     trial_id = models.CharField(max_length=200, null=True, blank=True)
+#     trial_name = models.CharField(max_length=200, null=True, blank=True)
+#     phase = models.CharField(max_length=20, null=True, blank=True)
+#     status = models.CharField(max_length=200, null=True, blank=True)
+#     results = models.BooleanField(default=False)
+#     institution = models.CharField(max_length=200, null=True, blank=True)
+#     drugs = models.CharField(max_length=200, null=True, blank=True)
+#
+#     def __unicode__(self):
+#         return "{} - {}".format(self.disease, self.trial_id)
