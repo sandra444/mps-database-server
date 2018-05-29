@@ -445,7 +445,8 @@ $(document).ready(function () {
 
             var chart = null;
 
-            if (assays[index].length > 4) {
+            // Line chart if more than one time point
+            if (assays[index].length > 2) {
                 chart = new google.visualization.LineChart(document.getElementById(charts + '_' + index));
 
                 // If the scale is not already small
@@ -460,6 +461,7 @@ $(document).ready(function () {
                     }
                 }
             }
+            // Bar chart if only one time point
             else if (assays[index].length > 1) {
                 // Convert to categories
                 data.insertColumn(0, 'string', data.getColumnLabel(0));
