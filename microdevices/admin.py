@@ -263,6 +263,9 @@ class OrganModelAdmin(LockableAdmin):
                         'mps', 'epa', 'tctc'
                     ),
                     (
+                        'disease'
+                    ),
+                    (
                         'model_image'
                     ),
                     (

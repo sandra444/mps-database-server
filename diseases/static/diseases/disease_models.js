@@ -59,7 +59,7 @@ $(document).ready(function() {
                 'targets': [7]
             },
             {
-                "width": "10%",
+                "width": "5%",
                 "targets": [0, 1]
             }
         ]

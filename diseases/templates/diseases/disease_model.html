@@ -69,11 +69,11 @@
             <tbody>
             {% for disease_model in disease_models %}
                 <tr class="model" id={{ disease_model.id }} name={{ disease_model.name }}>
-                    <td><a class="btn btn-primary" href="/microdevices/model/{{ disease_model.id }}">View</a></td>
-                    <td><a class="btn btn-primary" href="/microdevices/model/{{ disease_model.id }}/update/">Edit</a></td>
+                    <td><a target="_blank" class="btn btn-primary" href="/microdevices/model/{{ disease_model.id }}">View</a></td>
+                    <td><a target="_blank" class="btn btn-primary" href="/microdevices/model/{{ disease_model.id }}/update/">Edit</a></td>
                     <td>{{ disease_model.name }}</td>
                     <td>{{ disease_model.organ|default_if_none:"" }}</td>
-                    <td><a href="/microdevices/device/{{ disease_model.device.id }}">{{ disease_model.device|default_if_none:"" }}</a></td>
+                    <td><a target="_blank" href="/microdevices/device/{{ disease_model.device.id }}">{{ disease_model.device|default_if_none:"" }}</a></td>
                     <td>{{ disease_model.center|default_if_none:"" }}</td>
                     <td>{{ disease_model.description }}</td>
                     <td>
@@ -125,7 +125,7 @@
             {% for study in studies %}
                 {% if not reproducibility or study.data_points %}
                 <tr class="study" id={{ study.id }} name={{ study.id }}>
-                    <td><a class="btn btn-primary" href="/assays/assaystudy/{{study.id}}">View/Edit</a></td>
+                    <td><a target="_blank" class="btn btn-primary" href="/assays/assaystudy/{{study.id}}">View/Edit</a></td>
                     <td style="word-wrap: break-word">{{ study.name }}</td>
                     <td>{{ study.start_date|date:"M d, Y" }}</td>
                     <td>{{ study.get_study_types_string }}</td>

@@ -11,8 +11,8 @@ $(document).ready(function() {
                 "aTargets": [0]
             },
             {
-                "width": "10%",
-                "targets": [0, 1]
+                "width": "50%",
+                "targets": [6]
             }
         ]
     });
