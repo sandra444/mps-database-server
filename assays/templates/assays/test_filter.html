@@ -3,189 +3,189 @@
 
 {% block load %}
     <script src="{% static "assays/test_filter.js" %}"></script>
-    <style>
-    .table-testfilter
-    {
-        width:1100px;
-        vertical-align: text-top;
-        border-spacing: 0px 0px;
-        padding: 0px 0px 0px 5px;
-        border: 0px solid lightskyblue;
-    }
-    .table-responsive
-    {
-        vertical-align: text-top;
-        padding: 5px 20px 5px 20px;
-        border: 0px solid lightskyblue;
-    }
-
-
-    </style>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script src="{% static "assays/chart_display.js" %}"></script>
 {% endblock %}
 
 {% block breadcrumbs %}
     <li class="active">Query Data</li>
 {% endblock %}
 
-
 {% block content %}
-    {% block error %}
-        <div class="row">
-            <div hidden class="alert alert-danger" role="alert" id="error_message">
-                <p id="error">
-                    The server could not find the result to your request.
-                </p>
+    <div id="filter">
+    <div class="row text-center padded-bottom">
+        <a href="#show" type="button" class="btn btn-xlarge btn-primary text-center" id="submit">
+            Show Plots
+        </a>
+    </div>
 
-                <p>
-                    Please try a different query.
-                </p>
-            </div>
+    <div id="number_of_points_container" class="row text-center padded-bottom text-success">
+        <h1 id="select_user_group_message" class="text-danger">Please Select at Least One MPS Model</h1>
+        <h2>Number of Points: <span id="number_of_points"></span></h2>
+    </div>
+
+    <div class="row padded-bottom">
+        <div class="col-md-6">
+{#            <table id="id_study__matrix_item__organmodel_id__in" class="table table-striped table-hover">#}
+            <table id="filter_organ_models" class="table table-striped table-hover filter-table">
+                <thead>
+                    <tr>
+                        <th>Select</th>
+                        <th>MPS Model</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                </tbody>
+            </table>
         </div>
-    {% endblock %}
+        <div class="col-md-6">
+{#            <table id="id_study__group_id__in" class="table table-striped table-hover">#}
+            <table id="filter_groups" class="table table-striped table-hover filter-table">
+                <thead>
+                    <tr>
+                        <th>Select</th>
+                        <th>MPS User Group</th>
+                    </tr>
+                </thead>
+                <tbody>
 
-    <div id="selection">
-
-        <div class="row">
-            <!--
-            <h6 title="Clicking on these buttons should take the user to a place where they can do something with the data, filtered and grouped the way they want." class="text-center">
-                Hover for Design Notes
-            </h6>
-            -->
-            <div class="text-center">
-                {% block submit %}
-                <a href="#show" class="btn btn-primary text-center" id="submit">
-                    Graphs (Line and Bar)
-                </a>
-                <a href="#show" class="btn btn-primary text-center" id="submit">
-                    Reproducibilty Analysis
-                </a>
-                <a href="#show" class="btn btn-primary text-center" id="submit">
-                    Modeling
-                </a>
-                <a href="#show" class="btn btn-primary text-center" id="submit">
-                    Data Export
-                </a>
-                {% endblock %}
-            </div>
-        </div>
-
-        <!--Default filters always show-->
-        <div class="row">
-            <div class="row text-center">
-                <h3 title="Check/uncheck the F box to show/hide filter. Check/uncheck the G box to group/ungroup by indicated content." class="text-center">
-                    Filter (F) and/or Group (G)
-                </h3>
-            </div>
-        </div>
-
-        <div class="row">
-            <div class="col-xs-3">
-                <table class = "table-testfilter">
-                    <td valign="top">
-                    <div class="table-responsive">
-                        <h7 id="header_tier1"></h7>
-                        <h7 id="mytable_tier1"></h7>
-                    </div>
-                    </td>
-                    <td valign="top">
-                    <div class="table-responsive">
-                        <h7 id="header_tier2"></h7>
-                        <h7 id="mytable_tier2"></h7>
-                    </div>
-                    </td>
-                    <td valign="center">
-                        <table>
-
-                            <tr><td>Number of Groups Selected</td></tr>
-                            <tr><td>2</td></tr>
-                            <tr><td>Number of Data Points Selected</td></tr>
-                            <tr><td>4,456</td></tr>
-                            <tr><td>
-                                <h7 class="text-center">
-                                    More Advanced Filter and Group Options &nbsp;
-                                </h7>
-                                <label>
-                                    <input type="radio" name="radioshowhide" id="post-format-show" value="show" >Show
-                                </label>
-                                <label>
-                                    <input type="radio" name="radioshowhide" id="post-format-hide" value = "hide" >Hide
-                                </label>
-                            </td></tr>
-
-                        </table>
-                    </td>
-               </table>
-            </div>
-        </div>
-
-
-
-        <div id="gallery-box">
-            <div class="row">
-                <div class="col-xs-3">
-                    <table class = "table-testfilter">
-                        <td valign="top">
-                        <div class="table-responsive">
-                            <h7 id="header_tier3"></h7>
-                            <h7 id="mytable_tier3"></h7>
-                        </div>
-                        </td>
-                        <td valign="top">
-                        <div class="table-responsive">
-                            <h7 id="header_tier4"></h7>
-                            <h7 id="mytable_tier4"></h7>
-                        </div>
-                        </td>
-                        <td valign="top">
-                        <div class="table-responsive">
-                            <h7 id="header_tier5"></h7>
-                            <h7 id="mytable_tier5"></h7>
-                        </div>
-                        </td>
-                        <td valign="top">
-                        <div class="table-responsive">
-                            <h7 id="header_tier6"></h7>
-                            <h7 id="mytable_tier6"></h7>
-                        </div>
-                        </td>
-                   </table>
-                </div>
-            </div>
-        </div>
-
-        <!--Expanded filters - update all as options are  checked by user and filters are added up top-->
-        <hr>
-        <div class="row">
-        <div class="row text-center">
-            <h3 title="Use the search boxes to finding data of interest. Search results limit display, but must be checked to be applied." class="text-center">
-                Check to Apply Filter - Uncheck to Remove Filter
-            </h3>
-        </div>
-
-        <div class="row">
-            <div class="col-xs-3">
-                <table class = "table-testfilter" id="mysection_filtering">
-                </table>
-            </div>
-        </div>
-
-        <hr>
-        <div class="row">
-            <div class="row text-center">
-                <h2>
-                    Group Table
-                </h2>
-                <div class="row text-left">
-                    <ul>
-                        <li>Put the table here. Make the first column a check box that allows the user a second filter step, check to include.</li>
-                        <li>Make a select all check box in the column header just like in the filtering section.</li>
-                        <li>Once the user is happy with their choices, the click a button on the top to go to a differnt place.</li>
-                        <li>Luke has indicated that he wants to be able to go back and forth from the other location to here (carrying the choices back and forth). That's great!</li>
-                        <li>If the user checks boxes in the Apply Filter section, then unchecks that data element in the Filter Group section, warn them (yes - remove filter, no - put the check back.</li>
-                        <li>Groups and points (in table at top on right) should be updated when rows of this Group Table are checked/unchecked.</li>
-                    </ul>
-                </div>
-            </div>
+                </tbody>
+            </table>
         </div>
     </div>
+
+    <div class="row padded-bottom">
+        <div class="col-xs-6">
+{#            <table id="id_study_assay__target" class="table table-striped table-hover">#}
+            <table id="filter_targets" class="table table-striped table-hover filter-table">
+                <thead>
+                    <tr>
+                        <th>Select</th>
+                        <th>Target/Analyte</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                </tbody>
+            </table>
+        </div>
+        <div class="col-xs-6">
+{#            <table id="id_study_assay__target" class="table table-striped table-hover">#}
+            <table id="filter_compounds" class="table table-striped table-hover filter-table">
+                <thead>
+                    <tr>
+                        <th>Select</th>
+                        <th>Compound</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    </div>
+
+    <div hidden id="results">
+    <div class="row text-center padded-bottom">
+    <a href="#filter"  id="back" class="btn btn-xlarge btn-info">
+        <span class="glyphicon glyphicon-hand-left" aria-hidden="true"></span>
+        Back to Selection
+    </a>
+    </div>
+
+    {% include 'assays/chart_options.html' with chart_prefix="charts" chart_title="Selected Data" %}
+
+    {# Note indicating no data to display initially #}
+    <div id="charts" class="padded-bottom">
+        No data to display
+    </div>
+
+    <div id="heatmap_wrapper" class="padded-bottom">
+        <div class="row">
+            <div id="heatmap_filters" class="col-xs-12">
+                <label for="id_heatmap_matrix">Matrix
+                <select id="id_heatmap_matrix" data-heatmap-index="0"></select>
+                </label>
+                <label for="id_heatmap_target">Target
+                <select id="id_heatmap_target" data-heatmap-index="1"></select>
+                </label>
+                <label for="id_heatmap_method">Method
+                <select id="id_heatmap_method" data-heatmap-index="2"></select>
+                </label>
+                <label for="id_heatmap_unit">Unit
+                <select id="id_heatmap_unit" data-heatmap-index="3"></select>
+                </label>
+                <label for="id_heatmap_sample_location">Sample Location
+                <select id="id_heatmap_sample_location" data-heatmap-index="4"></select>
+                </label>
+                <label for="id_heatmap_subtarget">Subtarget
+                <select id="id_heatmap_subtarget" data-heatmap-index="5"></select>
+                </label>
+                <label for="id_heatmap_time">Time
+                <select id="id_heatmap_time" data-heatmap-index="6"></select>
+                </label>
+            </div>
+        </div>
+
+    <div class="well padded-bottom">
+        <div id="matrix_wrapper" class="overflow-auto" style="max-height:800px;">
+            {# NO INLINE STYLE PLEASE #}
+            <table id="matrix_table" class="table">
+                <tbody id="matrix_body"></tbody>
+            </table>
+        </div>
+    </div>
+    </div>
+
+    <table id="treatment_group_table" class="table table-striped table-bordered">
+        <thead id="treatment_group_head">
+        </thead>
+        <tbody id="treatment_group_display">
+        </tbody>
+    </table>
+
+    <div id="group_display" class="container hidden-print">
+        <table class="table table-bordered">
+            <tbody id="group_display_body">
+
+            </tbody>
+        </table>
+    </div>
+    </div>
+
+    {# TODO TODO TODO #}
+    <div hidden id="filter_popup" title="Dummy Filter">
+        Dummy Filter
+        <table>
+            <thead>
+                <tr>
+                    <th>Select</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><input checked type="checkbox"></td>
+                    <td>Example 1</td>
+                </tr>
+                <tr>
+                    <td><input checked type="checkbox"></td>
+                    <td>Example 2</td>
+                </tr>
+                <tr>
+                    <td><input checked type="checkbox"></td>
+                    <td>Example 3</td>
+                </tr>
+                <tr>
+                    <td><input checked type="checkbox"></td>
+                    <td>Example 4</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
 {% endblock %}
+
+

@@ -1577,7 +1577,3 @@ class AssayStudyImages(StudyViewerMixin, DetailView):
 
 class TestFilterView(TemplateView):
     template_name = 'assays/test_filter.html'
-
-
-class TestFilter2View(TemplateView):
-    template_name = 'assays/test_filter2.html'

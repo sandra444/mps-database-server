@@ -1240,53 +1240,6 @@ def fetch_data_points(request):
         pre_filter.update({
             'matrix_item_id__in': matrix_items
         })
-    elif request.POST.get('filters', ''):
-        current_filters = json.loads(request.POST.get('filters', '{}'))
-        accessible_studies = get_user_accessible_studies(request.user)
-
-        if current_filters.get('groups', []):
-            group_ids = [int(id) for id in current_filters.get('groups', []) if id]
-            accessible_studies = accessible_studies.filter(group_id__in=group_ids)
-
-        matrix_items = AssayMatrixItem.objects.filter(
-            study_id__in=accessible_studies
-        ).prefetch_related(
-            'organ_model',
-            'assaysetupcompound_set__compound_instance',
-            'assaydatapoint_set__study_assay__target'
-        )
-
-        if current_filters.get('organ_models', []):
-            organ_model_ids = [int(id) for id in current_filters.get('organ_models', []) if id]
-
-            matrix_items = matrix_items.filter(
-                organ_model_id__in=organ_model_ids
-            ) | matrix_items.filter(organ_model=None)
-
-        if current_filters.get('compounds', []):
-            compound_ids = [int(id) for id in current_filters.get('compounds', []) if id]
-
-            matrix_items = matrix_items.filter(
-                assaysetupcompound__compound_instance__compound_id__in=compound_ids
-            ) | matrix_items.filter(assaysetupcompound__isnull=True)
-
-        if current_filters.get('targets', []):
-            target_ids = [int(id) for id in current_filters.get('targets', []) if id]
-
-            matrix_items = matrix_items.filter(
-                assaydatapoint__study_assay__target_id__in=target_ids
-            ).distinct()
-
-            pre_filter.update({
-                'study_assay__target_id__in': target_ids
-            })
-
-        pre_filter.update({
-            'matrix_item_id__in': matrix_items.filter(assaydatapoint__isnull=False).distinct()
-        })
-
-        matrix_item = None
-        study = accessible_studies
     else:
         return HttpResponseServerError()
 
@@ -1606,6 +1559,101 @@ def fetch_pre_submission_filters(request):
                         content_type='application/json')
 
 
+def fetch_data_points_from_filters(request):
+    pre_filter = {}
+    if request.POST.get('filters', ''):
+        current_filters = json.loads(request.POST.get('filters', '{}'))
+        accessible_studies = get_user_accessible_studies(request.user)
+
+        # Notice exclusion of missing organ model
+        matrix_items = AssayMatrixItem.objects.filter(
+            study_id__in=accessible_studies
+        ).exclude(
+            organ_model_id=None
+        ).prefetch_related(
+            'organ_model',
+            # 'assaysetupcompound_set__compound_instance',
+            # 'assaydatapoint_set__study_assay__target'
+        )
+
+        if current_filters.get('organ_models', []):
+            organ_model_ids = [int(id) for id in current_filters.get('organ_models', []) if id]
+
+            matrix_items = matrix_items.filter(
+                organ_model_id__in=organ_model_ids
+            )
+
+        accessible_studies = accessible_studies.filter(
+            id__in=list(matrix_items.values_list('study_id', flat=True))
+        )
+
+        matrix_items.prefetch_related(
+            'assaysetupcompound_set__compound_instance',
+            'assaydatapoint_set__study_assay__target'
+        )
+
+        if current_filters.get('groups', []):
+            group_ids = [int(id) for id in current_filters.get('groups', []) if id]
+            accessible_studies = accessible_studies.filter(group_id__in=group_ids)
+
+        if current_filters.get('compounds', []):
+            compound_ids = [int(id) for id in current_filters.get('compounds', []) if id]
+
+            matrix_items = matrix_items.filter(
+                assaysetupcompound__compound_instance__compound_id__in=compound_ids
+            ) | matrix_items.filter(assaysetupcompound__isnull=True)
+
+        if current_filters.get('targets', []):
+            target_ids = [int(id) for id in current_filters.get('targets', []) if id]
+
+            matrix_items = matrix_items.filter(
+                assaydatapoint__study_assay__target_id__in=target_ids
+            ).distinct()
+
+            pre_filter.update({
+                'study_assay__target_id__in': target_ids
+            })
+
+        pre_filter.update({
+            'matrix_item_id__in': matrix_items.filter(assaydatapoint__isnull=False).distinct()
+        })
+
+        matrix_item = None
+        study = accessible_studies
+
+        # Not particularly DRY
+        data_points = AssayDataPoint.objects.filter(
+            **pre_filter
+        ).prefetch_related(
+            # TODO
+            'study_assay__target',
+            'study_assay__method',
+            'study_assay__unit',
+            'sample_location',
+            'matrix_item__matrix',
+            'subtarget'
+        )
+
+        data = get_data_points_for_charting(
+            data_points,
+            request.POST.get('key', ''),
+            request.POST.get('mean_type', ''),
+            request.POST.get('interval_type', ''),
+            request.POST.get('percent_control', ''),
+            request.POST.get('include_all', ''),
+            request.POST.get('truncate_negative', ''),
+            json.loads(request.POST.get('dynamic_excluded', '{}')),
+            study=study,
+            matrix_item=matrix_item,
+            matrix_items=matrix_items
+        )
+
+        return HttpResponse(json.dumps(data),
+                            content_type="application/json")
+    else:
+        return HttpResponseServerError()
+
+
 def study_viewer_validation(request):
     study = None
     if request.POST.get('study', ''):
@@ -1618,7 +1666,7 @@ def study_viewer_validation(request):
     if study:
         return user_is_valid_study_viewer(request.user, study)
     else:
-        return HttpResponseForbidden()
+        return False
 
 
 def study_editor_validation(request):
@@ -1633,99 +1681,11 @@ def study_editor_validation(request):
     if study:
         return is_group_editor(request.user, study.group.name)
     else:
-        return HttpResponseForbidden()
+        return False
 
-
-#~#Sandra Added for demo of grouping on stage....may want to remove when done with
-def fetch_test_filter(request):
-    data = {}
-
-    # ~# What sending into test_filter.py file
-    mydictionary = {}
-    #~# dGroup and dGroup number - tier - Filter by - Group by
-    mydictionary['d01-1-y-n-datagroup'] = 'Data Group'
-    mydictionary['d02-1-y-y-mpsmodel'] = 'MPS Model'
-    #mydictionary['d03-1-y-y-organmodel'] = 'Organ Model'
-    #mydictionary['d04-1-n-n-device'] = 'Device'
-    mydictionary['d05-1-n-n-disease'] = 'Disease'
-
-    mydictionary['d05-1-y-y-datapointtarget'] = 'Assay Target'
-    mydictionary['d06-2-n-n-datapointmethodkit'] = 'Method/Kit'
-    mydictionary['d07-2-y-y-datapointreportingunit'] = 'Reporting Unit'
-    mydictionary['d08-2-n-n-datapointsampletime'] = 'Data Point Sample Time'
-    mydictionary['d09-2-y-y-datapointlocation'] = 'Data Point Sample Location'
-    mydictionary['d10-2-n-n-datapointvalue'] = 'Data Point Value'
-
-    mydictionary['s01-3-n-n-studyname'] = 'Study Name'
-    mydictionary['s02-3-n-n-studycategory'] = 'Study Category(s) (Tox, Disease, etc)'
-    mydictionary['s03-3-n-n-chipmatrix'] = 'Chip Set/Matrix'
-    mydictionary['s04-3-n-n-chipname'] = 'Chip Name/Item'
-    mydictionary['s05-3-n-n-chiptype'] = 'Chip Type (Compound or Control)'
-
-    mydictionary['p01-1-y-y-compoundname'] = 'Compound Name'
-    mydictionary['p02-4-n-n-compoundadditionlocation'] = 'Compound Addition Location'
-    mydictionary['p03-4-n-n-compoundconcentration'] = 'Compound Concentration'
-    mydictionary['p04-4-n-n-compoundadditiontime'] = 'Compound Addition Time'
-    mydictionary['p05-4-n-n-compoundadditionduration'] = 'Compound Addition Duration'
-
-    mydictionary['l01-1-n-n-celltype'] = 'Cell Type'
-    mydictionary['l02-5-n-n-cellorigin'] = 'Cell Origin'
-    mydictionary['l03-5-n-n-cellsample'] = 'Cell Sample'
-    mydictionary['l04-5-n-n-celllot'] = 'Cell Lot'
-    mydictionary['l05-5-n-n-celldensity'] = 'Cell Density'
-
-    mydictionary['g01-6-n-n-settingname'] = 'Setting Name'
-    mydictionary['g02-6-n-n-settinglocation'] = 'Setting Location'
-    mydictionary['g03-6-n-n-settingvalue'] = 'Setting Value'
-    mydictionary['g04-6-n-n-settingtime'] = 'Setting Time'
-    mydictionary['g05-6-n-n-settingduration'] = 'Setting Duration'
-
-    keylist = []
-    vallist = []
-
-    for k in mydictionary:
-        keylist.append(k)
-        vallist.append(mydictionary[k])
-
-    data['keylist']= keylist
-    data['vallist'] = vallist
-
-    #lists of names for filter list (but not building in filtering functionality)
-    mpsmodellist = ['organ model 1','organ model 2','organ model 3','organ model 4']
-    datagrouplist = ['Rusyn_TAMU', 'Taylor_MPS', 'Cirit_MIT']
-    diseaselist = ['a disease','another disease']
-    studynamelist = ['study 1','study 2','study 3']
-    devicelist = ['some device','another device','other device']
-    chipmatrixlist = list(AssayMatrix.objects.values_list('name', flat=True))
-    chipnamelist = list(AssayMatrixItem.objects.values_list('name', flat=True))
-    datapointmethodkitlist = list(AssayMethod.objects.values_list('name', flat=True))
-    datapointtargetlist = list(AssayTarget.objects.values_list('name', flat=True))
-    datapointreportingunitlist = list(PhysicalUnits.objects.values_list('unit', flat=True))
-    compoundnamelist = ['cisplatin','cadmium','calcium','alcohol','blah blah']
-    datapointlocationlist = list(AssaySampleLocation.objects.values_list('name', flat=True))
-
-    data['mpsmodellist'] = mpsmodellist
-    data['datagrouplist'] = datagrouplist
-    data['studynamelist'] = studynamelist
-    data['devicelist'] = devicelist
-    data['chipmatrixlist'] = chipmatrixlist
-    data['chipnamelist'] = chipnamelist
-    data['datapointmethodkitlist'] = datapointmethodkitlist
-    data['datapointtargetlist'] = datapointtargetlist
-    data['datapointreportingunitlist'] = datapointreportingunitlist
-    data['compoundnamelist'] = compoundnamelist
-    data['diseaselist'] = diseaselist
-    data['datapointlocationlist'] = datapointlocationlist
-
-    return HttpResponse(json.dumps(data),
-                        content_type='application/json')
-
-#~#End of Sandra's added section
 
 # TODO TODO TODO
 switch = {
-    #~# Sandra added the next line for grouping demo
-    'fetch_test_filter': {'call': fetch_test_filter},
     'fetch_center_id': {'call': fetch_center_id},
     'fetch_organ_models': {'call': fetch_organ_models},
     'fetch_protocols': {'call': fetch_protocols},
@@ -1750,6 +1710,9 @@ switch = {
     },
     'fetch_pre_submission_filters': {
         'call': fetch_pre_submission_filters
+    },
+    'fetch_data_points_from_filters': {
+        'call': fetch_data_points_from_filters
     }
 }
 
