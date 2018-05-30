@@ -103,7 +103,7 @@ class OrganModelAdd(SpecificGroupRequiredMixin, CreateView):
 
     def get_context_data(self, **kwargs):
         context = super(OrganModelAdd, self).get_context_data(**kwargs)
-        if 'formset' not in context:
+        if 'protocol_formset' not in context:
             if self.request.POST:
                 context['protocol_formset'] = OrganModelProtocolFormsetFactory(self.request.POST, self.request.FILES)
                 context['location_formset'] = OrganModelLocationFormsetFactory(self.request.POST, self.request.FILES)
