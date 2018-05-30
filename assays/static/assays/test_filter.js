@@ -140,7 +140,6 @@ $(document).ready(function() {
                         // Cuts out extra unneeded pieces in the table
                         dom: 'lfrtip',
                         fixedHeader: {headerOffset: 50},
-                        responsive: true,
                         // order: table_ordering,
                         order: [1, 'asc'],
                         // Needed to destroy old table
@@ -158,8 +157,7 @@ $(document).ready(function() {
                 $('.dataTables_filter').css('float', 'left').prop('title', 'Separate terms with a space to search multiple fields');
                 $('.dataTables_length').css('float', 'right');
 
-                // Recalculate responsive and fixed headers
-                $($.fn.dataTable.tables(true)).DataTable().responsive.recalc();
+                // Recalculate fixed headers
                 $($.fn.dataTable.tables(true)).DataTable().fixedHeader.adjust();
             },
             error: function (xhr, errmsg, err) {
