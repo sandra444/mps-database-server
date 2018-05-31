@@ -74,7 +74,9 @@ class DiseaseModel(DetailView):
         context['disease_models'] = OrganModel.objects.filter(disease__name=context['disease'])
         # studies = AssayStudy.objects.filter(disease=True, assaymatrixitem__organ_model_id__in=context['disease_models']).distinct()
 
-        combined = get_user_accessible_studies(self.request.user).filter(assaymatrixitem__organ_model_id__in=context['disease_models']).distinct()
+        combined = get_user_accessible_studies(self.request.user).filter(
+            assaymatrixitem__organ_model_id__in=context['disease_models']
+        ).distinct()
 
         get_queryset_with_organ_model_map(combined)
         get_queryset_with_number_of_data_points(combined)

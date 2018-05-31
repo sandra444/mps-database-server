@@ -398,10 +398,7 @@ class AssayStudyList(LoginRequiredMixin, ListView):
         get_queryset_with_number_of_data_points(combined)
         get_queryset_with_stakeholder_sign_off(combined)
 
-        return combined.prefetch_related(
-            'created_by',
-            'signed_off_by'
-        )
+        return combined
 
 
 class AssayStudyAdd(OneGroupRequiredMixin, CreateView):

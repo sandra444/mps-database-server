@@ -291,7 +291,12 @@ def get_user_accessible_studies(user):
                queryset.filter(**unrestricted_filter).exclude(**unsigned_off_filter).exclude(
                    **missing_stakeholder_filter)
 
-    combined = combined.distinct().prefetch_related('created_by', 'modified_by', 'signed_off_by')
+    # May be overzealous to prefetch here
+    combined = combined.distinct().prefetch_related(
+        'created_by',
+        'modified_by',
+        'signed_off_by'
+    )
 
     return combined
 
