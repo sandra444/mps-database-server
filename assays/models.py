@@ -13,7 +13,26 @@ from django.contrib.auth.models import Group, User
 import urllib
 import collections
 
-from operator import attrgetter
+
+# These are here to avoid potentially messy imports, may change later
+def tuple_attrgetter(*items):
+    """Custom attrgetter that ALWAYS returns a tuple"""
+    # NOTE WILL NEED TO CHANGE IF MOVED TO PYTHON 3
+    if any(not (isinstance(item, str) or isinstance(item, unicode)) for item in items):
+        raise TypeError('attribute name must be a string')
+
+    def g(obj):
+        return tuple(resolve_attr(obj, attr) for attr in items)
+
+    return g
+
+
+def resolve_attr(obj, attr):
+    """Helper function for tuple_attrgetter"""
+    for name in attr.split("."):
+        obj = getattr(obj, name)
+    return obj
+
 
 # TODO MAKE MODEL AND FIELD NAMES MORE CONSISTENT/COHERENT
 
@@ -43,12 +62,13 @@ TIME_CONVERSIONS = [
 
 TIME_CONVERSIONS = collections.OrderedDict(TIME_CONVERSIONS)
 
+# SUBJECT TO CHANGE
 DEFAULT_SETUP_CRITERIA = (
-    'matrix.study_id',
-    'device_id',
+    # 'matrix.study_id',
+    # 'device_id',
     'organ_model_id',
-    'organ_model_protocol_id',
-    'variance_from_organ_model_protocol'
+    # 'organ_model_protocol_id',
+    # 'variance_from_organ_model_protocol'
 )
 
 DEFAULT_SETTING_CRITERIA = (
@@ -70,9 +90,10 @@ DEFAULT_COMPOUND_CRITERIA = (
 )
 
 DEFAULT_CELL_CRITERIA = (
-    'cell_sample_id',
     # Alternative
-    # 'cell_sample__cell_type_id',
+    'cell_sample_id',
+    # 'cell_sample.cell_type_id',
+    # 'cell_sample.cell_subtype_id',
     'biosensor_id',
     'density',
     'density_unit_id',
@@ -1750,9 +1771,9 @@ class AssayMatrixItem(FlaggableModel):
     def devolved_settings(self, criteria=DEFAULT_SETTING_CRITERIA):
         """Makes a tuple of cells (for comparison)"""
         setting_tuple = []
-        attribute_getter = attrgetter(*criteria)
+        attribute_getter = tuple_attrgetter(*criteria)
         for setting in self.assaysetupsetting_set.all():
-            current_tuple = attrgetter(setting)
+            current_tuple = attribute_getter(setting)
 
             setting_tuple.append(current_tuple)
 
@@ -1772,7 +1793,7 @@ class AssayMatrixItem(FlaggableModel):
     def devolved_cells(self, criteria=DEFAULT_CELL_CRITERIA):
         """Makes a tuple of cells (for comparison)"""
         cell_tuple = []
-        attribute_getter = attrgetter(*criteria)
+        attribute_getter = tuple_attrgetter(*criteria)
         for cell in self.assaysetupcell_set.all():
             current_tuple = attribute_getter(cell)
 
@@ -1794,7 +1815,7 @@ class AssayMatrixItem(FlaggableModel):
     def devolved_compounds(self, criteria=DEFAULT_COMPOUND_CRITERIA):
         """Makes a tuple of compounds (for comparison)"""
         compound_tuple = []
-        attribute_getter =  attrgetter(*criteria)
+        attribute_getter =  tuple_attrgetter(*criteria)
         for compound in self.assaysetupcompound_set.all():
             current_tuple = attribute_getter(compound)
 

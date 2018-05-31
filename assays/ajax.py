@@ -722,17 +722,14 @@ def get_item_groups(study, criteria, matrix_items=None):
     )
 
     if not criteria:
-        setup_criteria = DEFAULT_SETUP_CRITERIA
-        setting_criteria = DEFAULT_SETTING_CRITERIA
-        compound_criteria = DEFAULT_COMPOUND_CRITERIA
-        cell_criteria = DEFAULT_CELL_CRITERIA
-    else:
-        setup_criteria = criteria.get('setup_criteria', {})
-        setting_criteria = criteria.get('setting_criteria', {})
-        compound_criteria = criteria.get('compound_criteria', {})
-        cell_criteria = criteria.get('cell_criteria', {})
+        criteria = {
+            'setup': DEFAULT_SETUP_CRITERIA,
+            'setting': DEFAULT_SETTING_CRITERIA,
+            'compound': DEFAULT_COMPOUND_CRITERIA,
+            'cell': DEFAULT_CELL_CRITERIA
+        }
 
-    setup_attribute_getter = attrgetter(*setup_criteria)
+    setup_attribute_getter = tuple_attrgetter(*criteria.get('setup', ['']))
 
     for setup in setups:
         # treatment_group_tuple = (
@@ -746,16 +743,19 @@ def get_item_groups(study, criteria, matrix_items=None):
         #     setup.devolved_compounds(),
         #     setup.devolved_cells()
         # )
-        treatment_group_tuple = setup_attribute_getter(setup)
+        treatment_group_tuple = ()
 
-        if setting_criteria:
-            treatment_group_tuple += setup.devolved_settings(setting_criteria)
+        if criteria.get('setup', ''):
+            treatment_group_tuple = setup_attribute_getter(setup)
 
-        if compound_criteria:
-            treatment_group_tuple += setup.devolved_compounds(compound_criteria)
+        if criteria.get('setting', ''):
+            treatment_group_tuple += setup.devolved_settings(criteria.get('setting'))
 
-        if cell_criteria:
-            treatment_group_tuple += setup.devolved_cells(cell_criteria)
+        if criteria.get('compound', ''):
+            treatment_group_tuple += setup.devolved_compounds(criteria.get('compound'))
+
+        if criteria.get('cell', ''):
+            treatment_group_tuple += setup.devolved_cells(criteria.get('cell'))
 
         current_representative = treatment_groups.setdefault(treatment_group_tuple, setup.quick_dic())
 
@@ -921,31 +921,43 @@ def get_data_points_for_charting(
 
     all_sample_locations = {}
 
+    # Accommodation of "special" grouping
+    group_sample_location = True
+    group_method = True
+    group_time = True
+
+    # CRUDE
+    if group_criteria:
+        group_sample_location = 'sample_location' in group_criteria.get('special', [])
+        group_method = 'method' in group_criteria.get('special', [])
+        group_time = 'time' in group_criteria.get('special', [])
+
     # Append the additional_data as necessary
     # Why is this done? It is an expedient way to avoid duplicating data
     if additional_data:
         raw_data.extend(additional_data)
 
-    if not matrix_item:
-        if not matrix_items:
-            heatmap_matrices = AssayMatrix.objects.filter(
-                study_id=study,
-                representation='plate'
-            )
-        else:
-            heatmap_matrices = AssayMatrix.objects.filter(
-                assaymatrixitem__in=matrix_items,
-                representation='plate'
-            )
-
-        heatmap_data = raw_data.filter(matrix_item__matrix_id__in=heatmap_matrices)
-
-        final_data.update({
-            'heatmap': get_data_for_heatmap(heatmap_data)
-        })
-
-        if key == 'device':
-            raw_data = raw_data.exclude(matrix_item__matrix_id__in=heatmap_matrices)
+    # Don't bother with heatmaps at the moment
+    # if not matrix_item:
+    #     if not matrix_items:
+    #         heatmap_matrices = AssayMatrix.objects.filter(
+    #             study_id=study,
+    #             representation='plate'
+    #         )
+    #     else:
+    #         heatmap_matrices = AssayMatrix.objects.filter(
+    #             assaymatrixitem__in=matrix_items,
+    #             representation='plate'
+    #         )
+    #
+    #     heatmap_data = raw_data.filter(matrix_item__matrix_id__in=heatmap_matrices)
+    #
+    #     final_data.update({
+    #         'heatmap': get_data_for_heatmap(heatmap_data)
+    #     })
+    #
+    #     if key == 'device':
+    #         raw_data = raw_data.exclude(matrix_item__matrix_id__in=heatmap_matrices)
 
     for raw in raw_data:
         # Now uses full name
@@ -1038,7 +1050,7 @@ def get_data_points_for_charting(
         target = target_method[0]
         method = target_method[1]
 
-        if targets.count(target) > 1:
+        if group_method and targets.count(target) > 1:
             target = u'{} [{}]'.format(target, method)
 
         initial_data.update({
@@ -1082,7 +1094,7 @@ def get_data_points_for_charting(
                             time: average_and_interval
                         })
 
-    accommodate_sample_location = len(all_sample_locations) > 1
+    accommodate_sample_location = group_sample_location and len(all_sample_locations) > 1
 
     for target, units in averaged_data.items():
         for unit, tags in units.items():
@@ -1645,7 +1657,8 @@ def fetch_data_points_from_filters(request):
             json.loads(request.POST.get('dynamic_excluded', '{}')),
             study=study,
             matrix_item=matrix_item,
-            matrix_items=matrix_items
+            matrix_items=matrix_items,
+            group_criteria=json.loads(request.POST.get('criteria', '{}'))
         )
 
         return HttpResponse(json.dumps(data),

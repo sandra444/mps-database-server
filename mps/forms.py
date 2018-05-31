@@ -114,7 +114,7 @@ class MyUserChangeForm(UserChangeForm):
                         'data group editor: {{ data group }}<br>'
                         'data group admin (can sign off): {{ data group }} Admin<br>'
                         'stakeholder group admin (can approve): {{ access group }} Admin<br>'
-                        'stakeholder/access group viewer: {{ access group }} Viewer<br><br>',
-                        '***NOTE THAT EDITORS ARE ALSO VIEWERS AND ADMINS ARE EDITORS AND VIEWERS***<br><br>'
+                        'stakeholder/access group viewer: {{ access group }} Viewer<br><br>'
+                        '***NOTE THAT EDITORS ARE ALSO VIEWERS AND ADMINS ARE EDITORS AND VIEWERS***<br><br>',
             'user_permissions': '***THIS IS FOR THE ADMIN INTERFACE ONLY***<br>',
         }

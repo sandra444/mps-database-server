@@ -9,6 +9,9 @@ $(document).ready(function() {
         'targets': {}
     };
 
+    var group_criteria = {};
+    var grouping_checkbox_selector = $('.grouping-checkbox');
+
     // Odd ID
     var submit_button_selector = $('#submit');
     // var back_button_selector = ;
@@ -20,10 +23,25 @@ $(document).ready(function() {
     var charts_name = 'charts';
 
     function show_plots() {
+        // THIS IS A CRUDE WAY TO TEST THE GROUPING
+        // Reset the criteria
+        group_criteria = {};
+        grouping_checkbox_selector.each(function() {
+            if (this.checked) {
+                if (!group_criteria[$(this).attr('data-group-relation')]) {
+                    group_criteria[$(this).attr('data-group-relation')] = [];
+                }
+                group_criteria[$(this).attr('data-group-relation')].push(
+                    $(this).attr('data-group')
+                );
+            }
+        });
+
         var data = {
             // TODO TODO TODO CHANGE CALL
             call: 'fetch_data_points_from_filters',
             filters: JSON.stringify(filters),
+            criteria: JSON.stringify(group_criteria),
             csrfmiddlewaretoken: window.COOKIES.csrfmiddlewaretoken
         };
 
@@ -193,6 +211,11 @@ $(document).ready(function() {
 
     // Setup triggers
     $('#' + charts_name + 'chart_options').find('input').change(function() {
+        show_plots();
+    });
+
+    // NAIVE FOR NOW
+    $('#' + charts_name + 'refresh_plots').click(function() {
         show_plots();
     });
 });

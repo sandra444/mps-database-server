@@ -24,7 +24,7 @@
                         </td>
                         <td>
                             {# Exclude from grouping for now #}
-{#                            <input checked type="checkbox">#}
+{#                            <input checked type="checkbox" class="grouping-checkbox">#}
                         </td>
                         <td>
                             Study
@@ -38,7 +38,7 @@
 {#                            </a>#}
 {#                        </td>#}
 {#                        <td>#}
-{#                            <input checked type="checkbox">#}
+{#                            <input checked type="checkbox" class="grouping-checkbox">#}
 {#                        </td>#}
 {#                        <td>#}
 {#                            Device#}
@@ -52,7 +52,7 @@
                             </a>
                         </td>
                         <td>
-                            <input checked type="checkbox">
+                            <input data-group='organ_model_id' data-group-relation='setup' checked type="checkbox" class="grouping-checkbox">
                         </td>
                         <td>
                             MPS Model
@@ -66,7 +66,7 @@
 {#                            </a>#}
 {#                        </td>#}
 {#                        <td>#}
-{#                            <input checked type="checkbox">#}
+{#                            <input checked type="checkbox" class="grouping-checkbox">#}
 {#                        </td>#}
 {#                        <td>#}
 {#                            MPS Model Protocol#}
@@ -80,7 +80,7 @@
 {#                            </a>#}
 {#                        </td>#}
 {#                        <td>#}
-{#                            <input checked type="checkbox">#}
+{#                            <input checked type="checkbox" class="grouping-checkbox">#}
 {#                        </td>#}
 {#                        <td>#}
 {#                            Variance from Protocol#}
@@ -88,13 +88,14 @@
 {#                    </tr>#}
                     <tr>
                         <td>
-                            <a role='button' class="btn btn-sm">
+                            {# Subject to change #}
+                            <a data-filter-relation='matrix_item__matrix' role='button' class="btn btn-sm">
                                 <span class="glyphicon glyphicon-filter"></span>
                             </a>
                         </td>
                         <td>
                             {# Not currently used in grouping #}
-{#                            <input type="checkbox">#}
+{#                            <input type="checkbox" class="grouping-checkbox">#}
                         </td>
                         <td>
 
@@ -103,13 +104,13 @@
                     </tr>
                     <tr>
                         <td>
-                            <a role='button' class="btn btn-sm">
+                            <a data-filter-relation='matrix_item' role='button' class="btn btn-sm">
                                 <span class="glyphicon glyphicon-filter"></span>
                             </a>
                         </td>
                         <td>
                         {# Not currently used in grouping #}
-{#                            <input type="checkbox">#}
+{#                            <input type="checkbox" class="grouping-checkbox">#}
                         </td>
                         <td>
                             Matrix Item
@@ -124,7 +125,7 @@
 {#                        </td>#}
 {#                        <td>#}
                         {# Not currently used in grouping #}
-{#                            <input type="checkbox">#}
+{#                            <input type="checkbox" class="grouping-checkbox">#}
 {#                        </td>#}
 {#                        <td>#}
 {#                            Test Type#}
@@ -132,13 +133,13 @@
 {#                    </tr>#}
                     <tr>
                         <td>
-                            <a role='button' class="btn btn-sm">
+                            <a data-filter-relation='study_assay__target' role='button' class="btn btn-sm">
                                 <span class="glyphicon glyphicon-filter"></span>
                             </a>
                         </td>
                         <td>
                         {# For the moment, Target *ALWAYS* acts as a grouping criteria #}
-{#                            <input type="checkbox">#}
+{#                            <input type="checkbox" class="grouping-checkbox">#}
                         </td>
                         <td>
                            Target/Analyte
@@ -147,12 +148,12 @@
                     {# NOTE THAT THESE ARE SPECIAL EXCEPTIONS TO HOW GROUPING NORMALLY WORKS #}
                     <tr>
                         <td>
-                            <a role='button' class="btn btn-sm">
+                            <a data-filter-relation='study_assay__method' role='button' class="btn btn-sm">
                                 <span class="glyphicon glyphicon-filter"></span>
                             </a>
                         </td>
                         <td>
-                            <input checked type="checkbox">
+                            <input data-group='method' data-group-relation='special' checked type="checkbox" class="grouping-checkbox">
                         </td>
                         <td>
                             Method/Kit
@@ -160,12 +161,12 @@
                     </tr>
                     <tr>
                         <td>
-                            <a role='button' class="btn btn-sm">
+                            <a data-filter-relation='sample_location' role='button' class="btn btn-sm">
                                 <span class="glyphicon glyphicon-filter"></span>
                             </a>
                         </td>
                         <td>
-                            <input checked type="checkbox">
+                            <input data-group='sample_location' data-group-relation='special' checked type="checkbox" class="grouping-checkbox">
                         </td>
                         <td>
                             Sample Location
@@ -173,12 +174,12 @@
                     </tr>
                     <tr>
                         <td>
-                            <a role='button' class="btn btn-sm">
+                            <a data-filter-relation='time' role='button' class="btn btn-sm">
                                 <span class="glyphicon glyphicon-filter"></span>
                             </a>
                         </td>
                         <td>
-                            <input checked type="checkbox">
+                            <input data-group='time' data-group-relation='special' checked type="checkbox" class="grouping-checkbox">
                         </td>
                         <td>
                             Sample Time
@@ -208,12 +209,12 @@
                 <tbody>
                     <tr>
                         <td>
-                            <a role='button' class="btn btn-sm">
+                            <a data-filter-relation='cell_sample__cell_type' role='button' class="btn btn-sm">
                                 <span class="glyphicon glyphicon-filter"></span>
                             </a>
                         </td>
                         <td>
-                            <input type="checkbox">
+                            <input data-group='cell_sample.cell_type_id' data-group-relation='cell' type="checkbox" class="grouping-checkbox">
                         </td>
                         <td>
                             Cell Type
@@ -221,12 +222,12 @@
                     </tr>
                     <tr>
                         <td>
-                            <a role='button' class="btn btn-sm">
+                            <a data-filter-relation='cell_sample__cell_subtype' role='button' class="btn btn-sm">
                                 <span class="glyphicon glyphicon-filter"></span>
                             </a>
                         </td>
                         <td>
-                            <input type="checkbox">
+                            <input data-group='cell_sample.cell_subtype_id' data-group-relation='cell' type="checkbox" class="grouping-checkbox">
                         </td>
                         <td>
                             Cell Origin
@@ -234,12 +235,12 @@
                     </tr>
                     <tr>
                         <td>
-                            <a role='button' class="btn btn-sm">
+                            <a data-filter-relation='cell_sample' role='button' class="btn btn-sm">
                                 <span class="glyphicon glyphicon-filter"></span>
                             </a>
                         </td>
                         <td>
-                            <input checked type="checkbox">
+                            <input data-group='cell_sample_id' data-group-relation='cell' checked type="checkbox" class="grouping-checkbox">
                         </td>
                         <td>
                             Cell Sample (Includes Type and Origin)
@@ -247,12 +248,12 @@
                     </tr>
                     <tr>
                         <td>
-                            <a role='button' class="btn btn-sm">
+                            <a data-filter-relation='biosensor' role='button' class="btn btn-sm">
                                 <span class="glyphicon glyphicon-filter"></span>
                             </a>
                         </td>
                         <td>
-                            <input checked type="checkbox">
+                            <input data-group='biosensor_id' data-group-relation='cell' checked type="checkbox" class="grouping-checkbox">
                         </td>
                         <td>
                             Cell Biosensor
@@ -260,12 +261,12 @@
                     </tr>
                     <tr>
                         <td>
-                            <a role='button' class="btn btn-sm">
+                            <a data-filter-relation='passage' role='button' class="btn btn-sm">
                                 <span class="glyphicon glyphicon-filter"></span>
                             </a>
                         </td>
                         <td>
-                            <input checked type="checkbox">
+                            <input data-group='passage' data-group-relation='cell' checked type="checkbox" class="grouping-checkbox">
                         </td>
                         <td>
                             Cell Passage
@@ -273,12 +274,12 @@
                     </tr>
                     <tr>
                         <td>
-                            <a role='button' class="btn btn-sm">
+                            <a data-filter-relation='density' role='button' class="btn btn-sm">
                                 <span class="glyphicon glyphicon-filter"></span>
                             </a>
                         </td>
                         <td>
-                            <input checked type="checkbox">
+                            <input data-group='density' data-group-relation='cell' checked type="checkbox" class="grouping-checkbox">
                         </td>
                         <td>
                             Cell Density
@@ -291,7 +292,7 @@
 {#                            </a>#}
 {#                        </td>#}
 {#                        <td>#}
-{#                            <input checked type="checkbox">#}
+{#                            <input checked type="checkbox" class="grouping-checkbox">#}
 {#                        </td>#}
 {#                        <td>#}
 {#                            Cell Density Unit#}
@@ -299,12 +300,12 @@
 {#                    </tr>#}
                     <tr>
                         <td>
-                            <a role='button' class="btn btn-sm">
+                            <a data-filter-relation='addition_location' role='button' class="btn btn-sm">
                                 <span class="glyphicon glyphicon-filter"></span>
                             </a>
                         </td>
                         <td>
-                            <input checked type="checkbox">
+                            <input data-group='addition_location_id' data-group-relation='cell' checked type="checkbox" class="grouping-checkbox">
                         </td>
                         <td>
                             Cell Addition Location
@@ -340,7 +341,7 @@
                             </a>
                         </td>
                         <td>
-                            <input checked type="checkbox">
+                            <input data-group='compound_instance.compound_id' data-group-relation='compound' checked type="checkbox" class="grouping-checkbox">
                         </td>
                         <td>
                             Compound
@@ -353,7 +354,7 @@
                             </a>
                         </td>
                         <td>
-                            <input checked type="checkbox">
+                            <input data-group='compound_instance.supplier_id' data-group-relation='compound' checked type="checkbox" class="grouping-checkbox">
                         </td>
                         <td>
                             Compound Supplier
@@ -366,7 +367,7 @@
                             </a>
                         </td>
                         <td>
-                            <input checked type="checkbox">
+                            <input data-group='compound_instance.lot' data-group-relation='compound' checked type="checkbox" class="grouping-checkbox">
                         </td>
                         <td>
                             Compound Lot
@@ -379,7 +380,7 @@
                             </a>
                         </td>
                         <td>
-                            <input checked type="checkbox">
+                            <input data-group='compound_instance.receipt_date' data-group-relation='compound' checked type="checkbox" class="grouping-checkbox">
                         </td>
                         <td>
                             Compound Receipt Date
@@ -392,7 +393,7 @@
                             </a>
                         </td>
                         <td>
-                            <input checked type="checkbox">
+                            <input data-group='concentration' data-group-relation='compound' checked type="checkbox" class="grouping-checkbox">
                         </td>
                         <td>
                             Compound Concentration
@@ -405,7 +406,7 @@
 {#                            </a>#}
 {#                        </td>#}
 {#                        <td>#}
-{#                            <input checked type="checkbox">#}
+{#                            <input checked type="checkbox" class="grouping-checkbox">#}
 {#                        </td>#}
 {#                        <td>#}
 {#                            Compound Concentration Unit#}
@@ -418,7 +419,7 @@
                             </a>
                         </td>
                         <td>
-                            <input checked type="checkbox">
+                            <input data-group='addition_time' data-group-relation='compound' checked type="checkbox" class="grouping-checkbox">
                         </td>
                         <td>
                             Compound Addition Time
@@ -431,7 +432,7 @@
                             </a>
                         </td>
                         <td>
-                            <input checked type="checkbox">
+                            <input data-group='duration' data-group-relation='compound' checked type="checkbox" class="grouping-checkbox">
                         </td>
                         <td>
                             Compound Addition Duration
@@ -444,7 +445,7 @@
                             </a>
                         </td>
                         <td>
-                            <input checked type="checkbox">
+                            <input data-group='addition_location' data-group-relation='compound' checked type="checkbox" class="grouping-checkbox">
                         </td>
                         <td>
                             Compound Addition Location
@@ -479,7 +480,7 @@
                             </a>
                         </td>
                         <td>
-                            <input checked type="checkbox">
+                            <input data-group='setting_id' data-group-relation='setting' checked type="checkbox" class="grouping-checkbox">
                         </td>
                         <td>
                             Setting
@@ -492,7 +493,7 @@
 {#                            </a>#}
 {#                        </td>#}
 {#                        <td>#}
-{#                            <input checked type="checkbox">#}
+{#                            <input checked type="checkbox" class="grouping-checkbox">#}
 {#                        </td>#}
 {#                        <td>#}
 {#                            Setting Unit#}
@@ -505,7 +506,7 @@
                             </a>
                         </td>
                         <td>
-                            <input checked type="checkbox">
+                            <input data-group='value' data-group-relation='setting' checked type="checkbox" class="grouping-checkbox">
                         </td>
                         <td>
                             Setting Value
@@ -518,7 +519,7 @@
                             </a>
                         </td>
                         <td>
-                            <input checked type="checkbox">
+                            <input data-group='addition_time' data-group-relation='setting' checked type="checkbox" class="grouping-checkbox">
                         </td>
                         <td>
                             Setting Time
@@ -531,7 +532,7 @@
                             </a>
                         </td>
                         <td>
-                            <input checked type="checkbox">
+                            <input data-group='duration' data-group-relation='setting' checked type="checkbox" class="grouping-checkbox">
                         </td>
                         <td>
                             Setting Duration
@@ -544,7 +545,7 @@
                             </a>
                         </td>
                         <td>
-                            <input checked type="checkbox">
+                            <input data-group='addition_location_id' data-group-relation='setting' checked type="checkbox" class="grouping-checkbox">
                         </td>
                         <td>
                             Setting Location
@@ -555,6 +556,10 @@
         </div>
     </div>
 </div>
+<div class="row text-center">
+    <button id="{{ chart_prefix }}refresh_plots" class="btn btn-info">Refresh Plots</button>
+</div>
+
 </div>
 
 <div id="{{ chart_prefix }}chart_options" class="well hidden-print chart-option-block">
@@ -615,14 +620,14 @@
     </div>
     <div class="row">
         {# Subject to removal #}
-{#        <label class="radio-inline">#}
-{#            <input type="radio" name="{{ chart_prefix }}tooltip_type" id="{{ chart_prefix }}datum_select" value="datum" checked>#}
-{#            Tooltips for each Data Point#}
-{#        </label>#}
-{#        <label class="radio-inline">#}
-{#            <input type="radio" name="{{ chart_prefix }}tooltip_type" id="{{ chart_prefix }}category_select" value="category">#}
-{#            Tooltips for Entire Time Point#}
-{#        </label>#}
+        <label class="radio-inline">
+            <input type="radio" name="{{ chart_prefix }}tooltip_type" id="{{ chart_prefix }}datum_select" value="datum" checked>
+            Tooltips for each Data Point
+        </label>
+        <label class="radio-inline">
+            <input type="radio" name="{{ chart_prefix }}tooltip_type" id="{{ chart_prefix }}category_select" value="category">
+            Tooltips for Entire Time Point
+        </label>
         <label for="{{ chart_prefix }}log_x" class="pull-right">
             <input type="checkbox" name="{{ chart_prefix }}log_x" id="{{ chart_prefix }}log_x" />
             Log Scale X-Axis&nbsp;
