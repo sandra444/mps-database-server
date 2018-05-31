@@ -2205,14 +2205,6 @@ class AssaySetupCellForm(ModelFormSplitTime):
         model = AssaySetupCell
         exclude = tracking
 
-        # widgets = {
-        #     'matrix_item': forms.TextInput(),
-        #     'cell_sample': forms.TextInput(),
-        #     'biosensor': forms.TextInput(),
-        #     'density_unit': forms.TextInput(),
-        #     'addition_location': forms.TextInput(),
-        # }
-
     def __init__(self, *args, **kwargs):
         # self.static_choices = kwargs.pop('static_choices', None)
         super(AssaySetupCellForm, self).__init__(*args, **kwargs)
@@ -2220,6 +2212,8 @@ class AssaySetupCellForm(ModelFormSplitTime):
         # Change widget size
         self.fields['cell_sample'].widget.attrs['style'] = 'width:50px;'
         self.fields['passage'].widget.attrs['style'] = 'width:50px;'
+
+        self.fields['density_unit'].queryset = PhysicalUnits.objects.filter(availability__contains='cell')
 
 
 # TODO: IDEALLY THE CHOICES WILL BE PASSED VIA A KWARG
