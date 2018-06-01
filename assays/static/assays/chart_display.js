@@ -445,8 +445,8 @@ $(document).ready(function () {
 
             var chart = null;
 
-            // Line chart if more than one time point
-            if (assays[index].length > 2) {
+            // Line chart if more than one time point and less than 31 colors
+            if (assays[index].length > 2 && assays[index][0].length < 31) {
                 chart = new google.visualization.LineChart(document.getElementById(charts + '_' + index));
 
                 // If the scale is not already small
@@ -460,6 +460,14 @@ $(document).ready(function () {
                         options.hAxis.minValue = assays[index][1][0] - 1;
                     }
                 }
+            }
+            // Nothing if more than 30 colors
+            else if (assays[index][0].length > 30) {
+                document.getElementById(charts + '_' + index).innerHTML = '<div class="alert alert-danger" role="alert">' +
+                    '<span class="glyphicon glyphicon-warning-sign" aria-hidden="true"></span>' +
+                    '<span class="sr-only">Danger:</span>' +
+                    ' This plot has too many data points, please try filtering.' +
+                '</div>'
             }
             // Bar chart if only one time point
             else if (assays[index].length > 1) {
