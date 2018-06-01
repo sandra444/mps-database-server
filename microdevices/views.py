@@ -196,23 +196,3 @@ class OrganModelUpdate(UpdateView):
                 protocol_formset=protocol_formset,
                 location_formset=location_formset
             ))
-
-
-class DiseaseModelList(TemplateView):
-    template_name = 'microdevices/diseasemodel_list.html'
-
-
-class DiseaseModelDetail(TemplateView):
-    template_name = 'microdevices/diseasemodel_detail.html'
-
-
-class DiseaseModelClinicalData(TemplateView):
-    template_name = 'microdevices/diseasemodel_clinicaldata.html'
-
-
-class DiseaseModelDiseaseBiology(TemplateView):
-    template_name = 'microdevices/diseasemodel_diseasebiology.html'
-
-
-class DiseaseModelDiseaseModel(TemplateView):
-    template_name = 'microdevices/diseasemodel_diseasemodel.html'
