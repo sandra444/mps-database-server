@@ -701,6 +701,7 @@ def get_control_data(
 def get_item_groups(study, criteria, matrix_items=None):
     treatment_groups = {}
     setup_to_treatment_group = {}
+    header_keys = []
 
     # By pulling the setups for the study, I avoid problems with preview data
     if not matrix_items:
@@ -729,20 +730,20 @@ def get_item_groups(study, criteria, matrix_items=None):
             'cell': DEFAULT_CELL_CRITERIA
         }
 
+    if criteria.get('setup', ''):
+        header_keys.append('organ_model')
+    if criteria.get('cell', ''):
+        header_keys.append('cells')
+    if criteria.get('compound', ''):
+        header_keys.append('compounds')
+    if criteria.get('setting', ''):
+        header_keys.append('settings')
+
+    header_keys.append('setups_with_same_group')
+
     setup_attribute_getter = tuple_attrgetter(*criteria.get('setup', ['']))
 
     for setup in setups:
-        # treatment_group_tuple = (
-        #     # Somewhat odd that matrix items are not bound to studies for convenience
-        #     setup.matrix.study_id,
-        #     setup.device_id,
-        #     setup.organ_model_id,
-        #     setup.organ_model_protocol_id,
-        #     setup.variance_from_organ_model_protocol,
-        #     setup.devolved_settings(),
-        #     setup.devolved_compounds(),
-        #     setup.devolved_cells()
-        # )
         treatment_group_tuple = ()
 
         if criteria.get('setup', ''):
@@ -757,7 +758,7 @@ def get_item_groups(study, criteria, matrix_items=None):
         if criteria.get('cell', ''):
             treatment_group_tuple += setup.devolved_cells(criteria.get('cell'))
 
-        current_representative = treatment_groups.setdefault(treatment_group_tuple, setup.quick_dic())
+        current_representative = treatment_groups.setdefault(treatment_group_tuple, setup.quick_dic(criteria))
 
         current_representative.get('setups_with_same_group').append(
             setup.get_hyperlinked_name()
@@ -782,7 +783,7 @@ def get_item_groups(study, criteria, matrix_items=None):
             'index': index
         })
 
-    return (sorted_treatment_groups, setup_to_treatment_group)
+    return (sorted_treatment_groups, setup_to_treatment_group, header_keys)
 
 
 def get_paired_id_and_name(field):
@@ -876,7 +877,7 @@ def get_data_points_for_charting(
     }
 
     # Organization is assay -> unit -> compound/tag -> field -> time -> value
-    treatment_group_representatives, setup_to_treatment_group = get_item_groups(
+    treatment_group_representatives, setup_to_treatment_group, header_keys = get_item_groups(
         study,
         group_criteria,
         matrix_items
@@ -888,7 +889,8 @@ def get_data_points_for_charting(
         'heatmap': {
             'matrices': {},
             'values': {}
-        }
+        },
+        'header_keys': header_keys
     }
 
     intermediate_data = {}

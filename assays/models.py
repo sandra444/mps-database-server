@@ -1777,18 +1777,18 @@ class AssayMatrixItem(FlaggableModel):
 
             setting_tuple.append(current_tuple)
 
-        return tuple(sorted(setting_tuple))
+        return tuple(sorted(set(setting_tuple)))
 
-    def stringify_settings(self):
+    def stringify_settings(self, criteria=None):
         """Stringified cells for a setup"""
         settings = []
         for setting in self.assaysetupsetting_set.all():
-            settings.append(unicode(setting))
+            settings.append(setting.flex_string(criteria))
 
         if not settings:
             settings = ['-No Extra Settings-']
 
-        return '\n'.join(settings)
+        return '\n'.join(set(settings))
 
     def devolved_cells(self, criteria=DEFAULT_CELL_CRITERIA):
         """Makes a tuple of cells (for comparison)"""
@@ -1799,48 +1799,50 @@ class AssayMatrixItem(FlaggableModel):
 
             cell_tuple.append(current_tuple)
 
-        return tuple(sorted(cell_tuple))
+        return tuple(sorted(set(cell_tuple)))
 
-    def stringify_cells(self):
+    def stringify_cells(self, criteria=None):
         """Stringified cells for a setup"""
         cells = []
         for cell in self.assaysetupcell_set.all():
-            cells.append(unicode(cell))
+            cells.append(cell.flex_string(criteria))
 
         if not cells:
             cells = ['-No Cell Samples-']
 
-        return '\n'.join(cells)
+        return '\n'.join(set(cells))
 
     def devolved_compounds(self, criteria=DEFAULT_COMPOUND_CRITERIA):
         """Makes a tuple of compounds (for comparison)"""
         compound_tuple = []
-        attribute_getter =  tuple_attrgetter(*criteria)
+        attribute_getter = tuple_attrgetter(*criteria)
         for compound in self.assaysetupcompound_set.all():
             current_tuple = attribute_getter(compound)
 
             compound_tuple.append(current_tuple)
 
-        return tuple(sorted(compound_tuple))
+        return tuple(sorted(set(compound_tuple)))
 
-    def stringify_compounds(self):
+    def stringify_compounds(self, criteria=None):
         """Stringified cells for a setup"""
         compounds = []
         for compound in self.assaysetupcompound_set.all():
-            compounds.append(unicode(compound))
+            compounds.append(compound.flex_string(criteria))
 
         if not compounds:
             compounds = ['-No Compounds-']
 
-        return '\n'.join(compounds)
+        return '\n'.join(set(compounds))
 
-    def quick_dic(self):
+    def quick_dic(self, criteria=None):
+        if not criteria:
+            criteria = {}
         dic = {
             # 'device': self.device.name,
             'organ_model': self.get_hyperlinked_model_or_device(),
-            'compounds': self.stringify_compounds(),
-            'cells': self.stringify_cells(),
-            'settings': self.stringify_settings(),
+            'compounds': self.stringify_compounds(criteria.get('compound', None)),
+            'cells': self.stringify_cells(criteria.get('cell', None)),
+            'settings': self.stringify_settings(criteria.get('setting', None)),
             'setups_with_same_group': []
         }
         return dic
@@ -1933,6 +1935,48 @@ class AssaySetupCell(models.Model):
 
     # TODO TODO TODO TEMPORARILY NOT REQUIRED
     addition_location = models.ForeignKey(AssaySampleLocation, null=True, blank=True)
+
+    # NOT DRY
+    def get_addition_time_string(self):
+        split_times = get_split_times(self.addition_time)
+        return 'D{0} H{1} M{2}'.format(
+            split_times.get('day'),
+            split_times.get('hour'),
+            split_times.get('minute'),
+        )
+
+    # def get_duration_string(self):
+    #     split_times = get_split_times(self.duration)
+    #     return 'D{0} H{1} M{2}'.format(
+    #         split_times.get('day'),
+    #         split_times.get('hour'),
+    #         split_times.get('minute'),
+    #     )
+
+    # CRUDE
+    def flex_string(self, criteria=None):
+        if criteria:
+            full_string = []
+            if 'cell_sample_id' in criteria:
+                full_string.append(unicode(self.cell_sample))
+            if 'cell_sample_id' not in criteria and 'cell_sample.cell_type_id' in criteria:
+                full_string.append(unicode(self.cell_sample.cell_type))
+            if 'cell_sample_id' not in criteria and 'cell_sample.cell_subtype_id' in criteria:
+                full_string.append(unicode(self.cell_sample.cell_subtype))
+            if 'passage' in criteria:
+                full_string.append(self.passage)
+            if 'density' in criteria:
+                full_string.append('{:g}'.format(self.density))
+                full_string.append(self.density_unit.unit)
+            if 'addition_time' in criteria:
+                full_string.append('Added on: ' + self.get_addition_time_string())
+            # if 'duration' in criteria:
+            #     full_string.append('Duration of: ' + self.get_duration_string())
+            if 'addition_location_id' in criteria:
+                full_string.append(unicode(self.addition_location))
+            return ' '.join(full_string)
+        else:
+            return unicode(self)
 
     def __unicode__(self):
         if self.addition_location:
@@ -2141,6 +2185,25 @@ class AssaySetupCompound(models.Model):
             split_times.get('minute'),
         )
 
+    # CRUDE
+    def flex_string(self, criteria=None):
+        if criteria:
+            full_string = []
+            if 'compound_instance.compound_id' in criteria:
+                full_string.append(self.compound_instance.compound.name)
+            if 'concentration' in criteria:
+                full_string.append('{:g}'.format(self.concentration))
+                full_string.append(self.concentration_unit.unit)
+            if 'addition_time' in criteria:
+                full_string.append('Added on: ' + self.get_addition_time_string())
+            if 'duration' in criteria:
+                full_string.append('Duration of: ' + self.get_duration_string())
+            if 'addition_location_id' in criteria:
+                full_string.append(unicode(self.addition_location))
+            return ' '.join(full_string)
+        else:
+            return unicode(self)
+
     def __unicode__(self):
         if self.addition_location:
             return u'{0} ({1} {2})\n-Added on: {3}; Duration of: {4}; Added to: {5}'.format(
@@ -2291,6 +2354,42 @@ class AssaySetupSetting(models.Model):
 
     # TODO TODO TODO TEMPORARILY NOT REQUIRED
     addition_location = models.ForeignKey(AssaySampleLocation, null=True, blank=True)
+
+    # NOT DRY
+    def get_addition_time_string(self):
+        split_times = get_split_times(self.addition_time)
+        return 'D{0} H{1} M{2}'.format(
+            split_times.get('day'),
+            split_times.get('hour'),
+            split_times.get('minute'),
+        )
+
+    def get_duration_string(self):
+        split_times = get_split_times(self.duration)
+        return 'D{0} H{1} M{2}'.format(
+            split_times.get('day'),
+            split_times.get('hour'),
+            split_times.get('minute'),
+        )
+
+    # CRUDE
+    def flex_string(self, criteria=None):
+        if criteria:
+            full_string = []
+            if 'setting_id' in criteria:
+                full_string.append(unicode(self.setting_id))
+            if 'value' in criteria:
+                full_string.append('{:g}'.format(self.value))
+                full_string.append(self.unit.unit)
+            if 'addition_time' in criteria:
+                full_string.append('Added on: ' + self.get_addition_time_string())
+            if 'duration' in criteria:
+                full_string.append('Duration of: ' + self.get_duration_string())
+            if 'addition_location_id' in criteria:
+                full_string.append(unicode(self.addition_location))
+            return ' '.join(full_string)
+        else:
+            return unicode(self)
 
     def __unicode__(self):
         return u'{} {} {}'.format(self.setting.name, self.value, self.unit)

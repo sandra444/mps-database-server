@@ -32,6 +32,12 @@ $(document).ready(function () {
     // TODO TODO TODO TEMPORARILY EXPOSE
     var heatmap_data = {};
 
+    // Semi-arbitrary at the moment
+    var treatment_group_table = $('#treatment_group_table');
+    var treatment_group_display = $('#treatment_group_display');
+    var treatment_group_head = $('#treatment_group_head');
+    var treatment_group_data_table = null;
+
     // CONTRIVED DIALOG
     // Interestingly, this dialog should be separate and apart from chart_options
     // Really, I might as well make it from JS here
@@ -128,29 +134,34 @@ $(document).ready(function () {
         }
     };
 
-    window.CHARTS.display_treatment_groups = function(treatment_groups) {
+    window.CHARTS.display_treatment_groups = function(treatment_groups, header_keys) {
         // TODO KIND OF UGLY
-        var header_keys = [
-            // 'device',
-            'organ_model',
-            'cells',
-            'compounds',
-            'settings',
-            'setups_with_same_group'
-        ];
+        if (!header_keys) {
+            header_keys = [
+                // 'device',
+                'organ_model',
+                'cells',
+                'compounds',
+                'settings',
+                'setups_with_same_group'
+            ];
+        }
+
         var headers = {
             // 'device': 'Device',
-            'organ_model': 'Organ Model',
+            'organ_model': 'MPS Model',
             'cells': 'Cells',
             'compounds': 'Compounds',
             'settings': 'Settings',
             'setups_with_same_group': 'Chips/Wells'
         };
 
-        // Semi-arbitrary at the moment
-        var treatment_group_table = $('#treatment_group_table');
-        var treatment_group_display = $('#treatment_group_display');
-        var treatment_group_head = $('#treatment_group_head');
+        if (treatment_group_data_table) {
+            treatment_group_table.DataTable().clear();
+            treatment_group_table.DataTable().destroy();
+        }
+
+        treatment_group_display.empty();
 
         treatment_group_head.empty();
 
@@ -164,10 +175,6 @@ $(document).ready(function () {
         });
 
         treatment_group_head.append(new_row);
-
-        treatment_group_display.empty();
-        treatment_group_table.DataTable().clear();
-        treatment_group_table.DataTable().destroy();
 
         $.each(treatment_groups, function(index, treatment) {
             var group_name = 'Group ' + (index + 1);
@@ -195,9 +202,9 @@ $(document).ready(function () {
             treatment_group_display.append(new_row);
         });
 
-        treatment_group_table.DataTable({
+        treatment_group_data_table = treatment_group_table.DataTable({
             // Cuts out extra unneeded pieces in the table
-            dom: 'B<"row">rt',
+            dom: 'B<"row">rtp',
             fixedHeader: {headerOffset: 50},
             responsive: true,
             paging: false,
@@ -207,11 +214,12 @@ $(document).ready(function () {
             // Try to get a more reasonable size for cells
             columnDefs: [
                 // Treat the group column as if it were just the number
-                { "type": "num", "targets": 0, "width": "10%" },
-                { "width": "10%", "targets": 1 },
-                { "width": "15%", "targets": 2 },
-                { "width": "20%", "targets": 3 },
-                { "width": "15%", "targets": 4 }
+                { "type": "brute-numeric", "targets": 0, "width": "10%" }
+                // Poses a problem due to variable table
+                // { "width": "10%", "targets": 1 },
+                // { "width": "15%", "targets": 2 },
+                // { "width": "20%", "targets": 3 },
+                // { "width": "15%", "targets": 4 }
             ]
         });
 
@@ -421,9 +429,9 @@ $(document).ready(function () {
             };
 
             // NAIVE: I shouldn't perform a whole refresh just to change the scale!
-            // if (document.getElementById(charts + 'category_select').checked) {
-            //     options.focusTarget = 'category';
-            // }
+            if (document.getElementById(charts + 'category_select').checked) {
+                options.focusTarget = 'category';
+            }
 
             if (document.getElementById(charts + 'log_x').checked) {
                 options.hAxis.scaleType = 'log';
@@ -445,8 +453,8 @@ $(document).ready(function () {
 
             var chart = null;
 
-            // Line chart if more than one time point and less than 31 colors
-            if (assays[index].length > 2 && assays[index][0].length < 31) {
+            // Line chart if more than one time point and less than 101 colors
+            if (assays[index].length > 2 && assays[index][0].length < 101) {
                 chart = new google.visualization.LineChart(document.getElementById(charts + '_' + index));
 
                 // If the scale is not already small
@@ -461,8 +469,8 @@ $(document).ready(function () {
                     }
                 }
             }
-            // Nothing if more than 30 colors
-            else if (assays[index][0].length > 30) {
+            // Nothing if more than 100 colors
+            else if (assays[index][0].length > 100) {
                 document.getElementById(charts + '_' + index).innerHTML = '<div class="alert alert-danger" role="alert">' +
                     '<span class="glyphicon glyphicon-warning-sign" aria-hidden="true"></span>' +
                     '<span class="sr-only">Danger:</span>' +
@@ -510,7 +518,7 @@ $(document).ready(function () {
             }
         }
 
-        window.CHARTS.display_treatment_groups(json.treatment_groups);
+        window.CHARTS.display_treatment_groups(json.treatment_groups, json.header_keys);
 
         // Triggers for legends (TERRIBLE SELECTOR)
         // $(document).on('mouseover', 'g:has("g > text")', function() {
@@ -573,7 +581,6 @@ $(document).ready(function () {
     // Triggers for spawning filters
     // TODO REVISE THIS TERRIBLE SELECTOR
     $('.glyphicon-filter').click(function() {
-        console.log(dialog_example);
         dialog_example.dialog('open');
     });
 });
