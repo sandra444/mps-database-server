@@ -32,7 +32,7 @@ $(document).ready(function () {
     // Define brute numeric sort
     $.extend($.fn.dataTableExt.oSort, {
         "brute-numeric-pre": function (a) {
-            var x = a.replace(/\D/g,'');
+            var x = a.replace(/\D/g, '');
             return parseFloat(x);
         },
 

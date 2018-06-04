@@ -22,9 +22,6 @@ $(document).ready(function () {
         "rgba(159,51,0,0.4)", "rgba(147,26,0,0.4)", "rgba(135,0,0,0.4)"
     ];
 
-    // Probably should just have full data!
-    var device_to_group = {};
-
     // Avoid magic strings for heatmap elements
     var heatmap_filters_selector = $('#heatmap_filters').find('select');
     var matrix_body_selector = $('#matrix_body');
@@ -37,6 +34,10 @@ $(document).ready(function () {
     var treatment_group_display = $('#treatment_group_display');
     var treatment_group_head = $('#treatment_group_head');
     var treatment_group_data_table = null;
+
+    // Probably should just have full data!
+    var group_to_data = {};
+    var device_to_group = {};
 
     // CONTRIVED DIALOG
     // Interestingly, this dialog should be separate and apart from chart_options
@@ -177,6 +178,7 @@ $(document).ready(function () {
         treatment_group_head.append(new_row);
 
         $.each(treatment_groups, function(index, treatment) {
+            var group_index = (index + 1);
             var group_name = 'Group ' + (index + 1);
             var group_id = group_name.replace(' ', '_');
 
@@ -194,20 +196,22 @@ $(document).ready(function () {
                 // Somewhat sloppy conditional
                 if (current_header === 'setups_with_same_group') {
                     $.each(new_td.find('a'), function (index, anchor) {
-                        device_to_group[anchor.text] = group_id;
+                        device_to_group[anchor.text] = group_index;
                     });
                 }
             });
+
+            group_to_data[group_index] = new_row.clone();
 
             treatment_group_display.append(new_row);
         });
 
         treatment_group_data_table = treatment_group_table.DataTable({
             // Cuts out extra unneeded pieces in the table
-            dom: 'B<"row">rtp',
+            dom: 'B<"row">lfrtp',
             fixedHeader: {headerOffset: 50},
             responsive: true,
-            paging: false,
+            // paging: false,
             order: [[ 0, "asc" ]],
             // Needed to destroy old table
             bDestroy: true,
@@ -224,13 +228,12 @@ $(document).ready(function () {
         });
 
         // TODO NOT DRY
+        // Swap positions of filter and length selection; clarify filter
+        $('.dataTables_filter').css('float', 'left').prop('title', 'Separate terms with a space to search multiple fields');
+        $('.dataTables_length').css('float', 'right');
         // Reposition download/print/copy
         $('.DTTT_container').css('float', 'none');
 
-        // Clarify usage of sort
-        // $('.sorting').prop('title', 'Click a column to change its sorting\n Hold shift and click columns to sort multiple');
-        // $('.sorting_asc').prop('title', 'Click a column to change its sorting\n Hold shift and click columns to sort multiple');
-        // $('.sorting_desc').prop('title', 'Click a column to change its sorting\n Hold shift and click columns to sort multiple');
 
         // Recalculate responsive and fixed headers
         $($.fn.dataTable.tables(true)).DataTable().responsive.recalc();
@@ -537,35 +540,38 @@ $(document).ready(function () {
 
             // Naive, assumes Group would never be in a device name
             if (text_section.text().indexOf('Group') > -1) {
-                // content_split = $(this).find('text').text().split(/(\d+)/);
-                content_split = text_section.text().split(/(\d+)/);
-                row_id_to_use = '#' + content_split[0].replace(' ', '_') + content_split[1];
-                row_clone = $(row_id_to_use).clone().addClass('bg-warning');
+                content_split = text_section.text().replace(/\D/g, '');
+                row_clone = group_to_data[content_split].clone().addClass('bg-warning');
             }
             else {
                 // Naive, assumes spaces will not be in device name
-                // content_split = $(this).find('text').text().split(/(\s+)/);
-                content_split = text_section.text().split(/(\s+)/);
-                row_id_to_use = '#' + device_to_group[content_split[0]];
-                row_clone = $(row_id_to_use).clone().addClass('bg-warning');
+                // Additionally, naive try-catch
+                try {
+                    content_split = text_section.text().split(/(\s+)/);
+                    content_split = device_to_group[content_split[0]];
+                    row_clone = group_to_data[content_split].clone().addClass('bg-warning');
+                }
+                catch (err) {}
             }
 
-            $('#group_display_body').empty().append(row_clone);
+            if (row_clone) {
+                $('#group_display_body').empty().append(row_clone);
 
-            var second_row = $('<tr>').addClass('bg-warning');
-            var hidden_rows = false;
+                var second_row = $('<tr>').addClass('bg-warning');
+                var hidden_rows = false;
 
-            $(row_id_to_use).find('td:hidden').each(function(index) {
-                hidden_rows = true;
-                second_row.append($(this).clone().show());
-            });
+                $(row_id_to_use).find('td:hidden').each(function(index) {
+                    hidden_rows = true;
+                    second_row.append($(this).clone().show());
+                });
 
-            if (hidden_rows) {
-                $('#group_display_body').append(second_row);
-            }
+                if (hidden_rows) {
+                    $('#group_display_body').append(second_row);
+                }
 
-            $('#group_display').show()
-                .css({top: current_top, left: current_left, position:'absolute'});
+                $('#group_display').show()
+                    .css({top: current_top, left: current_left, position:'absolute'});
+                }
             }
         });
         $(document).on('mouseout', 'g:has(text[font-size="12"])', function() {
