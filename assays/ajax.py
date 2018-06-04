@@ -1130,12 +1130,14 @@ def get_data_points_for_charting(
                 elif use_key_discrimination:
                     tag = tag[1]
 
-                for sample_location, time_values in sample_locations.items():
-                    accommodate_intervals = False
-                    include_current = False
+                accommodate_intervals = False
+                include_current = False
 
+                for sample_location, time_values in sample_locations.items():
                     if accommodate_sample_location:
                         current_key = tag + ' ' + sample_location
+                        accommodate_intervals = False
+                        include_current = False
                     else:
                         current_key = tag
 
@@ -1171,7 +1173,9 @@ def get_data_points_for_charting(
                             y_header.update({time: True})
                             include_current = True
 
-                    if include_current:
+                    key_present = current_key in x_header
+
+                    if include_current and not key_present:
                         x_header.append(current_key)
                     # To include all
                     # x_header.append(current_key)
@@ -1181,7 +1185,7 @@ def get_data_points_for_charting(
                     # ])
 
                     # Only include intervals if necessary
-                    if accommodate_intervals and include_current:
+                    if accommodate_intervals and include_current and not key_present:
                         x_header.extend([
                             current_key + '_i1',
                             current_key + '_i2'
