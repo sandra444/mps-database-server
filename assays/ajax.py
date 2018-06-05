@@ -919,7 +919,7 @@ def get_data_points_for_charting(
 
     all_keys = {}
     key_discrimination = {}
-    use_key_discrimination = key in ['device', 'matrix']
+    use_key_discrimination = key == 'device'
 
     all_sample_locations = {}
 
@@ -1017,12 +1017,6 @@ def get_data_points_for_charting(
                     tag = ' & '.join(tag)
                 else:
                     tag = '-No Compound-'
-            # If by matrix
-            elif key == 'matrix':
-                tag = (matrix_id, matrix_name)
-
-                if all_keys.setdefault(matrix_name, matrix_id) != matrix_id:
-                    key_discrimination.update({matrix_name: True})
             # If by device
             else:
                 tag = (matrix_item_id, matrix_item_name)
