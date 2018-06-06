@@ -14,9 +14,6 @@ $(document).ready(function () {
     var contrast = 100;
     var brightness = 100;
 
-    // tableCols[3] = "Test";
-    // tableRows[3] = "Tester";
-
     // Perform on image expansion
     var popupDialogData = {};
     var dialogConfirm = $("#image_popup");
@@ -296,42 +293,50 @@ $(document).ready(function () {
     function doSearch(backspace) {
         var query = $('#search-box').val().toUpperCase();
         var isChip = false;
-        if (backspace) {
-            makeAllVisible();
+
+        // if (backspace) {
+        //     makeAllVisible();
+        // }
+
+        // Always make everything visible again
+        makeAllVisible();
+
+        for (var i=0; i<tableRows.length; i++) {
+            if (tableRows[i].toUpperCase().includes(query)) {
+                isChip = true;
+                break;
+            }
         }
-        image_table.find('figcaption').each(function(index, value) {
-            // var buttonActive = $('#'+$(value).parent().parent().parent().attr("class").split(" ")[2]).prop('checked');
-            var current_column = $(value).parent().parent().parent();
-            var current_fig = $(value).parent().parent();
-            var buttonActive = $('input[data-column="' + current_column.attr("data-column") + '"]').prop('checked');
-            if ($(value).text().toUpperCase().includes(query)) {
-                if (buttonActive) {
-                    current_fig.removeClass('hidden');
-                } else {
-                    current_fig.addClass('hidden');
-                }
-            } else {
-                for (var i=0; i<tableRows.length; i++) {
-                    if (tableRows[i].toUpperCase().includes(query)) {
-                        isChip = true;
-                        break;
+
+        if (isChip) {
+            image_table.find('th').each(function(header_index) {
+                if (header_index > tableCols.length - 1) {
+                    if ($(this).text().toUpperCase().includes(query)) {
+                        $(this).parent().removeClass('hidden');
+                    } else {
+                        $(this).parent().addClass('hidden');
                     }
                 }
-                if (isChip) {
-                    image_table.find('th').each(function(index, value) {
-                        if (index > tableCols.length-1){
-                            if ($(value).text().toUpperCase().includes(query)) {
-                                current_fig.removeClass('hidden');
-                            } else {
-                                current_fig.addClass('hidden');
-                            }
-                        }
-                    });
+            });
+        }
+        else {
+            image_table.find('figcaption').each(function() {
+                // var buttonActive = $('#'+$(value).parent().parent().parent().attr("class").split(" ")[2]).prop('checked');
+                var current_column = $(this).parent().parent().parent();
+                var current_fig = $(this).parent().parent();
+                var buttonActive = $('input[data-column="' + current_column.attr("data-column") + '"]').prop('checked');
+                if ($(this).text().toUpperCase().includes(query)) {
+                    if (buttonActive) {
+                        current_fig.removeClass('hidden');
+                    } else {
+                        current_fig.addClass('hidden');
+                    }
                 } else {
                     current_fig.addClass('hidden');
                 }
-            }
-        });
+            });
+        }
+
         hideEmpty();
     }
 
@@ -341,7 +346,7 @@ $(document).ready(function () {
             $(value).parent().parent().removeClass('hidden');
         });
         image_table.find('th').each(function(index, value) {
-            if (index > tableCols.length-1){
+            if (index > tableCols.length - 1){
                 $(value).parent().removeClass('hidden');
             }
         });
