@@ -301,12 +301,14 @@ $(document).ready(function () {
         }
         image_table.find('figcaption').each(function(index, value) {
             // var buttonActive = $('#'+$(value).parent().parent().parent().attr("class").split(" ")[2]).prop('checked');
-            var buttonActive = $('input[data-column="' + $(value).parent().parent().parent().attr("data-column") + '"]').prop('checked');
+            var current_column = $(value).parent().parent().parent();
+            var current_fig = $(value).parent().parent();
+            var buttonActive = $('input[data-column="' + current_column.attr("data-column") + '"]').prop('checked');
             if ($(value).text().toUpperCase().includes(query)) {
                 if (buttonActive) {
-                    $(value).parent().parent().removeClass('hidden');
+                    current_fig.removeClass('hidden');
                 } else {
-                    $(value).parent().parent().addClass('hidden');
+                    current_fig.addClass('hidden');
                 }
             } else {
                 for (var i=0; i<tableRows.length; i++) {
@@ -319,14 +321,14 @@ $(document).ready(function () {
                     image_table.find('th').each(function(index, value) {
                         if (index > tableCols.length-1){
                             if ($(value).text().toUpperCase().includes(query)) {
-                                $(value).parent().removeClass('hidden');
+                                current_fig.removeClass('hidden');
                             } else {
-                                $(value).parent().addClass('hidden');
+                                current_fig.addClass('hidden');
                             }
                         }
                     });
                 } else {
-                    $(value).parent().parent().addClass('hidden');
+                    current_fig.addClass('hidden');
                 }
             }
         });
@@ -348,8 +350,8 @@ $(document).ready(function () {
     // Hide rows that contain no images.
     function hideEmpty() {
         for (i=0; i<tableRows.length; i++) {
-            if ($('tr[data-row="'+tableRows[i] + '"]').height() < 100) {
-                $('tr[data-row="'+tableRows[i] + '"]');
+            if ($('tr[data-row="'+ tableRows[i] + '"]').height() < 100) {
+                $('tr[data-row="'+ tableRows[i] + '"]').addClass('hidden');
             }
         }
 
