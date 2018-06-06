@@ -208,7 +208,7 @@ $(document).ready(function () {
 
         treatment_group_data_table = treatment_group_table.DataTable({
             // Cuts out extra unneeded pieces in the table
-            dom: 'B<"row">lfrtp',
+            dom: 'B<"row">lfrtip',
             fixedHeader: {headerOffset: 50},
             responsive: true,
             // paging: false,
