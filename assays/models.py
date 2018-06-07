@@ -81,7 +81,8 @@ DEFAULT_SETTING_CRITERIA = (
 )
 
 DEFAULT_COMPOUND_CRITERIA = (
-    'compound_instance_id',
+    # 'compound_instance_id',
+    'compound_instance.compound_id',
     'concentration',
     'concentration_unit_id',
     'addition_time',

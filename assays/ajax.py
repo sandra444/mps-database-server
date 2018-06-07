@@ -312,6 +312,7 @@ def send_ready_for_sign_off_email(request):
 
 
 # TODO TODO TODO
+# This is a rather ugly function, naive
 def get_data_as_list_of_lists(ids, data_points=None, both_assay_names=False, include_header=False, include_all=False):
     if not data_points:
         # TODO ORDER SUBJECT TO CHANGE
@@ -325,6 +326,7 @@ def get_data_as_list_of_lists(ids, data_points=None, both_assay_names=False, inc
             'matrix_item__assaysetupcompound_set__concentration_unit',
             'matrix_item__device',
             'matrix_item__organ_model',
+            'matrix_item__matrix',
             'study_assay__target',
             'study_assay__method',
             'study_assay__unit',
@@ -360,6 +362,8 @@ def get_data_as_list_of_lists(ids, data_points=None, both_assay_names=False, inc
         study_id = unicode(data_point.study)
 
         item_name = data_point.matrix_item.name
+
+        matrix_name = data_point.matrix_item.matrix.name
 
         cross_reference = data_point.cross_reference
 
@@ -409,6 +413,7 @@ def get_data_as_list_of_lists(ids, data_points=None, both_assay_names=False, inc
                 [
                     study_id,
                     item_name,
+                    matrix_name,
                     cross_reference,
                     assay_plate_id,
                     assay_well_id,
@@ -1245,6 +1250,13 @@ def fetch_data_points(request):
         pre_filter.update({
             'matrix_item_id__in': matrix_items
         })
+    elif request.POST.get('matrix', ''):
+        matrix_items = AssayMatrixItem.objects.filter(matrix_id=int(request.POST.get('matrix')))
+        matrix_item = matrix_items[0]
+        study = matrix_item.study
+        pre_filter.update({
+            'matrix_item_id__in': matrix_items
+        })
     elif request.POST.get('study', ''):
         matrix_item = None
         study = AssayStudy.objects.get(pk=int(request.POST.get('study', None)))
@@ -1675,6 +1687,10 @@ def study_viewer_validation(request):
         # GET STUDY FROM THE MATRIX ITEM
         matrix_item = get_object_or_404(AssayMatrixItem, pk=request.POST.get('matrix_item'))
         study = matrix_item.study
+    elif request.POST.get('matrix', ''):
+        # GET STUDY FROM THE MATRIX ITEM
+        matrix = get_object_or_404(AssayMatrix, pk=request.POST.get('matrix'))
+        study = matrix.study
 
     if study:
         return user_is_valid_study_viewer(request.user, study)
@@ -1690,6 +1706,10 @@ def study_editor_validation(request):
         # GET STUDY FROM THE MATRIX ITEM
         matrix_item = get_object_or_404(AssayMatrixItem, pk=request.POST.get('matrix_item'))
         study = matrix_item.study
+    elif request.POST.get('matrix', ''):
+        # GET STUDY FROM THE MATRIX ITEM
+        matrix = get_object_or_404(AssayMatrix, pk=request.POST.get('matrix'))
+        study = matrix.study
 
     if study:
         return is_group_editor(request.user, study.group.name)

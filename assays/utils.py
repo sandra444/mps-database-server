@@ -116,6 +116,7 @@ CSV_HEADER_WITH_COMPOUNDS_AND_STUDY = (
 DEFAULT_EXPORT_HEADER = (
     'Study ID',
     'Chip ID',
+    'Matrix ID',
     'Cross Reference',
     'Assay Plate ID',
     'Assay Well ID',
