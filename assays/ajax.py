@@ -381,7 +381,11 @@ def get_data_as_list_of_lists(ids, data_points=None, both_assay_names=False, inc
         subtarget = data_point.subtarget.name
 
         device = data_point.matrix_item.device.name
-        organ_model = data_point.matrix_item.organ_model.name
+
+        if data_point.matrix_item.organ_model:
+            organ_model = data_point.matrix_item.organ_model.name
+        else:
+            organ_model = '-No Organ Model-'
 
         value = data_point.value
 

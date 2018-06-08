@@ -477,7 +477,8 @@ $(document).ready(function () {
                 document.getElementById(charts + '_' + index).innerHTML = '<div class="alert alert-danger" role="alert">' +
                     '<span class="glyphicon glyphicon-warning-sign" aria-hidden="true"></span>' +
                     '<span class="sr-only">Danger:</span>' +
-                    ' This plot has too many data points, please try filtering.' +
+                    ' <strong>' + assay + ' ' + unit + '</strong>' +
+                    '<br>This plot has too many data points, please try filtering.' +
                 '</div>'
             }
             // Bar chart if only one time point
