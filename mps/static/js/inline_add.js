@@ -21,6 +21,7 @@ $(document).ready(function () {
             var tag = '<tr class="inline" id="' + current_title + '-' + next_id + '">';
             // Use a regular expression to replace all the places where ID is needed
             // In case the RegExp looks a little obfuscated, it means to replace any number of digits that fall between two hyphens
+            // TODO is this irresponsible?
             $(tag).appendTo($('#'+current_set_title+'-group')).html(add.replace(/\-\d+\-/g,'-'+ next_id +'-'));
             next_id += 1;
             // Set the hidden TOTAL_FORMS to be incremented, otherwise won't bother reading other inline

@@ -12,6 +12,9 @@ window.CHARTS = {};
 // google.charts.setOnLoadCallback(window.CHARTS.callback);
 
 $(document).ready(function () {
+
+    var device_to_group = {};
+
     window.CHARTS.prepare_chart_options = function(charts) {
         var options = {};
 
@@ -63,6 +66,7 @@ $(document).ready(function () {
         }
     };
 
+    // No longer in use
     window.CHARTS.prepare_charts_by_table = function(json, charts) {
         // Clear existing charts
         var charts_id = $('#' + charts);
@@ -95,6 +99,7 @@ $(document).ready(function () {
             'organ_model',
             'cells',
             'compounds',
+            'settings',
             'setups_with_same_group'
         ];
         var headers = {
@@ -102,6 +107,7 @@ $(document).ready(function () {
             'organ_model': 'Organ Model',
             'cells': 'Cells',
             'compounds': 'Compounds',
+            'settings': 'Settings',
             'setups_with_same_group': 'Chips/Wells'
         };
 
@@ -141,6 +147,13 @@ $(document).ready(function () {
                 // Replace newlines with breaks
                 var new_td = $('<td>').html(treatment[current_header].split("\n").join("<br />"));
                 new_row.append(new_td);
+
+                // Somewhat sloppy conditional
+                if (current_header === 'setups_with_same_group') {
+                    $.each(new_td.find('a'), function (index, anchor) {
+                        device_to_group[anchor.text] = group_id;
+                    });
+                }
             });
 
             treatment_group_display.append(new_row);
@@ -158,10 +171,11 @@ $(document).ready(function () {
             // Try to get a more reasonable size for cells
             columnDefs: [
                 // Treat the group column as if it were just the number
-                { "type": "num", "targets": 0 },
-                { "width": "20%", "targets": 2 },
-                { "width": "30%", "targets": 3 },
-                { "width": "30%", "targets": 4 }
+                { "type": "num", "targets": 0, "width": "10%" },
+                { "width": "10%", "targets": 1 },
+                { "width": "15%", "targets": 2 },
+                { "width": "20%", "targets": 3 },
+                { "width": "15%", "targets": 4 }
             ]
         });
 
@@ -262,19 +276,33 @@ $(document).ready(function () {
                 }
             };
 
+            // NAIVE: I shouldn't perform a whole refresh just to change the scale!
+            if (document.getElementById(charts + 'category_select').checked) {
+                options.focusTarget = 'category';
+            }
+
+            if (document.getElementById(charts + 'log_x').checked) {
+                options.hAxis.scaleType = 'log';
+            }
+            if (document.getElementById(charts + 'log_y').checked) {
+                options.vAxis.scaleType = 'log';
+            }
+
             // Merge options with the specified changes
             $.extend(options, changes_to_options);
 
+            // REMOVED FOR NOW
             // Find out whether to shrink text
-            $.each(assays[index][0], function(index, column_header) {
-                if (column_header.length > 12) {
-                    options.legend.textStyle.fontSize = 10;
-                }
-            });
+            // $.each(assays[index][0], function(index, column_header) {
+            //     if (column_header.length > 12) {
+            //         options.legend.textStyle.fontSize = 10;
+            //     }
+            // });
 
             var chart = null;
 
-            if (assays[index].length > 4) {
+            // Line chart if more than one time point and less than 101 colors
+            if (assays[index].length > 2 && assays[index][0].length < 101) {
                 chart = new google.visualization.LineChart(document.getElementById(charts + '_' + index));
 
                 // If the scale is not already small
@@ -289,12 +317,23 @@ $(document).ready(function () {
                     }
                 }
             }
+            // Nothing if more than 100 colors
+            else if (assays[index][0].length > 100) {
+                document.getElementById(charts + '_' + index).innerHTML = '<div class="alert alert-danger" role="alert">' +
+                    '<span class="glyphicon glyphicon-warning-sign" aria-hidden="true"></span>' +
+                    '<span class="sr-only">Danger:</span>' +
+                    ' <strong>' + assay + ' ' + unit + '</strong>' +
+                    '<br>This plot has too many data points, please try filtering.' +
+                '</div>'
+            }
+            // Bar chart if only one time point
             else if (assays[index].length > 1) {
                 // Convert to categories
                 data.insertColumn(0, 'string', data.getColumnLabel(0));
                 // copy values from column 1 (old column 0) to column 0, converted to numbers
                 for (var i = 0; i < data.getNumberOfRows(); i++) {
                     var val = data.getValue(i, 1);
+                    // I don't mind this type-coercion, null, undefined (and maybe 0?) don't need to be parsed
                     if (val != null) {
                         // PLEASE NOTE: Floats are truncated to 3 decimals
                         data.setValue(i, 0, parseFloat(val.toFixed(3)) + ''.valueOf());
@@ -331,36 +370,52 @@ $(document).ready(function () {
         window.CHARTS.display_treament_groups(json.treatment_groups);
 
         // Triggers for legends (TERRIBLE SELECTOR)
-        $(document).on('mouseover', 'g:has("g > text")', function() {
-            var text_section = $(this).find('text');
-            if (text_section.length === 1) {
-                var content_split = $(this).find('text').text().split(/(\d+)/);
-                var current_pos = $(this).position();
-                // Make it appear slightly below the legend
-                var current_top = current_pos.top + 50;
-                // Get the furthest left it should go
-                var current_left = $('#breadcrumbs').position.left;
-                // var current_left = 200;
-                var row_id_to_use = '#' + content_split[0].replace(' ', '_') + content_split[1];
-                var row_clone = $(row_id_to_use).clone().addClass('bg-warning');
+        // $(document).on('mouseover', 'g:has("g > text")', function() {
+        $(document).on('mouseover', 'g > text[font-size="12"]', function() {
+            // var text_section = $(this).find('text');
+            // if (text_section.length === 1) {
+            var current_pos = $(this).position();
+            // Make it appear slightly below the legend
+            var current_top = current_pos.top + 50;
+            // Get the furthest left it should go
+            var current_left = $('#breadcrumbs').position.left;
 
-                $('#group_display_body').empty().append(row_clone);
+            var content_split = null;
+            var row_id_to_use = null;
+            var row_clone = null;
 
-                var second_row = $('<tr>').addClass('bg-warning');
-                var hidden_rows = false;
-
-                $(row_id_to_use).find('td:hidden').each(function(index) {
-                    hidden_rows = true;
-                    second_row.append($(this).clone().show());
-                });
-
-                if (hidden_rows) {
-                    $('#group_display_body').append(second_row);
-                }
-
-                $('#group_display').show()
-                    .css({top: current_top, left: current_left, position:'absolute'});
+            // Naive, assumes Group would never be in a device name
+            if ($(this).find('text').text().indexOf('Group') > -1) {
+                // content_split = $(this).find('text').text().split(/(\d+)/);
+                content_split = $(this).text().split(/(\d+)/);
+                row_id_to_use = '#' + content_split[0].replace(' ', '_') + content_split[1];
+                row_clone = $(row_id_to_use).clone().addClass('bg-warning');
             }
+            else {
+                // Naive, assumes spaces will not be in device name
+                // content_split = $(this).find('text').text().split(/(\s+)/);
+                content_split = $(this).text().split(/(\s+)/);
+                row_id_to_use = '#' + device_to_group[content_split[0]];
+                row_clone = $(row_id_to_use).clone().addClass('bg-warning');
+            }
+
+            $('#group_display_body').empty().append(row_clone);
+
+            var second_row = $('<tr>').addClass('bg-warning');
+            var hidden_rows = false;
+
+            $(row_id_to_use).find('td:hidden').each(function(index) {
+                hidden_rows = true;
+                second_row.append($(this).clone().show());
+            });
+
+            if (hidden_rows) {
+                $('#group_display_body').append(second_row);
+            }
+
+            $('#group_display').show()
+                .css({top: current_top, left: current_left, position:'absolute'});
+            // }
         });
         $(document).on('mouseout', 'g:has("g > text")', function() {
             $('#group_display').hide();

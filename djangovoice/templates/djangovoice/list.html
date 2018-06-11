@@ -1,7 +1,7 @@
 {% extends "djangovoice/base.html" %}
 
 {% load i18n %}
-{% load url from future %}
+{#{% load url from future %}#}
 {% load djangovoice_tags comments %}
 {% load vote_buttons_for from qhonuskan_votes %}
 
@@ -50,9 +50,10 @@
 {#                  <a href="{{ object.user.get_absolute_url }}" class="avatar" title="{% trans "View profile" %}">#}
 {#                    {% get_user_image object.user 15 %}#}
 {#                  </a>#}
-                    <a class="avatar">
-                      {% get_user_image object.user 15 %}
-                    </a>
+{#                    <a class="avatar">#}
+{#                      {% get_user_image object.user 15 %}#}
+{#                    </a>#}
+                    <img src="/static/img/glyphicons-user.png" height="15" width="15" />
 {#                  Links to user pages are dead at the moment, may make this view later#}
 {#                  <a href="{{ object.user.get_absolute_url }}" title="View profile">#}
                     <a>

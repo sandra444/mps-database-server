@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block load %}
+    <script src="{% static "assays/image_interface.js" %}"></script>
+    <script src="{% static "js/display_datatable.js" %}"></script>
+    <script>
+        var metadata_list = JSON.parse("{{ metadata|escapejs|safe }}");
+        var tableRows = JSON.parse("{{ tableRows|escapejs|safe }}");
+        var tableCols = JSON.parse("{{ tableCols|escapejs|safe }}");
+        var tableData = JSON.parse("{{ tableData|escapejs|safe }}");
+    </script>
+{% endblock %}
+
+{% block breadcrumbs %}
+    <li><a href="{{ object.get_list_url }}">All Studies</a></li>
+    <li><a href="{{ object.get_absolute_url }}">{{ object }}</a></li>
+    <li class="active">Study Images</li>
+{% endblock %}
+
+{% block content %}
+    <div class="well">
+        <div class="row text-center">
+            <h1>
+                {{ object }}
+            </h1>
+        </div>
+        <div class="row text-center small-padding-top">
+{#            <a href="/assays/{{ object.id }}" class="btn btn-primary" role="button">Study Landing</a>#}
+            <a href="{{ object.get_summary_url }}" class="btn btn-info" role="button">Study Summary</a>
+        </div>
+    </div>
+
+    <div id="filter_table" class="row no-padding hidden-checkboxes"></div>
+{% endblock %}
+
+{% block fluid-content %}
+    <div class="row no-padding">
+        <div id="image_mosaic" class="col-sm-12 large-padding-top">
+            <div title="Separate terms with a space to search multiple fields" style="float: left;">
+                <label>Search:<input type="search" id="search-box" placeholder="" aria-controls="image_table"></label>
+            </div>
+            <table id="image_table" class="table table-hover table-bordered"></table>
+        </div>
+    </div>
+
+    <div id="image_popup"><div id="myDialogText"></div></div>
+
+    <nav id="floating-sliders" class="footer navbar-fixed-bottom hidden-print floating-submit-row" style="width: 100vw;">
+        <div class="container large-padding-top">
+            <div class="row adjustment-sliders">
+                <div class="col-xs-12 col-md-6">
+                    <label>Contrast</label>
+                    <div id="slider-contrast">
+                        <div id="handle-contrast" class="ui-slider-handle"></div>
+                    </div>
+                </div>
+                <div class="col-xs-12 col-md-6">
+                    <label>Brightness</label>
+                    <div id="slider-brightness">
+                        <div id="handle-brightness" class="ui-slider-handle"></div>
+                    </div>
+                </div>
+                <div style="padding-bottom: 10px;" class="col-xs-12 large-padding-top text-center">
+                    <button id="reset-to-default" class="btn btn-primary">Reset Sliders to Default</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+{% endblock %}

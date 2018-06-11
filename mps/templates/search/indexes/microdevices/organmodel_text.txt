@@ -1,5 +1,5 @@
-{{ object.model_name }}
-{{ object.model_name }}
+{{ object.name }}
+{{ object.name }}
 {{ object.organ }}
 {{ object.center }}
 {{ object.device }}

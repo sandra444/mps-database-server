@@ -13,14 +13,16 @@ class MicrophysiologyCenter(LockableModel):
     Note that this is the model by which groups are affiliated with assays, cells, etc.
     """
     class Meta(object):
-        ordering = ('center_name',)
+        ordering = ('name',)
 
-    center_name = models.CharField(max_length=100, unique=True)
+    # TODO TODO THIS SHOULD BE JUST NAME
+    # center_name = models.CharField(max_length=100, unique=True)
+    name = models.CharField(max_length=100, unique=True)
     center_id = models.CharField(max_length=20, unique=True)
     description = models.CharField(max_length=4000, blank=True, default='')
     contact_person = models.CharField(max_length=250, blank=True, default='')
     contact_email = models.EmailField(blank=True, default='')
-    center_website = models.URLField(blank=True, null=True)
+    website = models.URLField(blank=True, null=True)
 
     groups = models.ManyToManyField(
         Group,
@@ -29,29 +31,30 @@ class MicrophysiologyCenter(LockableModel):
     )
 
     def __unicode__(self):
-        return self.center_name
+        return self.name
 
 
 class Manufacturer(LockableModel):
     """Manufacturer gives details for a manufacturer of devices and/or componentry"""
     class Meta(object):
-        ordering = ('manufacturer_name',)
+        ordering = ('name',)
 
-    manufacturer_name = models.CharField(max_length=100, unique=True)
+    name = models.CharField(max_length=100, unique=True)
     contact_person = models.CharField(max_length=250, blank=True, default='')
-    # Why is this in the incorrect case?
-    Manufacturer_website = models.URLField(blank=True, null=True)
+    website = models.URLField(blank=True, null=True)
 
     def __unicode__(self):
-        return self.manufacturer_name
+        return self.name
 
 
 class Microdevice(LockableModel):
     """A Microdevice describes a physical vessel for performing experiments (a plate, chip, etc.)"""
     class Meta(object):
-        ordering = ('device_name', 'organ',)
+        ordering = ('name', 'organ',)
 
-    device_name = models.CharField(max_length=200, unique=True)
+    # TODO TODO THIS SHOULD BE JUST NAME
+    # device_name = models.CharField(max_length=200, unique=True)
+    name = models.CharField(max_length=200, unique=True)
 
     organ = models.ForeignKey('cellsamples.Organ', blank=True, null=True)
     center = models.ForeignKey(MicrophysiologyCenter, blank=True, null=True)
@@ -67,6 +70,8 @@ class Microdevice(LockableModel):
         verbose_name='length (mm)', null=True, blank=True)
     device_thickness = models.FloatField(
         verbose_name='thickness (mm)', null=True, blank=True)
+
+    # What is this for? Residue to be purged
     device_size_unit = models.CharField(max_length=50, default='', blank=True)
 
     device_image = models.ImageField(upload_to='assays', null=True, blank=True)
@@ -126,7 +131,7 @@ class Microdevice(LockableModel):
     references = models.CharField(max_length=2000, blank=True, default='')
 
     def __unicode__(self):
-        return self.device_name
+        return self.name
 
     def get_absolute_url(self):
         return "/microdevices/device/{}/".format(self.id)
@@ -139,9 +144,10 @@ class OrganModel(LockableModel):
     """An Organ Model describes a way of preparing a device to emulate a particular organ"""
     class Meta(object):
         verbose_name = 'Organ Model'
-        ordering = ('model_name', 'organ',)
+        ordering = ('name', 'organ',)
 
-    model_name = models.CharField(max_length=200, unique=True)
+    # model_name = models.CharField(max_length=200, unique=True)
+    name = models.CharField(max_length=200, unique=True)
     organ = models.ForeignKey('cellsamples.Organ')
     # Centers are now required
     center = models.ForeignKey(MicrophysiologyCenter)
@@ -170,7 +176,7 @@ class OrganModel(LockableModel):
     references = models.CharField(max_length=2000, blank=True, default='')
 
     def __unicode__(self):
-        return self.model_name
+        return self.name
 
     def get_absolute_url(self):
         return "/microdevices/model/{}/".format(self.id)
@@ -199,6 +205,7 @@ class OrganModelProtocol(models.Model):
         unique_together = [('version', 'organ_model')]
 
     organ_model = models.ForeignKey(OrganModel, verbose_name='Organ Model')
+    # Uhh... this should probably just be "name"...
     version = models.CharField(max_length=20)
     file = models.FileField(upload_to='protocols', verbose_name='Protocol File')
 
@@ -215,3 +222,36 @@ class GroupDeferral(TrackableModel):
         blank=True,
         upload_to='deferral'
     )
+
+
+class OrganModelLocation(models.Model):
+    """This is an inline for models that permits us to list relevant sample locations"""
+    sample_location = models.ForeignKey('assays.AssaySampleLocation')
+    notes = models.CharField(max_length=1024)
+    organ_model = models.ForeignKey(OrganModel)
+
+
+# REMOVED FOR NOW
+# class MicrodeviceSublayout(models.Model):
+#     """Describes a the layout of sections for a device"""
+#     device = models.ForeignKey(Microdevice)
+#
+#     number_of_rows = models.IntegerField()
+#     number_of_columns = models.IntegerField()
+#
+#
+# class MicrodeviceSection(models.Model):
+#     """Describes a section of a device, for instance if a device has to compartments (apical and basal)"""
+#     device_sublayout = models.ForeignKey(MicrodeviceSublayout)
+#
+#     row_index = models.IntegerField()
+#     column_index = models.IntegerField()
+#
+#     name = models.CharField(max_length=255)
+#
+#     volume = models.FloatField()
+#
+#     # VOLUME UNITS TOO?
+#
+#     def __unicode__(self):
+#         return self.name

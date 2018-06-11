@@ -1,12 +1,11 @@
 # coding=utf-8
 
 from django.http import *
-from django.shortcuts import render_to_response
-from django.template import RequestContext
 import ujson as json
 from .models import *
-from assays.utils import CHIP_DATA_PREFETCH
-from assays.models import AssayChipRawData, AssayCompoundInstance, AssayChipSetup
+# from assays.utils import CHIP_DATA_PREFETCH
+# from assays.models import AssayChipRawData, AssayCompoundInstance, AssayChipSetup
+from assays.models import AssayDataPoint, AssaySetupCompound, AssayMatrixItem
 
 from bioservices import ChEMBL as ChEMBLdb
 
@@ -17,8 +16,6 @@ import requests
 import re
 
 import numpy as np
-
-from assays.ajax import get_related_compounds_map, get_list_of_present_compounds
 
 # Calling main is and always will be indicative of an error condition.
 # ajax.py is strictly for AJAX requests
@@ -101,7 +98,7 @@ def get_chembl_compound_data(chemblid):
     """Returns a dictionary of ChEMBL data given a chemblid"""
     data = {}
 
-    url = 'https://www.ebi.ac.uk/chembl/api/data/molecule/{}.json'.format(chemblid)
+    url = u'https://www.ebi.ac.uk/chembl/api/data/molecule/{}.json'.format(chemblid)
     response = requests.get(url)
     initial_data = json.loads(response.text)
 
@@ -151,7 +148,7 @@ def get_chembl_compound_data(chemblid):
         # Get medchem alerts
         medchem_alerts = False
         # Get URL of target for scrape
-        url = "https://www.ebi.ac.uk/chembl/compound/structural_alerts/{}".format(chemblid)
+        url = u"https://www.ebi.ac.uk/chembl/compound/structural_alerts/{}".format(chemblid)
         # Make the http request
         response = requests.get(url)
         # Get the webpage as text
@@ -184,22 +181,13 @@ def fetch_chembl_compound_data(request):
                         content_type='application/json')
 
 
+# TODO TODO TODO TODO TODO
 def fetch_compound_report(request):
     """Return in JSON the data required to make a compound report
 
     Receives the following from POST:
     compounds -- the names of the desired ChEMBL ids
     """
-    # summary_types = (
-    #     'Pre-clinical Findings',
-    #     'Clinical Findings',
-    #     # Recently added
-    #     'PK/Metabolism',
-    # )
-    # property_types = (
-    #     'Dose (xCmax)',
-    #     'cLogP',
-    # )
 
     # Should "compounds" be pk's instead of names?
     compounds_request = json.loads(request.POST.get('compounds', []))
@@ -225,79 +213,34 @@ def fetch_compound_report(request):
             }}
         )
 
-    # Acquire AssayChipRawData and store based on compound-assay (and convert to minutes?)
-    # Make sure that the quality IS THE EMPTY STRING (anything in the quality field qualifies as invalid)
-    # all_data_points = AssayChipRawData.objects.filter(
-    #     quality=u'',
-    #     assay_chip_id__chip_setup__assay_run_id__use_in_calculations=True
-    # ).exclude(
-    #     # Contrived at the moment
-    #     assay_instance__unit_id=45,
-    #     value__isnull=True
-    # ).prefetch_related(
-    #     *CHIP_DATA_PREFETCH
-    # )
-    #
-    # # MUDDLED USE OF TERMS PLEASE REVISE ASAP
-    # related_compounds_map = get_related_compounds_map(data=readouts)
-    #
-    # for readout in readouts:
-    #     for compound in related_compounds_map.get(readout.assay_chip_id.chip_setup.id, []):
-    #         compound_name = compound.compound_instance.compound.name
-    #         if compound_name in compounds_request:
-    #             plot = data.get(compound_name).get('plot')
-    #             assay = readout.assay_instance.target.short_name
-    #             if assay not in plot:
-    #                 plot[assay] = {}
-    #
-    #             # TODO SCALE CONCETRATIONS
-    #             concentration = unicode(
-    #                 compound.concentration
-    #             ) + u'_' + compound.concentration_unit.unit
-    #             if not concentration in plot[assay]:
-    #                 plot[assay][concentration] = {}
-    #             entry = plot[assay][concentration]
-    #
-    #             # Convert all times to days for now
-    #             # Get the conversion unit
-    #             # scale = readout.assay_chip_id.timeunit.scale_factor
-    #             # readout_time = "{0:.2f}".format((scale/1440.0) * readout.time)
-    #             # readout_time = readout_time.rstrip('0').rstrip('.') if '.' in readout_time else readout_time
-    #             readout_time = "{0:.2f}".format(readout.time / 1440)
-    #             readout_time = readout_time.rstrip('0').rstrip('.') if '.' in readout_time else readout_time
-    #
-    #             if readout_time not in entry:
-    #                 entry.update({readout_time: [readout.value]})
-    #             else:
-    #                 entry.get(readout_time).append(readout.value)
-
-    assay_compound_instances = AssayCompoundInstance.objects.filter(
+    setup_compounds = AssaySetupCompound.objects.filter(
         compound_instance__compound__name__in=compounds_request
     ).prefetch_related(
         'compound_instance__compound',
-        'chip_setup',
         'concentration_unit'
     )
-    # setups = assay_compound_instances.values_list('chip_setup_id', flat=True)
 
-    setup_id_to_compounds_map = {}
+    matrix_item_id_to_compounds_map = {}
 
-    for assay_compound_instance in assay_compound_instances:
-        setup_id_to_compounds_map.setdefault(
-            assay_compound_instance.chip_setup_id, []
-        ).append(assay_compound_instance)
+    for setup_compound in setup_compounds:
+        matrix_item_id_to_compounds_map.setdefault(
+            setup_compound.matrix_item_id, []
+        ).append(setup_compound)
 
-    studies = AssayChipSetup.objects.filter(
-        id__in=setup_id_to_compounds_map
-    ).values_list('assay_run_id_id', flat=True)
+    studies = AssayMatrixItem.objects.filter(
+        id__in=matrix_item_id_to_compounds_map
+    ).values_list('study_id', flat=True)
 
-    control_data_points = AssayChipRawData.objects.filter(
-        quality=u'',
-        assay_chip_id__chip_setup__assay_run_id__use_in_calculations=True,
-        assay_chip_id__chip_setup__assay_run_id__in=studies,
-        assay_chip_id__chip_setup__assaycompoundinstance__isnull=True
+    control_data_points = AssayDataPoint.objects.filter(
+        replaced=False,
+        excluded=False,
+        study__use_in_calculations=True,
+        study_id__in=studies,
+        matrix_item__assaysetupcompound__isnull=True
     ).prefetch_related(
-        *CHIP_DATA_PREFETCH
+        # TODO
+        'study',
+        'study_assay__target'
     )
     initial_control_data = {}
     control_data = {}
@@ -305,9 +248,9 @@ def fetch_compound_report(request):
     for data_point in control_data_points:
         if data_point.value:
             initial_control_data.setdefault(
-                data_point.assay_chip_id.chip_setup.assay_run_id_id, {}
+                data_point.study_id, {}
             ).setdefault(
-                data_point.assay_instance.target.short_name, {}
+                data_point.study_assay.target.short_name, {}
             ).setdefault(
                 data_point.time, []
             ).append(data_point.value)
@@ -319,35 +262,37 @@ def fetch_compound_report(request):
                     (study_id, assay, time): np.average(times)
                 })
 
-    data_points = AssayChipRawData.objects.filter(
-        quality=u'',
-        assay_chip_id__chip_setup__assay_run_id__use_in_calculations=True,
-        assay_chip_id__chip_setup_id__in=setup_id_to_compounds_map
+    data_points = AssayDataPoint.objects.filter(
+        replaced=False,
+        excluded=False,
+        study__use_in_calculations=True,
+        matrix_item_id__in=matrix_item_id_to_compounds_map
     ).prefetch_related(
-        *CHIP_DATA_PREFETCH
+        'study',
+        'study_assay__target'
     )
 
     for data_point in data_points:
-        study_id = data_point.assay_chip_id.chip_setup.assay_run_id_id
-        assay = data_point.assay_instance.target.short_name
+        study_id = data_point.study_id
+        assay = data_point.study_assay.target.short_name
         time = data_point.time
         value = data_point.value
 
         if control_data.get((study_id, assay, time)) and value:
-            for assay_compound_instance in setup_id_to_compounds_map.get(
-                    data_point.assay_chip_id.chip_setup_id
+            for setup_compound in matrix_item_id_to_compounds_map.get(
+                    data_point.matrix_item_id
             ):
-                if assay_compound_instance.addition_time <= time:
+                if setup_compound.addition_time <= time:
                     data.get(
-                        assay_compound_instance.compound_instance.compound.name, {}
+                        setup_compound.compound_instance.compound.name, {}
                     ).get(
                         'plot'
                     ).setdefault(
                         assay, {}
                     ).setdefault(
                         u'{0:.2f}_{1}'.format(
-                            assay_compound_instance.concentration,
-                            assay_compound_instance.concentration_unit.unit
+                            setup_compound.concentration,
+                            setup_compound.concentration_unit.unit
                         ), {}
                     ).setdefault(
                         '{0:.2f}'.format(time / 1440), []
@@ -473,7 +418,7 @@ def get_drugbank_data_from_chembl_id(chembl_id):
     }
 
     # Get drugbank_id or fail
-    url = 'https://www.ebi.ac.uk/unichem/rest/src_compound_id/{}/1/2'.format(chembl_id)
+    url = u'https://www.ebi.ac.uk/unichem/rest/src_compound_id/{}/1/2'.format(chembl_id)
     # Make the http request
     response = requests.get(url)
     # Get the webpage in JSON
@@ -486,7 +431,7 @@ def get_drugbank_data_from_chembl_id(chembl_id):
         data['drugbank_id'] = drugbank_id
 
         # Get URL of target for scrape
-        url = "http://www.drugbank.ca/drugs/{}".format(drugbank_id)
+        url = u"http://www.drugbank.ca/drugs/{}".format(drugbank_id)
         # Make the http request
         response = requests.get(url)
         # Get the webpage as text
@@ -683,7 +628,7 @@ def get_drugbank_data_from_chembl_id(chembl_id):
 
     # YES, I know that the function title is deceiving in that this is actually a PubChem ID
     # Get pubchemid from unichem too
-    url = 'https://www.ebi.ac.uk/unichem/rest/src_compound_id/{}/1/22'.format(chembl_id)
+    url = u'https://www.ebi.ac.uk/unichem/rest/src_compound_id/{}/1/22'.format(chembl_id)
     # Make the http request
     response = requests.get(url)
     # Get the webpage in JSON
@@ -719,7 +664,7 @@ def fetch_chembl_search_results(request):
     """
     query = request.POST.get('query', '')
 
-    url = 'https://www.ebi.ac.uk/chembl/api/data/chembl_id_lookup/search.json?q={}'.format(query)
+    url = u'https://www.ebi.ac.uk/chembl/api/data/chembl_id_lookup/search.json?q={}'.format(query)
     # Make the http request
     response = requests.get(url)
     # Get the webpage in JSON
@@ -733,7 +678,7 @@ def fetch_chembl_search_results(request):
             additional_data = {}
             chembl_id = lookup.get('chembl_id', '')
 
-            url = 'https://www.ebi.ac.uk/chembl/api/data/molecule/{}.json'.format(chembl_id)
+            url = u'https://www.ebi.ac.uk/chembl/api/data/molecule/{}.json'.format(chembl_id)
             # Make the http request
             response = requests.get(url)
             # Get the webpage in JSON

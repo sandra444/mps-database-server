@@ -49,23 +49,25 @@
     <link rel="stylesheet" type="text/css" href="{% static "css/buttons.dataTables.min.css" %}">
 
     <!-- DataTables -->
-    <script type="text/javascript" charset="utf8" src="{% static "js/jquery.dataTables.min.js" %}"></script>
-    <script type="text/javascript" charset="utf8" src="{% static "js/dataTables.fixedHeader.min.js" %}"></script>
-    <script type="text/javascript" charset="utf8" src="{% static "js/dataTables.responsive.min.js" %}"></script>
-    <script type="text/javascript" charset="utf8" src="{% static "js/dataTables.buttons.min.js" %}"></script>
+    <script type="text/javascript" charset="utf-8" src="{% static "js/jquery.dataTables.min.js" %}"></script>
+    <script type="text/javascript" charset="utf-8" src="{% static "js/dataTables.fixedHeader.min.js" %}"></script>
+    <script type="text/javascript" charset="utf-8" src="{% static "js/dataTables.responsive.min.js" %}"></script>
+    <script type="text/javascript" charset="utf-8" src="{% static "js/dataTables.buttons.min.js" %}"></script>
     {# We will just be using html5 for buttons (no fallback) #}
-    {# <script type="text/javascript" charset="utf8" src="{% static "js/buttons.flash.min.js" %}"></script>#}
-    <script type="text/javascript" charset="utf8" src="{% static "js/buttons.html5.min.js" %}"></script>
-    <script type="text/javascript" charset="utf8" src="{% static "js/buttons.print.min.js" %}"></script>
+    {# <script type="text/javascript" charset="utf-8" src="{% static "js/buttons.flash.min.js" %}"></script>#}
+    <script type="text/javascript" charset="utf-8" src="{% static "js/buttons.html5.min.js" %}"></script>
+    <script type="text/javascript" charset="utf-8" src="{% static "js/buttons.print.min.js" %}"></script>
 
 {#    This script sets defaults for Buttons #}
 {#    Currently I exclude Excel (as it is confusingly given a csv extension) and PDF (requires heavier SWF)#}
 {#    I may add these later, however, but I will have to remember to use the PDF enabled SWF if PDFs are desired#}
-    <script type="text/javascript" charset="utf8" src="{% static "js/datatable_options.js" %}"></script>
+    <script type="text/javascript" charset="utf-8" src="{% static "js/datatable_options.js" %}"></script>
 
     <!-- SmartMenus jQuery plugin -->
     {# No longer used #}
 {#    <script type="text/javascript" src="{% static "js/jquery.smartmenus.min.js" %}"></script>#}
+
+    <script src="{% static "js/cookies.js" %}"></script>
 
     {# Yes, I know this violates SOC #}
     <script>
@@ -75,37 +77,41 @@
 {#        return true;#}
 {#      };#}
 
+      // TODO NEEDS TO BE REVISED ALONG WITH HELP
+      // TODO MOVE THIS TO ITS OWN FILE PLEASE
 {#      // TODO MOVE THIS TO ITS OWN FILE PLEASE#}
       $(document).ready(function () {
+        // Prevent CSS conflict with Bootstrap
+        // CRUDE
+        $.fn.button.noConflict();
+
 {#        // Discern what anchor to add to the help URL by looking at current url#}
         var url = window.location.href;
         var anchor = '';
 
-        if (url.indexOf('/assaychipsetup/') > -1) {
-          anchor = '#chipsetups'
+        // TODO GET ANCHOR
+
+        $('#view_help')
+            .attr(
+                'onclick',
+                "window.open('/help/"
+                + anchor +
+                "','win','toolbars=0,width=1200,height=760,left=200,top=200,scrollbars=1,resizable=1')"
+            );
+
+        if (url.indexOf('/assaymatrix/') > -1) {
+          anchor = '#matrices'
         }
-        else if (url.indexOf('/assaychipreadout/') > -1) {
-          anchor = '#chipreadouts'
+        else if (url.indexOf('/assaymatrixitem/') > -1) {
+          anchor = '#matrixitems'
         }
-        else if (url.indexOf('/assaychiptestresult/') > -1) {
-          anchor = '#chipresults'
-        }
-{#        else if (url.indexOf('/assayplatesetup/') > -1) {#}
-{#          anchor = '#platesetups'#}
-{#        }#}
-{#        else if (url.indexOf('/assayplatereadout/') > -1) {#}
-{#          anchor = '#platereadouts'#}
-{#        }#}
-{#        else if (url.indexOf('/assayplatetestresult/') > -1) {#}
-{#          anchor = '#plateresults'#}
-{#        }#}
-        else if (url.indexOf('/bulk/') > -1) {
-          anchor = '#bulk'
+        else if (url.indexOf('/upload/') > -1) {
+          anchor = '#uploadingdata'
         }
 {#        else if (url.indexOf('/assaylayout/') > -1) {#}
 {#          anchor = '#assaylayouts'#}
 {#        }#}
-        else if (url.indexOf('/studyconfiguration/') > -1) {
+        else if (url.indexOf('/assaystudyconfiguration/') > -1) {
           anchor = '#studyconfigurations'
         }
         else if (url.indexOf('/model/') > -1) {
@@ -190,17 +196,17 @@
         <a class="dropdown-toggle" data-toggle="dropdown">Studies<span class="caret"></span></a>
         <ul class="dropdown-menu" role="menu">
           <li title="Index of all the studies created by groups you are a member of">
-              <a href="/assays/editable_studies/">View Editable Studies</a>
+              <a href="/assays/assaystudy/editable_studies/">View Editable Studies</a>
           </li>
-          <li><a href="/assays/study/">View All Studies</a></li>
+          <li><a href="/assays/assaystudy/">View All Studies</a></li>
           <li><a href="/assays/studyconfiguration/">View Integrated Study Configurations</a></li>
-          <li class="divider"></li>
-          <li><a href="/assays/assaychipsetup/">View Setups</a></li>
-          <li><a href="/assays/assaychipreadout/">View Readouts</a></li>
-          <li><a href="/assays/assaychiptestresult/">View Results</a></li>
+{#          <li class="divider"></li>#}
+{#          <li><a href="/assays/assaychipsetup/">View Setups</a></li>#}
+{#          <li><a href="/assays/assaychipreadout/">View Readouts</a></li>#}
+{#          <li><a href="/assays/assaychiptestresult/">View Results</a></li>#}
           <li class="divider"></li>
           <li class="dropdown-header">Requires Permission</li>
-          <li><a href="/assays/study/add/">Add Study</a></li>
+          <li><a href="/assays/assaystudy/add/">Add Study</a></li>
           <li><a href="/assays/studyconfiguration/add/">Add Integrated Study Configuration</a></li>
         </ul>
         </li>
@@ -214,22 +220,22 @@
           <li title="Generate a dendrogram for selected compound/bioactivity data">
               <a href="/bioactivities/cluster/#filter">Cluster</a>
           </li>
-          <li title="This feature is still in development"><a href="/under_construction/">
-              <span id="generic_alert_symbol" class="glyphicon glyphicon-wrench" aria-hidden="true"></span>
-              Reproducibility
-          </a></li>
+{#          <li title="This feature is still in development"><a href="/under_construction/">#}
+{#              <span class="glyphicon glyphicon-wrench" aria-hidden="true"></span>#}
+{#              Reproducibility#}
+{#          </a></li>#}
           <li class="divider"></li>
           <li class="dropdown-header">Computational Modeling</li>
           <li title="This feature is still in development"><a href="/under_construction/">
-              <span id="generic_alert_symbol" class="glyphicon glyphicon-wrench" aria-hidden="true"></span>
+              <span class="glyphicon glyphicon-wrench" aria-hidden="true"></span>
               PBPK
           </a></li>
           <li title="This feature is still in development"><a href="/bioactivities/model/">
-              <span id="generic_alert_symbol" class="glyphicon glyphicon-wrench" aria-hidden="true"></span>
+              <span class="glyphicon glyphicon-wrench" aria-hidden="true"></span>
               Predictive Modeling
           </a></li>
 {#          <li title="This feature is still in development"><a href="/under_construction/">#}
-{#              <span id="generic_alert_symbol" class="glyphicon glyphicon-wrench" aria-hidden="true"></span>#}
+{#              <span class="glyphicon glyphicon-wrench" aria-hidden="true"></span>#}
 {#              Pathway Modeling#}
 {#          </a></li>#}
         </ul>

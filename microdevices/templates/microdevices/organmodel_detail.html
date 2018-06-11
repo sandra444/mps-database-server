@@ -2,11 +2,11 @@
 
 {% block breadcrumbs %}
     <li><a href="/microdevices/model">Organ Models</a></li>
-    <li class="active">{{ object.model_name }}</li>
+    <li class="active">{{ object.name }}</li>
 {% endblock %}
 
 {% block content %}
-    <legend><h1>{{ object.model_name }}</h1></legend>
+    <legend><h1>{{ object.name }}</h1></legend>
 
     <div>
         <div class="col-xs-12">
@@ -95,7 +95,7 @@
                 </tr>
                 <tr>
                     <td>
-                        References
+                        <b>References</b>
                     </td>
                     <td>
                         {{ object.references|linebreaksbr }}
@@ -105,6 +105,27 @@
         </table>
         </div>
     </div>
+
+    {% if object.organmodellocation_set.count %}
+    <legend>Locations</legend>
+
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            <th>Location</th>
+            <th>Description</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for location in object.organmodellocation_set.all %}
+            <tr>
+                <td>{{ location.sample_location }}</td>
+                <td>{{ location.notes }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
 
     {% if protocols %}
     <legend>Protocols</legend>

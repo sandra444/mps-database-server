@@ -172,10 +172,11 @@ class Test(LockableModel):
     description = models.CharField(max_length=400, blank=True, default='')
 
     def __unicode__(self):
-        return u'{} :: {} :: {}'.format(self.organ,
-                                        self.test_type,
-                                        self.test_name
-                                        )
+        return u'{} :: {} :: {}'.format(
+            self.organ,
+            self.test_type,
+            self.test_name
+        )
 
 
 class FindingType(LockableModel):

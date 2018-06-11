@@ -12,7 +12,7 @@ def main(request):
 
 
 def get_cell_subtypes(request):
-    """Acquires all available cell subtypes for the given cell type"""
+    """Acquires all available Cell Origins for the given cell type"""
 
     dropdown = u'<option value="">---------</option>'
 
