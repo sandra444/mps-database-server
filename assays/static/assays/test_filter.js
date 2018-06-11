@@ -3,8 +3,8 @@ $(document).ready(function() {
     google.charts.load('current', {'packages':['corechart']});
 
     var filters = {
-        'groups': {},
         'organ_models': {},
+        'groups': {},
         'compounds': {},
         'targets': {}
     };
@@ -113,6 +113,12 @@ $(document).ready(function() {
                 $.each(json.filters, function (filter, contents) {
                     // Do not refresh current
                     if (filter === parent_filter) {
+                        return true;
+                    }
+
+                    // Do not refresh MPS Model if you don't have to
+                    // Crude, obviously
+                    if (filter === 'organ_models' && _.keys(filters['organ_models']).length) {
                         return true;
                     }
 
