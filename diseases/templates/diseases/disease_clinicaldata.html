@@ -96,38 +96,6 @@
             {% endfor %}
             </tbody>
         </table>
-        <!-- <table id="trials" class="table table-striped">
-            {% if clinicaltrials %}
-            <thead>
-                <tr>
-                    <th>Trial Name</th>
-                    <th>Phase</th>
-                    <th>Status</th>
-                    <th>Results</th>
-                    <th>Institution</th>
-                    <th>Drugs</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for key in clinicaltrials %}
-                <tr>
-                    <td><a target="_blank" href="https://clinicaltrials.gov/ct2/show/{{ key.trial_id }}"> {{ key.trial_name }}</a></td>
-                    <td>{{key.phase}}</td>
-                    <td>{{key.status}}</td>
-                    {% if key.results %}
-                        <td><a target="_blank" href="https://clinicaltrials.gov/ct2/show/results/{{ key.trial_id }}">Yes</a></td>
-                    {% else %}
-                        <td>No</td>
-                    {% endif %}
-                    <td>{{key.institution}}</td>
-                    <td>{{key.drugs}}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-            {% else %}
-            No clinical trials currently linked to this disease in the database.
-            {% endif %}
-        </table>-->
     </div>
     {% else %}
     <br><br>

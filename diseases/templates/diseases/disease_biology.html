@@ -98,8 +98,8 @@
             </div>
         </div>
         {% if disease.biology_kegg_pathway_map %}
-            <div class="col-md-4 thumbnail text-center row-center"> <h4><strong><a target="_blank" href="{{disease.biology_kegg_pathway_url}}">KEGG: {{disease.name}} Pathway Map</a></strong></h4>
-                <a target="_blank" href="{{disease.biology_kegg_pathway_map.url}}"><img src="{{disease.biology_kegg_pathway_map.url}}" class="img-responsive"></a> KEGG is a database resource for understanding high-level functions and utilities of the biological system.
+            <div class="col-md-4 thumbnail text-center row-center"> <h4><strong><a target="_blank" href="{{disease.biology_kegg_url}}">KEGG: {{disease.name}} Disease Entry</a></strong></h4>
+                <a target="_blank" href="{{disease.biology_kegg_pathway_url}}"><img src="{{disease.biology_kegg_pathway_map.url}}" class="img-responsive"></a> Click to view an interactive pathway map for {{disease.name}}.
             </div>
         {% endif %}
     </div>
@@ -107,49 +107,49 @@
 
     <legend>Proteomics, Metabolomics, and Pharmacogenomic Resources</legend>
     <div class="row padding-bottom">
-        <div class="col-md-6 padded">
+        <div class="col-xs-6 padded">
             <div class="panel panel-default">
                 <div class="panel-heading">
-                    <h4 class="panel-title">
+                    <h4>
                         <strong><a target="_blank" href="https://www.proteomicsdb.org/">ProteomicsDB by SAP</a></strong>
                     </h4>
                 </div>
-                <div class="col-xs-12 panel body padding-left">ProteomicsDB by SAP is a proteomic database that allows you to browse proteins and chromosomes of interest.</div>
+                <div class="col-xs-12 panel-body">ProteomicsDB by SAP is a proteomic database that allows you to browse proteins and chromosomes of interest.</div>
             </div>
         </div>
 
-        <div class="col-md-6 padding-bottom">
+        <div class="col-xs-6 padding-bottom">
             <div class="panel panel-default">
                 <div class="panel-heading">
-                    <h4 class="panel-title">
+                    <h4>
                         <strong><a target="_blank" href="http://www.metabolomicsworkbench.org/data/DRCCStudySummary.php?Mode=ProcessExpDataTextSearch&Title={{disease.name}}">Metabolomicsworkbench</a></strong>
                     </h4>
                 </div>
-                <div class="col-xs-12 panel body padding-left">Metabolomicsworkbench serves as a national and international repository for metabolomics data.</div>
+                <div class="col-xs-12 panel-body">Metabolomicsworkbench serves as a national and international repository for metabolomics data.</div>
             </div>
         </div>
     </div>
 
     <div class="row padding-bottom">
-        <div class="col-md-6 padding-bottom">
+        <div class="col-xs-6 padding-bottom">
             <div class="panel panel-default">
                 <div class="panel-heading">
-                    <h4 class="panel-title">
+                    <h4>
                         <strong><a target="_blank" href="https://www.pharmgkb.org/search?connections&query={{disease.name}}">PharmaGKB</a></strong>
                     </h4>
                 </div>
-            <div class="col-xs-12 panel body padding-left">PharmaGKB is a website that investigates genetic variations and how the body responds to medication.</div>
+                <div class="col-xs-12 panel-body">PharmaGKB is a website that investigates genetic variations and how the body responds to medication.</div>
             </div>
         </div>
 
-        <div class="col-md-6 padding-bottom">
+        <div class="col-xs-6">
             <div class="panel panel-default">
                 <div class="panel-heading">
-                    <h4 class="panel-title">
-                        <strong><a target="_blank" href="https://www.drugbank.ca">DrugBank</a></strong>
+                    <h4>
+                        <strong><a target="_blank" href="https://www.drugbank.ca/unearth/q?utf8=%E2%9C%93&searcher=drugs&query={{disease.name}}">DrugBank</a></strong>
                     </h4>
                 </div>
-                <div class="col-xs-12 panel body padding-left">DrugBank is a unique bioinformatics and chemoinformatics database that combines drug data with comprehensive drug target information.</div>
+                <div class="col-xs-12 panel-body">DrugBank is a unique bioinformatics and chemoinformatics database that combines drug data with comprehensive drug target information.</div>
             </div>
         </div>
     </div>

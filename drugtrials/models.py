@@ -65,7 +65,8 @@ class DrugTrial(LockableModel):
         verbose_name = 'Drug Trial'
         ordering = ('compound', 'species', )
 
-    title = models.CharField(max_length=255, blank=True, default='')
+    # title = models.CharField(max_length=2000, unique=True)
+    title = models.CharField(max_length=2000)
     condition = models.CharField(max_length=1400, blank=True, default='')
     source = models.ForeignKey(TrialSource)
     compound = models.ForeignKey('compounds.Compound')
@@ -118,11 +119,13 @@ class DrugTrial(LockableModel):
 
     # End of Participant Information
 
-    disease = models.ForeignKey(Disease, null=True, blank=True)
+    disease = models.ManyToManyField(Disease, blank=True)
     trial_type = models.CharField(max_length=1, choices=TRIALTYPES)
     trial_sub_type = models.CharField(max_length=1,
                                       choices=TRIALSUBTYPES, default='C')
-    trial_date = models.DateField(blank=True, null=True)
+    start_date = models.DateField(blank=True, null=True)
+    end_date = models.DateField(blank=True, null=True)
+    publish_date = models.DateField(blank=True, null=True)
     description = models.CharField(max_length=1400, blank=True, default='')
     source_link = models.URLField(blank=True, null=True)
     references = models.CharField(max_length=400, default='',
@@ -364,7 +367,20 @@ class FindingResult(models.Model):
     value_units = models.ForeignKey(PhysicalUnits, blank=True, null=True, related_name='finding_value_units')
 
     def __unicode__(self):
-        return u''
+        return u'{} {}'.format(unicode(self.drug_trial), unicode(self.finding_name))
+
+
+class FindingTreatment(models.Model):
+    """Finding Treatments are tied to Findings, and elaborate on the compounds and concentrations involved therein"""
+    compound = models.ForeignKey('compounds.Compound')
+    finding_result = models.ForeignKey(FindingResult)
+    concentration = models.FloatField(blank=True, null=True)
+    concentration_unit = models.ForeignKey(
+        'assays.PhysicalUnits',
+        blank=True,
+        null=True,
+        verbose_name='Concentration Unit'
+    )
 
 
 class AdverseEvent(models.Model):

@@ -1,5 +1,8 @@
 from django.contrib import admin
 from django.contrib.admin.widgets import AdminURLFieldWidget
+from django.core.urlresolvers import reverse
+from django.utils.translation import ugettext_lazy as _
+from django.utils.text import force_text
 from django.db.models import URLField
 from django.utils.safestring import mark_safe
 from django.forms import Textarea
@@ -115,12 +118,42 @@ class FindingResultInline(admin.TabularInline):
     raw_id_fields = ('finding_name',)
     verbose_name = 'Organ Finding'
     verbose_name_plural = 'Organ Findings'
-    fields = ('finding_name', 'descriptor', 'finding_time', 'time_units',
+    fields = ('finding_name', 'get_edit_link', 'descriptor', 'finding_time', 'time_units',
               'result', 'severity', 'frequency', 'value', 'value_units',)
+    readonly_fields = ['get_edit_link']
     extra = 0
+
+    def get_edit_link(self, obj=None):
+        if obj.pk:  # if object has already been saved and has a primary key, show link to it
+            url = reverse('admin:%s_%s_change' % (obj._meta.app_label, obj._meta.model_name), args=[force_text(obj.pk)])
+            return """<a href="{url}">{text}</a>""".format(
+                url=url,
+                text=_("Edit this %s separately") % obj._meta.verbose_name,
+            )
+        return _("(save and continue editing to create a link)")
+    get_edit_link.short_description = _("Edit link")
+    get_edit_link.allow_tags = True
 
     class Media(object):
         css = {"all": ("css/hide_admin_original.css",)}
+
+
+class FindingTreatmentInline(admin.StackedInline):
+    """Admin for Finding Treatment Inlines"""
+    model = FindingTreatment
+    verbose_name = 'Finding Treatments'
+    fields = ('compound', 'concentration', 'concentration_unit')
+    extra = 0
+
+
+class FindingResultAdmin(admin.ModelAdmin):
+    """Admin for Finding Result"""
+    model = FindingResult
+    fields = ('finding_name', 'descriptor', 'finding_time', 'time_units',
+              'result', 'severity', 'frequency', 'value', 'value_units',)
+    inlines = [FindingTreatmentInline]
+
+admin.site.register(FindingResult, FindingResultAdmin)
 
 
 class DrugTrialAdmin(LockableAdmin):
@@ -140,7 +173,7 @@ class DrugTrialAdmin(LockableAdmin):
     list_per_page = 300
     list_display = (
         'compound', 'species', 'trial_type', 'trial_sub_type',
-        'source_page', 'trial_date', 'locked')
+        'source_page', 'start_date', 'locked')
     list_filter = ['trial_type', ]
     search_fields = [
         'compound__name', 'species__species_name']
@@ -177,11 +210,12 @@ class DrugTrialAdmin(LockableAdmin):
     drug_display.allow_tags = True
     drug_display.short_description = 'Structure'
 
+    filter_horizontal = ('disease',)
     fieldsets = (
         (None, {
             'fields': (('compound', 'title'),
                        ('drug_display', 'figure1_display', 'figure2_display',),
-                       ('trial_type', 'trial_sub_type', 'trial_date'),
+                       ('trial_type', 'trial_sub_type', 'start_date'),
                        ('disease'),
                        ('condition', 'description',),
                        ('figure1', 'figure2',),)
