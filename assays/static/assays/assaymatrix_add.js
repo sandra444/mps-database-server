@@ -1006,4 +1006,51 @@ $(document).ready(function () {
             }
         });
     });
+
+    // Charting business
+    // Load core chart package
+    google.charts.load('current', {'packages':['corechart']});
+    // Set the callback
+    google.charts.setOnLoadCallback(get_readouts);
+
+    var charts = $('#charts');
+
+    // Name for the charts for binding events etc
+    var charts_name = 'charts';
+
+    function get_readouts() {
+        var data = {
+            // TODO TODO TODO CHANGE CALL
+            call: 'fetch_data_points',
+            matrix: matrix_id,
+            csrfmiddlewaretoken: window.COOKIES.csrfmiddlewaretoken
+        };
+
+        var options = window.CHARTS.prepare_chart_options(charts_name);
+
+        data = $.extend(data, options);
+
+        $.ajax({
+            url: "/assays_ajax/",
+            type: "POST",
+            dataType: "json",
+            data: data,
+            success: function (json) {
+                window.CHARTS.prepare_side_by_side_charts(json, charts_name);
+                window.CHARTS.make_charts(json, charts_name);
+
+                // Recalculate responsive and fixed headers
+                $($.fn.dataTable.tables(true)).DataTable().responsive.recalc();
+                $($.fn.dataTable.tables(true)).DataTable().fixedHeader.adjust();
+            },
+            error: function (xhr, errmsg, err) {
+                console.log(xhr.status + ": " + xhr.responseText);
+            }
+        });
+    }
+
+    // Setup triggers
+    $('#' + charts_name + 'chart_options').find('input').change(function() {
+        get_readouts();
+    });
 });
