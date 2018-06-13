@@ -18,11 +18,20 @@ class MicrophysiologyCenter(LockableModel):
 
     # TODO TODO THIS SHOULD BE JUST NAME
     # center_name = models.CharField(max_length=100, unique=True)
-    name = models.CharField(max_length=100, unique=True)
-    center_id = models.CharField(max_length=20, unique=True)
+    name = models.CharField(max_length=400, unique=True)
+
+    center_id = models.CharField(max_length=40, unique=True)
+
+    institution = models.CharField(max_length=400)
+
     description = models.CharField(max_length=4000, blank=True, default='')
+
     contact_person = models.CharField(max_length=250, blank=True, default='')
     contact_email = models.EmailField(blank=True, default='')
+
+    pi = models.CharField(max_length=250, blank=True, default='', verbose_name='PI')
+    pi_email = models.EmailField(blank=True, default='', verbose_name='PI Email')
+
     website = models.URLField(blank=True, null=True)
 
     groups = models.ManyToManyField(
