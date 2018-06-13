@@ -193,6 +193,7 @@ class PhysicalUnits(LockableModel):
         return u'{}'.format(self.unit)
 
 
+# DEPRECATED: SLATED FOR DELETION
 class AssayModelType(LockableModel):
     """Defines the type of an ASSAY (biochemical, mass spec, and so on)"""
 
@@ -206,6 +207,7 @@ class AssayModelType(LockableModel):
         return self.assay_type_name
 
 
+# DEPRECATED: SLATED FOR DELETION
 class AssayModel(LockableModel):
     """Defines an ASSAY such as albumin, BUN, and so on"""
 
@@ -233,6 +235,7 @@ class AssayModel(LockableModel):
         return u'{0} ({1})'.format(self.assay_name, self.assay_short_name)
 
 
+# DEPRECATED: SLATED FOR DELETION
 # Assay layout is now a flaggable model
 class AssayLayout(FlaggableRestrictedModel):
     """Defines the layout of a PLATE (parent of all associated wells)"""
@@ -262,6 +265,7 @@ class AssayLayout(FlaggableRestrictedModel):
         return '/assays/assaylayout/{}/delete/'.format(self.id)
 
 
+# DEPRECATED: SLATED FOR DELETION
 class AssayWellType(LockableModel):
     """PLATE well type
 
@@ -291,6 +295,7 @@ class AssayWellType(LockableModel):
     colored_display.allow_tags = True
 
 
+# DEPRECATED: SLATED FOR DELETION
 class AssayWell(models.Model):
     """An individual PLATE well"""
 
@@ -305,6 +310,7 @@ class AssayWell(models.Model):
     column = models.CharField(max_length=25)
 
 
+# DEPRECATED: SLATED FOR DELETION
 class AssayWellTimepoint(models.Model):
     """Timepoints for PLATE wells"""
     assay_layout = models.ForeignKey(AssayLayout)
@@ -313,6 +319,7 @@ class AssayWellTimepoint(models.Model):
     column = models.CharField(max_length=25)
 
 
+# DEPRECATED: SLATED FOR DELETION
 class AssayWellLabel(models.Model):
     """Arbitrary string label for PLATE wells"""
     assay_layout = models.ForeignKey(AssayLayout)
@@ -321,6 +328,7 @@ class AssayWellLabel(models.Model):
     column = models.CharField(max_length=25)
 
 
+# DEPRECATED: SLATED FOR DELETION
 class AssayCompoundInstance(models.Model):
     """An instance of a compound used in an assay; used as an inline"""
 
@@ -387,6 +395,7 @@ class AssayCompoundInstance(models.Model):
         )
 
 
+# DEPRECATED: SLATED FOR DELETION
 class AssayWellCompound(models.Model):
     """Compound for PLATE wells"""
     assay_layout = models.ForeignKey(AssayLayout)
@@ -402,6 +411,7 @@ class AssayWellCompound(models.Model):
     column = models.CharField(max_length=25)
 
 
+# DEPRECATED: SLATED FOR DELETION
 class AssayQualityIndicator(LockableModel):
     """AssayQualityIndicators show whether a data point needs to be excluded"""
     # Name of the indicator
@@ -476,6 +486,7 @@ class AssayPlateSetup(FlaggableRestrictedModel):
         return '/assays/assayplatesetup/{}/delete/'.format(self.id)
 
 
+# DEPRECATED: SLATED FOR DELETION
 class AssayReader(LockableModel):
     """Chip and Plate readers"""
 
@@ -623,6 +634,7 @@ POSNEG = (
 )
 
 
+# DEPRECATED: SLATED FOR DELETION
 class AssayResultFunction(LockableModel):
     """Function for analysis of CHIP RESULTS"""
     class Meta(object):
@@ -637,6 +649,7 @@ class AssayResultFunction(LockableModel):
         return self.function_name
 
 
+# DEPRECATED: SLATED FOR DELETION
 class AssayResultType(LockableModel):
     """Result types for CHIP RESULTS"""
 
@@ -760,6 +773,7 @@ def bulk_readout_file_location(instance, filename):
     return '/'.join(['csv', str(instance.id), 'bulk', filename])
 
 
+# DEPRECATED: SLATED FOR DELETION
 # To be renamed "AssayStudy" for clarity
 # Handling of study type will be changed
 # Nature of assay_run_id subject to revision
@@ -874,6 +888,7 @@ def study_supporting_data_location(instance, filename):
     return '/'.join(['supporting_data', str(instance.study_id), filename])
 
 
+# DEPRECATED: SLATED FOR DELETION
 class StudySupportingData(models.Model):
     """A file (with description) that gives extra data for a Study"""
     study = models.ForeignKey(AssayRun)
@@ -961,6 +976,7 @@ cell_choice_dict = {
 }
 
 
+# DEPRECATED: SLATED FOR DELETION
 class AssayChipCells(models.Model):
     """Individual cell parameters for CHIP setup used in inline"""
 
@@ -1694,8 +1710,11 @@ class AssayFailureReason(FlaggableModel):
     name = models.CharField(max_length=512, unique=True)
     description = models.CharField(max_length=2000)
 
+# TODO TODO TODO
+# These choices need to change
+# Please note contrivance with respect to compound/"Treated"
 TEST_TYPE_CHOICES = (
-    ('', '--------'), ('control', 'Control'), ('compound', 'Compound')
+    ('', '--------'), ('control', 'Control'), ('compound', 'Treated')
 )
 
 # SUBJECT TO REMOVAL (MAY JUST USE ASSAY SETUP)
