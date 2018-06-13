@@ -27,9 +27,11 @@ class MicrophysiologyCenter(LockableModel):
 
     contact_person = models.CharField(max_length=250, blank=True, default='')
     contact_email = models.EmailField(blank=True, default='')
+    contact_web_page = models.URLField(blank=True, null=True)
 
     pi = models.CharField(max_length=250, blank=True, default='', verbose_name='PI')
     pi_email = models.EmailField(blank=True, default='', verbose_name='PI Email')
+    pi_web_page = models.URLField(blank=True, null=True)
 
     website = models.URLField(blank=True, null=True)
 
