@@ -1,7 +1,7 @@
 from django import forms
 from captcha.fields import CaptchaField
 from registration.forms import RegistrationFormUniqueEmail
-from django.contrib.auth.forms import PasswordResetForm
+from django.contrib.auth.forms import PasswordResetForm, UserChangeForm
 from django.contrib.auth.models import User
 from mps.settings import DEFAULT_FROM_EMAIL
 
@@ -103,3 +103,18 @@ class CaptchaResetForm(PasswordResetForm):
             raise forms.ValidationError("There is no user registered with the specified email address!")
 
         return email
+
+
+class MyUserChangeForm(UserChangeForm):
+    # Very sloppy use of inheritance
+    class Meta(UserChangeForm.Meta):
+        help_texts = {
+            'groups':   '***Assign permissions as follows:***<br>'
+                        'data group viewer: {{ data group }} Viewer<br>'
+                        'data group editor: {{ data group }}<br>'
+                        'data group admin (can sign off): {{ data group }} Admin<br>'
+                        'stakeholder group admin (can approve): {{ access group }} Admin<br>'
+                        'stakeholder/access group viewer: {{ access group }} Viewer<br><br>'
+                        '***NOTE THAT EDITORS ARE ALSO VIEWERS AND ADMINS ARE EDITORS AND VIEWERS***<br><br>',
+            'user_permissions': '***THIS IS FOR THE ADMIN INTERFACE ONLY***<br>',
+        }
