@@ -1129,7 +1129,7 @@ def get_data_points_for_charting(
             for tag, sample_locations in tags.items():
                 # TODO: A little naive
                 if use_key_discrimination and key_discrimination.get(tag[1], ''):
-                    tag = '{} ({})'.format(tag[1], tag[0])
+                    tag = '{}||{}'.format(tag[1], tag[0])
                 elif use_key_discrimination:
                     tag = tag[1]
 
