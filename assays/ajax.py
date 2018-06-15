@@ -704,25 +704,26 @@ def get_control_data(
 
 
 # TODO WE MAY WANT THE DEFINITION OF A TREATMENT GROUP TO CHANGE, WHO KNOWS
-def get_item_groups(study):
+def get_item_groups(study, setups=None):
     treatment_groups = {}
     setup_to_treatment_group = {}
 
-    # By pulling the setups for the study, I avoid problems with preview data
-    setups = AssayMatrixItem.objects.filter(
-        study=study
-    ).prefetch_related(
-        'organ_model',
-        'assaysetupsetting_set__setting',
-        'assaysetupsetting_set__addition_location',
-        'assaysetupcell_set__cell_sample__cell_subtype',
-        'assaysetupcell_set__cell_sample__cell_type__organ',
-        'assaysetupcell_set__density_unit',
-        'assaysetupcell_set__addition_location',
-        'assaysetupcompound_set__compound_instance__compound',
-        'assaysetupcompound_set__concentration_unit',
-        'assaysetupcompound_set__addition_location',
-    )
+    if not setups:
+        # By pulling the setups for the study, I avoid problems with preview data
+        setups = AssayMatrixItem.objects.filter(
+            study=study
+        ).prefetch_related(
+            'organ_model',
+            'assaysetupsetting_set__setting',
+            'assaysetupsetting_set__addition_location',
+            'assaysetupcell_set__cell_sample__cell_subtype',
+            'assaysetupcell_set__cell_sample__cell_type__organ',
+            'assaysetupcell_set__density_unit',
+            'assaysetupcell_set__addition_location',
+            'assaysetupcompound_set__compound_instance__compound',
+            'assaysetupcompound_set__concentration_unit',
+            'assaysetupcompound_set__addition_location',
+        )
 
     for setup in setups:
         treatment_group_tuple = (
@@ -774,6 +775,7 @@ def get_data_points_for_charting(
         dynamic_excluded,
         study=None,
         matrix_item=None,
+        matrix_items=None,
         new_data=False,
         additional_data=None
 ):
@@ -793,7 +795,7 @@ def get_data_points_for_charting(
     additional_data - data to merge with raw_data (used when displaying individual readouts for convenience)
     """
     # Organization is assay -> unit -> compound/tag -> field -> time -> value
-    treatment_group_representatives, setup_to_treatment_group = get_item_groups(study)
+    treatment_group_representatives, setup_to_treatment_group = get_item_groups(study, matrix_items)
 
     final_data = {
         'sorted_assays': [],
@@ -974,7 +976,7 @@ def get_data_points_for_charting(
                     include_current = False
 
                     if accommodate_sample_location:
-                        current_key = tag + ' ' + sample_location
+                        current_key = tag + '||' + sample_location
                     else:
                         current_key = tag
 
@@ -989,8 +991,8 @@ def get_data_points_for_charting(
 
                         if not percent_control:
                             current_data.setdefault(current_key, {}).update({time: value})
-                            current_data.setdefault(current_key+'_i1', {}).update({time: value - interval})
-                            current_data.setdefault(current_key+'_i2', {}).update({time: value + interval})
+                            current_data.setdefault(current_key+'~@i1', {}).update({time: value - interval})
+                            current_data.setdefault(current_key+'~@i2', {}).update({time: value + interval})
                             y_header.update({time: True})
                             include_current = True
 
@@ -1005,8 +1007,8 @@ def get_data_points_for_charting(
                             adjusted_interval = (interval / control_value) * 100
 
                             current_data.setdefault(current_key, {}).update({time: adjusted_value})
-                            current_data.setdefault(current_key+'_i1', {}).update({time: adjusted_value - adjusted_interval})
-                            current_data.setdefault(current_key+'_i2', {}).update({time: adjusted_value + adjusted_interval})
+                            current_data.setdefault(current_key+'~@i1', {}).update({time: adjusted_value - adjusted_interval})
+                            current_data.setdefault(current_key+'~@i2', {}).update({time: adjusted_value + adjusted_interval})
                             y_header.update({time: True})
                             include_current = True
 
@@ -1015,27 +1017,27 @@ def get_data_points_for_charting(
                     # To include all
                     # x_header.append(current_key)
                     # x_header.extend([
-                    #     current_key + '_i1',
-                    #     current_key + '_i2'
+                    #     current_key + '~@i1',
+                    #     current_key + '~@i2'
                     # ])
 
                     # Only include intervals if necessary
                     if accommodate_intervals and include_current:
                         x_header.extend([
-                            current_key + '_i1',
-                            current_key + '_i2'
+                            current_key + '~@i1',
+                            current_key + '~@i2'
                         ])
                     else:
-                        if current_key+'_i1' in current_data:
-                            del current_data[current_key+'_i1']
-                            del current_data[current_key + '_i2']
+                        if current_key+'~@i1' in current_data:
+                            del current_data[current_key+'~@i1']
+                            del current_data[current_key + '~@i2']
 
             # for current_key in all_keys:
             #     if current_key not in x_header:
             #         x_header.extend([
             #             current_key,
-            #             current_key + '_i1',
-            #             current_key + '_i2'
+            #             current_key + '~@i1',
+            #             current_key + '~@i2'
             #         ])
 
             # Note manipulations for sorting
@@ -1043,7 +1045,7 @@ def get_data_points_for_charting(
             convert = lambda text: int(text) if text.isdigit() else text.lower()
             alphanum_key = lambda key: [
                 convert(
-                    c.replace('_I1', '!').replace('_I2', '"')
+                    c.replace('~@I1', '!').replace('~@I2', '"')
                 ) for c in re.split('([0-9]+)', key)
             ]
             x_header.sort(key=alphanum_key)
@@ -1114,7 +1116,8 @@ def fetch_data_points(request):
         request.POST.get('truncate_negative', ''),
         json.loads(request.POST.get('dynamic_excluded', '{}')),
         study=study,
-        matrix_item=matrix_item
+        matrix_item=matrix_item,
+        matrix_items=matrix_items
     )
 
     return HttpResponse(json.dumps(data),

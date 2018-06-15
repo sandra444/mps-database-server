@@ -12,8 +12,20 @@ window.CHARTS = {};
 // google.charts.setOnLoadCallback(window.CHARTS.callback);
 
 $(document).ready(function () {
+    // Charts
+    var all_charts = {};
+    var all_events = {};
 
+    // Semi-arbitrary at the moment
+    var treatment_group_table = $('#treatment_group_table');
+    var treatment_group_display = $('#treatment_group_display');
+    var treatment_group_head = $('#treatment_group_head');
+    var treatment_group_data_table = null;
+
+    // Probably should just have full data!
+    var group_to_data = [];
     var device_to_group = {};
+    var all_treatment_groups = [];
 
     window.CHARTS.prepare_chart_options = function(charts) {
         var options = {};
@@ -92,29 +104,36 @@ $(document).ready(function () {
         }
     };
 
-    window.CHARTS.display_treament_groups = function(treatment_groups) {
+    window.CHARTS.display_treatment_groups = function(treatment_groups, header_keys) {
+        device_to_group = {};
+
         // TODO KIND OF UGLY
-        var header_keys = [
-            // 'device',
-            'organ_model',
-            'cells',
-            'compounds',
-            'settings',
-            'setups_with_same_group'
-        ];
+        if (!header_keys) {
+            header_keys = [
+                // 'device',
+                'organ_model',
+                'cells',
+                'compounds',
+                'settings',
+                'setups_with_same_group'
+            ];
+        }
+
         var headers = {
             // 'device': 'Device',
-            'organ_model': 'Organ Model',
+            'organ_model': 'MPS Model',
             'cells': 'Cells',
             'compounds': 'Compounds',
             'settings': 'Settings',
             'setups_with_same_group': 'Chips/Wells'
         };
 
-        // Semi-arbitrary at the moment
-        var treatment_group_table = $('#treatment_group_table');
-        var treatment_group_display = $('#treatment_group_display');
-        var treatment_group_head = $('#treatment_group_head');
+        if (treatment_group_data_table) {
+            treatment_group_table.DataTable().clear();
+            treatment_group_table.DataTable().destroy();
+        }
+
+        treatment_group_display.empty();
 
         treatment_group_head.empty();
 
@@ -129,12 +148,9 @@ $(document).ready(function () {
 
         treatment_group_head.append(new_row);
 
-        treatment_group_display.empty();
-        treatment_group_table.DataTable().clear();
-        treatment_group_table.DataTable().destroy();
-
         $.each(treatment_groups, function(index, treatment) {
-            var group_name = 'Group ' + (index + 1);
+            var group_index = (index + 1);
+            var group_name = 'Group ' + group_index;
             var group_id = group_name.replace(' ', '_');
 
             var new_row = $('<tr>')
@@ -150,43 +166,46 @@ $(document).ready(function () {
 
                 // Somewhat sloppy conditional
                 if (current_header === 'setups_with_same_group') {
-                    $.each(new_td.find('a'), function (index, anchor) {
-                        device_to_group[anchor.text] = group_id;
+                    $.each(new_td.find('a'), function (anchor_index, anchor) {
+                        device_to_group[anchor.text] = index;
                     });
                 }
             });
 
+            all_treatment_groups.push(new_row.clone());
+            // group_to_data[group_index] = new_row.clone();
+
             treatment_group_display.append(new_row);
         });
 
-        treatment_group_table.DataTable({
+        treatment_group_data_table = treatment_group_table.DataTable({
             // Cuts out extra unneeded pieces in the table
-            dom: 'B<"row">rt',
+            dom: 'B<"row">lfrtip',
             fixedHeader: {headerOffset: 50},
             responsive: true,
-            paging: false,
+            // paging: false,
             order: [[ 0, "asc" ]],
             // Needed to destroy old table
             bDestroy: true,
             // Try to get a more reasonable size for cells
             columnDefs: [
                 // Treat the group column as if it were just the number
-                { "type": "num", "targets": 0, "width": "10%" },
-                { "width": "10%", "targets": 1 },
-                { "width": "15%", "targets": 2 },
-                { "width": "20%", "targets": 3 },
-                { "width": "15%", "targets": 4 }
+                { "type": "brute-numeric", "targets": 0, "width": "10%" }
+                // Poses a problem due to variable table
+                // { "width": "10%", "targets": 1 },
+                // { "width": "15%", "targets": 2 },
+                // { "width": "20%", "targets": 3 },
+                // { "width": "15%", "targets": 4 }
             ]
         });
 
         // TODO NOT DRY
+        // Swap positions of filter and length selection; clarify filter
+        $('.dataTables_filter').css('float', 'left').prop('title', 'Separate terms with a space to search multiple fields');
+        $('.dataTables_length').css('float', 'right');
         // Reposition download/print/copy
         $('.DTTT_container').css('float', 'none');
 
-        // Clarify usage of sort
-        $('.sorting').prop('title', 'Click a column to change its sorting\n Hold shift and click columns to sort multiple');
-        $('.sorting_asc').prop('title', 'Click a column to change its sorting\n Hold shift and click columns to sort multiple');
-        $('.sorting_desc').prop('title', 'Click a column to change its sorting\n Hold shift and click columns to sort multiple');
 
         // Recalculate responsive and fixed headers
         $($.fn.dataTable.tables(true)).DataTable().responsive.recalc();
@@ -194,9 +213,20 @@ $(document).ready(function () {
     };
 
     window.CHARTS.make_charts = function(json, charts, changes_to_options) {
+        // Remove triggers
+        if (all_events[charts]) {
+            $.each(all_events[charts], function(index, event) {
+                google.visualization.events.removeListener(event);
+            });
+        }
+
+        // Clear all charts
+        all_charts[charts] = [];
+        all_events[charts] = [];
+        group_to_data[charts] = [];
+
         // Show the chart options
         // NOTE: the chart options are currently shown by default, subject to change
-
         // If nothing to show
         if (!json.assays) {
             $('#' + charts).html('No data to display');
@@ -215,9 +245,9 @@ $(document).ready(function () {
             var options = {
                 title: assay,
                 interpolateNulls: true,
+                // Changes styling and prevents flickering issue
                 // tooltip: {
                 //     isHtml: true
-                //     trigger: 'selection'
                 // },
                 titleTextStyle: {
                     fontSize: 18,
@@ -354,7 +384,7 @@ $(document).ready(function () {
                 i = 1;
                 while (i < data.getNumberOfColumns()) {
                     interval_setter.push(i);
-                    if (i+2 < data.getNumberOfColumns() && assays[index][0][i+1].indexOf('_i1') > -1) {
+                    if (i + 2 < data.getNumberOfColumns() && assays[index][0][i+1].indexOf('~@i1') > -1) {
                         interval_setter.push({sourceColumn: i + 1, role: 'interval'});
                         interval_setter.push({sourceColumn: i + 2, role: 'interval'});
                         i += 2;
@@ -364,61 +394,59 @@ $(document).ready(function () {
                 dataView.setColumns(interval_setter);
 
                 chart.draw(dataView, options);
+
+                chart.chart_index = index;
+
+                all_charts[charts].push(chart);
             }
         }
 
-        window.CHARTS.display_treament_groups(json.treatment_groups);
+        window.CHARTS.display_treatment_groups(json.treatment_groups, json.header_keys);
 
-        // Triggers for legends (TERRIBLE SELECTOR)
-        // $(document).on('mouseover', 'g:has("g > text")', function() {
-        $(document).on('mouseover', 'g > text[font-size="12"]', function() {
-            // var text_section = $(this).find('text');
-            // if (text_section.length === 1) {
-            var current_pos = $(this).position();
-            // Make it appear slightly below the legend
-            var current_top = current_pos.top + 50;
-            // Get the furthest left it should go
-            var current_left = $('#breadcrumbs').position.left;
+        for (var index=0; index < all_charts[charts].length; index++) {
+            group_to_data[charts].push({});
 
-            var content_split = null;
-            var row_id_to_use = null;
-            var row_clone = null;
-
-            // Naive, assumes Group would never be in a device name
-            if ($(this).find('text').text().indexOf('Group') > -1) {
-                // content_split = $(this).find('text').text().split(/(\d+)/);
-                content_split = $(this).text().split(/(\d+)/);
-                row_id_to_use = '#' + content_split[0].replace(' ', '_') + content_split[1];
-                row_clone = $(row_id_to_use).clone().addClass('bg-warning');
-            }
-            else {
-                // Naive, assumes spaces will not be in device name
-                // content_split = $(this).find('text').text().split(/(\s+)/);
-                content_split = $(this).text().split(/(\s+)/);
-                row_id_to_use = '#' + device_to_group[content_split[0]];
-                row_clone = $(row_id_to_use).clone().addClass('bg-warning');
+            for (i=0; i < assays[index][0].length; i++) {
+                if (assays[index][0][i].indexOf('~@i1') === -1 && assays[index][0][i].indexOf('~@i2') === -1) {
+                    // Need to link EACH CHARTS values to the proper group
+                    // EMPHASIS ON EACH CHART
+                    // Somewhat naive
+                    if (document.getElementById(charts + 'group_select').checked) {
+                        // NOTE -1
+                        group_to_data[charts][index][i] = assays[index][0][i].replace(/\D/g, '') - 1;
+                    }
+                    else {
+                        var device = assays[index][0][i].split('||')[0];
+                        // console.log(device);
+                        // console.log(device_to_group);
+                        group_to_data[charts][index][i] = device_to_group[device];
+                    }
+                }
             }
 
-            $('#group_display_body').empty().append(row_clone);
+            // Makes use of a somewhat zany closure
+            var current_event = google.visualization.events.addListener(all_charts[charts][index], 'onmouseover', (function (charts, chart_index) {
+                return function (entry) {
+                    var current_pos = $(all_charts[charts][chart_index].container).position();
+                    var current_top = current_pos.top + 75;
+                    var current_left = $('#breadcrumbs').position.left;
+                    if (entry.row === null && entry.column) {
+                        var row_clone = all_treatment_groups[group_to_data[charts][chart_index][entry.column]].clone().addClass('bg-warning');
+                        if (row_clone) {
+                            $('#group_display_body').empty().append(row_clone);
 
-            var second_row = $('<tr>').addClass('bg-warning');
-            var hidden_rows = false;
+                            $('#group_display').show()
+                                .css({top: current_top, left: current_left, position:'absolute'});
+                        }
+                    }
+                }
+            })(charts, index));
+            all_events[charts].push(current_event);
 
-            $(row_id_to_use).find('td:hidden').each(function(index) {
-                hidden_rows = true;
-                second_row.append($(this).clone().show());
+            current_event = google.visualization.events.addListener(all_charts[charts][index], 'onmouseout', function () {
+                $('#group_display').hide();
             });
-
-            if (hidden_rows) {
-                $('#group_display_body').append(second_row);
-            }
-
-            $('#group_display').show()
-                .css({top: current_top, left: current_left, position:'absolute'});
-            // }
-        });
-        $(document).on('mouseout', 'g:has("g > text")', function() {
-            $('#group_display').hide();
-        });
-    };
+            all_events[charts].push(current_event);
+        }
+    }
 });
