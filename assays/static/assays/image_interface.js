@@ -14,8 +14,7 @@ $(document).ready(function () {
     var contrast = 100;
     var brightness = 100;
 
-    // tableCols[3] = "Test";
-    // tableRows[3] = "Tester";
+    var downloadFilename = '';
 
     // Perform on image expansion
     var popupDialogData = {};
@@ -31,7 +30,7 @@ $(document).ready(function () {
         {
             text: 'Download Full Size Image',
             click: function() {
-                window.open('/media/assay_images/'+study_pk+'/'+popupDialogData["file_name"]);
+                // window.open('/media/assay_images/'+study_pk+'/'+popupDialogData["file_name"]);
             }
         },
         {
@@ -110,16 +109,20 @@ $(document).ready(function () {
 
             // Tooltips logic
             var fieldTooltip = '';
-            if (iFieldDescription) {
+            if (iFieldDescription && iFieldDescription != "none") {
                 fieldTooltip = ' <span data-toggle="tooltip" title="'+iFieldDescription+'" class="glyphicon glyphicon-info-sign" aria-hidden="true"></span>';
             }
             var sampleLabelTooltip = '';
-            if (iSampleLabelDescription) {
+            if (iSampleLabelDescription && iSampleLabelDescription != "none") {
                 sampleLabelTooltip = ' <span data-toggle="tooltip" title="'+iSampleLabelDescription+'" class="glyphicon glyphicon-info-sign" aria-hidden="true"></span>';
             }
 
+            // Add tooltip to "Download" button
+            $(".ui-dialog").find(".ui-button-text-only:first").html('<a style="text-decoration: none;" download href=/media/assay_images/'+study_pk+'/'+downloadFilename+'><span class="ui-button-text">Download Full Size Image <span data-toggle="tooltip" title="Some images are dark and may require\n intensity adjustment to discern details." class="glyphicon glyphicon-info-sign" aria-hidden="true"></span></span>')
+
             // $("#myDialogText").html('<div class="row no-padding"><div class="thumbnail col-md-12 col-lg-4"><img style="filter: contrast('+contrast+'%)  brightness('+brightness+'%);" src="/media/assay_thumbs/'+study_pk+'/thumbnail_'+popupDialogData["file_name"].split(".")[0]+'_600_600.jpg"/></div><div class="col-md-12 col-lg-7"><table class="table table-hover table-striped table-bordered table-condensed small"><tr><th style="width: 250px;">Chip ID</th><td>'+iChip+'</td></tr><tr><th>Assay Plate ID</th><td>'+iPlate+'</td></tr><tr><th>Assay Well ID</th><td>'+iWell+'</td></tr><tr><th>Time</th><td>'+iTime+'</td></tr><tr><th>Method/Kit</th><td>'+iMethodKit+'</td></tr><tr><th>Target/Analyte</th><td>'+iTargetAnalyte+'</td></tr><tr><th>Subtarget</th><td>'+iSubtarget+'</td></tr><tr><th>Sample Location</th><td>'+iSampleLocation+'</td></tr><tr><th>Replicate</th><td>'+iReplicate+'</td></tr><tr><th>Notes</th><td>'+iNotes+'</td></tr><tr><th>Image File Name</th><td>'+iFileName+'</td></tr><tr><th>Image Field</th><td>'+iField+'</td></tr><tr><th>Image Field Description</th><td>'+iFieldDescription+'</td></tr><tr><th>Image Magnification</th><td>'+iMagnification+'</td></tr><tr><th>Image Resolution</th><td>'+iResolution+'</td></tr><tr><th>Image Resolution Unit</th><td>'+iResolutionUnit+'</td></tr><tr><th>Image Sample Label</th><td>'+iSampleLabel+'</td></tr><tr><th>Image Sample Label Description</th><td>'+iSampleLabelDescription+'</td></tr><tr><th>Image Wavelength (ex/em nm)</th><td>'+iWavelength+'</td></tr><tr><th>Image Color Mapping</th><td>'+iColorMapping+'</td></tr><tr><th>Image Setting Note</th><td>'+iSettingNote+'</td></tr></table></div></div>');
             $("#myDialogText").html('<div class="row no-padding"><div class="thumbnail col-md-12 col-lg-4"><img style="filter: contrast('+contrast+'%)  brightness('+brightness+'%);" src="/media/assay_thumbs/'+study_pk+'/thumbnail_'+popupDialogData["file_name"].split(".").slice(0, -1).join('.') +'_600_600.jpg"/></div><div class="col-md-12 col-lg-7"><table class="table table-hover table-striped table-bordered table-condensed small">'+
+                '<div class="text-center"><label>Note: Images may have been auto-leveled to assist with viewing. Do not use them to perform comparisons of relative intensity.</label></div><br>'+
                 '<tr><th style="width: 250px;">Chip ID</th><td>'+iChip+'</td></tr>'+
                 '<tr><th>Assay Plate ID</th><td>'+iPlate+'</td></tr>'+
                 '<tr><th>Assay Well ID</th><td>'+iWell+'</td></tr>'+
@@ -296,40 +299,50 @@ $(document).ready(function () {
     function doSearch(backspace) {
         var query = $('#search-box').val().toUpperCase();
         var isChip = false;
-        if (backspace) {
-            makeAllVisible();
+
+        // if (backspace) {
+        //     makeAllVisible();
+        // }
+
+        // Always make everything visible again
+        makeAllVisible();
+
+        for (var i=0; i<tableRows.length; i++) {
+            if (tableRows[i].toUpperCase().includes(query)) {
+                isChip = true;
+                break;
+            }
         }
-        image_table.find('figcaption').each(function(index, value) {
-            // var buttonActive = $('#'+$(value).parent().parent().parent().attr("class").split(" ")[2]).prop('checked');
-            var buttonActive = $('input[data-column="' + $(value).parent().parent().parent().attr("data-column") + '"]').prop('checked');
-            if ($(value).text().toUpperCase().includes(query)) {
-                if (buttonActive) {
-                    $(value).parent().parent().removeClass('hidden');
-                } else {
-                    $(value).parent().parent().addClass('hidden');
-                }
-            } else {
-                for (var i=0; i<tableRows.length; i++) {
-                    if (tableRows[i].toUpperCase().includes(query)) {
-                        isChip = true;
-                        break;
+
+        if (isChip) {
+            image_table.find('th').each(function(header_index) {
+                if (header_index > tableCols.length - 1) {
+                    if ($(this).text().toUpperCase().includes(query)) {
+                        $(this).parent().removeClass('hidden');
+                    } else {
+                        $(this).parent().addClass('hidden');
                     }
                 }
-                if (isChip) {
-                    image_table.find('th').each(function(index, value) {
-                        if (index > tableCols.length-1){
-                            if ($(value).text().toUpperCase().includes(query)) {
-                                $(value).parent().removeClass('hidden');
-                            } else {
-                                $(value).parent().addClass('hidden');
-                            }
-                        }
-                    });
+            });
+        }
+        else {
+            image_table.find('figcaption').each(function() {
+                // var buttonActive = $('#'+$(value).parent().parent().parent().attr("class").split(" ")[2]).prop('checked');
+                var current_column = $(this).parent().parent().parent();
+                var current_fig = $(this).parent().parent();
+                var buttonActive = $('input[data-column="' + current_column.attr("data-column") + '"]').prop('checked');
+                if ($(this).text().toUpperCase().includes(query)) {
+                    if (buttonActive) {
+                        current_fig.removeClass('hidden');
+                    } else {
+                        current_fig.addClass('hidden');
+                    }
                 } else {
-                    $(value).parent().parent().addClass('hidden');
+                    current_fig.addClass('hidden');
                 }
-            }
-        });
+            });
+        }
+
         hideEmpty();
     }
 
@@ -339,7 +352,7 @@ $(document).ready(function () {
             $(value).parent().parent().removeClass('hidden');
         });
         image_table.find('th').each(function(index, value) {
-            if (index > tableCols.length-1){
+            if (index > tableCols.length - 1){
                 $(value).parent().removeClass('hidden');
             }
         });
@@ -348,8 +361,8 @@ $(document).ready(function () {
     // Hide rows that contain no images.
     function hideEmpty() {
         for (i=0; i<tableRows.length; i++) {
-            if ($('tr[data-row="'+tableRows[i] + '"]').height() < 100) {
-                $('tr[data-row="'+tableRows[i] + '"]');
+            if ($('tr[data-row="'+ tableRows[i] + '"]').height() < 100) {
+                $('tr[data-row="'+ tableRows[i] + '"]').addClass('hidden');
             }
         }
 
@@ -366,9 +379,23 @@ $(document).ready(function () {
     // Make JQuery Dialog title bar not blend in with browser UI so strongly
     $(".ui-dialog").find(".ui-widget-header").css('background', 'linear-gradient(#111111, #333333)').css('color', 'white');
 
-    // "Close" and "Download" buttons as Bootstrap buttons.
-    // TODO Figure out what classes contribute to strange hovering when you are less tired.
+    // "Close" and "Download" buttons as Bootstrap buttons
     $(".ui-dialog").find(".ui-button-text-only").addClass('btn btn-primary').removeClass('ui-state-default');
+
+
+    //TODO Unintelligently play with table sizing at different image quantities
+    // var mostImages = 0;
+    // $("td").each(function(index){
+    //     if ($(this).children().length > mostImages){
+    //         mostImages = $(this).children().length;
+    //     }
+    // });
+    // console.log(mostImages);
+    // console.log(tableCols.length);
+    // if (mostImages < 3 && tableCols.length < 4) {
+    //     console.log("Shrinking table");
+    //     console.log($("#fluid-content").width());
+    // }
 
     // Escape Key closes dialog windows
     $(document).keydown(function(e) {
