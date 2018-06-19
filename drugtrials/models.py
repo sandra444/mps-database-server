@@ -69,7 +69,7 @@ class DrugTrial(LockableModel):
     title = models.CharField(max_length=2000)
     condition = models.CharField(max_length=1400, blank=True, default='')
     source = models.ForeignKey(TrialSource)
-    compound = models.ForeignKey('compounds.Compound')
+    compound = models.ForeignKey('compounds.Compound', blank=True)
 
     # Figures
     figure1 = models.ImageField(upload_to='figures', null=True, blank=True)

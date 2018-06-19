@@ -17,8 +17,8 @@ class Disease(models.Model):
     biology_blurb = models.TextField(default='', blank=True, help_text="NOTE: Use HTML tags to create lists.")
     biology_image = models.ImageField(upload_to='disease_images', null=True, blank=True)
     biology_kegg_pathway_map = models.ImageField(upload_to='disease_images', null=True, blank=True, help_text="NOTE: Save and upload the KEGG Pathway Map.")
-    biology_kegg_pathway_url = models.CharField(max_length=200, null=True, blank=True, help_text="Example: http://www.genome.jp/kegg-bin/show_pathway?hsa04932 (Direct link to KEGG Pathway Map)")
-    biology_kegg_url = models.CharField(max_length=200, null=True, blank=True, help_text="Example: http://www.genome.jp/kegg-bin/show_pathway?hsa04932 (Link to KEGG Disease Entry)")
+    biology_kegg_pathway_url = models.CharField(max_length=400, default="https://www.genome.jp/kegg/", help_text="Example: http://www.genome.jp/kegg-bin/show_pathway?hsa04932 (Direct link to KEGG Pathway Map)")
+    biology_kegg_url = models.CharField(max_length=400, default="https://www.genome.jp/kegg/", help_text="Example: https://www.genome.jp/dbget-bin/www_bget?ds:H01333 (Link to KEGG Disease Entry)")
 
     biology_genomic_geo_url = models.CharField(max_length=200, null=True, blank=True)
     biology_genomic_omim_url = models.CharField(max_length=200, null=True, blank=True, help_text="NOTE: On the OMIM result page for this disease, click the blue 'Gene Map Table' button before copying the URL.")
@@ -30,8 +30,8 @@ class Disease(models.Model):
     clinicaldata_image = models.ImageField(upload_to='disease_images', null=True, blank=True)
 
     # Everything necessary for the Disease Models Page
-    models_blurb = models.TextField(default='', blank=True, help_text="NOTE: Use HTML tags to create lists.")
-    models_image = models.ImageField(upload_to='disease_images', null=True, blank=True)
+    # models_blurb = models.TextField(default='', blank=True, help_text="NOTE: Use HTML tags to create lists.")
+    # models_image = models.ImageField(upload_to='disease_images', null=True, blank=True)
 
     # Everything necessary for the Data Analysis Page
     # Not yet detailed anywhere.
