@@ -57,9 +57,6 @@ class DiseaseClinicalData(DetailView):
     def get_context_data(self, **kwargs):
         context = {}
         context['disease'] = Disease.objects.get(pk=self.kwargs['pk'])
-        disease = context['disease']
-        # context['clinicaltrials'] = DiseaseClinicalTrial.objects.filter(disease=disease)
-        # context['trial_findings'] = FindingResult.objects.filter(drugtrial__disease_id__contains=context['disease'])
         context['trial_findings'] = FindingResult.objects.filter(drug_trial__disease__name=context['disease'])
         return context
 

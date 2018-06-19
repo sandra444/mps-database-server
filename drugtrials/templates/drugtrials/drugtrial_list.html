@@ -58,6 +58,9 @@
                                     {{ treatment.concentration_unit }}
                                 {% endif %}
                             {% endif %}
+                            {% if not forloop.last %}
+                                |
+                            {% endif %}
                         {% endfor %}
                     </td>
                     <td>{{ finding.drug_trial.species }}</td>
