@@ -28,10 +28,7 @@ $(document).ready(function () {
         autoOpen: false,
         buttons: [
         {
-            text: 'Download Full Size Image',
-            click: function() {
-                // window.open('/media/assay_images/'+study_pk+'/'+popupDialogData["file_name"]);
-            }
+            text: 'Download Full Size Image'
         },
         {
             text: 'Back',
