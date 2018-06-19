@@ -13,7 +13,26 @@ from django.contrib.auth.models import Group, User
 import urllib
 import collections
 
-from operator import attrgetter
+
+# These are here to avoid potentially messy imports, may change later
+def tuple_attrgetter(*items):
+    """Custom attrgetter that ALWAYS returns a tuple"""
+    # NOTE WILL NEED TO CHANGE IF MOVED TO PYTHON 3
+    if any(not (isinstance(item, str) or isinstance(item, unicode)) for item in items):
+        raise TypeError('attribute name must be a string')
+
+    def g(obj):
+        return tuple(resolve_attr(obj, attr) for attr in items)
+
+    return g
+
+
+def resolve_attr(obj, attr):
+    """Helper function for tuple_attrgetter"""
+    for name in attr.split("."):
+        obj = getattr(obj, name)
+    return obj
+
 
 # TODO MAKE MODEL AND FIELD NAMES MORE CONSISTENT/COHERENT
 
@@ -43,14 +62,27 @@ TIME_CONVERSIONS = [
 
 TIME_CONVERSIONS = collections.OrderedDict(TIME_CONVERSIONS)
 
+# SUBJECT TO CHANGE
+DEFAULT_SETUP_CRITERIA = (
+    # 'matrix.study_id',
+    # 'device_id',
+    'organ_model_id',
+    # 'organ_model_protocol_id',
+    # 'variance_from_organ_model_protocol'
+)
+
 DEFAULT_SETTING_CRITERIA = (
     'setting_id',
     'unit_id',
+    'value',
+    'addition_time',
+    'duration',
     'addition_location'
 )
 
 DEFAULT_COMPOUND_CRITERIA = (
-    'compound_instance_id',
+    # 'compound_instance_id',
+    'compound_instance.compound_id',
     'concentration',
     'concentration_unit_id',
     'addition_time',
@@ -59,7 +91,10 @@ DEFAULT_COMPOUND_CRITERIA = (
 )
 
 DEFAULT_CELL_CRITERIA = (
+    # Alternative
     'cell_sample_id',
+    # 'cell_sample.cell_type_id',
+    # 'cell_sample.cell_subtype_id',
     'biosensor_id',
     'density',
     'density_unit_id',
@@ -158,6 +193,7 @@ class PhysicalUnits(LockableModel):
         return u'{}'.format(self.unit)
 
 
+# DEPRECATED: SLATED FOR DELETION
 class AssayModelType(LockableModel):
     """Defines the type of an ASSAY (biochemical, mass spec, and so on)"""
 
@@ -171,6 +207,7 @@ class AssayModelType(LockableModel):
         return self.assay_type_name
 
 
+# DEPRECATED: SLATED FOR DELETION
 class AssayModel(LockableModel):
     """Defines an ASSAY such as albumin, BUN, and so on"""
 
@@ -198,6 +235,7 @@ class AssayModel(LockableModel):
         return u'{0} ({1})'.format(self.assay_name, self.assay_short_name)
 
 
+# DEPRECATED: SLATED FOR DELETION
 # Assay layout is now a flaggable model
 class AssayLayout(FlaggableRestrictedModel):
     """Defines the layout of a PLATE (parent of all associated wells)"""
@@ -227,6 +265,7 @@ class AssayLayout(FlaggableRestrictedModel):
         return '/assays/assaylayout/{}/delete/'.format(self.id)
 
 
+# DEPRECATED: SLATED FOR DELETION
 class AssayWellType(LockableModel):
     """PLATE well type
 
@@ -256,6 +295,7 @@ class AssayWellType(LockableModel):
     colored_display.allow_tags = True
 
 
+# DEPRECATED: SLATED FOR DELETION
 class AssayWell(models.Model):
     """An individual PLATE well"""
 
@@ -270,6 +310,7 @@ class AssayWell(models.Model):
     column = models.CharField(max_length=25)
 
 
+# DEPRECATED: SLATED FOR DELETION
 class AssayWellTimepoint(models.Model):
     """Timepoints for PLATE wells"""
     assay_layout = models.ForeignKey(AssayLayout)
@@ -278,6 +319,7 @@ class AssayWellTimepoint(models.Model):
     column = models.CharField(max_length=25)
 
 
+# DEPRECATED: SLATED FOR DELETION
 class AssayWellLabel(models.Model):
     """Arbitrary string label for PLATE wells"""
     assay_layout = models.ForeignKey(AssayLayout)
@@ -286,6 +328,7 @@ class AssayWellLabel(models.Model):
     column = models.CharField(max_length=25)
 
 
+# DEPRECATED: SLATED FOR DELETION
 class AssayCompoundInstance(models.Model):
     """An instance of a compound used in an assay; used as an inline"""
 
@@ -352,6 +395,7 @@ class AssayCompoundInstance(models.Model):
         )
 
 
+# DEPRECATED: SLATED FOR DELETION
 class AssayWellCompound(models.Model):
     """Compound for PLATE wells"""
     assay_layout = models.ForeignKey(AssayLayout)
@@ -367,6 +411,7 @@ class AssayWellCompound(models.Model):
     column = models.CharField(max_length=25)
 
 
+# DEPRECATED: SLATED FOR DELETION
 class AssayQualityIndicator(LockableModel):
     """AssayQualityIndicators show whether a data point needs to be excluded"""
     # Name of the indicator
@@ -441,6 +486,7 @@ class AssayPlateSetup(FlaggableRestrictedModel):
         return '/assays/assayplatesetup/{}/delete/'.format(self.id)
 
 
+# DEPRECATED: SLATED FOR DELETION
 class AssayReader(LockableModel):
     """Chip and Plate readers"""
 
@@ -588,6 +634,7 @@ POSNEG = (
 )
 
 
+# DEPRECATED: SLATED FOR DELETION
 class AssayResultFunction(LockableModel):
     """Function for analysis of CHIP RESULTS"""
     class Meta(object):
@@ -602,6 +649,7 @@ class AssayResultFunction(LockableModel):
         return self.function_name
 
 
+# DEPRECATED: SLATED FOR DELETION
 class AssayResultType(LockableModel):
     """Result types for CHIP RESULTS"""
 
@@ -725,6 +773,7 @@ def bulk_readout_file_location(instance, filename):
     return '/'.join(['csv', str(instance.id), 'bulk', filename])
 
 
+# DEPRECATED: SLATED FOR DELETION
 # To be renamed "AssayStudy" for clarity
 # Handling of study type will be changed
 # Nature of assay_run_id subject to revision
@@ -839,6 +888,7 @@ def study_supporting_data_location(instance, filename):
     return '/'.join(['supporting_data', str(instance.study_id), filename])
 
 
+# DEPRECATED: SLATED FOR DELETION
 class StudySupportingData(models.Model):
     """A file (with description) that gives extra data for a Study"""
     study = models.ForeignKey(AssayRun)
@@ -926,6 +976,7 @@ cell_choice_dict = {
 }
 
 
+# DEPRECATED: SLATED FOR DELETION
 class AssayChipCells(models.Model):
     """Individual cell parameters for CHIP setup used in inline"""
 
@@ -1503,9 +1554,14 @@ class AssayStudy(FlaggableModel):
     access_groups = models.ManyToManyField(Group, blank=True, related_name='study_access_groups')
 
     # THESE ARE NOW EXPLICIT FIELDS IN STUDY
-    group = models.ForeignKey(Group, help_text='Bind to a group')
+    group = models.ForeignKey(Group, verbose_name='Data Group', help_text='Select the Data Group. The study will be bound to this group')
 
-    restricted = models.BooleanField(default=True, help_text='Check box to restrict to selected group')
+    restricted = models.BooleanField(
+        default=True,
+        help_text='Check box to restrict to the Access Groups selected below.'
+                  ' Access is granted to access group(s) after Data Group admin and all designated'
+                  ' Stakeholder Group admin(s) sign off on the study'
+    )
 
     # Special addition, would put in base model, but don't want excess...
     signed_off_notes = models.CharField(max_length=255, blank=True, default='')
@@ -1654,8 +1710,11 @@ class AssayFailureReason(FlaggableModel):
     name = models.CharField(max_length=512, unique=True)
     description = models.CharField(max_length=2000)
 
+# TODO TODO TODO
+# These choices need to change
+# Please note contrivance with respect to compound/"Treated"
 TEST_TYPE_CHOICES = (
-    ('', '--------'), ('control', 'Control'), ('compound', 'Compound')
+    ('', '--------'), ('control', 'Control'), ('compound', 'Treated')
 )
 
 # SUBJECT TO REMOVAL (MAY JUST USE ASSAY SETUP)
@@ -1732,76 +1791,78 @@ class AssayMatrixItem(FlaggableModel):
     def devolved_settings(self, criteria=DEFAULT_SETTING_CRITERIA):
         """Makes a tuple of cells (for comparison)"""
         setting_tuple = []
-        attribute_getter = attrgetter(*criteria)
+        attribute_getter = tuple_attrgetter(*criteria)
         for setting in self.assaysetupsetting_set.all():
-            current_tuple = attrgetter(setting)
+            current_tuple = attribute_getter(setting)
 
             setting_tuple.append(current_tuple)
 
-        return tuple(sorted(setting_tuple))
+        return tuple(sorted(set(setting_tuple)))
 
-    def stringify_settings(self):
+    def stringify_settings(self, criteria=None):
         """Stringified cells for a setup"""
         settings = []
         for setting in self.assaysetupsetting_set.all():
-            settings.append(unicode(setting))
+            settings.append(setting.flex_string(criteria))
 
         if not settings:
             settings = ['-No Extra Settings-']
 
-        return '\n'.join(settings)
+        return '\n'.join(set(settings))
 
     def devolved_cells(self, criteria=DEFAULT_CELL_CRITERIA):
         """Makes a tuple of cells (for comparison)"""
         cell_tuple = []
-        attribute_getter = attrgetter(*criteria)
+        attribute_getter = tuple_attrgetter(*criteria)
         for cell in self.assaysetupcell_set.all():
             current_tuple = attribute_getter(cell)
 
             cell_tuple.append(current_tuple)
 
-        return tuple(sorted(cell_tuple))
+        return tuple(sorted(set(cell_tuple)))
 
-    def stringify_cells(self):
+    def stringify_cells(self, criteria=None):
         """Stringified cells for a setup"""
         cells = []
         for cell in self.assaysetupcell_set.all():
-            cells.append(unicode(cell))
+            cells.append(cell.flex_string(criteria))
 
         if not cells:
             cells = ['-No Cell Samples-']
 
-        return '\n'.join(cells)
+        return '\n'.join(set(cells))
 
     def devolved_compounds(self, criteria=DEFAULT_COMPOUND_CRITERIA):
         """Makes a tuple of compounds (for comparison)"""
         compound_tuple = []
-        attribute_getter =  attrgetter(*criteria)
+        attribute_getter = tuple_attrgetter(*criteria)
         for compound in self.assaysetupcompound_set.all():
             current_tuple = attribute_getter(compound)
 
             compound_tuple.append(current_tuple)
 
-        return tuple(sorted(compound_tuple))
+        return tuple(sorted(set(compound_tuple)))
 
-    def stringify_compounds(self):
+    def stringify_compounds(self, criteria=None):
         """Stringified cells for a setup"""
         compounds = []
         for compound in self.assaysetupcompound_set.all():
-            compounds.append(unicode(compound))
+            compounds.append(compound.flex_string(criteria))
 
         if not compounds:
             compounds = ['-No Compounds-']
 
-        return '\n'.join(compounds)
+        return '\n'.join(set(compounds))
 
-    def quick_dic(self):
+    def quick_dic(self, criteria=None):
+        if not criteria:
+            criteria = {}
         dic = {
             # 'device': self.device.name,
             'organ_model': self.get_hyperlinked_model_or_device(),
-            'compounds': self.stringify_compounds(),
-            'cells': self.stringify_cells(),
-            'settings': self.stringify_settings(),
+            'compounds': self.stringify_compounds(criteria.get('compound', None)),
+            'cells': self.stringify_cells(criteria.get('cell', None)),
+            'settings': self.stringify_settings(criteria.get('setting', None)),
             'setups_with_same_group': []
         }
         return dic
@@ -1894,6 +1955,48 @@ class AssaySetupCell(models.Model):
 
     # TODO TODO TODO TEMPORARILY NOT REQUIRED
     addition_location = models.ForeignKey(AssaySampleLocation, null=True, blank=True)
+
+    # NOT DRY
+    def get_addition_time_string(self):
+        split_times = get_split_times(self.addition_time)
+        return 'D{0} H{1} M{2}'.format(
+            split_times.get('day'),
+            split_times.get('hour'),
+            split_times.get('minute'),
+        )
+
+    # def get_duration_string(self):
+    #     split_times = get_split_times(self.duration)
+    #     return 'D{0} H{1} M{2}'.format(
+    #         split_times.get('day'),
+    #         split_times.get('hour'),
+    #         split_times.get('minute'),
+    #     )
+
+    # CRUDE
+    def flex_string(self, criteria=None):
+        if criteria:
+            full_string = []
+            if 'cell_sample_id' in criteria:
+                full_string.append(unicode(self.cell_sample))
+            if 'cell_sample_id' not in criteria and 'cell_sample.cell_type_id' in criteria:
+                full_string.append(unicode(self.cell_sample.cell_type))
+            if 'cell_sample_id' not in criteria and 'cell_sample.cell_subtype_id' in criteria:
+                full_string.append(unicode(self.cell_sample.cell_subtype))
+            if 'passage' in criteria:
+                full_string.append(self.passage)
+            if 'density' in criteria:
+                full_string.append('{:g}'.format(self.density))
+                full_string.append(self.density_unit.unit)
+            if 'addition_time' in criteria:
+                full_string.append('Added on: ' + self.get_addition_time_string())
+            # if 'duration' in criteria:
+            #     full_string.append('Duration of: ' + self.get_duration_string())
+            if 'addition_location_id' in criteria:
+                full_string.append(unicode(self.addition_location))
+            return ' '.join(full_string)
+        else:
+            return unicode(self)
 
     def __unicode__(self):
         if self.addition_location:
@@ -2102,6 +2205,25 @@ class AssaySetupCompound(models.Model):
             split_times.get('minute'),
         )
 
+    # CRUDE
+    def flex_string(self, criteria=None):
+        if criteria:
+            full_string = []
+            if 'compound_instance.compound_id' in criteria:
+                full_string.append(self.compound_instance.compound.name)
+            if 'concentration' in criteria:
+                full_string.append('{:g}'.format(self.concentration))
+                full_string.append(self.concentration_unit.unit)
+            if 'addition_time' in criteria:
+                full_string.append('Added on: ' + self.get_addition_time_string())
+            if 'duration' in criteria:
+                full_string.append('Duration of: ' + self.get_duration_string())
+            if 'addition_location_id' in criteria:
+                full_string.append(unicode(self.addition_location))
+            return ' '.join(full_string)
+        else:
+            return unicode(self)
+
     def __unicode__(self):
         if self.addition_location:
             return u'{0} ({1} {2})\n-Added on: {3}; Duration of: {4}; Added to: {5}'.format(
@@ -2252,6 +2374,42 @@ class AssaySetupSetting(models.Model):
 
     # TODO TODO TODO TEMPORARILY NOT REQUIRED
     addition_location = models.ForeignKey(AssaySampleLocation, null=True, blank=True)
+
+    # NOT DRY
+    def get_addition_time_string(self):
+        split_times = get_split_times(self.addition_time)
+        return 'D{0} H{1} M{2}'.format(
+            split_times.get('day'),
+            split_times.get('hour'),
+            split_times.get('minute'),
+        )
+
+    def get_duration_string(self):
+        split_times = get_split_times(self.duration)
+        return 'D{0} H{1} M{2}'.format(
+            split_times.get('day'),
+            split_times.get('hour'),
+            split_times.get('minute'),
+        )
+
+    # CRUDE
+    def flex_string(self, criteria=None):
+        if criteria:
+            full_string = []
+            if 'setting_id' in criteria:
+                full_string.append(unicode(self.setting_id))
+            if 'value' in criteria:
+                full_string.append('{:g}'.format(self.value))
+                full_string.append(self.unit.unit)
+            if 'addition_time' in criteria:
+                full_string.append('Added on: ' + self.get_addition_time_string())
+            if 'duration' in criteria:
+                full_string.append('Duration of: ' + self.get_duration_string())
+            if 'addition_location_id' in criteria:
+                full_string.append(unicode(self.addition_location))
+            return ' '.join(full_string)
+        else:
+            return unicode(self)
 
     def __unicode__(self):
         return u'{} {} {}'.format(self.setting.name, self.value, self.unit)

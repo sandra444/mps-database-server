@@ -19,11 +19,26 @@
         </a>
     </div>
 
-    <div class="row text-center padded-bottom">
-        <h2 class="text-success">Number of Points: <span id="number_of_points"></span></h2>
+    <div id="number_of_points_container" class="row text-center padded-bottom text-success">
+        <h1 id="select_user_group_message" class="text-danger">Please Select at Least One MPS Model</h1>
+        <h2>Number of Points: <span id="number_of_points"></span></h2>
     </div>
 
     <div class="row padded-bottom">
+        <div class="col-md-6">
+{#            <table id="id_study__matrix_item__organmodel_id__in" class="table table-striped table-hover">#}
+            <table id="filter_organ_models" class="table table-striped table-hover filter-table">
+                <thead>
+                    <tr>
+                        <th>Select</th>
+                        <th>MPS Model</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                </tbody>
+            </table>
+        </div>
         <div class="col-md-6">
 {#            <table id="id_study__group_id__in" class="table table-striped table-hover">#}
             <table id="filter_groups" class="table table-striped table-hover filter-table">
@@ -38,37 +53,9 @@
                 </tbody>
             </table>
         </div>
-        <div class="col-md-6">
-{#            <table id="id_study__matrix_item__organmodel_id__in" class="table table-striped table-hover">#}
-            <table id="filter_organ_models" class="table table-striped table-hover filter-table">
-                <thead>
-                    <tr>
-                        <th>Select</th>
-                        <th>Organ Model</th>
-                    </tr>
-                </thead>
-                <tbody>
-
-                </tbody>
-            </table>
-        </div>
     </div>
 
     <div class="row padded-bottom">
-        <div class="col-xs-6">
-{#            <table id="id_study_assay__target" class="table table-striped table-hover">#}
-            <table id="filter_compounds" class="table table-striped table-hover filter-table">
-                <thead>
-                    <tr>
-                        <th>Select</th>
-                        <th>Compound</th>
-                    </tr>
-                </thead>
-                <tbody>
-
-                </tbody>
-            </table>
-        </div>
         <div class="col-xs-6">
 {#            <table id="id_study_assay__target" class="table table-striped table-hover">#}
             <table id="filter_targets" class="table table-striped table-hover filter-table">
@@ -76,6 +63,20 @@
                     <tr>
                         <th>Select</th>
                         <th>Target/Analyte</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                </tbody>
+            </table>
+        </div>
+        <div class="col-xs-6">
+{#            <table id="id_study_assay__target" class="table table-striped table-hover">#}
+            <table id="filter_compounds" class="table table-striped table-hover filter-table">
+                <thead>
+                    <tr>
+                        <th>Select</th>
+                        <th>Compound</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -153,6 +154,37 @@
             </tbody>
         </table>
     </div>
+    </div>
+
+    {# TODO TODO TODO #}
+    <div hidden id="filter_popup" title="Dummy Filter">
+        Dummy Filter
+        <table>
+            <thead>
+                <tr>
+                    <th>Select</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><input checked type="checkbox"></td>
+                    <td>Example 1</td>
+                </tr>
+                <tr>
+                    <td><input checked type="checkbox"></td>
+                    <td>Example 2</td>
+                </tr>
+                <tr>
+                    <td><input checked type="checkbox"></td>
+                    <td>Example 3</td>
+                </tr>
+                <tr>
+                    <td><input checked type="checkbox"></td>
+                    <td>Example 4</td>
+                </tr>
+            </tbody>
+        </table>
     </div>
 {% endblock %}
 

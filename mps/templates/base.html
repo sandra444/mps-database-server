@@ -49,19 +49,19 @@
     <link rel="stylesheet" type="text/css" href="{% static "css/buttons.dataTables.min.css" %}">
 
     <!-- DataTables -->
-    <script type="text/javascript" charset="utf8" src="{% static "js/jquery.dataTables.min.js" %}"></script>
-    <script type="text/javascript" charset="utf8" src="{% static "js/dataTables.fixedHeader.min.js" %}"></script>
-    <script type="text/javascript" charset="utf8" src="{% static "js/dataTables.responsive.min.js" %}"></script>
-    <script type="text/javascript" charset="utf8" src="{% static "js/dataTables.buttons.min.js" %}"></script>
+    <script type="text/javascript" charset="utf-8" src="{% static "js/jquery.dataTables.min.js" %}"></script>
+    <script type="text/javascript" charset="utf-8" src="{% static "js/dataTables.fixedHeader.min.js" %}"></script>
+    <script type="text/javascript" charset="utf-8" src="{% static "js/dataTables.responsive.min.js" %}"></script>
+    <script type="text/javascript" charset="utf-8" src="{% static "js/dataTables.buttons.min.js" %}"></script>
     {# We will just be using html5 for buttons (no fallback) #}
-    {# <script type="text/javascript" charset="utf8" src="{% static "js/buttons.flash.min.js" %}"></script>#}
-    <script type="text/javascript" charset="utf8" src="{% static "js/buttons.html5.min.js" %}"></script>
-    <script type="text/javascript" charset="utf8" src="{% static "js/buttons.print.min.js" %}"></script>
+    {# <script type="text/javascript" charset="utf-8" src="{% static "js/buttons.flash.min.js" %}"></script>#}
+    <script type="text/javascript" charset="utf-8" src="{% static "js/buttons.html5.min.js" %}"></script>
+    <script type="text/javascript" charset="utf-8" src="{% static "js/buttons.print.min.js" %}"></script>
 
 {#    This script sets defaults for Buttons #}
 {#    Currently I exclude Excel (as it is confusingly given a csv extension) and PDF (requires heavier SWF)#}
 {#    I may add these later, however, but I will have to remember to use the PDF enabled SWF if PDFs are desired#}
-    <script type="text/javascript" charset="utf8" src="{% static "js/datatable_options.js" %}"></script>
+    <script type="text/javascript" charset="utf-8" src="{% static "js/datatable_options.js" %}"></script>
 
     <!-- SmartMenus jQuery plugin -->
     {# No longer used #}
@@ -117,6 +117,7 @@
         else if (url.indexOf('/model/') > -1) {
           anchor = '#organmodels'
         }
+        // TODO
         else if (url.indexOf('/diseasemodel_list/') > -1) {
           anchor = '#diseasemodels'
         }
@@ -224,17 +225,17 @@
               <a href="/bioactivities/cluster/#filter">Cluster</a>
           </li>
 {#          <li title="This feature is still in development"><a href="/under_construction/">#}
-{#              <span id="generic_alert_symbol" class="glyphicon glyphicon-wrench" aria-hidden="true"></span>#}
+{#              <span class="glyphicon glyphicon-wrench" aria-hidden="true"></span>#}
 {#              Reproducibility#}
 {#          </a></li>#}
           <li class="divider"></li>
           <li class="dropdown-header">Computational Modeling</li>
           <li title="This feature is still in development"><a href="/under_construction/">
-              <span id="generic_alert_symbol" class="glyphicon glyphicon-wrench" aria-hidden="true"></span>
+              <span class="glyphicon glyphicon-wrench" aria-hidden="true"></span>
               PBPK
           </a></li>
           <li title="This feature is still in development"><a href="/bioactivities/model/">
-              <span id="generic_alert_symbol" class="glyphicon glyphicon-wrench" aria-hidden="true"></span>
+              <span class="glyphicon glyphicon-wrench" aria-hidden="true"></span>
               Predictive Modeling
           </a></li>
           <li title="This feature is still in development"><a href="/assays/test_filter/">
@@ -242,7 +243,7 @@
               Test Filter
           </a></li>
 {#          <li title="This feature is still in development"><a href="/under_construction/">#}
-{#              <span id="generic_alert_symbol" class="glyphicon glyphicon-wrench" aria-hidden="true"></span>#}
+{#              <span class="glyphicon glyphicon-wrench" aria-hidden="true"></span>#}
 {#              Pathway Modeling#}
 {#          </a></li>#}
         </ul>

@@ -35,8 +35,10 @@ class MicrophysiologyCenterAdmin(LockableAdmin):
                     'description',
                     'contact_person',
                     'contact_email',
+                    'contact_web_page',
                     'pi',
                     'pi_email',
+                    'pi_web_page',
                     'website',
                     'groups',
                 )
