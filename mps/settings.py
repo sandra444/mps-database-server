@@ -216,9 +216,6 @@ INSTALLED_APPS = (
     # Django simple captchas
     'captcha',
 
-    # Django admin alphabetical filter
-    'alphafilter',
-
     # Djangovoice for feedback
     'django_comments',
     'qhonuskan_votes',

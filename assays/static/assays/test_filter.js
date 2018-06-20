@@ -3,19 +3,45 @@ $(document).ready(function() {
     google.charts.load('current', {'packages':['corechart']});
 
     var filters = {
-        'groups': {},
         'organ_models': {},
+        'groups': {},
         'compounds': {},
         'targets': {}
     };
 
+    var group_criteria = {};
+    var grouping_checkbox_selector = $('.grouping-checkbox');
+
+    // Odd ID
+    var submit_button_selector = $('#submit');
+    // var back_button_selector = ;
+
+    var number_of_points_selector = $('#number_of_points');
+    var number_of_points_container_selector = $('#number_of_points_container');
+    var select_user_group_message_selector = $('#select_user_group_message');
+
     var charts_name = 'charts';
 
     function show_plots() {
+        // THIS IS A CRUDE WAY TO TEST THE GROUPING
+        // Reset the criteria
+        group_criteria = {};
+        grouping_checkbox_selector.each(function() {
+            if (this.checked) {
+                if (!group_criteria[$(this).attr('data-group-relation')]) {
+                    group_criteria[$(this).attr('data-group-relation')] = [];
+                }
+                group_criteria[$(this).attr('data-group-relation')].push(
+                    $(this).attr('data-group')
+                );
+            }
+        });
+
         var data = {
             // TODO TODO TODO CHANGE CALL
-            call: 'fetch_data_points',
+            call: 'fetch_data_points_from_filters',
             filters: JSON.stringify(filters),
+            criteria: JSON.stringify(group_criteria),
             csrfmiddlewaretoken: window.COOKIES.csrfmiddlewaretoken
         };
 
@@ -49,6 +75,10 @@ $(document).ready(function() {
     }
 
     function refresh_filters(parent_filter) {
+        number_of_points_container_selector.removeClass('text-success text-danger');
+        number_of_points_container_selector.addClass('text-warning');
+        number_of_points_selector.html('Calculating, Please Wait');
+
         $.ajax({
             url: "/assays_ajax/",
             type: "POST",
@@ -59,7 +89,26 @@ $(document).ready(function() {
                 filters: JSON.stringify(filters)
             },
             success: function (json) {
-                $('#number_of_points').html(json.number_of_points);
+                number_of_points_selector.html(json.number_of_points);
+                if (json.number_of_points > 0) {
+                    number_of_points_container_selector.removeClass('text-warning text-danger');
+                    number_of_points_container_selector.addClass('text-success');
+                    submit_button_selector.removeAttr('disabled');
+                }
+                else {
+                    number_of_points_container_selector.removeClass('text-warning text-success');
+                    number_of_points_container_selector.addClass('text-danger');
+                    submit_button_selector.attr('disabled', 'disabled');
+                }
+
+                // Test if this is an "initial" query
+                if (_.isEmpty(json.filters.groups)) {
+                    select_user_group_message_selector.show();
+                    submit_button_selector.attr('disabled', 'disabled');
+                }
+                else {
+                    select_user_group_message_selector.hide();
+                }
 
                 $.each(json.filters, function (filter, contents) {
                     // Do not refresh current
@@ -67,12 +116,18 @@ $(document).ready(function() {
                         return true;
                     }
 
+                    // Do not refresh MPS Model if you don't have to
+                    // Crude, obviously
+                    if (filter === 'organ_models' && _.keys(filters['organ_models']).length) {
+                        return true;
+                    }
+
                     var current_table = $('#filter_' + filter);
                     var current_body = current_table.find('tbody');
 
-                    current_body.empty();
                     current_table.DataTable().clear();
                     current_table.DataTable().destroy();
+                    current_body.empty();
 
                     var initial_filter = filters[filter];
                     var current_filter = {};
@@ -81,10 +136,10 @@ $(document).ready(function() {
                     $.each(contents, function (index, content) {
                         var content_id = content[0];
                         var content_name = content[1];
-                        var checkbox = '<input class="filter-checkbox" data-filter="' + filter + '" type="checkbox" value="' + content_id + '">';
+                        var checkbox = '<input class="big-checkbox filter-checkbox" data-filter="' + filter + '" type="checkbox" value="' + content_id + '">';
                         if (initial_filter[content_id]) {
                             current_filter[content_id] = true;
-                            checkbox = '<input checked class="filter-checkbox" data-filter="' + filter + '" type="checkbox" value="' + content_id + '">';
+                            checkbox = '<input checked class="big-checkbox filter-checkbox" data-filter="' + filter + '" type="checkbox" value="' + content_id + '">';
                         }
 
                         rows_to_add.push(
@@ -109,14 +164,14 @@ $(document).ready(function() {
                         // Cuts out extra unneeded pieces in the table
                         dom: 'lfrtip',
                         fixedHeader: {headerOffset: 50},
-                        responsive: true,
                         // order: table_ordering,
                         order: [1, 'asc'],
                         // Needed to destroy old table
                         bDestroy: true,
                         columnDefs: [
                             // Treat the group column as if it were just the number
-                            { "type": "dom-checkbox", "targets": 0, "width": "10%" }
+                            { "type": "dom-checkbox", "targets": 0, "width": "10%" },
+                            { "className": "dt-center", "targets": 0}
                         ]
                     });
                 });
@@ -126,11 +181,13 @@ $(document).ready(function() {
                 $('.dataTables_filter').css('float', 'left').prop('title', 'Separate terms with a space to search multiple fields');
                 $('.dataTables_length').css('float', 'right');
 
-                // Recalculate responsive and fixed headers
-                $($.fn.dataTable.tables(true)).DataTable().responsive.recalc();
+                // Recalculate fixed headers
                 $($.fn.dataTable.tables(true)).DataTable().fixedHeader.adjust();
             },
             error: function (xhr, errmsg, err) {
+                number_of_points_container_selector.removeClass('text-warning text-success');
+                number_of_points_container_selector.addClass('text-danger');
+                number_of_points_selector.html('An Error has Occurred');
                 console.log(xhr.status + ": " + xhr.responseText);
             }
         });
@@ -147,7 +204,8 @@ $(document).ready(function() {
     });
     refresh_filters();
 
-    $('#submit').click(function() {
+    // TODO, THESE TRIGGERS SHOULD BE BASED ON THE ANCHOR, NOT BUTTON CLICKS
+    submit_button_selector.click(function() {
         show_plots();
     });
 
@@ -159,6 +217,11 @@ $(document).ready(function() {
 
     // Setup triggers
     $('#' + charts_name + 'chart_options').find('input').change(function() {
+        show_plots();
+    });
+
+    // NAIVE FOR NOW
+    $('#' + charts_name + 'refresh_plots').click(function() {
         show_plots();
     });
 });

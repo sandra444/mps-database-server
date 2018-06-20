@@ -312,6 +312,7 @@ def send_ready_for_sign_off_email(request):
 
 
 # TODO TODO TODO
+# This is a rather ugly function, naive
 def get_data_as_list_of_lists(ids, data_points=None, both_assay_names=False, include_header=False, include_all=False):
     if not data_points:
         # TODO ORDER SUBJECT TO CHANGE
@@ -325,6 +326,7 @@ def get_data_as_list_of_lists(ids, data_points=None, both_assay_names=False, inc
             'matrix_item__assaysetupcompound_set__concentration_unit',
             'matrix_item__device',
             'matrix_item__organ_model',
+            'matrix_item__matrix',
             'study_assay__target',
             'study_assay__method',
             'study_assay__unit',
@@ -361,6 +363,8 @@ def get_data_as_list_of_lists(ids, data_points=None, both_assay_names=False, inc
 
         item_name = data_point.matrix_item.name
 
+        matrix_name = data_point.matrix_item.matrix.name
+
         cross_reference = data_point.cross_reference
 
         assay_plate_id = data_point.assay_plate_id
@@ -377,7 +381,11 @@ def get_data_as_list_of_lists(ids, data_points=None, both_assay_names=False, inc
         subtarget = data_point.subtarget.name
 
         device = data_point.matrix_item.device.name
-        organ_model = data_point.matrix_item.organ_model.name
+
+        if data_point.matrix_item.organ_model:
+            organ_model = data_point.matrix_item.organ_model.name
+        else:
+            organ_model = '-No Organ Model-'
 
         value = data_point.value
 
@@ -409,6 +417,7 @@ def get_data_as_list_of_lists(ids, data_points=None, both_assay_names=False, inc
                 [
                     study_id,
                     item_name,
+                    matrix_name,
                     cross_reference,
                     assay_plate_id,
                     assay_well_id,
@@ -630,7 +639,7 @@ def get_control_data(
 
         time = raw.time / 1440.0
 
-        replaced = raw.replaced
+        # replaced = raw.replaced
         excluded = raw.excluded
 
         # No dynamic quality here
@@ -698,9 +707,10 @@ def get_control_data(
 
 
 # TODO WE MAY WANT THE DEFINITION OF A TREATMENT GROUP TO CHANGE, WHO KNOWS
-def get_item_groups(study, matrix_items=None):
+def get_item_groups(study, criteria, matrix_items=None):
     treatment_groups = {}
     setup_to_treatment_group = {}
+    header_keys = []
 
     # By pulling the setups for the study, I avoid problems with preview data
     if not matrix_items:
@@ -721,18 +731,43 @@ def get_item_groups(study, matrix_items=None):
         'assaysetupcompound_set__addition_location',
     )
 
-    for setup in setups:
-        treatment_group_tuple = (
-            setup.device_id,
-            setup.organ_model_id,
-            setup.organ_model_protocol_id,
-            setup.variance_from_organ_model_protocol,
-            setup.devolved_settings(),
-            setup.devolved_compounds(),
-            setup.devolved_cells()
-        )
+    if not criteria:
+        criteria = {
+            'setup': DEFAULT_SETUP_CRITERIA,
+            'setting': DEFAULT_SETTING_CRITERIA,
+            'compound': DEFAULT_COMPOUND_CRITERIA,
+            'cell': DEFAULT_CELL_CRITERIA
+        }
 
-        current_representative = treatment_groups.setdefault(treatment_group_tuple, setup.quick_dic())
+    if criteria.get('setup', ''):
+        header_keys.append('organ_model')
+    if criteria.get('cell', ''):
+        header_keys.append('cells')
+    if criteria.get('compound', ''):
+        header_keys.append('compounds')
+    if criteria.get('setting', ''):
+        header_keys.append('settings')
+
+    header_keys.append('setups_with_same_group')
+
+    setup_attribute_getter = tuple_attrgetter(*criteria.get('setup', ['']))
+
+    for setup in setups:
+        treatment_group_tuple = ()
+
+        if criteria.get('setup', ''):
+            treatment_group_tuple = setup_attribute_getter(setup)
+
+        if criteria.get('setting', ''):
+            treatment_group_tuple += setup.devolved_settings(criteria.get('setting'))
+
+        if criteria.get('compound', ''):
+            treatment_group_tuple += setup.devolved_compounds(criteria.get('compound'))
+
+        if criteria.get('cell', ''):
+            treatment_group_tuple += setup.devolved_cells(criteria.get('cell'))
+
+        current_representative = treatment_groups.setdefault(treatment_group_tuple, setup.quick_dic(criteria))
 
         current_representative.get('setups_with_same_group').append(
             setup.get_hyperlinked_name()
@@ -757,7 +792,7 @@ def get_item_groups(study, matrix_items=None):
             'index': index
         })
 
-    return (sorted_treatment_groups, setup_to_treatment_group)
+    return (sorted_treatment_groups, setup_to_treatment_group, header_keys)
 
 
 def get_paired_id_and_name(field):
@@ -808,6 +843,7 @@ def get_data_points_for_charting(
         include_all,
         truncate_negative,
         dynamic_excluded,
+        group_criteria=None,
         post_filter=None,
         study=None,
         matrix_item=None,
@@ -833,16 +869,28 @@ def get_data_points_for_charting(
     post_filter_options = {
         'study': {},
         'matrix_item__organ_model': {},
+        'matrix_item__device': {},
         'matrix_item__matrix': {},
         'matrix_item__assaysetupcompound__compound_instance__compound': {},
         'matrix_item': {},
+        'matrix_item__test_type': {},
         'study_assay__target': {},
-        # 'study_assay__method': {},
+        'study_assay__method': {},
         'sample_location': {},
+        'time': {},
+        'matrix_item__assaysetupcell__cell_sample__cell_type': {},
+        'matrix_item__assaysetupcell__cell_sample__cell_subtype': {},
+        'matrix_item__assaysetupcell__passage': {},
+        'matrix_item__assaysetupcell__cell_density': {},
+        'matrix_item__assaysetupcell__addition_location': {},
     }
 
     # Organization is assay -> unit -> compound/tag -> field -> time -> value
-    treatment_group_representatives, setup_to_treatment_group = get_item_groups(study, matrix_items)
+    treatment_group_representatives, setup_to_treatment_group, header_keys = get_item_groups(
+        study,
+        group_criteria,
+        matrix_items
+    )
 
     final_data = {
         'sorted_assays': [],
@@ -850,7 +898,8 @@ def get_data_points_for_charting(
         'heatmap': {
             'matrices': {},
             'values': {}
-        }
+        },
+        'header_keys': header_keys
     }
 
     intermediate_data = {}
@@ -879,35 +928,47 @@ def get_data_points_for_charting(
 
     all_keys = {}
     key_discrimination = {}
-    use_key_discrimination = key in ['device', 'matrix']
+    use_key_discrimination = key == 'device'
 
     all_sample_locations = {}
+
+    # Accommodation of "special" grouping
+    group_sample_location = True
+    group_method = True
+    group_time = True
+
+    # CRUDE
+    if group_criteria:
+        group_sample_location = 'sample_location' in group_criteria.get('special', [])
+        group_method = 'method' in group_criteria.get('special', [])
+        group_time = 'time' in group_criteria.get('special', [])
 
     # Append the additional_data as necessary
     # Why is this done? It is an expedient way to avoid duplicating data
     if additional_data:
         raw_data.extend(additional_data)
 
-    if not matrix_item:
-        if not matrix_items:
-            heatmap_matrices = AssayMatrix.objects.filter(
-                study_id=study,
-                representation='plate'
-            )
-        else:
-            heatmap_matrices = AssayMatrix.objects.filter(
-                assaymatrixitem__in=matrix_items,
-                representation='plate'
-            )
-
-        heatmap_data = raw_data.filter(matrix_item__matrix_id__in=heatmap_matrices)
-
-        final_data.update({
-            'heatmap': get_data_for_heatmap(heatmap_data)
-        })
-
-        if key == 'device':
-            raw_data = raw_data.exclude(matrix_item__matrix_id__in=heatmap_matrices)
+    # Don't bother with heatmaps at the moment
+    # if not matrix_item:
+    #     if not matrix_items:
+    #         heatmap_matrices = AssayMatrix.objects.filter(
+    #             study_id=study,
+    #             representation='plate'
+    #         )
+    #     else:
+    #         heatmap_matrices = AssayMatrix.objects.filter(
+    #             assaymatrixitem__in=matrix_items,
+    #             representation='plate'
+    #         )
+    #
+    #     heatmap_data = raw_data.filter(matrix_item__matrix_id__in=heatmap_matrices)
+    #
+    #     final_data.update({
+    #         'heatmap': get_data_for_heatmap(heatmap_data)
+    #     })
+    #
+    #     if key == 'device':
+    #         raw_data = raw_data.exclude(matrix_item__matrix_id__in=heatmap_matrices)
 
     for raw in raw_data:
         # Now uses full name
@@ -965,12 +1026,6 @@ def get_data_points_for_charting(
                     tag = ' & '.join(tag)
                 else:
                     tag = '-No Compound-'
-            # If by matrix
-            elif key == 'matrix':
-                tag = (matrix_id, matrix_name)
-
-                if all_keys.setdefault(matrix_name, matrix_id) != matrix_id:
-                    key_discrimination.update({matrix_name: True})
             # If by device
             else:
                 tag = (matrix_item_id, matrix_item_name)
@@ -1000,7 +1055,7 @@ def get_data_points_for_charting(
         target = target_method[0]
         method = target_method[1]
 
-        if targets.count(target) > 1:
+        if group_method and targets.count(target) > 1:
             target = u'{} [{}]'.format(target, method)
 
         initial_data.update({
@@ -1044,7 +1099,7 @@ def get_data_points_for_charting(
                             time: average_and_interval
                         })
 
-    accommodate_sample_location = len(all_sample_locations) > 1
+    accommodate_sample_location = group_sample_location and len(all_sample_locations) > 1
 
     for target, units in averaged_data.items():
         for unit, tags in units.items():
@@ -1078,12 +1133,14 @@ def get_data_points_for_charting(
                 elif use_key_discrimination:
                     tag = tag[1]
 
-                for sample_location, time_values in sample_locations.items():
-                    accommodate_intervals = False
-                    include_current = False
+                accommodate_intervals = False
+                include_current = False
 
+                for sample_location, time_values in sample_locations.items():
                     if accommodate_sample_location:
                         current_key = tag + ' ' + sample_location
+                        accommodate_intervals = False
+                        include_current = False
                     else:
                         current_key = tag
 
@@ -1119,7 +1176,9 @@ def get_data_points_for_charting(
                             y_header.update({time: True})
                             include_current = True
 
-                    if include_current:
+                    key_present = current_key in x_header
+
+                    if include_current and not key_present:
                         x_header.append(current_key)
                     # To include all
                     # x_header.append(current_key)
@@ -1129,7 +1188,7 @@ def get_data_points_for_charting(
                     # ])
 
                     # Only include intervals if necessary
-                    if accommodate_intervals and include_current:
+                    if accommodate_intervals and include_current and not key_present:
                         x_header.extend([
                             current_key + '_i1',
                             current_key + '_i2'
@@ -1195,6 +1254,13 @@ def fetch_data_points(request):
         pre_filter.update({
             'matrix_item_id__in': matrix_items
         })
+    elif request.POST.get('matrix', ''):
+        matrix_items = AssayMatrixItem.objects.filter(matrix_id=int(request.POST.get('matrix')))
+        matrix_item = matrix_items[0]
+        study = matrix_item.study
+        pre_filter.update({
+            'matrix_item_id__in': matrix_items
+        })
     elif request.POST.get('study', ''):
         matrix_item = None
         study = AssayStudy.objects.get(pk=int(request.POST.get('study', None)))
@@ -1202,53 +1268,6 @@ def fetch_data_points(request):
         pre_filter.update({
             'matrix_item_id__in': matrix_items
         })
-    elif request.POST.get('filters', ''):
-        current_filters = json.loads(request.POST.get('filters', '{}'))
-        accessible_studies = get_user_accessible_studies(request.user)
-
-        if current_filters.get('groups', []):
-            group_ids = [int(id) for id in current_filters.get('groups', []) if id]
-            accessible_studies = accessible_studies.filter(group_id__in=group_ids)
-
-        matrix_items = AssayMatrixItem.objects.filter(
-            study_id__in=accessible_studies
-        ).prefetch_related(
-            'organ_model',
-            'assaysetupcompound_set__compound_instance',
-            'assaydatapoint_set__study_assay__target'
-        )
-
-        if current_filters.get('organ_models', []):
-            organ_model_ids = [int(id) for id in current_filters.get('organ_models', []) if id]
-
-            matrix_items = matrix_items.filter(
-                organ_model_id__in=organ_model_ids
-            ) | matrix_items.filter(organ_model=None)
-
-        if current_filters.get('compounds', []):
-            compound_ids = [int(id) for id in current_filters.get('compounds', []) if id]
-
-            matrix_items = matrix_items.filter(
-                assaysetupcompound__compound_instance__compound_id__in=compound_ids
-            ) | matrix_items.filter(assaysetupcompound__isnull=True)
-
-        if current_filters.get('targets', []):
-            target_ids = [int(id) for id in current_filters.get('targets', []) if id]
-
-            matrix_items = matrix_items.filter(
-                assaydatapoint__study_assay__target_id__in=target_ids
-            ).distinct()
-
-            pre_filter.update({
-                'study_assay__target_id__in': target_ids
-            })
-
-        pre_filter.update({
-            'matrix_item_id__in': matrix_items
-        })
-
-        matrix_item = None
-        study = accessible_studies
     else:
         return HttpResponseServerError()
 
@@ -1437,38 +1456,29 @@ def fetch_pre_submission_filters(request):
 
     accessible_studies = get_user_accessible_studies(request.user)
 
-    groups = sorted(list(set([
-        (study.group_id, study.group.name) for study in
-        accessible_studies
+    # Notice EXCLUSION of items without organ models
+    accessible_matrix_items = AssayMatrixItem.objects.filter(
+        study_id__in=accessible_studies
+    ).exclude(
+        organ_model_id=None
+    ).prefetch_related(
+        'organ_model'
+    )
+
+    # Please note exclusion of null organ model here
+    organ_models = sorted(list(set([
+        (matrix_item.organ_model_id, matrix_item.organ_model.name) for matrix_item in
+        accessible_matrix_items.exclude(organ_model_id=None)
     ])), key=lambda x: x[1])
 
-    group_ids = {group[0]: True for group in groups}
+    organ_model_ids = {organ_model[0]: True for organ_model in organ_models}
 
-    organ_models = {}
+    groups = {}
     targets = {}
     compounds = {}
-    number_of_points = 'Please Make a Selection'
+    number_of_points = 0
 
     if filters_present:
-        if current_filters.get('groups', []):
-            group_ids = [int(id) for id in current_filters.get('groups', []) if int(id) in group_ids]
-
-        accessible_studies = accessible_studies.filter(group_id__in=group_ids)
-
-        accessible_matrix_items = AssayMatrixItem.objects.filter(
-            study_id__in=accessible_studies
-        ).prefetch_related(
-            'organ_model'
-        )
-
-        # Please note exclusion of null organ model here
-        organ_models = sorted(list(set([
-            (matrix_item.organ_model_id, matrix_item.organ_model.name) for matrix_item in
-            accessible_matrix_items.exclude(organ_model_id=None)
-        ])), key=lambda x: x[1])
-
-        organ_model_ids = {organ_model[0]: True for organ_model in organ_models}
-
         if current_filters.get('organ_models', []):
             new_organ_model_ids = [int(id) for id in current_filters.get('organ_models', []) if int(id) in organ_model_ids]
 
@@ -1478,7 +1488,53 @@ def fetch_pre_submission_filters(request):
 
         accessible_matrix_items = accessible_matrix_items.filter(
             organ_model_id__in=organ_model_ids
-        ) | accessible_matrix_items.filter(organ_model=None)
+        )
+
+        accessible_studies = accessible_studies.filter(
+            id__in=list(accessible_matrix_items.values_list('study_id', flat=True))
+        )
+
+        groups = sorted(list(set([
+            (study.group_id, study.group.name) for study in
+            accessible_studies
+        ])), key=lambda x: x[1])
+
+        group_ids = {group[0]: True for group in groups}
+
+        if current_filters.get('groups', []):
+            group_ids = [int(id) for id in current_filters.get('groups', []) if int(id) in group_ids]
+
+        accessible_studies = accessible_studies.filter(group_id__in=group_ids)
+
+        accessible_matrix_items = accessible_matrix_items.filter(
+            study_id__in=accessible_studies
+        )
+
+        accessible_study_assays = AssayStudyAssay.objects.filter(
+            assaydatapoint__matrix_item_id__in=accessible_matrix_items
+        ).prefetch_related(
+            'target'
+        )
+
+        targets = sorted(list(set([
+            (study_assay.target_id, study_assay.target.name) for study_assay in
+            accessible_study_assays
+        ])), key=lambda x: x[1])
+
+        target_ids = {target[0]: True for target in targets}
+
+        if current_filters.get('targets', []):
+            new_target_ids = [int(id) for id in current_filters.get('targets', []) if int(id) in target_ids]
+
+            # In case changes in filters eliminate all targets
+            if new_target_ids:
+                target_ids = new_target_ids
+
+            accessible_study_assays = accessible_study_assays.filter(target_id__in=target_ids)
+
+            accessible_matrix_items = accessible_matrix_items.filter(
+                assaydatapoint__study_assay__in=accessible_study_assays
+            ).distinct()
 
         accessible_compounds = AssaySetupCompound.objects.filter(
             matrix_item__in=accessible_matrix_items
@@ -1506,31 +1562,14 @@ def fetch_pre_submission_filters(request):
             assaysetupcompound__isnull=True
         )
 
-        accessible_study_assays = AssayStudyAssay.objects.filter(
-            assaydatapoint__matrix_item_id__in=accessible_matrix_items
-        ).prefetch_related(
-            'target'
-        )
-
-        targets = sorted(list(set([
-            (study_assay.target_id, study_assay.target.name) for study_assay in
-            accessible_study_assays
-        ])), key=lambda x: x[1])
-
-        target_ids = {target[0]: True for target in targets}
-
-        if current_filters.get('targets', []):
-            new_target_ids = [int(id) for id in current_filters.get('targets', []) if int(id) in target_ids]
-
-            # In case changes in filters eliminate all targets
-            if new_target_ids:
-                target_ids = new_target_ids
-
-            accessible_study_assays = accessible_study_assays.filter(target_id__in=target_ids)
-
         number_of_points = AssayDataPoint.objects.filter(
             matrix_item_id__in=accessible_matrix_items,
             study_assay_id__in=accessible_study_assays,
+            replaced=False
+        ).count()
+    else:
+        number_of_points = AssayDataPoint.objects.filter(
+            study_id__in=accessible_studies,
             replaced=False
         ).count()
 
@@ -1548,6 +1587,102 @@ def fetch_pre_submission_filters(request):
                         content_type='application/json')
 
 
+def fetch_data_points_from_filters(request):
+    pre_filter = {}
+    if request.POST.get('filters', ''):
+        current_filters = json.loads(request.POST.get('filters', '{}'))
+        accessible_studies = get_user_accessible_studies(request.user)
+
+        # Notice exclusion of missing organ model
+        matrix_items = AssayMatrixItem.objects.filter(
+            study_id__in=accessible_studies
+        ).exclude(
+            organ_model_id=None
+        ).prefetch_related(
+            'organ_model',
+            # 'assaysetupcompound_set__compound_instance',
+            # 'assaydatapoint_set__study_assay__target'
+        )
+
+        if current_filters.get('organ_models', []):
+            organ_model_ids = [int(id) for id in current_filters.get('organ_models', []) if id]
+
+            matrix_items = matrix_items.filter(
+                organ_model_id__in=organ_model_ids
+            )
+
+        accessible_studies = accessible_studies.filter(
+            id__in=list(matrix_items.values_list('study_id', flat=True))
+        )
+
+        matrix_items.prefetch_related(
+            'assaysetupcompound_set__compound_instance',
+            'assaydatapoint_set__study_assay__target'
+        )
+
+        if current_filters.get('groups', []):
+            group_ids = [int(id) for id in current_filters.get('groups', []) if id]
+            accessible_studies = accessible_studies.filter(group_id__in=group_ids)
+
+        if current_filters.get('compounds', []):
+            compound_ids = [int(id) for id in current_filters.get('compounds', []) if id]
+
+            matrix_items = matrix_items.filter(
+                assaysetupcompound__compound_instance__compound_id__in=compound_ids
+            ) | matrix_items.filter(assaysetupcompound__isnull=True)
+
+        if current_filters.get('targets', []):
+            target_ids = [int(id) for id in current_filters.get('targets', []) if id]
+
+            matrix_items = matrix_items.filter(
+                assaydatapoint__study_assay__target_id__in=target_ids
+            ).distinct()
+
+            pre_filter.update({
+                'study_assay__target_id__in': target_ids
+            })
+
+        pre_filter.update({
+            'matrix_item_id__in': matrix_items.filter(assaydatapoint__isnull=False).distinct()
+        })
+
+        matrix_item = None
+        study = accessible_studies
+
+        # Not particularly DRY
+        data_points = AssayDataPoint.objects.filter(
+            **pre_filter
+        ).prefetch_related(
+            # TODO
+            'study_assay__target',
+            'study_assay__method',
+            'study_assay__unit',
+            'sample_location',
+            'matrix_item__matrix',
+            'subtarget'
+        )
+
+        data = get_data_points_for_charting(
+            data_points,
+            request.POST.get('key', ''),
+            request.POST.get('mean_type', ''),
+            request.POST.get('interval_type', ''),
+            request.POST.get('percent_control', ''),
+            request.POST.get('include_all', ''),
+            request.POST.get('truncate_negative', ''),
+            json.loads(request.POST.get('dynamic_excluded', '{}')),
+            study=study,
+            matrix_item=matrix_item,
+            matrix_items=matrix_items,
+            group_criteria=json.loads(request.POST.get('criteria', '{}'))
+        )
+
+        return HttpResponse(json.dumps(data),
+                            content_type="application/json")
+    else:
+        return HttpResponseServerError()
+
+
 def study_viewer_validation(request):
     study = None
     if request.POST.get('study', ''):
@@ -1556,11 +1691,15 @@ def study_viewer_validation(request):
         # GET STUDY FROM THE MATRIX ITEM
         matrix_item = get_object_or_404(AssayMatrixItem, pk=request.POST.get('matrix_item'))
         study = matrix_item.study
+    elif request.POST.get('matrix', ''):
+        # GET STUDY FROM THE MATRIX ITEM
+        matrix = get_object_or_404(AssayMatrix, pk=request.POST.get('matrix'))
+        study = matrix.study
 
     if study:
         return user_is_valid_study_viewer(request.user, study)
     else:
-        return HttpResponseForbidden()
+        return False
 
 
 def study_editor_validation(request):
@@ -1571,11 +1710,15 @@ def study_editor_validation(request):
         # GET STUDY FROM THE MATRIX ITEM
         matrix_item = get_object_or_404(AssayMatrixItem, pk=request.POST.get('matrix_item'))
         study = matrix_item.study
+    elif request.POST.get('matrix', ''):
+        # GET STUDY FROM THE MATRIX ITEM
+        matrix = get_object_or_404(AssayMatrix, pk=request.POST.get('matrix'))
+        study = matrix.study
 
     if study:
         return is_group_editor(request.user, study.group.name)
     else:
-        return HttpResponseForbidden()
+        return False
 
 
 # TODO TODO TODO
@@ -1604,6 +1747,9 @@ switch = {
     },
     'fetch_pre_submission_filters': {
         'call': fetch_pre_submission_filters
+    },
+    'fetch_data_points_from_filters': {
+        'call': fetch_data_points_from_filters
     }
 }
 

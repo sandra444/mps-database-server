@@ -15,22 +15,19 @@ from bioactivities.forms import TargetsForm
 
 class TargetAdmin(LockableAdmin):
     """Admin for Bioactivity Target"""
-    class Media(object):
-        js = ('bioactivities/customize_admin.js',)
+    # class Media(object):
+    #     js = ('bioactivities/customize_admin.js',)
 
     form = TargetsForm
 
-    change_list_template = 'admin/bioactivities/change_list.html'
-    alphabet_filter = 'name'
-
-    class AddMultiForm(forms.Form):
-
-        chemblids = forms.CharField(
-            required=True,
-            label='ChEMBL IDs',
-            widget=forms.Textarea(),
-            help_text='<br>ChEMBL IDs separated by a space or a new line.'
-        )
+    # class AddMultiForm(forms.Form):
+    #
+    #     chemblids = forms.CharField(
+    #         required=True,
+    #         label='ChEMBL IDs',
+    #         widget=forms.Textarea(),
+    #         help_text='<br>ChEMBL IDs separated by a space or a new line.'
+    #     )
 
     save_on_top = True
     list_per_page = 300
@@ -148,9 +145,6 @@ admin.site.register(Target, TargetAdmin)
 class AssayAdmin(LockableAdmin):
     """Admin for Bioactivity Assay (not to be confused with models of the Assay App)"""
     form = AssayForm
-
-    change_list_template = 'admin/bioactivities/change_list.html'
-    alphabet_filter = 'description'
 
     class Media(object):
         js = ('bioactivities/customize_admin.js',)
@@ -279,10 +273,6 @@ admin.site.register(Assay, AssayAdmin)
 
 class BioactivityAdmin(LockableAdmin):
     """Admin for an individual Bioactivity"""
-    change_list_template = 'admin/bioactivities/change_list.html'
-    alphabet_filter = 'standard_name'
-    DEFAULT_ALPHABET = u'ABCDEFGHIJKLMNOPQRSTUVWXYZ%['
-
     save_on_top = True
     list_per_page = 50
     ordering = ('compound', 'standard_name')
@@ -349,9 +339,6 @@ admin.site.register(Bioactivity, BioactivityAdmin)
 
 class BioactivityTypeAdmin(LockableAdmin):
     """Admin for Bioactivty Type (for consolidating units and so on)"""
-    change_list_template = 'admin/bioactivities/change_list.html'
-    alphabet_filter = 'standard_name'
-
     resource_class = BioactivityTypeResource
     save_on_top = True
     list_per_page = 50

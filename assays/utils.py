@@ -116,6 +116,7 @@ CSV_HEADER_WITH_COMPOUNDS_AND_STUDY = (
 DEFAULT_EXPORT_HEADER = (
     'Study ID',
     'Chip ID',
+    'Matrix ID',
     'Cross Reference',
     'Assay Plate ID',
     'Assay Well ID',
@@ -233,7 +234,7 @@ def get_user_accessible_studies(user):
     user - Django user instance
     """
     queryset = AssayStudy.objects.all().prefetch_related(
-        'group',
+        'group'
     )
 
     user_group_names = [
@@ -291,7 +292,12 @@ def get_user_accessible_studies(user):
                queryset.filter(**unrestricted_filter).exclude(**unsigned_off_filter).exclude(
                    **missing_stakeholder_filter)
 
-    combined = combined.distinct().prefetch_related('created_by', 'modified_by', 'signed_off_by')
+    # May be overzealous to prefetch here
+    combined = combined.distinct().prefetch_related(
+        'created_by',
+        'modified_by',
+        'signed_off_by'
+    )
 
     return combined
 
