@@ -416,7 +416,7 @@ $(document).ready(function () {
                         group_to_data[charts][index][i] = assays[index][0][i].replace(/\D/g, '') - 1;
                     }
                     else {
-                        var device = assays[index][0][i].split('||')[0];
+                        var device = assays[index][0][i].split(' || ')[0];
                         // console.log(device);
                         // console.log(device_to_group);
                         group_to_data[charts][index][i] = device_to_group[device];

@@ -976,7 +976,7 @@ def get_data_points_for_charting(
                     include_current = False
 
                     if accommodate_sample_location:
-                        current_key = tag + '||' + sample_location
+                        current_key = tag + ' || ' + sample_location
                     else:
                         current_key = tag
 
