@@ -379,7 +379,6 @@ $(document).ready(function () {
     // "Close" and "Download" buttons as Bootstrap buttons
     $(".ui-dialog").find(".ui-button-text-only").addClass('btn btn-primary').removeClass('ui-state-default');
 
-
     //TODO Unintelligently play with table sizing at different image quantities
     // var mostImages = 0;
     // $("td").each(function(index){
