@@ -1138,7 +1138,7 @@ def get_data_points_for_charting(
 
                 for sample_location, time_values in sample_locations.items():
                     if accommodate_sample_location:
-                        current_key = tag + ' ' + sample_location
+                        current_key = tag + ' || ' + sample_location
                         accommodate_intervals = False
                         include_current = False
                     else:
@@ -1155,8 +1155,8 @@ def get_data_points_for_charting(
 
                         if not percent_control:
                             current_data.setdefault(current_key, {}).update({time: value})
-                            current_data.setdefault(current_key+'_i1', {}).update({time: value - interval})
-                            current_data.setdefault(current_key+'_i2', {}).update({time: value + interval})
+                            current_data.setdefault(current_key+'~@i1', {}).update({time: value - interval})
+                            current_data.setdefault(current_key+'~@i2', {}).update({time: value + interval})
                             y_header.update({time: True})
                             include_current = True
 
@@ -1171,8 +1171,8 @@ def get_data_points_for_charting(
                             adjusted_interval = (interval / control_value) * 100
 
                             current_data.setdefault(current_key, {}).update({time: adjusted_value})
-                            current_data.setdefault(current_key+'_i1', {}).update({time: adjusted_value - adjusted_interval})
-                            current_data.setdefault(current_key+'_i2', {}).update({time: adjusted_value + adjusted_interval})
+                            current_data.setdefault(current_key+'~@i1', {}).update({time: adjusted_value - adjusted_interval})
+                            current_data.setdefault(current_key+'~@i2', {}).update({time: adjusted_value + adjusted_interval})
                             y_header.update({time: True})
                             include_current = True
 
@@ -1183,27 +1183,27 @@ def get_data_points_for_charting(
                     # To include all
                     # x_header.append(current_key)
                     # x_header.extend([
-                    #     current_key + '_i1',
-                    #     current_key + '_i2'
+                    #     current_key + '~@i1',
+                    #     current_key + '~@i2'
                     # ])
 
                     # Only include intervals if necessary
                     if accommodate_intervals and include_current and not key_present:
                         x_header.extend([
-                            current_key + '_i1',
-                            current_key + '_i2'
+                            current_key + '~@i1',
+                            current_key + '~@i2'
                         ])
                     else:
-                        if current_key+'_i1' in current_data:
-                            del current_data[current_key+'_i1']
-                            del current_data[current_key + '_i2']
+                        if current_key+'~@i1' in current_data:
+                            del current_data[current_key+'~@i1']
+                            del current_data[current_key + '~@i2']
 
             # for current_key in all_keys:
             #     if current_key not in x_header:
             #         x_header.extend([
             #             current_key,
-            #             current_key + '_i1',
-            #             current_key + '_i2'
+            #             current_key + '~@i1',
+            #             current_key + '~@i2'
             #         ])
 
             # Note manipulations for sorting
@@ -1211,7 +1211,7 @@ def get_data_points_for_charting(
             convert = lambda text: int(text) if text.isdigit() else text.lower()
             alphanum_key = lambda key: [
                 convert(
-                    c.replace('_I1', '!').replace('_I2', '"')
+                    c.replace('~@I1', '!').replace('~@I2', '"')
                 ) for c in re.split('([0-9]+)', key)
             ]
             x_header.sort(key=alphanum_key)
