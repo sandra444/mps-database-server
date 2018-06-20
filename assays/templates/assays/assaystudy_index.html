@@ -1,0 +1,247 @@
+{% extends "base.html" %}
+{% load static %}
+{% load custom_filters %}
+
+{% block breadcrumbs %}
+    <li><a href="/assays/assaystudy/">Studies</a></li>
+    <li class="active">{{ object }}</li>
+{% endblock %}
+
+{% block load %}
+    <script src="{% static "assays/assaystudy_index.js" %}"></script>
+    <script src="{% static "js/display_datatable.js" %}"></script>
+{% endblock %}
+
+{% block content %}
+    {# Inform whether this is publicly accessible #}
+    {# Needs to account for all stakeholders too #}
+    {% if object.signed_off_by and stakeholder_sign_off and not object.restricted %}
+        <div class="alert alert-info" role="alert">
+            <span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span>
+            <span class="sr-only">Info:</span>
+            This study can be viewed by all registered users
+        </div>
+    {% endif %}
+
+    {% include 'tracking.html' with study_submit='true' %}
+
+    <div class="padded-bottom">
+        <div class="well">
+            <h1 class="text-center">
+                {{ object }}
+                <div>
+                    {% if user|is_group_editor:object.group.name %}
+                        <a href="update" class="btn btn-primary" role="button">Edit Study Details and Description</a>
+                    {% endif %}
+                    <a href="summary" class="btn btn-primary" role="button">Study Summary</a>
+                    <a href="reproducibility" class="btn btn-primary" role="button">View Reproducibility</a>
+                    <a href="images" class="btn btn-primary" role="button">View Images</a>
+                    {% if user_is_group_editor and not object.signed_off_by %}
+                    <a href="upload" class="btn btn-primary" role="button">Upload Data</a>
+                    {% endif %}
+                </div>
+                {% if not user_is_group_admin and user_is_group_editor and not object.signed_off_by %}
+                <div>
+                    <a id="indicate_study_is_ready_for_sign_off" class="btn btn-success" role="button">Indicate Study is Ready for Sign Off</a>
+                </div>
+                {% endif %}
+                {% if user_is_group_admin %}
+                    <div class="row text-center small-padding-top">
+                        <a href="sign_off" class="btn btn-success" role="button">View/Edit Sign Off Status of this Study</a>
+                    </div>
+                {% endif %}
+                {#  TODO TODO TODO #}
+                {% if user_is_stakeholder_admin %}
+                    <div class="row text-center small-padding-top">
+                        <a href="sign_off" class="btn btn-success" role="button">View/Edit Approval Status of this Study</a>
+                    </div>
+                {% endif %}
+                {% if user.is_superuser %}
+                <div>
+                    <a href="/admin/assays/assaystudy/{{ object.id }}" class="btn btn-success" role="button">Change Group Access for this Study</a>
+                </div>
+                {% endif %}
+            </h1>
+        </div>
+
+        <legend>
+            <h2>
+                Matrices
+                {# Hide setup add buttons if the study is marked reviewed #}
+                {% if user|is_group_editor:object.group.name and not object.signed_off_by %}
+                <div>
+                    <a href="assaymatrix/add" class="btn btn-success" role="button">Add Matrix</a>
+                </div>
+                {% endif %}
+            </h2>
+        </legend>
+
+        {% if matrices %}
+        <div>
+        <table id="matrices" class="display table table-striped table-hover" cellspacing="0" width="100%">
+            <thead>
+                <tr>
+                    <th>View/Edit</th>
+                    <th>Name</th>
+                    <th>Items</th>
+                    <th>Creator</th>
+                    <th>Review</th>
+                </tr>
+            </thead>
+
+            <tbody>
+            {% for matrix in matrices %}
+                <tr id={{ matrix.id }} name={{ matrix.id }}>
+                    <td>
+                        <a class="btn btn-primary"
+                           {# THIS SHOULD USE URL #}
+                           href="{{ matrix.get_absolute_url }}">
+                            View/Edit
+                        </a>
+                    </td>
+                    <td>{{ matrix.name }}</td>
+                    <td>
+                        {% for item in matrix.assaymatrixitem_set.all|dictsort:"name" %}
+                            <a href="{{ item.get_absolute_url }}">{{ item.name }}</a>;&nbsp;
+                        {% endfor %}
+                    </td>
+                    <td>
+                        {{ matrix.full_creator }}
+                    </td>
+                    <td>
+                        {% if matrix.signed_off_by %}
+                            <span hidden>1</span>
+                            <span title="This entry was validated by {{ matrix.full_reviewer }} on {{ matrix.signed_off_date }}" class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
+                        {% endif %}
+                        {% if matrix.flagged %}
+                            <span hidden>0</span>
+                            <span title="This entry is flagged for review: '{{ matrix.reason_for_flag }}'" class="glyphicon glyphicon-flag text-danger" aria-hidden="true"></span>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        </div>
+        {% else %}
+        <div class="alert alert-warning" role="alert">
+            No matrices exist for this study
+        </div>
+        {% endif %}
+
+        <legend>
+            <h2>
+                Items
+            </h2>
+        </legend>
+
+        {% if items %}
+        <div class="padded-bottom">
+        <table id="matrix_items" class="display table table-striped table-hover" cellspacing="0" width="100%">
+            <thead>
+                <tr>
+                    <th>View/Edit</th>
+                    <th>Name</th>
+                    <th>Date</th>
+                    <th>Organ Model</th>
+                    <th>Compound</th>
+                    <th>Cell</th>
+                    <th>Setting</th>
+                    <th>Creator</th>
+                    <th>Review</th>
+                </tr>
+            </thead>
+
+            <tbody>
+            {% for item in items %}
+                <tr id={{ item.id }} name={{ item.id }}>
+                    <td>
+                        <a class="btn btn-primary"
+                           href="{{ item.get_absolute_url }}">
+                            View/Edit
+                        </a>
+                    </td>
+                    <td>{{ item.name }}</td>
+                    <td>{{ item.setup_date }}</td>
+                    <td>{{ item.organ_model }}</td>
+                    <td>{{ item.stringify_compounds }}</td>
+                    <td>{{ item.stringify_cells }}</td>
+                    <td>{{ item.stringify_settings }}</td>
+                    <td>
+                        {{ item.full_creator }}
+                    </td>
+                    <td>
+                        {% if item.signed_off_by %}
+                            <span hidden>1</span>
+                            <span title="This entry was validated by {{ item.full_reviewer }} on {{ item.signed_off_date }}" class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
+                        {% endif %}
+                        {% if item.flagged %}
+                            <span hidden>0</span>
+                            <span title="This entry is flagged for review: '{{ item.reason_for_flag }}'" class="glyphicon glyphicon-flag text-danger" aria-hidden="true"></span>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        </div>
+        {% else %}
+        <div class="alert alert-warning" role="alert">
+            No items exist for this study
+        </div>
+        {% endif %}
+    </div>
+
+    {% if not user_is_group_admin and user_is_group_editor and not object.signed_off_by %}
+    <div hidden id="ready_for_sign_off_section" title="Indicate Study is Ready for Sign Off">
+    <form id="ready_for_sign_off_form">
+
+        <div class="alert alert-info" role="alert">
+            <span class="glyphicon glyphicon-envelope" aria-hidden="true"></span>
+            <span class="sr-only">Info:</span>
+            This form, when submitted, will send an email to the group's PI indicating that the study is ready for Sign Off.
+        </div>
+
+        <label for="email">Message:</label>
+        <div class="input-group padded-bottom">
+            {# Inline style is in poor taste #}
+            <textarea name="message" class="form-control" id="id_message" rows="4" style="width: 775px;"
+                    placeholder="Write a message to accompany your request for a Sign Off."></textarea>
+        </div>
+
+        <div class="well well-lg">
+        <label for="captcha">Please Type What You See</label>
+        <div class="input-group">
+            {{ ready_for_sign_off_form.captcha }}
+        </div>
+        </div>
+    </form>
+    <div hidden id="email_failure" class="alert alert-danger" role="alert">
+        <h3>
+            <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+            <span class="sr-only">Danger:</span>
+            Your request has failed.
+            <br>
+            <br>
+            <span id="email_failure_message"></span>
+            <br>
+            <br>
+            Please refresh the page and try again.
+        </h3>
+    </div>
+    <div hidden id="email_success" class="alert alert-success" role="alert">
+        <h3>
+            <span class="glyphicon glyphicon-check" aria-hidden="true"></span>
+            <span class="sr-only">Success:</span>
+            Your request has succeeded. Your message:
+            <br>
+            <br>
+            <span id="email_message"></span>
+            <br>
+            <br>
+            Was sent to users that can Sign Off on the study.
+        </h3>
+    </div>
+    </div>
+    {% endif %}
+{% endblock %}

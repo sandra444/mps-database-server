@@ -20,29 +20,13 @@
             </div>
         {# Only show options if this entry is not locked due to being reviewed #}
         {% else %}
-        {% if clone %}
-            <button id="submit" type="submit" class="btn btn-primary" onclick="$('#id_another').val(false);">Submit</button>
-        {% else %}
-            <button id="submit" type="submit" class="btn btn-primary">Submit</button>
-        {% endif %}
 
-        {% if not update and clone %}
-            <button type="submit" class="btn btn-info" onclick="$('#id_another').val(true);">Submit and Clone</button>
-        {% endif %}
+        <button id="submit" type="submit" class="btn btn-primary">Submit</button>
+        <a class="btn btn-warning" role="button" onclick="window.location.reload(false);">Clear all Changes</a>
 
-        {% if update and object.get_clone_url %}
-            <a role="button" class="btn btn-info" href="{{ object.get_clone_url }}">Clone</a>
-        {% endif %}
-
-        {% if update and object.get_delete_url and group %}
+        {% if update and object.get_delete_url %}
             <a role="button" class="btn btn-danger pull-right" href="{{ object.get_delete_url }}">Delete</a>
         {% endif %}
-
-        {# Special exception for Plate Layouts #}
-{#        {% if update and assay_layout %}#}
-{#            <a role="button" class="btn btn-info" href="/assays/assaylayout/add?base={{ object.id }}">Clone Base</a>#}
-{#            <a role="button" class="btn btn-info" href="/assays/assaylayout/add?clone={{ object.id }}">Clone All</a>#}
-{#        {% endif %}#}
 
         {% if flag %}
             {# Html for flagging for review #}
@@ -59,7 +43,7 @@
                 <a role='button' id="flag" class="btn btn-sm" title="Flag for review">
                     <span class="glyphicon glyphicon-flag" aria-hidden="true"></span>
                 </a>
-                <a role='button' id="notes_for_flag" class="btn btn-sm btn-warning" title="Reason for Flag" style="display: none">
+                <a role='button' id="notes_for_flag" class="btn btn-sm btn-danger" title="Reason for Flag" style="display: none">
                     Notes
                 </a>
             {% endif %}
@@ -69,50 +53,6 @@
                 {{ form.flagged }}
             </div>
         {% endif %}
-
-{#        <div hidden>#}
-{#            {{ form.signed_off }}#}
-{#        </div>#}
-
-        {# TODO REFACTOR #}
-        {# Check to see if the user has the 'review' group #}
-        {# Alternatively, some entries check to see if the user is the creator instead #}
-        {# Perhaps the logic should be removed from here and added to JS? #}
-{#        {% if study_submit and user|is_group_admin:group or update and creator and user.id == creator %}#}
-{#            {% if form.signed_off.value %}#}
-{#            <a role='button' id="mark_reviewed" class="btn btn-sm btn-success" title="Mark entry as reviewed"#}
-{#            onclick="if (confirm('Signing off will lock this object and its subsidiaries.\nAre you sure you want to change the Sign Off status?')){$('#id_signed_off').prop('checked', !$('#id_signed_off').prop('checked')); $(this).toggleClass('btn-success');}">#}
-{#                <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>#}
-{#            </a>#}
-{#            {% else %}#}
-{#            <a role='button' id="mark_reviewed" class="btn btn-sm" title="Mark entry as reviewed"#}
-{#            onclick="if (confirm('Signing off will lock this object and its subsidiaries.\nAre you sure you want to change the Sign Off status?')){$('#id_signed_off').prop('checked', !$('#id_signed_off').prop('checked')); $(this).toggleClass('btn-success');}">#}
-{#                <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>#}
-{#            </a>#}
-{#            {% endif %}#}
-{#        {% endif %}#}
-{##}
-{#        {% if not study_submit and group and user|is_group_editor:group %}#}
-{#            {% if form.signed_off.value %}#}
-{#            <a role='button' id="mark_reviewed" class="btn btn-sm btn-success" title="Mark entry as reviewed"#}
-{#            onclick="if (confirm('Signing off will mark this object.\nAre you sure you want to change the Sign Off status?')){$('#id_signed_off').prop('checked', !$('#id_signed_off').prop('checked')); $(this).toggleClass('btn-success');}">#}
-{#                <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>#}
-{#            </a>#}
-{#            {% else %}#}
-{#            <a role='button' id="mark_reviewed" class="btn btn-sm" title="Mark entry as reviewed"#}
-{#            onclick="if (confirm('Signing off will mark this object.\nAre you sure you want to change the Sign Off status?')){$('#id_signed_off').prop('checked', !$('#id_signed_off').prop('checked')); $(this).toggleClass('btn-success');}">#}
-{#                <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>#}
-{#            </a>#}
-{#            {% endif %}#}
-{#        {% endif %}#}
-
-        {# TODO THIS WAY OF HANDLING HELP HAS BEEN DEPRECATED #}
-{#        {% if help %}#}
-{#            <a role="button" class="btn btn-default" id="help_button">#}
-{#                <span class="glyphicon glyphicon-question-sign" aria-hidden="true"></span>#}
-{#                Help#}
-{#            </a>#}
-{#        {% endif %}#}
 
         <div class="form-group has-error small-padding-top">
             <div class="col-xs-12">

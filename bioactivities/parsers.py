@@ -107,7 +107,7 @@ def generate_list_of_all_data_in_bioactivities(exclude_questionable, pubchem, or
         if exclude_questionable:
             all_targets = all_targets.filter(data_validity='')
 
-        all_targets = all_targets.prefetch_related('compound').select_related('assay__target')
+        all_targets = all_targets.prefetch_related('compound', 'assay__target')
 
         all_data = all_targets.values_list(
             'activity_name',
@@ -218,7 +218,7 @@ def generate_list_of_all_targets_in_bioactivities(exclude_questionable, pubchem,
         else:
             all_targets = initial_targets
 
-        all_targets = all_targets.select_related('assay__target').values_list('assay__target__name')
+        all_targets = all_targets.prefetch_related('assay__target').values_list('assay__target__name')
 
     else:
         initial_targets = Bioactivity.objects.filter(
@@ -267,7 +267,7 @@ def generate_list_of_all_drugtrials(desired_organisms):
 
     result = FindingResult.objects.filter(
         value__isnull=False, drug_trial__species__species_name__in=desired_organisms
-    ).select_related('drug_trial__species', 'finding_name').values_list('finding_name__finding_name', flat=True)
+    ).prefetch_related('drug_trial__species', 'finding_name').values_list('finding_name__finding_name', flat=True)
 
     result = generate_record_frequency_data(result)
 
@@ -314,6 +314,7 @@ def generate_list_of_all_compounds_in_bioactivities(exclude_questionable, pubche
     return result
 
 
+# PLEASE REFACTOR
 def get_form_data(request):
     """Return dictionay containing data from the submitted filter form for bioactivities
 
@@ -323,54 +324,28 @@ def get_form_data(request):
     # convert data sent in request to a dict data type from a string data type
     request_filter = json.loads(request.POST.get('form', '{}'))
 
-    desired_targets = [
-        x.get(
-            'name'
-        ) for x in request_filter.get(
-            'targets_filter'
-        ) if x.get(
-            'is_selected'
-        ) is True
-    ]
+    desired_targets = request_filter.get(
+        'targets_filter', []
+    )
 
-    desired_compounds = [
-        x.get(
-            'name'
-        ) for x in request_filter.get(
-            'compounds_filter'
-        ) if x.get(
-            'is_selected'
-        ) is True
-    ]
+    desired_compounds = request_filter.get(
+        'compounds_filter', []
+    )
 
-    desired_bioactivities = [
-        x.get(
-            'name'
-        ) for x in request_filter.get(
-            'bioactivities_filter'
-        ) if x.get(
-            'is_selected'
-        ) is True
-    ]
+    desired_bioactivities = request_filter.get(
+        'bioactivities_filter', []
+    )
 
-    if 'drugtrials_filter' in request_filter:
-        desired_drugtrials = [
-            x.get(
-                'name'
-            ) for x in request_filter.get(
-                'drugtrials_filter'
-            ) if x.get(
-                'is_selected'
-            ) is True
-        ]
-    else:
-        desired_drugtrials = []
+    desired_drugtrials = request_filter.get(
+        'drugtrials_filter', []
+    )
 
+    # TODO TODO TODO REVISE REVISE REVISE
     desired_organisms = [
         x.get(
             'name'
         ) for x in request_filter.get(
-            'organisms_filter'
+            'organisms_filter', []
         ) if x.get(
             'is_selected'
         ) is True
@@ -472,8 +447,7 @@ def get_filtered_bioactivities(
 
         q = q.prefetch_related(
             'compound',
-            'assay'
-        ).select_related(
+            'assay',
             'assay__target'
         )
 
@@ -655,7 +629,6 @@ def fetch_all_standard_drugtrials_data(
     results = []
 
     for finding in desired_drugtrials:
-
         drugtrial_data = FindingResult.objects.filter(
             finding_name__finding_name=finding,
             value__isnull=False,
@@ -1304,7 +1277,7 @@ def table(request):
     length = q.count()
 
     # Prefetch all foreign keys
-    q = q.select_related(
+    q = q.prefetch_related(
         'compound',
         'assay__target',
         'assay'

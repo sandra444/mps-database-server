@@ -1,6 +1,12 @@
 // This script performs an on the spot query of the OpenFDA API to get a range of data
 $(document).ready(function () {
 
+    var estimated_usage_selector = $('#id_estimated_usage');
+    var estimated_usage = null;
+    if (estimated_usage_selector[0]) {
+        estimated_usage = estimated_usage_selector.val();
+    }
+
     var name= $('#compound').html();
     var chart = '';
 
@@ -61,9 +67,11 @@ $(document).ready(function () {
             }
 
             for (var i=0; i<limit; i++) {
+                // TODO UGLY WAY TO MAKE HTML
                 html += "<tr>";
                 html += '<td><a href="https://en.wikipedia.org/wiki/' + results[i].term.toLowerCase() + '">' + results[i].term + '</a></td>';
                 html += '<td>' + results[i].count + '</td>';
+                html += '<td>' + results[i].count / estimated_usage * 10000 + '</td>';
                 html += '</tr>';
             }
 

@@ -1,6 +1,5 @@
 $(function() {
     var compounds = [];
-    var middleware_token = getCookie('csrftoken');
 
     function better_search(req, responseFn) {
         var re = $.ui.autocomplete.escapeRegex(req.term);
@@ -17,7 +16,7 @@ $(function() {
             dataType: "json",
             data: {
                 call: 'fetch_compound_list',
-                csrfmiddlewaretoken: middleware_token
+                csrfmiddlewaretoken: window.COOKIES.csrfmiddlewaretoken
             },
             success: function (json) {
                 compounds = json;

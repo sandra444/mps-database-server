@@ -7,6 +7,7 @@ from django.utils import timezone
 # from django.shortcuts import redirect, get_object_or_404
 
 
+# TODO THIS WILL HAVE TO BE CHANGED IF WE WANT TO HAVE A RECORD FOR EVERY MODIFIER
 class TrackableModel(models.Model):
     """The base model for Trackable models
 
@@ -79,6 +80,9 @@ class LockableModel(TrackableModel):
         abstract = True
 
 
+# DEPRECATED
+# AT THE MOMENT, THESE FIELDS ARE NOT VERY MEANINGFULLY USED
+# TODO WE WILL HAVE TO BE SURE TO CHANGE ANY LOGIC THAT RELIES ON GROUP AND RESTRICTED
 class RestrictedModel(LockableModel):
     """The base model for Restricted models"""
 
@@ -86,6 +90,8 @@ class RestrictedModel(LockableModel):
     group = models.ForeignKey('auth.Group',
                               help_text='Bind to a group (Level 0)')
 
+    # DEPRECATED
+    # We seem to have decided to handle this differently
     restricted = models.BooleanField(default=True,
                                      help_text='Check box to restrict to selected group. Unchecked sends to Level 3')
 
@@ -93,7 +99,21 @@ class RestrictedModel(LockableModel):
         abstract = True
 
 
-class FlaggableModel(RestrictedModel):
+class FlaggableModel(LockableModel):
+    """The base model for flaggable models"""
+
+    flagged = models.BooleanField(default=False,
+                                  help_text='Check box to flag for review')
+
+    reason_for_flag = models.CharField(max_length=300,
+                                       help_text='Reason for why this entry was flagged', blank=True, default='')
+
+    class Meta(object):
+        abstract = True
+
+
+# FOR COMPATIBILITY
+class FlaggableRestrictedModel(RestrictedModel):
     """The base model for flaggable models"""
 
     flagged = models.BooleanField(default=False,
@@ -108,7 +128,6 @@ class FlaggableModel(RestrictedModel):
 
 def save_forms_with_tracking(self, form, formset=None, update=False):
     """Save tracking data
-
     Params:
     self -- the view in question (passed as self)
     form -- the form for the view
@@ -133,6 +152,8 @@ def save_forms_with_tracking(self, form, formset=None, update=False):
         # Else if Add
         if not update:
             self.object.modified_by = self.object.created_by = self.request.user
+        else:
+            self.object.modified_by = self.request.user
         self.object.save()
 
     if formset:
@@ -144,6 +165,6 @@ def save_forms_with_tracking(self, form, formset=None, update=False):
         else:
             formset.save()
 
-    # If Update
-    if update:
-        self.object.modified_by = self.request.user
+        if update:
+            self.object.modified_by = self.request.user
+            self.object.save()

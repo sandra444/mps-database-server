@@ -1,7 +1,4 @@
 $(document).ready(function () {
-    // Get the middleware token
-    var middleware_token = getCookie('csrftoken');
-
     function table(data) {
         // Show graphic
         $('#graphic').prop('hidden',false);
@@ -74,24 +71,24 @@ $(document).ready(function () {
 
     function submit() {
         // Clear all filters
-        bioactivities_filter = [];
-        targets_filter = [];
-        compounds_filter = [];
-
-        // Get bioactivities
-        $("#bioactivities input[type='checkbox']:checked").each( function() {
-            bioactivities_filter.push({"name":this.value, "is_selected":this.checked});
-        });
-
-        // Get targets
-        $("#targets input[type='checkbox']:checked").each( function() {
-            targets_filter.push({"name":this.value, "is_selected":this.checked});
-        });
-
-        // Get compounds
-        $("#compounds input[type='checkbox']:checked").each( function() {
-            compounds_filter.push({"name":this.value, "is_selected":this.checked});
-        });
+        // bioactivities_filter = [];
+        // targets_filter = [];
+        // compounds_filter = [];
+        //
+        // // Get bioactivities
+        // $("#bioactivities input[type='checkbox']:checked").each( function() {
+        //     bioactivities_filter.push({"name":this.value, "is_selected":this.checked});
+        // });
+        //
+        // // Get targets
+        // $("#targets input[type='checkbox']:checked").each( function() {
+        //     targets_filter.push({"name":this.value, "is_selected":this.checked});
+        // });
+        //
+        // // Get compounds
+        // $("#compounds input[type='checkbox']:checked").each( function() {
+        //     compounds_filter.push({"name":this.value, "is_selected":this.checked});
+        // });
 
         // Hide Selection html
         $('#selection').prop('hidden',true);
@@ -111,13 +108,13 @@ $(document).ready(function () {
                 form: JSON.stringify({
                     'exclude_questionable': FILTER.exclude_questionable,
                     'pubchem': FILTER.pubchem,
-                    'bioactivities_filter': bioactivities_filter,
-                    'targets_filter': targets_filter,
-                    'compounds_filter': compounds_filter,
+                    'bioactivities_filter': FILTER.bioactivities_filter,
+                    'targets_filter': FILTER.targets_filter,
+                    'compounds_filter': FILTER.compounds_filter,
                     'target_types_filter': FILTER.target_types,
                     'organisms_filter': FILTER.organisms
                 }),
-                csrfmiddlewaretoken: middleware_token
+                csrfmiddlewaretoken: window.COOKIES.csrfmiddlewaretoken
             },
             success: function (json) {
                 // Stop spinner

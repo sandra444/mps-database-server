@@ -3,25 +3,52 @@ $(document).ready(function() {
         dom: 'B<"row">lfrtip',
         fixedHeader: {headerOffset: 50},
         responsive: true,
-        "iDisplayLength": 50,
-        // Initially sort on compound and frequency
-        "order": [[ 1, "asc" ], [ 3, "desc"]],
-        // Try to improve speed
-        "deferRender": true,
-        "aoColumnDefs": [
+        iDisplayLength: 50,
+        deferRender: true,
+        ajax: {
+            url: '/drugtrials_ajax/',
+            data: {
+                call: 'fetch_adverse_events_data',
+                csrfmiddlewaretoken: window.COOKIES.csrfmiddlewaretoken
+            },
+            type: 'POST'
+        },
+        columns: [
             {
-                "bSortable": false,
-                "aTargets": [0]
+                data: 'view',
+                sortable:false,
+                width: "10%",
+                render:function (data, type, row, meta) {
+                    return '<a class="btn btn-primary" href="' + data + '">View</a>';
+                }
             },
             {
-                "width": "10%",
-                "targets": [0]
+                data: 'compound',
+                render:function (data, type, row, meta) {
+                    return '<a href="/compounds/' + data.id + '">' + data.name + '</a>';
+                }
             },
             {
-                "targets": [6],
-                "visible": false,
-                "searchable": true
-            }
-        ]
+                data: 'event',
+                render:function (data, type, row, meta) {
+                    return '<a href="https://en.wikipedia.org/wiki/' + data.lower+ '">' + data.name + '</a>';
+                }
+            },
+            {data: 'number_of_reports'},
+            {data: 'normalized_reports'},
+            {data: 'estimated_usage'},
+            {data: 'organ'},
+            {
+                data: 'black_box_warning',
+                render:function (data, type, row, meta) {
+                    if (data) {
+                        return '<span title="This compound has a Black Box Warning" class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>'
+                    }
+                    return '';
+                }
+            },
+            {data: 'project', visible: false, searchable: true}
+        ],
+        "order": [[ 1, "asc" ], [ 3, "desc"]]
     });
 });

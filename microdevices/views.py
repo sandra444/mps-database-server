@@ -1,8 +1,8 @@
-from django.views.generic import DetailView, CreateView, UpdateView, ListView
+from django.views.generic import DetailView, CreateView, UpdateView, ListView, TemplateView
 from django.shortcuts import redirect
 from django import forms
-from django.forms.models import inlineformset_factory
-from .forms import MicrodeviceForm, OrganModelForm, OrganModelProtocolInlineFormset
+
+from .forms import MicrodeviceForm, OrganModelForm, OrganModelProtocolFormsetFactory, OrganModelLocationFormsetFactory
 from .models import Microdevice, OrganModel, ValidatedAssay, OrganModelProtocol
 from mps.mixins import SpecificGroupRequiredMixin, PermissionDenied, user_is_active
 from mps.base.models import save_forms_with_tracking
@@ -92,17 +92,6 @@ class MicrodeviceUpdate(SpecificGroupRequiredMixin, UpdateView):
         else:
             return self.render_to_response(self.get_context_data(form=form))
 
-OrganModelProtocolFormset = inlineformset_factory(
-    OrganModel,
-    OrganModelProtocol,
-    formset=OrganModelProtocolInlineFormset,
-    extra=1,
-    exclude=[],
-    widgets={
-        'version': forms.TextInput(attrs={'size': 10})
-    }
-)
-
 
 class OrganModelAdd(SpecificGroupRequiredMixin, CreateView):
     """Allows the addition of Organ Models"""
@@ -114,25 +103,35 @@ class OrganModelAdd(SpecificGroupRequiredMixin, CreateView):
 
     def get_context_data(self, **kwargs):
         context = super(OrganModelAdd, self).get_context_data(**kwargs)
-        if 'formset' not in context:
+        if 'protocol_formset' not in context:
             if self.request.POST:
-                context['formset'] = OrganModelProtocolFormset(self.request.POST, self.request.FILES)
+                context['protocol_formset'] = OrganModelProtocolFormsetFactory(self.request.POST, self.request.FILES)
+                context['location_formset'] = OrganModelLocationFormsetFactory(self.request.POST, self.request.FILES)
             else:
-                context['formset'] = OrganModelProtocolFormset()
+                context['protocol_formset'] = OrganModelProtocolFormsetFactory()
+                context['location_formset'] = OrganModelLocationFormsetFactory()
 
         return context
 
     def form_valid(self, form):
-        formset = OrganModelProtocolFormset(
+        protocol_formset = OrganModelProtocolFormsetFactory(
             self.request.POST,
             self.request.FILES,
             instance=form.instance
         )
-        if form.is_valid() and formset.is_valid():
-            save_forms_with_tracking(self, form, formset=formset, update=False)
+        location_formset = OrganModelLocationFormsetFactory(
+            self.request.POST,
+            instance=form.instance
+        )
+        if form.is_valid() and protocol_formset.is_valid() and location_formset.is_valid():
+            save_forms_with_tracking(self, form, formset=[protocol_formset, location_formset], update=False)
             return redirect(self.object.get_post_submission_url())
         else:
-            return self.render_to_response(self.get_context_data(form=form, formset=formset))
+            return self.render_to_response(self.get_context_data(
+                form=form,
+                protocol_formset=protocol_formset,
+                location_formset=location_formset
+            ))
 
 
 # PLEASE NOTE THAT ORGAN MODEL DOES NOT USE A PERMISSION MIXIN
@@ -159,28 +158,41 @@ class OrganModelUpdate(UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super(OrganModelUpdate, self).get_context_data(**kwargs)
-        if 'formset' not in context:
+        if 'protocol_formset' not in context:
             if self.request.POST:
-                context['formset'] = OrganModelProtocolFormset(
+                context['protocol_formset'] = OrganModelProtocolFormsetFactory(
                     self.request.POST,
                     self.request.FILES,
                     instance=self.object
                 )
+                context['location_formset'] =OrganModelLocationFormsetFactory(
+                    self.request.POST,
+                    instance=self.object
+                )
             else:
-                context['formset'] = OrganModelProtocolFormset(instance=self.object)
+                context['protocol_formset'] = OrganModelProtocolFormsetFactory(instance=self.object)
+                context['location_formset'] = OrganModelLocationFormsetFactory(instance=self.object)
 
         context['update'] = True
 
         return context
 
     def form_valid(self, form):
-        formset = OrganModelProtocolFormset(
+        protocol_formset = OrganModelProtocolFormsetFactory(
             self.request.POST,
             self.request.FILES,
             instance=form.instance
         )
-        if form.is_valid() and formset.is_valid():
-            save_forms_with_tracking(self, form, formset=formset, update=True)
+        location_formset = OrganModelLocationFormsetFactory(
+            self.request.POST,
+            instance=form.instance
+        )
+        if form.is_valid() and protocol_formset.is_valid() and location_formset.is_valid():
+            save_forms_with_tracking(self, form, formset=[protocol_formset, location_formset], update=True)
             return redirect(self.object.get_post_submission_url())
         else:
-            return self.render_to_response(self.get_context_data(form=form, formset=formset))
+            return self.render_to_response(self.get_context_data(
+                form=form,
+                protocol_formset=protocol_formset,
+                location_formset=location_formset
+            ))

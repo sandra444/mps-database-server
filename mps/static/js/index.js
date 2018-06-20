@@ -1,6 +1,5 @@
 $(function() {
     var initial = $('#id_app').val();
-    var middleware_token = getCookie('csrftoken');
 
     if (initial == 'Bioactivities') {
         $("#bioactivities_search").show();
@@ -28,7 +27,7 @@ $(function() {
                 data: {
                     call: 'fetch_global_search_suggestions',
                     text: request.term,
-                    csrfmiddlewaretoken: middleware_token
+                    csrfmiddlewaretoken: window.COOKIES.csrfmiddlewaretoken
                 },
                 success: function (json) {
                     response(json);

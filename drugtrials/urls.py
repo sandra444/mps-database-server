@@ -1,8 +1,9 @@
-from django.conf.urls import patterns, url
+from django.conf.urls import url
+# Wildcards are vile
 from .views import *
+import drugtrials.ajax
 
-urlpatterns = patterns(
-    '',
+urlpatterns = [
     # Proposed URLS:
     # User can view drugtrials
     url(r'^drugtrials/$', DrugTrialList.as_view(), name='drugtrial_list'),
@@ -10,5 +11,8 @@ urlpatterns = patterns(
     # User can view adverse events
     url(r'^adverse_events/$', AdverseEventsList.as_view(), name='adverse_events_list'),
     url(r'^adverse_events/(?P<pk>[0-9]+)/$', AdverseEventDetail.as_view(), name='adverse_events_details'),
-    url(r'^compare_adverse_events/$', compare_adverse_events, name='compare_adverse_events'),
-)
+    url(r'^compare_adverse_events/$', CompareAdverseEvents.as_view(), name='compare_adverse_events'),
+
+    # Revise URL
+    url(r'^drugtrials_ajax/$', drugtrials.ajax.ajax)
+]

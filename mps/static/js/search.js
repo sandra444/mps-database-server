@@ -2,7 +2,6 @@
 $(document).ready(function () {
     var filter = [];
     var at_least_one_checked = $("#filter [type=checkbox]").is(':checked');
-    var middleware_token = getCookie('csrftoken');
 
     function filter_results() {
         // Default to showing everything (ie, only run if filters selected)
@@ -79,7 +78,7 @@ $(document).ready(function () {
                 data: {
                     call: 'fetch_global_search_suggestions',
                     text: request.term,
-                    csrfmiddlewaretoken: middleware_token
+                    csrfmiddlewaretoken: window.COOKIES.csrfmiddlewaretoken
                 },
                 success: function (json) {
                     response(json);

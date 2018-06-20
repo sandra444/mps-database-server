@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load staticfiles %}
+{% load static %}
 
 {% block load %}
     <script src="{% static "microdevices/microdevice_list.js" %}"></script>
@@ -29,22 +29,22 @@
                     <th>Device Name</th>
                     <th>Version/Catalog#</th>
                     <th>Manufacturer</th>
-                    <th>Center</th>
-                    <th>Organ</th>
+{#                    <th>Center</th>#}
+{#                    <th>Organ</th>#}
                     <th>Description</th>
                 </tr>
             </thead>
 
             <tbody>
             {% for device in object_list %}
-                <tr class="device" id={{ device.id }} name={{ device.device_name }}>
+                <tr class="device" id={{ device.id }} name={{ device.name }}>
                     <td><a class="btn btn-primary" href="{{ device.id }}">View</a></td>
                     <td><a class="btn btn-primary" href="{{ device.id }}/update/">Edit</a></td>
-                    <td>{{ device.device_name }}</td>
+                    <td>{{ device.name }}</td>
                     <td>{{ device.barcode }}</td>
                     <td>{{ device.manufacturer|default_if_none:"" }}</td>
-                    <td>{{ device.center|default_if_none:"" }}</td>
-                    <td>{{ device.organ|default_if_none:"" }}</td>
+{#                    <td>{{ device.center|default_if_none:"" }}</td>#}
+{#                    <td>{{ device.organ|default_if_none:"" }}</td>#}
                     <td>{{ device.description|default_if_none:"" }}</td>
                 </tr>
             {% endfor %}

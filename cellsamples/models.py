@@ -4,7 +4,8 @@
 from django.db import models
 
 # Use our own model base classes instead of models.Model
-from mps.base.models import LockableModel, RestrictedModel, FlaggableModel
+from mps.base.models import LockableModel, FlaggableModel
+from django.contrib.auth.models import Group
 
 
 class Organ(LockableModel):
@@ -26,6 +27,7 @@ class CellType(LockableModel):
         ('Rat', 'Rat'),
         ('Mouse', 'Mouse'),
     )
+    # Unsemantic name (should just be name)
     cell_type = models.CharField(max_length=255,
                                  help_text='Example: hepatocyte, muscle, kidney, etc')
     species = models.CharField(max_length=10,
@@ -60,6 +62,7 @@ class CellSubtype(LockableModel):
     class Meta(object):
         ordering = ('cell_subtype', )
 
+    # Unsemantic name (should just be name)
     cell_subtype = models.CharField(max_length=255, unique=True,
                                     help_text="Example: motor (type of neuron), "
                                               "skeletal (type of muscle), etc.")
@@ -106,6 +109,9 @@ class CellSample(FlaggableModel):
     cell_type = models.ForeignKey('CellType')
     cell_subtype = models.ForeignKey('CellSubtype')
 
+    # Group may need to be explicitly defined here as opposed to using a mixin
+    # group = models.ForeignKey('auth.Group', help_text='Bind to a group')
+
     # DEPRECATED
     # cell_source CONSIDERED UNINTUITIVE
     # CELLSOURCETYPE = (
@@ -128,6 +134,7 @@ class CellSample(FlaggableModel):
     product_id = models.CharField(max_length=255, blank=True)
 
     # PATIENT (move to subtype?)
+    # Technically, these are sexes, not genders
     GENDER_CHOICES = (
         ('N', 'Not-specified'),
         ('F', 'Female'),
@@ -166,20 +173,23 @@ class CellSample(FlaggableModel):
     cell_image = models.ImageField(upload_to='cellsamples',
                                    null=True, blank=True)
 
+    # THIS IS NOW EXPLICITLY LISTED
+    group = models.ForeignKey(Group, help_text='Bind to a group')
+
     class Meta(object):
         verbose_name = 'Cell Sample'
         ordering = ('-receipt_date', )
 
     def __unicode__(self):
         if self.barcode:
-            return u'{} {} ({}-{})'.format(
+            return u'{0} {1} ({2}-{3})'.format(
                 self.cell_subtype,
                 self.cell_type,
                 self.supplier,
                 self.barcode
             )
         else:
-            return u'{} {} ({})'.format(
+            return u'{0} {1} ({2})'.format(
                 self.cell_subtype,
                 self.cell_type,
                 self.supplier

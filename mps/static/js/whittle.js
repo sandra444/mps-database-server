@@ -1,5 +1,5 @@
 //Get token
-var middleware_token = getCookie('csrftoken');
+// var middleware_token = getCookie('csrftoken');
 
 function whittle(master,master_id,subject,next_model,next_filter) {
     // all_options is actually a deferred promise so that the variable is not assigned before AJAX over
@@ -19,7 +19,7 @@ function whittle(master,master_id,subject,next_model,next_filter) {
                 next_model: next_model,
                 next_filter: next_filter,
 
-                csrfmiddlewaretoken: middleware_token
+                csrfmiddlewaretoken: window.COOKIES.csrfmiddlewaretoken
             },
             success: function (json) {
                 all_options.resolve(json.dropdown);

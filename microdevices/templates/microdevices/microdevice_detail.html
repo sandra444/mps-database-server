@@ -2,22 +2,23 @@
 
 {% block breadcrumbs %}
     <li><a href="/microdevices/device">Devices</a></li>
-    <li class="active">{{ object.device_name }}</li>
+    <li class="active">{{ object.name }}</li>
 {% endblock %}
 
 {% block content %}
-    <legend><h1>{{ object.device_name }}</h1></legend>
+    <legend><h1>{{ object.name }}</h1></legend>
 
     <table class="table table-striped table-bordered table-nonfluid" style="background-color: #AAB3AB;">
         <tbody>
-            <tr>
-                <td>
-                    <b>Center</b>
-                </td>
-                <td>
-                    {{ object.center|default:'Unspecified' }}
-                </td>
-            </tr>
+        {# Hidden for now #}
+{#            <tr>#}
+{#                <td>#}
+{#                    <b>Center</b>#}
+{#                </td>#}
+{#                <td>#}
+{#                    {{ object.center|default:'Unspecified' }}#}
+{#                </td>#}
+{#            </tr>#}
             <tr>
                 <td>
                     <b>Manufacturer</b>
@@ -26,14 +27,15 @@
                     {{ object.manufacturer|default:'Unspecified' }}
                 </td>
             </tr>
-            <tr>
-                <td>
-                    <b>Organ</b>
-                </td>
-                <td>
-                    {{ object.organ|default:'Unspecified' }}
-                </td>
-            </tr>
+        {# Hidden for now #}
+{#            <tr>#}
+{#                <td>#}
+{#                    <b>Organ</b>#}
+{#                </td>#}
+{#                <td>#}
+{#                    {{ object.organ|default:'Unspecified' }}#}
+{#                </td>#}
+{#            </tr>#}
             <tr>
                 <td>
                     <b>Catalog#-Version</b>
@@ -78,10 +80,10 @@
             </tr>
             <tr>
                 <td>
-                    References
+                    <b>References</b>
                 </td>
                 <td>
-                    {{ object.references|linebreaksbr }}
+                    {{ object.references|linebreaksbr|default:'-No References Listed-' }}
                 </td>
             </tr>
         </tbody>

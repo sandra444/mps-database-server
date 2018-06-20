@@ -4,7 +4,7 @@ $(document).ready(function() {
     // Get URL parameters for auto search
     function urlParam(name) {
         var results = new RegExp('[\?&]' + name + '=([^&#]*)').exec(window.location.href);
-        if (results==null){
+        if (results == null){
            return null;
         }
         else{
@@ -19,13 +19,14 @@ $(document).ready(function() {
     $('.DTTT_container').css('float', 'none');
 
     // Clarify usage of sort
-    $('.sorting').prop('title', 'Click a column to change its sorting\n Hold shift and click columns to sort multiple');
-    $('.sorting_asc').prop('title', 'Click a column to change its sorting\n Hold shift and click columns to sort multiple');
-    $('.sorting_desc').prop('title', 'Click a column to change its sorting\n Hold shift and click columns to sort multiple');
+    // REMOVED FOR NOW
+    // $('.sorting').prop('title', 'Click a column to change its sorting\n Hold shift and click columns to sort multiple');
+    // $('.sorting_asc').prop('title', 'Click a column to change its sorting\n Hold shift and click columns to sort multiple');
+    // $('.sorting_desc').prop('title', 'Click a column to change its sorting\n Hold shift and click columns to sort multiple');
 
     // TODO Not currently used, but this could be helpful
     // Perform auto search (from GET)
-    $('.dataTables_filter input').val(urlParam('search')).trigger($.Event("keyup", { keyCode: 13 }));
+    // $('.dataTables_filter input').val(urlParam('search')).trigger($.Event("keyup", { keyCode: 13 }));
 
     // Reveal the table, as loading is complete
     $('table').prop('hidden', false);

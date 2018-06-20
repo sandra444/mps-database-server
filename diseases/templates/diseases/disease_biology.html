@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+
+{# TODO REQUIRES AESTHETIC REVISION #}
+
+{% block breadcrumbs %}
+    <li><a href="/diseases/">Diseases</a></li>
+    <li><a href="/diseases/{{disease.pk}}/">{{ disease.name }}</a></li>
+    <li class="active">Biology</li>
+{% endblock %}
+
+{% block content %}
+    <div class="well">
+        <div class="row text-center">
+            <h1>
+                {{ disease.name }} Disease Biology
+            </h1>
+        </div>
+        <div class="row text-center small-padding-top">
+            {% include "diseases/disease_links.html" %}
+        </div>
+    </div>
+
+    <legend>{{disease.name}} Disease Biology</legend>
+    <div class="row">
+        {% if disease.biology_image %}
+        <div class="col-sm-10 col-md-6 text-wrapped">
+            {{ disease.biology_blurb|safe }}
+        </div>
+        <div class="col-md-6 thumbnail text-center row-center">
+            <img src="{{disease.biology_image.url}}" class="img-responsive"></img>
+        </div>
+        {% else %}
+        <div class="col-sm-10 col-md-12 text-wrapped">
+            {{ disease.biology_blurb|safe }}
+        </div>
+        {% endif %}
+    </div>
+    <br><br>
+
+    <legend>{{disease.name}} Genomic Resources</legend>
+    <div class="row">
+        <div class="col-md-8">
+            <div class="panel-group">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h4 class="panel-title">
+                            <strong>Genomic Databases</strong>
+                        </h4>
+                    </div>
+                    <div class="panel panel-default">
+                        <div class="panel-body">
+                            <div class="row">
+                                <div class="col-xs-12">
+                                    {% if disease.biology_genomic_geo_url or disease.biology_genomic_omim_url or disease.biology_genomic_exsnp_url or disease.biology_genomic_diseasesorg_url %}
+                                    <table class="table table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th>Name</th>
+                                                <th>Description</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% if disease.biology_genomic_geo_url %}
+                                            <tr>
+                                                <td><a target="_blank" href="{{disease.biology_genomic_geo_url}}">Gene Expression Omnibus</a></td>
+                                                <td>The Gene Expression Omnibus (GEO) is a public repository that archives and freely distributes comprehensive sets of microarray, next-generation sequencing, and other forms of high-throughput functional genomic data submitted by the scientific community; the disease biology portal delivers a prequeried link to the most relevant archives.</td>
+                                            </tr>
+                                            {% endif %}
+                                            {% if disease.biology_genomic_omim_url %}
+                                            <tr>
+                                                <td><a target="_blank" href="{{disease.biology_genomic_omim_url}}">OMIM Gene-Phenotype Relationship</a></td>
+                                                <td>OMIM is a comprehensive, authoritative compendium of human genes and genetic phenotypes with full-text, referenced overviews of all known Mendelian disorders; the disease biology portal delievers a curated query of the most relevant genes.</td>
+                                            </tr>
+                                            {% endif %}
+                                            {% if disease.biology_genomic_exsnp_url %}
+                                            <tr>
+                                                <td><a target="_blank" href="{{disease.biology_genomic_exsnp_url}}">ExSNP</a></td>
+                                                <td>ExSNP is a data looking to establish a gold-standard list of consensus eQTLs by integrating publicly available data for specific human populations and cell types, so as to efficiently prioritize functional SNPs.</td>
+                                            </tr>
+                                            {% endif %}
+                                            {% if disease.biology_genomic_diseasesorg_url %}
+                                            <tr>
+                                                <td><a target="_blank" href="{{disease.biology_genomic_diseasesorg_url}}">DISEASES.org</a></td>
+                                                <td>Diseases is a tool that mines disease-gene relationships from text and reports text-mined genes based on your query. The disease biology portal provides a query that displays disease relevant search results.</td>
+                                            </tr>
+                                            {% endif %}
+                                        </tbody>
+                                    </table>
+                                    {% else %}
+                                        There are currently no Genomic Resources linked to this disease.
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% if disease.biology_kegg_pathway_map %}
+            <div class="col-md-4 thumbnail text-center row-center"> <h4><strong><a target="_blank" href="{{disease.biology_kegg_url}}">KEGG: {{disease.name}} Disease Entry</a></strong></h4>
+                <a target="_blank" href="{{disease.biology_kegg_pathway_url}}"><img src="{{disease.biology_kegg_pathway_map.url}}" class="img-responsive"></a> Click to view an interactive pathway map for {{disease.name}}.
+            </div>
+        {% endif %}
+    </div>
+    <br><br>
+
+    <legend>Proteomics, Metabolomics, and Pharmacogenomic Resources</legend>
+    <div class="row padding-bottom">
+        <div class="col-xs-6 padded">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h4>
+                        <strong><a target="_blank" href="https://www.proteomicsdb.org/">ProteomicsDB by SAP</a></strong>
+                    </h4>
+                </div>
+                <div class="col-xs-12 panel-body">ProteomicsDB by SAP is a proteomic database that allows you to browse proteins and chromosomes of interest.</div>
+            </div>
+        </div>
+
+        <div class="col-xs-6 padding-bottom">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h4>
+                        <strong><a target="_blank" href="http://www.metabolomicsworkbench.org/data/DRCCStudySummary.php?Mode=ProcessExpDataTextSearch&Title={{disease.name}}">Metabolomicsworkbench</a></strong>
+                    </h4>
+                </div>
+                <div class="col-xs-12 panel-body">Metabolomicsworkbench serves as a national and international repository for metabolomics data.</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row padding-bottom">
+        <div class="col-xs-6 padding-bottom">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h4>
+                        <strong><a target="_blank" href="https://www.pharmgkb.org/search?connections&query={{disease.name}}">PharmaGKB</a></strong>
+                    </h4>
+                </div>
+                <div class="col-xs-12 panel-body">PharmaGKB is a website that investigates genetic variations and how the body responds to medication.</div>
+            </div>
+        </div>
+
+        <div class="col-xs-6">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h4>
+                        <strong><a target="_blank" href="https://www.drugbank.ca/unearth/q?utf8=%E2%9C%93&searcher=drugs&query={{disease.name}}">DrugBank</a></strong>
+                    </h4>
+                </div>
+                <div class="col-xs-12 panel-body">DrugBank is a unique bioinformatics and chemoinformatics database that combines drug data with comprehensive drug target information.</div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

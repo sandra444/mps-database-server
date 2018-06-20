@@ -1,5 +1,6 @@
 {% extends "base.html" %}
-{% load staticfiles %}
+{% load static %}
+{% load humanize %}
 
 {% block load %}
     <script src="{% static "drugtrials/get_adverse_events.js" %}"></script>
@@ -41,7 +42,6 @@
     </legend>
 
     <div class="padded-row">
-
         <div class="col-sm-3 col-md-2 thumbnail text-center">
             <img src="https://www.ebi.ac.uk/chembldb/compound/displayimage/{{ object.compound.chemblid }}">
             {% if object.compound.mps %}
@@ -89,10 +89,21 @@
                             </td>
                         </tr>
                     {% endif %}
+                    {% if object.estimated_usage %}
+                        <tr>
+                            <td>
+                                <b>Estimated Usage</b>
+                            </td>
+                            <td>
+                                {{ object.estimated_usage|intcomma }}
+                                <span title="Estimate from the CDC's NAMCS/NHAMCS datasets" class="glyphicon glyphicon-question-sign" aria-hidden="true"></span>
+                                <input hidden id="id_estimated_usage" value="{{ object.estimated_usage }}">
+                            </td>
+                        </tr>
+                    {% endif %}
                 </tbody>
             </table>
         </div>
-
     </div>
 
     <div class="clearfix"></div>
@@ -146,7 +157,14 @@
             <tr>
                 <th>Plot</th>
                 <th>Event</th>
-                <th>Frequency</th>
+                <th>
+                    Number of Reports
+                    <span title="The number of FAERS reports with this compound and adverse event" class="glyphicon glyphicon-question-sign" aria-hidden="true"></span>
+                </th>
+                <th>
+                    Normalized # of Reports
+                    <span title="Number of Reports / Estimated Usage * 10,000" class="glyphicon glyphicon-question-sign" aria-hidden="true"></span>
+                </th>
                 <th>Organ</th>
             </tr>
         </thead>
@@ -155,7 +173,8 @@
             <tr>
                 <td><button class="plot_ae" data-adverse-event="{{ adverse_event.event }}">Toggle Plot</button></td>
                 <td><a href="https://en.wikipedia.org/wiki/{{ adverse_event.event|lower }}">{{ adverse_event.event }}</a></td>
-                <td>{{ adverse_event.frequency }}</td>
+                <td>{{ adverse_event.frequency|intcomma }}</td>
+                <td>{{ adverse_event.normalized_reports|floatformat:2|intcomma }}</td>
                 <td>{{ adverse_event.event.organ|default:"" }}</td>
             </tr>
         {% endfor %}
@@ -231,7 +250,14 @@
         <thead>
             <tr>
                 <th>Event</th>
-                <th>Frequency</th>
+                <th>
+                    Number of Reports
+                    <span title="The number of FAERS reports with this compound and adverse event" class="glyphicon glyphicon-question-sign" aria-hidden="true"></span>
+                </th>
+                <th>
+                    Normalized # of Reports
+                    <span title="Number of Reports / Estimated Usage * 10,000" class="glyphicon glyphicon-question-sign" aria-hidden="true"></span>
+                </th>
             </tr>
         </thead>
         <tbody id="ae_body">

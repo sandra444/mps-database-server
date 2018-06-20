@@ -44,7 +44,7 @@ $(document).ready(function () {
                 selector: selection,
 
                 // Always pass the CSRF middleware token with every AJAX call
-                csrfmiddlewaretoken: middleware_token
+                csrfmiddlewaretoken: window.COOKIES.csrfmiddlewaretoken
             },
             success: function (json) {
 

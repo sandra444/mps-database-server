@@ -1,7 +1,9 @@
 {% extends "base.html" %}
-{% load staticfiles %}
+{% load static %}
+{% load humanize %}
 
 {% block load %}
+    <script src="{% static "js/cookies.js" %}"></script>
     <script src="{% static "js/project_filter.js" %}"></script>
     <script src="{% static "drugtrials/adverse_events_list.js" %}"></script>
 {% endblock %}
@@ -20,49 +22,29 @@
 
         {% include 'project_filters.html' %}
 
-        <table hidden id="adverse_events" class="display" cellspacing="0" width="100%">
+        <table id="adverse_events" class="display" cellspacing="0" width="100%">
             <thead>
                 <tr>
                     <th>View</th>
                     <th>Compound</th>
                     <th>Event</th>
-                    <th>Frequency</th>
+                    <th>
+                        Number of Reports
+                        <span title="The number of FAERS reports with this compound and adverse event" class="glyphicon glyphicon-question-sign" aria-hidden="true"></span>
+                    </th>
+                    <th>
+                        Normalized # of Reports
+                        <span title="Number of Reports / Estimated Usage * 10,000" class="glyphicon glyphicon-question-sign" aria-hidden="true"></span>
+                    </th>
+                    <th>
+                        Estimated Usage
+                        <span title="Estimate from the CDC's NAMCS/NHAMCS datasets" class="glyphicon glyphicon-question-sign" aria-hidden="true"></span>
+                    </th>
                     <th>Organ</th>
                     <th>Black Box Warning</th>
                     <th>Project</th>
                 </tr>
             </thead>
-
-            <tbody>
-            {% for adverse_event in object_list %}
-                <tr class="adverse_event" id={{ adverse_event.id }}>
-                    <td><a class="btn btn-primary" href="{{ adverse_event.compound.id }}">View</a></td>
-                    <td><a href="/compounds/{{ adverse_event.compound.compound.id }}">{{ adverse_event.compound.compound }}</a></td>
-                    <td><a href="https://en.wikipedia.org/wiki/{{ adverse_event.event|lower }}">{{ adverse_event.event }}</a></td>
-                    <td>{{ adverse_event.frequency }}</td>
-                    <td>{{ adverse_event.event.organ|default:"" }}</td>
-                    <td>
-                        {% if adverse_event.compound.black_box %}
-                            <span title="This compound has a Black Box Warning" class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
-                        {% endif %}
-                    </td>
-                    <td>
-                        {% if adverse_event.compound.compound.mps %}
-                            MPS
-                        {% endif %}
-                        {% if adverse_event.compound.compound.epa %}
-                            EPA
-                        {% endif %}
-                        {% if adverse_event.compound.compound.tctc %}
-                            TCTC
-                        {% endif %}
-                        {% if not adverse_event.compound.compound.epa and not adverse_event.compound.compound.mps and not adverse_event.compound.compound.tctc %}
-                            Unassigned
-                        {% endif %}
-                    </td>
-                </tr>
-            {% endfor %}
-            </tbody>
         </table>
     </div>
 

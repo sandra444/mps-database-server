@@ -1,12 +1,11 @@
 # coding=utf-8
 
 from django.http import *
-from django.shortcuts import render_to_response
-from django.template import RequestContext
 import ujson as json
 from .models import *
-from assays.utils import CHIP_DATA_PREFETCH
-from assays.models import AssayChipRawData, AssayCompoundInstance, AssayChipSetup
+# from assays.utils import CHIP_DATA_PREFETCH
+# from assays.models import AssayChipRawData, AssayCompoundInstance, AssayChipSetup
+from assays.models import AssayDataPoint, AssaySetupCompound, AssayMatrixItem
 
 from bioservices import ChEMBL as ChEMBLdb
 
@@ -17,8 +16,6 @@ import requests
 import re
 
 import numpy as np
-
-from assays.ajax import get_related_compounds_map, get_list_of_present_compounds
 
 # Calling main is and always will be indicative of an error condition.
 # ajax.py is strictly for AJAX requests
@@ -101,7 +98,7 @@ def get_chembl_compound_data(chemblid):
     """Returns a dictionary of ChEMBL data given a chemblid"""
     data = {}
 
-    url = 'https://www.ebi.ac.uk/chembl/api/data/molecule/{}.json'.format(chemblid)
+    url = u'https://www.ebi.ac.uk/chembl/api/data/molecule/{}.json'.format(chemblid)
     response = requests.get(url)
     initial_data = json.loads(response.text)
 
@@ -151,7 +148,7 @@ def get_chembl_compound_data(chemblid):
         # Get medchem alerts
         medchem_alerts = False
         # Get URL of target for scrape
-        url = "https://www.ebi.ac.uk/chembl/compound/structural_alerts/{}".format(chemblid)
+        url = u"https://www.ebi.ac.uk/chembl/compound/structural_alerts/{}".format(chemblid)
         # Make the http request
         response = requests.get(url)
         # Get the webpage as text
@@ -184,22 +181,13 @@ def fetch_chembl_compound_data(request):
                         content_type='application/json')
 
 
+# TODO TODO TODO TODO TODO
 def fetch_compound_report(request):
     """Return in JSON the data required to make a compound report
 
     Receives the following from POST:
     compounds -- the names of the desired ChEMBL ids
     """
-    # summary_types = (
-    #     'Pre-clinical Findings',
-    #     'Clinical Findings',
-    #     # Recently added
-    #     'PK/Metabolism',
-    # )
-    # property_types = (
-    #     'Dose (xCmax)',
-    #     'cLogP',
-    # )
 
     # Should "compounds" be pk's instead of names?
     compounds_request = json.loads(request.POST.get('compounds', []))
@@ -225,79 +213,34 @@ def fetch_compound_report(request):
             }}
         )
 
-    # Acquire AssayChipRawData and store based on compound-assay (and convert to minutes?)
-    # Make sure that the quality IS THE EMPTY STRING (anything in the quality field qualifies as invalid)
-    # all_data_points = AssayChipRawData.objects.filter(
-    #     quality=u'',
-    #     assay_chip_id__chip_setup__assay_run_id__use_in_calculations=True
-    # ).exclude(
-    #     # Contrived at the moment
-    #     assay_instance__unit_id=45,
-    #     value__isnull=True
-    # ).prefetch_related(
-    #     *CHIP_DATA_PREFETCH
-    # )
-    #
-    # # MUDDLED USE OF TERMS PLEASE REVISE ASAP
-    # related_compounds_map = get_related_compounds_map(data=readouts)
-    #
-    # for readout in readouts:
-    #     for compound in related_compounds_map.get(readout.assay_chip_id.chip_setup.id, []):
-    #         compound_name = compound.compound_instance.compound.name
-    #         if compound_name in compounds_request:
-    #             plot = data.get(compound_name).get('plot')
-    #             assay = readout.assay_instance.target.short_name
-    #             if assay not in plot:
-    #                 plot[assay] = {}
-    #
-    #             # TODO SCALE CONCETRATIONS
-    #             concentration = unicode(
-    #                 compound.concentration
-    #             ) + u'_' + compound.concentration_unit.unit
-    #             if not concentration in plot[assay]:
-    #                 plot[assay][concentration] = {}
-    #             entry = plot[assay][concentration]
-    #
-    #             # Convert all times to days for now
-    #             # Get the conversion unit
-    #             # scale = readout.assay_chip_id.timeunit.scale_factor
-    #             # readout_time = "{0:.2f}".format((scale/1440.0) * readout.time)
-    #             # readout_time = readout_time.rstrip('0').rstrip('.') if '.' in readout_time else readout_time
-    #             readout_time = "{0:.2f}".format(readout.time / 1440)
-    #             readout_time = readout_time.rstrip('0').rstrip('.') if '.' in readout_time else readout_time
-    #
-    #             if readout_time not in entry:
-    #                 entry.update({readout_time: [readout.value]})
-    #             else:
-    #                 entry.get(readout_time).append(readout.value)
-
-    assay_compound_instances = AssayCompoundInstance.objects.filter(
+    setup_compounds = AssaySetupCompound.objects.filter(
         compound_instance__compound__name__in=compounds_request
     ).prefetch_related(
         'compound_instance__compound',
-        'chip_setup',
         'concentration_unit'
     )
-    # setups = assay_compound_instances.values_list('chip_setup_id', flat=True)
 
-    setup_id_to_compounds_map = {}
+    matrix_item_id_to_compounds_map = {}
 
-    for assay_compound_instance in assay_compound_instances:
-        setup_id_to_compounds_map.setdefault(
-            assay_compound_instance.chip_setup_id, []
-        ).append(assay_compound_instance)
+    for setup_compound in setup_compounds:
+        matrix_item_id_to_compounds_map.setdefault(
+            setup_compound.matrix_item_id, []
+        ).append(setup_compound)
 
-    studies = AssayChipSetup.objects.filter(
-        id__in=setup_id_to_compounds_map
-    ).values_list('assay_run_id_id', flat=True)
+    studies = AssayMatrixItem.objects.filter(
+        id__in=matrix_item_id_to_compounds_map
+    ).values_list('study_id', flat=True)
 
-    control_data_points = AssayChipRawData.objects.filter(
-        quality=u'',
-        assay_chip_id__chip_setup__assay_run_id__use_in_calculations=True,
-        assay_chip_id__chip_setup__assay_run_id__in=studies,
-        assay_chip_id__chip_setup__assaycompoundinstance__isnull=True
+    control_data_points = AssayDataPoint.objects.filter(
+        replaced=False,
+        excluded=False,
+        study__use_in_calculations=True,
+        study_id__in=studies,
+        matrix_item__assaysetupcompound__isnull=True
     ).prefetch_related(
-        *CHIP_DATA_PREFETCH
+        # TODO
+        'study',
+        'study_assay__target'
     )
     initial_control_data = {}
     control_data = {}
@@ -305,9 +248,9 @@ def fetch_compound_report(request):
     for data_point in control_data_points:
         if data_point.value:
             initial_control_data.setdefault(
-                data_point.assay_chip_id.chip_setup.assay_run_id_id, {}
+                data_point.study_id, {}
             ).setdefault(
-                data_point.assay_instance.target.short_name, {}
+                data_point.study_assay.target.short_name, {}
             ).setdefault(
                 data_point.time, []
             ).append(data_point.value)
@@ -319,35 +262,37 @@ def fetch_compound_report(request):
                     (study_id, assay, time): np.average(times)
                 })
 
-    data_points = AssayChipRawData.objects.filter(
-        quality=u'',
-        assay_chip_id__chip_setup__assay_run_id__use_in_calculations=True,
-        assay_chip_id__chip_setup_id__in=setup_id_to_compounds_map
+    data_points = AssayDataPoint.objects.filter(
+        replaced=False,
+        excluded=False,
+        study__use_in_calculations=True,
+        matrix_item_id__in=matrix_item_id_to_compounds_map
     ).prefetch_related(
-        *CHIP_DATA_PREFETCH
+        'study',
+        'study_assay__target'
     )
 
     for data_point in data_points:
-        study_id = data_point.assay_chip_id.chip_setup.assay_run_id_id
-        assay = data_point.assay_instance.target.short_name
+        study_id = data_point.study_id
+        assay = data_point.study_assay.target.short_name
         time = data_point.time
         value = data_point.value
 
         if control_data.get((study_id, assay, time)) and value:
-            for assay_compound_instance in setup_id_to_compounds_map.get(
-                    data_point.assay_chip_id.chip_setup_id
+            for setup_compound in matrix_item_id_to_compounds_map.get(
+                    data_point.matrix_item_id
             ):
-                if assay_compound_instance.addition_time <= time:
+                if setup_compound.addition_time <= time:
                     data.get(
-                        assay_compound_instance.compound_instance.compound.name, {}
+                        setup_compound.compound_instance.compound.name, {}
                     ).get(
                         'plot'
                     ).setdefault(
                         assay, {}
                     ).setdefault(
                         u'{0:.2f}_{1}'.format(
-                            assay_compound_instance.concentration,
-                            assay_compound_instance.concentration_unit.unit
+                            setup_compound.concentration,
+                            setup_compound.concentration_unit.unit
                         ), {}
                     ).setdefault(
                         '{0:.2f}'.format(time / 1440), []
@@ -422,55 +367,38 @@ def get_drugbank_target_information(data, type_of_target):
     values = data.findChildren('dd')
 
     for index, dt in enumerate(headers):
+        dd = values[index]
         if dt.text == 'Organism':
-            organism = values[index].text.strip()
+            organism = dd.text.strip()
 
             if len(organism) > 150:
                 organism = organism[:145] + '...'
 
             target['organism'] = organism
 
-    # Labels are used to show pharmacological action
-    label = data.findChildren('strong', class_='label')
+        elif dt.text == 'Pharmacological action':
+            # Badges are used to show pharmacological action
+            label = dd.findChildren('div', class_='badge')
 
-    if label:
-        target['pharmacological_action'] = label[0].text.strip()
+            if label:
+                target['pharmacological_action'] = label[0].text.strip()
 
-    # Badges contain actions
-    badges = data.findChildren('strong', class_='badge')
-    actions = []
+        elif dt.text == 'Actions':
+            # Badges contain actions
+            badges = dd.findChildren('div', class_='badge')
+            actions = []
 
-    for badge in badges:
-        actions.append(badge.text.strip())
+            for badge in badges:
+                actions.append(badge.text.strip())
 
-    target['action'] = ', '.join(actions)
+            target['action'] = ', '.join(actions)
 
-    uniprot = data.findChildren('div', class_='panel-body')[0].findChildren('a')
+        elif dt.text == 'Uniprot ID':
+            uniprot = dd.findChildren('a')
 
-    if uniprot:
-        if 'www.uniprot.org' in uniprot[0]['href']:
-            target['uniprot_id'] = uniprot[0].text.strip()
-
-    # Loop through the p children to find info
-    # for p in data.findChildren('p'):
-    #     if 'Organism: ' in p.text:
-    #         organism = p.text.replace('Organism: ', '').strip()
-    #
-    #         if len(organism) > 150:
-    #             organism = organism[:145] + '...'
-    #
-    #         target['organism'] = organism
-    #
-    #     elif 'Pharmacological action:' in p.text:
-    #         target['pharmacological_action'] = p.text.replace('Pharmacological action:', '').strip()
-    #
-    #     elif 'Actions:' in p.text:
-    #         target['action'] = p.text.replace('Actions:', '').lstrip().replace('\n        ', ', ').strip()
-    #
-    # # The child table contains the corresponding UniProt ID
-    # if data.findChildren('table') and data.findChildren('table')[0].findChildren('tbody')[0].findChildren('td'):
-    #     target['uniprot_id'] = data.findChildren('table')[0].findChildren(
-    #         'tbody')[0].findChildren('tr')[0].findChildren('td')[1].text.strip()
+            if uniprot:
+                if 'www.uniprot.org' in uniprot[0]['href']:
+                    target['uniprot_id'] = uniprot[0].text.strip()
 
     return target
 
@@ -490,7 +418,7 @@ def get_drugbank_data_from_chembl_id(chembl_id):
     }
 
     # Get drugbank_id or fail
-    url = 'https://www.ebi.ac.uk/unichem/rest/src_compound_id/{}/1/2'.format(chembl_id)
+    url = u'https://www.ebi.ac.uk/unichem/rest/src_compound_id/{}/1/2'.format(chembl_id)
     # Make the http request
     response = requests.get(url)
     # Get the webpage in JSON
@@ -499,9 +427,11 @@ def get_drugbank_data_from_chembl_id(chembl_id):
     if json_data and u'error' not in json_data:
         # Get drugbank_id
         drugbank_id = json_data[0].get('src_compound_id')
+        # Assign drugbank id right away
+        data['drugbank_id'] = drugbank_id
 
         # Get URL of target for scrape
-        url = "http://www.drugbank.ca/drugs/{}".format(drugbank_id)
+        url = u"http://www.drugbank.ca/drugs/{}".format(drugbank_id)
         # Make the http request
         response = requests.get(url)
         # Get the webpage as text
@@ -510,11 +440,7 @@ def get_drugbank_data_from_chembl_id(chembl_id):
         soup = BeautifulSoup(stuff, 'html5lib')
 
         # Get all tables
-        tables = soup.findChildren('table')
-        # Get table of interest
-        main_table = tables[0]
-        # Get rows
-        rows = main_table.findChildren('tr')
+        tables = soup.findChildren('dl')
 
         # Regex for extracting percentages
         percent_extractor = re.compile(r'<?\>?\d*\.?\d+%')
@@ -529,25 +455,25 @@ def get_drugbank_data_from_chembl_id(chembl_id):
         # Regex for extracting ints or floats
         integer_and_float_extractor = re.compile(r'\d*\.?\d+')
 
-        # Loop through the rows of the table
-        # Break when all 6 table rows found
-        # MAKE SURE TO IGNORE EXMPTY FIELDS
-        for row in rows:
-            header = row.findChildren('th')
+        # Loop through every dl
+        for dl in tables:
+            dts = dl.findChildren('dt')
+            dds = dl.findChildren('dd')
 
-            if header:
-                header = header[0].text
+            for index, dt in enumerate(dts):
+                header = dt.text
+                dd = dds[index]
 
-                if header == 'Accession Number':
-                    # The ID is in bold, so find with strong
-                    # There will always be an ID
-                    data['drugbank_id'] = row.findChildren('strong')[0].text
+                # Handled earlier, skip
+                # if header == 'Accession Number':
+                #     data['drugbank_id'] = dd.text
 
-                elif header == 'Sub Class':
+                # TODO MAKE A NEW FIELD FOR CLASS AND RENAME SUB CLASS
+                if header == 'Sub Class':
                     # The sub class is in the text of a link
                     # There might not be a sub class
-                    if row.findChildren('a'):
-                        drug_class = row.findChildren('a')[0].text.rstrip()
+                    if dd.findChildren('a'):
+                        drug_class = dd.findChildren('a')[0].text.rstrip()
 
                         if len(drug_class) > 150:
                             drug_class = drug_class[:145] + '...'
@@ -557,85 +483,94 @@ def get_drugbank_data_from_chembl_id(chembl_id):
                 elif header == 'Protein binding':
                     # Trim protein binding to get just the percentage
                     # There might not be protein binding
-                    protein_binding_initial = row.findChildren('td')[0].text
-                    protein_binding_processed = re.findall(percent_extractor, protein_binding_initial)
-                    # If there are multiple, which do I take?
-                    # Taking first percent for now
-                    if protein_binding_processed:
-                        data['protein_binding'] = protein_binding_processed[0]
-
-                    # If regex has failed and 'percent' is in the strings
-                    elif 'percent' in protein_binding_initial:
-                        protein_binding_processed = re.findall(
-                            re.compile(r'<?\>?\d*\.?\d+\spercent'),
-                            protein_binding_initial
-                        )
+                    if dd.findChildren('p'):
+                        protein_binding_initial = dd.findChildren('p')[0].text
+                        protein_binding_processed = re.findall(percent_extractor, protein_binding_initial)
+                        # If there are multiple, which do I take?
+                        # Taking first percent for now
                         if protein_binding_processed:
                             data['protein_binding'] = protein_binding_processed[0]
 
-                    # If +/- is in the string, the percent is likely the deviation
-                    if u'+/-' in protein_binding_initial:
-                        protein_binding_processed = protein_binding_initial.split(u'+/-')
-                        protein_binding_processed = re.findall(
-                            integer_and_float_extractor,
-                            protein_binding_processed[0]
-                        )
-                        if protein_binding_processed:
-                            data['protein_binding'] = protein_binding_processed[0]
+                        # If regex has failed and 'percent' is in the strings
+                        elif 'percent' in protein_binding_initial:
+                            protein_binding_processed = re.findall(
+                                re.compile(r'<?\>?\d*\.?\d+\spercent'),
+                                protein_binding_initial
+                            )
+                            if protein_binding_processed:
+                                data['protein_binding'] = protein_binding_processed[0]
 
-                    if u'±' in protein_binding_initial:
-                        protein_binding_processed = protein_binding_initial.split(u'±')
-                        protein_binding_processed = re.findall(
-                            integer_and_float_extractor,
-                            protein_binding_processed[0]
-                        )
-                        if protein_binding_processed:
-                            data['protein_binding'] = protein_binding_processed[0]
+                        # If +/- is in the string, the percent is likely the deviation
+                        if u'+/-' in protein_binding_initial:
+                            protein_binding_processed = protein_binding_initial.split(u'+/-')
+                            protein_binding_processed = re.findall(
+                                integer_and_float_extractor,
+                                protein_binding_processed[0]
+                            )
+                            if protein_binding_processed:
+                                data['protein_binding'] = protein_binding_processed[0]
+
+                        if u'±' in protein_binding_initial:
+                            protein_binding_processed = protein_binding_initial.split(u'±')
+                            protein_binding_processed = re.findall(
+                                integer_and_float_extractor,
+                                protein_binding_processed[0]
+                            )
+                            if protein_binding_processed:
+                                data['protein_binding'] = protein_binding_processed[0]
 
                 # NOT GUARANTEED TO BE 100% ACCURATE
                 elif header == 'Half life':
                     # Take full string
                     # Might not exist
                     # Be sure to decode for unicode comparisons
-                    life = row.findChildren('td')[0].text
+                    if dd.findChildren('p'):
+                        life = dd.findChildren('p')[0].text
 
-                    # Remove 't1/2' to eliminate confusion for the parser
-                    life = life.replace('t1/2', '')
+                        # Remove 't1/2' to eliminate confusion for the parser
+                        life = life.replace('t1/2', '')
 
-                    unit = ''
-                    for possible_unit in units:
-                        if not unit and possible_unit in life:
-                            unit = possible_unit
-                        # If a unit has already been selected, trim life to remove distracting units
-                        elif unit and possible_unit in life:
-                            life = life[life.index(possible_unit):]
+                        unit = ''
+                        for possible_unit in units:
+                            if not unit and possible_unit in life:
+                                unit = possible_unit
+                            # If a unit has already been selected, trim life to remove distracting units
+                            elif unit and possible_unit in life:
+                                life = life[life.index(possible_unit):]
 
-                    # Special exception for min (abbreviation of minutes)
-                    if not unit and 'min' in life:
-                        unit = 'min'
+                        # Special exception for min (abbreviation of minutes)
+                        if not unit and 'min' in life:
+                            unit = 'min'
 
-                    if unit:
-                        trimmed_life = life[:life.index(unit)]
-                        found_numbers = re.findall(integer_and_float_extractor, trimmed_life)
+                        if unit:
+                            trimmed_life = life[:life.index(unit)]
+                            found_numbers = re.findall(integer_and_float_extractor, trimmed_life)
 
-                        # Make sure the numbers aren't jumbled (float came second and integer came first)
-                        found_numbers.sort(key=float)
+                            # Make sure the numbers aren't jumbled (float came second and integer came first)
+                            found_numbers.sort(key=float)
 
-                        # If it is plus or minus
-                        if u'+/-' in trimmed_life or u'±' in trimmed_life:
-                            found_numbers = [
-                                unicode(float(found_numbers[-1])-float(found_numbers[0])),
-                                unicode(float(found_numbers[-1])+float(found_numbers[0]))
-                            ]
+                            # If it is plus or minus
+                            if u'+/-' in trimmed_life or u'±' in trimmed_life:
+                                found_numbers = [
+                                    unicode(float(found_numbers[-1])-float(found_numbers[0])),
+                                    unicode(float(found_numbers[-1])+float(found_numbers[0]))
+                                ]
 
-                        # Take first two
-                        data['half_life'] = '-'.join(found_numbers[:2]) + ' ' + unit + 's'.lstrip()
+                            # Take first two
+                            data['half_life'] = '-'.join(found_numbers[:2]) + ' ' + unit + 's'.lstrip()
 
+                # THIS IS NOW A UL
                 # Be sure to trim
                 elif header == 'Clearance':
                     # Might not exist
                     # Get rid of bullets with lstrip
-                    clearance = row.findChildren('td')[0].text.lstrip()
+                    clearance = []
+                    clearance_lis = dd.findChildren('li')
+
+                    for li in clearance_lis:
+                        clearance.append(li.text.lstrip())
+
+                    clearance = '\n'.join(clearance)
 
                     if len(clearance) > 500:
                         clearance = clearance[:495] + '...'
@@ -645,20 +580,21 @@ def get_drugbank_data_from_chembl_id(chembl_id):
                 # Be sure to trim
                 elif header == 'Absorption':
                     # Might not exist
-                    absorption_initial = row.findChildren('td')[0].text
+                    if dd.findChildren('p'):
+                        absorption_initial = dd.findChildren('p')[0].text
 
-                    # Absorption is just the full text
-                    absorption = absorption_initial
-                    if len(absorption) > 1000:
-                        absorption = absorption[:995] + '...'
-                    data['absorption'] = absorption
+                        # Absorption is just the full text
+                        absorption = absorption_initial
+                        if len(absorption) > 1000:
+                            absorption = absorption[:995] + '...'
+                        data['absorption'] = absorption
 
-                    # Find percent for bioavailability
-                    bioavailability_initial = re.findall(percent_extractor, absorption_initial)
-                    # If there are multiple, which do I take?
-                    # Taking first percent for now
-                    if bioavailability_initial:
-                        data['bioavailability'] = bioavailability_initial[0]
+                        # Find percent for bioavailability
+                        bioavailability_initial = re.findall(percent_extractor, absorption_initial)
+                        # If there are multiple, which do I take?
+                        # Taking first percent for now
+                        if bioavailability_initial:
+                            data['bioavailability'] = bioavailability_initial[0]
 
         # Convert Not Available to None (for clarity)
         for key, value in data.items():
@@ -668,52 +604,31 @@ def get_drugbank_data_from_chembl_id(chembl_id):
         # Array of targets
         targets = []
 
+        classes = {
+            'targets': 'Target',
+            'enzymes': 'Enzyme',
+            'carriers': 'Carrier',
+            'transporters': 'Transporter',
+        }
+
         # Loop through all target cards
-        listed_targets = soup.findChildren('div', class_='target')
-        if listed_targets:
-            listed_targets = listed_targets[0].findChildren('div', class_='panel')
+        for class_name, full_name in classes.items():
+            listed_targets = soup.findChildren('div', class_=class_name)
 
-            for target in listed_targets:
-                to_add = get_drugbank_target_information(target, 'Target')
-                if to_add.get('name', ''):
-                    targets.append(to_add)
+            if listed_targets:
+                listed_targets = listed_targets[0].findChildren('div', class_='bond')
 
-        # Loop through all enzyme cards
-        listed_enzymes = soup.findChildren('div', class_='enzyme')
-        if listed_enzymes:
-            listed_enzymes = listed_enzymes[0].findChildren('div', class_='panel')
-
-            for enzyme in listed_enzymes:
-                to_add = get_drugbank_target_information(enzyme, 'Enzyme')
-                if to_add.get('name', ''):
-                    targets.append(to_add)
-
-        # Loop through all carrier cards
-        listed_carriers = soup.findChildren('div', class_='carrier')
-        if listed_carriers:
-            listed_carriers = listed_carriers[0].findChildren('div', class_='panel')
-
-            for carrier in listed_carriers:
-                to_add = get_drugbank_target_information(carrier, 'Carrier')
-                if to_add.get('name', ''):
-                    targets.append(to_add)
-
-        # Loop through all transporter cards
-        listed_transporters = soup.findChildren('div', class_='transporter')
-        if listed_transporters:
-            listed_transporters = listed_transporters[0].findChildren('div', class_='panel')
-
-            for transporter in listed_transporters:
-                to_add = get_drugbank_target_information(transporter, 'Transporter')
-                if to_add.get('name', ''):
-                    targets.append(to_add)
+                for target in listed_targets:
+                    to_add = get_drugbank_target_information(target, full_name)
+                    if to_add.get('name', ''):
+                        targets.append(to_add)
 
         # Remember that targets is a list!
         data.update({'targets': targets})
 
     # YES, I know that the function title is deceiving in that this is actually a PubChem ID
     # Get pubchemid from unichem too
-    url = 'https://www.ebi.ac.uk/unichem/rest/src_compound_id/{}/1/22'.format(chembl_id)
+    url = u'https://www.ebi.ac.uk/unichem/rest/src_compound_id/{}/1/22'.format(chembl_id)
     # Make the http request
     response = requests.get(url)
     # Get the webpage in JSON
@@ -749,7 +664,7 @@ def fetch_chembl_search_results(request):
     """
     query = request.POST.get('query', '')
 
-    url = 'https://www.ebi.ac.uk/chembl/api/data/chembl_id_lookup/search.json?q={}'.format(query)
+    url = u'https://www.ebi.ac.uk/chembl/api/data/chembl_id_lookup/search.json?q={}'.format(query)
     # Make the http request
     response = requests.get(url)
     # Get the webpage in JSON
@@ -763,7 +678,7 @@ def fetch_chembl_search_results(request):
             additional_data = {}
             chembl_id = lookup.get('chembl_id', '')
 
-            url = 'https://www.ebi.ac.uk/chembl/api/data/molecule/{}.json'.format(chembl_id)
+            url = u'https://www.ebi.ac.uk/chembl/api/data/molecule/{}.json'.format(chembl_id)
             # Make the http request
             response = requests.get(url)
             # Get the webpage in JSON
