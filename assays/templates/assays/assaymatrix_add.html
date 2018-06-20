@@ -921,6 +921,7 @@
     </div>
 
     {# CHARTING STUFF #}
+    {% if not adding %}
     <div class="container">
     {% include 'assays/chart_options.html' with chart_prefix="charts" chart_title="Current Data" %}
 
@@ -944,4 +945,5 @@
         </table>
     </div>
     </div>
+    {% endif %}
 {% endblock %}

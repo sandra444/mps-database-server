@@ -1087,7 +1087,6 @@ def get_cell_samples_for_selection(user, setups=None):
     return combined_query
 
 
-# TODO NOT THE RIGHT PERMISSION MIXIN
 class AssayMatrixAdd(StudyGroupMixin, CreateView):
     """Add a matrix"""
     model = AssayMatrix
@@ -1147,6 +1146,8 @@ class AssayMatrixAdd(StudyGroupMixin, CreateView):
                 study=study,
                 user=self.request.user
             )
+
+        context['adding'] = True
 
         return context
 
