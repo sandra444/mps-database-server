@@ -30,8 +30,8 @@
             <h1 class="text-center">
                 {{ object }}
                 <div>
-                    {% if user|is_group_editor:object.group.name %}
-                        <a href="update" class="btn btn-primary" role="button">Edit Study Details and Description</a>
+                    {% if user_is_group_editor and not object.signed_off_by %}
+                        <a href="update" class="btn btn-primary" role="button">Edit This Study</a>
                     {% endif %}
                     <a href="summary" class="btn btn-primary" role="button">Study Summary</a>
                     <a href="reproducibility" class="btn btn-primary" role="button">View Reproducibility</a>

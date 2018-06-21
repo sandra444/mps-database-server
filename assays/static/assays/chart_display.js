@@ -478,8 +478,16 @@ $(document).ready(function () {
 
             var chart = null;
 
+            var num_colors = 0;
+
+            $.each(assays[index][0].slice(1), function(index, value) {
+                if (value.indexOf('~@i1') === -1) {
+                    num_colors++;
+                }
+            });
+
             // Line chart if more than one time point and less than 101 colors
-            if (assays[index].length > 2 && assays[index][0].length < 101) {
+            if (assays[index].length > 2 && num_colors < 101) {
                 chart = new google.visualization.LineChart(document.getElementById(charts + '_' + index));
 
                 // If the scale is not already small
@@ -495,7 +503,7 @@ $(document).ready(function () {
                 }
             }
             // Nothing if more than 100 colors
-            else if (assays[index][0].length > 100) {
+            else if (num_colors > 100) {
                 document.getElementById(charts + '_' + index).innerHTML = '<div class="alert alert-danger" role="alert">' +
                     '<span class="glyphicon glyphicon-warning-sign" aria-hidden="true"></span>' +
                     '<span class="sr-only">Danger:</span>' +
@@ -563,7 +571,7 @@ $(document).ready(function () {
                         group_to_data[charts][index][i] = assays[index][0][i].replace(/\D/g, '') - 1;
                     }
                     else {
-                        var device = assays[index][0][i].split('||')[0];
+                        var device = assays[index][0][i].split(' || ')[0];
                         // console.log(device);
                         // console.log(device_to_group);
                         group_to_data[charts][index][i] = device_to_group[device];
