@@ -100,7 +100,7 @@ class CompoundAdmin(LockableAdmin):
     list_per_page = 300
     list_display = ('name', 'chembl_link', 'known_drug',
                     'molecular_formula', 'tags', 'mps', 'epa', 'tctc', 'last_update', 'locked')
-    search_fields = ['=name', 'synonyms', '=chemblid', 'tags']
+    search_fields = ['name', 'synonyms', 'chemblid', 'tags']
     readonly_fields = ('last_update', 'created_by', 'created_on',
                        'modified_by', 'modified_on', 'image_display')
     actions = ['update_fields']
