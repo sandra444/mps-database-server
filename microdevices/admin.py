@@ -21,7 +21,8 @@ class MicrophysiologyCenterAdmin(LockableAdmin):
     form = MicrophysiologyCenterForm
     save_on_top = True
     list_display = (
-        'name', 'center_id', 'description', 'contact_person', 'center_site')
+        'name', 'center_id', 'institution', 'description', 'pi', 'contact_person', 'center_site'
+    )
     list_per_page = 300
     filter_horizontal = ('groups',)
     fieldsets = (
@@ -30,9 +31,14 @@ class MicrophysiologyCenterAdmin(LockableAdmin):
                 'fields': (
                     'name',
                     'center_id',
+                    'institution',
                     'description',
                     'contact_person',
                     'contact_email',
+                    'contact_web_page',
+                    'pi',
+                    'pi_email',
+                    'pi_web_page',
                     'website',
                     'groups',
                 )
@@ -261,6 +267,9 @@ class OrganModelAdmin(LockableAdmin):
                     ),
                     (
                         'mps', 'epa', 'tctc'
+                    ),
+                    (
+                        'disease'
                     ),
                     (
                         'model_image'

@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin, GroupAdmin
 from django.contrib.auth.models import User, Group
+from .forms import MyUserChangeForm
 
 
 class MyUserAdmin(UserAdmin):
@@ -14,10 +15,9 @@ class MyUserAdmin(UserAdmin):
         'all_groups',
         'is_active',
         'is_staff',
-        'is_superuser',
-        'date_joined',
-        'last_login'
+        'is_superuser'
     )
+    form = MyUserChangeForm
 
     def get_queryset(self, request):
         qs = super(MyUserAdmin, self).get_queryset(request)

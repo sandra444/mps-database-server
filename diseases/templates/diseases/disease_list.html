@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+
+{% block load %}
+    <script src="{% static "diseases/disease_list.js" %}"></script>
+{% endblock %}
+
+{% block breadcrumbs %}
+    <li class="active">Diseases</li>
+{% endblock %}
+
+{% block content %}
+    <div class="padded-bottom">
+        <legend>
+            <h2 class="text-center">
+                Diseases
+            </h2>
+        </legend>
+
+        {# <div class="row text-center padded-bottom">#}
+            {# <a href="/diseases/add/" class="btn btn-lg btn-success" role="button">Add Disease</a>#}
+        {# </div>#}
+
+        <table id="models" class="display" cellspacing="0" width="100%">
+            <thead>
+                <tr>
+                    <th>View</th>
+                    <th>Disease</th>
+                    {# <th>Biology</th>#}
+                    <th>Clinical Findings</th>
+                    <th>MPS Models</th>
+                    <th>Studies</th>
+                    <th>Data Points</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+
+            <tbody>
+            {% for disease in object_list %}
+                {# {% for key, value in stat %}#}
+                 <tr class="disease" id={{ disease.id }} name={{ disease.name }}>
+                    <td><a class="btn btn-primary" href="{{ disease.id }}">View</a></td>
+                    <td>{{ disease.name }}</td>
+                    {# <td></td>#}
+                    <td>{{ disease.trials.count|default:0 }}</td>
+                    <td>{{ disease.models.count|default:0 }}</td>
+                    <td>{{ disease.studies.count|default:0 }}</td>
+                    <td>{{ disease.datapoints|default:0 }}</td>
+                    <td>{{ disease.description }}</td>
+                </tr>
+                {# {% endfor %}#}
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <script src="{% static "js/display_datatable.js" %}"></script>
+{% endblock %}

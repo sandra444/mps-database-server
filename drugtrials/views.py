@@ -17,8 +17,11 @@ class DrugTrialList(ListView):
             'drug_trial__compound',
             'drug_trial__species',
             'finding_name__organ',
-            'finding_name__finding_type'
+            'finding_name__finding_type',
+            'findingtreatment_set__compound',
+            'findingtreatment_set__concentration_unit',
         ).all()
+
         return queryset
 
 
