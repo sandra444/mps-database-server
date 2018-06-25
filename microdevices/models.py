@@ -17,11 +17,22 @@ class MicrophysiologyCenter(LockableModel):
 
     # TODO TODO THIS SHOULD BE JUST NAME
     # center_name = models.CharField(max_length=100, unique=True)
-    name = models.CharField(max_length=100, unique=True)
-    center_id = models.CharField(max_length=20, unique=True)
+    name = models.CharField(max_length=400, unique=True)
+
+    center_id = models.CharField(max_length=40, unique=True)
+
+    institution = models.CharField(max_length=400)
+
     description = models.CharField(max_length=4000, blank=True, default='')
+
     contact_person = models.CharField(max_length=250, blank=True, default='')
     contact_email = models.EmailField(blank=True, default='')
+    contact_web_page = models.URLField(blank=True, null=True)
+
+    pi = models.CharField(max_length=250, blank=True, default='', verbose_name='PI')
+    pi_email = models.EmailField(blank=True, default='', verbose_name='PI Email')
+    pi_web_page = models.URLField(blank=True, null=True)
+
     website = models.URLField(blank=True, null=True)
 
     groups = models.ManyToManyField(
@@ -149,6 +160,7 @@ class OrganModel(LockableModel):
     # model_name = models.CharField(max_length=200, unique=True)
     name = models.CharField(max_length=200, unique=True)
     organ = models.ForeignKey('cellsamples.Organ')
+    disease = models.ForeignKey('diseases.Disease', null=True, blank=True)
     # Centers are now required
     center = models.ForeignKey(MicrophysiologyCenter)
     device = models.ForeignKey(Microdevice)

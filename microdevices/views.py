@@ -1,4 +1,4 @@
-from django.views.generic import DetailView, CreateView, UpdateView, ListView
+from django.views.generic import DetailView, CreateView, UpdateView, ListView, TemplateView
 from django.shortcuts import redirect
 from django import forms
 
