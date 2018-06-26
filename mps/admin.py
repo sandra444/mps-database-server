@@ -15,7 +15,9 @@ class MyUserAdmin(UserAdmin):
         'all_groups',
         'is_active',
         'is_staff',
-        'is_superuser'
+        'is_superuser',
+        'date_joined',
+        'last_login'
     )
     form = MyUserChangeForm
 
