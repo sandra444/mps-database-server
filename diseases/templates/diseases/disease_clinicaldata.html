@@ -1,25 +1,48 @@
 {% extends "base.html" %}
-{% load static %}
+{% load staticfiles %}
 
 {% block load %}
-    <script src="{% static "js/project_filter.js" %}"></script>
-    <script src="{% static "drugtrials/drugtrial_list.js" %}"></script>
+    <script src="{% static "js/display_datatable.js" %}"></script>
+    <script src="{% static "diseases/disease_clinicaldata.js" %}"></script>
 {% endblock %}
 
 {% block breadcrumbs %}
-    <li class="active">Drug Trials</li>
+    <li><a href="/diseases/">Diseases</a></li>
+    <li><a href="/diseases/{{disease.pk}}/">{{ disease.name }}</a></li>
+    <li class="active">Clinical Data</li>
 {% endblock %}
 
 {% block content %}
-    <div class="padded-bottom">
-        <legend>
-            <h2 class="text-center">
-                Drug Trials
-            </h2>
-        </legend>
+    <div class="well">
+        <div class="row text-center">
+            <h1>
+                {{ disease.name }} Clinical Data
+            </h1>
+        </div>
+        <div class="row text-center small-padding-top">
+            {% include "diseases/disease_links.html" %}
+        </div>
+    </div>
 
-        {% include 'project_filters.html' %}
+    <legend>{{ disease.name }} Clinical Data</legend>
+    <div class="row">
+        {% if disease.clinicaldata_image %}
+        <div class="col-sm-10 col-md-6 text-wrapped">
+            {{ disease.clinicaldata_blurb|safe }}
+        </div>
+        <div class="col-md-6 thumbnail text-center row-center">
+            <img src="{{disease.clinicaldata_image.url}}" class="img-responsive"></img>
+        </div>
+        {% else %}
+        <div class="col-sm-10 col-md-12 text-wrapped">
+            {{ disease.clinicaldata_blurb|safe }}
+        </div>
+        {% endif %}
+    </div>
+    <br><br>
 
+    {% if trial_findings %}
+    <div class="col-md-12">
         <table hidden id="drugtrials" class="display" cellspacing="0" width="100%">
             <thead>
                 <tr>
@@ -39,9 +62,9 @@
             </thead>
 
             <tbody>
-            {% for finding in object_list %}
+            {% for finding in trial_findings %}
                 <tr class="finding" id={{ finding.id }}>
-                    <td><a class="btn btn-primary" href="{{ finding.drug_trial.id }}">View</a></td>
+                    <td><a target="_blank" class="btn btn-primary" href="/drugtrials/{{ finding.drug_trial.id }}">View</a></td>
                     <td>{{ finding.drug_trial.id }}</td>
                     <td>
                         {# DEPRECATED #}
@@ -49,7 +72,7 @@
 {#                            {{ finding.drug_trial.compound }}#}
 {#                        </a>#}
                         {% for treatment in finding.findingtreatment_set.all %}
-                            <a href="/compounds/{{ treatment.compound.id }}">
+                            <a target="_blank" href="/compounds/{{ treatment.compound.id }}">
                                 {{ treatment.compound }}
                             </a>
                             {% if treatment.concentration %}
@@ -59,7 +82,7 @@
                                 {% endif %}
                             {% endif %}
                             {% if not forloop.last %}
-                                <br>
+                            |
                             {% endif %}
                         {% endfor %}
                     </td>
@@ -91,6 +114,9 @@
             </tbody>
         </table>
     </div>
-
-    <script src="{% static "js/display_datatable.js" %}"></script>
+    {% else %}
+    <br><br>
+    <h3>There are currenty no findings associated with {{disease.name}} drug trials in the database.</h3>
+    <br><br>
+    {% endif %}
 {% endblock %}

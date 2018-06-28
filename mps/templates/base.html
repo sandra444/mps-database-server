@@ -117,6 +117,10 @@
         else if (url.indexOf('/model/') > -1) {
           anchor = '#organmodels'
         }
+        // TODO
+        // else if (url.indexOf('/diseasemodel_list/') > -1) {
+        //   anchor = '#diseasemodels'
+        // }
         else if (url.indexOf('/microdevices/') > -1) {
           anchor = '#microdevices'
         }
@@ -153,7 +157,7 @@
 
         $('#view_help').attr('onclick',"window.open('/help/" + anchor + "','win','toolbars=0,width=1000,height=760,left=200,top=200,scrollbars=1,resizable=1')");
 
-{#        // Bind a listener to the navbar that causes a collapse if it is oversized   #}
+{#       Bind a listener to the navbar that causes a collapse if it is oversized   #}
         var navbar = $('#autocollapse');
 
         function autocollapse() {
@@ -240,14 +244,15 @@
 {#          </a></li>#}
         </ul>
         </li>
-        <li title="View/add organ models and microdevices" class="dropdown">
+        <li title="View/add MPS models and microdevices" class="dropdown">
         <a class="dropdown-toggle" data-toggle="dropdown">Models<span class="caret"></span></a>
         <ul class="dropdown-menu" role="menu">
-          <li title="View organ models"><a href="/microdevices/model">View Organ Models</a></li>
+          <li title="View MPS models"><a href="/microdevices/model">View MPS Models</a></li>
           <li title="View microdevices"><a href="/microdevices/device">View Microdevices</a></li>
+          <li title="View disease models"><a href="/diseases/">View Diseases</a></li>
           <li class="divider"></li>
           <li class="dropdown-header">Requires Permission</li>
-          <li><a href="/microdevices/model/add/">Add Organ Model</a></li>
+          <li><a href="/microdevices/model/add/">Add MPS Model</a></li>
           <li><a href="/microdevices/device/add/">Add Microdevice</a></li>
         </ul>
         </li>

@@ -17,8 +17,11 @@ class DrugTrialList(ListView):
             'drug_trial__compound',
             'drug_trial__species',
             'finding_name__organ',
-            'finding_name__finding_type'
+            'finding_name__finding_type',
+            'findingtreatment_set__compound',
+            'findingtreatment_set__concentration_unit',
         ).all()
+
         return queryset
 
 
@@ -41,9 +44,31 @@ class DrugTrialDetail(DetailView):
             'drug_trial__compound',
             'drug_trial__species',
             'finding_name__organ',
-            'finding_name__finding_type'
+            'finding_name__finding_type',
+            'findingtreatment_set__compound',
+            'findingtreatment_set__concentration_unit',
         )
 
+        # Get the unique compounds in the results
+        treatments_dic = {}
+        treatments = []
+        for finding in results:
+            for treatment in finding.findingtreatment_set.all():
+                treatment_tuple = (
+                    treatment.compound_id,
+                    treatment.concentration_unit_id,
+                    treatment.concentration
+                )
+                if not treatments_dic.get(treatment_tuple, ''):
+                    treatments_dic.update({
+                        treatment_tuple: True
+                    })
+                    treatments.append(treatment)
+
+        self.object.unique_treatments = treatments
+
+        # Can no longer *really* order by compound (there may be more than one!)
+        # This may lead to a bit of confusion, but then again that would be true if the user changed the sorting...
         trials = list(DrugTrial.objects.all().order_by('compound', 'id').values_list('id', flat=True))
         current = trials.index(self.object.id)
 
