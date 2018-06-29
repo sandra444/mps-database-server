@@ -10,7 +10,7 @@
 
 {% block breadcrumbs %}
     <li><a href="/diseases/">Diseases</a></li>
-    <li><a href="/diseases/{{disease.pk}}/">{{ disease.name }}</a></li>
+    <li><a href="/diseases/{{object.pk}}/">{{ object }}</a></li>
     <li class="active">Models</li>
 {% endblock %}
 
@@ -18,42 +18,42 @@
     <div class="well">
         <div class="row text-center">
             <h1>
-                {{ disease.name }} Disease Models &amp; Studies
+                {{ object }} Disease Models &amp; Studies
             </h1>
         </div>
         <div class="row text-center small-padding-top">
-            {% include "diseases/disease_links.html" %}
+            {% include "diseases/disease_links.html" with overview="default" biology="default" clinical="default" model="primary" %}
         </div>
     </div>
 
-    <!-- <legend>{{ disease.name }} Disease Models</legend>
+    <!-- {% if object.models_image or object.models_blurb %}<legend>{{ object }} Disease Models</legend>
     <div class="row">
-        {% if disease.models_image %}
+        {% if object.models_image %}
         <div class="col-sm-10 col-md-6 text-wrapped">
-            {{ disease.models_blurb|safe }}
+            {{ object.models_blurb|safe }}
         </div>
         <div class="col-md-6 thumbnail text-center row-center">
-            <img src="{{disease.models_image.url}}" class="img-responsive"></img>
+            <img src="{{object.models_image.url}}" class="img-responsive" alt="{{ object }} Models Image"></img>
         </div>
         {% else %}
         <div class="col-sm-10 col-md-12 text-wrapped">
-            {{ disease.models_blurb|safe }}
+            {{ object.models_blurb|safe }}
         </div>
         {% endif %}
     </div>
-    <br><br>-->
+    <br><br>{% endif %}-->
 
     {% if disease_models %}
     <div class="padded-bottom">
         <legend>
             <h2 class="text-center">
-                {{disease.name}} Disease Models
+                {{ object }} Disease Models
             </h2>
         </legend>
 
         {% include 'project_filters.html' %}
 
-        <table hidden id="models" class="display" cellspacing="0" width="100%">
+        <table hidden id="models" class="display" width="100%">
             <thead>
                 <tr>
                     <th>View</th>
@@ -69,10 +69,10 @@
 
             <tbody>
             {% for disease_model in disease_models %}
-                <tr class="model" id={{ disease_model.id }} name={{ disease_model.name }}>
+                <tr>
                     <td><a target="_blank" class="btn btn-primary" href="/microdevices/model/{{ disease_model.id }}">View</a></td>
                     <td><a target="_blank" class="btn btn-primary" href="/microdevices/model/{{ disease_model.id }}/update/">Edit</a></td>
-                    <td>{{ disease_model.name }}</td>
+                    <td>{{ disease_model }}</td>
                     <td>{{ disease_model.organ|default_if_none:"" }}</td>
                     <td><a target="_blank" href="/microdevices/device/{{ disease_model.device.id }}">{{ disease_model.device|default_if_none:"" }}</a></td>
                     <td>{{ disease_model.center|default_if_none:"" }}</td>
@@ -97,12 +97,10 @@
         </table>
     </div>
 
-    {{object_list}}
-
     <div class="padded-bottom">
         <legend>
             <h2 class="text-center">
-                Studies Using {{disease.name}} Disease Models
+                Studies Using {{ object }} Disease Models
             </h2>
         </legend>
 
@@ -125,9 +123,9 @@
             <tbody>
             {% for study in studies %}
                 {% if not reproducibility or study.data_points %}
-                <tr class="study" id={{ study.id }} name={{ study.id }}>
+                <tr>
                     <td><a target="_blank" class="btn btn-primary" href="/assays/assaystudy/{{study.id}}">View/Edit</a></td>
-                    <td style="word-wrap: break-word">{{ study.name }}</td>
+                    <td style="word-wrap: break-word">{{ study }}</td>
                     <td>{{ study.start_date|date:"M d, Y" }}</td>
                     <td>{{ study.get_study_types_string }}</td>
                     <td>{{ study.organ_models|default:"-No Organ Models-" }}</td>
@@ -174,7 +172,7 @@
 
     {% else %}
     <br><br>
-    <h3>There are currenty no {{disease.name}} models designated as such in the database.</h3>
+    <h3>There are currenty no {{ object }} models designated as such in the database.</h3>
     <br><br>
     {% endif %}
 {% endblock %}
