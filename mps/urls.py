@@ -144,6 +144,7 @@ urlpatterns = [
     url(r'^', include('microdevices.urls')),
     url(r'^', include('drugtrials.urls')),
     url(r'^', include('cellsamples.urls')),
+    url(r'^', include('diseases.urls')),
 
     # Default search via haystack/whoosh
     url(r'^haystack/', include('haystack.urls')),
