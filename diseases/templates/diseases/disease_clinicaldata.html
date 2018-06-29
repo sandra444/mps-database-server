@@ -8,7 +8,7 @@
 
 {% block breadcrumbs %}
     <li><a href="/diseases/">Diseases</a></li>
-    <li><a href="/diseases/{{disease.pk}}/">{{ disease.name }}</a></li>
+    <li><a href="/diseases/{{object.id}}/">{{ object }}</a></li>
     <li class="active">Clinical Data</li>
 {% endblock %}
 
@@ -16,30 +16,30 @@
     <div class="well">
         <div class="row text-center">
             <h1>
-                {{ disease.name }} Clinical Data
+                {{ object }} Clinical Data
             </h1>
         </div>
         <div class="row text-center small-padding-top">
-            {% include "diseases/disease_links.html" %}
+            {% include "diseases/disease_links.html" with overview="default" biology="default" clinical="primary" model="default" %}
         </div>
     </div>
 
-    <legend>{{ disease.name }} Clinical Data</legend>
+    {% if object.clinicaldata_image or disease.clinicaldata_blurb %}<legend>{{ object }} Clinical Data</legend>
     <div class="row">
-        {% if disease.clinicaldata_image %}
+        {% if object.clinicaldata_image %}
         <div class="col-sm-10 col-md-6 text-wrapped">
-            {{ disease.clinicaldata_blurb|safe }}
+            {{ object.clinicaldata_blurb|safe }}
         </div>
         <div class="col-md-6 thumbnail text-center row-center">
-            <img src="{{disease.clinicaldata_image.url}}" class="img-responsive"></img>
+            <img src="{{object.clinicaldata_image.url}}" class="img-responsive" alt="{{ object }} Clinical Data Image"></img>
         </div>
         {% else %}
         <div class="col-sm-10 col-md-12 text-wrapped">
-            {{ disease.clinicaldata_blurb|safe }}
+            {{ object.clinicaldata_blurb|safe }}
         </div>
         {% endif %}
     </div>
-    <br><br>
+    <br><br>{% endif %}
 
     {% if trial_findings %}
     <div class="col-md-12">
@@ -48,7 +48,7 @@
                 <tr>
                     <th>View</th>
                     <th>Drug Trial ID</th>
-                    <th>Treatment</th>
+                    <th>Compound</th>
                     <th>Species</th>
                     <th>Trial Type</th>
                     <th>Finding</th>
@@ -63,7 +63,7 @@
 
             <tbody>
             {% for finding in trial_findings %}
-                <tr class="finding" id={{ finding.id }}>
+                <tr class="finding" id="{{ finding.id }}">
                     <td><a target="_blank" class="btn btn-primary" href="/drugtrials/{{ finding.drug_trial.id }}">View</a></td>
                     <td>{{ finding.drug_trial.id }}</td>
                     <td>
@@ -116,7 +116,7 @@
     </div>
     {% else %}
     <br><br>
-    <h3>There are currenty no findings associated with {{disease.name}} drug trials in the database.</h3>
+    <h3>There are currenty no findings associated with {{ object }} drug trials in the database.</h3>
     <br><br>
     {% endif %}
 {% endblock %}
