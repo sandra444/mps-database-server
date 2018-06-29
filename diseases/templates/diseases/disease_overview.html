@@ -1,39 +1,37 @@
 {% extends "base.html" %}
 {% load staticfiles %}
 
-{# TODO REQUIRES AESTHETIC REVISION #}
-
 {% block breadcrumbs %}
     <li><a href="/diseases/">Diseases</a></li>
-    <li class="active">{{ disease.name}}</li>
+    <li class="active">{{ object }}</li>
 {% endblock %}
 
 {% block content %}
     <div class="well">
         <div class="row text-center">
             <h1>
-                {{ disease.name }} Disease Overview
+                {{ object }} Disease Overview
             </h1>
         </div>
         <div class="row text-center small-padding-top">
-            {% include "diseases/disease_links.html" %}
+            {% include "diseases/disease_links.html" with overview="primary" biology="default" clinical="default" model="default" %}
         </div>
     </div>
 
-    <legend>{{disease.name}} Disease State</legend>
+    {% if object.overview_state_image or object.overview_state_blurb %}<legend>{{ object }} Disease State</legend>
     <div class="row">
-        {% if disease.overview_state_image %}
+        {% if object.overview_state_image %}
         <div class="col-sm-10 col-md-6 text-wrapped">
-            {{ disease.overview_state_blurb|safe }}
+            {{ object.overview_state_blurb|safe }}
         </div>
         <div class="col-md-6 thumbnail text-center row-center">
-            <img src="{{disease.overview_state_image.url}}" class="img-responsive"></img>
+            <img src="{{object.overview_state_image.url}}" class="img-responsive" alt="{{ object }} Overview Image"></img>
         </div>
         {% else %}
         <div class="col-sm-10 col-md-12 text-wrapped">
-            {{ disease.overview_state_blurb|safe }}
+            {{ object.overview_state_blurb|safe }}
         </div>
         {% endif %}
     </div>
-    <br><br>
+    <br><br>{% endif %}
 {% endblock %}

@@ -65,4 +65,5 @@ $(document).ready(function() {
         ]
     });
 
+    $($.fn.dataTable.tables(true)).DataTable().fixedHeader.adjust();
 });
