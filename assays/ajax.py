@@ -19,7 +19,8 @@ from .utils import (
     # MATRIX_ITEM_PREFETCH,
     DEFAULT_EXPORT_HEADER,
     get_repro_data,
-    get_user_accessible_studies
+    get_user_accessible_studies,
+    get_inter_study_reproducibility_report
 )
 
 from StringIO import StringIO
@@ -52,6 +53,16 @@ logger = logging.getLogger(__name__)
 # TODO OPTIMIZE DATABASE HITS
 # Global variable for what to call control values (avoid magic strings)
 CONTROL_LABEL = '-Control-'
+
+# Note manipulations for sorting
+# Somewhat contrived
+# THESE SHOULD BE DEFINED, NOT LAMBDA FUNCTIONS
+convert = lambda text: int(text) if text.isdigit() else text.lower()
+alphanum_key = lambda key: [
+    convert(
+        c.replace('~@I1', '!').replace('~@I2', '"').replace('~@S', '"')
+    ) for c in re.split('([0-9]+)', key)
+]
 
 
 # TODO REFACTOR Rather than passing the same thing over and over, we can make an object with attributes!
@@ -1207,14 +1218,6 @@ def get_data_points_for_charting(
             #             current_key + '~@i2'
             #         ])
 
-            # Note manipulations for sorting
-            # Somewhat contrived
-            convert = lambda text: int(text) if text.isdigit() else text.lower()
-            alphanum_key = lambda key: [
-                convert(
-                    c.replace('~@I1', '!').replace('~@I2', '"')
-                ) for c in re.split('([0-9]+)', key)
-            ]
             x_header.sort(key=alphanum_key)
             current_table[0].extend(x_header)
 
@@ -1566,12 +1569,16 @@ def fetch_pre_submission_filters(request):
         number_of_points = AssayDataPoint.objects.filter(
             matrix_item_id__in=accessible_matrix_items,
             study_assay_id__in=accessible_study_assays,
-            replaced=False
+            replaced=False,
+            excluded=False,
+            value__isnull=False
         ).count()
     else:
         number_of_points = AssayDataPoint.objects.filter(
             study_id__in=accessible_studies,
-            replaced=False
+            replaced=False,
+            excluded=False,
+            value__isnull=False
         ).count()
 
     data = {
@@ -1589,6 +1596,7 @@ def fetch_pre_submission_filters(request):
 
 
 def fetch_data_points_from_filters(request):
+    intention = request.POST.get('intention', 'charting')
     pre_filter = {}
     if request.POST.get('filters', ''):
         current_filters = json.loads(request.POST.get('filters', '{}'))
@@ -1661,27 +1669,366 @@ def fetch_data_points_from_filters(request):
             'sample_location',
             'matrix_item__matrix',
             'subtarget'
+        ).filter(
+            replaced=False,
+            excluded=False,
+            value__isnull=False
         )
 
-        data = get_data_points_for_charting(
-            data_points,
-            request.POST.get('key', ''),
-            request.POST.get('mean_type', ''),
-            request.POST.get('interval_type', ''),
-            request.POST.get('percent_control', ''),
-            request.POST.get('include_all', ''),
-            request.POST.get('truncate_negative', ''),
-            json.loads(request.POST.get('dynamic_excluded', '{}')),
-            study=study,
-            matrix_item=matrix_item,
-            matrix_items=matrix_items,
-            group_criteria=json.loads(request.POST.get('criteria', '{}'))
-        )
+        if intention == 'charting':
+            data = get_data_points_for_charting(
+                data_points,
+                request.POST.get('key', ''),
+                request.POST.get('mean_type', ''),
+                request.POST.get('interval_type', ''),
+                request.POST.get('percent_control', ''),
+                request.POST.get('include_all', ''),
+                request.POST.get('truncate_negative', ''),
+                json.loads(request.POST.get('dynamic_excluded', '{}')),
+                study=study,
+                matrix_item=matrix_item,
+                matrix_items=matrix_items,
+                group_criteria=json.loads(request.POST.get('criteria', '{}'))
+            )
+            return HttpResponse(json.dumps(data),
+                                content_type="application/json")
+        elif intention == 'inter_repro':
+            criteria = json.loads(request.POST.get('criteria', '{}'))
+            inter_level = request.POST.get('inter_level', 1)
+            max_interpolation_size = request.POST.get('max_interpolation_size', 2)
+            initial_norm = request.POST.get('initial_norm', 0)
 
-        return HttpResponse(json.dumps(data),
-                            content_type="application/json")
+            data = get_inter_study_reproducibility(
+                data_points,
+                matrix_items,
+                inter_level,
+                max_interpolation_size,
+                initial_norm,
+                criteria
+            )
+            return HttpResponse(json.dumps(data),
+                                content_type="application/json")
+        else:
+            return HttpResponseServerError()
     else:
         return HttpResponseServerError()
+
+
+def get_inter_study_reproducibility(
+        data_points,
+        matrix_items,
+        inter_level,
+        max_interpolation_size,
+        initial_norm,
+        criteria
+    ):
+    # CONTRIVED FOR THE MOMENT
+    criteria = {
+        'setup': {},
+        'setting': DEFAULT_SETTING_CRITERIA,
+        'compound': DEFAULT_COMPOUND_CRITERIA,
+        'cell': {}
+    }
+
+    # TODO GENERIC FILTER CALL HERE TO GET STUDY AND MATRIX ITEMS
+    # studies = [5, 135]
+    # matrix_items = AssayMatrixItem.objects.filter(study_id__in=studies)
+
+    # TODO TODO TODO WE NEED TO MAKE SURE THE CRITERIA ARE SATISFACTORY
+    # criteria = json.loads(request.POST.get('criteria', '{}'))
+    # inter_level = request.POST.get('inter_level', 1)
+    # max_interpolation_size = request.POST.get('max_interpolation_size', 2)
+    # initial_norm = request.POST.get('initial_norm', 0)
+
+    # Organization is assay -> unit -> compound/tag -> field -> time -> value
+    treatment_group_representatives, setup_to_treatment_group, treatment_header_keys = get_item_groups(
+        None,
+        criteria,
+        matrix_items
+    )
+
+    inter_data = []
+
+    # data_points = AssayDataPoint.objects.filter(replaced=False, matrix_item_id__in=matrix_items).prefetch_related(
+    #     'study_assay__target',
+    #     'study_assay__method',
+    #     'study_assay__unit__base_unit',
+    #     'sample_location',
+    #     'matrix_item',
+    #     'study__group'
+    # )
+
+    data_point_treatment_groups = {}
+    treatment_group_table = {}
+
+    # CONTRIVED FOR NOW
+    data_header_keys = [
+        'Target',
+        # 'Method',
+        'Value Unit',
+        'Sample Location'
+    ]
+
+    # Temporary for now
+    # TODO TODO TODO TODO
+    data_point_attribute_getter_base = tuple_attrgetter(*(
+        'study_assay.target_id',
+        # 'study_assay.method_id',
+        'study_assay.unit.base_unit_id',
+        'sample_location_id'
+    ))
+    data_point_attribute_getter_current = tuple_attrgetter(*(
+        'study_assay.target_id',
+        # 'study_assay.method_id',
+        'study_assay.unit_id',
+        'sample_location_id'
+    ))
+
+    for point in data_points:
+        point.standard_value = point.value
+        item_id = point.matrix_item_id
+        if point.study_assay.unit.base_unit_id:
+            data_point_tuple = data_point_attribute_getter_base(point)
+            point.standard_value *= point.study_assay.unit.scale_factor
+        else:
+            data_point_tuple = data_point_attribute_getter_current(point)
+        current_group = data_point_treatment_groups.setdefault(
+            (
+                data_point_tuple,
+                # setup_to_treatment_group.get(item_id).get('id')
+                setup_to_treatment_group.get(item_id).get('index')
+            ),
+            # 'Group {}'.format(len(data_point_treatment_groups) + 1)
+            '{}'.format(len(data_point_treatment_groups) + 1)
+        )
+        point.data_group = current_group
+        if current_group not in treatment_group_table:
+            if point.study_assay.unit.base_unit_id:
+                treatment_group_table.update({
+                    current_group: [unicode(x) for x in [
+                        point.study_assay.target,
+                        point.study_assay.unit.base_unit,
+                        point.sample_location,
+                        setup_to_treatment_group.get(item_id).get('index')
+                    ]]
+                })
+            else:
+                treatment_group_table.update({
+                    current_group: [unicode(x) for x in [
+                        point.study_assay.target,
+                        point.study_assay.unit.base_unit,
+                        point.sample_location,
+                        setup_to_treatment_group.get(item_id).get('index')
+                    ]]
+                })
+
+    inter_data.append([
+        'Study ID',
+        'Chip ID',
+        'Time',
+        'Value',
+        'MPS User Group',
+        # NAME THIS SOMETHING ELSE
+        'Treatment Group'
+    ])
+
+    # GET RAW DATAPOINTS AS LEGEND -> TIME -> LIST OF VALUES
+    # AFTER THAN REPOSITION THEM FOR CHARTING AND AVERAGE ONE OF THE SETS (KEEP RAW THOUGH)
+    initial_chart_data = {}
+    final_chart_data = {}
+
+    for point in data_points:
+        inter_data.append([
+            point.study.name,
+            point.matrix_item.name,
+            point.time,
+            # NOTE USE OF STANDARD VALUE RATHER THAN VALUE
+            point.standard_value,
+            point.study.group.name,
+            point.data_group
+        ])
+
+        if inter_level:
+            legend = point.study.group.name
+        else:
+            legend = point.study.name
+
+        initial_chart_data.setdefault(
+            point.data_group, {}
+        ).setdefault(
+            'item', {}
+        ).setdefault(
+            legend, {}
+        ).setdefault(
+            # NOTE CONVERT TO DAYS
+            point.time / 1440.0, []
+        ).append(point.standard_value)
+
+        initial_chart_data.setdefault(
+            point.data_group, {}
+        ).setdefault(
+            'average', {}
+        ).setdefault(
+            legend, {}
+        ).setdefault(
+            # NOTE CONVERT TO DAYS
+            point.time / 1440.0, []
+        ).append(point.standard_value)
+
+    for set, chart_groups in initial_chart_data.items():
+        current_set = final_chart_data.setdefault(set, {})
+        for chart_group, legends in chart_groups.items():
+            current_data = {}
+            current_table = current_set.setdefault(chart_group, [['Time']])
+            x_header = {}
+            y_header = {}
+            for legend, times in legends.items():
+                x_header.update({
+                    legend: True,
+                })
+
+                if chart_group == 'average':
+                    x_header.update({
+                        legend: True,
+                        # This is to deal with intervals
+                        legend + '~@i1': True,
+                        legend + '~@i2': True,
+                    })
+
+                for time, values in times.items():
+                    if chart_group == 'item':
+                        for index, value in enumerate(values):
+                            current_data.setdefault(legend, {}).update({'{}~{}'.format(time, index): value})
+                            y_header.update({'{}~{}'.format(time, index): True})
+                            # x_header.update({
+                            #     '{}~@x{}'.format(legend, index): True
+                            # })
+                            # current_data.setdefault('{}~@x{}'.format(legend, index), {}).update({time: value})
+                            # y_header.update({time: True})
+                    else:
+                        if len(values) > 1:
+                            # TODO TODO TODO ONLY ARITHMETIC MEAN RIGHT NOW
+                            value = np.mean(values)
+                            std = np.std(values)
+                            current_data.setdefault(legend, {}).update({time: value})
+                            current_data.setdefault(legend + '~@i1', {}).update({time: value - std})
+                            current_data.setdefault(legend + '~@i2', {}).update({time: value + std})
+                        else:
+                            current_data.setdefault(legend, {}).update({time: values[0]})
+                        y_header.update({time: True})
+
+            x_header_keys = x_header.keys()
+            x_header_keys.sort(key=alphanum_key)
+            current_table[0].extend(x_header_keys)
+
+            # if chart_group == 'average':
+            #     current_table[0].extend(x_header_keys)
+            # else:
+            #     current_table[0].extend([x.split('~@x')[0] for x in x_header_keys])
+
+            x_header = {x_header_keys[index]: index + 1 for index in range(len(x_header_keys))}
+
+            y_header = y_header.keys()
+            y_header.sort(key=lambda x: float(unicode(x).split('~')[0]))
+            # y_header.sort(key=float)
+
+            for y in y_header:
+                current_table.append([float(str(y).split('~')[0])] + [None] * (len(x_header)))
+                # current_table.append([y] + [None] * (len(x_header)))
+
+            y_header = {y_header[index]: index + 1 for index in range(len(y_header))}
+
+            for x, data_point in current_data.items():
+                for y, value in data_point.items():
+                    current_table[y_header.get(y)][x_header.get(x)] = value
+
+    # Reset chart data again
+    initial_chart_data = {}
+
+    reproducibility_results_table, inter_data_table = get_inter_study_reproducibility_report(
+        len(treatment_group_table),
+        inter_data,
+        inter_level,
+        max_interpolation_size,
+        initial_norm
+    )
+
+    reproducibility_results_table = reproducibility_results_table.astype(object).replace(np.nan, '')
+    # results_columns = [i for i in reproducibility_results_table.columns]
+    # results_rows = results_columns + [[row[i] for i in range(1, len(row))] for row in reproducibility_results_table.itertuples()]
+    results_rows = [
+        [row[i] for i in range(1, len(row))] for row in reproducibility_results_table.itertuples()
+    ]
+
+    inter_data_table = inter_data_table.astype(object).replace(np.nan, '')
+    # inter_data_columns = [i for i in inter_data_table.columns]
+    inter_data_rows = [[row[i] for i in range(1, len(row))] for row in inter_data_table.itertuples()]
+
+    for row in inter_data_rows:
+        # BE CAREFUL, INDICES MAY CHANGE
+        shape = ''
+        if row[3] != 'Original':
+            shape = 'point {shape-type: star; size: 8;}'
+        initial_chart_data.setdefault(
+            row[5], {}
+        ).setdefault(
+            row[4], {}
+        ).setdefault(
+            row[1], {}
+        ).setdefault(
+            # NOTE CONVERT TO DAYS
+            row[0] / 1440.0, (row[2], shape)
+        )
+
+    for set, chart_groups in initial_chart_data.items():
+        current_set = final_chart_data.setdefault(set, {})
+        for chart_group, legends in chart_groups.items():
+            current_data = {}
+            current_table = current_set.setdefault(chart_group, [['Time']])
+            x_header = {}
+            y_header = {}
+            for legend, times in legends.items():
+                x_header.update({
+                    legend: True,
+                    # This is to deal with the style
+                    legend + '~@s': True,
+                })
+                for time, value_shape in times.items():
+                    value, shape = value_shape[0], value_shape[1]
+                    current_data.setdefault(legend, {}).update({time: value})
+                    current_data.setdefault(legend + '~@s', {}).update({time: shape})
+                    y_header.update({time: True})
+
+            x_header_keys = x_header.keys()
+            x_header_keys.sort(key=alphanum_key)
+            current_table[0].extend(x_header_keys)
+
+            x_header = {x_header_keys[index]: index + 1 for index in range(len(x_header_keys))}
+
+            y_header = y_header.keys()
+            y_header.sort(key=float)
+
+            for y in y_header:
+                current_table.append([y] + [None] * (len(x_header)))
+
+            y_header = {y_header[index]: index + 1 for index in range(len(y_header))}
+
+            for x, data_point in current_data.items():
+                for y, value in data_point.items():
+                    current_table[y_header.get(y)][x_header.get(x)] = value
+
+    data = {
+        'chart_data': final_chart_data,
+        'repro_table_data': results_rows,
+        'data_groups': treatment_group_table,
+        'header_keys': {
+            'treatment': treatment_header_keys,
+            'data': data_header_keys
+        },
+        'treatment_groups': treatment_group_representatives
+    }
+
+    return data
 
 
 def study_viewer_validation(request):
