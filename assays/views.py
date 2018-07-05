@@ -1605,10 +1605,10 @@ class InterStudyReproducibility(TemplateView):
 
         # CONTRIVED FOR THE MOMENT
         criteria = {
-            'setup': {},
+            'setup': DEFAULT_SETUP_CRITERIA,
             'setting': DEFAULT_SETTING_CRITERIA,
             'compound': DEFAULT_COMPOUND_CRITERIA,
-            'cell': {}
+            'cell': DEFAULT_CELL_CRITERIA
         }
 
         # TODO GENERIC FILTER CALL HERE TO GET STUDY AND MATRIX ITEMS

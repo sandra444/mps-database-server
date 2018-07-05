@@ -1694,9 +1694,9 @@ def fetch_data_points_from_filters(request):
                                 content_type="application/json")
         elif intention == 'inter_repro':
             criteria = json.loads(request.POST.get('criteria', '{}'))
-            inter_level = request.POST.get('inter_level', 1)
-            max_interpolation_size = request.POST.get('max_interpolation_size', 2)
-            initial_norm = request.POST.get('initial_norm', 0)
+            inter_level = int(request.POST.get('inter_level', 1))
+            max_interpolation_size = int(request.POST.get('max_interpolation_size', 2))
+            initial_norm = int(request.POST.get('initial_norm', 0))
 
             data = get_inter_study_reproducibility(
                 data_points,
@@ -1722,13 +1722,14 @@ def get_inter_study_reproducibility(
         initial_norm,
         criteria
     ):
+    print criteria
     # CONTRIVED FOR THE MOMENT
-    criteria = {
-        'setup': {},
-        'setting': DEFAULT_SETTING_CRITERIA,
-        'compound': DEFAULT_COMPOUND_CRITERIA,
-        'cell': {}
-    }
+    # criteria = {
+    #     'setup': {},
+    #     'setting': DEFAULT_SETTING_CRITERIA,
+    #     'compound': DEFAULT_COMPOUND_CRITERIA,
+    #     'cell': {}
+    # }
 
     # TODO GENERIC FILTER CALL HERE TO GET STUDY AND MATRIX ITEMS
     # studies = [5, 135]

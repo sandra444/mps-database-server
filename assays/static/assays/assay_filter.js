@@ -17,7 +17,7 @@ $(document).ready(function() {
     var submit_buttons_selector = $('.submit-button');
     var charts_button_selector = $('#charts_submit');
     var repro_button_selector = $('#repro_submit');
-    // var back_button_selector = ;
+    var back_button_selector = $('#back');
 
     var number_of_points_selector = $('#number_of_points');
     var number_of_points_container_selector = $('#number_of_points_container');
@@ -25,20 +25,12 @@ $(document).ready(function() {
 
     var charts_name = 'charts';
 
+    var current_context = '';
+
     function show_plots() {
-        // THIS IS A CRUDE WAY TO TEST THE GROUPING
-        // Reset the criteria
-        group_criteria = {};
-        grouping_checkbox_selector.each(function() {
-            if (this.checked) {
-                if (!group_criteria[$(this).attr('data-group-relation')]) {
-                    group_criteria[$(this).attr('data-group-relation')] = [];
-                }
-                group_criteria[$(this).attr('data-group-relation')].push(
-                    $(this).attr('data-group')
-                );
-            }
-        });
+        current_context = 'plots';
+
+        $('.submit-button').hide();
 
         var data = {
             // TODO TODO TODO CHANGE CALL
@@ -61,6 +53,7 @@ $(document).ready(function() {
             success: function (json) {
                 $('#results').prop('hidden', false);
                 $('#filter').prop('hidden', true);
+                $('#grouping_filtering').show();
 
                 // HIDE THE DATATABLE HEADERS HERE
                 $('.filter-table').prop('hidden', true);
@@ -228,17 +221,34 @@ $(document).ready(function() {
     // Table for the broad results
     var repro_table = null;
 
-    var repro_set_info = $('#repro_set_info');
+    var repro_info_table_display = $('#repro_info_table_display');
+    var area_to_copy_to = $("#expanded_data");
 
     function show_repro() {
+        current_context = 'repro';
+
         $('#filter').hide();
         $('#inter_repro').show();
+        $('#grouping_filtering').show();
+
+        $('.submit-button').hide();
+
+        var inter_level = $('[name="inter_level"]').val();
+        var max_interpolation_size = $('#max_interpolation_size').val();
+        var initial_norm = $('#initial_norm').prop('checked') ? 1 : 0;
+
+        console.log(inter_level, max_interpolation_size, initial_norm);
 
         // Define what the legend is
         // TODO TODO TODO CONTRIVED FOR NOW
         var legend_key = 'Centers';
-        if (false) {
+        if (!inter_level) {
             legend_key = 'Studies';
+        }
+
+        if (repro_table) {
+            repro_table.clear();
+            repro_table.destroy();
         }
 
         repro_table = $('#repro_table').DataTable({
@@ -250,6 +260,9 @@ $(document).ready(function() {
                     intention: 'inter_repro',
                     filters: JSON.stringify(filters),
                     criteria: JSON.stringify(group_criteria),
+                    inter_level: inter_level,
+                    max_interpolation_size: max_interpolation_size,
+                    initial_norm: initial_norm,
                     csrfmiddlewaretoken: window.COOKIES.csrfmiddlewaretoken
                 },
                 type: 'POST',
@@ -345,11 +358,17 @@ $(document).ready(function() {
             dom: 'B<"row">lfrtip',
             fixedHeader: {headerOffset: 50},
             deferRender: true,
+            destroy: true,
             initComplete: function () {
                 // TODO TODO TODO
                 // Draw necessary sections below
                 console.log('Hello');
                 draw_subsections();
+
+                // TODO NOT DRY
+                // Swap positions of filter and length selection; clarify filter
+                $('.dataTables_filter').css('float', 'left').prop('title', 'Separate terms with a space to search multiple fields');
+                $('.dataTables_length').css('float', 'right');
             },
             drawCallback: function () {
                 // Make sure tooltips displayed properly
@@ -370,7 +389,6 @@ $(document).ready(function() {
 
     function draw_subsections() {
         var item_to_copy = $("#clone_container").find('[data-id="repro-data"]');
-        var copy_to = $("#expanded_data");
         repro_table.rows().every(function() {
             var data = this.data();
             var group = data[0];
@@ -397,7 +415,7 @@ $(document).ready(function() {
 
                 populate_table(group, data_table);
 
-                copy_to.append(current_clone);
+                area_to_copy_to.append(current_clone);
             }
         });
     }
@@ -599,14 +617,23 @@ $(document).ready(function() {
         $('[data-toggle="tooltip"]').tooltip({container:"body"});
     });
 
-    $(document).on('mouseover', '.repro-info-box', function() {
-        var current_group = Math.floor($(this).html());
+    $(document).on('mouseover', '.repro-set-info', function() {
+        var current_position = $(this).offset();
 
+        var current_top = current_position.top + 20;
+        var current_left = current_position.left - 100;
+
+        var current_group = Math.floor($(this).html());
+        var current_section = $('.repro-' + current_group);
+        var current_table = current_section.find('[data-id="data-table"]');
+        var clone_table = current_table.parent().html();
+        repro_info_table_display.html(clone_table)
+            .show()
+            .css({top: current_top, left: current_left, position:'absolute'});
     });
 
-    $(document).on('mouseout', '.repro-info-box', function() {
-        var current_group = Math.floor($(this).html());
-
+    $(document).on('mouseout', '.repro-set-info', function() {
+        repro_info_table_display.hide();
     });
 
     function order_info(orderList){
@@ -617,6 +644,31 @@ $(document).ready(function() {
     // TODO TODO TODO END REPRO STUFF
 
     // TODO, THESE TRIGGERS SHOULD BE BASED ON THE ANCHOR, NOT BUTTON CLICKS
+    function get_grouping_filtering() {
+        // THIS IS A CRUDE WAY TO TEST THE GROUPING
+        // Reset the criteria
+        group_criteria = {};
+        grouping_checkbox_selector.each(function() {
+            if (this.checked) {
+                if (!group_criteria[$(this).attr('data-group-relation')]) {
+                    group_criteria[$(this).attr('data-group-relation')] = [];
+                }
+                group_criteria[$(this).attr('data-group-relation')].push(
+                    $(this).attr('data-group')
+                );
+            }
+        });
+        back_button_selector.removeClass('hidden');
+
+        area_to_copy_to.empty();
+        // TODO TODO TODO
+        $('#charts').empty();
+    }
+
+    submit_buttons_selector.click(function() {
+        get_grouping_filtering();
+    });
+
     charts_button_selector.click(function() {
         show_plots();
     });
@@ -625,10 +677,12 @@ $(document).ready(function() {
         show_repro();
     });
 
-    $('#back').click(function() {
+    back_button_selector.click(function() {
         $('#filter').prop('hidden', false);
         $('.filter-table').prop('hidden', false);
         $('#results').prop('hidden', true);
+        $('.submit-button').show();
+        $(this).addClass('hidden');
     });
 
     // Setup triggers
@@ -637,7 +691,13 @@ $(document).ready(function() {
     });
 
     // NAIVE FOR NOW
-    $('#' + charts_name + 'refresh_plots').click(function() {
-        show_plots();
+    $('#refresh_plots').click(function() {
+        get_grouping_filtering();
+        if (current_context === 'plots') {
+           show_plots();
+        }
+        else if (current_context === 'repro') {
+            show_repro();
+        }
     });
 });

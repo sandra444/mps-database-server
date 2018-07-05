@@ -12,16 +12,20 @@
 {% endblock %}
 
 {% block content %}
-    <div id="filter">
     <div class="row text-center padded-bottom">
-        <a href="#charts" type="button" class="btn btn-lg btn-primary text-center submit-button" id="charts_submit">
+        <a href="#charts" type="button" class="btn btn-xlarge btn-primary text-center submit-button" id="charts_submit">
             Show Plots
         </a>
-        <a href="#inter_repro" type="button" class="btn btn-lg btn-primary text-center submit-button" id="repro_submit">
+        <a href="#inter_repro" type="button" class="btn btn-xlarge btn-primary text-center submit-button" id="repro_submit">
             Show Reproducibility
+        </a>
+        <a href="#filter" id="back" class="btn btn-xlarge btn-info hidden">
+            <span class="glyphicon glyphicon-hand-left" aria-hidden="true"></span>
+            Back to Selection
         </a>
     </div>
 
+    <div id="filter">
     <div id="number_of_points_container" class="row text-center padded-bottom text-success">
         <h1 id="select_user_group_message" class="text-danger">Please Select at Least One MPS Model</h1>
         <h2>Number of Points: <span id="number_of_points"></span></h2>
@@ -91,45 +95,76 @@
 
     </div>
 
-    <div hidden id="results">
-    <div class="row text-center padded-bottom">
-    <a href="#filter"  id="back" class="btn btn-xlarge btn-info">
-        <span class="glyphicon glyphicon-hand-left" aria-hidden="true"></span>
-        Back to Selection
-    </a>
+    <div hidden id="grouping_filtering">
+        {% include 'assays/grouping_filtering.html' %}
     </div>
 
+    <div hidden id="results">
     {% include 'assays/chart_options.html' with chart_prefix="charts" chart_title="Selected Data" %}
 
     {# Note indicating no data to display initially #}
     <div id="charts" class="padded-bottom">
         No data to display
     </div>
+
+    <table id="treatment_group_table" class="table table-striped table-bordered">
+        <thead id="treatment_group_head">
+        </thead>
+        <tbody id="treatment_group_display">
+        </tbody>
+    </table>
+
+    <div id="group_display" class="container hidden-print">
+        <table class="table table-bordered">
+            <tbody id="group_display_body">
+
+            </tbody>
+        </table>
+    </div>
     </div>
 
     <div hidden id="inter_repro">
-    <div class="row text-center padded-bottom">
-    <a href="#filter"  id="back" class="btn btn-xlarge btn-info">
-        <span class="glyphicon glyphicon-hand-left" aria-hidden="true"></span>
-        Back to Selection
-    </a>
-    </div>
 
     {# TODO TODO TODO NEED GROUPING  AND FILTERING STUFF HERE TOO #}
 
     <div class="well">
         {# TODO TODO TODO #}
         OPTIONS: inter_level, max_interpolation_size, initial_norm
+        <div class="row">
+        <div class="col-md-4">
+        <label class="radio-inline">
+            <input type="radio" name="inter_level" id="" value="1" checked>
+            By Center
+        </label>
+        <label class="radio-inline">
+            <input type="radio" name="inter_level" id="" value="0">
+            By Study
+        </label>
+        </div>
+        <div class="col-md-4">
+        <label>
+            <input type="checkbox" name="initial_norm" id="initial_norm">
+            Normalize by Initial Value
+        </label>
+        </div>
+        <div class="col-md-4">
+        <label>Maximum Interpolation Size
+            <input id="max_interpolation_size" type="number" value="2">
+        </label>
+        </div>
+        </div>
     </div>
 
-    <table id='repro_table' class="display table-bordered" cellspacing="0" width="100%"></table>
+    <table id='repro_table' class="display table-bordered" cellspacing="0" width="100%">
+
+    </table>
 
     <div id="expanded_data">
 
     </div>
 
     <div id='clone_container'>
-        <div data-id='repro-data' class='container hidden'>
+        <div data-id='repro-data' class='container hidden padded-bottom'>
             <div class='row'>
                 <div class='col-xs-12'><h2 data-id='repro-title' class='text-center'></h2></div>
             </div>
@@ -175,5 +210,10 @@
             </div>
         </div>
     </div>
+
+    <div hidden id="repro_info_table_display" class="container hidden-print bg-white">
+
+    </div>
+
     </div>
 {% endblock %}
