@@ -659,6 +659,12 @@ $(document).ready(function() {
     function refresh_current() {
         window.GROUPING.get_grouping_filtering();
 
+        back_button_selector.removeClass('hidden');
+        area_to_copy_to.empty();
+        // TODO TODO TODO
+        $('#charts').empty();
+        submit_buttons_selector.hide();
+
         if (current_context === 'plots') {
            show_plots();
         }
@@ -668,13 +674,7 @@ $(document).ready(function() {
     }
 
     submit_buttons_selector.click(function() {
-        window.GROUPING.get_grouping_filtering();
-
-        back_button_selector.removeClass('hidden');
-        area_to_copy_to.empty();
-        // TODO TODO TODO
-        $('#charts').empty();
-        submit_buttons_selector.hide();
+        refresh_current();
     });
 
     charts_button_selector.click(function() {
