@@ -253,7 +253,7 @@ $(document).ready(function() {
                     call: 'fetch_data_points_from_filters',
                     intention: 'inter_repro',
                     filters: JSON.stringify(filters),
-                    criteria: JSON.stringify(group_criteria),
+                    criteria: JSON.stringify(window.GROUPING.get_grouping_filtering()),
                     inter_level: inter_level,
                     max_interpolation_size: max_interpolation_size,
                     initial_norm: initial_norm,
