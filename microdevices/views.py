@@ -206,4 +206,6 @@ class MicrophysiologyCenterDetail(DetailView):
     def get_context_data(self, **kwargs):
         context = super(MicrophysiologyCenterDetail, self).get_context_data(**kwargs)
         context['models'] = OrganModel.objects.filter(center=self.object).values_list('name', flat=True)
+        context['pi_email_parts'] = self.object.pi_email.split("@")
+        context['contact_email_parts'] = self.object.contact_email.split("@")
         return context
