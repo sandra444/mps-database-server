@@ -12,6 +12,22 @@ window.CHARTS = {};
 // google.charts.setOnLoadCallback(window.CHARTS.callback);
 
 $(document).ready(function () {
+    var colors = [
+        "rgba(0,128,0,0.4)", "rgba(26,140,0,0.4)", "rgba(51,152,0,0.4)",
+        "rgba(77,164,0,0.4)", "rgba(102,176,0,0.4)", "rgba(128,188,0,0.4)",
+        "rgba(153,200,0,0.4)", "rgba(179,212,0,0.4)", "rgba(204,224,0,0.4)",
+        "rgba(230,236,0,0.4)", "rgba(255,255,0,0.4)", "rgba(243,230,0,0.4)",
+        "rgba(231,204,0,0.4)", "rgba(219,179,0,0.4)", "rgba(207,153,0,0.4)",
+        "rgba(195,128,0,0.4)", "rgba(183,102,0,0.4)", "rgba(171,77,0,0.4)",
+        "rgba(159,51,0,0.4)", "rgba(147,26,0,0.4)", "rgba(135,0,0,0.4)"
+    ];
+
+    // Avoid magic strings for heatmap elements
+    var heatmap_filters_selector = $('#heatmap_filters').find('select');
+    var matrix_body_selector = $('#matrix_body');
+    var heatmap_wrapper_selector = $('#heatmap_wrapper');
+    // TODO TODO TODO TEMPORARILY EXPOSE
+    var heatmap_data = {};
     // Charts
     var all_charts = {};
     var all_events = {};
@@ -26,6 +42,25 @@ $(document).ready(function () {
     var group_to_data = [];
     var device_to_group = {};
     var all_treatment_groups = [];
+
+    // CONTRIVED DIALOG
+    // Interestingly, this dialog should be separate and apart from chart_options
+    // Really, I might as well make it from JS here
+    // TODO PLEASE MAKE THIS NOT CONTRIVED SOON
+    var dialog_example = $('#filter_popup');
+    if (dialog_example) {
+        dialog_example.dialog({
+           closeOnEscape: true,
+           autoOpen: false,
+           close: function() {
+               $('body').removeClass('stop-scrolling');
+           },
+           open: function() {
+               $('body').addClass('stop-scrolling');
+           }
+        });
+        dialog_example.removeProp('hidden');
+    }
 
     window.CHARTS.prepare_chart_options = function(charts) {
         var options = {};
@@ -212,6 +247,102 @@ $(document).ready(function () {
         $($.fn.dataTable.tables(true)).DataTable().fixedHeader.adjust();
     };
 
+    window.CHARTS.get_heatmap_dropdowns = function(starting_index) {
+        if (heatmap_data.matrices && _.keys(heatmap_data.matrices).length > 0) {
+            heatmap_wrapper_selector.show();
+
+            var current_index = 0;
+            var data_level = heatmap_data.values;
+            var current;
+
+            while (current_index < starting_index) {
+                current = heatmap_filters_selector.eq(current_index);
+                data_level = data_level[current.val()];
+                current_index++;
+            }
+
+            while (current_index < heatmap_filters_selector.length) {
+                current = heatmap_filters_selector.eq(current_index);
+                var former_value = current.val();
+
+                if (former_value === null || starting_index < current_index) {
+                    current.empty();
+                    $.each(_.sortBy(_.keys(data_level)), function (index, key) {
+                        var dropdown_text = key.split('\n')[0];
+                        current.append($('<option>').val(key).text(dropdown_text));
+                    });
+
+                    if (former_value && current.find('option[value="' + former_value + '"]').length > 0) {
+                        current.val(former_value);
+                    }
+                }
+
+                data_level = data_level[current.val()];
+                current_index++;
+            }
+
+            // Make the heatmap
+            // Get the values for the heatmap
+            var means = {};
+
+            $.each(data_level, function (key, values) {
+                means[key] = d3.mean(values);
+            });
+
+            var median = d3.median(means);
+            // Get the min
+            var min_value = _.min(means);
+            min_value -= min_value * 0.000001;
+            // Get the max
+            var max_value = _.max(means);
+            max_value += max_value * 0.000001;
+            // Get the colorscale
+            var color_scale = d3.scale.quantile()
+                .domain([min_value, median, max_value])
+                .range(colors);
+
+            // Actually display the heatmap
+            var current_matrix = heatmap_data.matrices[$('#id_heatmap_matrix').val()];
+
+            matrix_body_selector.empty();
+
+            // Check to see if new forms will be generated
+            for (var row_index = 0; row_index < current_matrix.length; row_index++) {
+                var row_id = 'row_' + row_index;
+                var current_row = $('<tr>')
+                    .attr('id', row_id);
+
+                for (var column_index = 0; column_index < current_matrix[row_index].length; column_index++) {
+                    var new_cell = $('<td>');
+
+                    var current_key = row_index + '_' + column_index;
+                    var value = data_level[current_key];
+                    var mean_value = means[current_key];
+
+                    if (value) {
+                        new_cell.html(value.join(', '));
+                        new_cell.css('background-color', color_scale(mean_value));
+                    }
+                    else {
+                        new_cell.css('background-color', '#606060');
+                    }
+
+                    // Add
+                    current_row.append(new_cell);
+                }
+
+                matrix_body_selector.append(current_row);
+            }
+        }
+        else {
+            heatmap_wrapper_selector.hide();
+        }
+    };
+
+    // window.CHARTS.make_heatmap = function() {
+    //
+    // };
+
     window.CHARTS.make_charts = function(json, charts, changes_to_options) {
         // Remove triggers
         if (all_events[charts]) {
@@ -227,6 +358,19 @@ $(document).ready(function () {
 
         // Show the chart options
         // NOTE: the chart options are currently shown by default, subject to change
+
+        heatmap_data = json.heatmap;
+
+        window.CHARTS.get_heatmap_dropdowns(0);
+
+        // Naive way to learn whether dose vs. time
+        var is_dose = $('#' + charts + 'dose_select').prop('checked');
+
+        var x_axis_label = 'Time (Days)';
+        if (is_dose) {
+            x_axis_label = 'Dose (μM)';
+        }
+
         // If nothing to show
         if (!json.assays) {
             $('#' + charts).html('No data to display');
@@ -264,7 +408,7 @@ $(document).ready(function () {
                     }
                 },
                 hAxis: {
-                    title: 'Time (Days)',
+                    title: x_axis_label,
                     textStyle: {
                         bold: true
                     },
@@ -331,16 +475,8 @@ $(document).ready(function () {
 
             var chart = null;
 
-            var num_colors = 0;
-
-            $.each(assays[index][0].slice(1), function(index, value) {
-                if (value.indexOf('~@i1') === -1) {
-                    num_colors++;
-                }
-            });
-
             // Line chart if more than one time point and less than 101 colors
-            if (assays[index].length > 2 && num_colors < 101) {
+            if (assays[index].length > 2 && assays[index][0].length < 101) {
                 chart = new google.visualization.LineChart(document.getElementById(charts + '_' + index));
 
                 // If the scale is not already small
@@ -356,7 +492,7 @@ $(document).ready(function () {
                 }
             }
             // Nothing if more than 100 colors
-            else if (num_colors > 100) {
+            else if (assays[index][0].length > 100) {
                 document.getElementById(charts + '_' + index).innerHTML = '<div class="alert alert-danger" role="alert">' +
                     '<span class="glyphicon glyphicon-warning-sign" aria-hidden="true"></span>' +
                     '<span class="sr-only">Danger:</span>' +
@@ -456,5 +592,16 @@ $(document).ready(function () {
             });
             all_events[charts].push(current_event);
         }
-    }
+    };
+
+    // Triggers for heatmap filters
+    heatmap_filters_selector.change(function() {
+        window.CHARTS.get_heatmap_dropdowns(Math.floor($(this).data('heatmap-index')));
+    });
+
+    // Triggers for spawning filters
+    // TODO REVISE THIS TERRIBLE SELECTOR
+    $('.glyphicon-filter').click(function() {
+        dialog_example.dialog('open');
+    });
 });
