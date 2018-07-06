@@ -4,6 +4,8 @@ $(document).ready(function() {
     // Set the callback
     google.charts.setOnLoadCallback(get_readouts);
 
+    window.GROUPING.refresh_function = get_readouts;
+
     var charts = $('#charts');
     var study_id = Math.floor(window.location.href.split('/')[5]);
 
@@ -15,6 +17,7 @@ $(document).ready(function() {
             // TODO TODO TODO CHANGE CALL
             call: 'fetch_data_points',
             study: study_id,
+            criteria: JSON.stringify(window.GROUPING.get_grouping_filtering()),
             csrfmiddlewaretoken: window.COOKIES.csrfmiddlewaretoken
         };
 

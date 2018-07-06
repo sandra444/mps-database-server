@@ -9,8 +9,8 @@ $(document).ready(function() {
         'targets': {}
     };
 
-    var group_criteria = {};
-    var grouping_checkbox_selector = $('.grouping-checkbox');
+    // var group_criteria = {};
+    // var grouping_checkbox_selector = $('.grouping-checkbox');
 
     // Odd ID
     // var submit_button_selector = $('#submit');
@@ -30,14 +30,12 @@ $(document).ready(function() {
     function show_plots() {
         current_context = 'plots';
 
-        $('.submit-button').hide();
-
         var data = {
             // TODO TODO TODO CHANGE CALL
             call: 'fetch_data_points_from_filters',
             intention: 'charting',
             filters: JSON.stringify(filters),
-            criteria: JSON.stringify(group_criteria),
+            criteria: JSON.stringify(window.GROUPING.get_grouping_filtering()),
             csrfmiddlewaretoken: window.COOKIES.csrfmiddlewaretoken
         };
 
@@ -231,13 +229,9 @@ $(document).ready(function() {
         $('#inter_repro').show();
         $('#grouping_filtering').show();
 
-        $('.submit-button').hide();
-
-        var inter_level = $('[name="inter_level"]').val();
+        var inter_level = $('#inter_level_by_center').prop('checked') ? 1 : 0;
         var max_interpolation_size = $('#max_interpolation_size').val();
         var initial_norm = $('#initial_norm').prop('checked') ? 1 : 0;
-
-        console.log(inter_level, max_interpolation_size, initial_norm);
 
         // Define what the legend is
         // TODO TODO TODO CONTRIVED FOR NOW
@@ -644,29 +638,43 @@ $(document).ready(function() {
     // TODO TODO TODO END REPRO STUFF
 
     // TODO, THESE TRIGGERS SHOULD BE BASED ON THE ANCHOR, NOT BUTTON CLICKS
-    function get_grouping_filtering() {
-        // THIS IS A CRUDE WAY TO TEST THE GROUPING
-        // Reset the criteria
-        group_criteria = {};
-        grouping_checkbox_selector.each(function() {
-            if (this.checked) {
-                if (!group_criteria[$(this).attr('data-group-relation')]) {
-                    group_criteria[$(this).attr('data-group-relation')] = [];
-                }
-                group_criteria[$(this).attr('data-group-relation')].push(
-                    $(this).attr('data-group')
-                );
-            }
-        });
-        back_button_selector.removeClass('hidden');
+    // function get_grouping_filtering() {
+    //     // THIS IS A CRUDE WAY TO TEST THE GROUPING
+    //     // Reset the criteria
+    //     group_criteria = {};
+    //     grouping_checkbox_selector.each(function() {
+    //         if (this.checked) {
+    //             if (!group_criteria[$(this).attr('data-group-relation')]) {
+    //                 group_criteria[$(this).attr('data-group-relation')] = [];
+    //             }
+    //             group_criteria[$(this).attr('data-group-relation')].push(
+    //                 $(this).attr('data-group')
+    //             );
+    //         }
+    //     });
+    // }
 
-        area_to_copy_to.empty();
-        // TODO TODO TODO
-        $('#charts').empty();
+    // Set the refresh function
+    window.GROUPING.refresh_function = refresh_current;
+    function refresh_current() {
+        window.GROUPING.get_grouping_filtering();
+
+        if (current_context === 'plots') {
+           show_plots();
+        }
+        else if (current_context === 'repro') {
+            show_repro();
+        }
     }
 
     submit_buttons_selector.click(function() {
-        get_grouping_filtering();
+        window.GROUPING.get_grouping_filtering();
+
+        back_button_selector.removeClass('hidden');
+        area_to_copy_to.empty();
+        // TODO TODO TODO
+        $('#charts').empty();
+        submit_buttons_selector.hide();
     });
 
     charts_button_selector.click(function() {
@@ -688,16 +696,5 @@ $(document).ready(function() {
     // Setup triggers
     $('#' + charts_name + 'chart_options').find('input').change(function() {
         show_plots();
-    });
-
-    // NAIVE FOR NOW
-    $('#refresh_plots').click(function() {
-        get_grouping_filtering();
-        if (current_context === 'plots') {
-           show_plots();
-        }
-        else if (current_context === 'repro') {
-            show_repro();
-        }
     });
 });

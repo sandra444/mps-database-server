@@ -854,7 +854,7 @@ def get_data_points_for_charting(
         include_all,
         truncate_negative,
         dynamic_excluded,
-        group_criteria=None,
+        criteria=None,
         post_filter=None,
         study=None,
         matrix_item=None,
@@ -899,7 +899,7 @@ def get_data_points_for_charting(
     # Organization is assay -> unit -> compound/tag -> field -> time -> value
     treatment_group_representatives, setup_to_treatment_group, header_keys = get_item_groups(
         study,
-        group_criteria,
+        criteria,
         matrix_items
     )
 
@@ -949,10 +949,10 @@ def get_data_points_for_charting(
     group_time = True
 
     # CRUDE
-    if group_criteria:
-        group_sample_location = 'sample_location' in group_criteria.get('special', [])
-        group_method = 'method' in group_criteria.get('special', [])
-        group_time = 'time' in group_criteria.get('special', [])
+    if criteria:
+        group_sample_location = 'sample_location' in criteria.get('special', [])
+        group_method = 'method' in criteria.get('special', [])
+        group_time = 'time' in criteria.get('special', [])
 
     # Append the additional_data as necessary
     # Why is this done? It is an expedient way to avoid duplicating data
@@ -1298,7 +1298,8 @@ def fetch_data_points(request):
         json.loads(request.POST.get('dynamic_excluded', '{}')),
         study=study,
         matrix_item=matrix_item,
-        matrix_items=matrix_items
+        matrix_items=matrix_items,
+        criteria=json.loads(request.POST.get('criteria', '{}'))
     )
 
     return HttpResponse(json.dumps(data),
@@ -1363,7 +1364,8 @@ def validate_data_file(request):
             truncate_negative,
             dynamic_quality,
             study=this_study,
-            new_data=True
+            new_data=True,
+            criteria=json.loads(request.POST.get('criteria', '{}'))
         )
 
         data = {
@@ -1688,7 +1690,7 @@ def fetch_data_points_from_filters(request):
                 study=study,
                 matrix_item=matrix_item,
                 matrix_items=matrix_items,
-                group_criteria=json.loads(request.POST.get('criteria', '{}'))
+                criteria=json.loads(request.POST.get('criteria', '{}'))
             )
             return HttpResponse(json.dumps(data),
                                 content_type="application/json")

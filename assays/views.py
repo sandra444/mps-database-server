@@ -1646,6 +1646,4 @@ class InterStudyReproducibility(TemplateView):
             )
         })
 
-        print context['data_stuff']
-
         return context

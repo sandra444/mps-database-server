@@ -181,6 +181,8 @@
     </table>
     {% endif %}
 
+    {% include 'assays/grouping_filtering.html' %}
+
     {% include 'assays/chart_options.html' with chart_title="Data" chart_prefix="charts"%}
 
     <div id="charts" class="padded-bottom"></div>

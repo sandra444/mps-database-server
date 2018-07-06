@@ -1020,11 +1020,14 @@ $(document).ready(function () {
         // Name for the charts for binding events etc
         var charts_name = 'charts';
 
+        window.GROUPING.refresh_function = get_readouts;
+
         function get_readouts() {
             var data = {
                 // TODO TODO TODO CHANGE CALL
                 call: 'fetch_data_points',
                 matrix: matrix_id,
+                criteria: JSON.stringify(window.GROUPING.get_grouping_filtering()),
                 csrfmiddlewaretoken: window.COOKIES.csrfmiddlewaretoken
             };
 
