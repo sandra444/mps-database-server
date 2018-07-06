@@ -56,10 +56,24 @@
                 <tbody>
                     <tr>
                         <td>
-                            <b>Compound</b>
+                            <b>Treatments</b>
                         </td>
                         <td>
-                            <a href="/compounds/{{ object.compound.id }}">{{ object.compound }}</a>
+{#                            <a href="/compounds/{{ object.compound.id }}">{{ object.compound }}</a>#}
+                            {% for treatment in object.unique_treatments %}
+                                <a href="/compounds/{{ treatment.compound.id }}">
+                                    {{ treatment.compound }}
+                                </a>
+                                {% if treatment.concentration %}
+                                    {{ treatment.concentration }}
+                                    {% if treatment.concentration_unit %}
+                                        {{ treatment.concentration_unit }}
+                                    {% endif %}
+                                {% endif %}
+                                {% if not forloop.last %}
+                                    <br>
+                                {% endif %}
+                            {% endfor %}
                         </td>
                     </tr>
                     <tr>
@@ -155,6 +169,7 @@
     <table class="table table-striped">
         <thead>
         <tr>
+            <th>Treatment</th>
             <th>Finding</th>
             <th>Descriptor</th>
             <th>+/-</th>
@@ -166,6 +181,22 @@
         <tbody>
         {% for result in results %}
             <tr>
+                <td>
+                    {% for treatment in result.findingtreatment_set.all %}
+                        <a href="/compounds/{{ treatment.compound.id }}">
+                            {{ treatment.compound }}
+                        </a>
+                        {% if treatment.concentration %}
+                            {{ treatment.concentration }}
+                            {% if treatment.concentration_unit %}
+                                {{ treatment.concentration_unit }}
+                            {% endif %}
+                        {% endif %}
+                        {% if not forloop.last %}
+                            <br>
+                        {% endif %}
+                    {% endfor %}
+                </td>
                 <td>{{ result.finding_name }}</td>
                 <td>{{ result.descriptor|default_if_none:"" }}</td>
                 <td>{{ result.get_result_display }}</td>

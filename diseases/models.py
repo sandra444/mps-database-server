@@ -5,7 +5,7 @@ import drugtrials
 from assays.utils import get_user_accessible_studies
 
 
-class Disease(models.Model):
+class Disease(LockableModel):
     name = models.CharField(max_length=200, unique=True)
     description = models.TextField(default='', blank=True)
 

@@ -39,7 +39,8 @@ from django import forms
 # TODO REVISE SPAGHETTI CODE
 from assays.ajax import get_data_as_csv
 from assays.utils import (
-    AssayFileProcessor
+    AssayFileProcessor,
+    get_user_accessible_studies
 )
 
 from django.forms.models import inlineformset_factory
@@ -273,13 +274,21 @@ class AssayStudyConfigurationUpdate(OneGroupRequiredMixin, UpdateView):
 # BEGIN NEW
 def get_queryset_with_organ_model_map(queryset):
     """Takes a queryset and returns it with a organ model map"""
+    # Not DRY
+    study_ids = list(queryset.values_list('id', flat=True))
+
     setups = AssayMatrixItem.objects.filter(
-        organ_model__isnull=False
+        organ_model__isnull=False,
+        study_id__in=study_ids
     ).prefetch_related(
-        'matrix__study',
-        'device',
+        # 'matrix__study',
+        # 'device',
         'organ_model',
-        'organ_model_protocol'
+        # 'organ_model_protocol'
+    ).only(
+        'id',
+        'study_id',
+        'organ_model'
     )
 
     organ_model_map = {}
@@ -301,9 +310,12 @@ def get_queryset_with_organ_model_map(queryset):
 
 def get_queryset_with_number_of_data_points(queryset):
     """Add number of data points to each object in an Assay Study querysey"""
+    study_ids = list(queryset.values_list('id', flat=True))
+
     data_points = AssayDataPoint.objects.filter(
-        replaced=False
-    )
+        replaced=False,
+        study_id__in=study_ids
+    ).only('id', 'study_id')
 
     data_points_map = {}
 
@@ -315,9 +327,12 @@ def get_queryset_with_number_of_data_points(queryset):
             data_point.study_id: current_value + 1
         })
 
-    images = AssayImage.objects.all().prefetch_related(
-        'matrix_item'
-    )
+    images = AssayImage.objects.filter(
+        setting__study_id__in=study_ids
+    ).prefetch_related(
+        'matrix_item',
+        'setting'
+    ).only('id', 'matrix_item', 'setting')
 
     images_map = {}
 
@@ -377,68 +392,7 @@ class AssayStudyList(LoginRequiredMixin, ListView):
     model = AssayStudy
 
     def get_queryset(self):
-        queryset = AssayStudy.objects.all().prefetch_related(
-            'created_by',
-            'group',
-            'signed_off_by'
-        )
-
-        user_group_names = [
-            group.name.replace(VIEWER_SUFFIX, '').replace(ADMIN_SUFFIX, '') for group in self.request.user.groups.all()
-        ]
-
-        data_group_filter = {}
-        access_group_filter = {}
-        unrestricted_filter = {}
-        unsigned_off_filter = {}
-        stakeholder_group_filter = {}
-        missing_stakeholder_filter = {}
-
-        stakeholder_group_whitelist = list(set(
-            AssayStudyStakeholder.objects.filter(
-                group__name__in=user_group_names
-            ).values_list('study_id', flat=True)
-        ))
-
-        missing_stakeholder_blacklist = list(set(
-            AssayStudyStakeholder.objects.filter(
-                signed_off_by_id=None,
-                sign_off_required=True
-            ).values_list('study_id', flat=True)
-        ))
-
-        data_group_filter.update({
-            'group__name__in': user_group_names
-        })
-        access_group_filter.update({
-            'access_groups__name__in': user_group_names,
-        })
-        unrestricted_filter.update({
-            'restricted': False
-        })
-        unsigned_off_filter.update({
-            'signed_off_by': None
-        })
-        stakeholder_group_filter.update({
-            'id__in': stakeholder_group_whitelist
-        })
-        missing_stakeholder_filter.update({
-            'id__in': missing_stakeholder_blacklist
-        })
-
-        # Show if:
-        # 1: Study has group matching user_group_names
-        # 2: Study has Stakeholder group matching user_group_name AND is signed off on
-        # 3: Study has access group matching user_group_names AND is signed off on AND all Stakeholders have signed off
-        # 4: Study is unrestricted AND is signed off on AND all Stakeholders have signed off
-        combined = queryset.filter(**data_group_filter) | \
-                   queryset.filter(**stakeholder_group_filter).exclude(**unsigned_off_filter) | \
-                   queryset.filter(**access_group_filter).exclude(**unsigned_off_filter).exclude(
-                       **missing_stakeholder_filter) | \
-                   queryset.filter(**unrestricted_filter).exclude(**unsigned_off_filter).exclude(
-                       **missing_stakeholder_filter)
-
-        combined = combined.distinct()
+        combined = get_user_accessible_studies(self.request.user)
 
         get_queryset_with_organ_model_map(combined)
         get_queryset_with_number_of_data_points(combined)
@@ -1641,3 +1595,7 @@ class AssayStudyImages(StudyViewerMixin, DetailView):
         # get_user_status_context(self, context)
 
         return context
+
+
+class TestFilterView(TemplateView):
+    template_name = 'assays/test_filter.html'
