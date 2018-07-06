@@ -5,6 +5,8 @@ $(document).ready(function() {
     // Set the callback
     google.charts.setOnLoadCallback(get_readout);
 
+    window.GROUPING.refresh_function = get_readout;
+
     var device = $('#id_device');
     var organ_model = $('#id_organ_model');
     var protocol = $('#id_organ_model_protocol');
@@ -461,6 +463,7 @@ $(document).ready(function() {
             study: study_id,
             matrix_item: matrix_item_id,
             csrfmiddlewaretoken: window.COOKIES.csrfmiddlewaretoken,
+            criteria: JSON.stringify(window.GROUPING.get_grouping_filtering()),
             dynamic_excluded: JSON.stringify(dynamic_excluded)
         };
 

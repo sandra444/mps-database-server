@@ -12,22 +12,24 @@ window.CHARTS = {};
 // google.charts.setOnLoadCallback(window.CHARTS.callback);
 
 $(document).ready(function () {
-    var colors = [
-        "rgba(0,128,0,0.4)", "rgba(26,140,0,0.4)", "rgba(51,152,0,0.4)",
-        "rgba(77,164,0,0.4)", "rgba(102,176,0,0.4)", "rgba(128,188,0,0.4)",
-        "rgba(153,200,0,0.4)", "rgba(179,212,0,0.4)", "rgba(204,224,0,0.4)",
-        "rgba(230,236,0,0.4)", "rgba(255,255,0,0.4)", "rgba(243,230,0,0.4)",
-        "rgba(231,204,0,0.4)", "rgba(219,179,0,0.4)", "rgba(207,153,0,0.4)",
-        "rgba(195,128,0,0.4)", "rgba(183,102,0,0.4)", "rgba(171,77,0,0.4)",
-        "rgba(159,51,0,0.4)", "rgba(147,26,0,0.4)", "rgba(135,0,0,0.4)"
-    ];
+    // Heatmap stuff for later
+    // var colors = [
+    //     "rgba(0,128,0,0.4)", "rgba(26,140,0,0.4)", "rgba(51,152,0,0.4)",
+    //     "rgba(77,164,0,0.4)", "rgba(102,176,0,0.4)", "rgba(128,188,0,0.4)",
+    //     "rgba(153,200,0,0.4)", "rgba(179,212,0,0.4)", "rgba(204,224,0,0.4)",
+    //     "rgba(230,236,0,0.4)", "rgba(255,255,0,0.4)", "rgba(243,230,0,0.4)",
+    //     "rgba(231,204,0,0.4)", "rgba(219,179,0,0.4)", "rgba(207,153,0,0.4)",
+    //     "rgba(195,128,0,0.4)", "rgba(183,102,0,0.4)", "rgba(171,77,0,0.4)",
+    //     "rgba(159,51,0,0.4)", "rgba(147,26,0,0.4)", "rgba(135,0,0,0.4)"
+    // ];
+    //
+    // // Avoid magic strings for heatmap elements
+    // var heatmap_filters_selector = $('#heatmap_filters').find('select');
+    // var matrix_body_selector = $('#matrix_body');
+    // var heatmap_wrapper_selector = $('#heatmap_wrapper');
+    // // TODO TODO TODO TEMPORARILY EXPOSE
+    // var heatmap_data = {};
 
-    // Avoid magic strings for heatmap elements
-    var heatmap_filters_selector = $('#heatmap_filters').find('select');
-    var matrix_body_selector = $('#matrix_body');
-    var heatmap_wrapper_selector = $('#heatmap_wrapper');
-    // TODO TODO TODO TEMPORARILY EXPOSE
-    var heatmap_data = {};
     // Charts
     var all_charts = {};
     var all_events = {};
@@ -359,9 +361,10 @@ $(document).ready(function () {
         // Show the chart options
         // NOTE: the chart options are currently shown by default, subject to change
 
-        heatmap_data = json.heatmap;
-
-        window.CHARTS.get_heatmap_dropdowns(0);
+        // heatmap WIP
+        // heatmap_data = json.heatmap;
+        //
+        // window.CHARTS.get_heatmap_dropdowns(0);
 
         // Naive way to learn whether dose vs. time
         var is_dose = $('#' + charts + 'dose_select').prop('checked');
@@ -593,11 +596,6 @@ $(document).ready(function () {
             all_events[charts].push(current_event);
         }
     };
-
-    // Triggers for heatmap filters
-    heatmap_filters_selector.change(function() {
-        window.CHARTS.get_heatmap_dropdowns(Math.floor($(this).data('heatmap-index')));
-    });
 
     // Triggers for spawning filters
     // TODO REVISE THIS TERRIBLE SELECTOR

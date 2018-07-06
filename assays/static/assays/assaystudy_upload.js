@@ -7,6 +7,16 @@ $(document).ready(function () {
     // Set the callback
     google.charts.setOnLoadCallback(get_readouts);
 
+    window.GROUPING.refresh_function = refresh_current;
+
+    function refresh_current() {
+        get_readouts();
+
+        if ($('#id_bulk_file').val()) {
+            validate_bulk_file();
+        }
+    }
+
     var study_id = Math.floor(window.location.href.split('/')[5]);
 
     function get_readouts() {
@@ -15,6 +25,7 @@ $(document).ready(function () {
         var data = {
             call: 'fetch_data_points',
             study: study_id,
+            criteria: JSON.stringify(window.GROUPING.get_grouping_filtering()),
             csrfmiddlewaretoken: window.COOKIES.csrfmiddlewaretoken
         };
 
@@ -47,6 +58,7 @@ $(document).ready(function () {
         var data = {
             call: 'validate_data_file',
             study: study_id,
+            criteria: JSON.stringify(window.GROUPING.get_grouping_filtering()),
             csrfmiddlewaretoken: window.COOKIES.csrfmiddlewaretoken
         //    dynamic_quality: JSON.stringify(dynamic_quality),
         //    include_table: include_table

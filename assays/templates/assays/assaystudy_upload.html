@@ -66,6 +66,8 @@
 
     {% include 'assays/assaydatafileupload_table.html' with show_delete="true" group=object.group.name %}
 
+    {% include 'assays/grouping_filtering.html' %}
+
     {% include 'assays/chart_options.html' with chart_title="New Data" chart_prefix="new_charts" %}
     <div id="new_charts" class="padded-bottom">Preview Unavailable</div>
 

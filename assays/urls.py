@@ -93,6 +93,9 @@ urlpatterns = [
 
     url(r'^assays/test_filter/$', TestFilterView.as_view(), name='test-filter'),
 
+    # TEST TEST TEST TODO TODO TODO
+    url(r'^assays/test_inter/$', InterStudyReproducibility.as_view(), name='test-filter'),
+
     # Ajax
     url(r'^assays_ajax/$', assays.ajax.ajax),
 ]
