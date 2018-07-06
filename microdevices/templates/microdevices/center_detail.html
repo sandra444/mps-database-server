@@ -75,7 +75,7 @@
                     <div class='col-xs-6'>
                         <legend class='small-padding-bottom'>Primary Investigator</legend>
                         <strong style='font-size: 16px;'>{{ object.pi }}</strong><br>
-                        {% if object.pi_email %}Email: {{ object.pi_email }}<br>{% endif %}
+                        {% if object.pi_email %}Email: {{ pi_email_parts.0 }}<strong>&#x00040;</strong>{{ pi_email_parts.1 }}<br>{% endif %}
                         {% if object.pi_web_page %}Website: <a href="{{ object.pi_web_page }}">{{ object.pi_web_page }}</a>{% endif %}
                     </div>
                 {% endif %}
@@ -83,7 +83,7 @@
                     <div class='col-xs-6'>
                         <legend>Contact Person</legend>
                         <strong style='font-size: 16px;'>{{ object.contact_person }}</strong><br>
-                        {% if object.contact_email %}Email: {{ object.contact_email }}<br>{% endif %}
+                        {% if object.contact_email %}Email: {{ contact_email_parts.0 }}<strong>&#x00040;</strong>{{ contact_email_parts.1 }}<br>{% endif %}
                         {% if object.contact_web_page %}Website: <a href="{{ object.contact_web_page }}">{{ object.contact_web_page }}</a>{% endif %}
                     </div>
                 {% endif %}
