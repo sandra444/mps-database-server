@@ -40,13 +40,13 @@
 
             <tbody>
             {% for model in object_list %}
-                <tr class="model" id={{ model.id }} name={{ model.name }}>
+                <tr class="model" id="{{ model.id }}">
                     <td><a class="btn btn-primary" href="{{ model.id }}">View</a></td>
                     <td><a class="btn btn-primary" href="{{ model.id }}/update/">Edit</a></td>
                     <td>{{ model.name }}</td>
                     <td>{{ model.organ|default_if_none:"" }}</td>
                     <td><a href="/microdevices/device/{{ model.device.id }}">{{ model.device|default_if_none:"" }}</a></td>
-                    <td>{{ model.center|default_if_none:"" }}</td>
+                    <td><a href="/microdevices/center/{{ model.center.id }}" target='_blank'>{{ model.center|default_if_none:"" }}</a></td>
                     <td>{{ model.description }}</td>
                     <td>
                         {% if model.mps %}
