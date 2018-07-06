@@ -49,12 +49,12 @@ $(document).ready(function() {
             dataType: "json",
             data: data,
             success: function (json) {
-                $('#results').prop('hidden', false);
-                $('#filter').prop('hidden', true);
+                $('#results').show();
+                $('#filter').hide();
                 $('#grouping_filtering').show();
 
                 // HIDE THE DATATABLE HEADERS HERE
-                $('.filter-table').prop('hidden', true);
+                $('.filter-table').hide();
 
                 window.CHARTS.prepare_side_by_side_charts(json, charts_name);
                 window.CHARTS.make_charts(json, charts_name);
@@ -686,10 +686,15 @@ $(document).ready(function() {
     });
 
     back_button_selector.click(function() {
-        $('#filter').prop('hidden', false);
-        $('.filter-table').prop('hidden', false);
-        $('#results').prop('hidden', true);
+        $('#filter').show();
+        $('.filter-table').show();
+
+        $('#results').hide();
         $('.submit-button').show();
+
+        $('#inter_repro').hide();
+        $('#grouping_filtering').hide();
+
         $(this).addClass('hidden');
     });
 
