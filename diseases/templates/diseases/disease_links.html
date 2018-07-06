@@ -1,17 +1,14 @@
 <div style="text-align:center;">
-    <a href="/diseases/{{disease.pk}}/" class="btn btn-primary btn-large">
+    <a href="/diseases/{{ disease.pk }}/" class="btn btn-{{ overview }} btn-large">
         Disease Overview
     </a>
-    <a href="/diseases/{{disease.pk}}/biology" class="btn btn-primary btn-large">
+    <a href="/diseases/{{ disease.pk }}/biology" class="btn btn-{{ biology }} btn-large">
         Disease Biology
     </a>
-    <a href="/diseases/{{disease.pk}}/clinicaldata" class="btn btn-primary btn-large">
+    <a href="/diseases/{{ disease.pk }}/clinicaldata" class="btn btn-{{ clinical }} btn-large">
         Clinical Data
     </a>
-    <a href="/diseases/{{disease.pk}}/model" class="btn btn-primary btn-large">
+    <a href="/diseases/{{ disease.pk }}/model" class="btn btn-{{ model }} btn-large">
         Disease Models &amp; Studies
     </a>
-    {# <a href="../../../under_construction/" class="btn btn-primary btn-large">#}
-        {# Data Analysis#}
-    {# </a>#}
 </div>
