@@ -444,6 +444,13 @@ class AssayStudyList(LoginRequiredMixin, ListView):
         get_queryset_with_number_of_data_points(combined)
         get_queryset_with_stakeholder_sign_off(combined)
 
+        centers = MicrophysiologyCenter.objects.all().prefetch_related(
+            'groups'
+        )
+
+        for study in combined:
+            study.center = centers.filter(groups__name__contains=study.group).first()
+
         return combined
 
 

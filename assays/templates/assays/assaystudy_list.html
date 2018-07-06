@@ -46,8 +46,8 @@
                     <th>Images</th>
 {#                    <th>Integrated Study Configuration</th>#}
                     <th>Description</th>
-                    <th>Creator</th>
-                    <th>Group</th>
+                    <th>Data Provider</th>
+                    <th>Data Entry</th>
                     <th>Review</th>
                 </tr>
             </thead>
@@ -78,10 +78,10 @@
                         <td class="text-danger">0</td>
                     {% endif %}
                     <td>{{ study.description }}</td>
+                    <td><a href='/microdevices/center/{{ study.center.id }}/' target='_blank'>{{ study.center.name }}</a></td>
                     <td>
                         {{ study.full_creator }}
                     </td>
-                    <td>{{ study.group }}</td>
                     <td>
                         {% if study.signed_off_by %}
                             {% if study.stakeholder_sign_off and not study.restricted %}

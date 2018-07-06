@@ -3,7 +3,7 @@ from django.shortcuts import redirect
 from django import forms
 
 from .forms import MicrodeviceForm, OrganModelForm, OrganModelProtocolFormsetFactory, OrganModelLocationFormsetFactory
-from .models import Microdevice, OrganModel, ValidatedAssay, OrganModelProtocol
+from .models import Microdevice, OrganModel, ValidatedAssay, OrganModelProtocol, MicrophysiologyCenter
 from mps.mixins import SpecificGroupRequiredMixin, PermissionDenied, user_is_active
 from mps.base.models import save_forms_with_tracking
 from django.contrib.auth.decorators import login_required, user_passes_test
@@ -196,3 +196,14 @@ class OrganModelUpdate(UpdateView):
                 protocol_formset=protocol_formset,
                 location_formset=location_formset
             ))
+
+
+class MicrophysiologyCenterDetail(DetailView):
+    """Displays details for a Microphysiology Center"""
+    model = MicrophysiologyCenter
+    template_name = 'microdevices/center_detail.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(MicrophysiologyCenterDetail, self).get_context_data(**kwargs)
+        context['models'] = OrganModel.objects.filter(center=self.object).values_list('name', flat=True)
+        return context
