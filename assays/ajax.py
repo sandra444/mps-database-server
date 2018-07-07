@@ -1599,6 +1599,7 @@ def fetch_pre_submission_filters(request):
 
 def fetch_data_points_from_filters(request):
     intention = request.POST.get('intention', 'charting')
+
     pre_filter = {}
     if request.POST.get('filters', ''):
         current_filters = json.loads(request.POST.get('filters', '{}'))
