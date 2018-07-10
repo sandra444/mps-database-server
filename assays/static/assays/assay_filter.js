@@ -225,8 +225,6 @@ $(document).ready(function() {
     var area_to_copy_to = $("#expanded_data");
 
     function show_repro() {
-        current_context = 'repro';
-
         $('#filter').hide();
         $('#inter_repro').show();
         $('#grouping_filtering').show();
@@ -679,16 +677,14 @@ $(document).ready(function() {
         }
     }
 
-    submit_buttons_selector.click(function() {
+    charts_button_selector.click(function() {
+        current_context = 'plots';
         refresh_current();
     });
 
-    charts_button_selector.click(function() {
-        show_plots();
-    });
-
     repro_button_selector.click(function() {
-        show_repro();
+        current_context = 'repro';
+        refresh_current();
     });
 
     back_button_selector.click(function() {
