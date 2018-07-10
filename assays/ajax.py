@@ -1553,6 +1553,10 @@ def fetch_pre_submission_filters(request):
             accessible_compounds
         ])), key=lambda x: x[1])
 
+        # Prepend contrived no compound
+        if compounds:
+            compounds.insert(0, (0, '-Control-'))
+
         compound_ids = {compound[0]: True for compound in compounds}
 
         if current_filters.get('compounds', []):
@@ -1562,11 +1566,25 @@ def fetch_pre_submission_filters(request):
             if new_compound_ids:
                 compound_ids = new_compound_ids
 
-        accessible_matrix_items = accessible_matrix_items.filter(
-            assaysetupcompound__compound_instance__compound_id__in=compound_ids
-        ) | accessible_matrix_items.filter(
-            assaysetupcompound__isnull=True
-        )
+            # A little odd
+            if 0 in new_compound_ids:
+                include_no_compounds = True
+            else:
+                include_no_compounds = False
+        else:
+            include_no_compounds = True
+
+        # Compensate for no compounds
+        if include_no_compounds:
+            accessible_matrix_items = accessible_matrix_items.filter(
+                assaysetupcompound__compound_instance__compound_id__in=compound_ids
+            ) | accessible_matrix_items.filter(
+                assaysetupcompound__isnull=True
+            )
+        else:
+            accessible_matrix_items = accessible_matrix_items.filter(
+                assaysetupcompound__compound_instance__compound_id__in=compound_ids
+            )
 
         number_of_points = AssayDataPoint.objects.filter(
             matrix_item_id__in=accessible_matrix_items,
@@ -1725,7 +1743,6 @@ def get_inter_study_reproducibility(
         initial_norm,
         criteria
     ):
-    print criteria
     # CONTRIVED FOR THE MOMENT
     # criteria = {
     #     'setup': {},
