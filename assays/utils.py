@@ -1685,7 +1685,7 @@ def Inter_reproducibility(group_count, inter_data_df, inter_level=1, max_interpo
                 group_rep_mtarix.iloc[0, group_rep_mtarix.columns.get_loc('Treatment Group')] = group_id
                 group_rep_mtarix.iloc[0, 3] = np.nan
                 group_rep_mtarix.iloc[
-                    0, group_rep_mtarix.columns.get_loc('Reproducibility Note')] = 'Less than two centers/studies'
+                    0, group_rep_mtarix.columns.get_loc('Reproducibility Note')] = 'Fewer than two centers/studies'
                 reproducibility_results_table = reproducibility_results_table.append(group_rep_mtarix,
                                                                                      ignore_index=True)
             else:
@@ -1716,7 +1716,7 @@ def Inter_reproducibility(group_count, inter_data_df, inter_level=1, max_interpo
                     group_rep_mtarix.iloc[0, group_rep_mtarix.columns.get_loc('Treatment Group')] = group_id
                     group_rep_mtarix.iloc[0, 3] = no_nan_matrix.shape[1]
                     group_rep_mtarix.iloc[
-                        0, group_rep_mtarix.columns.get_loc('Reproducibility Note')] = 'Less than two centers/studies'
+                        0, group_rep_mtarix.columns.get_loc('Reproducibility Note')] = 'Fewer than two centers/studies'
                     reproducibility_results_table = reproducibility_results_table.append(group_rep_mtarix,
                                                                                          ignore_index=True)
                 elif no_nan_matrix.shape[0] < 1:
