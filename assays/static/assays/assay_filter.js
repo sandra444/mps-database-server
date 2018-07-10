@@ -216,6 +216,8 @@ $(document).ready(function() {
     var data_groups = null;
     var header_keys = null;
 
+    var value_unit_index = null;
+
     // Table for the broad results
     var repro_table = null;
 
@@ -266,6 +268,8 @@ $(document).ready(function() {
                     data_groups = json.data_groups;
                     header_keys = json.header_keys;
                     treatment_groups = json.treatment_groups;
+
+                    value_unit_index = json.header_keys.data.indexOf('Value Unit');
 
                     console.log(repro_table_data);
                     console.log(chart_data);
@@ -448,6 +452,8 @@ $(document).ready(function() {
             'cubic'
         ];
 
+        var value_unit = data_groups[set][value_unit_index];
+
         $.each(chart_content_types, function(index, content_type) {
             var values = chart_data[set][content_type];
             if (values == null) {
@@ -495,7 +501,7 @@ $(document).ready(function() {
                     }
                 },
                 vAxis: {
-                    title: 'VALUE UNIT HERE',
+                    title: value_unit,
                     format: 'short',
                     textStyle: {
                         bold: true
