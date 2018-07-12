@@ -1660,16 +1660,14 @@ def Inter_reproducibility(group_count, inter_data_df, inter_level=1, max_interpo
     # Loop every unique replicate group
     for row in range(group_count):
         print 'Group ' + str(row + 1)
-        # group_id = 'Group ' + str(row + 1)
         group_id = str(row + 1)
-        group_chip_data = chip_data[chip_data['Treatment Group'] == 'Group ' + str(row + 1)]
+        # group_chip_data = chip_data[chip_data['Treatment Group'] == 'Group ' + str(row + 1)]
         group_chip_data = chip_data[chip_data['Treatment Group'] == str(row + 1)]
         if group_chip_data.shape[0] < 1:
             group_rep_mtarix = pd.DataFrame(index=[0], columns=header_list)
             group_rep_mtarix.iloc[0, group_rep_mtarix.columns.get_loc('Treatment Group')] = group_id
             group_rep_mtarix.iloc[0, 3] = np.nan
-            group_rep_mtarix.iloc[
-                0, group_rep_mtarix.columns.get_loc('Reproducibility Note')] = 'No data for this group'
+            group_rep_mtarix.iloc[0, group_rep_mtarix.columns.get_loc('Reproducibility Note')] = 'No data for this group'
             reproducibility_results_table = reproducibility_results_table.append(group_rep_mtarix, ignore_index=True)
         else:
             if inter_level == 1:
@@ -1739,9 +1737,21 @@ def Inter_reproducibility(group_count, inter_data_df, inter_level=1, max_interpo
                     p_value = Single_Time_ANOVA(anova_data, 1)
 
                     group_rep_mtarix.iloc[0, group_rep_mtarix.columns.get_loc('ANOVA P-Value')] = p_value
+
+                    # Calcualate CV
+                    single_array = anova_data['Value'].dropna()
+                    single_array_val = single_array.values
+                    single_CV = np.std(single_array_val, ddof=1) / np.mean(single_array_val) * 100
+
+                    group_rep_mtarix.iloc[0, group_rep_mtarix.columns.get_loc('Max CV')] = single_CV
+
                     if p_value >= 0.05:
-                        group_rep_mtarix.iloc[
-                            0, group_rep_mtarix.columns.get_loc('Reproducibility Status')] = 'Acceptable (P-Value)'
+                        if single_CV <= 5:
+                            group_rep_mtarix.iloc[
+                                0, group_rep_mtarix.columns.get_loc('Reproducibility Status')] = 'Excellent (CV)'
+                        else:
+                            group_rep_mtarix.iloc[
+                                0, group_rep_mtarix.columns.get_loc('Reproducibility Status')] = 'Acceptable (P-Value)'
                     else:
                         group_rep_mtarix.iloc[
                             0, group_rep_mtarix.columns.get_loc('Reproducibility Status')] = 'Poor (P-Value)'
@@ -1770,7 +1780,6 @@ def Inter_reproducibility(group_count, inter_data_df, inter_level=1, max_interpo
                                                                                      'nearest', inter_level,
                                                                                      max_interpolation_size, group_id,
                                                                                      initial_Norm)
-
                     reproducibility_results_table = reproducibility_results_table.append(group_rep_mtarix,
                                                                                          ignore_index=True)
                     inter_data_table = inter_data_table.append(inter_data_set, ignore_index=True)
@@ -1780,7 +1789,6 @@ def Inter_reproducibility(group_count, inter_data_df, inter_level=1, max_interpo
                                                                                      'linear', inter_level,
                                                                                      max_interpolation_size, group_id,
                                                                                      initial_Norm)
-
                     reproducibility_results_table = reproducibility_results_table.append(group_rep_mtarix,
                                                                                          ignore_index=True)
                     inter_data_table = inter_data_table.append(inter_data_set, ignore_index=True)
