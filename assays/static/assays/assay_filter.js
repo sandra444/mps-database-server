@@ -304,6 +304,12 @@ $(document).ready(function() {
                     }
                 },
                 {
+                    title: "Target",
+                    "render": function (data, type, row) {
+                        return data_groups[row[0]][0];
+                    }
+                },
+                {
                     title: "Interpolation",
                     "render": function (data, type, row) {
                         if (type === 'display' && row[1] !== '') {
@@ -335,7 +341,7 @@ $(document).ready(function() {
                     }
                 }
             ],
-            "order": [[9, 'desc'], [ 1, "asc" ]],
+            "order": [[10, 'desc'], [ 1, "asc" ]],
             "createdRow": function(row, data, dataIndex) {
                 if (data[8][0] === "E") {
                     $(row).find('td:eq(9)').css("background-color", "#74ff5b").css("font-weight", "bold");
