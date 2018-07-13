@@ -203,10 +203,8 @@ $(document).ready(function() {
     // TODO: UGLY
     var cv_tooltip = '<span data-toggle="tooltip" title="The CV is calculated for each time point and the value reported is the max CV across time points, or the CV if a single time point is present.  The reproducibility status is excellent if Max CV/CV < 5% (Excellent (CV)), acceptable if Max CV/CV < 15% (Acceptable (CV)), and poor if CV > 15% for a single time point (Poor (CV))" class="glyphicon glyphicon-question-sign" aria-hidden="true" data-placement="bottom"></span>';
     var icc_tooltip = '<span data-toggle="tooltip" title="The ICC Absolute Agreement of the measurements across multiple time points is a correlation coefficient that ranges from -1 to 1 with values closer to 1 being more correlated.  When the Max CV > 15%, the reproducibility status is reported to be excellent if > 0.8 (Excellent (ICC), acceptable if > 0.2 (Acceptable (ICC)), and poor if < 0.2 (Poor (ICC))" class="glyphicon glyphicon-question-sign" aria-hidden="true" data-placement="bottom"></span>';
-    var repro_tooltip = '<span data-toggle="tooltip" title="Our classification of this grouping\'s reproducibility (Excellent > Acceptable > Poor/NA). If Max CV < 15% then the status is based on the  Max CV criteria, otherwise the status is based on the ICC criteria" class="glyphicon glyphicon-question-sign" aria-hidden="true" data-placement="bottom"></span>';
-    var missing_tooltip = '<span data-toggle="tooltip" title="Quantity of data values whose values were missing from the data provided and were interpolated by the average of the data values at the same time point" class="glyphicon glyphicon-question-sign" aria-hidden="true"></span>';
-    var mad_tooltip = '<span data-toggle="tooltip" title="Median Absolute Deviation (MAD) scores of all chip measurement population at every time point.  A score > 3.5 or < -3.5 indicates that the chip is an outlier relative to the median of chip measurement population at a that time point" class="glyphicon glyphicon-question-sign" aria-hidden="true"></span>';
-    var comp_tooltip = '<span data-toggle="tooltip" title="The ICC is calculated for each chip relative to the median of all of the chips." class="glyphicon glyphicon-question-sign" aria-hidden="true"></span>';
+    var repro_tooltip = '<span data-toggle="tooltip" title="Our classification of this grouping\'s reproducibility (Excellent > Acceptable > Poor/NA). If Max CV < 15% then the status is based on the  Max CV criteria, otherwise the status is based on the ICC criteria when the number of overlapping time points is more than one. For single time point data, if CV <15% then the status is based on the CV criteria, otherwise the status is based on the ANOVA P-Value" class="glyphicon glyphicon-question-sign" aria-hidden="true" data-placement="bottom"></span>';
+    var anova_tooltip = '<span data-toggle="tooltip" title="The ANOVA p-value is calculated for the single overlapping time point data across MPS centers or studies. The reproducibility status is Acceptable (P-Value) if ANOVA p-value >= 0.05, and Poor (P-Value) if ANOVA p-value <0.05." class="glyphicon glyphicon-question-sign" aria-hidden="true" data-placement="bottom"></span>';
 
     // For making the table
     var repro_table_data = null;
@@ -314,17 +312,17 @@ $(document).ready(function() {
                     "render": function (data, type, row) {
                         if (type === 'display' && row[1] !== '') {
                             // var groupNum = row[10];
-                            return '<input type="checkbox" class="repro-chart-checkbox"> ' + row[1];
+                            return row[1] + ' (' + row[2] + ')';
                         }
                         return '';
                     }
                 },
-                {title: "Max Interpolated", data: '2'},
+                // {title: "Max Interpolated", data: '2'},
                 {title: legend_key, data: '3'},
                 {title: "# of Overlapping Time Points", data: '4'},
                 {title: "<span style='white-space: nowrap;'>Max CV<br>or CV " + cv_tooltip + "</span>", data: '5'},
                 {title: "<span style='white-space: nowrap;'>ICC " + icc_tooltip + "</span>", data: '6'},
-                {title: "ANOVA P-Value", data: '7'},
+                {title: "<span style='white-space: nowrap;'>ANOVA P-Value " + anova_tooltip + "</span>", data: '7'},
                 {
                     title: "Reproducibility<br>Status " + repro_tooltip,
                     data: '8',
@@ -341,7 +339,7 @@ $(document).ready(function() {
                     }
                 }
             ],
-            "order": [[10, 'desc'], [ 1, "asc" ]],
+            "order": [[9, 'desc'], [ 1, "asc" ]],
             "createdRow": function(row, data, dataIndex) {
                 if (data[8][0] === "E") {
                     $(row).find('td:eq(9)').css("background-color", "#74ff5b").css("font-weight", "bold");
