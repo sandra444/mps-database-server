@@ -1654,6 +1654,10 @@ def fetch_data_points_from_filters(request):
             group_ids = [int(id) for id in current_filters.get('groups', []) if id]
             accessible_studies = accessible_studies.filter(group_id__in=group_ids)
 
+            matrix_items = matrix_items.filter(
+                study_id__in=accessible_studies
+            )
+
         if current_filters.get('compounds', []):
             compound_ids = [int(id) for id in current_filters.get('compounds', []) if id]
 
@@ -1743,24 +1747,6 @@ def get_inter_study_reproducibility(
         initial_norm,
         criteria
     ):
-    # CONTRIVED FOR THE MOMENT
-    # criteria = {
-    #     'setup': {},
-    #     'setting': DEFAULT_SETTING_CRITERIA,
-    #     'compound': DEFAULT_COMPOUND_CRITERIA,
-    #     'cell': {}
-    # }
-
-    # TODO GENERIC FILTER CALL HERE TO GET STUDY AND MATRIX ITEMS
-    # studies = [5, 135]
-    # matrix_items = AssayMatrixItem.objects.filter(study_id__in=studies)
-
-    # TODO TODO TODO WE NEED TO MAKE SURE THE CRITERIA ARE SATISFACTORY
-    # criteria = json.loads(request.POST.get('criteria', '{}'))
-    # inter_level = request.POST.get('inter_level', 1)
-    # max_interpolation_size = request.POST.get('max_interpolation_size', 2)
-    # initial_norm = request.POST.get('initial_norm', 0)
-
     # Organization is assay -> unit -> compound/tag -> field -> time -> value
     treatment_group_representatives, setup_to_treatment_group, treatment_header_keys = get_item_groups(
         None,
@@ -1770,15 +1756,6 @@ def get_inter_study_reproducibility(
 
     inter_data = []
 
-    # data_points = AssayDataPoint.objects.filter(replaced=False, matrix_item_id__in=matrix_items).prefetch_related(
-    #     'study_assay__target',
-    #     'study_assay__method',
-    #     'study_assay__unit__base_unit',
-    #     'sample_location',
-    #     'matrix_item',
-    #     'study__group'
-    # )
-
     data_point_treatment_groups = {}
     treatment_group_table = {}
 
@@ -1787,23 +1764,52 @@ def get_inter_study_reproducibility(
         'Target',
         # 'Method',
         'Value Unit',
-        'Sample Location'
+        # 'Sample Location'
     ]
 
-    # Temporary for now
-    # TODO TODO TODO TODO
-    data_point_attribute_getter_base = tuple_attrgetter(*(
+    base_tuple = (
         'study_assay.target_id',
         # 'study_assay.method_id',
         'study_assay.unit.base_unit_id',
-        'sample_location_id'
-    ))
-    data_point_attribute_getter_current = tuple_attrgetter(*(
+        # 'sample_location_id'
+    )
+
+    current_tuple = (
         'study_assay.target_id',
         # 'study_assay.method_id',
         'study_assay.unit_id',
-        'sample_location_id'
-    ))
+        # 'sample_location_id'
+    )
+
+    additional_keys = []
+
+    # CRUDE
+    if criteria:
+        group_sample_location = 'sample_location' in criteria.get('special', [])
+        group_method = 'method' in criteria.get('special', [])
+
+        if group_method:
+            data_header_keys.append('Method')
+            additional_keys.append('study_assay.method_id')
+
+        if group_sample_location:
+            data_header_keys.append('Sample Location')
+            additional_keys.append('sample_location_id')
+
+    if additional_keys:
+        base_tuple += tuple(additional_keys)
+        current_tuple += tuple(additional_keys)
+
+    # ASSUME _id termination
+    base_value_tuple = tuple([x.replace('_id', '') for x in base_tuple])
+    current_value_tuple = tuple([x.replace('_id', '') for x in current_tuple])
+
+    # TODO TODO TODO TODO
+    data_point_attribute_getter_base = tuple_attrgetter(*base_tuple)
+    data_point_attribute_getter_current = tuple_attrgetter(*current_tuple)
+
+    data_point_attribute_getter_base_values = tuple_attrgetter(*base_value_tuple)
+    data_point_attribute_getter_current_values = tuple_attrgetter(*current_value_tuple)
 
     for point in data_points:
         point.standard_value = point.value
@@ -1826,21 +1832,15 @@ def get_inter_study_reproducibility(
         if current_group not in treatment_group_table:
             if point.study_assay.unit.base_unit_id:
                 treatment_group_table.update({
-                    current_group: [unicode(x) for x in [
-                        point.study_assay.target,
-                        point.study_assay.unit.base_unit,
-                        point.sample_location,
-                        setup_to_treatment_group.get(item_id).get('index')
-                    ]]
+                    current_group: [unicode(x) for x in list(
+                        data_point_attribute_getter_base_values(point)
+                    ) + [setup_to_treatment_group.get(item_id).get('index')]]
                 })
             else:
                 treatment_group_table.update({
-                    current_group: [unicode(x) for x in [
-                        point.study_assay.target,
-                        point.study_assay.unit.base_unit,
-                        point.sample_location,
-                        setup_to_treatment_group.get(item_id).get('index')
-                    ]]
+                    current_group: [unicode(x) for x in list(
+                        data_point_attribute_getter_current_values(point)
+                    ) + [setup_to_treatment_group.get(item_id).get('index')]]
                 })
 
     inter_data.append([

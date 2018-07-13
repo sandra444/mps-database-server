@@ -243,10 +243,12 @@ $(document).ready(function () {
         // Reposition download/print/copy
         $('.DTTT_container').css('float', 'none');
 
-
         // Recalculate responsive and fixed headers
         $($.fn.dataTable.tables(true)).DataTable().responsive.recalc();
         $($.fn.dataTable.tables(true)).DataTable().fixedHeader.adjust();
+
+        // Make sure the header is fixed and active
+        treatment_group_data_table.fixedHeader.enable();
     };
 
     window.CHARTS.get_heatmap_dropdowns = function(starting_index) {
