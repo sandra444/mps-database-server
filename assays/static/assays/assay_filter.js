@@ -23,12 +23,23 @@ $(document).ready(function() {
     var number_of_points_container_selector = $('#number_of_points_container');
     var select_user_group_message_selector = $('#select_user_group_message');
 
+    var treatment_group_table = $('#treatment_group_table');
+
     var charts_name = 'charts';
 
     var current_context = '';
 
     function show_plots() {
         current_context = 'plots';
+
+        // Hide irrelevant floating headers
+        if (repro_table) {
+            repro_table.fixedHeader.disable();
+        }
+        $.each(filters, function (filter, contents) {
+            var current_filter = $('#filter_' + filter);
+            current_filter.DataTable().fixedHeader.disable();
+        });
 
         var data = {
             // TODO TODO TODO CHANGE CALL
@@ -223,6 +234,12 @@ $(document).ready(function() {
     var area_to_copy_to = $("#expanded_data");
 
     function show_repro() {
+        // Hide fixed headers
+        $.each(filters, function (filter, contents) {
+            var current_filter = $('#filter_' + filter);
+            current_filter.DataTable().fixedHeader.disable();
+        });
+
         $('#filter').hide();
         $('#inter_repro').show();
         $('#grouping_filtering').show();
@@ -702,6 +719,17 @@ $(document).ready(function() {
         $('#grouping_filtering').hide();
 
         $(this).addClass('hidden');
+
+        // Hide any lingering fixed headers
+        if ($.fn.DataTable.isDataTable(treatment_group_table)) {
+            treatment_group_table.DataTable().fixedHeader.disable();
+        }
+
+        // Show fixed header
+        $.each(filters, function (filter, contents) {
+            var current_filter = $('#filter_' + filter);
+            current_filter.DataTable().fixedHeader.enable();
+        });
     });
 
     // Setup triggers
