@@ -299,6 +299,7 @@ $(document).ready(function() {
                 {
                     title: "Show Details",
                     "render": function (data, type, row) {
+                        // if (type === 'display' && row[1] === '') {
                         if (type === 'display' && row[1] === '') {
                             // var groupNum = row[10];
                             return '<input type="checkbox" class="big-checkbox repro-checkbox" data-repro-set="' + row[0] + '">';
