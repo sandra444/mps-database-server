@@ -218,7 +218,8 @@ $(document).ready(function() {
     var anova_tooltip = '<span data-toggle="tooltip" title="The ANOVA p-value is calculated for the single overlapping time point data across MPS centers or studies. The reproducibility status is Acceptable (P-Value) if ANOVA p-value >= 0.05, and Poor (P-Value) if ANOVA p-value <0.05." class="glyphicon glyphicon-question-sign" aria-hidden="true" data-placement="bottom"></span>';
 
     // For making the table
-    var repro_table_data = null;
+    var repro_table_data_full = null;
+    var repro_table_data_best = null;
     // For making the charts
     var chart_data = null;
     // For getting info on treatment groups
@@ -276,7 +277,8 @@ $(document).ready(function() {
                 },
                 type: 'POST',
                 dataSrc: function (json) {
-                    repro_table_data = json.repro_table_data;
+                    repro_table_data_full = json.repro_table_data_full;
+                    repro_table_data_best = json.repro_table_data_best;
                     chart_data = json.chart_data;
                     data_groups = json.data_groups;
                     header_keys = json.header_keys;
@@ -284,13 +286,13 @@ $(document).ready(function() {
 
                     value_unit_index = json.header_keys.data.indexOf('Value Unit');
 
-                    console.log(repro_table_data);
+                    console.log(repro_table_data_full);
                     console.log(chart_data);
                     console.log(data_groups);
                     console.log(header_keys);
                     console.log(treatment_groups);
 
-                    return repro_table_data;
+                    return repro_table_data_best;
                 }
             },
             columns: [
@@ -379,7 +381,6 @@ $(document).ready(function() {
             initComplete: function () {
                 // TODO TODO TODO
                 // Draw necessary sections below
-                console.log('Hello');
                 draw_subsections();
 
                 // TODO NOT DRY
