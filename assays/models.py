@@ -930,7 +930,7 @@ class AssayChipCells(models.Model):
                                     blank=True, default='')
 
     def __unicode__(self):
-        return u'{0}\n-{1:.0e} {2}'.format(
+        return u'{0}\n~{1:.0e} {2}'.format(
             self.cell_sample,
             self.cellsample_density,
             cell_choice_dict.get(self.cellsample_density_unit, 'Unknown Unit')
@@ -1881,18 +1881,23 @@ class AssaySetupCell(models.Model):
     addition_location = models.ForeignKey(AssaySampleLocation, null=True, blank=True)
 
     def __unicode__(self):
+        passage = ''
+
+        if self.passage:
+            passage = 'p{}'.format(self.passage)
+
         if self.addition_location:
-            return u'{0} [{1}]\n-{2:.0e} {3}\nAdded to: {4}'.format(
+            return u'{0} {1}\n~{2:.2e} {3}\nAdded to: {4}'.format(
                 self.cell_sample,
-                self.passage,
+                passage,
                 self.density,
                 self.density_unit.unit,
                 self.addition_location
             )
         else:
-            return u'{0} [{1}]\n-{2:.0e} {3}'.format(
+            return u'{0} {1}\n~{2:.2e} {3}'.format(
                 self.cell_sample,
-                self.passage,
+                passage,
                 self.density,
                 self.density_unit.unit,
             )
@@ -2081,7 +2086,7 @@ class AssaySetupCompound(models.Model):
 
     def __unicode__(self):
         if self.addition_location:
-            return u'{0} ({1} {2})\n-Added on: {3}; Duration of: {4}; Added to: {5}'.format(
+            return u'{0} ({1} {2})\nAdded on: {3}; Duration of: {4}; Added to: {5}'.format(
                 self.compound_instance.compound.name,
                 self.concentration,
                 self.concentration_unit.unit,
@@ -2090,7 +2095,7 @@ class AssaySetupCompound(models.Model):
                 self.addition_location
             )
         else:
-            return u'{0} ({1} {2})\n-Added on: {3}; Duration of: {4}'.format(
+            return u'{0} ({1} {2})\nAdded on: {3}; Duration of: {4}'.format(
                 self.compound_instance.compound.name,
                 self.concentration,
                 self.concentration_unit.unit,
