@@ -218,7 +218,8 @@ $(document).ready(function() {
     var anova_tooltip = '<span data-toggle="tooltip" title="The ANOVA p-value is calculated for the single overlapping time point data across MPS centers or studies. The reproducibility status is Acceptable (P-Value) if ANOVA p-value >= 0.05, and Poor (P-Value) if ANOVA p-value <0.05." class="glyphicon glyphicon-question-sign" aria-hidden="true" data-placement="bottom"></span>';
 
     // For making the table
-    var repro_table_data = null;
+    var repro_table_data_full = null;
+    var repro_table_data_best = null;
     // For making the charts
     var chart_data = null;
     // For getting info on treatment groups
@@ -276,7 +277,8 @@ $(document).ready(function() {
                 },
                 type: 'POST',
                 dataSrc: function (json) {
-                    repro_table_data = json.repro_table_data;
+                    repro_table_data_full = json.repro_table_data_full;
+                    repro_table_data_best = json.repro_table_data_best;
                     chart_data = json.chart_data;
                     data_groups = json.data_groups;
                     header_keys = json.header_keys;
@@ -284,13 +286,13 @@ $(document).ready(function() {
 
                     value_unit_index = json.header_keys.data.indexOf('Value Unit');
 
-                    console.log(repro_table_data);
+                    console.log(repro_table_data_full);
                     console.log(chart_data);
                     console.log(data_groups);
                     console.log(header_keys);
                     console.log(treatment_groups);
 
-                    return repro_table_data;
+                    return repro_table_data_best;
                 }
             },
             columns: [
@@ -379,7 +381,6 @@ $(document).ready(function() {
             initComplete: function () {
                 // TODO TODO TODO
                 // Draw necessary sections below
-                console.log('Hello');
                 draw_subsections();
 
                 // TODO NOT DRY
@@ -410,34 +411,51 @@ $(document).ready(function() {
             var data = this.data();
             var group = data[0];
             var method = data[1];
-            if (!method) {
-                var icc_status = data[8];
-                var current_clone = item_to_copy.first().clone(true);
-                current_clone.addClass('repro-'+group);
-                var repro_title = current_clone.find('[data-id="repro-title"]');
-                var repro_status = current_clone.find('[data-id="repro-status"]');
-                var data_table = current_clone.find('[data-id="data-table"]');
+            var icc_status = data[8];
+            var current_clone = item_to_copy.first().clone(true);
+            current_clone.addClass('repro-'+group);
+            var repro_title = current_clone.find('[data-id="repro-title"]');
+            var repro_status = current_clone.find('[data-id="repro-status"]');
+            var data_table = current_clone.find('[data-id="data-table"]');
 
-                repro_title.html('Set ' + group);
+            var icc_table = current_clone.find('[data-id="icc-table"]');
 
-                if (icc_status[0] === 'E'){
-                    repro_status.html('<em>'+icc_status+'</em>').css("background-color", "#74ff5b");
-                } else if (icc_status[0] === 'A'){
-                    repro_status.html('<em>'+icc_status+'</em>').css("background-color", "#fcfa8d");
-                } else if (icc_status[0] === 'P'){
-                    repro_status.html('<em>'+icc_status+'</em>').css("background-color", "#ff7863");
-                } else {
-                    repro_status.html('<em>'+icc_status+'</em><small style="color: black;"><span data-toggle="tooltip" title="'+data[13]+'" class="glyphicon glyphicon-question-sign" aria-hidden="true"></span></small>').css("background-color", "Grey");
-                }
+            repro_title.html('Set ' + group);
 
-                populate_table(group, data_table);
+            // if (icc_status[0] === 'E'){
+            //     repro_status.html('<em>'+icc_status+'</em>').css("background-color", "#74ff5b");
+            // } else if (icc_status[0] === 'A'){
+            //     repro_status.html('<em>'+icc_status+'</em>').css("background-color", "#fcfa8d");
+            // } else if (icc_status[0] === 'P'){
+            //     repro_status.html('<em>'+icc_status+'</em>').css("background-color", "#ff7863");
+            // } else {
+            //     repro_status.html('<em>'+icc_status+'</em><small style="color: black;"><span data-toggle="tooltip" title="'+data[13]+'" class="glyphicon glyphicon-question-sign" aria-hidden="true"></span></small>').css("background-color", "Grey");
+            // }
 
-                area_to_copy_to.append(current_clone);
-            }
+            get_repro_status(icc_status, data[13], repro_status);
+
+            populate_selection_table(group, data_table);
+            populate_icc_table(group, icc_table);
+
+            area_to_copy_to.append(current_clone);
         });
     }
 
-    function populate_table(set, current_table) {
+    function get_repro_status(icc_status, repro_status_string, repro_status) {
+        if (icc_status[0] === 'E'){
+            repro_status.html('<em>'+icc_status+'</em>').css("background-color", "#74ff5b");
+        } else if (icc_status[0] === 'A'){
+            repro_status.html('<em>'+icc_status+'</em>').css("background-color", "#fcfa8d");
+        } else if (icc_status[0] === 'P'){
+            repro_status.html('<em>'+icc_status+'</em>').css("background-color", "#ff7863");
+        } else {
+            repro_status.html(
+                '<em>'+icc_status+'</em><small style="color: black;"><span data-toggle="tooltip" title="'+ repro_status_string +'" class="glyphicon glyphicon-question-sign" aria-hidden="true"></span></small>'
+            ).css("background-color", "Grey");
+        }
+    }
+
+    function populate_selection_table(set, current_table) {
         var current_body = current_table.find('tbody');
 
         var rows = [];
@@ -454,6 +472,42 @@ $(document).ready(function() {
             rows.push(
                 '<tr><th>' + key + '</th><td>' + treatment_groups[current_treatment_group][key] + '</td></tr>'
             );
+        });
+
+        rows = rows.join('');
+        current_body.html(rows);
+    }
+
+    function populate_icc_table(set, current_table) {
+        var current_body = current_table.find('tbody');
+
+        var rows = [];
+
+        // TO SORT
+        var all_icc = repro_table_data_full[set];
+
+        $.each(all_icc, function(interpolation, data) {
+            if (interpolation !== 'best') {
+                var row = '<tr>' +
+                    '<td>' + interpolation + '</td>' +
+                    '<td>' + data[2] + '</td>' +
+                    '<td>' + data[5] + '</td>' +
+                    '<td>' + data[6] +'</td>' +
+                    '<td>' + data[7] +'</td>';
+
+                repro_status_html = '<td>';
+                repro_status = $('<span>');
+
+                get_repro_status(data[8], data[9], repro_status);
+
+                repro_status_html += repro_status[0].outerHTML + '</td>';
+
+                row += repro_status_html;
+
+                row += '</tr>';
+
+                rows.push(row);
+            }
         });
 
         rows = rows.join('');

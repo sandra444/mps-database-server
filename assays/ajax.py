@@ -1980,6 +1980,31 @@ def get_inter_study_reproducibility(
     results_rows = [
         [row[i] for i in range(1, len(row))] for row in reproducibility_results_table.itertuples()
     ]
+    # Make into a suitable dictionary
+    results_rows_full = {}
+    results_rows_best = []
+    for row in results_rows:
+        current_dic = results_rows_full.setdefault(
+            row[0], {}
+        )
+        current_dic.update({
+            row[1]: row
+        })
+
+        current_icc = row[6] if row[6] else 0
+
+        if current_dic.get('best', '') and current_icc > current_dic.get('best')[6]:
+            current_dic.update({
+                'best': row
+            })
+        # Subject to revision
+        elif not current_dic.get('best', ''):
+            current_dic.update({
+                'best': row
+            })
+
+    for set, dic in results_rows_full.items():
+        results_rows_best.append(dic.get('best'))
 
     inter_data_table = inter_data_table.astype(object).replace(np.nan, '')
     # inter_data_columns = [i for i in inter_data_table.columns]
@@ -2040,7 +2065,8 @@ def get_inter_study_reproducibility(
 
     data = {
         'chart_data': final_chart_data,
-        'repro_table_data': results_rows,
+        'repro_table_data_full': results_rows_full,
+        'repro_table_data_best': results_rows_best,
         'data_groups': treatment_group_table,
         'header_keys': {
             'treatment': treatment_header_keys,
