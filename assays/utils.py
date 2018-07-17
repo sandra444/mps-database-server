@@ -1508,20 +1508,29 @@ def update_group_reproducibility_index_status(group_rep_mtarix, rep_index):
     group_rep_mtarix.iloc[0, group_rep_mtarix.columns.get_loc('ICC Absolute Agreement')] = rep_index.iloc[0, 1]
     group_rep_mtarix.iloc[0, group_rep_mtarix.columns.get_loc('Max CV')] = rep_index.iloc[0, 0]
 
-    if rep_index.iloc[0][0] <= 15 and rep_index.iloc[0][0] > 0:
-        if rep_index.iloc[0][0] <= 5:
+    if pd.isnull(rep_index.iloc[0, 1]) == True:
+        if rep_index.iloc[0, 0] <= 5:
             group_rep_mtarix.iloc[0, group_rep_mtarix.columns.get_loc('Reproducibility Status')] = 'Excellent (CV)'
-        elif rep_index.iloc[0][1] >= 0.8:
-            group_rep_mtarix.iloc[0, group_rep_mtarix.columns.get_loc('Reproducibility Status')] = 'Excellent (ICC)'
-        else:
+        elif rep_index.iloc[0, 0] > 5 and rep_index.iloc[0, 0] <= 15:
             group_rep_mtarix.iloc[0, group_rep_mtarix.columns.get_loc('Reproducibility Status')] = 'Acceptable (CV)'
-    else:
-        if rep_index.iloc[0][1] >= 0.8:
-            group_rep_mtarix.iloc[0, group_rep_mtarix.columns.get_loc('Reproducibility Status')] = 'Excellent (ICC)'
-        elif rep_index.iloc[0][1] >= 0.2:
-            group_rep_mtarix.iloc[0, group_rep_mtarix.columns.get_loc('Reproducibility Status')] = 'Acceptable (ICC)'
         else:
-            group_rep_mtarix.iloc[0, group_rep_mtarix.columns.get_loc('Reproducibility Status')] = 'Poor (ICC)'
+            group_rep_mtarix.iloc[0, group_rep_mtarix.columns.get_loc('Reproducibility Status')] = 'Poor (CV)'
+    else:
+        if rep_index.iloc[0][0] <= 15 and rep_index.iloc[0][0] > 0:
+            if rep_index.iloc[0][0] <= 5:
+                group_rep_mtarix.iloc[0, group_rep_mtarix.columns.get_loc('Reproducibility Status')] = 'Excellent (CV)'
+            elif rep_index.iloc[0][1] >= 0.8:
+                group_rep_mtarix.iloc[0, group_rep_mtarix.columns.get_loc('Reproducibility Status')] = 'Excellent (ICC)'
+            else:
+                group_rep_mtarix.iloc[0, group_rep_mtarix.columns.get_loc('Reproducibility Status')] = 'Acceptable (CV)'
+        else:
+            if rep_index.iloc[0][1] >= 0.8:
+                group_rep_mtarix.iloc[0, group_rep_mtarix.columns.get_loc('Reproducibility Status')] = 'Excellent (ICC)'
+            elif rep_index.iloc[0][1] >= 0.2:
+                group_rep_mtarix.iloc[
+                    0, group_rep_mtarix.columns.get_loc('Reproducibility Status')] = 'Acceptable (ICC)'
+            else:
+                group_rep_mtarix.iloc[0, group_rep_mtarix.columns.get_loc('Reproducibility Status')] = 'Poor (ICC)'
     return group_rep_mtarix
 
 
@@ -1659,15 +1668,16 @@ def Inter_reproducibility(group_count, inter_data_df, inter_level=1, max_interpo
     # Define all columns of original and
     # Loop every unique replicate group
     for row in range(group_count):
-        # print 'Group ' + str(row + 1)
         group_id = str(row + 1)
         # group_chip_data = chip_data[chip_data['Treatment Group'] == 'Group ' + str(row + 1)]
         group_chip_data = chip_data[chip_data['Treatment Group'] == str(row + 1)]
+
         if group_chip_data.shape[0] < 1:
             group_rep_mtarix = pd.DataFrame(index=[0], columns=header_list)
             group_rep_mtarix.iloc[0, group_rep_mtarix.columns.get_loc('Treatment Group')] = group_id
             group_rep_mtarix.iloc[0, 3] = np.nan
-            group_rep_mtarix.iloc[0, group_rep_mtarix.columns.get_loc('Reproducibility Note')] = 'No data for this group'
+            group_rep_mtarix.iloc[
+                0, group_rep_mtarix.columns.get_loc('Reproducibility Note')] = 'No data for this group'
             reproducibility_results_table = reproducibility_results_table.append(group_rep_mtarix, ignore_index=True)
         else:
             if inter_level == 1:
@@ -1681,8 +1691,10 @@ def Inter_reproducibility(group_count, inter_data_df, inter_level=1, max_interpo
 
                 group_rep_mtarix = pd.DataFrame(index=[0], columns=header_list)
                 group_rep_mtarix.iloc[0, group_rep_mtarix.columns.get_loc('Treatment Group')] = group_id
-                group_rep_mtarix.iloc[0, 3] = np.nan
-                group_rep_mtarix.iloc[0, group_rep_mtarix.columns.get_loc('Reproducibility Note')] = 'Fewer than two centers/studies'
+                # group_rep_mtarix.iloc[0, 3] = np.nan
+                group_rep_mtarix.iloc[0, 3] = pivot_group_matrix.shape[1]
+                group_rep_mtarix.iloc[
+                    0, group_rep_mtarix.columns.get_loc('Reproducibility Note')] = 'Fewer than two centers/studies'
                 reproducibility_results_table = reproducibility_results_table.append(group_rep_mtarix,
                                                                                      ignore_index=True)
             else:
@@ -1737,7 +1749,7 @@ def Inter_reproducibility(group_count, inter_data_df, inter_level=1, max_interpo
                     group_rep_mtarix.iloc[0, group_rep_mtarix.columns.get_loc('ANOVA P-Value')] = p_value
 
                     # Calcualate CV
-                    single_array = anova_data['Value'].dropna()
+                    single_array = no_nan_matrix.dropna()
                     single_array_val = single_array.values
                     single_CV = np.std(single_array_val, ddof=1) / np.mean(single_array_val) * 100
 
@@ -1747,6 +1759,9 @@ def Inter_reproducibility(group_count, inter_data_df, inter_level=1, max_interpo
                         if single_CV <= 5:
                             group_rep_mtarix.iloc[
                                 0, group_rep_mtarix.columns.get_loc('Reproducibility Status')] = 'Excellent (CV)'
+                        elif single_CV > 5 and single_CV <= 15:
+                            group_rep_mtarix.iloc[
+                                0, group_rep_mtarix.columns.get_loc('Reproducibility Status')] = 'Acceptable (CV)'
                         else:
                             group_rep_mtarix.iloc[
                                 0, group_rep_mtarix.columns.get_loc('Reproducibility Status')] = 'Acceptable (P-Value)'
