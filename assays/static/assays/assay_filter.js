@@ -29,6 +29,29 @@ $(document).ready(function() {
 
     var current_context = '';
 
+    // Iterate over matching placeholders and add correct icons
+    var treatment_icon = $('<span>')
+        .addClass('glyphicon glyphicon-folder-open')
+        .attr('title', 'This parameter contributes to the definition of a Treatment Group.');
+
+    var color_icon = $('<span>')
+        .addClass('glyphicon glyphicon-tint')
+        .attr('title', 'This parameter contributes to chart Colors.');
+
+    var trellis_icon = $('<span>')
+        .addClass('glyphicon glyphicon-th-large')
+        .attr('title', 'This parameter contributes to Trellising.');
+
+    $('[data-group-type="treatment"]').each(function() {
+        $(this).append(treatment_icon.clone());
+    });
+    $('[data-group-type="color"]').each(function() {
+        $(this).append(color_icon.clone());
+    });
+    $('[data-group-type="trellis"]').each(function() {
+        $(this).append(trellis_icon.clone());
+    });
+
     function show_plots() {
         current_context = 'plots';
 
@@ -486,9 +509,17 @@ $(document).ready(function() {
 
         // TO SORT
         var all_icc = repro_table_data_full[set];
+        var methods = [
+            '',
+            'Nearest',
+            'Linear',
+            'Quadratic',
+            'Cubic'
+        ];
 
-        $.each(all_icc, function(interpolation, data) {
-            if (interpolation !== 'best') {
+        $.each(methods, function(index, interpolation) {
+            var data = all_icc[interpolation];
+            if (data) {
                 var row = '<tr>' +
                     '<td>' + interpolation + '</td>' +
                     '<td>' + data[2] + '</td>' +
@@ -496,14 +527,11 @@ $(document).ready(function() {
                     '<td>' + data[6] +'</td>' +
                     '<td>' + data[7] +'</td>';
 
-                repro_status_html = '<td>';
-                repro_status = $('<span>');
+                repro_status = $('<td>');
 
                 get_repro_status(data[8], data[9], repro_status);
 
-                repro_status_html += repro_status[0].outerHTML + '</td>';
-
-                row += repro_status_html;
+                row += repro_status[0].outerHTML;
 
                 row += '</tr>';
 
