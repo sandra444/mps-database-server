@@ -1659,7 +1659,7 @@ def Inter_reproducibility(group_count, inter_data_df, inter_level=1, max_interpo
     # Define all columns of original and
     # Loop every unique replicate group
     for row in range(group_count):
-        print 'Group ' + str(row + 1)
+        # print 'Group ' + str(row + 1)
         group_id = str(row + 1)
         # group_chip_data = chip_data[chip_data['Treatment Group'] == 'Group ' + str(row + 1)]
         group_chip_data = chip_data[chip_data['Treatment Group'] == str(row + 1)]
