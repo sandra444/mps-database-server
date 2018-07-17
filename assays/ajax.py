@@ -1593,13 +1593,14 @@ def fetch_pre_submission_filters(request):
             excluded=False,
             value__isnull=False
         ).count()
-    else:
-        number_of_points = AssayDataPoint.objects.filter(
-            study_id__in=accessible_studies,
-            replaced=False,
-            excluded=False,
-            value__isnull=False
-        ).count()
+    # Do not default to showing all data points
+    # else:
+    #     number_of_points = AssayDataPoint.objects.filter(
+    #         study_id__in=accessible_studies,
+    #         replaced=False,
+    #         excluded=False,
+    #         value__isnull=False
+    #     ).count()
 
     data = {
         'filters': {
