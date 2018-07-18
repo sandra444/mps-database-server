@@ -1859,11 +1859,11 @@ class AssayMatrixItem(FlaggableModel):
             criteria = {}
         dic = {
             # 'device': self.device.name,
-            'organ_model': self.get_hyperlinked_model_or_device(),
-            'compounds': self.stringify_compounds(criteria.get('compound', None)),
-            'cells': self.stringify_cells(criteria.get('cell', None)),
-            'settings': self.stringify_settings(criteria.get('setting', None)),
-            'setups_with_same_group': []
+            'MPS Model': self.get_hyperlinked_model_or_device(),
+            'Compounds': self.stringify_compounds(criteria.get('compound', None)),
+            'Cells': self.stringify_cells(criteria.get('cell', None)),
+            'Settings': self.stringify_settings(criteria.get('setting', None)),
+            'Items with Same Treatment': []
         }
         return dic
 

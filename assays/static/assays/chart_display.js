@@ -148,21 +148,21 @@ $(document).ready(function () {
         if (!header_keys) {
             header_keys = [
                 // 'device',
-                'organ_model',
-                'cells',
-                'compounds',
-                'settings',
-                'setups_with_same_group'
+                'MPS Model',
+                'Cells',
+                'Compounds',
+                'Settings',
+                'Items with Same Treatment'
             ];
         }
 
         var headers = {
             // 'device': 'Device',
-            'organ_model': 'MPS Model',
-            'cells': 'Cells',
-            'compounds': 'Compounds',
-            'settings': 'Settings',
-            'setups_with_same_group': 'Chips/Wells'
+            'MPS Model': 'MPS Model',
+            'Cells': 'Cells',
+            'Compounds': 'Compounds',
+            'Settings': 'Settings',
+            'Items with Same Treatment': 'Chips/Wells'
         };
 
         if (treatment_group_data_table) {
@@ -202,7 +202,7 @@ $(document).ready(function () {
                 new_row.append(new_td);
 
                 // Somewhat sloppy conditional
-                if (current_header === 'setups_with_same_group') {
+                if (current_header === 'Items with Same Treatment') {
                     $.each(new_td.find('a'), function (anchor_index, anchor) {
                         device_to_group[anchor.text] = index;
                     });
