@@ -71,4 +71,9 @@
             Log Scale Y-Axis&nbsp;
         </label>
     </div>
+
+    {# Inline JS is a little risque, but expedient #}
+    <div class="padded-row padded-bottom">
+        <a role="button" onclick="$('#{{ chart_prefix }}').toggle('slow');$(this).text($(this).text() === 'Show' ? 'Hide' : 'Show');" class="btn btn-info">Hide Charts</a>
+    </div>
 </div>

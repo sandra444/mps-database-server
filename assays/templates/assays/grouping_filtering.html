@@ -2,7 +2,12 @@
 <script src="{% static "assays/grouping_filtering.js" %}"></script>
 
 <div id="filtering" class="well">
-    <div class="row">
+    {# Inline JS is a little risque, but expedient #}
+    <div class="padded-row padded-bottom">
+        <a role="button" onclick="$('#filtering_tables').toggle('slow');$(this).text($(this).text() === 'Hide' ? 'Show' : 'Hide');" class="btn btn-info">Show Grouping/Filtering</a>
+    </div>
+
+    <div hidden class="row" id="filtering_tables">
     <div class="col-xs-3">
         <p class="text-center">
             <label>
@@ -608,7 +613,7 @@
     </div>
 </div>
 <div class="row text-center">
-    <a role="button" id="refresh_plots" class="btn btn-info btn-block">Refresh</a>
+    <a role="button" id="refresh_plots" class="btn btn-primary btn-lg">Refresh</a>
 </div>
 </div>
 
