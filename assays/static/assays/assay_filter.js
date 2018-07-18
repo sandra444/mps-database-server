@@ -335,7 +335,8 @@ $(document).ready(function() {
                             $(td).css('vertical-align', 'middle')
                         }
                     },
-                    "sortable": false
+                    "sortable": false,
+                    width: '7.5%'
                 },
                 {
                     title: "Set",
@@ -362,10 +363,10 @@ $(document).ready(function() {
                 },
                 // {title: "Max Interpolated", data: '2'},
                 {title: legend_key, data: '3'},
-                {title: "# of Overlapping Time Points", data: '4'},
+                {title: "# of Overlapping Time Points", data: '4', width: '10%'},
                 {title: "<span style='white-space: nowrap;'>Max CV<br>or CV " + cv_tooltip + "</span>", data: '5'},
                 {title: "<span style='white-space: nowrap;'>ICC " + icc_tooltip + "</span>", data: '6'},
-                {title: "<span style='white-space: nowrap;'>ANOVA P-Value " + anova_tooltip + "</span>", data: '7'},
+                {title: "<span>ANOVA<br>P-Value " + anova_tooltip + "</span>", data: '7', width: '10%'},
                 {
                     title: "Reproducibility<br>Status " + repro_tooltip,
                     data: '8',
@@ -434,7 +435,7 @@ $(document).ready(function() {
         repro_table.rows().every(function() {
             var data = this.data();
             var group = data[0];
-            var method = data[1];
+            // var method = data[1];
             var icc_status = data[8];
             var current_clone = item_to_copy.first().clone(true);
             current_clone.addClass('repro-'+group);
@@ -445,16 +446,6 @@ $(document).ready(function() {
             var icc_table = current_clone.find('[data-id="icc-table"]');
 
             repro_title.html('Set ' + group);
-
-            // if (icc_status[0] === 'E'){
-            //     repro_status.html('<em>'+icc_status+'</em>').css("background-color", "#74ff5b");
-            // } else if (icc_status[0] === 'A'){
-            //     repro_status.html('<em>'+icc_status+'</em>').css("background-color", "#fcfa8d");
-            // } else if (icc_status[0] === 'P'){
-            //     repro_status.html('<em>'+icc_status+'</em>').css("background-color", "#ff7863");
-            // } else {
-            //     repro_status.html('<em>'+icc_status+'</em><small style="color: black;"><span data-toggle="tooltip" title="'+data[13]+'" class="glyphicon glyphicon-question-sign" aria-hidden="true"></span></small>').css("background-color", "Grey");
-            // }
 
             get_repro_status(icc_status, data[13], repro_status);
 
@@ -576,7 +567,8 @@ $(document).ready(function() {
             }
             var data = google.visualization.arrayToDataTable(values);
             var options = {
-                title: content_type,
+                // Make sure title case
+                title: content_type[0].toUpperCase() + content_type.substr(1),
                 interpolateNulls: true,
                 titleTextStyle: {
                     fontSize: 18,
@@ -626,7 +618,8 @@ $(document).ready(function() {
                 // Individual point tooltips, not aggregate
                 focusTarget: 'datum',
                 // Use an HTML tooltip.
-                tooltip: {isHtml: true},
+                // TODO TODO TODO
+                // tooltip: {isHtml: true},
                 intervals: {
                     style: 'sticks'
                 }
