@@ -29,6 +29,7 @@ import pandas as pd
 import numpy as np
 import scipy.interpolate as sp
 import scipy.stats as stats
+from scipy.interpolate import CubicSpline
 
 import csv
 
@@ -1356,33 +1357,37 @@ def ICC_A(X):
 
     Count_Row = icc_mat.shape[0]  # gives number of row count
     Count_Col = icc_mat.shape[1]  # gives number of col count
+    if Count_Row < 2:
+        ICC_A = np.nan
+    elif Count_Col < 2:
+        ICC_A = np.nan
+    else:
+        # ICC row mean
+        icc_row_mean = icc_mat.mean(axis=1)
 
-    # ICC row mean
-    icc_row_mean = icc_mat.mean(axis=1)
+        # ICC column mean
+        icc_col_mean = icc_mat.mean(axis=0)
 
-    # ICC column mean
-    icc_col_mean = icc_mat.mean(axis=0)
+        # ICC total mean
+        icc_total_mean = icc_mat.mean()
 
-    # ICC total mean
-    icc_total_mean = icc_mat.mean()
+        # Sum of squre row and column means
+        SSC = sum((icc_col_mean - icc_total_mean) ** 2) * Count_Row
 
-    # Sum of squre row and column means
-    SSC = sum((icc_col_mean - icc_total_mean) ** 2) * Count_Row
+        SSR = sum((icc_row_mean - icc_total_mean) ** 2) * Count_Col
 
-    SSR = sum((icc_row_mean - icc_total_mean) ** 2) * Count_Col
+        # sum of squre errors
+        SSE = 0
+        for row in range(Count_Row):
+            for col in range(Count_Col):
+                SSE = SSE + (icc_mat[row, col] - icc_row_mean[row] - icc_col_mean[col] + icc_total_mean) ** 2
 
-    # sum of squre errors
-    SSE = 0
-    for row in range(Count_Row):
-        for col in range(Count_Col):
-            SSE = SSE + (icc_mat[row, col] - icc_row_mean[row] - icc_col_mean[col] + icc_total_mean) ** 2
-
-    # SSW = SSE + SSC
-    MSR = SSR / (Count_Row - 1)
-    MSE = SSE / ((Count_Row - 1) * (Count_Col - 1))
-    MSC = SSC / (Count_Col - 1)
-    # MSW = SSW / (Count_Row*(Count_Col-1))
-    ICC_A = (MSR - MSE) / (MSR + (Count_Col - 1) * MSE + Count_Col * (MSC - MSE) / Count_Row)
+        # SSW = SSE + SSC
+        MSR = SSR / (Count_Row - 1)
+        MSE = SSE / ((Count_Row - 1) * (Count_Col - 1))
+        MSC = SSC / (Count_Col - 1)
+        # MSW = SSW / (Count_Row*(Count_Col-1))
+        ICC_A = (MSR - MSE) / (MSR + (Count_Col - 1) * MSE + Count_Col * (MSC - MSE) / Count_Row)
     return ICC_A
 
 
@@ -1407,7 +1412,10 @@ def Inter_Reproducibility_Index(X):
 
     Y = X.dropna()
     Max_CV_value = Inter_Max_CV(Y)  # Call Max CV function
-    ICC_Value = ICC_A(Y)  # Call ICC function
+    if Y.shape[0] > 1 and Y.shape[1] > 1:
+        ICC_Value = ICC_A(Y)  # Call ICC function
+    else:
+        ICC_Value = np.nan
     # Create a reproducibility index dataframe
     rep_index = pd.DataFrame(index=range(1), columns=['Max CV', 'ICC Absolute Agreement'],
                              dtype='float')  # define the empty dataframe
@@ -1421,12 +1429,22 @@ def fill_nan(A, interp_method):
     '''
     interpolate to fill nan values
     '''
-    inds = np.arange(A.shape[0])
-    # print "total # " + str(inds)
-    good = np.where(np.isfinite(A))
-    f = sp.interp1d(inds[good], A[good], kind=interp_method, bounds_error=False)
-    B = np.where(np.isfinite(A), A, f(inds))
-    return B
+    try:
+        inds = np.arange(A.shape[0])
+        # print "total # " + str(inds)
+        good = np.where(np.isfinite(A))
+        if interp_method == 'cubic':
+            cs = CubicSpline(inds[good], A[good], extrapolate=False)
+            B = np.where(np.isfinite(A), A, cs(inds))
+            fill_status = True
+        else:
+            f = sp.interp1d(inds[good], A[good], kind=interp_method, bounds_error=False)
+            B = np.where(np.isfinite(A), A, f(inds))
+            fill_status = True
+    except ValueError:
+        B = A
+        fill_status = False
+    return B, fill_status
 
 
 def update_missing_nan(update_missing_block, A):
@@ -1494,13 +1512,13 @@ def matrix_interpolate(group_chip_data, interp_method, inter_level):
         interp_group_matrix = pd.pivot_table(group_chip_data, values='Value', index='Time', columns=['Study ID'],
                                              aggfunc=np.mean)
 
-    header_list = interp_group_matrix.columns.values.tolist()
+    fill_header_list = interp_group_matrix.columns.values.tolist()
     for col in range(interp_group_matrix.shape[1]):
         # print col
         df_arr = interp_group_matrix.values[:, col]
         df_s = interp_group_matrix.iloc[:, col]
         if max_in_nan_size_array(df_s) > 0:
-            interp_group_matrix[header_list[col]] = fill_nan(df_arr, interp_method)
+            [interp_group_matrix[fill_header_list[col]], fill_status] = fill_nan(df_arr, interp_method)
     return interp_group_matrix
 
 
@@ -1508,29 +1526,41 @@ def update_group_reproducibility_index_status(group_rep_mtarix, rep_index):
     group_rep_mtarix.iloc[0, group_rep_mtarix.columns.get_loc('ICC Absolute Agreement')] = rep_index.iloc[0, 1]
     group_rep_mtarix.iloc[0, group_rep_mtarix.columns.get_loc('Max CV')] = rep_index.iloc[0, 0]
 
-    if pd.isnull(rep_index.iloc[0, 1]) == True:
-        if rep_index.iloc[0, 0] <= 5:
-            group_rep_mtarix.iloc[0, group_rep_mtarix.columns.get_loc('Reproducibility Status')] = 'Excellent (CV)'
-        elif rep_index.iloc[0, 0] > 5 and rep_index.iloc[0, 0] <= 15:
-            group_rep_mtarix.iloc[0, group_rep_mtarix.columns.get_loc('Reproducibility Status')] = 'Acceptable (CV)'
-        else:
-            group_rep_mtarix.iloc[0, group_rep_mtarix.columns.get_loc('Reproducibility Status')] = 'Poor (CV)'
+    if group_rep_mtarix.iloc[0, 4] == 0:
+        group_rep_mtarix.iloc[
+            0, group_rep_mtarix.columns.get_loc('Reproducibility Note')] = 'No overlaped time for comparing'
     else:
-        if rep_index.iloc[0][0] <= 15 and rep_index.iloc[0][0] > 0:
-            if rep_index.iloc[0][0] <= 5:
+        if pd.isnull(rep_index.iloc[0, 1]) == True:
+            if rep_index.iloc[0, 0] <= 5:
                 group_rep_mtarix.iloc[0, group_rep_mtarix.columns.get_loc('Reproducibility Status')] = 'Excellent (CV)'
-            elif rep_index.iloc[0][1] >= 0.8:
-                group_rep_mtarix.iloc[0, group_rep_mtarix.columns.get_loc('Reproducibility Status')] = 'Excellent (ICC)'
-            else:
+            elif rep_index.iloc[0, 0] > 5 and rep_index.iloc[0, 0] <= 15:
                 group_rep_mtarix.iloc[0, group_rep_mtarix.columns.get_loc('Reproducibility Status')] = 'Acceptable (CV)'
-        else:
-            if rep_index.iloc[0][1] >= 0.8:
-                group_rep_mtarix.iloc[0, group_rep_mtarix.columns.get_loc('Reproducibility Status')] = 'Excellent (ICC)'
-            elif rep_index.iloc[0][1] >= 0.2:
-                group_rep_mtarix.iloc[
-                    0, group_rep_mtarix.columns.get_loc('Reproducibility Status')] = 'Acceptable (ICC)'
+            elif rep_index.iloc[0, 0] > 15:
+                group_rep_mtarix.iloc[0, group_rep_mtarix.columns.get_loc('Reproducibility Status')] = 'Poor (CV)'
             else:
-                group_rep_mtarix.iloc[0, group_rep_mtarix.columns.get_loc('Reproducibility Status')] = 'Poor (ICC)'
+                group_rep_mtarix.iloc[0, group_rep_mtarix.columns.get_loc('Reproducibility Status')] = np.nan
+        else:
+            if rep_index.iloc[0][0] <= 15 and rep_index.iloc[0][0] > 0:
+                if rep_index.iloc[0][0] <= 5:
+                    group_rep_mtarix.iloc[
+                        0, group_rep_mtarix.columns.get_loc('Reproducibility Status')] = 'Excellent (CV)'
+                elif rep_index.iloc[0][1] >= 0.8:
+                    group_rep_mtarix.iloc[
+                        0, group_rep_mtarix.columns.get_loc('Reproducibility Status')] = 'Excellent (ICC)'
+                else:
+                    group_rep_mtarix.iloc[
+                        0, group_rep_mtarix.columns.get_loc('Reproducibility Status')] = 'Acceptable (CV)'
+            else:
+                if rep_index.iloc[0][1] >= 0.8:
+                    group_rep_mtarix.iloc[
+                        0, group_rep_mtarix.columns.get_loc('Reproducibility Status')] = 'Excellent (ICC)'
+                elif rep_index.iloc[0][1] >= 0.2:
+                    group_rep_mtarix.iloc[
+                        0, group_rep_mtarix.columns.get_loc('Reproducibility Status')] = 'Acceptable (ICC)'
+                elif rep_index.iloc[0][1] < 0.2:
+                    group_rep_mtarix.iloc[0, group_rep_mtarix.columns.get_loc('Reproducibility Status')] = 'Poor (ICC)'
+                else:
+                    group_rep_mtarix.iloc[0, group_rep_mtarix.columns.get_loc('Reproducibility Status')] = np.nan
     return group_rep_mtarix
 
 
@@ -1697,13 +1727,18 @@ def Inter_reproducibility(group_count, inter_data_df, inter_level=1, max_interpo
                 reproducibility_results_table = reproducibility_results_table.append(group_rep_mtarix,
                                                                                      ignore_index=True)
             else:
-                if initial_Norm == 1:
+                if initial_Norm == 1 and pivot_group_matrix.shape[0] > 0:
                     # Normalize each center data by the start data value
                     norm_pivot_group_matrix = pivot_group_matrix
                     for norm_col in range(pivot_group_matrix.shape[1]):
                         first_value = pivot_group_matrix.iloc[:, norm_col].dropna().values[0]
+                        if first_value == 0 and pivot_group_matrix.shape[0] > 1:
+                            for norm_row in range(pivot_group_matrix.shape[0]):
+                                if pivot_group_matrix.iloc[:, norm_col].dropna().values[norm_row] > 0:
+                                    first_value = pivot_group_matrix.iloc[:, norm_col].dropna().values[norm_row]
+
                         for norm_row in range(pivot_group_matrix.shape[0]):
-                            if pd.isnull(pivot_group_matrix.iloc[norm_row, norm_col]) == False:
+                            if pd.isnull(pivot_group_matrix.iloc[norm_row, norm_col]) == False and first_value > 0:
                                 norm_pivot_group_matrix.iloc[norm_row, norm_col] = pivot_group_matrix.iloc[
                                                                                        norm_row, norm_col] / first_value
                     pivot_group_matrix = norm_pivot_group_matrix
@@ -1730,6 +1765,7 @@ def Inter_reproducibility(group_count, inter_data_df, inter_level=1, max_interpo
                 elif no_nan_matrix.shape[0] < 1:
                     group_rep_mtarix = pd.DataFrame(index=[0], columns=header_list)
                     group_rep_mtarix.iloc[0, group_rep_mtarix.columns.get_loc('Treatment Group')] = group_id
+                    group_rep_mtarix.iloc[0, 3] = no_nan_matrix.shape[1]
                     group_rep_mtarix.iloc[0, 4] = 0
                     group_rep_mtarix.iloc[
                         0, group_rep_mtarix.columns.get_loc('Reproducibility Note')] = 'No overlaped time for comparing'
