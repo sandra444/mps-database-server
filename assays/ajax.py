@@ -64,6 +64,7 @@ alphanum_key = lambda key: [
     ) for c in re.split('([0-9]+)', key)
 ]
 
+alphanum_key_for_item_groups = lambda pair: re.split('([0-9]+)', pair[0])
 
 # TODO REFACTOR Rather than passing the same thing over and over, we can make an object with attributes!
 # def main(request):
@@ -784,6 +785,9 @@ def get_item_groups(study, criteria, matrix_items=None):
         current_representative.get('Items with Same Treatment').append(
             setup.get_hyperlinked_name()
         )
+        current_representative.setdefault('names for items', []).append(
+            setup.name
+        )
         setup_to_treatment_group.update({setup.id: current_representative})
 
     # Attempt to sort reasonably
@@ -798,7 +802,13 @@ def get_item_groups(study, criteria, matrix_items=None):
     )
 
     for index, representative in enumerate(sorted_treatment_groups):
-        representative.get('Items with Same Treatment').sort()
+        items = representative.get('Items with Same Treatment')
+        item_names = representative.get('names for items')
+        sorted_items = [x for _, x in sorted(zip(item_names, items), key=alphanum_key_for_item_groups)]
+        # representative.get('Items with Same Treatment').sort()
+        representative.update({
+            'Items with Same Treatment': sorted_items
+        })
         representative.update({
             'Items with Same Treatment': ', '.join(representative.get('Items with Same Treatment')),
             'index': index
