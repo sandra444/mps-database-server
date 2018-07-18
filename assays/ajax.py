@@ -750,16 +750,17 @@ def get_item_groups(study, criteria, matrix_items=None):
             'cell': DEFAULT_CELL_CRITERIA
         }
 
+    # TODO TODO TODO REVISE THESE MAGIC KEYS
     if criteria.get('setup', ''):
-        header_keys.append('organ_model')
+        header_keys.append('MPS Model')
     if criteria.get('cell', ''):
-        header_keys.append('cells')
+        header_keys.append('Cells')
     if criteria.get('compound', ''):
-        header_keys.append('compounds')
+        header_keys.append('Compounds')
     if criteria.get('setting', ''):
-        header_keys.append('settings')
+        header_keys.append('Settings')
 
-    header_keys.append('setups_with_same_group')
+    header_keys.append('Items with Same Treatment')
 
     setup_attribute_getter = tuple_attrgetter(*criteria.get('setup', ['']))
 
@@ -780,7 +781,7 @@ def get_item_groups(study, criteria, matrix_items=None):
 
         current_representative = treatment_groups.setdefault(treatment_group_tuple, setup.quick_dic(criteria))
 
-        current_representative.get('setups_with_same_group').append(
+        current_representative.get('Items with Same Treatment').append(
             setup.get_hyperlinked_name()
         )
         setup_to_treatment_group.update({setup.id: current_representative})
@@ -788,18 +789,18 @@ def get_item_groups(study, criteria, matrix_items=None):
     # Attempt to sort reasonably
     sorted_treatment_groups = sorted(
         treatment_groups.values(), key=lambda x: (
-            x.get('compounds'),
-            x.get('organ_model'),
-            x.get('cells'),
-            x.get('settings'),
-            x.get('setups_with_same_group')[0]
+            x.get('Compounds'),
+            x.get('MPS Model'),
+            x.get('Cells'),
+            x.get('Settings'),
+            x.get('Items with Same Treatment')[0]
         )
     )
 
     for index, representative in enumerate(sorted_treatment_groups):
-        representative.get('setups_with_same_group').sort()
+        representative.get('Items with Same Treatment').sort()
         representative.update({
-            'setups_with_same_group': ', '.join(representative.get('setups_with_same_group')),
+            'Items with Same Treatment': ', '.join(representative.get('Items with Same Treatment')),
             'index': index
         })
 
