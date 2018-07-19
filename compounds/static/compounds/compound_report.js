@@ -373,7 +373,7 @@ $(document).ready(function () {
     });
 
     window.onhashchange = function() {
-        if (location.hash != '#show') {
+        if (location.hash !== '#show') {
             $('#graphic').prop('hidden', true);
             $('#selection').prop('hidden', false);
             // Hide the header for results
