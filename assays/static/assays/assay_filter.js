@@ -257,6 +257,10 @@ $(document).ready(function() {
     var repro_info_table_display = $('#repro_info_table_display');
     var area_to_copy_to = $("#expanded_data");
 
+    var inter_level = $('#inter_level_by_center').prop('checked') ? 1 : 0;
+    var max_interpolation_size = $('#max_interpolation_size').val();
+    var initial_norm = $('#initial_norm').prop('checked') ? 1 : 0;
+
     function show_repro() {
         // Hide fixed headers
         $.each(filters, function (filter, contents) {
@@ -268,9 +272,9 @@ $(document).ready(function() {
         $('#inter_repro').show();
         $('#grouping_filtering').show();
 
-        var inter_level = $('#inter_level_by_center').prop('checked') ? 1 : 0;
-        var max_interpolation_size = $('#max_interpolation_size').val();
-        var initial_norm = $('#initial_norm').prop('checked') ? 1 : 0;
+        inter_level = $('#inter_level_by_center').prop('checked') ? 1 : 0;
+        max_interpolation_size = $('#max_interpolation_size').val();
+        initial_norm = $('#initial_norm').prop('checked') ? 1 : 0;
 
         // Define what the legend is
         // TODO TODO TODO CONTRIVED FOR NOW
@@ -549,6 +553,14 @@ $(document).ready(function() {
 
         $.each(chart_content_types, function(index, content_type) {
             var values = chart_data[set][content_type];
+
+            var current_value_unit = value_unit;
+
+            // Beware magic strings
+            if (initial_norm && content_type !== 'item' && content_type !== 'average') {
+                current_value_unit = 'Normalized by Initial Value';
+            }
+
             if (values == null) {
                 return true;
             }
@@ -595,7 +607,7 @@ $(document).ready(function() {
                     }
                 },
                 vAxis: {
-                    title: value_unit,
+                    title: current_value_unit,
                     format: 'short',
                     textStyle: {
                         bold: true

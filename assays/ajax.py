@@ -1493,7 +1493,11 @@ def fetch_pre_submission_filters(request):
     groups = {}
     targets = {}
     compounds = {}
+
     number_of_points = 0
+    # TODO TODO TODO
+    number_of_studies = 0
+    number_of_centers = 0
 
     if filters_present:
         if current_filters.get('organ_models', []):
@@ -1502,6 +1506,8 @@ def fetch_pre_submission_filters(request):
             # In case changes in filters eliminate all organ models
             if new_organ_model_ids:
                 organ_model_ids = new_organ_model_ids
+        else:
+            organ_model_ids = []
 
         accessible_matrix_items = accessible_matrix_items.filter(
             organ_model_id__in=organ_model_ids
@@ -1520,6 +1526,8 @@ def fetch_pre_submission_filters(request):
 
         if current_filters.get('groups', []):
             group_ids = [int(id) for id in current_filters.get('groups', []) if int(id) in group_ids]
+        else:
+            group_ids = []
 
         accessible_studies = accessible_studies.filter(group_id__in=group_ids)
 
@@ -1552,6 +1560,11 @@ def fetch_pre_submission_filters(request):
             accessible_matrix_items = accessible_matrix_items.filter(
                 assaydatapoint__study_assay__in=accessible_study_assays
             ).distinct()
+        else:
+            # Default to None
+            target_ids = []
+            accessible_study_assays = AssayStudyAssay.objects.none()
+            accessible_matrix_items = AssayMatrixItem.objects.none()
 
         accessible_compounds = AssaySetupCompound.objects.filter(
             matrix_item__in=accessible_matrix_items
@@ -1583,7 +1596,10 @@ def fetch_pre_submission_filters(request):
             else:
                 include_no_compounds = False
         else:
-            include_no_compounds = True
+            # Default to none
+            compound_ids = []
+            include_no_compounds = False
+            # include_no_compounds = True
 
         # Compensate for no compounds
         if include_no_compounds:
@@ -1652,6 +1668,9 @@ def fetch_data_points_from_filters(request):
             matrix_items = matrix_items.filter(
                 organ_model_id__in=organ_model_ids
             )
+        # Default to empty
+        else:
+            matrix_items = AssayMatrixItem.objects.none()
 
         accessible_studies = accessible_studies.filter(
             id__in=list(matrix_items.values_list('study_id', flat=True))
@@ -1669,6 +1688,8 @@ def fetch_data_points_from_filters(request):
             matrix_items = matrix_items.filter(
                 study_id__in=accessible_studies
             )
+        else:
+            matrix_items = AssayMatrixItem.objects.none()
 
         if current_filters.get('compounds', []):
             compound_ids = [int(id) for id in current_filters.get('compounds', []) if id]
@@ -1676,6 +1697,8 @@ def fetch_data_points_from_filters(request):
             matrix_items = matrix_items.filter(
                 assaysetupcompound__compound_instance__compound_id__in=compound_ids
             ) | matrix_items.filter(assaysetupcompound__isnull=True)
+        else:
+            matrix_items = AssayMatrixItem.objects.none()
 
         if current_filters.get('targets', []):
             target_ids = [int(id) for id in current_filters.get('targets', []) if id]
@@ -1687,6 +1710,8 @@ def fetch_data_points_from_filters(request):
             pre_filter.update({
                 'study_assay__target_id__in': target_ids
             })
+        else:
+            matrix_items = AssayMatrixItem.objects.none()
 
         pre_filter.update({
             'matrix_item_id__in': matrix_items.filter(assaydatapoint__isnull=False).distinct()
