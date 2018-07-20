@@ -431,7 +431,7 @@ $(document).ready(function() {
                     "targets": [1]
                 },
                 {
-                    "sSortDataType": "dom-checkbox",
+                    sortable: false,
                     "targets": [8]
                 }
             ]

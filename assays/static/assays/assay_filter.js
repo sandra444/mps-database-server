@@ -108,6 +108,10 @@ $(document).ready(function() {
         number_of_points_container_selector.addClass('text-warning');
         number_of_points_selector.html('Calculating, Please Wait');
 
+        // Disable all checkboxes
+        // $('.filter-checkbox').attr('disabled', 'disabled');
+        $('.filter-table').addClass('gray-out');
+
         $.ajax({
             url: "/assays_ajax/",
             type: "POST",
@@ -165,10 +169,10 @@ $(document).ready(function() {
                     $.each(contents, function (index, content) {
                         var content_id = content[0];
                         var content_name = content[1];
-                        var checkbox = '<input class="big-checkbox filter-checkbox" data-filter="' + filter + '" type="checkbox" value="' + content_id + '">';
+                        var checkbox = '<input class="big-checkbox filter-checkbox" data-table-index="' + index + '" data-filter="' + filter + '" type="checkbox" value="' + content_id + '">';
                         if (initial_filter[content_id]) {
                             current_filter[content_id] = true;
-                            checkbox = '<input checked class="big-checkbox filter-checkbox" data-filter="' + filter + '" type="checkbox" value="' + content_id + '">';
+                            checkbox = '<input class="big-checkbox filter-checkbox" data-table-index="' + index + '" data-filter="' + filter + '" type="checkbox" value="' + content_id + '" checked>';
                         }
 
                         rows_to_add.push(
@@ -199,7 +203,7 @@ $(document).ready(function() {
                         bDestroy: true,
                         columnDefs: [
                             // Treat the group column as if it were just the number
-                            { "type": "dom-checkbox", "targets": 0, "width": "10%" },
+                            { "sSortDataType": "dom-checkbox", "targets": 0, "width": "10%" },
                             { "className": "dt-center", "targets": 0}
                         ]
                     });
@@ -212,23 +216,97 @@ $(document).ready(function() {
 
                 // Recalculate fixed headers
                 $($.fn.dataTable.tables(true)).DataTable().fixedHeader.adjust();
+
+                // Enable buttons
+                $('.filter-table').removeClass('gray-out');
             },
             error: function (xhr, errmsg, err) {
                 number_of_points_container_selector.removeClass('text-warning text-success');
                 number_of_points_container_selector.addClass('text-danger');
                 number_of_points_selector.html('An Error has Occurred');
+
+                // Enable boxes
+                // $('.filter-checkbox').removeAttr('disabled');
+                $('.filter-table').removeClass('gray-out');
+
                 console.log(xhr.status + ": " + xhr.responseText);
             }
         });
     }
 
-    $(document).on('change', '.filter-checkbox', function() {
-        if (this.checked) {
-            filters[$(this).attr('data-filter')][this.value] = true;
+    // Add a check to datatables data to make sorting work properly (and ensure no missing checks)
+    function modify_checkbox(current_table, checkbox, add_or_remove, data_filter) {
+        var checkbox_index = $(checkbox).attr('data-table-index');
+        var checkbox_data_filter = $(checkbox).attr('data-filter');
+
+        if (add_or_remove) {
+            $(checkbox).attr('checked', 'checked');
+
+            current_table.data()[
+                checkbox_index
+            ][0] = current_table.data()[
+                checkbox_index
+            ][0].replace('>', ' checked>');
+
+            if (data_filter) {
+                data_filter[checkbox_data_filter][checkbox.value] = true;
+            }
         }
         else {
-            delete filters[$(this).attr('data-filter')][this.value];
+            $(checkbox).removeAttr('checked');
+
+            current_table.data()[
+                checkbox_index
+            ][0] = current_table.data()[
+                checkbox_index
+            ][0].replace(' checked>', '>');
+
+            if (data_filter) {
+                delete data_filter[checkbox_data_filter][checkbox.value];
+            }
         }
+    }
+
+    // Triggers for select all
+    $('.filter-select-all').click(function() {
+        var current_table = $(this).attr('data-target-id');
+        current_table = $('#' + current_table);
+        current_data_table = current_table.DataTable();
+
+        current_data_table.page.len(-1).draw();
+
+        current_table.find('.filter-checkbox').each(function() {
+            modify_checkbox(current_data_table, this, true, filters);
+        });
+
+        current_data_table.order([[1, 'asc']]);
+        current_data_table.page.len(10).draw();
+
+        refresh_filters(current_table.attr('data-filter'));
+    });
+
+    // Triggers for deselect all
+    $('.filter-deselect-all').click(function() {
+        var current_table = $(this).attr('data-target-id');
+        current_table = $('#' + current_table);
+        current_data_table = current_table.DataTable();
+
+        current_data_table.page.len(-1).draw();
+
+        current_table.find('.filter-checkbox').each(function() {
+            modify_checkbox(current_data_table, this, false, filters);
+        });
+
+        current_data_table.order([[1, 'asc']]);
+        current_data_table.page.len(10).draw();
+
+        refresh_filters(current_table.attr('data-filter'));
+    });
+
+    $(document).on('change', '.filter-checkbox', function() {
+        var current_table = $(this).parent().parent().parent().parent().DataTable();
+
+        modify_checkbox(current_table, this, $(this).prop('checked'), filters);
         refresh_filters($(this).attr('data-filter'));
     });
     refresh_filters();
@@ -325,11 +403,11 @@ $(document).ready(function() {
             columns: [
                 {
                     title: "Show Details",
-                    "render": function (data, type, row) {
+                    "render": function (data, type, row, meta) {
                         // if (type === 'display' && row[1] === '') {
                         if (type === 'display') {
                             // var groupNum = row[10];
-                            return '<input type="checkbox" class="big-checkbox repro-checkbox" data-repro-set="' + row[0] + '">';
+                            return '<input type="checkbox" class="big-checkbox repro-checkbox" data-table-index="' + meta.row + '" data-repro-set="' + row[0] + '">';
                         }
                         return '';
                     },
@@ -745,7 +823,7 @@ $(document).ready(function() {
 
     function order_info(orderList){
         for (var i=0; i < orderList.length; i++) {
-            $('#clone-container .repro-'+orderList[i]).appendTo('#clone-container');
+            $('#expanded_data .repro-'+orderList[i]).appendTo('#expanded_data');
         }
     }
     // TODO TODO TODO END REPRO STUFF
