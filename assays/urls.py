@@ -91,6 +91,13 @@ urlpatterns = [
     # Images
     url(r'^assays/assaystudy/(?P<pk>[0-9]+)/images/$', AssayStudyImages.as_view(), name='study-images'),
 
+    # Targets and Methods
+    url(r'^assays/targets/$', AssayTargetList.as_view(), name='assay-targets-list'),
+    url(r'^assays/targets/(?P<pk>[0-9]+)/$', AssayTargetDetail.as_view(), name='assay-targets-detail'),
+    url(r'^assays/methods/$', AssayMethodList.as_view(), name='assay-methods-list'),
+    url(r'^assays/methods/(?P<pk>[0-9]+)/$', AssayMethodDetail.as_view(), name='assay-methods-detail'),
+
+
     url(r'^assays/test_filter/$', TestFilterView.as_view(), name='test-filter'),
 
     # Ajax

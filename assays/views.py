@@ -1599,3 +1599,23 @@ class AssayStudyImages(StudyViewerMixin, DetailView):
 
 class TestFilterView(TemplateView):
     template_name = 'assays/test_filter.html'
+
+
+class AssayTargetList(ListView):
+    model = AssayTarget
+    template_name = 'assays/assaytarget_list.html'
+
+
+class AssayTargetDetail(DetailView):
+    model = AssayTarget
+    template_name = 'assays/assaytarget_detail.html'
+
+
+class AssayMethodList(ListView):
+    model = AssayMethod
+    template_name = 'assays/assaymethod_list.html'
+
+
+class AssayMethodDetail(DetailView):
+    model = AssayMethod
+    template_name = 'assays/assaymethod_detail.html'

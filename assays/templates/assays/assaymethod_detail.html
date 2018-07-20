@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block breadcrumbs %}
+    <li><a href="assays/targets/">Methods</a></li>
+    <li class="active">{{ object.name }}</li>
+{% endblock %}
+
+{% block content %}
+    <div class="padded-bottom">
+        <legend>
+            <h2 class="text-center">
+                Methods
+            </h2>
+        </legend>
+    </div>
+    <script src="{% static "js/display_datatable.js" %}"></script>
+{% endblock %}
