@@ -408,7 +408,7 @@ $(document).ready(function () {
                 "searchable": true
             },
             {
-                "sSortDataType": "dom-checkbox",
+                sortable: false,
                 "targets": [0]
             }
         ],
