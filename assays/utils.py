@@ -1082,13 +1082,13 @@ def Single_Time_Reproducibility_Index(X):
 
 def Reproducibility_Report(study_data):
     #Calculate and report the reproducibility index and status and other parameters
-     #Select unique group rows by study, organ model,sample location, assay and unit
+    #Select unique group rows by study, organ model,sample location, assay and unit
     #Drop null value rows
     study_data= study_data.dropna(subset=['Value'])
     #Define the Chip ID column to string type
     study_data[['Chip ID']] = study_data[['Chip ID']].astype(str)
 
-    study_group=study_data[["Organ Model","Cells","Compound Treatment(s)","Target/Analyte","Method/Kit","Sample Location","Value Unit"]]
+    study_group=study_data[["Organ Model","Cells","Compound Treatment(s)","Target/Analyte","Method/Kit","Sample Location","Value Unit","Settings"]]
     study_unique_group=study_group.drop_duplicates()
     study_unique_group.set_index([range(study_unique_group.shape[0])],drop=True, append=False, inplace=True)
 
@@ -1115,6 +1115,7 @@ def Reproducibility_Report(study_data):
         rep_matrix=rep_matrix[rep_matrix['Method/Kit']==study_unique_group['Method/Kit'][row]]
         rep_matrix=rep_matrix[rep_matrix['Sample Location']==study_unique_group['Sample Location'][row]]
         rep_matrix=rep_matrix[rep_matrix['Value Unit']==study_unique_group['Value Unit'][row]]
+        rep_matrix=rep_matrix[rep_matrix['Settings']==study_unique_group['Settings'][row]]
         #create replicate matrix for intra reproducibility analysis
         icc_pivot = pd.pivot_table(rep_matrix, values='Value', index='Time (day)',columns=['Chip ID'], aggfunc=np.mean)
         group_id = str(row+1) #Define group ID
@@ -1191,7 +1192,7 @@ def pivot_data_matrix(study_data,group_index):
     #Define the Chip ID column to string type
     study_data[['Chip ID']] = study_data[['Chip ID']].astype(str)
     row=group_index
-    study_group=study_data[["Organ Model","Cells","Compound Treatment(s)","Target/Analyte","Method/Kit","Sample Location","Value Unit"]]
+    study_group=study_data[["Organ Model","Cells","Compound Treatment(s)","Target/Analyte","Method/Kit","Sample Location","Value Unit","Settings"]]
     study_unique_group=study_group.drop_duplicates()
     study_unique_group.set_index([range(study_unique_group.shape[0])],drop=True, append=False, inplace=True)
     rep_matrix=study_data[study_data['Organ Model']==study_unique_group['Organ Model'][row]]
@@ -1201,6 +1202,7 @@ def pivot_data_matrix(study_data,group_index):
     rep_matrix=rep_matrix[rep_matrix['Method/Kit']==study_unique_group['Method/Kit'][row]]
     rep_matrix=rep_matrix[rep_matrix['Sample Location']==study_unique_group['Sample Location'][row]]
     rep_matrix=rep_matrix[rep_matrix['Value Unit']==study_unique_group['Value Unit'][row]]
+    rep_matrix=rep_matrix[rep_matrix['Settings']==study_unique_group['Settings'][row]]
     #create replicate matrix for intra reproducibility analysis
     icc_pivot = pd.pivot_table(rep_matrix, values='Value', index='Time (day)',columns=['Chip ID'], aggfunc=np.mean)
     return icc_pivot
@@ -1212,7 +1214,7 @@ def scatter_plot_matrix(study_data,group_index):
     #Define the Chip ID column to string type
     study_data[['Chip ID']] = study_data[['Chip ID']].astype(str)
     row=group_index
-    study_group=study_data[["Organ Model","Cells","Compound Treatment(s)","Target/Analyte","Method/Kit","Sample Location","Value Unit"]]
+    study_group=study_data[["Organ Model","Cells","Compound Treatment(s)","Target/Analyte","Method/Kit","Sample Location","Value Unit","Settings"]]
     study_unique_group=study_group.drop_duplicates()
     study_unique_group.set_index([range(study_unique_group.shape[0])],drop=True, append=False, inplace=True)
     rep_matrix=study_data[study_data['Organ Model']==study_unique_group['Organ Model'][row]]
@@ -1222,6 +1224,7 @@ def scatter_plot_matrix(study_data,group_index):
     rep_matrix=rep_matrix[rep_matrix['Method/Kit']==study_unique_group['Method/Kit'][row]]
     rep_matrix=rep_matrix[rep_matrix['Sample Location']==study_unique_group['Sample Location'][row]]
     rep_matrix=rep_matrix[rep_matrix['Value Unit']==study_unique_group['Value Unit'][row]]
+    rep_matrix=rep_matrix[rep_matrix['Settings']==study_unique_group['Settings'][row]]
     #create replicate matrix for intra reproducibility analysis
     icc_pivot = pd.pivot_table(rep_matrix, values='Value', index='Time (day)',columns=['Chip ID'], aggfunc=np.mean)
     if icc_pivot.isnull().sum().sum()>0:
@@ -1256,7 +1259,7 @@ def get_repro_data(datafile):
     study_data["Time (day)"] = study_data["Time (day)"].apply(lambda x: round(x,2))
 
     #Select unique group rows by study, organ model,sample location, assay and unit
-    study_group=study_data[["Organ Model","Cells","Compound Treatment(s)","Target/Analyte","Method/Kit","Sample Location","Value Unit"]]
+    study_group=study_data[["Organ Model","Cells","Compound Treatment(s)","Target/Analyte","Method/Kit","Sample Location","Value Unit","Settings"]]
     study_unique_group=study_group.drop_duplicates()
     study_unique_group.set_index([range(study_unique_group.shape[0])],drop=True, append=False, inplace=True)
 
