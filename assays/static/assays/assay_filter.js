@@ -904,6 +904,12 @@ $(document).ready(function() {
 
         $(this).addClass('hidden');
 
+        // Destroy repro
+        if (repro_table) {
+            repro_table.clear();
+            repro_table.destroy();
+        }
+
         // Hide any lingering fixed headers
         if ($.fn.DataTable.isDataTable(treatment_group_table)) {
             treatment_group_table.DataTable().fixedHeader.disable();
