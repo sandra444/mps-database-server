@@ -2011,6 +2011,9 @@ def get_inter_study_reproducibility(
         initial_norm
     )
 
+    if inter_data_table.get('errors', ''):
+        return inter_data_table
+
     reproducibility_results_table = reproducibility_results_table.astype(object).replace(np.nan, '')
     # results_columns = [i for i in reproducibility_results_table.columns]
     # results_rows = results_columns + [[row[i] for i in range(1, len(row))] for row in reproducibility_results_table.itertuples()]

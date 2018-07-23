@@ -1877,16 +1877,17 @@ def get_inter_study_reproducibility_report(group_count, inter_data, inter_level,
         center_group = inter_data_df[["MPS User Group"]]
         center_unique_group = center_group.drop_duplicates()
         if len(center_unique_group.axes[0]) < 2:
-            return {
+            return [{}, {
                 'errors': 'Only one MPS User Group! The cross-center reproducibility can not be analyzed.'
-            }
+                          '\nPlease try selecting the "By Study" option and clicking "Refresh."'
+            }]
     else:
         study_group = inter_data_df[["Study ID"]]
         study_unique_group = study_group.drop_duplicates()
         if len(study_unique_group.axes[0]) < 2:
-            return {
+            return [{}, {
                 'errors': 'Only one Study! The cross-study reproducibility can not be analyzed.'
-            }
+            }]
 
     # Return the summary and datatable
     return Inter_reproducibility(

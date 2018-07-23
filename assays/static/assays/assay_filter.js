@@ -275,12 +275,18 @@ $(document).ready(function() {
 
         current_data_table.page.len(-1).draw();
 
+        // Recalculate fixed headers
+        $($.fn.dataTable.tables(true)).DataTable().fixedHeader.adjust();
+
         current_table.find('.filter-checkbox').each(function() {
             modify_checkbox(current_data_table, this, true, filters);
         });
 
         current_data_table.order([[1, 'asc']]);
         current_data_table.page.len(10).draw();
+
+        // Recalculate fixed headers
+        $($.fn.dataTable.tables(true)).DataTable().fixedHeader.adjust();
 
         refresh_filters(current_table.attr('data-filter'));
     });
@@ -293,12 +299,18 @@ $(document).ready(function() {
 
         current_data_table.page.len(-1).draw();
 
+        // Recalculate fixed headers
+        $($.fn.dataTable.tables(true)).DataTable().fixedHeader.adjust();
+
         current_table.find('.filter-checkbox').each(function() {
             modify_checkbox(current_data_table, this, false, filters);
         });
 
         current_data_table.order([[1, 'asc']]);
         current_data_table.page.len(10).draw();
+
+        // Recalculate fixed headers
+        $($.fn.dataTable.tables(true)).DataTable().fixedHeader.adjust();
 
         refresh_filters(current_table.attr('data-filter'));
     });
@@ -382,6 +394,13 @@ $(document).ready(function() {
                 },
                 type: 'POST',
                 dataSrc: function (json) {
+                    // A little unpleasant
+                    if (json.errors) {
+                        alert(json.errors);
+
+                        return [];
+                    }
+
                     repro_table_data_full = json.repro_table_data_full;
                     repro_table_data_best = json.repro_table_data_best;
                     chart_data = json.chart_data;
@@ -390,12 +409,6 @@ $(document).ready(function() {
                     treatment_groups = json.treatment_groups;
 
                     value_unit_index = json.header_keys.data.indexOf('Value Unit');
-
-                    console.log(repro_table_data_full);
-                    console.log(chart_data);
-                    console.log(data_groups);
-                    console.log(header_keys);
-                    console.log(treatment_groups);
 
                     return repro_table_data_best;
                 }
