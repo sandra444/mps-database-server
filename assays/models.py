@@ -1868,13 +1868,13 @@ class AssayMatrixItem(FlaggableModel):
         return dic
 
     def get_hyperlinked_name(self):
-        return '<a href="{0}">{1}</a>'.format(self.get_absolute_url(), self.name)
+        return '<a target="_blank" href="{0}">{1}</a>'.format(self.get_absolute_url(), self.name)
 
     def get_hyperlinked_model_or_device(self):
         if not self.organ_model:
-            return '<a href="{0}">{1} (No Organ Model)</a>'.format(self.device.get_absolute_url(), self.device.name)
+            return '<a target="_blank" href="{0}">{1} (No Organ Model)</a>'.format(self.device.get_absolute_url(), self.device.name)
         else:
-            return '<a href="{0}">{1}</a>'.format(self.organ_model.get_absolute_url(), self.organ_model.name)
+            return '<a target="_blank" href="{0}">{1}</a>'.format(self.organ_model.get_absolute_url(), self.organ_model.name)
 
     # TODO TODO TODO CHANGE
     def get_absolute_url(self):
