@@ -1591,7 +1591,7 @@ def fetch_pre_submission_filters(request):
                 compound_ids = new_compound_ids
 
             # A little odd
-            if 0 in new_compound_ids:
+            if '0' in current_filters.get('compounds', []):
                 include_no_compounds = True
             else:
                 include_no_compounds = False
@@ -1694,9 +1694,16 @@ def fetch_data_points_from_filters(request):
         if current_filters.get('compounds', []):
             compound_ids = [int(id) for id in current_filters.get('compounds', []) if id]
 
-            matrix_items = matrix_items.filter(
-                assaysetupcompound__compound_instance__compound_id__in=compound_ids
-            ) | matrix_items.filter(assaysetupcompound__isnull=True)
+            # See whether to include no compounds
+            if '0' in current_filters.get('compounds', []):
+                matrix_items = matrix_items.filter(
+                    assaysetupcompound__compound_instance__compound_id__in=compound_ids
+                ) | matrix_items.filter(assaysetupcompound__isnull=True)
+            else:
+                matrix_items = matrix_items.filter(
+                    assaysetupcompound__compound_instance__compound_id__in=compound_ids
+                )
+
         else:
             matrix_items = AssayMatrixItem.objects.none()
 

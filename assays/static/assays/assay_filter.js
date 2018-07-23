@@ -411,6 +411,11 @@ $(document).ready(function() {
                     value_unit_index = json.header_keys.data.indexOf('Value Unit');
 
                     return repro_table_data_best;
+                },
+                // Error callback
+                error: function (xhr, errmsg, err) {
+                    alert('An error has occurred, please try different selections.');
+                    console.log(xhr.status + ": " + xhr.responseText);
                 }
             },
             columns: [
