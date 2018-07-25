@@ -70,6 +70,7 @@ $(document).ready(function() {
             intention: 'charting',
             filters: JSON.stringify(filters),
             criteria: JSON.stringify(window.GROUPING.get_grouping_filtering()),
+            post_filter: JSON.stringify(window.GROUPING.current_post_filter),
             csrfmiddlewaretoken: window.COOKIES.csrfmiddlewaretoken
         };
 
@@ -387,6 +388,7 @@ $(document).ready(function() {
                     intention: 'inter_repro',
                     filters: JSON.stringify(filters),
                     criteria: JSON.stringify(window.GROUPING.get_grouping_filtering()),
+                    post_filter: JSON.stringify(window.GROUPING.current_post_filter),
                     inter_level: inter_level,
                     max_interpolation_size: max_interpolation_size,
                     initial_norm: initial_norm,
@@ -409,6 +411,11 @@ $(document).ready(function() {
                     treatment_groups = json.treatment_groups;
 
                     value_unit_index = json.header_keys.data.indexOf('Value Unit');
+
+                    if (window.GROUPING.full_post_filter === null) {
+                        window.GROUPING.full_post_filter = json.post_filter;
+                        window.GROUPING.current_post_filter = JSON.parse(JSON.stringify(json.post_filter));
+                    }
 
                     return repro_table_data_best;
                 },
@@ -893,6 +900,10 @@ $(document).ready(function() {
     });
 
     back_button_selector.click(function() {
+        // Reset post_filter
+        window.GROUPING.full_post_filter = null;
+        window.GROUPING.current_post_filter = {};
+
         $('#filter').show();
         $('.filter-table').show();
 

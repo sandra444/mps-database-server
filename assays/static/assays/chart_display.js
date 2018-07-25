@@ -45,25 +45,6 @@ $(document).ready(function () {
     var device_to_group = {};
     var all_treatment_groups = [];
 
-    // CONTRIVED DIALOG
-    // Interestingly, this dialog should be separate and apart from chart_options
-    // Really, I might as well make it from JS here
-    // TODO PLEASE MAKE THIS NOT CONTRIVED SOON
-    var dialog_example = $('#filter_popup');
-    if (dialog_example) {
-        dialog_example.dialog({
-           closeOnEscape: true,
-           autoOpen: false,
-           close: function() {
-               $('body').removeClass('stop-scrolling');
-           },
-           open: function() {
-               $('body').addClass('stop-scrolling');
-           }
-        });
-        dialog_example.removeProp('hidden');
-    }
-
     window.CHARTS.prepare_chart_options = function(charts) {
         var options = {};
 
@@ -348,6 +329,13 @@ $(document).ready(function () {
     // };
 
     window.CHARTS.make_charts = function(json, charts, changes_to_options) {
+        console.log(json);
+        // post_filter setup
+        if (window.GROUPING.full_post_filter === null) {
+            window.GROUPING.full_post_filter = json.post_filter;
+            window.GROUPING.current_post_filter = JSON.parse(JSON.stringify(json.post_filter));
+        }
+
         // Remove triggers
         if (all_events[charts]) {
             $.each(all_events[charts], function(index, event) {
@@ -606,10 +594,4 @@ $(document).ready(function () {
             all_events[charts].push(current_event);
         }
     };
-
-    // Triggers for spawning filters
-    // TODO REVISE THIS TERRIBLE SELECTOR
-    $('.glyphicon-filter').click(function() {
-        dialog_example.dialog('open');
-    });
 });
