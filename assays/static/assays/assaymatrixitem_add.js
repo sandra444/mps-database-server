@@ -464,6 +464,7 @@ $(document).ready(function() {
             matrix_item: matrix_item_id,
             csrfmiddlewaretoken: window.COOKIES.csrfmiddlewaretoken,
             criteria: JSON.stringify(window.GROUPING.get_grouping_filtering()),
+            post_filter: JSON.stringify(window.GROUPING.current_post_filter),
             dynamic_excluded: JSON.stringify(dynamic_excluded)
         };
 

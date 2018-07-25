@@ -26,6 +26,7 @@ $(document).ready(function () {
             call: 'fetch_data_points',
             study: study_id,
             criteria: JSON.stringify(window.GROUPING.get_grouping_filtering()),
+            post_filter: JSON.stringify(window.GROUPING.current_post_filter),
             csrfmiddlewaretoken: window.COOKIES.csrfmiddlewaretoken
         };
 
@@ -59,6 +60,7 @@ $(document).ready(function () {
             call: 'validate_data_file',
             study: study_id,
             criteria: JSON.stringify(window.GROUPING.get_grouping_filtering()),
+            post_filter: JSON.stringify(window.GROUPING.current_post_filter),
             csrfmiddlewaretoken: window.COOKIES.csrfmiddlewaretoken
         //    dynamic_quality: JSON.stringify(dynamic_quality),
         //    include_table: include_table

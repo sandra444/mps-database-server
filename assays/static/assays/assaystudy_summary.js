@@ -18,6 +18,7 @@ $(document).ready(function() {
             call: 'fetch_data_points',
             study: study_id,
             criteria: JSON.stringify(window.GROUPING.get_grouping_filtering()),
+            post_filter: JSON.stringify(window.GROUPING.current_post_filter),
             csrfmiddlewaretoken: window.COOKIES.csrfmiddlewaretoken
         };
 
