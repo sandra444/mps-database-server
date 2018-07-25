@@ -329,7 +329,6 @@ $(document).ready(function () {
     // };
 
     window.CHARTS.make_charts = function(json, charts, changes_to_options) {
-        console.log(json);
         // post_filter setup
         if (window.GROUPING.full_post_filter === null) {
             window.GROUPING.full_post_filter = json.post_filter;
