@@ -121,7 +121,6 @@ $(document).ready(function () {
             autoWidth: false,
             destroy: true,
             dom: '<"wrapper"lfrtip>',
-            fixedHeader: {headerOffset: 50},
             deferRender: true,
             iDisplayLength: 10,
             order: [1, 'asc']
