@@ -1860,7 +1860,7 @@ def acquire_post_filter(studies, assays, matrix_items, data_points):
             current.setdefault(
                 'assaysetupcompound__duration__in', {}
             ).update({
-                compound.addition_time: compound.addition_time
+                compound.duration: compound.duration
             })
 
             current.setdefault(
