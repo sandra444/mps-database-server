@@ -528,9 +528,9 @@ $(document).ready(function() {
         });
 
         // On reorder
-        repro_table.on('order.dt', function () {
+        $('#repro_table').DataTable().on('order.dt', function () {
             var set_order = [];
-            repro_table.column(0, {search:'applied'}).data().each(function(value, index) {
+            $('#repro_table').DataTable().column(0, {search:'applied'}).data().each(function(value, index) {
                 set_order.push(value);
             });
             order_info(set_order);
@@ -919,6 +919,7 @@ $(document).ready(function() {
         if (repro_table) {
             repro_table.clear();
             repro_table.destroy();
+            repro_table = null;
         }
 
         // Hide any lingering fixed headers
