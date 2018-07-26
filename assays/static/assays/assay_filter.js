@@ -530,7 +530,7 @@ $(document).ready(function() {
         // On reorder
         repro_table.on('order.dt', function () {
             var set_order = [];
-            repro_table.column(1, {search:'applied'}).data().each(function(value, index) {
+            repro_table.column(0, {search:'applied'}).data().each(function(value, index) {
                 set_order.push(value);
             });
             order_info(set_order);
@@ -846,7 +846,7 @@ $(document).ready(function() {
         repro_info_table_display.hide();
     });
 
-    function order_info(orderList){
+    function order_info(orderList) {
         for (var i=0; i < orderList.length; i++) {
             $('#expanded_data .repro-'+orderList[i]).appendTo('#expanded_data');
         }

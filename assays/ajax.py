@@ -2485,7 +2485,11 @@ def get_inter_study_reproducibility(
             })
 
     for set, dic in results_rows_full.items():
-        results_rows_best.append(dic.get('best'))
+        current_best = dic.get('best')
+
+        # Make sure it actually has multiple centers/studies
+        if current_best[3] > 1:
+            results_rows_best.append(current_best)
 
     inter_data_table = inter_data_table.astype(object).replace(np.nan, '')
     # inter_data_columns = [i for i in inter_data_table.columns]

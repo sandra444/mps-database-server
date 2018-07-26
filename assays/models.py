@@ -1954,7 +1954,7 @@ class AssaySetupCell(models.Model):
     # duration = models.FloatField(null=True, blank=True)
 
     # TODO TODO TODO TEMPORARILY NOT REQUIRED
-    addition_location = models.ForeignKey(AssaySampleLocation, null=True, blank=True)
+    addition_location = models.ForeignKey(AssaySampleLocation, blank=True, default=1)
 
     # NOT DRY
     def get_addition_time_string(self):
@@ -2186,7 +2186,7 @@ class AssaySetupCompound(models.Model):
     duration = models.FloatField(blank=True)
 
     # TODO TODO TODO TEMPORARILY NOT REQUIRED
-    addition_location = models.ForeignKey(AssaySampleLocation, null=True, blank=True)
+    addition_location = models.ForeignKey(AssaySampleLocation, blank=True, default=1)
 
     # NOT DRY
     def get_addition_time_string(self):
@@ -2373,7 +2373,7 @@ class AssaySetupSetting(models.Model):
     duration = models.FloatField(blank=True)
 
     # TODO TODO TODO TEMPORARILY NOT REQUIRED
-    addition_location = models.ForeignKey(AssaySampleLocation, null=True, blank=True)
+    addition_location = models.ForeignKey(AssaySampleLocation, blank=True, default=1)
 
     # NOT DRY
     def get_addition_time_string(self):
