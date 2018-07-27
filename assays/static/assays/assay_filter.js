@@ -379,6 +379,9 @@ $(document).ready(function() {
             repro_table.destroy();
         }
 
+        // Prevents some issues with spawning another table
+        $('#repro_table').empty();
+
         repro_table = $('#repro_table').DataTable({
             ajax: {
                 url: '/assays_ajax/',
@@ -765,12 +768,12 @@ $(document).ready(function() {
                 i = 1;
                 while (i < data.getNumberOfColumns()) {
                     interval_setter.push(i);
-                    if (i + 2 < data.getNumberOfColumns() && values[0][i + 1].indexOf('~@i1') > -1) {
+                    if (i + 2 < data.getNumberOfColumns() && values[0][i + 1].indexOf(' ~@i1') > -1) {
                         interval_setter.push({sourceColumn: i + 1, role: 'interval'});
                         interval_setter.push({sourceColumn: i + 2, role: 'interval'});
                         i += 2;
                     }
-                    else if (i + 1 < data.getNumberOfColumns() && values[0][i + 1].indexOf('~@s') > -1) {
+                    else if (i + 1 < data.getNumberOfColumns() && values[0][i + 1].indexOf(' ~@s') > -1) {
                         interval_setter.push({sourceColumn: i + 1, type: 'string', role: 'style'});
                         i += 1;
                     }

@@ -467,8 +467,16 @@ $(document).ready(function () {
 
             var chart = null;
 
+            var num_colors = 0;
+
+            $.each(assays[index][0].slice(1), function(index, value) {
+                if (value.indexOf(' ~@i1') === -1) {
+                    num_colors++;
+                }
+            });
+
             // Line chart if more than one time point and less than 101 colors
-            if (assays[index].length > 2 && assays[index][0].length < 101) {
+            if (assays[index].length > 2 && num_colors < 101) {
                 chart = new google.visualization.LineChart(document.getElementById(charts + '_' + index));
 
                 // If the scale is not already small
@@ -484,7 +492,7 @@ $(document).ready(function () {
                 }
             }
             // Nothing if more than 100 colors
-            else if (assays[index][0].length > 100) {
+            else if (num_colors > 100) {
                 document.getElementById(charts + '_' + index).innerHTML = '<div class="alert alert-danger" role="alert">' +
                     '<span class="glyphicon glyphicon-warning-sign" aria-hidden="true"></span>' +
                     '<span class="sr-only">Danger:</span>' +
@@ -520,7 +528,7 @@ $(document).ready(function () {
                 i = 1;
                 while (i < data.getNumberOfColumns()) {
                     interval_setter.push(i);
-                    if (i + 2 < data.getNumberOfColumns() && assays[index][0][i+1].indexOf('~@i1') > -1) {
+                    if (i + 2 < data.getNumberOfColumns() && assays[index][0][i+1].indexOf(' ~@i1') > -1) {
                         interval_setter.push({sourceColumn: i + 1, role: 'interval'});
                         interval_setter.push({sourceColumn: i + 2, role: 'interval'});
                         i += 2;
@@ -543,7 +551,7 @@ $(document).ready(function () {
             group_to_data[charts].push({});
 
             for (i=0; i < assays[index][0].length; i++) {
-                if (assays[index][0][i].indexOf('~@i1') === -1 && assays[index][0][i].indexOf('~@i2') === -1) {
+                if (assays[index][0][i].indexOf(' ~@i1') === -1 && assays[index][0][i].indexOf(' ~@i2') === -1) {
                     // Need to link EACH CHARTS values to the proper group
                     // EMPHASIS ON EACH CHART
                     // Somewhat naive
