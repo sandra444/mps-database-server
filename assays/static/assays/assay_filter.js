@@ -379,6 +379,9 @@ $(document).ready(function() {
             repro_table.destroy();
         }
 
+        // Prevents some issues with spawning another table
+        $('#repro_table').empty();
+
         repro_table = $('#repro_table').DataTable({
             ajax: {
                 url: '/assays_ajax/',
