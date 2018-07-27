@@ -59,12 +59,21 @@ $(document).ready(function () {
         }
     });
 
-// Defines the options for the print, copy, and save as buttons
+    // Defines the options for the print, copy, and save as buttons
     $.extend(true, $.fn.dataTable.defaults, {
         buttons: [
             'copy', 'csv', 'print'
         ]
         // swfPath: '/static/swf/flashExport.swf'
+    });
+
+    // Indicates that floating headers need to be refreshed when a toggle-hide-button is clicked
+    $(document).on('click', '.toggle-hide-button', function() {
+        // Recalculate responsive and fixed headers
+        setTimeout(function() {
+            $($.fn.dataTable.tables(true)).DataTable().responsive.recalc();
+            $($.fn.dataTable.tables(true)).DataTable().fixedHeader.adjust();
+        }, 1000);
     });
 });
 // $.fn.dataTable.TableTools.defaults.aButtons = [
