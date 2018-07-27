@@ -725,7 +725,7 @@ def get_item_groups(study, criteria, matrix_items=None):
     header_keys = []
 
     # By pulling the setups for the study, I avoid problems with preview data
-    if not matrix_items:
+    if matrix_items is None:
         matrix_items = AssayMatrixItem.objects.filter(
             study=study
         )
@@ -1762,6 +1762,11 @@ def acquire_post_filter(studies, assays, matrix_items, data_points):
             study.id: study.name
         })
 
+    assays = assays.prefetch_related(
+        'target',
+        'method'
+    )
+
     for assay in assays:
         current = post_filter.setdefault('assay', {})
 
@@ -1798,6 +1803,20 @@ def acquire_post_filter(studies, assays, matrix_items, data_points):
         0: '-No Settings-'
     })
 
+    matrix_items = matrix_items.prefetch_related(
+        'assaysetupcompound_set__compound_instance__compound',
+        'assaysetupcompound_set__compound_instance__supplier',
+        'assaysetupcompound_set__addition_location',
+        'assaysetupcell_set__cell_sample__cell_type',
+        'assaysetupcell_set__cell_sample__cell_subtype',
+        'assaysetupcell_set__addition_location',
+        'assaysetupcell_set__biosensor',
+        'assaysetupsetting_set__setting',
+        'assaysetupsetting_set__addition_location',
+        'organ_model',
+        'matrix'
+    )
+
     for matrix_item in matrix_items:
         current = post_filter.setdefault('matrix_item', {})
 
@@ -1811,12 +1830,6 @@ def acquire_post_filter(studies, assays, matrix_items, data_points):
             'matrix_id__in', {}
         ).update({
             matrix_item.matrix_id: matrix_item.matrix.name
-        })
-
-        current.setdefault(
-            'organ_model_id__in', {}
-        ).update({
-            matrix_item.organ_model_id: matrix_item.organ_model.name
         })
 
         current.setdefault(
@@ -1937,6 +1950,10 @@ def acquire_post_filter(studies, assays, matrix_items, data_points):
                 setting.addition_location_id: setting.addition_location.name
             })
 
+    data_points = data_points.prefetch_related(
+        'sample_location'
+    )
+
     for data_point in data_points:
         current = post_filter.setdefault('data_point', {})
 
@@ -2054,9 +2071,10 @@ def fetch_data_points_from_filters(request):
             **pre_filter
         ).prefetch_related(
             # TODO
+            'study__group',
             'study_assay__target',
             'study_assay__method',
-            'study_assay__unit',
+            'study_assay__unit__base_unit',
             'sample_location',
             'matrix_item__matrix',
             'subtarget'
