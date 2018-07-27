@@ -13,33 +13,37 @@
     <div class="padded-bottom">
         <legend>
             <h2 class="text-center">
-                Methods
+                Method/Kits
             </h2>
         </legend>
+        <div id="methods" style="display: none;">
+            <table id="models" class="display" cellspacing="0" width="100%">
+                <thead>
+                    <tr>
+                        <th>View</th>
+                        <th>Method</th>
+                        <th>Measurement Type</th>
+                        <th>Supplier</th>
+                        <th>Description</th>
+                        <th>Protocol</th>
+                    </tr>
+                </thead>
 
-        <table id="models" class="display" cellspacing="0" width="100%">
-            <thead>
-                <tr>
-                    <th>View</th>
-                    <th>Method</th>
-                    <th>Supplier</th>
-                    <th>Description</th>
-                    <th>Protocol</th>
-                </tr>
-            </thead>
-
-            <tbody>
-            {% for method in object_list %}
-                 <tr class="method" id="{{ method.id }}">
-                    <td><a class="btn btn-primary" href="{{ method.id }}">View</a></td>
-                    <td>{% if method.alt_name %}{{ method.alt_name }}{% else %}{{ method.name }}{% endif %}</td>
-                    <td>{{ method.supplier }}</td>
-                    <td>{{ method.description }}</td>
-                    <td>{% if method.protocol_file %}<a href="media/{{ method.protocol_file.url }}" download><span data-toggle="tooltip" title="Download protocol file." class="glyphicon glyphicon-file"></span></a>{% else %}{% endif %}</td>
-                </tr>
-            {% endfor %}
-            </tbody>
-        </table>
+                <tbody>
+                {% for method in object_list %}
+                     <tr>
+                        <td><a class="btn btn-{% if method.assays > 0 %}primary" title="View paired target/analytes." href="{{ method.id }}"{% else %}default" style="pointer-events: auto;" title="This method has no paired target/analytes." disabled{% endif %}>View</a></td>
+                        <!--<td>{% if method.alt_name %}{{ method.alt_name }}{% else %}{{ method.name }}{% endif %}</td>-->
+                        <td>{{ method.name }}</td>
+                        <td>{{ method.measurement_type }}</td>
+                        <td>{{ method.supplier }}</td>
+                        <td>{{ method.description }}</td>
+                        <td>{% if method.protocol_file %}<a href="{{ method.protocol_file.url }}" download><span data-toggle="tooltip" title="Download protocol file." class="glyphicon glyphicon-file"></span></a>{% else %}{% endif %}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
 
     <script src="{% static "js/display_datatable.js" %}"></script>

@@ -32,7 +32,8 @@ from assays.forms import (
     AssayStudyStakeholderFormSetFactory,
     AssayStudyDataUploadForm,
     AssayImage,
-    AssayImageSetting
+    AssayImageSetting,
+    AssayStudyAssay
 )
 from django import forms
 
@@ -1605,17 +1606,47 @@ class AssayTargetList(ListView):
     model = AssayTarget
     template_name = 'assays/assaytarget_list.html'
 
+    def get_queryset(self):
+        queryset = AssayTarget.objects.all()
+        for target in queryset:
+            target.assays = AssayStudyAssay.objects.filter(
+                target__name__icontains=target.name
+            ).values_list("target__name").distinct().count()
+        return queryset
+
 
 class AssayTargetDetail(DetailView):
     model = AssayTarget
     template_name = 'assays/assaytarget_detail.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(AssayTargetDetail, self).get_context_data(**kwargs)
+        context['assays'] = AssayStudyAssay.objects.filter(
+            target__name__icontains=self.object.name
+        ).values_list("target__name", "method__name", "method_id").distinct()
+        return context
 
 
 class AssayMethodList(ListView):
     model = AssayMethod
     template_name = 'assays/assaymethod_list.html'
 
+    def get_queryset(self):
+        queryset = AssayMethod.objects.all()
+        for method in queryset:
+            method.assays = AssayStudyAssay.objects.filter(
+                method__name__icontains=method.name
+            ).values_list("method__name").distinct().count()
+        return queryset
+
 
 class AssayMethodDetail(DetailView):
     model = AssayMethod
     template_name = 'assays/assaymethod_detail.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(AssayMethodDetail, self).get_context_data(**kwargs)
+        context['assays'] = AssayStudyAssay.objects.filter(
+            method__name__icontains=self.object.name
+        ).values_list("method__name", "target__name", "target_id").distinct()
+        return context

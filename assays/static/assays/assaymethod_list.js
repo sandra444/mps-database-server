@@ -8,7 +8,7 @@ $(document).ready(function() {
         "aoColumnDefs": [
             {
                 "className": "dt-center",
-                "targets": [0,2,4]
+                "targets": [0,2,5]
             },
             {
                 "responsivePriority": 1,
@@ -19,7 +19,7 @@ $(document).ready(function() {
             {
                 "responsivePriority": 1,
                 "width": '15%',
-                "aTargets": [1]
+                "aTargets": [1,3]
             },
             {
                 "responsivePriority": 3,
@@ -28,14 +28,23 @@ $(document).ready(function() {
             },
             {
                 "responsivePriority": 4,
+                "bSortable": false,
                 "width": '45%',
-                "aTargets": [3]
+                "aTargets": [4]
             },
             {
                 "responsivePriority": 2,
-                "width": '10%',
-                "aTargets": [4]
+                "width": '5%',
+                "aTargets": [5]
             }
         ]
     });
+
+    // Prevent "pop in".
+    $("#methods").css("display", "block");
+
+    // Fix some boundary issues on resize TODO fix more.
+    window.onresize = function() {
+        window.TABLE.responsive.recalc();
+    }
 });
