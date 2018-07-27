@@ -470,7 +470,7 @@ $(document).ready(function () {
             var num_colors = 0;
 
             $.each(assays[index][0].slice(1), function(index, value) {
-                if (value.indexOf('~@i1') === -1) {
+                if (value.indexOf(' ~@i1') === -1) {
                     num_colors++;
                 }
             });
@@ -528,7 +528,7 @@ $(document).ready(function () {
                 i = 1;
                 while (i < data.getNumberOfColumns()) {
                     interval_setter.push(i);
-                    if (i + 2 < data.getNumberOfColumns() && assays[index][0][i+1].indexOf('~@i1') > -1) {
+                    if (i + 2 < data.getNumberOfColumns() && assays[index][0][i+1].indexOf(' ~@i1') > -1) {
                         interval_setter.push({sourceColumn: i + 1, role: 'interval'});
                         interval_setter.push({sourceColumn: i + 2, role: 'interval'});
                         i += 2;
@@ -551,7 +551,7 @@ $(document).ready(function () {
             group_to_data[charts].push({});
 
             for (i=0; i < assays[index][0].length; i++) {
-                if (assays[index][0][i].indexOf('~@i1') === -1 && assays[index][0][i].indexOf('~@i2') === -1) {
+                if (assays[index][0][i].indexOf(' ~@i1') === -1 && assays[index][0][i].indexOf(' ~@i2') === -1) {
                     // Need to link EACH CHARTS values to the proper group
                     // EMPHASIS ON EACH CHART
                     // Somewhat naive
