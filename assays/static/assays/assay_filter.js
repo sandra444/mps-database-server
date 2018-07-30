@@ -223,7 +223,8 @@ $(document).ready(function() {
                     current_table.DataTable({
                         // Cuts out extra unneeded pieces in the table
                         dom: 'lfrtip',
-                        fixedHeader: {headerOffset: 50},
+                        // Scratch the fixedHeader
+                        // fixedHeader: {headerOffset: 50},
                         // order: table_ordering,
                         order: [1, 'asc'],
                         // Needed to destroy old table
@@ -242,7 +243,7 @@ $(document).ready(function() {
                 $('.dataTables_length').css('float', 'right');
 
                 // Recalculate fixed headers
-                $($.fn.dataTable.tables(true)).DataTable().fixedHeader.adjust();
+                // $($.fn.dataTable.tables(true)).DataTable().fixedHeader.adjust();
 
                 // Enable buttons
                 $('.filter-table').removeClass('gray-out');
