@@ -9,6 +9,20 @@ $(document).ready(function() {
         'targets': {}
     };
 
+    var ordered_filters = [
+        'organ_models',
+        'groups',
+        'targets',
+        'compounds'
+    ];
+
+    var filter_empty_messages = {
+        'organ_models': 'Please Select at Least One MPS Model.',
+        'groups': 'Please Select at Least One MPS User Group.',
+        'targets': 'Please Select at Least One Target.',
+        'compounds': 'Please Select at Least One Compound.'
+    };
+
     // var group_criteria = {};
     // var grouping_checkbox_selector = $('.grouping-checkbox');
 
@@ -21,7 +35,7 @@ $(document).ready(function() {
 
     var number_of_points_selector = $('#number_of_points');
     var number_of_points_container_selector = $('#number_of_points_container');
-    var select_user_group_message_selector = $('#select_user_group_message');
+    var make_more_selections_message_selector = $('#make_more_selections_message');
 
     var treatment_group_table = $('#treatment_group_table');
 
@@ -136,13 +150,25 @@ $(document).ready(function() {
                 }
 
                 // Test if this is an "initial" query
-                if (_.isEmpty(json.filters.groups)) {
-                    select_user_group_message_selector.show();
-                    submit_buttons_selector.attr('disabled', 'disabled');
-                }
-                else {
-                    select_user_group_message_selector.hide();
-                }
+                // if (_.isEmpty(json.filters.groups)) {
+                //     make_more_selections_message_selector.show();
+                //     submit_buttons_selector.attr('disabled', 'disabled');
+                // }
+                // else {
+                //     make_more_selections_message_selector.hide();
+                // }
+
+                // Hide initially
+                make_more_selections_message_selector.hide();
+
+                $.each(ordered_filters, function (index, filter) {
+                    if (_.isEmpty(filters[filter])) {
+                        make_more_selections_message_selector.html(filter_empty_messages[filter]);
+                        make_more_selections_message_selector.show();
+                        submit_buttons_selector.attr('disabled', 'disabled');
+                        return false;
+                    }
+                });
 
                 $.each(json.filters, function (filter, contents) {
                     // Do not refresh current
