@@ -806,6 +806,39 @@ $(document).ready(function() {
                 chart.draw(dataView, options);
             }
         });
+
+        var interpolation_methods = [
+            'Nearest',
+            'Linear',
+            'Quadratic',
+            'Cubic'
+        ];
+
+        var current_full_data = repro_table_data_full[set];
+        var current_max = 0;
+        var method_to_show = '';
+
+        // Hide all but highest interpolation
+        // See which interpolation method is best
+        // Also hide the charts at first
+        $.each(interpolation_methods, function(index, method) {
+            var current_row = current_full_data[method];
+            var lower_method = method.toLowerCase();
+
+            $('.repro-' + set).find(
+                '[data-id="' + lower_method + '_chart"]'
+            ).hide();
+
+            if (current_row && current_row[6] > current_max) {
+                current_max = current_row[6];
+                method_to_show = lower_method;
+            }
+        });
+
+        // Show best
+        $('.repro-' + set).find(
+            '[data-id="' + method_to_show + '_chart"]'
+        ).show();
     }
 
     function generate_data_point_tooltip(time, value, chip_id) {
