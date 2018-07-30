@@ -664,6 +664,16 @@ $(document).ready(function() {
         var x_axis_min = Math.floor(first_time) - 1;
         var x_axis_max = Math.ceil(last_time) + 1;
 
+        var y_axis_label_type = 'scientific';
+
+        $.each(item_data_set, function(index, values) {
+            var current = Math.max.apply(null, values.slice(1));
+            if (current > 10) {
+                y_axis_label_type = 'short';
+                return false;
+            }
+        });
+
         $.each(chart_content_types, function(index, content_type) {
             var values = chart_data[set][content_type];
 
@@ -726,7 +736,7 @@ $(document).ready(function() {
                 },
                 vAxis: {
                     title: current_value_unit,
-                    format: 'scientific',
+                    format: y_axis_label_type,
                     textStyle: {
                         bold: true
                     },
@@ -740,7 +750,7 @@ $(document).ready(function() {
                 },
                 pointSize: 5,
                 'chartArea': {
-                    'width': '75%',
+                    'width': '80%',
                     'height': '75%'
                 },
                 'height': 400,
