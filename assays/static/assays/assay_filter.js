@@ -657,6 +657,23 @@ $(document).ready(function() {
 
         var value_unit = data_groups[set][value_unit_index];
 
+        var item_data_set = chart_data[set]['item'];
+        var first_time = item_data_set[1][0];
+        var last_time = item_data_set[item_data_set.length - 1][0];
+
+        var x_axis_min = Math.floor(first_time) - 1;
+        var x_axis_max = Math.ceil(last_time) + 1;
+
+        var y_axis_label_type = 'scientific';
+
+        $.each(item_data_set, function(index, values) {
+            var current = Math.max.apply(null, values.slice(1));
+            if (current > 10) {
+                y_axis_label_type = 'short';
+                return false;
+            }
+        });
+
         $.each(chart_content_types, function(index, content_type) {
             var values = chart_data[set][content_type];
 
@@ -710,11 +727,16 @@ $(document).ready(function() {
                         fontSize: 14,
                         bold: true,
                         italic: false
+                    },
+                    viewWindowMode: 'explicit',
+                    viewWindow: {
+                        min: x_axis_min,
+                        max: x_axis_max
                     }
                 },
                 vAxis: {
                     title: current_value_unit,
-                    format: 'short',
+                    format: y_axis_label_type,
                     textStyle: {
                         bold: true
                     },
@@ -784,6 +806,39 @@ $(document).ready(function() {
                 chart.draw(dataView, options);
             }
         });
+
+        var interpolation_methods = [
+            'Nearest',
+            'Linear',
+            'Quadratic',
+            'Cubic'
+        ];
+
+        var current_full_data = repro_table_data_full[set];
+        var current_max = 0;
+        var method_to_show = '';
+
+        // Hide all but highest interpolation
+        // See which interpolation method is best
+        // Also hide the charts at first
+        $.each(interpolation_methods, function(index, method) {
+            var current_row = current_full_data[method];
+            var lower_method = method.toLowerCase();
+
+            $('.repro-' + set).find(
+                '[data-id="' + lower_method + '_chart"]'
+            ).hide();
+
+            if (current_row && current_row[6] > current_max) {
+                current_max = current_row[6];
+                method_to_show = lower_method;
+            }
+        });
+
+        // Show best
+        $('.repro-' + set).find(
+            '[data-id="' + method_to_show + '_chart"]'
+        ).show();
     }
 
     function generate_data_point_tooltip(time, value, chip_id) {
