@@ -657,6 +657,13 @@ $(document).ready(function() {
 
         var value_unit = data_groups[set][value_unit_index];
 
+        var item_data_set = chart_data[set]['item'];
+        var first_time = item_data_set[1][0];
+        var last_time = item_data_set[item_data_set.length - 1][0];
+
+        var x_axis_min = Math.floor(first_time) - 1;
+        var x_axis_max = Math.ceil(last_time) + 1;
+
         $.each(chart_content_types, function(index, content_type) {
             var values = chart_data[set][content_type];
 
@@ -710,11 +717,16 @@ $(document).ready(function() {
                         fontSize: 14,
                         bold: true,
                         italic: false
+                    },
+                    viewWindowMode: 'explicit',
+                    viewWindow: {
+                        min: x_axis_min,
+                        max: x_axis_max
                     }
                 },
                 vAxis: {
                     title: current_value_unit,
-                    format: 'short',
+                    format: 'scientific',
                     textStyle: {
                         bold: true
                     },
@@ -728,7 +740,7 @@ $(document).ready(function() {
                 },
                 pointSize: 5,
                 'chartArea': {
-                    'width': '80%',
+                    'width': '75%',
                     'height': '75%'
                 },
                 'height': 400,
