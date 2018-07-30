@@ -414,7 +414,7 @@ $(document).ready(function () {
                 },
                 vAxis: {
                     title: unit,
-                    format: 'short',
+                    format: 'scientific',
                     textStyle: {
                         bold: true
                     },
