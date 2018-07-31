@@ -472,12 +472,20 @@ $(document).ready(function() {
 
         data = $.extend(data, options);
 
+        // Show spinner
+        window.spinner.spin(
+            document.getElementById("spinner")
+        );
+
         $.ajax({
             url: "/assays_ajax/",
             type: "POST",
             dataType: "json",
             data: data,
             success: function (json) {
+                // Stop spinner
+                window.spinner.stop();
+
                 window.CHARTS.prepare_side_by_side_charts(json, charts_name);
                 window.CHARTS.make_charts(json, charts_name, changes_to_chart_options);
                 // Recalculate responsive and fixed headers
@@ -485,6 +493,9 @@ $(document).ready(function() {
                 $($.fn.dataTable.tables(true)).DataTable().fixedHeader.adjust();
             },
             error: function (xhr, errmsg, err) {
+                // Stop spinner
+                window.spinner.stop();
+
                 console.log(xhr.status + ": " + xhr.responseText);
             }
         });
