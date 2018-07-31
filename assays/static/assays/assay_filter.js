@@ -92,12 +92,20 @@ $(document).ready(function() {
 
         data = $.extend(data, options);
 
+        // Show spinner
+        window.spinner.spin(
+            document.getElementById("spinner")
+        );
+
         $.ajax({
             url: "/assays_ajax/",
             type: "POST",
             dataType: "json",
             data: data,
             success: function (json) {
+                // Stop spinner
+                window.spinner.stop();
+
                 $('#results').show();
                 $('#filter').hide();
                 $('#grouping_filtering').show();
@@ -113,6 +121,9 @@ $(document).ready(function() {
                 $($.fn.dataTable.tables(true)).DataTable().fixedHeader.adjust();
             },
             error: function (xhr, errmsg, err) {
+                // Stop spinner
+                window.spinner.stop();
+
                 console.log(xhr.status + ": " + xhr.responseText);
             }
         });
@@ -409,6 +420,11 @@ $(document).ready(function() {
         // Prevents some issues with spawning another table
         $('#repro_table').empty();
 
+        // Show spinner
+        window.spinner.spin(
+            document.getElementById("spinner")
+        );
+
         repro_table = $('#repro_table').DataTable({
             ajax: {
                 url: '/assays_ajax/',
@@ -426,6 +442,9 @@ $(document).ready(function() {
                 },
                 type: 'POST',
                 dataSrc: function (json) {
+                    // Stop spinner
+                    window.spinner.stop();
+
                     // A little unpleasant
                     if (json.errors) {
                         alert(json.errors);
@@ -451,6 +470,9 @@ $(document).ready(function() {
                 },
                 // Error callback
                 error: function (xhr, errmsg, err) {
+                    // Stop spinner
+                    window.spinner.stop();
+
                     alert('An error has occurred, please try different selections.');
                     console.log(xhr.status + ": " + xhr.responseText);
                 }

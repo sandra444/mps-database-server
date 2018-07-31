@@ -2,8 +2,6 @@
 {% load static %}
 
 {% block load %}
-    <script src="{% static "js/spin.min.js" %}"></script>
-    <script src="{% static "js/mps_spinner.js" %}"></script>
     <script src="{% static "js/project_filter.js" %}"></script>
     <script src="{% static "compounds/compound_report.js" %}"></script>
 {% endblock %}
@@ -121,8 +119,6 @@
                 </tbody>
         </table>
     </div>
-
-    <div id="spinner"></div>
 
     {# Right now the fields of a report are static, but that will likely change #}
     {# Need to switch to hide full #}

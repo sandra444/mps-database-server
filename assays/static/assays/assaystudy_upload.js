@@ -34,16 +34,27 @@ $(document).ready(function () {
 
         data = $.extend(data, options);
 
+        // Show spinner
+        window.spinner.spin(
+            document.getElementById("spinner")
+        );
+
         $.ajax({
             url: "/assays_ajax/",
             type: "POST",
             dataType: "json",
             data: data,
             success: function (json) {
+                // Stop spinner
+                window.spinner.stop();
+
                 window.CHARTS.prepare_side_by_side_charts(json, charts_name);
                 window.CHARTS.make_charts(json, charts_name);
             },
             error: function (xhr, errmsg, err) {
+                // Stop spinner
+                window.spinner.stop();
+
                 console.log(xhr.status + ": " + xhr.responseText);
             }
         });
@@ -82,6 +93,11 @@ $(document).ready(function () {
         });
 
         if ($("#id_bulk_file")[0].files[0]) {
+            // Show spinner
+            window.spinner.spin(
+                document.getElementById("spinner")
+            );
+
             $.ajax({
                 url: "/assays_ajax/",
                 type: "POST",
@@ -91,6 +107,9 @@ $(document).ready(function () {
                 processData: false,
                 data: formData,
                 success: function (json) {
+                    // Stop spinner
+                    window.spinner.stop();
+
                     // console.log(json);
                     if (json.errors) {
                         // Display errors
@@ -115,6 +134,9 @@ $(document).ready(function () {
                     }
                 },
                 error: function (xhr, errmsg, err) {
+                    // Stop spinner
+                    window.spinner.stop();
+
                     alert('An unknown error has occurred. \nIf you have the file open, you may need to close it.');
                     console.log(xhr.status + ": " + xhr.responseText);
                     // Remove file selection

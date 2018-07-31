@@ -70,67 +70,72 @@ $(document).ready(function () {
     // Triggers for spawning filters
     // TODO REVISE THIS TERRIBLE SELECTOR
     $('.post-filter-spawn').click(function() {
+        // Parent row
+        var current_title = $(this).parent().parent().find('td').eq(2).html();
+
         // Current parent model
         current_parent_model = $(this).attr('data-parent-model');
         // Current filter
         current_filter = $(this).attr('data-filter-relation');
 
         // Set title and header
-        filter_popup_title.html(current_filter);
+        filter_popup_title.html(current_title);
         // filter_popup_header.html(current_filter);
 
-        full_post_filter_data = window.GROUPING.full_post_filter[current_parent_model][current_filter];
-        current_post_filter_data = window.GROUPING.current_post_filter[current_parent_model][current_filter];
+        if (window.GROUPING.full_post_filter && window.GROUPING.full_post_filter[current_parent_model]) {
+            full_post_filter_data = window.GROUPING.full_post_filter[current_parent_model][current_filter];
+            current_post_filter_data = window.GROUPING.current_post_filter[current_parent_model][current_filter];
 
-        // Clear current contents
-        if (filter_data_table) {
-            filter_table.DataTable().clear();
-            filter_table.DataTable().destroy();
-        }
+            // Clear current contents
+            if (filter_data_table) {
+                filter_table.DataTable().clear();
+                filter_table.DataTable().destroy();
+            }
 
-        filter_body.empty();
+            filter_body.empty();
 
-        var html_to_append = [];
+            var html_to_append = [];
 
-        if (full_post_filter_data) {
-            // Spawn checkboxes
-            $.each(full_post_filter_data, function(obj_val, obj_name) {
-                var row = '<tr>';
+            if (full_post_filter_data) {
+                // Spawn checkboxes
+                $.each(full_post_filter_data, function (obj_val, obj_name) {
+                    var row = '<tr>';
 
-                if (current_post_filter_data[obj_val]) {
-                   row += '<td width="10%" class="text-center"><input data-obj-name="' + obj_name + '" class="big-checkbox post-filter-checkbox" type="checkbox" value="' + obj_val + '" checked></td>';
-                }
-                else {
-                    row += '<td width="10%" class="text-center"><input data-obj-name="' + obj_name + '" class="big-checkbox post-filter-checkbox" type="checkbox" value="' + obj_val + '"></td>';
-                }
+                    if (current_post_filter_data[obj_val]) {
+                        row += '<td width="10%" class="text-center"><input data-obj-name="' + obj_name + '" class="big-checkbox post-filter-checkbox" type="checkbox" value="' + obj_val + '" checked></td>';
+                    }
+                    else {
+                        row += '<td width="10%" class="text-center"><input data-obj-name="' + obj_name + '" class="big-checkbox post-filter-checkbox" type="checkbox" value="' + obj_val + '"></td>';
+                    }
 
-                row += '<td>' + obj_name + '</td>';
+                    row += '<td>' + obj_name + '</td>';
 
-                row += '</tr>';
+                    row += '</tr>';
 
-                html_to_append.push(row);
+                    html_to_append.push(row);
+                });
+            }
+            else {
+                html_to_append.push('<tr><td></td><td>No data to display.</td></tr>');
+            }
+
+            filter_body.html(html_to_append.join(''));
+
+            filter_data_table = filter_table.DataTable({
+                autoWidth: false,
+                destroy: true,
+                dom: '<"wrapper"lfrtip>',
+                deferRender: true,
+                iDisplayLength: 10,
+                order: [1, 'asc']
             });
+
+            // Swap positions of filter and length selection; clarify filter
+            $('.dataTables_filter').css('float', 'left').prop('title', 'Separate terms with a space to search multiple fields');
+            $('.dataTables_length').css('float', 'right');
+
+            filter_popup.dialog('open');
         }
-        else {
-            html_to_append.push('<tr><td></td><td>No data to display.</td></tr>');
-        }
-
-        filter_body.html(html_to_append.join(''));
-
-        filter_data_table = filter_table.DataTable({
-            autoWidth: false,
-            destroy: true,
-            dom: '<"wrapper"lfrtip>',
-            deferRender: true,
-            iDisplayLength: 10,
-            order: [1, 'asc']
-        });
-
-        // Swap positions of filter and length selection; clarify filter
-        $('.dataTables_filter').css('float', 'left').prop('title', 'Separate terms with a space to search multiple fields');
-        $('.dataTables_length').css('float', 'right');
-
-        filter_popup.dialog('open');
     });
 
     // TODO CHECKBOX TRIGGER
