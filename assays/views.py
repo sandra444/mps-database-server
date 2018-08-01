@@ -1610,8 +1610,8 @@ class AssayTargetList(ListView):
         queryset = AssayTarget.objects.all()
         for target in queryset:
             target.assays = AssayStudyAssay.objects.filter(
-                target__name__icontains=target.name
-            ).values_list("target__name").distinct().count()
+                target__id=target.id
+            ).exists()
         return queryset
 
 
@@ -1623,7 +1623,7 @@ class AssayTargetDetail(DetailView):
         context = super(AssayTargetDetail, self).get_context_data(**kwargs)
         context['assays'] = AssayStudyAssay.objects.filter(
             target__name__icontains=self.object.name
-        ).values_list("target__name", "method__name", "method_id").distinct()
+        ).values_list("target__name", "method__name", "method_id", "method__description").distinct()
         return context
 
 
@@ -1635,8 +1635,8 @@ class AssayMethodList(ListView):
         queryset = AssayMethod.objects.all()
         for method in queryset:
             method.assays = AssayStudyAssay.objects.filter(
-                method__name__icontains=method.name
-            ).values_list("method__name").distinct().count()
+                method__id=method.id
+            ).exists()
         return queryset
 
 
@@ -1648,5 +1648,5 @@ class AssayMethodDetail(DetailView):
         context = super(AssayMethodDetail, self).get_context_data(**kwargs)
         context['assays'] = AssayStudyAssay.objects.filter(
             method__name__icontains=self.object.name
-        ).values_list("method__name", "target__name", "target_id").distinct()
+        ).values_list("method__name", "target__name", "target_id", "target__description").distinct()
         return context

@@ -29,7 +29,7 @@
                 <tbody>
                 {% for target in object_list %}
                      <tr class="target" id="{{ target.id }}">
-                        <td><a class="btn btn-{% if target.assays > 0 %}primary"{% else %}default" disabled{% endif %} href="{{ target.id }}">View</a></td>
+                        <td><a class="btn btn-{% if target.assays %}primary" title="View paired method/kits." href="{{ target.id }}"{% else %}default" style="pointer-events: auto;" title="This method has no paired method/kits." disabled{% endif %}>View</a></td>
                         <td>{{ target.name }}</td>
                         <td>{{ target.description }}</td>
                     </tr>

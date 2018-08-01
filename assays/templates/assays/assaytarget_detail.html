@@ -22,7 +22,8 @@
                 <thead>
                     <tr>
                         <th>Target/Analyte</th>
-                        <th>Method/Kit</th>
+                        <th>Associated Method/Kit</th>
+                        <th>Description</th>
                     </tr>
                 </thead>
 
@@ -31,6 +32,7 @@
                      <tr class="assay" id="{{ assay.id }}">
                         <td>{{ assay.0 }}</td>
                         <td><a href= "/assays/methods/{{ assay.2 }}/">{{ assay.1 }}</a></td>
+                        <td>{{ assay.3 }}</td>
                     </tr>
                 {% endfor %}
                 </tbody>
