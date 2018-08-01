@@ -138,6 +138,12 @@ $(document).ready(function() {
         // $('.filter-checkbox').attr('disabled', 'disabled');
         $('.filter-table').addClass('gray-out');
 
+        // Change the download href to include the filters
+        var current_download_href = $('#download_submit').attr('href');
+        var initial_href = current_download_href.split('?')[0];
+        var get_for_href = 'filters=' + JSON.stringify(filters);
+        $('#download_submit').attr('href', initial_href + '?' + get_for_href);
+
         $.ajax({
             url: "/assays_ajax/",
             type: "POST",
