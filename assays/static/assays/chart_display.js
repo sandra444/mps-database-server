@@ -124,6 +124,7 @@ $(document).ready(function () {
 
     window.CHARTS.display_treatment_groups = function(treatment_groups, header_keys) {
         device_to_group = {};
+        all_treatment_groups = [];
 
         // TODO KIND OF UGLY
         if (!header_keys) {
@@ -571,16 +572,19 @@ $(document).ready(function () {
             // Makes use of a somewhat zany closure
             var current_event = google.visualization.events.addListener(all_charts[charts][index], 'onmouseover', (function (charts, chart_index) {
                 return function (entry) {
-                    var current_pos = $(all_charts[charts][chart_index].container).position();
-                    var current_top = current_pos.top + 75;
-                    var current_left = $('#breadcrumbs').position.left;
-                    if (entry.row === null && entry.column) {
-                        var row_clone = all_treatment_groups[group_to_data[charts][chart_index][entry.column]].clone().addClass('bg-warning');
-                        if (row_clone) {
-                            $('#group_display_body').empty().append(row_clone);
+                    // Only attempts to display if there is a valid treatment group
+                    if (all_treatment_groups[group_to_data[charts][chart_index][entry.column]]) {
+                        var current_pos = $(all_charts[charts][chart_index].container).position();
+                        var current_top = current_pos.top + 75;
+                        var current_left = $('#breadcrumbs').position.left;
+                        if (entry.row === null && entry.column) {
+                            var row_clone = all_treatment_groups[group_to_data[charts][chart_index][entry.column]].clone().addClass('bg-warning');
+                            if (row_clone) {
+                                $('#group_display_body').empty().append(row_clone);
 
-                            $('#group_display').show()
-                                .css({top: current_top, left: current_left, position:'absolute'});
+                                $('#group_display').show()
+                                    .css({top: current_top, left: current_left, position: 'absolute'});
+                            }
                         }
                     }
                 }
