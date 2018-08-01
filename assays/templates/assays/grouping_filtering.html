@@ -1,0 +1,639 @@
+{% load static %}
+<script src="{% static "assays/grouping_filtering.js" %}"></script>
+
+<div id="filtering" class="well">
+    {# Inline JS is a little risque, but expedient #}
+    <h3 class="text-center">
+        Grouping/Filtering
+    </h3>
+
+    <div class="padded-row padded-bottom">
+        <a role="button" onclick="$('#filtering_tables').toggle('slow');$(this).text($(this).text() === 'Show' ? 'Hide' : 'Show');" class="btn btn-info toggle-hide-button">Hide Grouping/Filtering</a>
+    </div>
+
+    <div class="row" id="filtering_tables">
+    <div class="col-xs-3">
+        <p class="text-center">
+            <label>
+                Assay Metadata
+            </label>
+        </p>
+        <div>
+            <table class="table table-bordered table-condensed bg-white">
+                <thead>
+                    <tr>
+                        <th>Filter</th>
+                        <th>Group</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>
+                            <a data-parent-model='study' data-filter-relation='id__in' role='button' class="btn btn-sm post-filter-spawn">
+                                <span class="glyphicon glyphicon-filter"></span>
+                            </a>
+                        </td>
+                        <td>
+                            {# Exclude from grouping for now #}
+{#                            <input checked type="checkbox" class="grouping-checkbox">#}
+                        </td>
+                        <td>
+                            Study
+                        </td>
+                    </tr>
+                    {# Subject to removal? #}
+{#                    <tr>#}
+{#                        <td>#}
+{#                            <a role='button' class="btn btn-sm">#}
+{#                                <span class="glyphicon glyphicon-filter"></span>#}
+{#                            </a>#}
+{#                        </td>#}
+{#                        <td>#}
+{#                            <input checked type="checkbox" class="grouping-checkbox">#}
+{#                        </td>#}
+{#                        <td>#}
+{#                            Device#}
+{#                        </td>#}
+{#                    </tr>#}
+                    {# Subject to removal? #}
+                    <tr class="text-danger">
+                        <td>
+                            <a data-parent-model='matrix_item' data-filter-relation='organ_model_id__in' role='button' class="btn btn-sm post-filter-spawn">
+                                <span class="glyphicon glyphicon-filter"></span>
+                            </a>
+                        </td>
+                        <td>
+                            <input data-group='organ_model_id' data-group-relation='setup' type="checkbox" class="grouping-checkbox">
+                            <span data-group-type="treatment"></span>
+                        </td>
+                        <td>
+{#                            <span data-group-type="treatment"></span>#}
+                            MPS Model
+                        </td>
+                    </tr>
+                    {# Subject to removal? #}
+{#                    <tr>#}
+{#                        <td>#}
+{#                            <a role='button' class="btn btn-sm post-filter-spawn">#}
+{#                                <span class="glyphicon glyphicon-filter"></span>#}
+{#                            </a>#}
+{#                        </td>#}
+{#                        <td>#}
+{#                            <input checked type="checkbox" class="grouping-checkbox">#}
+{#                        </td>#}
+{#                        <td>#}
+{#                            MPS Model Protocol#}
+{#                        </td>#}
+{#                    </tr>#}
+                    {# Subject to removal? #}
+{#                    <tr>#}
+{#                        <td>#}
+{#                            <a role='button' class="btn btn-sm post-filter-spawn">#}
+{#                                <span class="glyphicon glyphicon-filter"></span>#}
+{#                            </a>#}
+{#                        </td>#}
+{#                        <td>#}
+{#                            <input checked type="checkbox" class="grouping-checkbox">#}
+{#                        </td>#}
+{#                        <td>#}
+{#                            Variance from Protocol#}
+{#                        </td>#}
+{#                    </tr>#}
+                    <tr>
+                        <td>
+                            {# Subject to change #}
+                            <a data-parent-model='matrix_item' data-filter-relation='matrix_id__in' role='button' class="btn btn-sm post-filter-spawn">
+                                <span class="glyphicon glyphicon-filter"></span>
+                            </a>
+                        </td>
+                        <td>
+                            {# Not currently used in grouping #}
+{#                            <input type="checkbox" class="grouping-checkbox">#}
+                        </td>
+                        <td>
+
+                            Matrix
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <a data-parent-model='matrix_item' data-filter-relation='id__in' role='button' class="btn btn-sm post-filter-spawn">
+                                <span class="glyphicon glyphicon-filter"></span>
+                            </a>
+                        </td>
+                        <td>
+                        {# Not currently used in grouping #}
+{#                            <input type="checkbox" class="grouping-checkbox">#}
+                        </td>
+                        <td>
+                            Matrix Item
+                        </td>
+                    </tr>
+                    {# Subject to removal? #}
+{#                    <tr>#}
+{#                        <td>#}
+{#                            <a role='button' class="btn btn-sm post-filter-spawn">#}
+{#                                <span class="glyphicon glyphicon-filter"></span>#}
+{#                            </a>#}
+{#                        </td>#}
+{#                        <td>#}
+                        {# Not currently used in grouping #}
+{#                            <input type="checkbox" class="grouping-checkbox">#}
+{#                        </td>#}
+{#                        <td>#}
+{#                            Test Type#}
+{#                        </td>#}
+{#                    </tr>#}
+                    <tr>
+                        <td>
+                            <a data-parent-model='assay' data-filter-relation='target_id__in' role='button' class="btn btn-sm post-filter-spawn">
+                                <span class="glyphicon glyphicon-filter"></span>
+                            </a>
+                        </td>
+                        <td>
+                        {# For the moment, Target *ALWAYS* acts as a grouping criteria #}
+{#                            <input type="checkbox" class="grouping-checkbox">#}
+                        </td>
+                        <td>
+                           Target/Analyte
+                        </td>
+                    </tr>
+                    {# NOTE THAT THESE ARE SPECIAL EXCEPTIONS TO HOW GROUPING NORMALLY WORKS #}
+                    <tr>
+                        <td>
+                            <a data-parent-model='assay' data-filter-relation='method_id__in' role='button' class="btn btn-sm post-filter-spawn">
+                                <span class="glyphicon glyphicon-filter"></span>
+                            </a>
+                        </td>
+                        <td>
+                            <input data-group='method' data-group-relation='special' type="checkbox" class="grouping-checkbox">
+                            <span data-group-type="trellis"></span>
+                        </td>
+                        <td>
+{#                            <span data-group-type="trellis"></span>#}
+                            Method/Kit
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <a data-parent-model='data_point' data-filter-relation='sample_location_id__in' role='button' class="btn btn-sm post-filter-spawn">
+                                <span class="glyphicon glyphicon-filter"></span>
+                            </a>
+                        </td>
+                        <td>
+                            <input data-group='sample_location' data-group-relation='special' checked type="checkbox" class="grouping-checkbox">
+                            <span data-group-type="color"></span>
+                        </td>
+                        <td>
+{#                            <span data-group-type="color"></span>#}
+                            Sample Location
+                        </td>
+                    </tr>
+{#                    <tr>#}
+{#                        <td>#}
+{#                            <a data-filter-relation='time' role='button' class="btn btn-sm post-filter-spawn">#}
+{#                                <span class="glyphicon glyphicon-filter"></span>#}
+{#                            </a>#}
+{#                        </td>#}
+{#                        <td>#}
+{#                            <input data-group='time' data-group-relation='special' checked type="checkbox" class="grouping-checkbox">#}
+{#                            <span data-group-type="color" data-extra-note="Dose-Response Only"></span>#}
+{#                        </td>#}
+{#                        <td>#}
+{#                            <span data-group-type="color" data-extra-note="Dose-Response Only"></span>#}
+{#                            Sample Time#}
+{#                        </td>#}
+{#                    </tr>#}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+
+    <div class="col-xs-3">
+        <p class="text-center">
+            <label>
+                Cell Metadata
+            </label>
+        </p>
+        <div>
+            <table class="table table-bordered table-condensed bg-white">
+                <thead>
+                    <tr>
+                        <th>Filter</th>
+                        <th>Group</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>
+                            <a data-parent-model='matrix_item' data-filter-relation='assaysetupcell__cell_sample__cell_type_id__in' role='button' class="btn btn-sm post-filter-spawn">
+                                <span class="glyphicon glyphicon-filter"></span>
+                            </a>
+                        </td>
+                        <td>
+                            <input data-group='cell_sample.cell_type_id' checked data-group-relation='cell' type="checkbox" class="grouping-checkbox">
+                            <span data-group-type="treatment"></span>
+                        </td>
+                        <td>
+{#                            <span data-group-type="treatment"></span>#}
+                            Cell Type
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <a data-parent-model='matrix_item' data-filter-relation='assaysetupcell__cell_sample__cell_subtype_id__in' role='button' class="btn btn-sm post-filter-spawn">
+                                <span class="glyphicon glyphicon-filter"></span>
+                            </a>
+                        </td>
+                        <td>
+                            <input data-group='cell_sample.cell_subtype_id' data-group-relation='cell' type="checkbox" class="grouping-checkbox">
+                            <span data-group-type="treatment"></span>
+                        </td>
+                        <td>
+{#                            <span data-group-type="treatment"></span>#}
+                            Cell Origin
+                        </td>
+                    </tr>
+                    {# Maybe hide this for now... #}
+{#                    <tr>#}
+{#                        <td>#}
+{#                            <a data-filter-relation='cell_sample' role='button' class="btn btn-sm post-filter-spawn">#}
+{#                                <span class="glyphicon glyphicon-filter"></span>#}
+{#                            </a>#}
+{#                        </td>#}
+{#                        <td>#}
+{#                            <input data-group='cell_sample_id' data-group-relation='cell' type="checkbox" class="grouping-checkbox">#}
+{#                            <span data-group-type="treatment"></span>#}
+{#                        </td>#}
+{#                        <td>#}
+{#                            <span data-group-type="treatment"></span>#}
+{#                            Cell Sample (Includes Type and Origin)#}
+{#                        </td>#}
+{#                    </tr>#}
+                    <tr>
+                        <td>
+                            <a data-parent-model='matrix_item' data-filter-relation='assaysetupcell__biosensor_id__in' role='button' class="btn btn-sm post-filter-spawn">
+                                <span class="glyphicon glyphicon-filter"></span>
+                            </a>
+                        </td>
+                        <td>
+                            <input data-group='biosensor_id' data-group-relation='cell' type="checkbox" class="grouping-checkbox">
+                            <span data-group-type="treatment"></span>
+                        </td>
+                        <td>
+{#                            <span data-group-type="treatment"></span>#}
+                            Cell Biosensor
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <a data-parent-model='matrix_item' data-filter-relation='assaysetupcell__passage__in' role='button' class="btn btn-sm post-filter-spawn">
+                                <span class="glyphicon glyphicon-filter"></span>
+                            </a>
+                        </td>
+                        <td>
+                            <input data-group='passage' data-group-relation='cell' type="checkbox" class="grouping-checkbox">
+                            <span data-group-type="treatment"></span>
+                        </td>
+                        <td>
+{#                            <span data-group-type="treatment"></span>#}
+                            Cell Passage
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <a data-parent-model='matrix_item' data-filter-relation='assaysetupcell__density__in' role='button' class="btn btn-sm post-filter-spawn">
+                                <span class="glyphicon glyphicon-filter"></span>
+                            </a>
+                        </td>
+                        <td>
+                            <input data-group='density' data-group-relation='cell' type="checkbox" class="grouping-checkbox">
+                            <span data-group-type="treatment"></span>
+                        </td>
+                        <td>
+{#                            <span data-group-type="treatment"></span>#}
+                            Cell Density
+                        </td>
+                    </tr>
+{#                    <tr>#}
+{#                        <td>#}
+{#                            <a role='button' class="btn btn-sm post-filter-spawn">#}
+{#                                <span class="glyphicon glyphicon-filter"></span>#}
+{#                            </a>#}
+{#                        </td>#}
+{#                        <td>#}
+{#                            <input checked type="checkbox" class="grouping-checkbox">#}
+{#                        </td>#}
+{#                        <td>#}
+{#                            Cell Density Unit#}
+{#                        </td>#}
+{#                    </tr>#}
+                    {# SHOULD ADDITION TIME BE HERE #}
+                    <tr>
+                        <td>
+                            <a data-parent-model='matrix_item' data-filter-relation='assaysetupcell__addition_location_id__in' role='button' class="btn btn-sm post-filter-spawn">
+                                <span class="glyphicon glyphicon-filter"></span>
+                            </a>
+                        </td>
+                        <td>
+                            <input data-group='addition_location_id' data-group-relation='cell' checked type="checkbox" class="grouping-checkbox">
+                            <span data-group-type="treatment"></span>
+                        </td>
+                        <td>
+{#                            <span data-group-type="treatment"></span>#}
+                            Cell Addition Location
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+
+
+    <div class="col-xs-3">
+        <p class="text-center">
+            <label>
+                Compound Metadata
+            </label>
+        </p>
+        <div>
+            <table class="table table-bordered table-condensed bg-white">
+                <thead>
+                    <tr>
+                        <th>Filter</th>
+                        <th>Group</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>
+                            <a data-parent-model='matrix_item' data-filter-relation='assaysetupcompound__compound_instance__compound_id__in' role='button' class="btn btn-sm post-filter-spawn">
+                                <span class="glyphicon glyphicon-filter"></span>
+                            </a>
+                        </td>
+                        <td>
+                            <input data-group='compound_instance.compound_id' data-group-relation='compound' checked type="checkbox" class="grouping-checkbox">
+                            <span data-group-type="treatment"></span>
+                        </td>
+                        <td>
+{#                            <span data-group-type="treatment"></span>#}
+                            Compound
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <a data-parent-model='matrix_item' data-filter-relation='assaysetupcompound__compound_instance__supplier_id__in' role='button' class="btn btn-sm post-filter-spawn">
+                                <span class="glyphicon glyphicon-filter"></span>
+                            </a>
+                        </td>
+                        <td>
+                            <input data-group='compound_instance.supplier_id' data-group-relation='compound' type="checkbox" class="grouping-checkbox">
+                            <span data-group-type="treatment"></span>
+                        </td>
+                        <td>
+{#                            <span data-group-type="treatment"></span>#}
+                            Compound Supplier
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <a data-parent-model='matrix_item' data-filter-relation='assaysetupcompound__compound_instance__lot__in' role='button' class="btn btn-sm post-filter-spawn">
+                                <span class="glyphicon glyphicon-filter"></span>
+                            </a>
+                        </td>
+                        <td>
+                            <input data-group='compound_instance.lot' data-group-relation='compound' type="checkbox" class="grouping-checkbox">
+                            <span data-group-type="treatment"></span>
+                        </td>
+                        <td>
+{#                            <span data-group-type="treatment"></span>#}
+                            Compound Lot
+                        </td>
+                    </tr>
+                    {# Maybe hide this for now... #}
+{#                    <tr>#}
+{#                        <td>#}
+{#                            <a role='button' class="btn btn-sm post-filter-spawn">#}
+{#                                <span class="glyphicon glyphicon-filter"></span>#}
+{#                            </a>#}
+{#                        </td>#}
+{#                        <td>#}
+{#                            <input data-group='compound_instance.receipt_date' data-group-relation='compound' type="checkbox" class="grouping-checkbox">#}
+{#                            <span data-group-type="treatment"></span>#}
+{#                        </td>#}
+{#                        <td>#}
+{#                            <span data-group-type="treatment"></span>#}
+{#                            Compound Receipt Date#}
+{#                        </td>#}
+{#                    </tr>#}
+                    <tr>
+                        <td>
+                            <a data-parent-model='matrix_item' data-filter-relation='assaysetupcompound__concentration__in' role='button' class="btn btn-sm post-filter-spawn">
+                                <span class="glyphicon glyphicon-filter"></span>
+                            </a>
+                        </td>
+                        <td>
+                            <input data-group='concentration' data-group-relation='compound' checked type="checkbox" class="grouping-checkbox">
+                            <span data-group-type="treatment"></span>
+                        </td>
+                        <td>
+{#                            <span data-group-type="treatment"></span>#}
+                            Compound Concentration
+                        </td>
+                    </tr>
+{#                    <tr>#}
+{#                        <td>#}
+{#                            <a role='button' class="btn btn-sm post-filter-spawn">#}
+{#                                <span class="glyphicon glyphicon-filter"></span>#}
+{#                            </a>#}
+{#                        </td>#}
+{#                        <td>#}
+{#                            <input checked type="checkbox" class="grouping-checkbox">#}
+{#                        </td>#}
+{#                        <td>#}
+{#                            Compound Concentration Unit#}
+{#                        </td>#}
+{#                    </tr>#}
+                    <tr>
+                        <td>
+                            <a data-parent-model='matrix_item' data-filter-relation='assaysetupcompound__addition_time__in' role='button' class="btn btn-sm post-filter-spawn">
+                                <span class="glyphicon glyphicon-filter"></span>
+                            </a>
+                        </td>
+                        <td>
+                            <input data-group='addition_time' data-group-relation='compound' type="checkbox" class="grouping-checkbox">
+                            <span data-group-type="treatment"></span>
+                        </td>
+                        <td>
+{#                            <span data-group-type="treatment"></span>#}
+                            Compound Addition Time
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <a data-parent-model='matrix_item' data-filter-relation='assaysetupcompound__duration__in' role='button' class="btn btn-sm post-filter-spawn">
+                                <span class="glyphicon glyphicon-filter"></span>
+                            </a>
+                        </td>
+                        <td>
+                            <input data-group='duration' data-group-relation='compound' type="checkbox" class="grouping-checkbox">
+                            <span data-group-type="treatment"></span>
+                        </td>
+                        <td>
+{#                            <span data-group-type="treatment"></span>#}
+                            Compound Addition Duration
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <a data-parent-model='matrix_item' data-filter-relation='assaysetupcompound__addition_location_id__in' role='button' class="btn btn-sm post-filter-spawn">
+                                <span class="glyphicon glyphicon-filter"></span>
+                            </a>
+                        </td>
+                        <td>
+                            <input data-group='addition_location_id' data-group-relation='compound' checked type="checkbox" class="grouping-checkbox">
+                            <span data-group-type="treatment"></span>
+                        </td>
+                        <td>
+{#                            <span data-group-type="treatment"></span>#}
+                            Compound Addition Location
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+
+    <div class="col-xs-3">
+        <p class="text-center">
+            <label>
+                Setting Metadata
+            </label>
+        </p>
+        <div>
+            <table class="table table-bordered table-condensed bg-white">
+                <thead>
+                    <tr>
+                        <th>Filter</th>
+                        <th>Group</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>
+                            <a data-parent-model='matrix_item' data-filter-relation='assaysetupsetting__setting_id__in' role='button' class="btn btn-sm post-filter-spawn">
+                                <span class="glyphicon glyphicon-filter"></span>
+                            </a>
+                        </td>
+                        <td>
+                            <input data-group='setting_id' data-group-relation='setting' checked type="checkbox" class="grouping-checkbox">
+                            <span data-group-type="treatment"></span>
+                        </td>
+                        <td>
+{#                            <span data-group-type="treatment"></span>#}
+                            Setting
+                        </td>
+                    </tr>
+{#                    <tr>#}
+{#                        <td>#}
+{#                            <a role='button' class="btn btn-sm post-filter-spawn">#}
+{#                                <span class="glyphicon glyphicon-filter"></span>#}
+{#                            </a>#}
+{#                        </td>#}
+{#                        <td>#}
+{#                            <input checked type="checkbox" class="grouping-checkbox">#}
+{#                        </td>#}
+{#                        <td>#}
+{#                            Setting Unit#}
+{#                        </td>#}
+{#                    </tr>#}
+                    <tr>
+                        <td>
+                            <a data-parent-model='matrix_item' data-filter-relation='assaysetupsetting__value__in' role='button' class="btn btn-sm post-filter-spawn">
+                                <span class="glyphicon glyphicon-filter"></span>
+                            </a>
+                        </td>
+                        <td>
+                            <input data-group='value' data-group-relation='setting' checked type="checkbox" class="grouping-checkbox">
+                            <span data-group-type="treatment"></span>
+                        </td>
+                        <td>
+{#                            <span data-group-type="treatment"></span>#}
+                            Setting Value
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <a data-parent-model='matrix_item' data-filter-relation='assaysetupsetting__time__in' role='button' class="btn btn-sm post-filter-spawn">
+                                <span class="glyphicon glyphicon-filter"></span>
+                            </a>
+                        </td>
+                        <td>
+                            <input data-group='addition_time' data-group-relation='setting' type="checkbox" class="grouping-checkbox">
+                            <span data-group-type="treatment"></span>
+                        </td>
+                        <td>
+{#                            <span data-group-type="treatment"></span>#}
+                            Setting Time
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <a data-parent-model='matrix_item' data-filter-relation='assaysetupsetting__duration__in' role='button' class="btn btn-sm post-filter-spawn">
+                                <span class="glyphicon glyphicon-filter"></span>
+                            </a>
+                        </td>
+                        <td>
+                            <input data-group='duration' data-group-relation='setting' type="checkbox" class="grouping-checkbox">
+                            <span data-group-type="treatment"></span>
+                        </td>
+                        <td>
+{#                            <span data-group-type="treatment"></span>#}
+                            Setting Duration
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <a data-parent-model='matrix_item' data-filter-relation='assaysetupsetting__addition_location_id__in' role='button' class="btn btn-sm post-filter-spawn">
+                                <span class="glyphicon glyphicon-filter"></span>
+                            </a>
+                        </td>
+                        <td>
+                            <input data-group='addition_location_id' data-group-relation='setting' checked type="checkbox" class="grouping-checkbox">
+                            <span data-group-type="treatment"></span>
+                        </td>
+                        <td>
+{#                            <span data-group-type="treatment"></span>#}
+                            Setting Location
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<div class="row text-center">
+    <a role="button" id="refresh_plots" class="btn btn-primary btn-lg">Refresh</a>
+</div>
+</div>
+
+<div hidden id="filter_popup" title="X">
+{#    <h5></h5>#}
+    <table class="display table" cellspacing="0" width="100%">
+        <thead>
+            <tr>
+                <th>Select</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+</div>

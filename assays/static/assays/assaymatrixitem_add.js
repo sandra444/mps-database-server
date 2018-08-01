@@ -5,6 +5,8 @@ $(document).ready(function() {
     // Set the callback
     google.charts.setOnLoadCallback(get_readout);
 
+    window.GROUPING.refresh_function = get_readout;
+
     var device = $('#id_device');
     var organ_model = $('#id_organ_model');
     var protocol = $('#id_organ_model_protocol');
@@ -429,7 +431,7 @@ $(document).ready(function() {
                     "targets": [1]
                 },
                 {
-                    "sSortDataType": "dom-checkbox",
+                    sortable: false,
                     "targets": [8]
                 }
             ]
@@ -461,6 +463,8 @@ $(document).ready(function() {
             study: study_id,
             matrix_item: matrix_item_id,
             csrfmiddlewaretoken: window.COOKIES.csrfmiddlewaretoken,
+            criteria: JSON.stringify(window.GROUPING.get_grouping_filtering()),
+            post_filter: JSON.stringify(window.GROUPING.current_post_filter),
             dynamic_excluded: JSON.stringify(dynamic_excluded)
         };
 
@@ -468,12 +472,20 @@ $(document).ready(function() {
 
         data = $.extend(data, options);
 
+        // Show spinner
+        window.spinner.spin(
+            document.getElementById("spinner")
+        );
+
         $.ajax({
             url: "/assays_ajax/",
             type: "POST",
             dataType: "json",
             data: data,
             success: function (json) {
+                // Stop spinner
+                window.spinner.stop();
+
                 window.CHARTS.prepare_side_by_side_charts(json, charts_name);
                 window.CHARTS.make_charts(json, charts_name, changes_to_chart_options);
                 // Recalculate responsive and fixed headers
@@ -481,6 +493,9 @@ $(document).ready(function() {
                 $($.fn.dataTable.tables(true)).DataTable().fixedHeader.adjust();
             },
             error: function (xhr, errmsg, err) {
+                // Stop spinner
+                window.spinner.stop();
+
                 console.log(xhr.status + ": " + xhr.responseText);
             }
         });
