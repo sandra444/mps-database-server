@@ -94,6 +94,9 @@ urlpatterns = [
     # Location for test filter, for now
     url(r'^assays/test_filter/$', TestFilterView.as_view(), name='test-filter'),
 
+    # Data from filters
+    url(r'^assays/data_from_filters/$', AssayDataFromFilters.as_view(), name='data-from-filters'),
+
     # Ajax
     url(r'^assays_ajax/$', assays.ajax.ajax),
 ]

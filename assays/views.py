@@ -37,7 +37,7 @@ from assays.forms import (
 from django import forms
 
 # TODO REVISE SPAGHETTI CODE
-from assays.ajax import get_data_as_csv
+from assays.ajax import get_data_as_csv, fetch_data_points_from_filters
 from assays.utils import (
     AssayFileProcessor,
     get_user_accessible_studies
@@ -1593,3 +1593,142 @@ class AssayStudyImages(StudyViewerMixin, DetailView):
 # THESE ARE ONLY TESTS
 class TestFilterView(TemplateView):
     template_name = 'assays/assay_filter.html'
+
+
+# Inappropriate use of CBV
+class AssayDataFromFilters(TemplateView):
+    """Returns a combined file for all data for given filters"""
+    template_name = 'assays/assay_filter.html'
+
+    def render_to_response(self, context, **response_kwargs):
+        pre_filter = {}
+        data = None
+
+        # TODO TODO TODO NOT DRY
+        if self.request.GET.get('filters', None):
+            current_filters = json.loads(self.request.GET.get('filters', '{}'))
+            accessible_studies = get_user_accessible_studies(self.request.user)
+
+            # Notice exclusion of missing organ model
+            matrix_items = AssayMatrixItem.objects.filter(
+                study_id__in=accessible_studies
+            ).exclude(
+                organ_model_id=None
+            ).prefetch_related(
+                'organ_model',
+                # 'assaysetupcompound_set__compound_instance',
+                # 'assaydatapoint_set__study_assay__target'
+            )
+
+            if current_filters.get('organ_models', []):
+                organ_model_ids = [int(id) for id in current_filters.get('organ_models', []) if id]
+
+                matrix_items = matrix_items.filter(
+                    organ_model_id__in=organ_model_ids
+                )
+            # Default to empty
+            else:
+                matrix_items = AssayMatrixItem.objects.none()
+
+            accessible_studies = accessible_studies.filter(
+                id__in=list(matrix_items.values_list('study_id', flat=True))
+            )
+
+            matrix_items.prefetch_related(
+                'assaysetupcompound_set__compound_instance',
+                'assaydatapoint_set__study_assay__target'
+            )
+
+            if current_filters.get('groups', []):
+                group_ids = [int(id) for id in current_filters.get('groups', []) if id]
+                accessible_studies = accessible_studies.filter(group_id__in=group_ids)
+
+                matrix_items = matrix_items.filter(
+                    study_id__in=accessible_studies
+                )
+            else:
+                matrix_items = AssayMatrixItem.objects.none()
+
+            if current_filters.get('compounds', []):
+                compound_ids = [int(id) for id in current_filters.get('compounds', []) if id]
+
+                # See whether to include no compounds
+                if '0' in current_filters.get('compounds', []):
+                    matrix_items = matrix_items.filter(
+                        assaysetupcompound__compound_instance__compound_id__in=compound_ids
+                    ) | matrix_items.filter(assaysetupcompound__isnull=True)
+                else:
+                    matrix_items = matrix_items.filter(
+                        assaysetupcompound__compound_instance__compound_id__in=compound_ids
+                    )
+
+            else:
+                matrix_items = AssayMatrixItem.objects.none()
+
+            if current_filters.get('targets', []):
+                target_ids = [int(id) for id in current_filters.get('targets', []) if id]
+
+                matrix_items = matrix_items.filter(
+                    assaydatapoint__study_assay__target_id__in=target_ids
+                ).distinct()
+
+                pre_filter.update({
+                    'study_assay__target_id__in': target_ids
+                })
+            else:
+                matrix_items = AssayMatrixItem.objects.none()
+
+            pre_filter.update({
+                'matrix_item_id__in': matrix_items.filter(assaydatapoint__isnull=False).distinct()
+            })
+
+            # Not particularly DRY
+            data_points = AssayDataPoint.objects.filter(
+                **pre_filter
+            ).prefetch_related(
+                # TODO
+                'study__group__microphysiologycenter_set',
+                'matrix_item__assaysetupsetting_set__setting',
+                'matrix_item__assaysetupcell_set__cell_sample',
+                'matrix_item__assaysetupcell_set__density_unit',
+                'matrix_item__assaysetupcell_set__cell_sample__cell_type__organ',
+                'matrix_item__assaysetupcompound_set__compound_instance__compound',
+                'matrix_item__assaysetupcompound_set__concentration_unit',
+                'matrix_item__device',
+                'matrix_item__organ_model',
+                'matrix_item__matrix',
+                'study_assay__target',
+                'study_assay__method',
+                'study_assay__unit',
+                'sample_location',
+                # 'data_file_upload',
+                # Will use eventually, maybe
+                'subtarget'
+            ).filter(
+                replaced=False,
+                excluded=False,
+                value__isnull=False
+            ).order_by(
+                'matrix_item__name',
+                'study_assay__target__name',
+                'study_assay__method__name',
+                'time',
+                'sample_location__name',
+                'excluded',
+                'update_number'
+            )
+
+            data = get_data_as_csv(matrix_items, data_points=data_points, include_header=True)
+
+        if data:
+            # Should do eventually
+            # include_all = self.request.GET.get('include_all', False)
+
+            # For specifically text
+            response = HttpResponse(data, content_type='text/csv')
+            response['Content-Disposition'] = 'attachment;filename=MPS_Download.csv'
+
+            return response
+        # Return nothing otherwise
+        else:
+            return HttpResponse('', content_type='text/plain')
