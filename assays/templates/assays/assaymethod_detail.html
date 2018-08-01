@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block load %}
+    <script src="{% static "assays/assaytarget_detail.js" %}"></script>
+{% endblock %}
+
+{% block breadcrumbs %}
+    <li><a href="/assays/methods/">Methods</a></li>
+    <li class="active">{{ object.name }}</li>
+{% endblock %}
+
+{% block content %}
+    <div class="padded-bottom">
+        <legend>
+            <h2 class="text-center">
+                Method/Kit: {{ object.name }}
+            </h2>
+        </legend>
+        {% if object.protocol_file %}
+            <div class="row text-center padded-bottom">
+                <a href="{{ object.protocol_file.url }}" download class="btn btn-lg btn-success" role="button">Download Protocol</a>
+            </div>
+        {% endif %}
+        <div id="assays" style="display: none;">
+            <table id="models" class="display" cellspacing="0" width="100%">
+                <thead>
+                    <tr>
+                        <th>Method/Kit</th>
+                        <th>Associated Target/Analyte</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                {% for assay in assays %}
+                     <tr class="assay" id="{{ assay.id }}">
+                        <td>{{ assay.0 }}</td>
+                        <td><a href= "/assays/targets/{{ assay.2 }}/">{{ assay.1 }}</a></td>
+                        <td>{{ assay.3 }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <script src="{% static "js/display_datatable.js" %}"></script>
+{% endblock %}

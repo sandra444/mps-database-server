@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block load %}
+    <script src="{% static "assays/assaytarget_detail.js" %}"></script>
+{% endblock %}
+
+{% block breadcrumbs %}
+    <li><a href="/assays/targets/">Targets</a></li>
+    <li class="active">{{ object.name }}</li>
+{% endblock %}
+
+{% block content %}
+    <div class="padded-bottom">
+        <legend>
+            <h2 class="text-center">
+                Target/Analyte: {{ object.name }}
+            </h2>
+        </legend>
+        <div id="assays" style="display: none;">
+            <table id="models" class="display" cellspacing="0" width="100%">
+                <thead>
+                    <tr>
+                        <th>Target/Analyte</th>
+                        <th>Associated Method/Kit</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                {% for assay in assays %}
+                     <tr class="assay" id="{{ assay.id }}">
+                        <td>{{ assay.0 }}</td>
+                        <td><a href= "/assays/methods/{{ assay.2 }}/">{{ assay.1 }}</a></td>
+                        <td>{{ assay.3 }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <script src="{% static "js/display_datatable.js" %}"></script>
+{% endblock %}
