@@ -49,7 +49,7 @@ $(document).ready(function() {
                         });
                     }
 
-                    return methods.join(',');
+                    return methods.join(', \n');
                 }
             },
             {
@@ -59,10 +59,13 @@ $(document).ready(function() {
 
                     if (data) {
                         $.each(data, function(index, value) {
-                            methods.push(value.name);
+                            if(!value.name.includes("Placebo" || "placebo")){
+                                drugName = value.name;
+                                drugName = drugName.charAt(0).toUpperCase() + drugName.substring(1);
+                                methods.push(drugName);
+                            }
                         });
                     }
-
                     return methods.join(', \n');
                 }
             },
@@ -114,7 +117,7 @@ $(document).ready(function() {
                 return methods.join(',')
                 }
             },
-            {
+            /*{
                 data: 'eligibilities',
                 className: 'none',
                 render:function (data, type, row, meta) {
@@ -127,7 +130,7 @@ $(document).ready(function() {
                         }
                 return methods.join(',')
                 }
-            },
+            },*/
             {
                 data: 'eligibilities',
                 className: 'none',
@@ -189,15 +192,20 @@ $(document).ready(function() {
                 data: 'reported_events',
                 className: 'none',
                 render:function (data, type, row, meta) {
-                    var methods = [];
+                    var methods = new Set();
 
                     if (data) {
                         $.each(data, function(index, value) {
-                            methods.push(" " + value.adverse_event_term);
+                            if(value.adverse_event_term === "Total" || "serious adverse events" || "other adverse events"){
+                            }
+                            else{
+                                methods.add(value.adverse_event_term);
+                            }
                         });
                     }
-
-                    return methods.join(',');
+                    var methodsArr = Array.from(methods);
+                    var advEv = methodsArr.join(',');
+                    return advEv
                 }
             },
             {
@@ -209,12 +217,12 @@ $(document).ready(function() {
                     if (data) {
                         $.each(data, function(index, value) {
                             if(value.outcome_type == "Primary"){
-                                methods.push(value.title);
+                                methods.push(value.title + ": " + value.description + "<br><br>");
                             }
                         });
                     }
 
-                    return methods.join(',\n');
+                    return methods.join('\n');
                 }
             },
             {
@@ -238,11 +246,14 @@ $(document).ready(function() {
                 render:function (data, type, row, meta) {
                     var methods = []
                     if (data) {
-                        if (data.hasOwnProperty("completion_date")){
+                        if (data.hasOwnProperty("completion_date") && data["completion_date"] != null){
                             var myDate = new Date(data["completion_date"]*1000)
                             methods.push($.datepicker.formatDate('M yy',myDate))
 
                             }
+                        else{
+                            methods.push("N/A")
+                        }
                         }
                 return methods.join(',')
                 }
