@@ -11,8 +11,8 @@
     <li class="active">Query Data</li>
 {% endblock %}
 
-{% block content %}
-    <div class="row text-center padded-bottom">
+{% block fluid-content %}
+    <div class="row text-center padded-bottom large-padding-top">
         <a href="#charts" type="button" class="btn btn-xlarge btn-primary text-center submit-button" id="charts_submit">
             Show Plots
         </a>
@@ -28,7 +28,7 @@
         </a>
     </div>
 
-    <div id="filter">
+    <div class="container" id="filter">
     <div id="number_of_points_container" class="row text-center padded-bottom text-success">
         <h1 id="make_more_selections_message" class="text-danger">Please Select at Least One MPS Model</h1>
         <h2>Number of Points: <span id="number_of_points"></span></h2>
@@ -118,11 +118,11 @@
 
     </div>
 
-    <div hidden id="grouping_filtering">
+    <div class="container" hidden id="grouping_filtering">
         {% include 'assays/grouping_filtering.html' %}
     </div>
 
-    <div hidden id="results">
+    <div class="container" hidden id="results">
     {% include 'assays/chart_options.html' with chart_prefix="charts" chart_title="Selected Data" %}
 
     {# Note indicating no data to display initially #}
@@ -150,7 +150,7 @@
 
     {# TODO TODO TODO NEED GROUPING  AND FILTERING STUFF HERE TOO #}
 
-    <div class="well">
+    <div class="well container">
         {# TODO TODO TODO #}
         <div class="row">
         <div class="col-md-4">
@@ -177,9 +177,10 @@
         </div>
     </div>
 
-    <table id='repro_table' class="display table-bordered text-wrapped" cellspacing="0" width="100%">
-
-    </table>
+    <div class="padded-row">
+        <table id='repro_table' class="display table-bordered text-wrapped padded-row" cellspacing="0" width="100%">
+        </table>
+    </div>
 
     <div id="expanded_data">
 

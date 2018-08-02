@@ -1779,10 +1779,11 @@ def Inter_reproducibility(group_count, inter_data_df, inter_level=1, max_interpo
                         group_rep_mtarix.iloc[0, group_rep_mtarix.columns.get_loc('Treatment Group')] = group_id
                         group_rep_mtarix.iloc[0, 3] = no_nan_matrix.shape[1]
                         group_rep_mtarix.iloc[0, 4] = no_nan_matrix.shape[0]
-                        group_rep_mtarix.iloc[0, group_rep_mtarix.columns.get_loc('ANOVA P-Value')] = 1
-                        group_rep_mtarix.iloc[0, group_rep_mtarix.columns.get_loc('Max CV')] = 0
+                        group_rep_mtarix.iloc[0, group_rep_mtarix.columns.get_loc('ANOVA P-Value')] = np.nan
+                        group_rep_mtarix.iloc[0, group_rep_mtarix.columns.get_loc('Max CV')] = np.nan
                         group_rep_mtarix.iloc[
-                            0, group_rep_mtarix.columns.get_loc('Reproducibility Status')] = 'Excellent (CV)'
+                            0, group_rep_mtarix.columns.get_loc('Reproducibility Note')
+                        ] = 'Normalized by Initial value is not applicable to single time point'
                     else:
                         single_time = no_nan_matrix.index[0]
                         group_rep_mtarix = pd.DataFrame(index=[0], columns=header_list)

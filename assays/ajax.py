@@ -2254,6 +2254,7 @@ def get_inter_study_reproducibility(
 
     data_point_treatment_groups = {}
     treatment_group_table = {}
+    data_group_to_studies = {}
 
     # CONTRIVED FOR NOW
     data_header_keys = [
@@ -2338,6 +2339,12 @@ def get_inter_study_reproducibility(
                         data_point_attribute_getter_current_values(point)
                     ) + [setup_to_treatment_group.get(item_id).get('index')]]
                 })
+
+        data_group_to_studies.setdefault(
+            current_group, {}
+        ).update({
+            '{}'.format(point.study): True
+        })
 
     inter_data.append([
         'Study ID',
@@ -2575,7 +2582,8 @@ def get_inter_study_reproducibility(
             'treatment': treatment_header_keys,
             'data': data_header_keys
         },
-        'treatment_groups': treatment_group_representatives
+        'treatment_groups': treatment_group_representatives,
+        'data_group_to_studies': data_group_to_studies
     }
 
     return data
