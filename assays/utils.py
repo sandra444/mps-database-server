@@ -1773,40 +1773,59 @@ def Inter_reproducibility(group_count, inter_data_df, inter_level=1, max_interpo
                     reproducibility_results_table = reproducibility_results_table.append(group_rep_mtarix,
                                                                                          ignore_index=True)
                 elif no_nan_matrix.shape[0] == 1 and no_nan_matrix.shape[1] >= 2:
-                    single_time = no_nan_matrix.index[0]
-                    group_rep_mtarix = pd.DataFrame(index=[0], columns=header_list)
-                    group_rep_mtarix.iloc[0, group_rep_mtarix.columns.get_loc('Treatment Group')] = group_id
-                    group_rep_mtarix.iloc[0, 3] = no_nan_matrix.shape[1]
-                    group_rep_mtarix.iloc[0, 4] = no_nan_matrix.shape[0]
-                    anova_data = group_chip_data[group_chip_data['Time'] == single_time]
-
-                    p_value = Single_Time_ANOVA(anova_data, 1)
-
-                    group_rep_mtarix.iloc[0, group_rep_mtarix.columns.get_loc('ANOVA P-Value')] = p_value
-
-                    # Calcualate CV
-                    single_array = no_nan_matrix.dropna()
-                    single_array_val = single_array.values
-                    single_CV = np.std(single_array_val, ddof=1) / np.mean(single_array_val) * 100
-
-                    group_rep_mtarix.iloc[0, group_rep_mtarix.columns.get_loc('Max CV')] = single_CV
-
-                    if p_value >= 0.05:
-                        if single_CV <= 5:
-                            group_rep_mtarix.iloc[
-                                0, group_rep_mtarix.columns.get_loc('Reproducibility Status')] = 'Excellent (CV)'
-                        elif single_CV > 5 and single_CV <= 15:
-                            group_rep_mtarix.iloc[
-                                0, group_rep_mtarix.columns.get_loc('Reproducibility Status')] = 'Acceptable (CV)'
-                        else:
-                            group_rep_mtarix.iloc[
-                                0, group_rep_mtarix.columns.get_loc('Reproducibility Status')] = 'Acceptable (P-Value)'
-                    else:
+                    if initial_Norm == 1:
+                        single_time = no_nan_matrix.index[0]
+                        group_rep_mtarix = pd.DataFrame(index=[0], columns=header_list)
+                        group_rep_mtarix.iloc[0, group_rep_mtarix.columns.get_loc('Treatment Group')] = group_id
+                        group_rep_mtarix.iloc[0, 3] = no_nan_matrix.shape[1]
+                        group_rep_mtarix.iloc[0, 4] = no_nan_matrix.shape[0]
+                        group_rep_mtarix.iloc[0, group_rep_mtarix.columns.get_loc('ANOVA P-Value')] = 1
+                        group_rep_mtarix.iloc[0, group_rep_mtarix.columns.get_loc('Max CV')] = 0
                         group_rep_mtarix.iloc[
-                            0, group_rep_mtarix.columns.get_loc('Reproducibility Status')] = 'Poor (P-Value)'
+                            0, group_rep_mtarix.columns.get_loc('Reproducibility Status')] = 'Excellent (CV)'
+                    else:
+                        single_time = no_nan_matrix.index[0]
+                        group_rep_mtarix = pd.DataFrame(index=[0], columns=header_list)
+                        group_rep_mtarix.iloc[0, group_rep_mtarix.columns.get_loc('Treatment Group')] = group_id
+                        group_rep_mtarix.iloc[0, 3] = no_nan_matrix.shape[1]
+                        group_rep_mtarix.iloc[0, 4] = no_nan_matrix.shape[0]
+                        anova_data = group_chip_data[group_chip_data['Time'] == single_time]
 
-                    group_rep_mtarix.iloc[0, group_rep_mtarix.columns.get_loc(
-                        'Reproducibility Note')] = 'Single overlaped time for comparing'
+                        p_value = Single_Time_ANOVA(anova_data, inter_level)
+
+                        # Calcualate CV
+                        single_array = no_nan_matrix.dropna()
+                        single_array_val = single_array.values
+                        single_CV = np.std(single_array_val, ddof=1) / np.mean(single_array_val) * 100
+
+                        group_rep_mtarix.iloc[0, group_rep_mtarix.columns.get_loc('Max CV')] = single_CV
+
+                        if p_value >= 0.05:
+                            if single_CV <= 5:
+                                group_rep_mtarix.iloc[
+                                    0, group_rep_mtarix.columns.get_loc('Reproducibility Status')] = 'Excellent (CV)'
+                            elif single_CV > 5 and single_CV <= 15:
+                                group_rep_mtarix.iloc[
+                                    0, group_rep_mtarix.columns.get_loc('Reproducibility Status')] = 'Acceptable (CV)'
+                            else:
+                                group_rep_mtarix.iloc[0, group_rep_mtarix.columns.get_loc(
+                                    'Reproducibility Status')] = 'Acceptable (P-Value)'
+                        elif p_value < 0.05:
+                            group_rep_mtarix.iloc[
+                                0, group_rep_mtarix.columns.get_loc('Reproducibility Status')] = 'Poor (P-Value)'
+                        else:
+                            if single_CV <= 5:
+                                group_rep_mtarix.iloc[
+                                    0, group_rep_mtarix.columns.get_loc('Reproducibility Status')] = 'Excellent (CV)'
+                            elif single_CV > 5 and single_CV <= 15:
+                                group_rep_mtarix.iloc[
+                                    0, group_rep_mtarix.columns.get_loc('Reproducibility Status')] = 'Acceptable (CV)'
+                            else:
+                                group_rep_mtarix.iloc[
+                                    0, group_rep_mtarix.columns.get_loc('Reproducibility Status')] = 'Poor (CV)'
+
+                        group_rep_mtarix.iloc[0, group_rep_mtarix.columns.get_loc(
+                            'Reproducibility Note')] = 'Single overlaped time for comparing'
                     reproducibility_results_table = reproducibility_results_table.append(group_rep_mtarix,
                                                                                          ignore_index=True)
                 elif no_nan_matrix.shape[0] > 1 and no_nan_matrix.shape[1] >= 2:
