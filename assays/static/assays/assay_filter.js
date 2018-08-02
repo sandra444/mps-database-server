@@ -384,6 +384,8 @@ $(document).ready(function() {
     var data_groups = null;
     var header_keys = null;
 
+    var data_group_to_studies = null;
+
     var value_unit_index = null;
 
     // Table for the broad results
@@ -465,6 +467,8 @@ $(document).ready(function() {
                     header_keys = json.header_keys;
                     treatment_groups = json.treatment_groups;
 
+                    data_group_to_studies = json.data_group_to_studies;
+
                     value_unit_index = json.header_keys.data.indexOf('Value Unit');
 
                     if (window.GROUPING.full_post_filter === null) {
@@ -514,7 +518,15 @@ $(document).ready(function() {
                     title: "Target",
                     "render": function (data, type, row) {
                         return data_groups[row[0]][0];
-                    }
+                    },
+                    width: '20%'
+                },
+                {
+                    title: "Studies",
+                    "render": function (data, type, row) {
+                        return _.keys(data_group_to_studies[row[0]]).join('<br>');
+                    },
+                    width: '20%'
                 },
                 {
                     title: "Interpolation",
@@ -528,7 +540,7 @@ $(document).ready(function() {
                 },
                 // {title: "Max Interpolated", data: '2'},
                 {title: legend_key, data: '3'},
-                {title: "# of Overlapping Time Points", data: '4', width: '10%'},
+                {title: "Time Point Overlap", data: '4', width: '5%'},
                 {title: "<span style='white-space: nowrap;'>Max CV<br>or CV " + cv_tooltip + "</span>", data: '5'},
                 {title: "<span style='white-space: nowrap;'>ICC " + icc_tooltip + "</span>", data: '6'},
                 {title: "<span>ANOVA<br>P-Value " + anova_tooltip + "</span>", data: '7', width: '10%'},
@@ -551,16 +563,16 @@ $(document).ready(function() {
             "order": [[9, 'desc'], [ 1, "asc" ]],
             "createdRow": function(row, data, dataIndex) {
                 if (data[8][0] === "E") {
-                    $(row).find('td:eq(9)').css("background-color", "#74ff5b").css("font-weight", "bold");
+                    $(row).find('td:eq(10)').css("background-color", "#74ff5b").css("font-weight", "bold");
                 }
                 else if (data[8][0] === "A") {
-                    $(row).find('td:eq(9)').css("background-color", "#fcfa8d").css("font-weight", "bold");
+                    $(row).find('td:eq(10)').css("background-color", "#fcfa8d").css("font-weight", "bold");
                 }
                 else if (data[8][0] === "P") {
-                    $(row).find('td:eq(9)').css("background-color", "#ff7863").css("font-weight", "bold");
+                    $(row).find('td:eq(10)').css("background-color", "#ff7863").css("font-weight", "bold");
                 }
                 else {
-                    $(row).find('td:eq(9)').css("background-color", "Grey").css("font-weight", "bold");
+                    $(row).find('td:eq(10)').css("background-color", "Grey").css("font-weight", "bold");
                 }
             },
             "responsive": true,
@@ -653,6 +665,10 @@ $(document).ready(function() {
                 '<tr><th>' + key + '</th><td>' + treatment_groups[current_treatment_group][key] + '</td></tr>'
             );
         });
+
+        rows.push(
+            '<tr><th>Studies</th><td>' + _.keys(data_group_to_studies[set]).join('<br>') + '</td></tr>'
+        );
 
         rows = rows.join('');
         current_body.html(rows);
