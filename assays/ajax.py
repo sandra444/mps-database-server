@@ -2468,7 +2468,7 @@ def get_inter_study_reproducibility(
                     current_table[y_header.get(y)][x_header.get(x)] = value
 
     # Reset chart data again
-    initial_chart_data = {}
+    # initial_chart_data = {}
 
     reproducibility_results_table, inter_data_table = get_inter_study_reproducibility_report(
         len(treatment_group_table),
@@ -2521,12 +2521,14 @@ def get_inter_study_reproducibility(
     # inter_data_columns = [i for i in inter_data_table.columns]
     inter_data_rows = [[row[i] for i in range(1, len(row))] for row in inter_data_table.itertuples()]
 
+    inter_chart_data = {}
+
     for row in inter_data_rows:
         # BE CAREFUL, INDICES MAY CHANGE
         shape = ''
         if row[3] != 'Original':
-            shape = 'point {shape-type: star; size: 8;}'
-        initial_chart_data.setdefault(
+            shape = 'point {shape-type: star; size: 9;}'
+        inter_chart_data.setdefault(
             row[5], {}
         ).setdefault(
             row[4], {}
@@ -2537,7 +2539,7 @@ def get_inter_study_reproducibility(
             row[0] / 1440.0, (row[2], shape)
         )
 
-    for set, chart_groups in initial_chart_data.items():
+    for set, chart_groups in inter_chart_data.items():
         current_set = final_chart_data.setdefault(set, {})
         for chart_group, legends in chart_groups.items():
             current_data = {}
@@ -2549,12 +2551,38 @@ def get_inter_study_reproducibility(
                     legend: True,
                     # This is to deal with the style
                     legend + ' ~@s': True,
+                    # This is to deal with intervals
+                    legend + ' ~@i1': True,
+                    legend + ' ~@i2': True,
                 })
                 for time, value_shape in times.items():
                     value, shape = value_shape[0], value_shape[1]
-                    current_data.setdefault(legend, {}).update({time: value})
-                    current_data.setdefault(legend + ' ~@s', {}).update({time: shape})
-                    y_header.update({time: True})
+                    if shape:
+                        current_data.setdefault(legend, {}).update({time: value})
+                        current_data.setdefault(legend + ' ~@s', {}).update({time: shape})
+                        y_header.update({time: True})
+                    else:
+                        values = initial_chart_data.get(
+                            set
+                        ).get(
+                            'average'
+                        ).get(
+                            legend
+                        ).get(
+                            time
+                        )
+                        if len(values) > 1:
+                            # TODO TODO TODO ONLY ARITHMETIC MEAN RIGHT NOW
+                            value = np.mean(values)
+                            std = np.std(values)
+                            current_data.setdefault(legend, {}).update({time: value})
+                            current_data.setdefault(legend + ' ~@i1', {}).update({time: value - std})
+                            current_data.setdefault(legend + ' ~@i2', {}).update({time: value + std})
+                            current_data.setdefault(legend + ' ~@s', {}).update({time: shape})
+                        else:
+                            current_data.setdefault(legend, {}).update({time: values[0]})
+
+                        y_header.update({time: True})
 
             x_header_keys = x_header.keys()
             x_header_keys.sort(key=alphanum_key)
