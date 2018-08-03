@@ -1759,7 +1759,7 @@ def acquire_post_filter(studies, assays, matrix_items, data_points):
         current.setdefault(
             'id__in', {}
         ).update({
-            study.id: study.name
+            study.id: u'{} ({})'.format(study.name, study.group.name)
         })
 
     assays = assays.prefetch_related(
@@ -1814,7 +1814,8 @@ def acquire_post_filter(studies, assays, matrix_items, data_points):
         'assaysetupsetting_set__setting',
         'assaysetupsetting_set__addition_location',
         'organ_model',
-        'matrix'
+        'matrix',
+        'study'
     )
 
     for matrix_item in matrix_items:
@@ -1823,13 +1824,13 @@ def acquire_post_filter(studies, assays, matrix_items, data_points):
         current.setdefault(
             'id__in', {}
         ).update({
-            matrix_item.id: matrix_item.name
+            matrix_item.id: u'{} ({})'.format(matrix_item.name, matrix_item.study.name)
         })
 
         current.setdefault(
             'matrix_id__in', {}
         ).update({
-            matrix_item.matrix_id: matrix_item.matrix.name
+            matrix_item.matrix_id: u'{} ({})'.format(matrix_item.matrix.name, matrix_item.study.name)
         })
 
         current.setdefault(
@@ -2343,7 +2344,7 @@ def get_inter_study_reproducibility(
         data_group_to_studies.setdefault(
             current_group, {}
         ).update({
-            '{}'.format(point.study): True
+            u'{} ({})'.format(point.study.name, point.study.group.name): True
         })
 
     inter_data.append([
