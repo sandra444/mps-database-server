@@ -872,12 +872,15 @@ $(document).ready(function() {
                     if (i + 2 < data.getNumberOfColumns() && values[0][i + 1].indexOf(' ~@i1') > -1) {
                         interval_setter.push({sourceColumn: i + 1, role: 'interval'});
                         interval_setter.push({sourceColumn: i + 2, role: 'interval'});
+
+                        if (i + 3 < data.getNumberOfColumns() && values[0][i + 3].indexOf(' ~@s') > -1) {
+                            interval_setter.push({sourceColumn: i + 3, type: 'string', role: 'style'});
+                            i += 1;
+                        }
+
                         i += 2;
                     }
-                    else if (i + 1 < data.getNumberOfColumns() && values[0][i + 1].indexOf(' ~@s') > -1) {
-                        interval_setter.push({sourceColumn: i + 1, type: 'string', role: 'style'});
-                        i += 1;
-                    }
+
                     i += 1;
                 }
                 dataView.setColumns(interval_setter);

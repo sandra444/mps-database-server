@@ -12,7 +12,7 @@
 {% endblock %}
 
 {% block fluid-content %}
-    <div class="row text-center padded-bottom large-padding-top">
+    <div class="row padded-row text-center padded-bottom large-padding-top">
         <a href="#charts" type="button" class="btn btn-xlarge btn-primary text-center submit-button" id="charts_submit">
             Show Plots
         </a>
@@ -177,9 +177,11 @@
         </div>
     </div>
 
-    <div class="padded-row">
+    <div class="row padded-row">
+        <div class="col-xs-12">
         <table id='repro_table' class="display table-bordered text-wrapped padded-row" cellspacing="0" width="100%">
         </table>
+        </div>
     </div>
 
     <div id="expanded_data">
