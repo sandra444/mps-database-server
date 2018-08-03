@@ -524,7 +524,14 @@ $(document).ready(function() {
                 {
                     title: "Studies",
                     "render": function (data, type, row) {
-                        return _.keys(data_group_to_studies[row[0]]).join('<br>');
+                        return Object.keys(data_group_to_studies[row[0]]).sort().join('<br>');
+                    },
+                    width: '20%'
+                },
+                {
+                    title: "Compounds",
+                    "render": function (data, type, row) {
+                        return treatment_groups[data_groups[row[0]][3]]['Trimmed Compounds'];
                     },
                     width: '20%'
                 },
@@ -560,19 +567,19 @@ $(document).ready(function() {
                     }
                 }
             ],
-            "order": [[9, 'desc'], [ 1, "asc" ]],
+            "order": [[11, 'desc'], [ 1, "asc" ]],
             "createdRow": function(row, data, dataIndex) {
                 if (data[8][0] === "E") {
-                    $(row).find('td:eq(10)').css("background-color", "#74ff5b").css("font-weight", "bold");
+                    $(row).find('td:eq(11)').css("background-color", "#74ff5b").css("font-weight", "bold");
                 }
                 else if (data[8][0] === "A") {
-                    $(row).find('td:eq(10)').css("background-color", "#fcfa8d").css("font-weight", "bold");
+                    $(row).find('td:eq(11)').css("background-color", "#fcfa8d").css("font-weight", "bold");
                 }
                 else if (data[8][0] === "P") {
-                    $(row).find('td:eq(10)').css("background-color", "#ff7863").css("font-weight", "bold");
+                    $(row).find('td:eq(11)').css("background-color", "#ff7863").css("font-weight", "bold");
                 }
                 else {
-                    $(row).find('td:eq(10)').css("background-color", "Grey").css("font-weight", "bold");
+                    $(row).find('td:eq(11)').css("background-color", "Grey").css("font-weight", "bold");
                 }
             },
             "responsive": true,
@@ -667,7 +674,7 @@ $(document).ready(function() {
         });
 
         rows.push(
-            '<tr><th>Studies</th><td>' + _.keys(data_group_to_studies[set]).join('<br>') + '</td></tr>'
+            '<tr><th>Studies</th><td>' + Object.keys(data_group_to_studies[set]).sort().join('<br>') + '</td></tr>'
         );
 
         rows = rows.join('');
