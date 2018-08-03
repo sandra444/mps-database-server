@@ -1598,8 +1598,9 @@ class AssayStudyImages(StudyViewerMixin, DetailView):
         return context
 
 
+# THESE ARE ONLY TESTS
 class TestFilterView(TemplateView):
-    template_name = 'assays/test_filter.html'
+    template_name = 'assays/assay_filter.html'
 
 
 class AssayTargetList(ListView):

@@ -19,7 +19,8 @@ from .utils import (
     # MATRIX_ITEM_PREFETCH,
     DEFAULT_EXPORT_HEADER,
     get_repro_data,
-    get_user_accessible_studies
+    get_user_accessible_studies,
+    get_inter_study_reproducibility_report
 )
 
 from StringIO import StringIO
@@ -53,6 +54,17 @@ logger = logging.getLogger(__name__)
 # Global variable for what to call control values (avoid magic strings)
 CONTROL_LABEL = '-Control-'
 
+# Note manipulations for sorting
+# Somewhat contrived
+# THESE SHOULD BE DEFINED, NOT LAMBDA FUNCTIONS
+convert = lambda text: int(text) if text.isdigit() else text.lower()
+alphanum_key = lambda key: [
+    convert(
+        c.replace(' ~@I1', '!').replace(' ~@I2', '"').replace(' ~@S', '"')
+    ) for c in re.split('([0-9]+)', key)
+]
+
+alphanum_key_for_item_groups = lambda pair: re.split('([0-9]+)', pair[0])
 
 # TODO REFACTOR Rather than passing the same thing over and over, we can make an object with attributes!
 # def main(request):
@@ -713,7 +725,7 @@ def get_item_groups(study, criteria, matrix_items=None):
     header_keys = []
 
     # By pulling the setups for the study, I avoid problems with preview data
-    if not matrix_items:
+    if matrix_items is None:
         matrix_items = AssayMatrixItem.objects.filter(
             study=study
         )
@@ -739,16 +751,17 @@ def get_item_groups(study, criteria, matrix_items=None):
             'cell': DEFAULT_CELL_CRITERIA
         }
 
+    # TODO TODO TODO REVISE THESE MAGIC KEYS
     if criteria.get('setup', ''):
-        header_keys.append('organ_model')
+        header_keys.append('MPS Model')
     if criteria.get('cell', ''):
-        header_keys.append('cells')
+        header_keys.append('Cells')
     if criteria.get('compound', ''):
-        header_keys.append('compounds')
+        header_keys.append('Compounds')
     if criteria.get('setting', ''):
-        header_keys.append('settings')
+        header_keys.append('Settings')
 
-    header_keys.append('setups_with_same_group')
+    header_keys.append('Items with Same Treatment')
 
     setup_attribute_getter = tuple_attrgetter(*criteria.get('setup', ['']))
 
@@ -769,26 +782,35 @@ def get_item_groups(study, criteria, matrix_items=None):
 
         current_representative = treatment_groups.setdefault(treatment_group_tuple, setup.quick_dic(criteria))
 
-        current_representative.get('setups_with_same_group').append(
+        current_representative.get('Items with Same Treatment').append(
             setup.get_hyperlinked_name()
+        )
+        current_representative.setdefault('names for items', []).append(
+            setup.name
         )
         setup_to_treatment_group.update({setup.id: current_representative})
 
     # Attempt to sort reasonably
     sorted_treatment_groups = sorted(
         treatment_groups.values(), key=lambda x: (
-            x.get('compounds'),
-            x.get('organ_model'),
-            x.get('cells'),
-            x.get('settings'),
-            x.get('setups_with_same_group')[0]
+            x.get('Compounds'),
+            x.get('MPS Model'),
+            x.get('Cells'),
+            x.get('Settings'),
+            x.get('Items with Same Treatment')[0]
         )
     )
 
     for index, representative in enumerate(sorted_treatment_groups):
-        representative.get('setups_with_same_group').sort()
+        items = representative.get('Items with Same Treatment')
+        item_names = representative.get('names for items')
+        sorted_items = [x for _, x in sorted(zip(item_names, items), key=alphanum_key_for_item_groups)]
+        # representative.get('Items with Same Treatment').sort()
         representative.update({
-            'setups_with_same_group': ', '.join(representative.get('setups_with_same_group')),
+            'Items with Same Treatment': sorted_items
+        })
+        representative.update({
+            'Items with Same Treatment': ', '.join(representative.get('Items with Same Treatment')),
             'index': index
         })
 
@@ -843,7 +865,7 @@ def get_data_points_for_charting(
         include_all,
         truncate_negative,
         dynamic_excluded,
-        group_criteria=None,
+        criteria=None,
         post_filter=None,
         study=None,
         matrix_item=None,
@@ -866,29 +888,10 @@ def get_data_points_for_charting(
     new_data - indicates whether data in raw_data is new
     additional_data - data to merge with raw_data (used when displaying individual readouts for convenience)
     """
-    post_filter_options = {
-        'study': {},
-        'matrix_item__organ_model': {},
-        'matrix_item__device': {},
-        'matrix_item__matrix': {},
-        'matrix_item__assaysetupcompound__compound_instance__compound': {},
-        'matrix_item': {},
-        'matrix_item__test_type': {},
-        'study_assay__target': {},
-        'study_assay__method': {},
-        'sample_location': {},
-        'time': {},
-        'matrix_item__assaysetupcell__cell_sample__cell_type': {},
-        'matrix_item__assaysetupcell__cell_sample__cell_subtype': {},
-        'matrix_item__assaysetupcell__passage': {},
-        'matrix_item__assaysetupcell__cell_density': {},
-        'matrix_item__assaysetupcell__addition_location': {},
-    }
-
     # Organization is assay -> unit -> compound/tag -> field -> time -> value
     treatment_group_representatives, setup_to_treatment_group, header_keys = get_item_groups(
         study,
-        group_criteria,
+        criteria,
         matrix_items
     )
 
@@ -938,10 +941,10 @@ def get_data_points_for_charting(
     group_time = True
 
     # CRUDE
-    if group_criteria:
-        group_sample_location = 'sample_location' in group_criteria.get('special', [])
-        group_method = 'method' in group_criteria.get('special', [])
-        group_time = 'time' in group_criteria.get('special', [])
+    if criteria:
+        group_sample_location = 'sample_location' in criteria.get('special', [])
+        group_method = 'method' in criteria.get('special', [])
+        group_time = 'time' in criteria.get('special', [])
 
     # Append the additional_data as necessary
     # Why is this done? It is an expedient way to avoid duplicating data
@@ -1129,7 +1132,7 @@ def get_data_points_for_charting(
             for tag, sample_locations in tags.items():
                 # TODO: A little naive
                 if use_key_discrimination and key_discrimination.get(tag[1], ''):
-                    tag = '{} ({})'.format(tag[1], tag[0])
+                    tag = '{} || {}'.format(tag[1], tag[0])
                 elif use_key_discrimination:
                     tag = tag[1]
 
@@ -1141,6 +1144,7 @@ def get_data_points_for_charting(
                         current_key = tag + ' || ' + sample_location
                         accommodate_intervals = False
                         include_current = False
+
                     else:
                         current_key = tag
 
@@ -1155,8 +1159,8 @@ def get_data_points_for_charting(
 
                         if not percent_control:
                             current_data.setdefault(current_key, {}).update({time: value})
-                            current_data.setdefault(current_key+'~@i1', {}).update({time: value - interval})
-                            current_data.setdefault(current_key+'~@i2', {}).update({time: value + interval})
+                            current_data.setdefault(current_key+' ~@i1', {}).update({time: value - interval})
+                            current_data.setdefault(current_key+' ~@i2', {}).update({time: value + interval})
                             y_header.update({time: True})
                             include_current = True
 
@@ -1171,8 +1175,8 @@ def get_data_points_for_charting(
                             adjusted_interval = (interval / control_value) * 100
 
                             current_data.setdefault(current_key, {}).update({time: adjusted_value})
-                            current_data.setdefault(current_key+'~@i1', {}).update({time: adjusted_value - adjusted_interval})
-                            current_data.setdefault(current_key+'~@i2', {}).update({time: adjusted_value + adjusted_interval})
+                            current_data.setdefault(current_key+' ~@i1', {}).update({time: adjusted_value - adjusted_interval})
+                            current_data.setdefault(current_key+' ~@i2', {}).update({time: adjusted_value + adjusted_interval})
                             y_header.update({time: True})
                             include_current = True
 
@@ -1183,37 +1187,29 @@ def get_data_points_for_charting(
                     # To include all
                     # x_header.append(current_key)
                     # x_header.extend([
-                    #     current_key + '~@i1',
-                    #     current_key + '~@i2'
+                    #     current_key + ' ~@i1',
+                    #     current_key + ' ~@i2'
                     # ])
 
                     # Only include intervals if necessary
                     if accommodate_intervals and include_current and not key_present:
                         x_header.extend([
-                            current_key + '~@i1',
-                            current_key + '~@i2'
+                            current_key + ' ~@i1',
+                            current_key + ' ~@i2'
                         ])
                     else:
-                        if current_key+'~@i1' in current_data:
-                            del current_data[current_key+'~@i1']
-                            del current_data[current_key + '~@i2']
+                        if current_key+' ~@i1' in current_data:
+                            del current_data[current_key+' ~@i1']
+                            del current_data[current_key + ' ~@i2']
 
             # for current_key in all_keys:
             #     if current_key not in x_header:
             #         x_header.extend([
             #             current_key,
-            #             current_key + '~@i1',
-            #             current_key + '~@i2'
+            #             current_key + ' ~@i1',
+            #             current_key + ' ~@i2'
             #         ])
 
-            # Note manipulations for sorting
-            # Somewhat contrived
-            convert = lambda text: int(text) if text.isdigit() else text.lower()
-            alphanum_key = lambda key: [
-                convert(
-                    c.replace('~@I1', '!').replace('~@I2', '"')
-                ) for c in re.split('([0-9]+)', key)
-            ]
             x_header.sort(key=alphanum_key)
             current_table[0].extend(x_header)
 
@@ -1246,6 +1242,8 @@ def get_data_points_for_charting(
 
 def fetch_data_points(request):
     pre_filter = {}
+
+    post_filter = json.loads(request.POST.get('post_filter', '{}'))
 
     if request.POST.get('matrix_item', ''):
         matrix_items = AssayMatrixItem.objects.filter(pk=int(request.POST.get('matrix_item')))
@@ -1283,6 +1281,122 @@ def fetch_data_points(request):
         'subtarget'
     )
 
+    # Very odd, but expedient
+    study = AssayStudy.objects.filter(id=study.id)
+
+    # A little contrived
+    assays = AssayStudyAssay.objects.filter(
+        study=study
+    )
+
+    # UGLY NOT DRY
+    if not post_filter:
+        assays = assays.prefetch_related(
+            'target',
+            'method'
+        )
+
+        post_filter = acquire_post_filter(study, assays, matrix_items, data_points)
+    else:
+        # Not very elegant...
+        study_post_filters = {
+            current_filter: [
+                x for x in post_filter.get('study', {}).get(current_filter, [])
+            ] for current_filter in post_filter.get('study')
+        }
+
+        study = study.filter(
+            **study_post_filters
+        )
+
+        assay_post_filters = {
+            current_filter: [
+                x for x in post_filter.get('assay', {}).get(current_filter, [])
+            ] for current_filter in post_filter.get('assay')
+        }
+
+        assays = assays.filter(
+            study_id__in=study
+        ).filter(
+            **assay_post_filters
+        )
+
+        # Matrix Items somewhat contrived to deal with null compounds
+        matrix_item_post_filters = {
+            current_filter: [
+                x for x in post_filter.get('matrix_item', {}).get(current_filter, [])
+            ] for current_filter in post_filter.get('matrix_item') if not current_filter.startswith('assaysetup')
+        }
+
+        matrix_item_compound_post_filters = {
+            current_filter: [
+                x for x in post_filter.get('matrix_item', {}).get(current_filter, [])
+            ] for current_filter in post_filter.get('matrix_item') if current_filter.startswith('assaysetupcompound__')
+        }
+
+        matrix_item_cell_post_filters = {
+            current_filter: [
+                x for x in post_filter.get('matrix_item', {}).get(current_filter, [])
+            ] for current_filter in post_filter.get('matrix_item') if current_filter.startswith('assaysetupcell__')
+        }
+
+        matrix_item_setting_post_filters = {
+            current_filter: [
+                x for x in post_filter.get('matrix_item', {}).get(current_filter, [])
+            ] for current_filter in post_filter.get('matrix_item') if current_filter.startswith('assaysetupsetting__')
+        }
+
+        matrix_items.filter(study_id__in=study)
+
+        matrix_items = matrix_items.filter(
+            **matrix_item_post_filters
+        )
+
+        # Compounds
+        if post_filter.get('matrix_item', {}).get('assaysetupcompound__compound_instance__compound_id__in', {}).get('0',
+                                                                                                                    None):
+            matrix_items = matrix_items.filter(
+                **matrix_item_compound_post_filters
+            ) | matrix_items.filter(assaysetupcompound__isnull=True)
+        else:
+            matrix_items = matrix_items.filter(
+                **matrix_item_compound_post_filters
+            )
+
+        # Cells
+        if post_filter.get('matrix_item', {}).get('assaysetupcell__cell_sample__cell_type_id__in', {}).get('0', None):
+            matrix_items = matrix_items.filter(
+                **matrix_item_cell_post_filters
+            ) | matrix_items.filter(assaysetupcell__isnull=True)
+        else:
+            matrix_items = matrix_items.filter(
+                **matrix_item_cell_post_filters
+            )
+
+        # Setting
+        if post_filter.get('matrix_item', {}).get('assaysetupsetting__setting_id__in', {}).get('0', None):
+            matrix_items = matrix_items.filter(
+                **matrix_item_setting_post_filters
+            ) | matrix_items.filter(assaysetupsetting__isnull=True)
+        else:
+            matrix_items = matrix_items.filter(
+                **matrix_item_setting_post_filters
+            )
+
+        data_point_post_filters = {
+            current_filter: [
+                x for x in post_filter.get('data_point', {}).get(current_filter, [])
+            ] for current_filter in post_filter.get('data_point')
+        }
+
+        data_points = data_points.filter(
+            study_id__in=study,
+            study_assay_id__in=assays,
+            matrix_item_id__in=matrix_items,
+        ).filter(
+            **data_point_post_filters
+        )
+
     data = get_data_points_for_charting(
         data_points,
         request.POST.get('key', ''),
@@ -1294,8 +1408,13 @@ def fetch_data_points(request):
         json.loads(request.POST.get('dynamic_excluded', '{}')),
         study=study,
         matrix_item=matrix_item,
-        matrix_items=matrix_items
+        matrix_items=matrix_items,
+        criteria=json.loads(request.POST.get('criteria', '{}'))
     )
+
+    data.update({
+        'post_filter': post_filter
+    })
 
     return HttpResponse(json.dumps(data),
                         content_type="application/json")
@@ -1359,7 +1478,8 @@ def validate_data_file(request):
             truncate_negative,
             dynamic_quality,
             study=this_study,
-            new_data=True
+            new_data=True,
+            criteria=json.loads(request.POST.get('criteria', '{}'))
         )
 
         data = {
@@ -1476,7 +1596,11 @@ def fetch_pre_submission_filters(request):
     groups = {}
     targets = {}
     compounds = {}
+
     number_of_points = 0
+    # TODO TODO TODO
+    number_of_studies = 0
+    number_of_centers = 0
 
     if filters_present:
         if current_filters.get('organ_models', []):
@@ -1485,6 +1609,8 @@ def fetch_pre_submission_filters(request):
             # In case changes in filters eliminate all organ models
             if new_organ_model_ids:
                 organ_model_ids = new_organ_model_ids
+        else:
+            organ_model_ids = []
 
         accessible_matrix_items = accessible_matrix_items.filter(
             organ_model_id__in=organ_model_ids
@@ -1503,6 +1629,8 @@ def fetch_pre_submission_filters(request):
 
         if current_filters.get('groups', []):
             group_ids = [int(id) for id in current_filters.get('groups', []) if int(id) in group_ids]
+        else:
+            group_ids = []
 
         accessible_studies = accessible_studies.filter(group_id__in=group_ids)
 
@@ -1535,6 +1663,11 @@ def fetch_pre_submission_filters(request):
             accessible_matrix_items = accessible_matrix_items.filter(
                 assaydatapoint__study_assay__in=accessible_study_assays
             ).distinct()
+        else:
+            # Default to None
+            target_ids = []
+            accessible_study_assays = AssayStudyAssay.objects.none()
+            accessible_matrix_items = AssayMatrixItem.objects.none()
 
         accessible_compounds = AssaySetupCompound.objects.filter(
             matrix_item__in=accessible_matrix_items
@@ -1547,6 +1680,10 @@ def fetch_pre_submission_filters(request):
             accessible_compounds
         ])), key=lambda x: x[1])
 
+        # Prepend contrived no compound
+        if compounds:
+            compounds.insert(0, (0, '-Control-'))
+
         compound_ids = {compound[0]: True for compound in compounds}
 
         if current_filters.get('compounds', []):
@@ -1556,22 +1693,44 @@ def fetch_pre_submission_filters(request):
             if new_compound_ids:
                 compound_ids = new_compound_ids
 
-        accessible_matrix_items = accessible_matrix_items.filter(
-            assaysetupcompound__compound_instance__compound_id__in=compound_ids
-        ) | accessible_matrix_items.filter(
-            assaysetupcompound__isnull=True
-        )
+            # A little odd
+            if '0' in current_filters.get('compounds', []):
+                include_no_compounds = True
+            else:
+                include_no_compounds = False
+        else:
+            # Default to none
+            compound_ids = []
+            include_no_compounds = False
+            # include_no_compounds = True
+
+        # Compensate for no compounds
+        if include_no_compounds:
+            accessible_matrix_items = accessible_matrix_items.filter(
+                assaysetupcompound__compound_instance__compound_id__in=compound_ids
+            ) | accessible_matrix_items.filter(
+                assaysetupcompound__isnull=True
+            )
+        else:
+            accessible_matrix_items = accessible_matrix_items.filter(
+                assaysetupcompound__compound_instance__compound_id__in=compound_ids
+            )
 
         number_of_points = AssayDataPoint.objects.filter(
             matrix_item_id__in=accessible_matrix_items,
             study_assay_id__in=accessible_study_assays,
-            replaced=False
+            replaced=False,
+            excluded=False,
+            value__isnull=False
         ).count()
-    else:
-        number_of_points = AssayDataPoint.objects.filter(
-            study_id__in=accessible_studies,
-            replaced=False
-        ).count()
+    # Do not default to showing all data points
+    # else:
+    #     number_of_points = AssayDataPoint.objects.filter(
+    #         study_id__in=accessible_studies,
+    #         replaced=False,
+    #         excluded=False,
+    #         value__isnull=False
+    #     ).count()
 
     data = {
         'filters': {
@@ -1587,7 +1746,238 @@ def fetch_pre_submission_filters(request):
                         content_type='application/json')
 
 
+# TODO NOT VERY DRY
+def acquire_post_filter(studies, assays, matrix_items, data_points):
+    # Table -> Filter -> value -> [name, in_use]
+    post_filter = {}
+
+    for study in studies:
+        current = post_filter.setdefault(
+            'study', {}
+        )
+
+        current.setdefault(
+            'id__in', {}
+        ).update({
+            study.id: study.name
+        })
+
+    assays = assays.prefetch_related(
+        'target',
+        'method'
+    )
+
+    for assay in assays:
+        current = post_filter.setdefault('assay', {})
+
+        current.setdefault(
+            'target_id__in', {}
+        ).update({
+            assay.target.id: assay.target.name
+        })
+
+        current.setdefault(
+            'method_id__in', {}
+        ).update({
+            assay.method.id: assay.method.name
+        })
+
+    # Contrived: Add no compounds
+    post_filter.setdefault('matrix_item', {}).setdefault(
+        'assaysetupcompound__compound_instance__compound_id__in', {}
+    ).update({
+        0: '-Control-'
+    })
+
+    # Contrived: Add no cells
+    post_filter.setdefault('matrix_item', {}).setdefault(
+        'assaysetupcell__cell_sample__cell_type_id__in', {}
+    ).update({
+        0: '-No Cells-'
+    })
+
+    # Contrived: Add no settings
+    post_filter.setdefault('matrix_item', {}).setdefault(
+        'assaysetupsetting__setting_id__in', {}
+    ).update({
+        0: '-No Settings-'
+    })
+
+    matrix_items = matrix_items.prefetch_related(
+        'assaysetupcompound_set__compound_instance__compound',
+        'assaysetupcompound_set__compound_instance__supplier',
+        'assaysetupcompound_set__addition_location',
+        'assaysetupcell_set__cell_sample__cell_type',
+        'assaysetupcell_set__cell_sample__cell_subtype',
+        'assaysetupcell_set__addition_location',
+        'assaysetupcell_set__biosensor',
+        'assaysetupsetting_set__setting',
+        'assaysetupsetting_set__addition_location',
+        'organ_model',
+        'matrix'
+    )
+
+    for matrix_item in matrix_items:
+        current = post_filter.setdefault('matrix_item', {})
+
+        current.setdefault(
+            'id__in', {}
+        ).update({
+            matrix_item.id: matrix_item.name
+        })
+
+        current.setdefault(
+            'matrix_id__in', {}
+        ).update({
+            matrix_item.matrix_id: matrix_item.matrix.name
+        })
+
+        current.setdefault(
+            'organ_model_id__in', {}
+        ).update({
+            matrix_item.organ_model_id: matrix_item.organ_model.name
+        })
+
+        for compound in matrix_item.assaysetupcompound_set.all():
+            current.setdefault(
+                'assaysetupcompound__compound_instance__compound_id__in', {}
+            ).update({
+                compound.compound_instance.compound_id : compound.compound_instance.compound.name
+            })
+
+            current.setdefault(
+                'assaysetupcompound__compound_instance__supplier_id__in', {}
+            ).update({
+                compound.compound_instance.supplier_id: compound.compound_instance.supplier.name
+            })
+
+            current.setdefault(
+                'assaysetupcompound__compound_instance__lot__in', {}
+            ).update({
+                compound.compound_instance.lot: compound.compound_instance.lot
+            })
+
+            # NAIVE AND CAN CAUSE COLLISIONS
+            current.setdefault(
+                'assaysetupcompound__concentration__in', {}
+            ).update({
+                compound.concentration: compound.concentration
+            })
+
+            current.setdefault(
+                'assaysetupcompound__addition_time__in', {}
+            ).update({
+                compound.addition_time: compound.addition_time
+            })
+
+            current.setdefault(
+                'assaysetupcompound__duration__in', {}
+            ).update({
+                compound.duration: compound.duration
+            })
+
+            current.setdefault(
+                'assaysetupcompound__addition_location_id__in', {}
+            ).update({
+                compound.addition_location_id: compound.addition_location.name
+            })
+
+        for cell in matrix_item.assaysetupcell_set.all():
+            current.setdefault(
+                'assaysetupcell__cell_sample__cell_type_id__in', {}
+            ).update({
+                cell.cell_sample.cell_type_id: cell.cell_sample.cell_type.cell_type
+            })
+
+            current.setdefault(
+                'assaysetupcell__cell_sample__cell_subtype_id__in', {}
+            ).update({
+                cell.cell_sample.cell_subtype_id: cell.cell_sample.cell_subtype.cell_subtype
+            })
+
+            current.setdefault(
+                'assaysetupcell__biosensor_id__in', {}
+            ).update({
+                cell.biosensor_id: cell.biosensor.name
+            })
+
+            current.setdefault(
+                'assaysetupcell__passage__in', {}
+            ).update({
+                cell.passage: cell.passage
+            })
+
+            current.setdefault(
+                'assaysetupcell__density__in', {}
+            ).update({
+                cell.density: cell.density
+            })
+
+            current.setdefault(
+                'assaysetupcell__addition_location_id__in', {}
+            ).update({
+                cell.addition_location_id: cell.addition_location.name
+            })
+
+        for setting in matrix_item.assaysetupsetting_set.all():
+            current.setdefault(
+                'assaysetupsetting__setting__setting_id__in', {}
+            ).update({
+                setting.setting_id: setting.setting.name
+            })
+
+            current.setdefault(
+                'assaysetupsetting__value__in', {}
+            ).update({
+                setting.value: setting.value
+            })
+
+            current.setdefault(
+                'assaysetupsetting__addition_time__in', {}
+            ).update({
+                setting.addition_time: setting.addition_time
+            })
+
+            current.setdefault(
+                'assaysetupsetting__duration__in', {}
+            ).update({
+                setting.duration: setting.duration
+            })
+
+            current.setdefault(
+                'assaysetupsetting__addition_location_id__in', {}
+            ).update({
+                setting.addition_location_id: setting.addition_location.name
+            })
+
+    data_points = data_points.prefetch_related(
+        'sample_location'
+    )
+
+    for data_point in data_points:
+        current = post_filter.setdefault('data_point', {})
+
+        current.setdefault(
+            'sample_location_id__in', {}
+        ).update({
+            data_point.sample_location_id: data_point.sample_location.name
+        })
+
+        # Out for now
+        # current.setdefault(
+        #     'time__in', {}
+        # ).update({
+        #     data_point.time: data_point.time
+        # })
+
+    return post_filter
+
+
 def fetch_data_points_from_filters(request):
+    intention = request.POST.get('intention', 'charting')
+
+    post_filter = json.loads(request.POST.get('post_filter', '{}'))
+
     pre_filter = {}
     if request.POST.get('filters', ''):
         current_filters = json.loads(request.POST.get('filters', '{}'))
@@ -1610,6 +2000,9 @@ def fetch_data_points_from_filters(request):
             matrix_items = matrix_items.filter(
                 organ_model_id__in=organ_model_ids
             )
+        # Default to empty
+        else:
+            matrix_items = AssayMatrixItem.objects.none()
 
         accessible_studies = accessible_studies.filter(
             id__in=list(matrix_items.values_list('study_id', flat=True))
@@ -1624,12 +2017,27 @@ def fetch_data_points_from_filters(request):
             group_ids = [int(id) for id in current_filters.get('groups', []) if id]
             accessible_studies = accessible_studies.filter(group_id__in=group_ids)
 
+            matrix_items = matrix_items.filter(
+                study_id__in=accessible_studies
+            )
+        else:
+            matrix_items = AssayMatrixItem.objects.none()
+
         if current_filters.get('compounds', []):
             compound_ids = [int(id) for id in current_filters.get('compounds', []) if id]
 
-            matrix_items = matrix_items.filter(
-                assaysetupcompound__compound_instance__compound_id__in=compound_ids
-            ) | matrix_items.filter(assaysetupcompound__isnull=True)
+            # See whether to include no compounds
+            if '0' in current_filters.get('compounds', []):
+                matrix_items = matrix_items.filter(
+                    assaysetupcompound__compound_instance__compound_id__in=compound_ids
+                ) | matrix_items.filter(assaysetupcompound__isnull=True)
+            else:
+                matrix_items = matrix_items.filter(
+                    assaysetupcompound__compound_instance__compound_id__in=compound_ids
+                )
+
+        else:
+            matrix_items = AssayMatrixItem.objects.none()
 
         if current_filters.get('targets', []):
             target_ids = [int(id) for id in current_filters.get('targets', []) if id]
@@ -1641,6 +2049,9 @@ def fetch_data_points_from_filters(request):
             pre_filter.update({
                 'study_assay__target_id__in': target_ids
             })
+        else:
+            matrix_items = AssayMatrixItem.objects.none()
+            target_ids = []
 
         pre_filter.update({
             'matrix_item_id__in': matrix_items.filter(assaydatapoint__isnull=False).distinct()
@@ -1649,38 +2060,525 @@ def fetch_data_points_from_filters(request):
         matrix_item = None
         study = accessible_studies
 
+        # A little contrived
+        assays = AssayStudyAssay.objects.filter(
+            study_id__in=study,
+            target_id__in=target_ids
+        )
+
         # Not particularly DRY
         data_points = AssayDataPoint.objects.filter(
             **pre_filter
         ).prefetch_related(
             # TODO
+            'study__group',
             'study_assay__target',
             'study_assay__method',
-            'study_assay__unit',
+            'study_assay__unit__base_unit',
             'sample_location',
             'matrix_item__matrix',
             'subtarget'
+        ).filter(
+            replaced=False,
+            excluded=False,
+            value__isnull=False
         )
 
-        data = get_data_points_for_charting(
-            data_points,
-            request.POST.get('key', ''),
-            request.POST.get('mean_type', ''),
-            request.POST.get('interval_type', ''),
-            request.POST.get('percent_control', ''),
-            request.POST.get('include_all', ''),
-            request.POST.get('truncate_negative', ''),
-            json.loads(request.POST.get('dynamic_excluded', '{}')),
-            study=study,
-            matrix_item=matrix_item,
-            matrix_items=matrix_items,
-            group_criteria=json.loads(request.POST.get('criteria', '{}'))
-        )
+        if not post_filter:
+            assays = assays.prefetch_related(
+                'target',
+                'method'
+            )
 
-        return HttpResponse(json.dumps(data),
-                            content_type="application/json")
+            post_filter = acquire_post_filter(study, assays, matrix_items, data_points)
+        else:
+            # Not very elegant...
+            study_post_filters = {
+                current_filter: [
+                    x for x in post_filter.get('study', {}).get(current_filter, [])
+                ] for current_filter in post_filter.get('study')
+            }
+
+            study = study.filter(
+                **study_post_filters
+            )
+
+            assay_post_filters = {
+                current_filter: [
+                    x for x in post_filter.get('assay', {}).get(current_filter, [])
+                ] for current_filter in post_filter.get('assay')
+            }
+
+            assays = assays.filter(
+                study_id__in=study
+            ).filter(
+                **assay_post_filters
+            )
+
+            # Matrix Items somewhat contrived to deal with null compounds
+            matrix_item_post_filters = {
+                current_filter: [
+                    x for x in post_filter.get('matrix_item', {}).get(current_filter, [])
+                ] for current_filter in post_filter.get('matrix_item') if not current_filter.startswith('assaysetup')
+            }
+
+            matrix_item_compound_post_filters = {
+                current_filter: [
+                    x for x in post_filter.get('matrix_item', {}).get(current_filter, [])
+                ] for current_filter in post_filter.get('matrix_item') if current_filter.startswith('assaysetupcompound__')
+            }
+
+            matrix_item_cell_post_filters = {
+                current_filter: [
+                    x for x in post_filter.get('matrix_item', {}).get(current_filter, [])
+                ] for current_filter in post_filter.get('matrix_item') if current_filter.startswith('assaysetupcell__')
+            }
+
+            matrix_item_setting_post_filters = {
+                current_filter: [
+                    x for x in post_filter.get('matrix_item', {}).get(current_filter, [])
+                ] for current_filter in post_filter.get('matrix_item') if current_filter.startswith('assaysetupsetting__')
+            }
+
+            matrix_items.filter(study_id__in=study)
+
+            matrix_items = matrix_items.filter(
+                **matrix_item_post_filters
+            )
+
+            # Compounds
+            if post_filter.get('matrix_item', {}).get('assaysetupcompound__compound_instance__compound_id__in', {}).get('0', None):
+                matrix_items = matrix_items.filter(
+                    **matrix_item_compound_post_filters
+                ) | matrix_items.filter(assaysetupcompound__isnull=True)
+            else:
+                matrix_items = matrix_items.filter(
+                    **matrix_item_compound_post_filters
+                )
+
+            # Cells
+            if post_filter.get('matrix_item', {}).get('assaysetupcell__cell_sample__cell_type_id__in', {}).get('0', None):
+                matrix_items = matrix_items.filter(
+                    **matrix_item_cell_post_filters
+                ) | matrix_items.filter(assaysetupcell__isnull=True)
+            else:
+                matrix_items = matrix_items.filter(
+                    **matrix_item_cell_post_filters
+                )
+
+            # Setting
+            if post_filter.get('matrix_item', {}).get('assaysetupsetting__setting_id__in', {}).get('0', None):
+                matrix_items = matrix_items.filter(
+                    **matrix_item_setting_post_filters
+                ) | matrix_items.filter(assaysetupsetting__isnull=True)
+            else:
+                matrix_items = matrix_items.filter(
+                    **matrix_item_setting_post_filters
+                )
+
+            data_point_post_filters = {
+                current_filter: [
+                    x for x in post_filter.get('data_point', {}).get(current_filter, [])
+                ] for current_filter in post_filter.get('data_point')
+            }
+
+            data_points = data_points.filter(
+                study_id__in=study,
+                study_assay_id__in=assays,
+                matrix_item_id__in=matrix_items,
+            ).filter(
+                **data_point_post_filters
+            )
+
+        if intention == 'charting':
+            data = get_data_points_for_charting(
+                data_points,
+                request.POST.get('key', ''),
+                request.POST.get('mean_type', ''),
+                request.POST.get('interval_type', ''),
+                request.POST.get('percent_control', ''),
+                request.POST.get('include_all', ''),
+                request.POST.get('truncate_negative', ''),
+                json.loads(request.POST.get('dynamic_excluded', '{}')),
+                study=study,
+                matrix_item=matrix_item,
+                matrix_items=matrix_items,
+                criteria=json.loads(request.POST.get('criteria', '{}'))
+            )
+
+            data.update({'post_filter': post_filter})
+
+            return HttpResponse(json.dumps(data),
+                                content_type="application/json")
+        elif intention == 'inter_repro':
+            criteria = json.loads(request.POST.get('criteria', '{}'))
+            inter_level = int(request.POST.get('inter_level', 1))
+            max_interpolation_size = int(request.POST.get('max_interpolation_size', 2))
+            initial_norm = int(request.POST.get('initial_norm', 0))
+
+            data = get_inter_study_reproducibility(
+                data_points,
+                matrix_items,
+                inter_level,
+                max_interpolation_size,
+                initial_norm,
+                criteria
+            )
+
+            data.update({'post_filter': post_filter})
+
+            return HttpResponse(json.dumps(data),
+                                content_type="application/json")
+        else:
+            return HttpResponseServerError()
     else:
         return HttpResponseServerError()
+
+
+def get_inter_study_reproducibility(
+        data_points,
+        matrix_items,
+        inter_level,
+        max_interpolation_size,
+        initial_norm,
+        criteria
+    ):
+    # Organization is assay -> unit -> compound/tag -> field -> time -> value
+    treatment_group_representatives, setup_to_treatment_group, treatment_header_keys = get_item_groups(
+        None,
+        criteria,
+        matrix_items
+    )
+
+    inter_data = []
+
+    data_point_treatment_groups = {}
+    treatment_group_table = {}
+
+    # CONTRIVED FOR NOW
+    data_header_keys = [
+        'Target',
+        # 'Method',
+        'Value Unit',
+        # 'Sample Location'
+    ]
+
+    base_tuple = (
+        'study_assay.target_id',
+        # 'study_assay.method_id',
+        'study_assay.unit.base_unit_id',
+        # 'sample_location_id'
+    )
+
+    current_tuple = (
+        'study_assay.target_id',
+        # 'study_assay.method_id',
+        'study_assay.unit_id',
+        # 'sample_location_id'
+    )
+
+    additional_keys = []
+
+    # CRUDE
+    if criteria:
+        group_sample_location = 'sample_location' in criteria.get('special', [])
+        group_method = 'method' in criteria.get('special', [])
+
+        if group_method:
+            data_header_keys.append('Method')
+            additional_keys.append('study_assay.method_id')
+
+        if group_sample_location:
+            data_header_keys.append('Sample Location')
+            additional_keys.append('sample_location_id')
+
+    if additional_keys:
+        base_tuple += tuple(additional_keys)
+        current_tuple += tuple(additional_keys)
+
+    # ASSUME _id termination
+    base_value_tuple = tuple([x.replace('_id', '') for x in base_tuple])
+    current_value_tuple = tuple([x.replace('_id', '') for x in current_tuple])
+
+    # TODO TODO TODO TODO
+    data_point_attribute_getter_base = tuple_attrgetter(*base_tuple)
+    data_point_attribute_getter_current = tuple_attrgetter(*current_tuple)
+
+    data_point_attribute_getter_base_values = tuple_attrgetter(*base_value_tuple)
+    data_point_attribute_getter_current_values = tuple_attrgetter(*current_value_tuple)
+
+    for point in data_points:
+        point.standard_value = point.value
+        item_id = point.matrix_item_id
+        if point.study_assay.unit.base_unit_id:
+            data_point_tuple = data_point_attribute_getter_base(point)
+            point.standard_value *= point.study_assay.unit.scale_factor
+        else:
+            data_point_tuple = data_point_attribute_getter_current(point)
+        current_group = data_point_treatment_groups.setdefault(
+            (
+                data_point_tuple,
+                # setup_to_treatment_group.get(item_id).get('id')
+                setup_to_treatment_group.get(item_id).get('index')
+            ),
+            # 'Group {}'.format(len(data_point_treatment_groups) + 1)
+            '{}'.format(len(data_point_treatment_groups) + 1)
+        )
+        point.data_group = current_group
+        if current_group not in treatment_group_table:
+            if point.study_assay.unit.base_unit_id:
+                treatment_group_table.update({
+                    current_group: [unicode(x) for x in list(
+                        data_point_attribute_getter_base_values(point)
+                    ) + [setup_to_treatment_group.get(item_id).get('index')]]
+                })
+            else:
+                treatment_group_table.update({
+                    current_group: [unicode(x) for x in list(
+                        data_point_attribute_getter_current_values(point)
+                    ) + [setup_to_treatment_group.get(item_id).get('index')]]
+                })
+
+    inter_data.append([
+        'Study ID',
+        'Chip ID',
+        'Time',
+        'Value',
+        'MPS User Group',
+        # NAME THIS SOMETHING ELSE
+        'Treatment Group'
+    ])
+
+    # GET RAW DATAPOINTS AS LEGEND -> TIME -> LIST OF VALUES
+    # AFTER THAN REPOSITION THEM FOR CHARTING AND AVERAGE ONE OF THE SETS (KEEP RAW THOUGH)
+    initial_chart_data = {}
+    final_chart_data = {}
+
+    for point in data_points:
+        inter_data.append([
+            point.study.name,
+            point.matrix_item.name,
+            point.time,
+            # NOTE USE OF STANDARD VALUE RATHER THAN VALUE
+            point.standard_value,
+            point.study.group.name,
+            point.data_group
+        ])
+
+        if inter_level:
+            legend = point.study.group.name
+        else:
+            legend = point.study.name
+
+        initial_chart_data.setdefault(
+            point.data_group, {}
+        ).setdefault(
+            'item', {}
+        ).setdefault(
+            legend, {}
+        ).setdefault(
+            # NOTE CONVERT TO DAYS
+            point.time / 1440.0, []
+        ).append(point.standard_value)
+
+        initial_chart_data.setdefault(
+            point.data_group, {}
+        ).setdefault(
+            'average', {}
+        ).setdefault(
+            legend, {}
+        ).setdefault(
+            # NOTE CONVERT TO DAYS
+            point.time / 1440.0, []
+        ).append(point.standard_value)
+
+    for set, chart_groups in initial_chart_data.items():
+        current_set = final_chart_data.setdefault(set, {})
+        for chart_group, legends in chart_groups.items():
+            current_data = {}
+            current_table = current_set.setdefault(chart_group, [['Time']])
+            x_header = {}
+            y_header = {}
+            for legend, times in legends.items():
+                x_header.update({
+                    legend: True,
+                })
+
+                if chart_group == 'average':
+                    x_header.update({
+                        legend: True,
+                        # This is to deal with intervals
+                        legend + ' ~@i1': True,
+                        legend + ' ~@i2': True,
+                    })
+
+                for time, values in times.items():
+                    if chart_group == 'item':
+                        for index, value in enumerate(values):
+                            current_data.setdefault(legend, {}).update({'{}~{}'.format(time, index): value})
+                            y_header.update({'{}~{}'.format(time, index): True})
+                            # x_header.update({
+                            #     '{}~@x{}'.format(legend, index): True
+                            # })
+                            # current_data.setdefault('{}~@x{}'.format(legend, index), {}).update({time: value})
+                            # y_header.update({time: True})
+                    else:
+                        if len(values) > 1:
+                            # TODO TODO TODO ONLY ARITHMETIC MEAN RIGHT NOW
+                            value = np.mean(values)
+                            std = np.std(values)
+                            current_data.setdefault(legend, {}).update({time: value})
+                            current_data.setdefault(legend + ' ~@i1', {}).update({time: value - std})
+                            current_data.setdefault(legend + ' ~@i2', {}).update({time: value + std})
+                        else:
+                            current_data.setdefault(legend, {}).update({time: values[0]})
+                        y_header.update({time: True})
+
+            x_header_keys = x_header.keys()
+            x_header_keys.sort(key=alphanum_key)
+            current_table[0].extend(x_header_keys)
+
+            # if chart_group == 'average':
+            #     current_table[0].extend(x_header_keys)
+            # else:
+            #     current_table[0].extend([x.split('~@x')[0] for x in x_header_keys])
+
+            x_header = {x_header_keys[index]: index + 1 for index in range(len(x_header_keys))}
+
+            y_header = y_header.keys()
+            y_header.sort(key=lambda x: float(unicode(x).split('~')[0]))
+            # y_header.sort(key=float)
+
+            for y in y_header:
+                current_table.append([float(str(y).split('~')[0])] + [None] * (len(x_header)))
+                # current_table.append([y] + [None] * (len(x_header)))
+
+            y_header = {y_header[index]: index + 1 for index in range(len(y_header))}
+
+            for x, data_point in current_data.items():
+                for y, value in data_point.items():
+                    current_table[y_header.get(y)][x_header.get(x)] = value
+
+    # Reset chart data again
+    initial_chart_data = {}
+
+    reproducibility_results_table, inter_data_table = get_inter_study_reproducibility_report(
+        len(treatment_group_table),
+        inter_data,
+        inter_level,
+        max_interpolation_size,
+        initial_norm
+    )
+
+    if inter_data_table.get('errors', ''):
+        return inter_data_table
+
+    reproducibility_results_table = reproducibility_results_table.astype(object).replace(np.nan, '')
+    # results_columns = [i for i in reproducibility_results_table.columns]
+    # results_rows = results_columns + [[row[i] for i in range(1, len(row))] for row in reproducibility_results_table.itertuples()]
+    results_rows = [
+        [row[i] for i in range(1, len(row))] for row in reproducibility_results_table.itertuples()
+    ]
+    # Make into a suitable dictionary
+    results_rows_full = {}
+    results_rows_best = []
+    for row in results_rows:
+        current_dic = results_rows_full.setdefault(
+            row[0], {}
+        )
+        current_dic.update({
+            row[1]: row
+        })
+
+        current_icc = row[6] if row[6] else 0
+
+        if current_dic.get('best', '') and current_icc > current_dic.get('best')[6]:
+            current_dic.update({
+                'best': row
+            })
+        # Subject to revision
+        elif not current_dic.get('best', ''):
+            current_dic.update({
+                'best': row
+            })
+
+    for set, dic in results_rows_full.items():
+        current_best = dic.get('best')
+
+        # Make sure it actually has multiple centers/studies
+        if current_best[3] > 1:
+            results_rows_best.append(current_best)
+
+    inter_data_table = inter_data_table.astype(object).replace(np.nan, '')
+    # inter_data_columns = [i for i in inter_data_table.columns]
+    inter_data_rows = [[row[i] for i in range(1, len(row))] for row in inter_data_table.itertuples()]
+
+    for row in inter_data_rows:
+        # BE CAREFUL, INDICES MAY CHANGE
+        shape = ''
+        if row[3] != 'Original':
+            shape = 'point {shape-type: star; size: 8;}'
+        initial_chart_data.setdefault(
+            row[5], {}
+        ).setdefault(
+            row[4], {}
+        ).setdefault(
+            row[1], {}
+        ).setdefault(
+            # NOTE CONVERT TO DAYS
+            row[0] / 1440.0, (row[2], shape)
+        )
+
+    for set, chart_groups in initial_chart_data.items():
+        current_set = final_chart_data.setdefault(set, {})
+        for chart_group, legends in chart_groups.items():
+            current_data = {}
+            current_table = current_set.setdefault(chart_group, [['Time']])
+            x_header = {}
+            y_header = {}
+            for legend, times in legends.items():
+                x_header.update({
+                    legend: True,
+                    # This is to deal with the style
+                    legend + ' ~@s': True,
+                })
+                for time, value_shape in times.items():
+                    value, shape = value_shape[0], value_shape[1]
+                    current_data.setdefault(legend, {}).update({time: value})
+                    current_data.setdefault(legend + ' ~@s', {}).update({time: shape})
+                    y_header.update({time: True})
+
+            x_header_keys = x_header.keys()
+            x_header_keys.sort(key=alphanum_key)
+            current_table[0].extend(x_header_keys)
+
+            x_header = {x_header_keys[index]: index + 1 for index in range(len(x_header_keys))}
+
+            y_header = y_header.keys()
+            y_header.sort(key=float)
+
+            for y in y_header:
+                current_table.append([y] + [None] * (len(x_header)))
+
+            y_header = {y_header[index]: index + 1 for index in range(len(y_header))}
+
+            for x, data_point in current_data.items():
+                for y, value in data_point.items():
+                    current_table[y_header.get(y)][x_header.get(x)] = value
+
+    data = {
+        'chart_data': final_chart_data,
+        'repro_table_data_full': results_rows_full,
+        'repro_table_data_best': results_rows_best,
+        'data_groups': treatment_group_table,
+        'header_keys': {
+            'treatment': treatment_header_keys,
+            'data': data_header_keys
+        },
+        'treatment_groups': treatment_group_representatives
+    }
+
+    return data
 
 
 def study_viewer_validation(request):

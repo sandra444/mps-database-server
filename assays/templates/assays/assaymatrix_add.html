@@ -923,6 +923,9 @@
     {# CHARTING STUFF #}
     {% if not adding %}
     <div class="container">
+
+    {% include 'assays/grouping_filtering.html' %}
+
     {% include 'assays/chart_options.html' with chart_prefix="charts" chart_title="Current Data" %}
 
     {# Note indicating no data to display initially #}

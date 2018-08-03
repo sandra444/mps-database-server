@@ -14,3 +14,4 @@ additional_credentials.py
 .project
 .pydevproject
 .settings/*
+drugtrials/mps_AATCcredentials.py

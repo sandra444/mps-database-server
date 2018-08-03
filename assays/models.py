@@ -1859,22 +1859,22 @@ class AssayMatrixItem(FlaggableModel):
             criteria = {}
         dic = {
             # 'device': self.device.name,
-            'organ_model': self.get_hyperlinked_model_or_device(),
-            'compounds': self.stringify_compounds(criteria.get('compound', None)),
-            'cells': self.stringify_cells(criteria.get('cell', None)),
-            'settings': self.stringify_settings(criteria.get('setting', None)),
-            'setups_with_same_group': []
+            'MPS Model': self.get_hyperlinked_model_or_device(),
+            'Compounds': self.stringify_compounds(criteria.get('compound', None)),
+            'Cells': self.stringify_cells(criteria.get('cell', None)),
+            'Settings': self.stringify_settings(criteria.get('setting', None)),
+            'Items with Same Treatment': []
         }
         return dic
 
     def get_hyperlinked_name(self):
-        return '<a href="{0}">{1}</a>'.format(self.get_absolute_url(), self.name)
+        return '<a target="_blank" href="{0}">{1}</a>'.format(self.get_absolute_url(), self.name)
 
     def get_hyperlinked_model_or_device(self):
         if not self.organ_model:
-            return '<a href="{0}">{1} (No Organ Model)</a>'.format(self.device.get_absolute_url(), self.device.name)
+            return '<a target="_blank" href="{0}">{1} (No Organ Model)</a>'.format(self.device.get_absolute_url(), self.device.name)
         else:
-            return '<a href="{0}">{1}</a>'.format(self.organ_model.get_absolute_url(), self.organ_model.name)
+            return '<a target="_blank" href="{0}">{1}</a>'.format(self.organ_model.get_absolute_url(), self.organ_model.name)
 
     # TODO TODO TODO CHANGE
     def get_absolute_url(self):
@@ -1954,7 +1954,7 @@ class AssaySetupCell(models.Model):
     # duration = models.FloatField(null=True, blank=True)
 
     # TODO TODO TODO TEMPORARILY NOT REQUIRED
-    addition_location = models.ForeignKey(AssaySampleLocation, null=True, blank=True)
+    addition_location = models.ForeignKey(AssaySampleLocation, blank=True, default=1)
 
     # NOT DRY
     def get_addition_time_string(self):
@@ -2186,7 +2186,7 @@ class AssaySetupCompound(models.Model):
     duration = models.FloatField(blank=True)
 
     # TODO TODO TODO TEMPORARILY NOT REQUIRED
-    addition_location = models.ForeignKey(AssaySampleLocation, null=True, blank=True)
+    addition_location = models.ForeignKey(AssaySampleLocation, blank=True, default=1)
 
     # NOT DRY
     def get_addition_time_string(self):
@@ -2373,7 +2373,7 @@ class AssaySetupSetting(models.Model):
     duration = models.FloatField(blank=True)
 
     # TODO TODO TODO TEMPORARILY NOT REQUIRED
-    addition_location = models.ForeignKey(AssaySampleLocation, null=True, blank=True)
+    addition_location = models.ForeignKey(AssaySampleLocation, blank=True, default=1)
 
     # NOT DRY
     def get_addition_time_string(self):

@@ -69,6 +69,10 @@
 
     <script src="{% static "js/cookies.js" %}"></script>
 
+    {# Spinner #}
+    <script src="{% static "js/spin.min.js" %}"></script>
+    <script src="{% static "js/mps_spinner.js" %}"></script>
+
     {# Yes, I know this violates SOC #}
     <script>
       {# Smart menus removed #}
@@ -241,7 +245,7 @@
               Predictive Modeling
           </a></li>
           <li title="This feature is still in development"><a href="/assays/test_filter/">
-              <span id="generic_alert_symbol" class="glyphicon glyphicon-wrench" aria-hidden="true"></span>
+              <span class="glyphicon glyphicon-wrench" aria-hidden="true"></span>
               Test Filter
           </a></li>
 {#          <li title="This feature is still in development"><a href="/under_construction/">#}
@@ -270,6 +274,7 @@
           {# TODO NOTE THAT THIS IS A REPEAT LINK! #}
           <li><a href="/bioactivities/table/#filter">View Bioactivities</a></li>
           <li><a href="/drugtrials/">View Drug Trials</a></li>
+          <li><a href="/autodrugtrialsform/">Pull Novel Drug Trials</a></li>
           <li><a href="/adverse_events/">View Adverse Events</a></li>
           <li class="divider"></li>
           <li><a href="/compare_adverse_events/">Compare Adverse Events</a></li>
@@ -400,6 +405,10 @@
       </div>
     </footer>
   </div>
+
+  {# Spinner #}
+  <div id="spinner"></div>
+
   </div>
 </body>
 </html>

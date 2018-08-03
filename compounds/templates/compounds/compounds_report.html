@@ -2,8 +2,6 @@
 {% load static %}
 
 {% block load %}
-    <script src="{% static "js/spin.min.js" %}"></script>
-    <script src="{% static "js/mps_spinner.js" %}"></script>
     <script src="{% static "js/project_filter.js" %}"></script>
     <script src="{% static "compounds/compound_report.js" %}"></script>
 {% endblock %}
@@ -54,7 +52,7 @@
             {% for compound in object_list %}
                 <tr class="compound" id={{ compound.id }} name={{ compound.name }}>
                     {# Checkbox for each compound #}
-                    <td><input class="checkbox" type="checkbox" value="{{ compound.name|safe }}"></td>
+                    <td><input class="big-checkbox checkbox" type="checkbox" value="{{ compound.name|safe }}"></td>
                     <td><a href="/compounds/{{ compound.id }}">{{ compound.name }}</a></td>
                     <td><a href="https://www.ebi.ac.uk/chembl/compound/inspect/{{ compound.chemblid }}">{{ compound.chemblid }}</a></td>
                     <td>{{ compound.synonyms }}</td>
@@ -121,8 +119,6 @@
                 </tbody>
         </table>
     </div>
-
-    <div id="spinner"></div>
 
     {# Right now the fields of a report are static, but that will likely change #}
     {# Need to switch to hide full #}

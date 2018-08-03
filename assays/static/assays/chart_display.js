@@ -12,22 +12,24 @@ window.CHARTS = {};
 // google.charts.setOnLoadCallback(window.CHARTS.callback);
 
 $(document).ready(function () {
-    var colors = [
-        "rgba(0,128,0,0.4)", "rgba(26,140,0,0.4)", "rgba(51,152,0,0.4)",
-        "rgba(77,164,0,0.4)", "rgba(102,176,0,0.4)", "rgba(128,188,0,0.4)",
-        "rgba(153,200,0,0.4)", "rgba(179,212,0,0.4)", "rgba(204,224,0,0.4)",
-        "rgba(230,236,0,0.4)", "rgba(255,255,0,0.4)", "rgba(243,230,0,0.4)",
-        "rgba(231,204,0,0.4)", "rgba(219,179,0,0.4)", "rgba(207,153,0,0.4)",
-        "rgba(195,128,0,0.4)", "rgba(183,102,0,0.4)", "rgba(171,77,0,0.4)",
-        "rgba(159,51,0,0.4)", "rgba(147,26,0,0.4)", "rgba(135,0,0,0.4)"
-    ];
+    // Heatmap stuff for later
+    // var colors = [
+    //     "rgba(0,128,0,0.4)", "rgba(26,140,0,0.4)", "rgba(51,152,0,0.4)",
+    //     "rgba(77,164,0,0.4)", "rgba(102,176,0,0.4)", "rgba(128,188,0,0.4)",
+    //     "rgba(153,200,0,0.4)", "rgba(179,212,0,0.4)", "rgba(204,224,0,0.4)",
+    //     "rgba(230,236,0,0.4)", "rgba(255,255,0,0.4)", "rgba(243,230,0,0.4)",
+    //     "rgba(231,204,0,0.4)", "rgba(219,179,0,0.4)", "rgba(207,153,0,0.4)",
+    //     "rgba(195,128,0,0.4)", "rgba(183,102,0,0.4)", "rgba(171,77,0,0.4)",
+    //     "rgba(159,51,0,0.4)", "rgba(147,26,0,0.4)", "rgba(135,0,0,0.4)"
+    // ];
+    //
+    // // Avoid magic strings for heatmap elements
+    // var heatmap_filters_selector = $('#heatmap_filters').find('select');
+    // var matrix_body_selector = $('#matrix_body');
+    // var heatmap_wrapper_selector = $('#heatmap_wrapper');
+    // // TODO TODO TODO TEMPORARILY EXPOSE
+    // var heatmap_data = {};
 
-    // Avoid magic strings for heatmap elements
-    var heatmap_filters_selector = $('#heatmap_filters').find('select');
-    var matrix_body_selector = $('#matrix_body');
-    var heatmap_wrapper_selector = $('#heatmap_wrapper');
-    // TODO TODO TODO TEMPORARILY EXPOSE
-    var heatmap_data = {};
     // Charts
     var all_charts = {};
     var all_events = {};
@@ -42,25 +44,6 @@ $(document).ready(function () {
     var group_to_data = [];
     var device_to_group = {};
     var all_treatment_groups = [];
-
-    // CONTRIVED DIALOG
-    // Interestingly, this dialog should be separate and apart from chart_options
-    // Really, I might as well make it from JS here
-    // TODO PLEASE MAKE THIS NOT CONTRIVED SOON
-    var dialog_example = $('#filter_popup');
-    if (dialog_example) {
-        dialog_example.dialog({
-           closeOnEscape: true,
-           autoOpen: false,
-           close: function() {
-               $('body').removeClass('stop-scrolling');
-           },
-           open: function() {
-               $('body').addClass('stop-scrolling');
-           }
-        });
-        dialog_example.removeProp('hidden');
-    }
 
     window.CHARTS.prepare_chart_options = function(charts) {
         var options = {};
@@ -141,26 +124,27 @@ $(document).ready(function () {
 
     window.CHARTS.display_treatment_groups = function(treatment_groups, header_keys) {
         device_to_group = {};
+        all_treatment_groups = [];
 
         // TODO KIND OF UGLY
         if (!header_keys) {
             header_keys = [
                 // 'device',
-                'organ_model',
-                'cells',
-                'compounds',
-                'settings',
-                'setups_with_same_group'
+                'MPS Model',
+                'Cells',
+                'Compounds',
+                'Settings',
+                'Items with Same Treatment'
             ];
         }
 
         var headers = {
             // 'device': 'Device',
-            'organ_model': 'MPS Model',
-            'cells': 'Cells',
-            'compounds': 'Compounds',
-            'settings': 'Settings',
-            'setups_with_same_group': 'Chips/Wells'
+            'MPS Model': 'MPS Model',
+            'Cells': 'Cells',
+            'Compounds': 'Compounds',
+            'Settings': 'Settings',
+            'Items with Same Treatment': 'Chips/Wells'
         };
 
         if (treatment_group_data_table) {
@@ -200,7 +184,7 @@ $(document).ready(function () {
                 new_row.append(new_td);
 
                 // Somewhat sloppy conditional
-                if (current_header === 'setups_with_same_group') {
+                if (current_header === 'Items with Same Treatment') {
                     $.each(new_td.find('a'), function (anchor_index, anchor) {
                         device_to_group[anchor.text] = index;
                     });
@@ -241,10 +225,12 @@ $(document).ready(function () {
         // Reposition download/print/copy
         $('.DTTT_container').css('float', 'none');
 
-
         // Recalculate responsive and fixed headers
         $($.fn.dataTable.tables(true)).DataTable().responsive.recalc();
         $($.fn.dataTable.tables(true)).DataTable().fixedHeader.adjust();
+
+        // Make sure the header is fixed and active
+        treatment_group_data_table.fixedHeader.enable();
     };
 
     window.CHARTS.get_heatmap_dropdowns = function(starting_index) {
@@ -344,6 +330,12 @@ $(document).ready(function () {
     // };
 
     window.CHARTS.make_charts = function(json, charts, changes_to_options) {
+        // post_filter setup
+        if (window.GROUPING.full_post_filter === null) {
+            window.GROUPING.full_post_filter = json.post_filter;
+            window.GROUPING.current_post_filter = JSON.parse(JSON.stringify(json.post_filter));
+        }
+
         // Remove triggers
         if (all_events[charts]) {
             $.each(all_events[charts], function(index, event) {
@@ -359,9 +351,10 @@ $(document).ready(function () {
         // Show the chart options
         // NOTE: the chart options are currently shown by default, subject to change
 
-        heatmap_data = json.heatmap;
-
-        window.CHARTS.get_heatmap_dropdowns(0);
+        // heatmap WIP
+        // heatmap_data = json.heatmap;
+        //
+        // window.CHARTS.get_heatmap_dropdowns(0);
 
         // Naive way to learn whether dose vs. time
         var is_dose = $('#' + charts + 'dose_select').prop('checked');
@@ -422,7 +415,7 @@ $(document).ready(function () {
                 },
                 vAxis: {
                     title: unit,
-                    format: 'short',
+                    format: 'scientific',
                     textStyle: {
                         bold: true
                     },
@@ -475,8 +468,16 @@ $(document).ready(function () {
 
             var chart = null;
 
+            var num_colors = 0;
+
+            $.each(assays[index][0].slice(1), function(index, value) {
+                if (value.indexOf(' ~@i1') === -1) {
+                    num_colors++;
+                }
+            });
+
             // Line chart if more than one time point and less than 101 colors
-            if (assays[index].length > 2 && assays[index][0].length < 101) {
+            if (assays[index].length > 2 && num_colors < 101) {
                 chart = new google.visualization.LineChart(document.getElementById(charts + '_' + index));
 
                 // If the scale is not already small
@@ -492,7 +493,7 @@ $(document).ready(function () {
                 }
             }
             // Nothing if more than 100 colors
-            else if (assays[index][0].length > 100) {
+            else if (num_colors > 100) {
                 document.getElementById(charts + '_' + index).innerHTML = '<div class="alert alert-danger" role="alert">' +
                     '<span class="glyphicon glyphicon-warning-sign" aria-hidden="true"></span>' +
                     '<span class="sr-only">Danger:</span>' +
@@ -528,7 +529,7 @@ $(document).ready(function () {
                 i = 1;
                 while (i < data.getNumberOfColumns()) {
                     interval_setter.push(i);
-                    if (i + 2 < data.getNumberOfColumns() && assays[index][0][i+1].indexOf('~@i1') > -1) {
+                    if (i + 2 < data.getNumberOfColumns() && assays[index][0][i+1].indexOf(' ~@i1') > -1) {
                         interval_setter.push({sourceColumn: i + 1, role: 'interval'});
                         interval_setter.push({sourceColumn: i + 2, role: 'interval'});
                         i += 2;
@@ -551,7 +552,7 @@ $(document).ready(function () {
             group_to_data[charts].push({});
 
             for (i=0; i < assays[index][0].length; i++) {
-                if (assays[index][0][i].indexOf('~@i1') === -1 && assays[index][0][i].indexOf('~@i2') === -1) {
+                if (assays[index][0][i].indexOf(' ~@i1') === -1 && assays[index][0][i].indexOf(' ~@i2') === -1) {
                     // Need to link EACH CHARTS values to the proper group
                     // EMPHASIS ON EACH CHART
                     // Somewhat naive
@@ -571,16 +572,19 @@ $(document).ready(function () {
             // Makes use of a somewhat zany closure
             var current_event = google.visualization.events.addListener(all_charts[charts][index], 'onmouseover', (function (charts, chart_index) {
                 return function (entry) {
-                    var current_pos = $(all_charts[charts][chart_index].container).position();
-                    var current_top = current_pos.top + 75;
-                    var current_left = $('#breadcrumbs').position.left;
-                    if (entry.row === null && entry.column) {
-                        var row_clone = all_treatment_groups[group_to_data[charts][chart_index][entry.column]].clone().addClass('bg-warning');
-                        if (row_clone) {
-                            $('#group_display_body').empty().append(row_clone);
+                    // Only attempts to display if there is a valid treatment group
+                    if (all_treatment_groups[group_to_data[charts][chart_index][entry.column]]) {
+                        var current_pos = $(all_charts[charts][chart_index].container).position();
+                        var current_top = current_pos.top + 75;
+                        var current_left = $('#breadcrumbs').position.left;
+                        if (entry.row === null && entry.column) {
+                            var row_clone = all_treatment_groups[group_to_data[charts][chart_index][entry.column]].clone().addClass('bg-warning');
+                            if (row_clone) {
+                                $('#group_display_body').empty().append(row_clone);
 
-                            $('#group_display').show()
-                                .css({top: current_top, left: current_left, position:'absolute'});
+                                $('#group_display').show()
+                                    .css({top: current_top, left: current_left, position: 'absolute'});
+                            }
                         }
                     }
                 }
@@ -593,15 +597,4 @@ $(document).ready(function () {
             all_events[charts].push(current_event);
         }
     };
-
-    // Triggers for heatmap filters
-    heatmap_filters_selector.change(function() {
-        window.CHARTS.get_heatmap_dropdowns(Math.floor($(this).data('heatmap-index')));
-    });
-
-    // Triggers for spawning filters
-    // TODO REVISE THIS TERRIBLE SELECTOR
-    $('.glyphicon-filter').click(function() {
-        dialog_example.dialog('open');
-    });
 });

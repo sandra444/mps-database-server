@@ -1,9 +1,23 @@
 // Add method to sort by checkbox
 // (I reversed it so that ascending will place checked first)
 $(document).ready(function () {
-    $.fn.dataTable.ext.order['dom-checkbox'] = function (settings, col) {
-        return this.api().column(col, {order: 'index'}).nodes().map(function (td, i) {
-            return $('input', td).prop('checked') ? 0 : 1;
+    // $.fn.dataTable.ext.order['dom-checkbox'] = function (settings, col) {
+    //     return this.api().column(col, {order: 'index'}).nodes().map(function (td, i) {
+    //         return $('input', td).prop('checked') ? 0 : 1;
+    //     });
+    // };
+
+    // Add method to sort by checkbox
+    // (I reversed it so that ascending will place checked first)
+    $.fn.dataTable.ext.order['dom-checkbox-defer'] = function(settings, col) {
+        return settings.aoData.map(function(data, index) {
+            return data._aData.checkbox.indexOf(' checked>') > -1 ? 0 : 1;
+        });
+    };
+
+    $.fn.dataTable.ext.order['dom-checkbox'] = function(settings, col) {
+        return settings.aoData.map(function(data, index) {
+            return data._aData[0].indexOf(' checked>') > -1 ? 0 : 1;
         });
     };
 
@@ -45,12 +59,21 @@ $(document).ready(function () {
         }
     });
 
-// Defines the options for the print, copy, and save as buttons
+    // Defines the options for the print, copy, and save as buttons
     $.extend(true, $.fn.dataTable.defaults, {
         buttons: [
             'copy', 'csv', 'print'
         ]
         // swfPath: '/static/swf/flashExport.swf'
+    });
+
+    // Indicates that floating headers need to be refreshed when a toggle-hide-button is clicked
+    $(document).on('click', '.toggle-hide-button', function() {
+        // Recalculate responsive and fixed headers
+        setTimeout(function() {
+            $($.fn.dataTable.tables(true)).DataTable().responsive.recalc();
+            $($.fn.dataTable.tables(true)).DataTable().fixedHeader.adjust();
+        }, 1000);
     });
 });
 // $.fn.dataTable.TableTools.defaults.aButtons = [
