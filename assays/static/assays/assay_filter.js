@@ -778,7 +778,7 @@ $(document).ready(function() {
             if (all_null) {
                 return false;
             }
-            var data = google.visualization.arrayToDataTable(values);
+
             var options = {
                 // Make sure title case
                 title: content_type[0].toUpperCase() + content_type.substr(1),
@@ -845,47 +845,92 @@ $(document).ready(function() {
             };
 
             // CONTRIVANCE FOR NOW
-            if (content_type !== 'item') {
-                chart = new google.visualization.LineChart(
-                    $('.repro-' + set).find(
-                        '[data-id="' + content_type + '_chart"]'
-                    ).first()[0]);
+            // if (content_type !== 'item') {
+                // chart = new google.visualization.LineChart(
+                //     $('.repro-' + set).find(
+                //         '[data-id="' + content_type + '_chart"]'
+                //     ).first()[0]);
+            // }
+            // else {
+                // chart = new google.visualization.ScatterChart(
+                //     $('.repro-' + set).find(
+                //         '[data-id="' + content_type + '_chart"]'
+                //     ).first()[0]);
+
+                // Make sure isHtml true for items
+                // options.tooltip = {isHtml: true};
+            // }
+
+            var chart_type = 'LineChart';
+            var container_id = $('.repro-' + set).find(
+                    '[data-id="' + content_type + '_chart"]'
+                ).first()[0];
+            if (content_type === 'item') {
+                chart_type = 'ScatterChart';
+                // Make sure isHtml true for items
+                options.tooltip = {isHtml: true};
             }
-            else {
-                chart = new google.visualization.ScatterChart(
-                    $('.repro-' + set).find(
-                        '[data-id="' + content_type + '_chart"]'
-                    ).first()[0]);
-            }
 
 
-            if (chart) {
-                var dataView = new google.visualization.DataView(data);
-
+            if (chart_type) {
                 // Change interval columns to intervals
                 // ALSO CHANGES ROLE FOR STYLE COLUMNS
                 var interval_setter = [0];
 
                 i = 1;
-                while (i < data.getNumberOfColumns()) {
+                while (i < values[0].length) {
                     interval_setter.push(i);
-                    if (i + 2 < data.getNumberOfColumns() && values[0][i + 1].indexOf(' ~@i1') > -1) {
+                    if (i + 2 < values[0].length && values[0][i + 1].indexOf(' ~@i1') > -1) {
                         interval_setter.push({sourceColumn: i + 1, role: 'interval'});
                         interval_setter.push({sourceColumn: i + 2, role: 'interval'});
 
-                        if (i + 3 < data.getNumberOfColumns() && values[0][i + 3].indexOf(' ~@s') > -1) {
+                        if (i + 3 < values[0].length && values[0][i + 3].indexOf(' ~@s') > -1) {
                             interval_setter.push({sourceColumn: i + 3, type: 'string', role: 'style'});
                             i += 1;
                         }
 
                         i += 2;
                     }
+                    // Item only
+                    if (i + 1 < values[0].length && values[0][i + 1].indexOf(' ~@t') > -1) {
+                        for (var row_index = 1; row_index < values.length; row_index++) {
+                            var current_contents = values[row_index][i + 1];
+                            if (current_contents) {
+                                values[row_index][i + 1] = generate_data_point_tooltip(
+                                    current_contents[0],
+                                    current_contents[1],
+                                    current_contents[2],
+                                    current_contents[3]
+                                );
+                            }
+                        }
+
+                        interval_setter.push(
+                            {
+                                sourceColumn: i + 1, type: 'string', role: 'tooltip', 'p': {'html': true}
+                            }
+                        );
+
+                        i += 1;
+                    }
 
                     i += 1;
                 }
-                dataView.setColumns(interval_setter);
 
-                chart.draw(dataView, options);
+                var data = google.visualization.arrayToDataTable(values);
+                // var dataView = new google.visualization.DataView(data);
+                // dataView.setColumns(interval_setter);
+
+                var wrapper = new google.visualization.ChartWrapper({
+                    chartType: chart_type,
+                    dataTable: data,
+                    options: options,
+                    containerId: container_id
+                });
+
+                wrapper.setView({columns:interval_setter});
+
+                wrapper.draw();
             }
         });
 
@@ -923,32 +968,23 @@ $(document).ready(function() {
         ).show();
     }
 
-    function generate_data_point_tooltip(time, value, chip_id) {
-        return '<div style="padding:5px 5px 5px 5px;">' +
-        '<table class="table">' +
-        '<tr>' +
-        '<td><b>' + time + '</b></td>' +
-        '</tr>' +
-        '<tr>' +
-        '<td><b>Value</b></td>' +
-        '<td>' + value + '</td>' +
-        '</tr>' +
-        '<tr>' +
-        '<td><b>Item</b></td>' +
-        '<td>' + chip_id + '</td>' +
-        '</tr>' +
-        '</table>' +
-        '</div>';
-    }
-
-    function build_group_table(group_id) {
-        var content = '';
-        return content;
-    }
-
-    function build_cv_icc(cv, icc){
-        content = '<tr><th>CV(%)</th><th>ICC-Absolute Agreement</th></tr><tr><td>'+cv+'</td><td>'+icc+'</td></tr>';
-        return content;
+    function generate_data_point_tooltip(time, legend, value, chip_id) {
+        // return '<div style="padding:5px 5px 5px 5px;">' +
+        // '<table class="table">' +
+        // '<tr>' +
+        // '<td><b>' + time + '</b></td>' +
+        // '</tr>' +
+        // '<tr>' +
+        // '<td><b>Value</b></td>' +
+        // '<td>' + value + '</td>' +
+        // '</tr>' +
+        // '<tr>' +
+        // '<td><b>Item</b></td>' +
+        // '<td>' + chip_id + '</td>' +
+        // '</tr>' +
+        // '</table>' +
+        // '</div>';
+        return time + '\n' + legend + ': ' + value + '\n' + chip_id;
     }
 
     //Checkbox click event

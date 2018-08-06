@@ -2251,6 +2251,10 @@ def get_inter_study_reproducibility(
         matrix_items
     )
 
+    matrix_item_id_to_tooltip_string = {
+        matrix_item.id: '{} ({})'.format(matrix_item.name, matrix_item.matrix.name) for matrix_item in matrix_items
+    }
+
     inter_data = []
 
     data_point_treatment_groups = {}
@@ -2387,7 +2391,7 @@ def get_inter_study_reproducibility(
         ).setdefault(
             # NOTE CONVERT TO DAYS
             point.time / 1440.0, []
-        ).append(point.standard_value)
+        ).append((point.standard_value, matrix_item_id_to_tooltip_string.get(point.matrix_item_id)))
 
         initial_chart_data.setdefault(
             point.data_group, {}
@@ -2419,11 +2423,24 @@ def get_inter_study_reproducibility(
                         legend + ' ~@i1': True,
                         legend + ' ~@i2': True,
                     })
+                else:
+                    x_header.update({
+                        legend: True,
+                        # This is to deal with custom tooltips
+                        legend + ' ~@t': True,
+                    })
 
                 for time, values in times.items():
                     if chart_group == 'item':
-                        for index, value in enumerate(values):
+                        for index, value_pair in enumerate(values):
+                            value = value_pair[0]
+                            matrix_item_id = value_pair[1]
                             current_data.setdefault(legend, {}).update({'{}~{}'.format(time, index): value})
+                            current_data.setdefault(legend + ' ~@t', {}).update(
+                                {
+                                    '{}~{}'.format(time, index): [time, legend, value, matrix_item_id]
+                                }
+                            )
                             y_header.update({'{}~{}'.format(time, index): True})
                             # x_header.update({
                             #     '{}~@x{}'.format(legend, index): True
