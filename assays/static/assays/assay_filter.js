@@ -524,7 +524,7 @@ $(document).ready(function() {
                 {
                     title: "Studies",
                     "render": function (data, type, row) {
-                        return Object.keys(data_group_to_studies[row[0]]).sort().join('<br>');
+                        return data_group_to_studies[row[0]].join('<br>');
                     },
                     width: '20%'
                 },
@@ -674,7 +674,7 @@ $(document).ready(function() {
         });
 
         rows.push(
-            '<tr><th>Studies</th><td>' + Object.keys(data_group_to_studies[set]).sort().join('<br>') + '</td></tr>'
+            '<tr><th>Studies</th><td>' + data_group_to_studies[set].join('<br>') + '</td></tr>'
         );
 
         rows = rows.join('');
