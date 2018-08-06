@@ -531,7 +531,7 @@ $(document).ready(function() {
                 {
                     title: "Compounds",
                     "render": function (data, type, row) {
-                        return treatment_groups[data_groups[row[0]][3]]['Trimmed Compounds'];
+                        return treatment_groups[data_groups[row[0]][data_groups[row[0]].length - 1]]['Trimmed Compounds'];
                     },
                     width: '20%'
                 },
