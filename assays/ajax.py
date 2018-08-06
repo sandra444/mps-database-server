@@ -2348,7 +2348,7 @@ def get_inter_study_reproducibility(
         data_group_to_studies.setdefault(
             current_group, {}
         ).update({
-            u'{} ({})'.format(point.study.name, point.study.group.name): True
+            u'<a href="{}" target="_blank">{} ({})</a>'.format(point.study.get_absolute_url(), point.study.name, point.study.group.name): point.study.name
         })
 
     inter_data.append([
@@ -2619,6 +2619,10 @@ def get_inter_study_reproducibility(
                 for y, value in data_point.items():
                     current_table[y_header.get(y)][x_header.get(x)] = value
 
+    final_data_group_to_studies = {}
+    for data_group, current_studies in data_group_to_studies.items():
+        final_data_group_to_studies[data_group] = sorted(current_studies, key=current_studies.get)
+
     data = {
         'chart_data': final_chart_data,
         'repro_table_data_full': results_rows_full,
@@ -2629,7 +2633,7 @@ def get_inter_study_reproducibility(
             'data': data_header_keys
         },
         'treatment_groups': treatment_group_representatives,
-        'data_group_to_studies': data_group_to_studies
+        'data_group_to_studies': final_data_group_to_studies
     }
 
     return data
