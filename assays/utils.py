@@ -1794,12 +1794,14 @@ def Inter_reproducibility(group_count, inter_data_df, inter_level=1, max_interpo
 
                         p_value = Single_Time_ANOVA(anova_data, inter_level)
 
+                        group_rep_mtarix.iloc[0, group_rep_mtarix.columns.get_loc('ANOVA P-Value')] = '{0:.4g}'.format(p_value)
+
                         # Calcualate CV
                         single_array = no_nan_matrix.dropna()
                         single_array_val = single_array.values
                         single_CV = np.std(single_array_val, ddof=1) / np.mean(single_array_val) * 100
 
-                        group_rep_mtarix.iloc[0, group_rep_mtarix.columns.get_loc('Max CV')] = single_CV
+                        group_rep_mtarix.iloc[0, group_rep_mtarix.columns.get_loc('Max CV')] = '{0:.4g}'.format(single_CV)
 
                         if p_value >= 0.05:
                             if single_CV <= 5:

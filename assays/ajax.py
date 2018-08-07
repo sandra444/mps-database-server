@@ -620,7 +620,7 @@ def get_control_data(
     controls = {}
 
     data_points = list(AssayDataPoint.objects.filter(
-        study_id=study,
+        study_id__in=study,
         replaced=False
     ).prefetch_related(
         'study',
@@ -817,42 +817,43 @@ def get_item_groups(study, criteria, matrix_items=None):
     return (sorted_treatment_groups, setup_to_treatment_group, header_keys)
 
 
-def get_paired_id_and_name(field):
-    return '\n'.join((field.name, unicode(field.id)))
-
-
-def get_data_for_heatmap(raw_data):
-    data = {
-        'matrices': {},
-        'values': {}
-    }
-
-    # Nesting like this is a serious violation of style
-    for raw in raw_data:
-        data.get('values').setdefault(
-            get_paired_id_and_name(raw.matrix_item.matrix), {}
-        ).setdefault(
-            get_paired_id_and_name(raw.study_assay.target), {}
-        ).setdefault(
-            get_paired_id_and_name(raw.study_assay.method), {}
-        ).setdefault(
-            # Dumb exception
-            '\n'.join((raw.study_assay.unit.unit, unicode(raw.study_assay.unit.id))), {}
-        ).setdefault(
-            get_paired_id_and_name(raw.sample_location), {}
-        ).setdefault(
-            get_paired_id_and_name(raw.subtarget), {}
-        ).setdefault(
-            '\n'.join((raw.get_time_string(), unicode(raw.time))), {}
-        ).setdefault(
-            '_'.join([unicode(raw.matrix_item.row_index), unicode(raw.matrix_item.column_index)]), []
-        ).append(raw.value)
-
-        data.get('matrices').setdefault(
-            get_paired_id_and_name(raw.matrix_item.matrix), [[''] * raw.matrix_item.matrix.number_of_columns for _ in range(raw.matrix_item.matrix.number_of_rows)]
-        )[raw.matrix_item.row_index][raw.matrix_item.column_index] = raw.matrix_item.name
-
-    return data
+# TODO PROTOTYPE ONLY
+# def get_paired_id_and_name(field):
+#     return '\n'.join((field.name, unicode(field.id)))
+#
+#
+# def get_data_for_heatmap(raw_data):
+#     data = {
+#         'matrices': {},
+#         'values': {}
+#     }
+#
+#     # Nesting like this is a serious violation of style
+#     for raw in raw_data:
+#         data.get('values').setdefault(
+#             get_paired_id_and_name(raw.matrix_item.matrix), {}
+#         ).setdefault(
+#             get_paired_id_and_name(raw.study_assay.target), {}
+#         ).setdefault(
+#             get_paired_id_and_name(raw.study_assay.method), {}
+#         ).setdefault(
+#             # Dumb exception
+#             '\n'.join((raw.study_assay.unit.unit, unicode(raw.study_assay.unit.id))), {}
+#         ).setdefault(
+#             get_paired_id_and_name(raw.sample_location), {}
+#         ).setdefault(
+#             get_paired_id_and_name(raw.subtarget), {}
+#         ).setdefault(
+#             '\n'.join((raw.get_time_string(), unicode(raw.time))), {}
+#         ).setdefault(
+#             '_'.join([unicode(raw.matrix_item.row_index), unicode(raw.matrix_item.column_index)]), []
+#         ).append(raw.value)
+#
+#         data.get('matrices').setdefault(
+#             get_paired_id_and_name(raw.matrix_item.matrix), [[''] * raw.matrix_item.matrix.number_of_columns for _ in range(raw.matrix_item.matrix.number_of_rows)]
+#         )[raw.matrix_item.row_index][raw.matrix_item.column_index] = raw.matrix_item.name
+#
+#     return data
 
 
 # TODO TODO TODO MAKE SURE STUDY NO LONGER REQUIRED
