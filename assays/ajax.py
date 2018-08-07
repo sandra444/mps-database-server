@@ -620,7 +620,7 @@ def get_control_data(
     controls = {}
 
     data_points = list(AssayDataPoint.objects.filter(
-        study_id=study,
+        study_id__in=study,
         replaced=False
     ).prefetch_related(
         'study',
@@ -817,42 +817,43 @@ def get_item_groups(study, criteria, matrix_items=None):
     return (sorted_treatment_groups, setup_to_treatment_group, header_keys)
 
 
-def get_paired_id_and_name(field):
-    return '\n'.join((field.name, unicode(field.id)))
-
-
-def get_data_for_heatmap(raw_data):
-    data = {
-        'matrices': {},
-        'values': {}
-    }
-
-    # Nesting like this is a serious violation of style
-    for raw in raw_data:
-        data.get('values').setdefault(
-            get_paired_id_and_name(raw.matrix_item.matrix), {}
-        ).setdefault(
-            get_paired_id_and_name(raw.study_assay.target), {}
-        ).setdefault(
-            get_paired_id_and_name(raw.study_assay.method), {}
-        ).setdefault(
-            # Dumb exception
-            '\n'.join((raw.study_assay.unit.unit, unicode(raw.study_assay.unit.id))), {}
-        ).setdefault(
-            get_paired_id_and_name(raw.sample_location), {}
-        ).setdefault(
-            get_paired_id_and_name(raw.subtarget), {}
-        ).setdefault(
-            '\n'.join((raw.get_time_string(), unicode(raw.time))), {}
-        ).setdefault(
-            '_'.join([unicode(raw.matrix_item.row_index), unicode(raw.matrix_item.column_index)]), []
-        ).append(raw.value)
-
-        data.get('matrices').setdefault(
-            get_paired_id_and_name(raw.matrix_item.matrix), [[''] * raw.matrix_item.matrix.number_of_columns for _ in range(raw.matrix_item.matrix.number_of_rows)]
-        )[raw.matrix_item.row_index][raw.matrix_item.column_index] = raw.matrix_item.name
-
-    return data
+# TODO PROTOTYPE ONLY
+# def get_paired_id_and_name(field):
+#     return '\n'.join((field.name, unicode(field.id)))
+#
+#
+# def get_data_for_heatmap(raw_data):
+#     data = {
+#         'matrices': {},
+#         'values': {}
+#     }
+#
+#     # Nesting like this is a serious violation of style
+#     for raw in raw_data:
+#         data.get('values').setdefault(
+#             get_paired_id_and_name(raw.matrix_item.matrix), {}
+#         ).setdefault(
+#             get_paired_id_and_name(raw.study_assay.target), {}
+#         ).setdefault(
+#             get_paired_id_and_name(raw.study_assay.method), {}
+#         ).setdefault(
+#             # Dumb exception
+#             '\n'.join((raw.study_assay.unit.unit, unicode(raw.study_assay.unit.id))), {}
+#         ).setdefault(
+#             get_paired_id_and_name(raw.sample_location), {}
+#         ).setdefault(
+#             get_paired_id_and_name(raw.subtarget), {}
+#         ).setdefault(
+#             '\n'.join((raw.get_time_string(), unicode(raw.time))), {}
+#         ).setdefault(
+#             '_'.join([unicode(raw.matrix_item.row_index), unicode(raw.matrix_item.column_index)]), []
+#         ).append(raw.value)
+#
+#         data.get('matrices').setdefault(
+#             get_paired_id_and_name(raw.matrix_item.matrix), [[''] * raw.matrix_item.matrix.number_of_columns for _ in range(raw.matrix_item.matrix.number_of_rows)]
+#         )[raw.matrix_item.row_index][raw.matrix_item.column_index] = raw.matrix_item.name
+#
+#     return data
 
 
 # TODO TODO TODO MAKE SURE STUDY NO LONGER REQUIRED
@@ -1132,7 +1133,7 @@ def get_data_points_for_charting(
             for tag, sample_locations in tags.items():
                 # TODO: A little naive
                 if use_key_discrimination and key_discrimination.get(tag[1], ''):
-                    tag = '{} || {}'.format(tag[1], tag[0])
+                    tag = u'{} || {}'.format(tag[1], tag[0])
                 elif use_key_discrimination:
                     tag = tag[1]
 
@@ -2252,7 +2253,7 @@ def get_inter_study_reproducibility(
     )
 
     matrix_item_id_to_tooltip_string = {
-        matrix_item.id: '{} ({})'.format(matrix_item.name, matrix_item.matrix.name) for matrix_item in matrix_items
+        matrix_item.id: u'{} ({})'.format(matrix_item.name, matrix_item.matrix.name) for matrix_item in matrix_items
     }
 
     inter_data = []
@@ -2328,7 +2329,7 @@ def get_inter_study_reproducibility(
                 setup_to_treatment_group.get(item_id).get('index')
             ),
             # 'Group {}'.format(len(data_point_treatment_groups) + 1)
-            '{}'.format(len(data_point_treatment_groups) + 1)
+            u'{}'.format(len(data_point_treatment_groups) + 1)
         )
         point.data_group = current_group
         if current_group not in treatment_group_table:
@@ -2435,13 +2436,13 @@ def get_inter_study_reproducibility(
                         for index, value_pair in enumerate(values):
                             value = value_pair[0]
                             matrix_item_id = value_pair[1]
-                            current_data.setdefault(legend, {}).update({'{}~{}'.format(time, index): value})
+                            current_data.setdefault(legend, {}).update({u'{}~{}'.format(time, index): value})
                             current_data.setdefault(legend + ' ~@t', {}).update(
                                 {
-                                    '{}~{}'.format(time, index): [time, legend, value, matrix_item_id]
+                                    u'{}~{}'.format(time, index): [time, legend, value, matrix_item_id]
                                 }
                             )
-                            y_header.update({'{}~{}'.format(time, index): True})
+                            y_header.update({u'{}~{}'.format(time, index): True})
                             # x_header.update({
                             #     '{}~@x{}'.format(legend, index): True
                             # })
