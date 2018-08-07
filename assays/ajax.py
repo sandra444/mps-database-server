@@ -1132,7 +1132,7 @@ def get_data_points_for_charting(
             for tag, sample_locations in tags.items():
                 # TODO: A little naive
                 if use_key_discrimination and key_discrimination.get(tag[1], ''):
-                    tag = '{} || {}'.format(tag[1], tag[0])
+                    tag = u'{} || {}'.format(tag[1], tag[0])
                 elif use_key_discrimination:
                     tag = tag[1]
 
@@ -2252,7 +2252,7 @@ def get_inter_study_reproducibility(
     )
 
     matrix_item_id_to_tooltip_string = {
-        matrix_item.id: '{} ({})'.format(matrix_item.name, matrix_item.matrix.name) for matrix_item in matrix_items
+        matrix_item.id: u'{} ({})'.format(matrix_item.name, matrix_item.matrix.name) for matrix_item in matrix_items
     }
 
     inter_data = []
@@ -2328,7 +2328,7 @@ def get_inter_study_reproducibility(
                 setup_to_treatment_group.get(item_id).get('index')
             ),
             # 'Group {}'.format(len(data_point_treatment_groups) + 1)
-            '{}'.format(len(data_point_treatment_groups) + 1)
+            u'{}'.format(len(data_point_treatment_groups) + 1)
         )
         point.data_group = current_group
         if current_group not in treatment_group_table:
@@ -2435,13 +2435,13 @@ def get_inter_study_reproducibility(
                         for index, value_pair in enumerate(values):
                             value = value_pair[0]
                             matrix_item_id = value_pair[1]
-                            current_data.setdefault(legend, {}).update({'{}~{}'.format(time, index): value})
+                            current_data.setdefault(legend, {}).update({u'{}~{}'.format(time, index): value})
                             current_data.setdefault(legend + ' ~@t', {}).update(
                                 {
-                                    '{}~{}'.format(time, index): [time, legend, value, matrix_item_id]
+                                    u'{}~{}'.format(time, index): [time, legend, value, matrix_item_id]
                                 }
                             )
-                            y_header.update({'{}~{}'.format(time, index): True})
+                            y_header.update({u'{}~{}'.format(time, index): True})
                             # x_header.update({
                             #     '{}~@x{}'.format(legend, index): True
                             # })
