@@ -2516,7 +2516,16 @@ def get_inter_study_reproducibility(
             row[1]: row
         })
 
+        # Get numeric ICC
         current_icc = row[6] if row[6] else 0
+
+        # Format the ICC
+        if current_icc:
+            row[6] = '{0:.4g}'.format(row[6])
+
+        # Format Max CV while I am at it
+        if row[5]:
+            row[5] = '{0:.4g}'.format(row[5])
 
         if current_dic.get('best', '') and current_icc > current_dic.get('best')[6]:
             current_dic.update({

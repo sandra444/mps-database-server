@@ -1421,7 +1421,7 @@ def Inter_Reproducibility_Index(X):
                              dtype='float')  # define the empty dataframe
     rep_index.iloc[0][0] = Max_CV_value
     rep_index.iloc[0][1] = ICC_Value
-    rep_index = rep_index.round(2)
+    # rep_index = rep_index.round(2)
     return rep_index
 
 
