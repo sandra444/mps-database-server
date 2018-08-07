@@ -2524,7 +2524,7 @@ def get_inter_study_reproducibility(
             row[6] = '{0:.4g}'.format(row[6])
 
         # Format Max CV while I am at it
-        if row[5]:
+        if row[5] and not type(row[5]) == str:
             row[5] = '{0:.4g}'.format(row[5])
 
         if current_dic.get('best', '') and current_icc > current_dic.get('best')[6]:

@@ -815,7 +815,8 @@ $(document).ready(function() {
                 vAxis: {
                     title: current_value_unit,
                     // format: y_axis_label_type,
-                    format: 'scientific',
+                    // format: 'scientific',
+                    format:'0.00E0',
                     textStyle: {
                         bold: true
                     },
@@ -829,7 +830,7 @@ $(document).ready(function() {
                 },
                 pointSize: 5,
                 'chartArea': {
-                    'width': '80%',
+                    'width': '75%',
                     'height': '75%'
                 },
                 'height': 400,
