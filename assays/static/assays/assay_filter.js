@@ -752,6 +752,21 @@ $(document).ready(function() {
         //     }
         // });
 
+        var y_axis_label_type = '';
+
+        $.each(item_data_set, function(index, values) {
+            var current_max = Math.abs(Math.max.apply(null, values.slice(1)));
+            var current_min = Math.abs(Math.min.apply(null, values.slice(1)));
+            if (current_max > 1000 || current_max < 0.001) {
+                y_axis_label_type = '0.00E0';
+                return false;
+            }
+            else if (Math.abs(current_max - current_min) < 1) {
+                y_axis_label_type = '0.00';
+                return false;
+            }
+        });
+
         $.each(chart_content_types, function(index, content_type) {
             var values = chart_data[set][content_type];
 
@@ -814,8 +829,9 @@ $(document).ready(function() {
                 },
                 vAxis: {
                     title: current_value_unit,
-                    // format: y_axis_label_type,
-                    format: 'scientific',
+                    format: y_axis_label_type,
+                    // format: 'scientific',
+                    // format:'0.00E0',
                     textStyle: {
                         bold: true
                     },
@@ -829,7 +845,7 @@ $(document).ready(function() {
                 },
                 pointSize: 5,
                 'chartArea': {
-                    'width': '80%',
+                    'width': '75%',
                     'height': '75%'
                 },
                 'height': 400,

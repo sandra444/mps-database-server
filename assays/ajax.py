@@ -2519,14 +2519,6 @@ def get_inter_study_reproducibility(
         # Get numeric ICC
         current_icc = row[6] if row[6] else 0
 
-        # Format the ICC
-        if current_icc:
-            row[6] = '{0:.4g}'.format(row[6])
-
-        # Format Max CV while I am at it
-        if row[5]:
-            row[5] = '{0:.4g}'.format(row[5])
-
         if current_dic.get('best', '') and current_icc > current_dic.get('best')[6]:
             current_dic.update({
                 'best': row
@@ -2538,6 +2530,15 @@ def get_inter_study_reproducibility(
             })
 
     for set, dic in results_rows_full.items():
+        for current_type, row in dic.items():
+            # Format the ICC
+            if row[6] and not type(row[6]) == str:
+                row[6] = '{0:.4g}'.format(row[6])
+
+            # Format Max CV while I am at it
+            if row[5] and not type(row[5]) == str:
+                row[5] = '{0:.4g}'.format(row[5])
+
         current_best = dic.get('best')
 
         # Make sure it actually has multiple centers/studies
@@ -2574,6 +2575,17 @@ def get_inter_study_reproducibility(
             x_header = {}
             y_header = {}
             for legend, times in legends.items():
+                # Get the current first value
+                first_value = np.mean(initial_chart_data.get(
+                    set
+                ).get(
+                    'average'
+                ).get(
+                    legend
+                ).get(
+                    min(initial_chart_data.get(set).get('average').get(legend).keys())
+                ))
+
                 x_header.update({
                     legend: True,
                     # This is to deal with the style
@@ -2598,6 +2610,10 @@ def get_inter_study_reproducibility(
                         ).get(
                             time
                         )
+
+                        if initial_norm and first_value:
+                            values = [current_value / first_value for current_value in values]
+
                         if len(values) > 1:
                             # TODO TODO TODO ONLY ARITHMETIC MEAN RIGHT NOW
                             value = np.mean(values)
