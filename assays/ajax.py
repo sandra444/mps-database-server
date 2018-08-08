@@ -606,7 +606,8 @@ def get_control_data(
         mean_type,
         include_all,
         truncate_negative,
-        new_data_for_control=None
+        new_data_for_control=None,
+        normalize_units=False
 ):
     """Gets control data for performing percent control calculations
 
@@ -626,7 +627,7 @@ def get_control_data(
         'study',
         'study_assay__target',
         'study_assay__method',
-        'study_assay__unit',
+        'study_assay__unit__base_unit',
         'matrix_item',
         'sample_location'
     ))
@@ -642,6 +643,10 @@ def get_control_data(
         study_assay = raw.study_assay
         target = study_assay.target.name
         unit = study_assay.unit.unit
+
+        if normalize_units and study_assay.unit.base_unit:
+            unit = study_assay.unit.base_unit.unit
+
         # Not currently used
         method = study_assay.method.name
 
@@ -673,7 +678,7 @@ def get_control_data(
                 ).setdefault(
                     time, []
                 ).append(
-                    value
+                    raw
                 )
 
     targets = [target_method[0] for target_method in initial_control_data.keys()]
@@ -682,8 +687,9 @@ def get_control_data(
         target = target_method[0]
         method = target_method[1]
 
-        if targets.count(target) > 1:
-            target = u'{} [{}]'.format(target, method)
+        # JUST IGNORE METHOD FOR NOW
+        # if targets.count(target) > 1:
+        #     target = u'{} [{}]'.format(target, method)
 
         initial_control_data.update({
             target: units
@@ -695,25 +701,35 @@ def get_control_data(
         for unit, tags in units.items():
             for tag, sample_locations in tags.items():
                 for sample_location, time_values in sample_locations.items():
-                    for time, values in time_values.items():
-                        if len(values) > 1:
-                            # If geometric mean
-                            if mean_type == 'geometric':
-                                # Geometric mean will sometimes fail (due to zero values and so on)
-                                average = gmean(values)
-                                if np.isnan(average):
-                                    return {
-                                        'errors': 'Geometric mean could not be calculated (probably due to negative values), please use an arithmetic mean instead.'
-                                    }
-                            # If arithmetic mean
-                            else:
-                                average = np.average(values)
-                        else:
-                            average = values[0]
+                    for time, points in time_values.items():
+                        # TODO TODO TODO More than a little crude: PLEASE REVISE THESE NESTED LOOPS SO THAT THEY ARE MORE ROBUST
+                        study_values = {}
 
-                        controls.update(
-                                {(target, unit, sample_location, time): average}
-                        )
+                        for point in points:
+                            if normalize_units:
+                                study_values.setdefault(point.study_id, []).append(point.value * point.study_assay.unit.scale_factor)
+                            else:
+                                study_values.setdefault(point.study_id, []).append(point.value)
+
+                        for study_id, values in study_values.items():
+                            if len(values) > 1:
+                                # If geometric mean
+                                if mean_type == 'geometric':
+                                    # Geometric mean will sometimes fail (due to zero values and so on)
+                                    average = gmean(values)
+                                    if np.isnan(average):
+                                        return {
+                                            'errors': 'Geometric mean could not be calculated (probably due to negative values), please use an arithmetic mean instead.'
+                                        }
+                                # If arithmetic mean
+                                else:
+                                    average = np.average(values)
+                            else:
+                                average = values[0]
+
+                            controls.update(
+                                    {(study_id, target, unit, sample_location, time): average}
+                            )
 
     return controls
 
@@ -872,7 +888,8 @@ def get_data_points_for_charting(
         matrix_item=None,
         matrix_items=None,
         new_data=False,
-        additional_data=None
+        additional_data=None,
+        normalize_units=False
 ):
     """Get all readout data for a study and return it in JSON format
 
@@ -922,7 +939,8 @@ def get_data_points_for_charting(
             mean_type,
             include_all,
             truncate_negative,
-            new_data_for_control=new_data_for_control
+            new_data_for_control=new_data_for_control,
+            normalize_units=normalize_units
         )
 
         if controls.get('errors' , ''):
@@ -1048,7 +1066,7 @@ def get_data_points_for_charting(
                 sample_location, {}
             ).setdefault(
                 time, []
-            ).append(value)
+            ).append(raw)
 
             # Update all_sample_locations
             all_sample_locations.update({sample_location: True})
@@ -1072,36 +1090,44 @@ def get_data_points_for_charting(
     for target, units in initial_data.items():
         for unit, tags in units.items():
             for tag, sample_locations in tags.items():
-                for sample_location, time_values in sample_locations.items():
-                    for time, values in time_values.items():
-                        if len(values) > 1:
-                            # If geometric mean
-                            if mean_type == 'geometric':
-                                # Geometric mean will sometimes fail (due to zero values and so on)
-                                average = gmean(values)
-                                if np.isnan(average):
-                                    return {'errors': 'Geometric mean could not be calculated (probably due to negative values), please use an arithmetic mean instead.'}
-                            # If arithmetic mean
+                for sample_location, time_points in sample_locations.items():
+                    for time, points in time_points.items():
+                        # TODO TODO TODO More than a little crude: PLEASE REVISE THESE NESTED LOOPS SO THAT THEY ARE MORE ROBUST
+                        study_values = {}
+
+                        for point in points:
+                            study_values.setdefault(point.study_id, []).append(point.value)
+
+                        for study_id, values in study_values.items():
+                            if len(values) > 1:
+                                # If geometric mean
+                                if mean_type == 'geometric':
+                                    # Geometric mean will sometimes fail (due to zero values and so on)
+                                    average = gmean(values)
+                                    if np.isnan(average):
+                                        return {'errors': 'Geometric mean could not be calculated (probably due to negative values), please use an arithmetic mean instead.'}
+                                # If arithmetic mean
+                                else:
+                                    average = np.average(values)
                             else:
-                                average = np.average(values)
-                        else:
-                            average = values[0]
+                                average = values[0]
 
-                        # If standard deviation
-                        if interval_type == 'std':
-                            interval = np.std(values)
-                        # Standard error if not std
-                        else:
-                            interval = np.std(values) / len(values) ** 0.5
+                            # If standard deviation
+                            if interval_type == 'std':
+                                interval = np.std(values)
+                            # Standard error if not std
+                            else:
+                                interval = np.std(values) / len(values) ** 0.5
 
-                        average_and_interval = (
-                            average,
-                            interval
-                        )
+                            average_interval_study_id = (
+                                average,
+                                interval,
+                                study_id
+                            )
 
-                        averaged_data.setdefault(target, {}).setdefault(unit, {}).setdefault(tag, {}).setdefault(sample_location, {}).update({
-                            time: average_and_interval
-                        })
+                            averaged_data.setdefault(target, {}).setdefault(unit, {}).setdefault(tag, {}).setdefault(sample_location, {}).update({
+                                time: average_interval_study_id
+                            })
 
     accommodate_sample_location = group_sample_location and len(all_sample_locations) > 1
 
@@ -1151,9 +1177,10 @@ def get_data_points_for_charting(
 
                     # all_keys.update({current_key: True})
 
-                    for time, value_and_interval in time_values.items():
-                        value = value_and_interval[0]
-                        interval = value_and_interval[1]
+                    for time, value_interval_study_id in time_values.items():
+                        value = value_interval_study_id[0]
+                        interval = value_interval_study_id[1]
+                        study_id = value_interval_study_id[2]
 
                         if interval != 0:
                             accommodate_intervals = True
@@ -1165,8 +1192,8 @@ def get_data_points_for_charting(
                             y_header.update({time: True})
                             include_current = True
 
-                        elif controls.get((target, unit, sample_location, time), False):
-                            control_value = controls.get((target, unit, sample_location, time))
+                        elif controls.get((study_id, target, unit, sample_location, time), False):
+                            control_value = controls.get((study_id, target, unit, sample_location, time))
 
                             # We can not divide by zero
                             if control_value == 0:
