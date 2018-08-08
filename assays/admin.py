@@ -2305,6 +2305,22 @@ class AssayStudyAssayInline(admin.TabularInline):
     model = AssayStudyAssay
     exclude = []
 
+    # TODO REVIEW
+    # TODO NOT DRY
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == 'target':
+            target_queryset = AssayTarget.objects.all().order_by('name')
+            kwargs["queryset"] = target_queryset
+        elif db_field.name == 'method':
+            method_queryset = AssayMethod.objects.all().order_by('name')
+            kwargs["queryset"] = method_queryset
+        elif db_field.name == 'unit':
+            unit_queryset = PhysicalUnits.objects.filter(
+                availability__icontains='readout'
+            ).order_by('unit_type', 'base_unit', 'scale_factor')
+            kwargs["queryset"] = unit_queryset
+        return super(AssayStudyAssayInline, self).formfield_for_foreignkey(db_field, request, **kwargs)
+
 
 class AssayStudySupportingDataInline(admin.TabularInline):
     """Inline for Studies"""
