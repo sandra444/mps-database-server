@@ -2519,7 +2519,7 @@ def get_inter_study_reproducibility(
         # Get numeric ICC
         current_icc = row[6] if row[6] else 0
 
-        if current_dic.get('best', '') and current_icc > current_dic.get('best')[6]:
+        if current_dic.get('best', '') and (current_icc > current_dic.get('best')[6] or not current_dic.get('best')[6]):
             current_dic.update({
                 'best': row
             })
@@ -2529,8 +2529,23 @@ def get_inter_study_reproducibility(
                 'best': row
             })
 
-    for set, dic in results_rows_full.items():
-        for current_type, row in dic.items():
+    for set, current_dic in results_rows_full.items():
+        current_best = current_dic.get('best')
+
+        # If the current best has no ICC, try CV
+        if not current_best[6]:
+            for current_type, row in current_dic.items():
+                current_cv = row[5] if row[5] else 999
+
+                if current_cv < current_dic.get('best')[5]:
+                    current_dic.update({
+                        'best': row
+                    })
+
+    for set, current_dic in results_rows_full.items():
+        current_best = current_dic.get('best')
+
+        for current_type, row in current_dic.items():
             # Format the ICC
             if row[6] and not type(row[6]) == str:
                 row[6] = '{0:.4g}'.format(row[6])
@@ -2538,8 +2553,6 @@ def get_inter_study_reproducibility(
             # Format Max CV while I am at it
             if row[5] and not type(row[5]) == str:
                 row[5] = '{0:.4g}'.format(row[5])
-
-        current_best = dic.get('best')
 
         # Make sure it actually has multiple centers/studies
         if current_best[3] > 1:

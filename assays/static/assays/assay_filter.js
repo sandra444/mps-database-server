@@ -754,19 +754,6 @@ $(document).ready(function() {
 
         var y_axis_label_type = '';
 
-        $.each(item_data_set, function(index, values) {
-            var current_max = Math.abs(Math.max.apply(null, values.slice(1)));
-            var current_min = Math.abs(Math.min.apply(null, values.slice(1)));
-            if (current_max > 1000 || current_max < 0.001) {
-                y_axis_label_type = '0.00E0';
-                return false;
-            }
-            else if (Math.abs(current_max - current_min) < 1) {
-                y_axis_label_type = '0.00';
-                return false;
-            }
-        });
-
         $.each(chart_content_types, function(index, content_type) {
             var values = chart_data[set][content_type];
 
@@ -777,9 +764,10 @@ $(document).ready(function() {
                 current_value_unit = 'Normalized by Initial Value';
             }
 
-            if (values == null) {
+            if (!values) {
                 return true;
             }
+
             var all_null = true;
             for (var i = 1; i < values.length; i++) {
                 for (var j = 1; j < values[i].length; j++) {
@@ -791,8 +779,21 @@ $(document).ready(function() {
                 }
             }
             if (all_null) {
-                return false;
+                return true;
             }
+
+            $.each(values, function(index, values) {
+                var current_max = Math.abs(Math.max.apply(null, values.slice(1)));
+                var current_min = Math.abs(Math.min.apply(null, values.slice(1)));
+                if (current_max > 1000 || current_max < 0.001) {
+                    y_axis_label_type = '0.00E0';
+                    return false;
+                }
+                else if (Math.abs(current_max - current_min) < 1) {
+                    y_axis_label_type = '0.00';
+                    return false;
+                }
+            });
 
             var options = {
                 // Make sure title case
@@ -959,11 +960,13 @@ $(document).ready(function() {
 
         var current_full_data = repro_table_data_full[set];
         var current_max = 0;
+        var current_min = 999;
         var method_to_show = '';
 
         // Hide all but highest interpolation
         // See which interpolation method is best
         // Also hide the charts at first
+        // Redundant!
         $.each(interpolation_methods, function(index, method) {
             var current_row = current_full_data[method];
             var lower_method = method.toLowerCase();
@@ -977,6 +980,18 @@ $(document).ready(function() {
                 method_to_show = lower_method;
             }
         });
+
+        if (!method_to_show) {
+            $.each(interpolation_methods, function(index, method) {
+                var current_row = current_full_data[method];
+                var lower_method = method.toLowerCase();
+
+                if (current_row && current_row[5] < current_min) {
+                    current_min = current_row[5];
+                    method_to_show = lower_method;
+                }
+            });
+        }
 
         // Show best
         $('.repro-' + set).find(
