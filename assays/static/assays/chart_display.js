@@ -397,7 +397,7 @@ $(document).ready(function () {
                     y_axis_label_type = '0.00E0';
                     return false;
                 }
-                else if (Math.abs(current_max - current_min) < 10) {
+                else if (Math.abs(current_max - current_min) < 10 && Math.abs(current_max - current_min) !== 0) {
                     y_axis_label_type = '0.00';
                     return false;
                 }
