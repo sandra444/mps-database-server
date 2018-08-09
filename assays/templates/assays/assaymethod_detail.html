@@ -14,30 +14,94 @@
     <div class="padded-bottom">
         <legend>
             <h2 class="text-center">
-                Method/Kit: {{ object.name }}
+                Method/Kit:<br>{{ object.name }}
             </h2>
         </legend>
+        <div class="col-xs-12">
+            <table class="table table-striped table-bordered table-nonfluid" style="background-color: #AAB3AB; float:none; margin:auto; margin-bottom:18px;">
+                <tbody>
+                    {% if object.supplier %}
+                    <tr>
+                        <td style="white-space: nowrap">
+                            <b>Supplier</b>
+                        </td>
+                        <td>
+                            {{ object.supplier }}
+                        </td>
+                    </tr>
+                    {% endif %}
+                    {% if object.measurement_type %}
+                    <tr>
+                        <td style="white-space: nowrap">
+                            <b>Measurement Type</b>
+                        </td>
+                        <td>
+                            {{ object.measurement_type }}
+                        </td>
+                    </tr>
+                    {% endif %}
+                    {% if object.description %}
+                    <tr>
+                        <td>
+                            <b>Description</b>
+                        </td>
+                        <td>
+                            {{ object.description|linebreaksbr }}
+                        </td>
+                    </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+        <br><br>
         {% if object.protocol_file %}
             <div class="row text-center padded-bottom">
                 <a href="{{ object.protocol_file.url }}" download class="btn btn-lg btn-success" role="button">Download Protocol</a>
             </div>
         {% endif %}
+        <br>
+        <legend>Target/Analytes that Share Assays with Method/Kit</legend>
         <div id="assays" style="display: none;">
-            <table id="models" class="display" cellspacing="0" width="100%">
+            <table id="assays-table" class="display" cellspacing="0" width="100%">
                 <thead>
                     <tr>
-                        <th>Method/Kit</th>
-                        <th>Associated Target/Analyte</th>
+                        <th>Target/Analyte</th>
+                        <th>Short Name</th>
                         <th>Description</th>
                     </tr>
                 </thead>
 
                 <tbody>
                 {% for assay in assays %}
-                     <tr class="assay" id="{{ assay.id }}">
-                        <td>{{ assay.0 }}</td>
-                        <td><a href= "/assays/targets/{{ assay.2 }}/">{{ assay.1 }}</a></td>
+                     <tr class="assay">
+                        <td><a href= "/assays/targets/{{ assay.1 }}/">{{ assay.0 }}</a></td>
                         <td>{{ assay.3 }}</td>
+                        <td>{{ assay.2 }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <br>
+        <legend>Studies with Assays Utilizing this Target/Analyte</legend>
+        <div id="studies" style="display: none;">
+            <table id="studies-table" class="display" cellspacing="0" width="100%">
+                <thead>
+                    <tr>
+                        <th>Study</th>
+                        <th>Start Date</th>
+                        <th>Study Types</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                {% for study in studies %}
+                     <tr class="study">
+                        <td><a href= "/assays/assaystudy/{{ study.id }}/">{{ study.name }}</a></td>
+                        <td>{{ study.start_date }}</td>
+                        <td>{{ study.get_study_types_string }}</td>
+                        <td>{{ study.description }}</td>
                     </tr>
                 {% endfor %}
                 </tbody>

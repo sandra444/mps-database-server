@@ -1,5 +1,5 @@
 $(document).ready(function() {
-    window.TABLE = $('#models').DataTable({
+    window.TABLE = $('#methods-table').DataTable({
         "iDisplayLength": 100,
         "sDom": '<B<"row">lfrtip>',
         fixedHeader: {headerOffset: 50},
