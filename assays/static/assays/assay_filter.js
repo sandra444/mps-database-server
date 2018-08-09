@@ -385,6 +385,7 @@ $(document).ready(function() {
     var header_keys = null;
 
     var data_group_to_studies = null;
+    var data_group_to_sample_locations = null;
 
     var value_unit_index = null;
 
@@ -397,6 +398,8 @@ $(document).ready(function() {
     var inter_level = $('#inter_level_by_center').prop('checked') ? 1 : 0;
     var max_interpolation_size = $('#max_interpolation_size').val();
     var initial_norm = $('#initial_norm').prop('checked') ? 1 : 0;
+
+    var status_column_index = 13;
 
     function show_repro() {
         // Hide fixed headers
@@ -433,6 +436,99 @@ $(document).ready(function() {
             document.getElementById("spinner")
         );
 
+        var columns = [
+            {
+                title: "Show Details",
+                "render": function (data, type, row, meta) {
+                    // if (type === 'display' && row[1] === '') {
+                    if (type === 'display') {
+                        // var groupNum = row[10];
+                        return '<input type="checkbox" class="big-checkbox repro-checkbox" data-table-index="' + meta.row + '" data-repro-set="' + row[0] + '">';
+                    }
+                    return '';
+                },
+                "className": "dt-body-center",
+                "createdCell": function (td, cellData, rowData, row, col) {
+                    if (cellData) {
+                        $(td).css('vertical-align', 'middle')
+                    }
+                },
+                "sortable": false,
+                width: '7.5%'
+            },
+            {
+                title: "Set",
+                type: "brute-numeric",
+                "render": function (data, type, row) {
+                        return '<span class="badge badge-primary repro-set-info">' + row[0] + '</span>';
+                }
+            },
+            {
+                title: "Target",
+                "render": function (data, type, row) {
+                    return data_groups[row[0]][0];
+                },
+                width: '20%'
+            },
+            {
+                title: "Unit",
+                "render": function (data, type, row) {
+                    return data_groups[row[0]][value_unit_index];
+                }
+            },
+            {
+                title: "Studies",
+                "render": function (data, type, row) {
+                    return data_group_to_studies[row[0]].join('<br>');
+                },
+                width: '20%'
+            },
+            {
+                title: "Compounds",
+                "render": function (data, type, row) {
+                    return treatment_groups[data_groups[row[0]][data_groups[row[0]].length - 1]]['Trimmed Compounds'];
+                },
+                width: '20%'
+            },
+            {
+                title: "Sample Locations",
+                "render": function (data, type, row) {
+                    return data_group_to_sample_locations[row[0]].join('<br>');
+                }
+            },
+            {
+                title: "Interpolation",
+                "render": function (data, type, row) {
+                    if (type === 'display' && row[1] !== '') {
+                        // var groupNum = row[10];
+                        return row[1] + ' (' + row[2] + ')';
+                    }
+                    return '';
+                }
+            },
+            // {title: "Max Interpolated", data: '2'},
+            {title: legend_key, data: '3'},
+            {title: "Time Point Overlap", data: '4', width: '5%'},
+            {title: "<span style='white-space: nowrap;'>Max CV<br>or CV " + cv_tooltip + "</span>", data: '5'},
+            {title: "<span style='white-space: nowrap;'>ICC " + icc_tooltip + "</span>", data: '6'},
+            {title: "<span>ANOVA<br>P-Value " + anova_tooltip + "</span>", data: '7', width: '10%'},
+            {
+                title: "Reproducibility<br>Status " + repro_tooltip,
+                data: '8',
+                render: function (data, type, row, meta) {
+                    if (data == "Excellent (ICC)" || data == "Excellent (CV)") {
+                        return '<td><span class="hidden">3</span>' + data + '</td>';
+                    } else if (data == "Acceptable (ICC)" || data == "Acceptable (CV)") {
+                        return '<td><span class="hidden">2</span>' + data + '</td>';
+                    } else if (data == "Poor (ICC)" || data == "Poor (CV)") {
+                        return '<td><span class="hidden">1</span>' + data + '</td>';
+                    } else {
+                        return '<td><span class="hidden">0</span>' + data + '<span data-toggle="tooltip" title="' + row[9] + '" class="glyphicon glyphicon-question-sign" aria-hidden="true"></span></td>';
+                    }
+                }
+            }
+        ];
+
         repro_table = $('#repro_table').DataTable({
             ajax: {
                 url: '/assays_ajax/',
@@ -468,6 +564,7 @@ $(document).ready(function() {
                     treatment_groups = json.treatment_groups;
 
                     data_group_to_studies = json.data_group_to_studies;
+                    data_group_to_sample_locations = json.data_group_to_sample_locations;
 
                     value_unit_index = json.header_keys.data.indexOf('Value Unit');
 
@@ -487,99 +584,20 @@ $(document).ready(function() {
                     console.log(xhr.status + ": " + xhr.responseText);
                 }
             },
-            columns: [
-                {
-                    title: "Show Details",
-                    "render": function (data, type, row, meta) {
-                        // if (type === 'display' && row[1] === '') {
-                        if (type === 'display') {
-                            // var groupNum = row[10];
-                            return '<input type="checkbox" class="big-checkbox repro-checkbox" data-table-index="' + meta.row + '" data-repro-set="' + row[0] + '">';
-                        }
-                        return '';
-                    },
-                    "className": "dt-body-center",
-                    "createdCell": function (td, cellData, rowData, row, col) {
-                        if (cellData) {
-                            $(td).css('vertical-align', 'middle')
-                        }
-                    },
-                    "sortable": false,
-                    width: '7.5%'
-                },
-                {
-                    title: "Set",
-                    type: "brute-numeric",
-                    "render": function (data, type, row) {
-                            return '<span class="badge badge-primary repro-set-info">' + row[0] + '</span>';
-                    }
-                },
-                {
-                    title: "Target",
-                    "render": function (data, type, row) {
-                        return data_groups[row[0]][0];
-                    },
-                    width: '20%'
-                },
-                {
-                    title: "Studies",
-                    "render": function (data, type, row) {
-                        return data_group_to_studies[row[0]].join('<br>');
-                    },
-                    width: '20%'
-                },
-                {
-                    title: "Compounds",
-                    "render": function (data, type, row) {
-                        return treatment_groups[data_groups[row[0]][data_groups[row[0]].length - 1]]['Trimmed Compounds'];
-                    },
-                    width: '20%'
-                },
-                {
-                    title: "Interpolation",
-                    "render": function (data, type, row) {
-                        if (type === 'display' && row[1] !== '') {
-                            // var groupNum = row[10];
-                            return row[1] + ' (' + row[2] + ')';
-                        }
-                        return '';
-                    }
-                },
-                // {title: "Max Interpolated", data: '2'},
-                {title: legend_key, data: '3'},
-                {title: "Time Point Overlap", data: '4', width: '5%'},
-                {title: "<span style='white-space: nowrap;'>Max CV<br>or CV " + cv_tooltip + "</span>", data: '5'},
-                {title: "<span style='white-space: nowrap;'>ICC " + icc_tooltip + "</span>", data: '6'},
-                {title: "<span>ANOVA<br>P-Value " + anova_tooltip + "</span>", data: '7', width: '10%'},
-                {
-                    title: "Reproducibility<br>Status " + repro_tooltip,
-                    data: '8',
-                    render: function (data, type, row, meta) {
-                        if (data == "Excellent (ICC)" || data == "Excellent (CV)") {
-                            return '<td><span class="hidden">3</span>' + data + '</td>';
-                        } else if (data == "Acceptable (ICC)" || data == "Acceptable (CV)") {
-                            return '<td><span class="hidden">2</span>' + data + '</td>';
-                        } else if (data == "Poor (ICC)" || data == "Poor (CV)") {
-                            return '<td><span class="hidden">1</span>' + data + '</td>';
-                        } else {
-                            return '<td><span class="hidden">0</span>' + data + '<span data-toggle="tooltip" title="' + row[9] + '" class="glyphicon glyphicon-question-sign" aria-hidden="true"></span></td>';
-                        }
-                    }
-                }
-            ],
-            "order": [[11, 'desc'], [ 1, "asc" ]],
+            columns: columns,
+            "order": [[status_column_index, 'desc'], [ 1, "asc" ]],
             "createdRow": function(row, data, dataIndex) {
                 if (data[8][0] === "E") {
-                    $(row).find('td:eq(11)').css("background-color", "#74ff5b").css("font-weight", "bold");
+                    $(row).find('td:eq(' + status_column_index + ')').css("background-color", "#74ff5b").css("font-weight", "bold");
                 }
                 else if (data[8][0] === "A") {
-                    $(row).find('td:eq(11)').css("background-color", "#fcfa8d").css("font-weight", "bold");
+                    $(row).find('td:eq(' + status_column_index + ')').css("background-color", "#fcfa8d").css("font-weight", "bold");
                 }
                 else if (data[8][0] === "P") {
-                    $(row).find('td:eq(11)').css("background-color", "#ff7863").css("font-weight", "bold");
+                    $(row).find('td:eq(' + status_column_index + ')').css("background-color", "#ff7863").css("font-weight", "bold");
                 }
                 else {
-                    $(row).find('td:eq(11)').css("background-color", "Grey").css("font-weight", "bold");
+                    $(row).find('td:eq(' + status_column_index + ')').css("background-color", "Grey").css("font-weight", "bold");
                 }
             },
             "responsive": true,

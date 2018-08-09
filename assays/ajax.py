@@ -2288,6 +2288,7 @@ def get_inter_study_reproducibility(
     data_point_treatment_groups = {}
     treatment_group_table = {}
     data_group_to_studies = {}
+    data_group_to_sample_locations = {}
 
     # CONTRIVED FOR NOW
     data_header_keys = [
@@ -2377,6 +2378,12 @@ def get_inter_study_reproducibility(
             current_group, {}
         ).update({
             u'<a href="{}" target="_blank">{} ({})</a>'.format(point.study.get_absolute_url(), point.study.name, point.study.group.name): point.study.name
+        })
+
+        data_group_to_sample_locations.setdefault(
+            current_group, {}
+        ).update({
+            point.sample_location.name: True
         })
 
     inter_data.append([
@@ -2690,6 +2697,10 @@ def get_inter_study_reproducibility(
     for data_group, current_studies in data_group_to_studies.items():
         final_data_group_to_studies[data_group] = sorted(current_studies, key=current_studies.get)
 
+    final_data_group_to_sample_locations = {}
+    for data_group, current_sample_location in data_group_to_sample_locations.items():
+        final_data_group_to_sample_locations[data_group] = sorted(current_sample_location)
+
     data = {
         'chart_data': final_chart_data,
         'repro_table_data_full': results_rows_full,
@@ -2700,7 +2711,9 @@ def get_inter_study_reproducibility(
             'data': data_header_keys
         },
         'treatment_groups': treatment_group_representatives,
-        'data_group_to_studies': final_data_group_to_studies
+        'data_group_to_studies': final_data_group_to_studies,
+        # BAD
+        'data_group_to_sample_locations': final_data_group_to_sample_locations
     }
 
     return data
