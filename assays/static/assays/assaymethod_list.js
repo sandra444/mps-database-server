@@ -42,9 +42,4 @@ $(document).ready(function() {
 
     // Prevent "pop in".
     $("#methods").css("display", "block");
-
-    // Fix some boundary issues on resize TODO fix more.
-    window.onresize = function() {
-        window.TABLE.responsive.recalc();
-    }
 });
