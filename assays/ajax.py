@@ -1950,7 +1950,7 @@ def acquire_post_filter(studies, assays, matrix_items, data_points):
 
         for setting in matrix_item.assaysetupsetting_set.all():
             current.setdefault(
-                'assaysetupsetting__setting__setting_id__in', {}
+                'assaysetupsetting__setting_id__in', {}
             ).update({
                 setting.setting_id: setting.setting.name
             })
