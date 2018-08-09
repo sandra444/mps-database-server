@@ -722,6 +722,10 @@ $(document).ready(function() {
         current_body.html(rows);
     }
 
+    function isNumber(obj) {
+        return obj !== undefined && typeof(obj) === 'number' && !isNaN(obj);
+    }
+
     function draw_charts(set) {
         var chart_content_types = [
             'item',
@@ -752,8 +756,6 @@ $(document).ready(function() {
         //     }
         // });
 
-        var y_axis_label_type = '';
-
         $.each(chart_content_types, function(index, content_type) {
             var values = chart_data[set][content_type];
 
@@ -782,14 +784,20 @@ $(document).ready(function() {
                 return true;
             }
 
-            $.each(values, function(index, values) {
-                var current_max = Math.abs(Math.max.apply(null, values.slice(1)));
-                var current_min = Math.abs(Math.min.apply(null, values.slice(1)));
+            var y_axis_label_type = '';
+
+            $.each(values.slice(1), function(index, current_values) {
+                // Idiomatic way to remove NaNs
+                var trimmed_values = current_values.slice(1).filter(isNumber);
+
+                var current_max = Math.abs(Math.max.apply(null, trimmed_values));
+                var current_min = Math.abs(Math.min.apply(null, trimmed_values));
+
                 if (current_max > 1000 || current_max < 0.001) {
                     y_axis_label_type = '0.00E0';
                     return false;
                 }
-                else if (Math.abs(current_max - current_min) < 1) {
+                else if (Math.abs(current_max - current_min) < 10 && Math.abs(current_max - current_min) !== 0) {
                     y_axis_label_type = '0.00';
                     return false;
                 }
