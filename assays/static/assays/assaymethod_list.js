@@ -1,5 +1,5 @@
 $(document).ready(function() {
-    window.TABLE = $('#models').DataTable({
+    window.TABLE = $('#methods-table').DataTable({
         "iDisplayLength": 100,
         "sDom": '<B<"row">lfrtip>',
         fixedHeader: {headerOffset: 50},
@@ -42,9 +42,4 @@ $(document).ready(function() {
 
     // Prevent "pop in".
     $("#methods").css("display", "block");
-
-    // Fix some boundary issues on resize TODO fix more.
-    window.onresize = function() {
-        window.TABLE.responsive.recalc();
-    }
 });

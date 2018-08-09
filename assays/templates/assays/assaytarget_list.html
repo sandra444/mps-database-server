@@ -17,11 +17,12 @@
             </h2>
         </legend>
         <div id="targets" style="display: none;">
-            <table id="models" class="display" cellspacing="0" width="100%">
+            <table id="targets-table" class="display" cellspacing="0" width="100%">
                 <thead>
                     <tr>
-                        <th>View</th>
+                        <th>View Details</th>
                         <th>Target</th>
+                        <th>Short Name</th>
                         <th>Description</th>
                     </tr>
                 </thead>
@@ -31,6 +32,7 @@
                      <tr class="target" id="{{ target.id }}">
                         <td><a class="btn btn-{% if target.assays %}primary" title="View paired method/kits." href="{{ target.id }}"{% else %}default" style="pointer-events: auto;" title="This method has no paired method/kits." disabled{% endif %}>View</a></td>
                         <td>{{ target.name }}</td>
+                        <td>{{ target.short_name }}</td>
                         <td>{{ target.description }}</td>
                     </tr>
                 {% endfor %}

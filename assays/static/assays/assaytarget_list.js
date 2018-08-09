@@ -1,5 +1,5 @@
 $(document).ready(function() {
-    window.TABLE = $('#models').DataTable({
+    window.TABLE = $('#targets-table').DataTable({
         "iDisplayLength": 100,
         "sDom": '<B<"row">lfrtip>',
         fixedHeader: {headerOffset: 50},
@@ -18,5 +18,7 @@ $(document).ready(function() {
             },
         ]
     });
+
+    // Prevent "pop in".
     $("#targets").css("display", "block");
 });

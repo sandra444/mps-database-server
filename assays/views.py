@@ -1624,7 +1624,12 @@ class AssayTargetDetail(DetailView):
         context = super(AssayTargetDetail, self).get_context_data(**kwargs)
         context['assays'] = AssayStudyAssay.objects.filter(
             target__name__icontains=self.object.name
-        ).values_list("target__name", "method__name", "method_id", "method__description").distinct()
+        ).values_list("method__name", "method_id", "method__description").distinct()
+        context['studies'] = get_user_accessible_studies(
+            self.request.user
+        ).filter(
+            assaystudyassay__target__name=self.object.name
+        ).distinct()
         return context
 
 
@@ -1649,7 +1654,12 @@ class AssayMethodDetail(DetailView):
         context = super(AssayMethodDetail, self).get_context_data(**kwargs)
         context['assays'] = AssayStudyAssay.objects.filter(
             method__name__icontains=self.object.name
-        ).values_list("method__name", "target__name", "target_id", "target__description").distinct()
+        ).values_list("target__name", "target_id", "target__description", "target__short_name").distinct()
+        context['studies'] = get_user_accessible_studies(
+            self.request.user
+        ).filter(
+            assaystudyassay__method__name=self.object.name
+        ).distinct()
         return context
 
 
