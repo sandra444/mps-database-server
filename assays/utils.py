@@ -1593,13 +1593,15 @@ def interpolate_group_rep_index(header_list, group_chip_data, interp_method, int
                             interp_mat.iloc[i, col] = np.nan
 
     if initial_Norm == 1:
-        # Normalize the interpolation matrix
+        # Normalize each center data by the median value
         norm_pivot_group_matrix = interp_mat
         for norm_col in range(interp_mat.shape[1]):
-            first_value = interp_mat.iloc[:, norm_col].dropna().values[0]
+            med_value = interp_mat.iloc[:, norm_col].dropna().median()
+
             for norm_row in range(interp_mat.shape[0]):
-                if pd.isnull(interp_mat.iloc[norm_row, norm_col]) == False:
-                    norm_pivot_group_matrix.iloc[norm_row, norm_col] = interp_mat.iloc[norm_row, norm_col] / first_value
+                if pd.isnull(interp_mat.iloc[norm_row, norm_col]) == False and med_value > 0:
+                    norm_pivot_group_matrix.iloc[norm_row, norm_col] = interp_mat.iloc[
+                                                                           norm_row, norm_col] / med_value
         interp_mat = norm_pivot_group_matrix
 
         # Build inter data set
@@ -1732,22 +1734,18 @@ def Inter_reproducibility(group_count, inter_data_df, inter_level=1, max_interpo
                                                                                      ignore_index=True)
             else:
                 if initial_Norm == 1 and pivot_group_matrix.shape[0] > 0:
-                    # Normalize each center data by the start data value
+                    # Normalize each center data by the median value
                     norm_pivot_group_matrix = pivot_group_matrix
                     for norm_col in range(pivot_group_matrix.shape[1]):
-                        first_value = pivot_group_matrix.iloc[:, norm_col].dropna().values[0]
-                        if first_value == 0 and pivot_group_matrix.shape[0] > 1:
-                            for norm_row in range(pivot_group_matrix.shape[0]):
-                                if pivot_group_matrix.iloc[:, norm_col].dropna().values[norm_row] > 0:
-                                    first_value = pivot_group_matrix.iloc[:, norm_col].dropna().values[norm_row]
+                        med_value = pivot_group_matrix.iloc[:, norm_col].dropna().median()
 
                         for norm_row in range(pivot_group_matrix.shape[0]):
-                            if pd.isnull(pivot_group_matrix.iloc[norm_row, norm_col]) == False and first_value > 0:
+                            if pd.isnull(pivot_group_matrix.iloc[norm_row, norm_col]) == False and med_value > 0:
                                 norm_pivot_group_matrix.iloc[norm_row, norm_col] = pivot_group_matrix.iloc[
-                                                                                       norm_row, norm_col] / first_value
+                                                                                       norm_row, norm_col] / med_value
                     pivot_group_matrix = norm_pivot_group_matrix
 
-                    # Trim nan data points
+                # Trim nan data points
                 no_nan_matrix = pivot_group_matrix.dropna()
 
                 # Add trimmed data to the inter data table when there are overlaped time points existing
@@ -1786,7 +1784,7 @@ def Inter_reproducibility(group_count, inter_data_df, inter_level=1, max_interpo
                         group_rep_mtarix.iloc[0, group_rep_mtarix.columns.get_loc('Max CV')] = np.nan
                         group_rep_mtarix.iloc[
                             0, group_rep_mtarix.columns.get_loc('Reproducibility Note')
-                        ] = 'Normalized by Initial value is not applicable to single time point'
+                        ] = 'Normalized by median is not applicable to single time point'
                     else:
                         single_time = no_nan_matrix.index[0]
                         group_rep_mtarix = pd.DataFrame(index=[0], columns=header_list)
