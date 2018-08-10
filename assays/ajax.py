@@ -2623,16 +2623,16 @@ def get_inter_study_reproducibility(
             x_header = {}
             y_header = {}
             for legend, times in legends.items():
-                # Get the current first value
-                first_value = np.mean(initial_chart_data.get(
-                    set
-                ).get(
-                    'average'
-                ).get(
-                    legend
-                ).get(
-                    min(initial_chart_data.get(set).get('average').get(legend).keys())
-                ))
+                # Get the median
+                current_median = np.median([
+                    np.median(x) for x in initial_chart_data.get(
+                        set
+                    ).get(
+                        'average'
+                    ).get(
+                        legend
+                    ).values()
+                ])
 
                 x_header.update({
                     legend: True,
@@ -2659,8 +2659,8 @@ def get_inter_study_reproducibility(
                             time
                         )
 
-                        if initial_norm and first_value:
-                            values = [current_value / first_value for current_value in values]
+                        if initial_norm == 1 and current_median:
+                            values = [current_value / current_median for current_value in values]
 
                         if len(values) > 1:
                             # TODO TODO TODO ONLY ARITHMETIC MEAN RIGHT NOW
