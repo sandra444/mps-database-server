@@ -87,15 +87,33 @@ $(document).ready(function() {
                         //$.each(data, function(index, value) {
                             if(data[1]){
                                 var count = 1;
+                                resultGroups = []
                                 $.each(data[1], function(index, value) {
-                                    if (value.outcome_id == data[0].id && value.classification){
-                                        methods.push("<strong>"+data[1][index].classification+"</strong>: "+ value.param_value + " " + value.units + "<br>");
+                                    if (value.outcome_id == data[0].id){
+                                        if(resultGroups.indexOf(value.result_group_id) == -1){
+                                            resultGroups.push(value.result_group_id)
+                                        }
                                     }
-                                    else if (value.outcome_id == data[0].id){
-                                        methods.push("<strong>Result Group "+ count + "</strong>: "+ value.param_value + " " + value.units + "<br>");
-                                        count = count + 1
-                                    }
+                                    // else if (value.outcome_id == data[0].id){
+                                        //methods.push("<strong>Result Group "+ count + "</strong>: "+ value.param_value + " " + value.units + "<br>");
+                                        //count = count + 1
+                                    //}
                                 });
+                                count = 1
+                                for(var i = 0; i < resultGroups.length; i++){
+                                    methods.push("<strong><u> Result Group " + count + "</u></strong><br>")
+                                    $.each(data[1], function(index, value){
+                                        if(value.result_group_id == resultGroups[i]){
+                                            if(value.classification){
+                                                methods.push("<strong>" + value.classification + ":</strong> " + value.param_value + " " + value.units + "<br>");
+                                            }
+                                            else {
+                                                methods.push(value.param_value + " " + value.units + "<br>");
+                                            }
+                                        }
+                                    });
+                                    count = count + 1
+                                }
                             }
                         //});
                     //}
