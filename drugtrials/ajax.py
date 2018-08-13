@@ -10,7 +10,7 @@ import cgi
 import urllib2
 import psycopg2
 import psycopg2.extras
-import time
+# import time
 
 import mps_AATCcredentials
 
@@ -27,7 +27,7 @@ def fetch_auto_drug_trial_data(request):
         disease = "nafld"
 
     startTime = time.time()
-    print('Starting..')
+    # print('Starting..')
 # https://clinicaltrials.gov/ct2/results?cond=&term=&type=Intr&rslt=With&recrs=e&age_v=&gndr=&intr=&titles=&outc=&spons=&lead=&id=&cntry=US&state=&city=&dist=&locn=&strd_s=&strd_e=&prcd_s=&prcd_e=&sfpd_s=&sfpd_e=&lupd_s=&lupd_e=
     url = "https://clinicaltrials.gov/ct2/results/download_fields?cond=" + disease + "&term=&type=Intr&rslt=With&recrs=e&age_v=&gndr=&intr=&titles=&outc=&spons=&lead=&id=&cntry=US&state=&city=&dist=&locn=&strd_s=&strd_e=&prcd_s=&prcd_e=&sfpd_s=&sfpd_e=&lupd_s=&lupd_e=&down_count=10000&down_fmt=plain"
     file = urllib2.urlopen(url)
@@ -45,7 +45,7 @@ def fetch_auto_drug_trial_data(request):
 
     studyIDs = (lst2pgarr(studyIDs))
 
-    print('Collected Study IDs from Clinical Trials: ' + str(time.time() - startTime))
+    # print('Collected Study IDs from Clinical Trials: ' + str(time.time() - startTime))
     userName = mps_AATCcredentials.userid
     passWord = mps_AATCcredentials.pw
 
@@ -111,7 +111,7 @@ def fetch_auto_drug_trial_data(request):
     cur.close()
     conn.close()
 
-    print('Collected Field Information from AACT: ' + str(time.time() - startTime))
+    # print('Collected Field Information from AACT: ' + str(time.time() - startTime))
     def rList(nct_id,key):
         l = [d for d in key if d['nct_id'] == nct_id]
 
@@ -149,7 +149,7 @@ def fetch_auto_drug_trial_data(request):
                     }
             studiesWithResults.append(study)
 
-    print('Formatted Studies: ' + str(time.time()-startTime))
+
     outcomeData = []
     for i in range(0, len(studiesWithResults)):
         for j in range(0, len(studiesWithResults[i]["outcomes"])):
@@ -161,7 +161,7 @@ def fetch_auto_drug_trial_data(request):
             outcomeData.append(outcomeInfo)
     outcomeDataDisplay = {'data': outcomeData}
     #studyData = { 'data' : studiesWithResults }
-    print('Done ' + str(time.time() - startTime))
+    #print('Done ' + str(time.time() - startTime))
     return HttpResponse(
         json.dumps(outcomeDataDisplay),
         content_type="application/json"
