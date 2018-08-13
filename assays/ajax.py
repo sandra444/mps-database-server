@@ -2106,6 +2106,7 @@ def fetch_data_points_from_filters(request):
             'study_assay__unit__base_unit',
             'sample_location',
             'matrix_item__matrix',
+            'matrix_item__organ_model',
             'subtarget'
         ).filter(
             replaced=False,
@@ -2289,6 +2290,7 @@ def get_inter_study_reproducibility(
     treatment_group_table = {}
     data_group_to_studies = {}
     data_group_to_sample_locations = {}
+    data_group_to_organ_models = {}
 
     # CONTRIVED FOR NOW
     data_header_keys = [
@@ -2384,6 +2386,12 @@ def get_inter_study_reproducibility(
             current_group, {}
         ).update({
             point.sample_location.name: True
+        })
+
+        data_group_to_organ_models.setdefault(
+            current_group, {}
+        ).update({
+            point.matrix_item.organ_model.name: True
         })
 
     inter_data.append([
@@ -2701,6 +2709,10 @@ def get_inter_study_reproducibility(
     for data_group, current_sample_location in data_group_to_sample_locations.items():
         final_data_group_to_sample_locations[data_group] = sorted(current_sample_location)
 
+        final_data_group_to_organ_models = {}
+    for data_group, current_organ_model in data_group_to_organ_models.items():
+        final_data_group_to_organ_models[data_group] = sorted(current_organ_model)
+
     data = {
         'chart_data': final_chart_data,
         'repro_table_data_full': results_rows_full,
@@ -2713,7 +2725,8 @@ def get_inter_study_reproducibility(
         'treatment_groups': treatment_group_representatives,
         'data_group_to_studies': final_data_group_to_studies,
         # BAD
-        'data_group_to_sample_locations': final_data_group_to_sample_locations
+        'data_group_to_sample_locations': final_data_group_to_sample_locations,
+        'data_group_to_organ_models': final_data_group_to_organ_models
     }
 
     return data
