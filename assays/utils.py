@@ -1841,6 +1841,7 @@ def Inter_reproducibility(group_count, inter_data_df, inter_level=1, max_interpo
 
                     rep_index = Inter_Reproducibility_Index(icc_data)
                     group_rep_mtarix = update_group_reproducibility_index_status(group_rep_mtarix, rep_index)
+                    group_rep_mtarix.iloc[0, group_rep_mtarix.columns.get_loc('Interpolation Method')] = 'Trimmed'
                     reproducibility_results_table = reproducibility_results_table.append(group_rep_mtarix,
                                                                                          ignore_index=True)
 

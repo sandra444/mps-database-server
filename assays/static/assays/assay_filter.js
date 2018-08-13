@@ -383,7 +383,7 @@ $(document).ready(function() {
     };
 
     var interpolation_tooltips = {
-        '': 'These values use no interpolation method, they are based only on overlapping data.',
+        'Trimmed': 'These values use no interpolation method, they are based only on overlapping data.',
         'Nearest': 'This method sets the value of an interpolated point to the value of the nearest data point.',
         'Linear': 'This method fits a different linear polynomial between each pair of data points for curves, or between sets of three points for surfaces.',
         'Quadratic': 'This method fits a different quadratic polynomial between each pair of data points for curves, or between sets of three points for surfaces.',
@@ -414,7 +414,7 @@ $(document).ready(function() {
     var max_interpolation_size = $('#max_interpolation_size').val();
     var initial_norm = $('#initial_norm').prop('checked') ? 1 : 0;
 
-    var status_column_index = 13;
+    var status_column_index = 14;
 
     function show_repro() {
         // Hide fixed headers
@@ -506,6 +506,12 @@ $(document).ready(function() {
                 width: '20%'
             },
             {
+                title: "Organ Models",
+                "render": function (data, type, row) {
+                    return data_group_to_organ_models[row[0]].join('<br>');
+                }
+            },
+            {
                 title: "Sample Locations",
                 "render": function (data, type, row) {
                     return data_group_to_sample_locations[row[0]].join('<br>');
@@ -516,7 +522,7 @@ $(document).ready(function() {
                 "render": function (data, type, row) {
                     if (type === 'display' && row[1] !== '') {
                         // var groupNum = row[10];
-                        return row[1] + ' (' + row[2] + ')';
+                        return row[1];
                     }
                     return '';
                 }
@@ -580,6 +586,7 @@ $(document).ready(function() {
 
                     data_group_to_studies = json.data_group_to_studies;
                     data_group_to_sample_locations = json.data_group_to_sample_locations;
+                    data_group_to_organ_models = json.data_group_to_organ_models;
 
                     value_unit_index = json.header_keys.data.indexOf('Value Unit');
 
@@ -723,7 +730,10 @@ $(document).ready(function() {
         current_body.html(rows);
     }
 
-    function help_span(title) {
+    function help_span(title, pull) {
+        if (pull) {
+            return '<span data-toggle="tooltip" class="pull-right glyphicon glyphicon-question-sign" aria-hidden="true" title="' + title + '"></span>';
+        }
         return '<span data-toggle="tooltip" class="glyphicon glyphicon-question-sign" aria-hidden="true" title="' + title + '"></span>';
     }
 
@@ -735,7 +745,7 @@ $(document).ready(function() {
         // TO SORT
         var all_icc = repro_table_data_full[set];
         var methods = [
-            '',
+            'Trimmed',
             'Nearest',
             'Linear',
             'Quadratic',
@@ -746,8 +756,8 @@ $(document).ready(function() {
             var data = all_icc[interpolation];
             if (data) {
                 var row = '<tr>' +
-                    '<td>' + interpolation + ' ' + help_span(interpolation_tooltips[interpolation]) +'</td>' +
-                    '<td>' + data[2] + '</td>' +
+                    '<td>' + interpolation + ' ' + help_span(interpolation_tooltips[interpolation], true) +'</td>' +
+                    // '<td>' + data[2] + '</td>' +
                     '<td>' + data[5] + '</td>' +
                     '<td>' + data[6] +'</td>' +
                     '<td>' + data[7] +'</td>';
@@ -809,7 +819,7 @@ $(document).ready(function() {
 
             // Beware magic strings
             if (initial_norm && content_type !== 'item' && content_type !== 'average') {
-                current_value_unit = 'Normalized by Initial Value';
+                current_value_unit = 'Normalized by Median Value';
             }
 
             if (!values) {
@@ -843,8 +853,12 @@ $(document).ready(function() {
                     y_axis_label_type = '0.00E0';
                     return false;
                 }
-                else if (Math.abs(current_max - current_min) < 10 && Math.abs(current_max - current_min) !== 0) {
+                else if (Math.abs(current_max - current_min) < 10 && Math.abs(current_max - current_min) > 0.1 && Math.abs(current_max - current_min) !== 0) {
                     y_axis_label_type = '0.00';
+                    return false;
+                }
+                else if (Math.abs(current_max - current_min) < 0.1 && Math.abs(current_max - current_min) !== 0) {
+                    y_axis_label_type = '0.00E0';
                     return false;
                 }
             });
@@ -1015,7 +1029,7 @@ $(document).ready(function() {
         var current_full_data = repro_table_data_full[set];
         var current_max = 0;
         var current_min = 999;
-        var method_to_show = '';
+        var method_to_show = 'trimmed';
 
         // Hide all but highest interpolation
         // See which interpolation method is best
