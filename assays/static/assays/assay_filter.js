@@ -374,6 +374,21 @@ $(document).ready(function() {
     var icc_tooltip = '<span data-toggle="tooltip" title="The ICC Absolute Agreement of the measurements across multiple time points is a correlation coefficient that ranges from -1 to 1 with values closer to 1 being more correlated.  When the Max CV > 15%, the reproducibility status is reported to be excellent if > 0.8 (Excellent (ICC), acceptable if > 0.2 (Acceptable (ICC)), and poor if < 0.2 (Poor (ICC))" class="glyphicon glyphicon-question-sign" aria-hidden="true" data-placement="bottom"></span>';
     var repro_tooltip = '<span data-toggle="tooltip" title="Our classification of this grouping\'s reproducibility (Excellent > Acceptable > Poor/NA). If Max CV < 15% then the status is based on the  Max CV criteria, otherwise the status is based on the ICC criteria when the number of overlapping time points is more than one. For single time point data, if CV <15% then the status is based on the CV criteria, otherwise the status is based on the ANOVA P-Value" class="glyphicon glyphicon-question-sign" aria-hidden="true" data-placement="bottom"></span>';
     var anova_tooltip = '<span data-toggle="tooltip" title="The ANOVA p-value is calculated for the single overlapping time point data across MPS centers or studies. The reproducibility status is Acceptable (P-Value) if ANOVA p-value >= 0.05, and Poor (P-Value) if ANOVA p-value <0.05." class="glyphicon glyphicon-question-sign" aria-hidden="true" data-placement="bottom"></span>';
+    // Bad
+    var chart_tooltips = {
+        'item': '“Item” graph displays selected Target/Analyte’s measurements on each item (chip or well) against time cross centers or studies.',
+        'average': '“Average” graph displays the average plus error bar (standard deviation) of selected Target/Analyte’s measurements aggregated by centers or studies against time.',
+        'trimmed': '“Trimmed” graph displays the average of selected Target/Analyte’s measurements aggregated by centers or studies against time by dropping the data points which timely consistent measurement is missing from one or more center/study. It means the time observations are excluded from the analysis when any observations by center/study  are missing at that time.',
+        'interpolated': '“Interpolated” graph displays the average of selected Target/Analyte’s measurements aggregated by centers or studies against time by interpolating the data points which timely consistent measurement(s) is(are) missing from a center/study. Four interpolation methods are applied for filling missing points, which are “nearest”, “linear spline”,” quadratic spline” and “cubic spline”. The overlapped data against time from one of four interpolation methods which has highest ICC value is depicted as a graph . The inter reproducibility results from all four interpolation methods are displayed in the table above the graphs.'
+    };
+
+    var interpolation_tooltips = {
+        '': 'These values use no interpolation method, they are based only on overlapping data.',
+        'Nearest': 'This method sets the value of an interpolated point to the value of the nearest data point.',
+        'Linear': 'This method fits a different linear polynomial between each pair of data points for curves, or between sets of three points for surfaces.',
+        'Quadratic': 'This method fits a different quadratic polynomial between each pair of data points for curves, or between sets of three points for surfaces.',
+        'Cubic': 'This method fits a different cubic polynomial between each pair of data points for curves, or between sets of three points for surfaces.'
+    };
 
     // For making the table
     var repro_table_data_full = null;
@@ -654,7 +669,16 @@ $(document).ready(function() {
             populate_selection_table(group, data_table);
             populate_icc_table(group, icc_table);
 
+            // UGLY
+            $.each(chart_tooltips, function(tooltip_name, tooltip_title) {
+                var charts_section_title = current_clone.find('[data-id="tooltip_' + tooltip_name + '"]');
+                charts_section_title.html(help_span(tooltip_title));
+            });
+
             area_to_copy_to.append(current_clone);
+
+            // Activates Bootstrap tooltips
+            $('[data-toggle="tooltip"]').tooltip({container:"body"});
         });
     }
 
@@ -699,6 +723,10 @@ $(document).ready(function() {
         current_body.html(rows);
     }
 
+    function help_span(title) {
+        return '<span data-toggle="tooltip" class="glyphicon glyphicon-question-sign" aria-hidden="true" title="' + title + '"></span>';
+    }
+
     function populate_icc_table(set, current_table) {
         var current_body = current_table.find('tbody');
 
@@ -718,7 +746,7 @@ $(document).ready(function() {
             var data = all_icc[interpolation];
             if (data) {
                 var row = '<tr>' +
-                    '<td>' + interpolation + '</td>' +
+                    '<td>' + interpolation + ' ' + help_span(interpolation_tooltips[interpolation]) +'</td>' +
                     '<td>' + data[2] + '</td>' +
                     '<td>' + data[5] + '</td>' +
                     '<td>' + data[6] +'</td>' +
