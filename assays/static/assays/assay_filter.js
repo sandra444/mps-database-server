@@ -671,10 +671,15 @@ $(document).ready(function() {
 
             repro_title.html('Set ' + group);
 
-            get_repro_status(icc_status, data[13], repro_status);
+            get_repro_status(icc_status, data[9], repro_status);
 
             populate_selection_table(group, data_table);
-            populate_icc_table(group, icc_table);
+            if (repro_table_data_full[group].best[1]) {
+                populate_icc_table(group, icc_table);
+            }
+            else {
+                icc_table.hide();
+            }
 
             // UGLY
             $.each(chart_tooltips, function(tooltip_name, tooltip_title) {
@@ -697,9 +702,7 @@ $(document).ready(function() {
         } else if (icc_status[0] === 'P'){
             repro_status.html('<em>'+icc_status+'</em>').css("background-color", "#ff7863");
         } else {
-            repro_status.html(
-                '<em>'+icc_status+'</em><small style="color: black;"><span data-toggle="tooltip" title="'+ repro_status_string +'" class="glyphicon glyphicon-question-sign" aria-hidden="true"></span></small>'
-            ).css("background-color", "Grey");
+            repro_status.html('<em>'+repro_status_string+'</em>').css("background-color", "Grey");
         }
     }
 
@@ -1026,20 +1029,31 @@ $(document).ready(function() {
             'Cubic'
         ];
 
+        // Decide whether or not to show trimmed
+        var current_repro_set_selector = $('.repro-' + set);
         var current_full_data = repro_table_data_full[set];
+
+        current_repro_set_selector.find('[data-id="tooltip_trimmed"]').hide();
+
+        if (current_full_data['Trimmed']) {
+            current_repro_set_selector.find('[data-id="tooltip_trimmed"]').show();
+        }
+
         var current_max = 0;
         var current_min = 999;
-        var method_to_show = 'trimmed';
+        var method_to_show = '';
 
         // Hide all but highest interpolation
         // See which interpolation method is best
         // Also hide the charts at first
         // Redundant!
+        current_repro_set_selector.find('[data-id="tooltip_interpolated"]').hide();
+
         $.each(interpolation_methods, function(index, method) {
             var current_row = current_full_data[method];
             var lower_method = method.toLowerCase();
 
-            $('.repro-' + set).find(
+            current_repro_set_selector.find(
                 '[data-id="' + lower_method + '_chart"]'
             ).hide();
 
@@ -1061,10 +1075,14 @@ $(document).ready(function() {
             });
         }
 
-        // Show best
-        $('.repro-' + set).find(
-            '[data-id="' + method_to_show + '_chart"]'
-        ).show();
+        if (method_to_show) {
+            // Show best
+            current_repro_set_selector.find(
+                '[data-id="' + method_to_show + '_chart"]'
+            ).show();
+
+            current_repro_set_selector.find('[data-id="tooltip_interpolated"]').show();
+        }
     }
 
     function generate_data_point_tooltip(time, legend, value, chip_id) {
