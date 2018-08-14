@@ -928,7 +928,8 @@ $(document).ready(function() {
                 // TODO TODO TODO
                 // tooltip: {isHtml: true},
                 intervals: {
-                    style: 'sticks'
+                    // style: 'bars'
+                    'lineWidth':2, 'barWidth': 1
                 }
             };
 

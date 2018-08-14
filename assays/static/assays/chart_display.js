@@ -468,7 +468,8 @@ $(document).ready(function () {
                 // Individual point tooltips, not aggregate
                 focusTarget: 'datum',
                 intervals: {
-                    style: 'bars'
+                    // style: 'bars'
+                    'lineWidth':2, 'barWidth': 1
                 }
             };
 
