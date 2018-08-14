@@ -2596,10 +2596,11 @@ def get_inter_study_reproducibility(
             if row[5] and not type(row[5]) == str:
                 row[5] = '{0:.4g}'.format(row[5])
 
+        # Removed for now
         # Make sure it actually has points overlapping
-        # if current_best[3] > 1:
-        if current_best[4]:
-            results_rows_best.append(current_best)
+        # if current_best[4]:
+        #     results_rows_best.append(current_best)
+        results_rows_best.append(current_best)
 
     inter_data_table = inter_data_table.astype(object).replace(np.nan, '')
     # inter_data_columns = [i for i in inter_data_table.columns]
