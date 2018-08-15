@@ -1,15 +1,21 @@
 <div id="{{ chart_prefix }}chart_options" class="well hidden-print chart-option-block">
 {#    <h3 class="text-center">Chip Readout Data</h3>#}
-    <h3 class="text-center">{{ chart_title }}</h3>
+    <h3 class="text-center">
+        {{ chart_title }}
+    </h3>
     <div class="row">
         <label class="radio-inline">
-            <input type="radio" name="{{ chart_prefix }}key" id="{{ chart_prefix }}chip_select" value="chip" checked>
-            View by Device
+            <input type="radio" name="{{ chart_prefix }}key" id="{{ chart_prefix }}device_select" value="device" checked>
+            By Chip
         </label>
         <label class="radio-inline">
             <input type="radio" name="{{ chart_prefix }}key" id="{{ chart_prefix }}group_select" value="group">
-            View by Group
+            By Group
         </label>
+{#        <label class="radio-inline">#}
+{#            <input type="radio" name="{{ chart_prefix }}key" id="{{ chart_prefix }}dose_select" value="dose">#}
+{#            By Dose-Response#}
+{#        </label>#}
         <label for="{{ chart_prefix }}percent_control" class="pull-right">
             <input type="checkbox" name="{{ chart_prefix }}percent_control" id="{{ chart_prefix }}percent_control" />
             Convert to Percent of Control&nbsp;
@@ -45,6 +51,7 @@
         </label>
     </div>
     <div class="row">
+        {# Subject to removal #}
         <label class="radio-inline">
             <input type="radio" name="{{ chart_prefix }}tooltip_type" id="{{ chart_prefix }}datum_select" value="datum" checked>
             Tooltips for each Data Point
@@ -63,5 +70,10 @@
             <input type="checkbox" name="{{ chart_prefix }}log_y" id="{{ chart_prefix }}log_y" />
             Log Scale Y-Axis&nbsp;
         </label>
+    </div>
+
+    {# Inline JS is a little risque, but expedient #}
+    <div class="padded-row padded-bottom">
+        <a role="button" onclick="$('#{{ chart_prefix }}').toggle('slow');$(this).text($(this).text() === 'Show' ? 'Hide' : 'Show');" class="btn btn-info toggle-hide-button">Hide Charts</a>
     </div>
 </div>

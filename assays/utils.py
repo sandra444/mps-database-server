@@ -27,6 +27,9 @@ import cStringIO
 
 import pandas as pd
 import numpy as np
+import scipy.interpolate as sp
+import scipy.stats as stats
+from scipy.interpolate import CubicSpline
 
 import csv
 
@@ -904,41 +907,41 @@ class AssayFileProcessor:
 
 
 # TODO TODO TODO PLEASE REVISE STYLES WHEN POSSIBLE
-def ICC_A(X):
-    #This function is to calculate the ICC absolute agreement value for the input matrix
-    icc_mat=X.values
-
-    Count_Row=icc_mat.shape[0] #gives number of row count
-    Count_Col=icc_mat.shape[1] #gives number of col count
-
-    #ICC row mean
-    icc_row_mean=icc_mat.mean(axis=1)
-
-    #ICC column mean
-    icc_col_mean=icc_mat.mean(axis=0)
-
-    #ICC total mean
-    icc_total_mean=icc_mat.mean()
-
-    #Sum of squre row and column means
-    SSC=sum((icc_col_mean-icc_total_mean)**2)*Count_Row
-
-    SSR=sum((icc_row_mean-icc_total_mean)**2)*Count_Col
-
-    #sum of squre errors
-    SSE=0
-    for row in range(Count_Row):
-        for col in range(Count_Col):
-            SSE=SSE+(icc_mat[row,col]-icc_row_mean[row]-icc_col_mean[col]+icc_total_mean)**2
-
-    SSW = SSE + SSC
-    MSR = SSR / (Count_Row-1)
-    MSE = SSE / ((Count_Row-1)*(Count_Col-1))
-    MSC = SSC / (Count_Col-1)
-    MSW = SSW / (Count_Row*(Count_Col-1))
-    ICC_A = (MSR - MSE) / (MSR + (Count_Col-1)*MSE + Count_Col*(MSC-MSE)/Count_Row)
-    return ICC_A
-
+# def ICC_A(X):
+#     # This function is to calculate the ICC absolute agreement value for the input matrix
+#     X = X.dropna()
+#     icc_mat = X.values
+#
+#     Count_Row = icc_mat.shape[0]  # gives number of row count
+#     Count_Col = icc_mat.shape[1]  # gives number of col count
+#
+#     # ICC row mean
+#     icc_row_mean = icc_mat.mean(axis=1)
+#
+#     # ICC column mean
+#     icc_col_mean = icc_mat.mean(axis=0)
+#
+#     # ICC total mean
+#     icc_total_mean = icc_mat.mean()
+#
+#     # Sum of squre row and column means
+#     SSC = sum((icc_col_mean - icc_total_mean) ** 2) * Count_Row
+#
+#     SSR = sum((icc_row_mean - icc_total_mean) ** 2) * Count_Col
+#
+#     # sum of squre errors
+#     SSE = 0
+#     for row in range(Count_Row):
+#         for col in range(Count_Col):
+#             SSE = SSE + (icc_mat[row, col] - icc_row_mean[row] - icc_col_mean[col] + icc_total_mean) ** 2
+#
+#     # SSW = SSE + SSC
+#     MSR = SSR / (Count_Row - 1)
+#     MSE = SSE / ((Count_Row - 1) * (Count_Col - 1))
+#     MSC = SSC / (Count_Col - 1)
+#     # MSW = SSW / (Count_Row*(Count_Col-1))
+#     ICC_A = (MSR - MSE) / (MSR + (Count_Col - 1) * MSE + Count_Col * (MSC - MSE) / Count_Row)
+#     return ICC_A
 
 def Max_CV(X):
     #This function is to estimate the maximum CV of all chips' measurements through time (row)
@@ -1242,9 +1245,9 @@ def scatter_plot_matrix(study_data,group_index):
     return plot_matrix
 
 
-def get_repro_data(datafile):
+def get_repro_data(data):
     #Load the summary data into the dataframe
-    study_data = pd.DataFrame(datafile)
+    study_data = pd.DataFrame(data)
     study_data.columns = study_data.iloc[0]
     study_data = study_data.drop(study_data.index[0])
     #Drop null value rows
@@ -1310,3 +1313,611 @@ def get_repro_data(datafile):
         group_index=study_group_setting(study_unique_group,row)
 
     return datadict
+
+
+def consecutive_one_new(data):
+    longest = 0
+    current = 0
+    start_row = 0
+    long_start_row = 0
+    row = 0
+    for num in data:
+        row = row + 1
+        if num == 1:
+            current += 1
+            if current == 1:
+                start_row = row
+                # print('start_row=',start_row)
+        else:
+            longest = max(longest, current)
+            current = 0
+
+        # print('long_start_row=',long_start_row)
+        # print('current=',current,'','longest=',longest)
+        if current > longest:
+            long_start_row = start_row
+
+            # print('long_start_row=',long_start_row)
+
+    return max(longest, current), long_start_row
+
+
+def Single_Time_ANOVA(st_anova_data, inter_level):
+    a_data = st_anova_data
+    if inter_level == 1:
+        samples = [condition[1] for condition in a_data.groupby('MPS User Group')['Value']]
+    else:
+        samples = [condition[1] for condition in a_data.groupby('Study ID')['Value']]
+
+    f_val, p_val = stats.f_oneway(*samples)
+    return p_val
+
+
+def ICC_A(X):
+    # This function is to calculate the ICC absolute agreement value for the input matrix
+    X = X.dropna()
+    icc_mat = X.values
+
+    Count_Row = icc_mat.shape[0]  # gives number of row count
+    Count_Col = icc_mat.shape[1]  # gives number of col count
+    if Count_Row < 2:
+        ICC_A = np.nan
+    elif Count_Col < 2:
+        ICC_A = np.nan
+    else:
+        # ICC row mean
+        icc_row_mean = icc_mat.mean(axis=1)
+
+        # ICC column mean
+        icc_col_mean = icc_mat.mean(axis=0)
+
+        # ICC total mean
+        icc_total_mean = icc_mat.mean()
+
+        # Sum of squre row and column means
+        SSC = sum((icc_col_mean - icc_total_mean) ** 2) * Count_Row
+
+        SSR = sum((icc_row_mean - icc_total_mean) ** 2) * Count_Col
+
+        # sum of squre errors
+        SSE = 0
+        for row in range(Count_Row):
+            for col in range(Count_Col):
+                SSE = SSE + (icc_mat[row, col] - icc_row_mean[row] - icc_col_mean[col] + icc_total_mean) ** 2
+
+        # SSW = SSE + SSC
+        MSR = SSR / (Count_Row - 1)
+        MSE = SSE / ((Count_Row - 1) * (Count_Col - 1))
+        MSC = SSC / (Count_Col - 1)
+        # MSW = SSW / (Count_Row*(Count_Col-1))
+        ICC_A = (MSR - MSE) / (MSR + (Count_Col - 1) * MSE + Count_Col * (MSC - MSE) / Count_Row)
+    return ICC_A
+
+
+def Inter_Max_CV(X):
+    # This function is to estimate the maximum CV of cross centers or studies' measurements through time (row)
+    Y = X.dropna()
+    icc_mat = Y.values
+    a_count = Y.shape[0]
+    CV_Array = pd.DataFrame(index=Y.index, columns=['CV (%)'])
+    for row in range(a_count):
+        if np.std(icc_mat[row, :]) > 0:
+            CV_Array.iloc[row][0] = np.std(icc_mat[row, :], ddof=1) / np.mean(icc_mat[row, :]) * 100.0
+        else:
+            CV_Array.iloc[row][0] = 0
+    # Calculate Max CV
+    Max_CV = CV_Array.max(axis=0)
+    return Max_CV
+
+
+def Inter_Reproducibility_Index(X):
+    # This function is to calculate the Max CV and ICC absolute agreement data table
+
+    Y = X.dropna()
+    Max_CV_value = Inter_Max_CV(Y)  # Call Max CV function
+    if Y.shape[0] > 1 and Y.shape[1] > 1:
+        ICC_Value = ICC_A(Y)  # Call ICC function
+    else:
+        ICC_Value = np.nan
+    # Create a reproducibility index dataframe
+    rep_index = pd.DataFrame(index=range(1), columns=['Max CV', 'ICC Absolute Agreement'],
+                             dtype='float')  # define the empty dataframe
+    rep_index.iloc[0][0] = Max_CV_value
+    rep_index.iloc[0][1] = ICC_Value
+    # rep_index = rep_index.round(2)
+    return rep_index
+
+
+def fill_nan(A, interp_method):
+    '''
+    interpolate to fill nan values
+    '''
+    try:
+        inds = np.arange(A.shape[0])
+        # print "total # " + str(inds)
+        good = np.where(np.isfinite(A))
+        if interp_method == 'cubic':
+            cs = CubicSpline(inds[good], A[good], extrapolate=False)
+            B = np.where(np.isfinite(A), A, cs(inds))
+            fill_status = True
+        else:
+            f = sp.interp1d(inds[good], A[good], kind=interp_method, bounds_error=False)
+            B = np.where(np.isfinite(A), A, f(inds))
+            fill_status = True
+    except ValueError:
+        B = A
+        fill_status = False
+    return B, fill_status
+
+
+def update_missing_nan(update_missing_block, A):
+    s_row = update_missing_block.iloc[0, 1] - 1
+    e_row = update_missing_block.iloc[0, 1] + update_missing_block.iloc[0, 0] - 1
+    for i in range(s_row, e_row):
+        A[i] = 0
+    return A
+
+
+def search_nan_blocks(df_s):
+    total_rows = len(df_s)
+    missing_list = []
+    for i in range(total_rows):
+        if np.isnan(df_s.iloc[i]):
+            missing_list.append(1)
+        else:
+            missing_list.append(0)
+
+    nan_blocks_df = pd.DataFrame(columns=['nan block size', 'block_start_row', 'Out NaN'])
+    block_df = pd.DataFrame(index=[1], columns=['nan block size', 'block_start_row', 'Out NaN'])
+
+    [max_missing_len, max_missing_len_start_row] = consecutive_one_new(missing_list)
+    while True:
+        if max_missing_len > 0:
+            block_df.iloc[0, 0] = max_missing_len
+            block_df.iloc[0, 1] = max_missing_len_start_row
+            if max_missing_len_start_row == 1 or max_missing_len_start_row + max_missing_len - 1 == total_rows:
+                block_df.iloc[0, 2] = True
+            else:
+                block_df.iloc[0, 2] = False
+            nan_blocks_df = nan_blocks_df.append(block_df, ignore_index=True)
+            missing_list = update_missing_nan(block_df, missing_list)
+            [max_missing_len, max_missing_len_start_row] = consecutive_one_new(missing_list)
+        else:
+            break
+    return nan_blocks_df
+
+
+def max_in_nan_size_array(df_s):
+    nan_blocks = search_nan_blocks(df_s)
+    in_nan_blocks = nan_blocks[nan_blocks['Out NaN'] == False]
+    if len(in_nan_blocks.index) > 0:
+        max_nan_size_array = max(in_nan_blocks.iloc[:, 0])
+    else:
+        max_nan_size_array = 0
+    return max_nan_size_array
+
+
+def max_in_nan_size_matrix(pivot_group_matrix):
+    no_cols = pivot_group_matrix.shape[1]
+    max_in_nan_matrix = 0
+    for col in range(no_cols):
+        curr_size = max_in_nan_size_array(pivot_group_matrix.iloc[:, col])
+        if curr_size > max_in_nan_matrix:
+            max_in_nan_matrix = curr_size
+    return max_in_nan_matrix
+
+
+def matrix_interpolate(group_chip_data, interp_method, inter_level):
+    if inter_level == 1:
+        interp_group_matrix = pd.pivot_table(group_chip_data, values='Value', index='Time', columns=['MPS User Group'],
+                                             aggfunc=np.mean)
+    else:
+        interp_group_matrix = pd.pivot_table(group_chip_data, values='Value', index='Time', columns=['Study ID'],
+                                             aggfunc=np.mean)
+
+    fill_header_list = interp_group_matrix.columns.values.tolist()
+    for col in range(interp_group_matrix.shape[1]):
+        # print col
+        df_arr = interp_group_matrix.values[:, col]
+        df_s = interp_group_matrix.iloc[:, col]
+        if max_in_nan_size_array(df_s) > 0:
+            [interp_group_matrix[fill_header_list[col]], fill_status] = fill_nan(df_arr, interp_method)
+    return interp_group_matrix
+
+
+def update_group_reproducibility_index_status(group_rep_mtarix, rep_index):
+    group_rep_mtarix.iloc[0, group_rep_mtarix.columns.get_loc('ICC Absolute Agreement')] = rep_index.iloc[0, 1]
+    group_rep_mtarix.iloc[0, group_rep_mtarix.columns.get_loc('Max CV')] = rep_index.iloc[0, 0]
+
+    if group_rep_mtarix.iloc[0, 4] == 0:
+        group_rep_mtarix.iloc[
+            0, group_rep_mtarix.columns.get_loc('Reproducibility Note')] = 'No overlaped time for comparing'
+    else:
+        if pd.isnull(rep_index.iloc[0, 1]) == True:
+            if rep_index.iloc[0, 0] <= 5:
+                group_rep_mtarix.iloc[0, group_rep_mtarix.columns.get_loc('Reproducibility Status')] = 'Excellent (CV)'
+            elif rep_index.iloc[0, 0] > 5 and rep_index.iloc[0, 0] <= 15:
+                group_rep_mtarix.iloc[0, group_rep_mtarix.columns.get_loc('Reproducibility Status')] = 'Acceptable (CV)'
+            elif rep_index.iloc[0, 0] > 15:
+                group_rep_mtarix.iloc[0, group_rep_mtarix.columns.get_loc('Reproducibility Status')] = 'Poor (CV)'
+            else:
+                group_rep_mtarix.iloc[0, group_rep_mtarix.columns.get_loc('Reproducibility Status')] = np.nan
+        else:
+            if rep_index.iloc[0][0] <= 15 and rep_index.iloc[0][0] > 0:
+                if rep_index.iloc[0][0] <= 5:
+                    group_rep_mtarix.iloc[
+                        0, group_rep_mtarix.columns.get_loc('Reproducibility Status')] = 'Excellent (CV)'
+                elif rep_index.iloc[0][1] >= 0.8:
+                    group_rep_mtarix.iloc[
+                        0, group_rep_mtarix.columns.get_loc('Reproducibility Status')] = 'Excellent (ICC)'
+                else:
+                    group_rep_mtarix.iloc[
+                        0, group_rep_mtarix.columns.get_loc('Reproducibility Status')] = 'Acceptable (CV)'
+            else:
+                if rep_index.iloc[0][1] >= 0.8:
+                    group_rep_mtarix.iloc[
+                        0, group_rep_mtarix.columns.get_loc('Reproducibility Status')] = 'Excellent (ICC)'
+                elif rep_index.iloc[0][1] >= 0.2:
+                    group_rep_mtarix.iloc[
+                        0, group_rep_mtarix.columns.get_loc('Reproducibility Status')] = 'Acceptable (ICC)'
+                elif rep_index.iloc[0][1] < 0.2:
+                    group_rep_mtarix.iloc[0, group_rep_mtarix.columns.get_loc('Reproducibility Status')] = 'Poor (ICC)'
+                else:
+                    group_rep_mtarix.iloc[0, group_rep_mtarix.columns.get_loc('Reproducibility Status')] = np.nan
+    return group_rep_mtarix
+
+
+def interpolate_group_rep_index(header_list, group_chip_data, interp_method, inter_level, max_interpolation_size,
+                                group_id, initial_Norm=0):
+    if inter_level == 1:
+        interp_group_matrix = pd.pivot_table(group_chip_data, values='Value', index='Time', columns=['MPS User Group'],
+                                             aggfunc=np.mean)
+    else:
+        interp_group_matrix = pd.pivot_table(group_chip_data, values='Value', index='Time', columns=['Study ID'],
+                                             aggfunc=np.mean)
+
+    origin_isnull = interp_group_matrix.isnull()
+    origin_isnull_col = pivot_transpose_to_column(origin_isnull, inter_level)
+    interp_mat = matrix_interpolate(group_chip_data, interp_method, inter_level)  # interpolate
+
+    # Update maximum interpolation size
+    if max_in_nan_size_matrix(interp_group_matrix) > max_interpolation_size:
+        for col in range(interp_group_matrix.shape[1]):
+            df_s = interp_group_matrix.iloc[:, col]
+            if max_in_nan_size_array(df_s) > max_interpolation_size:
+                nan_blocks = search_nan_blocks(df_s)
+                for b_row in range(nan_blocks.shape[0]):
+                    if nan_blocks.iloc[b_row, 0] > max_interpolation_size and nan_blocks.iloc[b_row, 2] == False:
+                        for i in range(nan_blocks.iloc[b_row, 1] - 1,
+                                       nan_blocks.iloc[b_row, 1] - 1 + nan_blocks.iloc[b_row, 0]):
+                            interp_mat.iloc[i, col] = np.nan
+
+    if initial_Norm == 1:
+        # Normalize each center data by the median value
+        norm_pivot_group_matrix = interp_mat
+        for norm_col in range(interp_mat.shape[1]):
+            med_value = interp_mat.iloc[:, norm_col].dropna().median()
+
+            for norm_row in range(interp_mat.shape[0]):
+                if pd.isnull(interp_mat.iloc[norm_row, norm_col]) == False and med_value > 0:
+                    norm_pivot_group_matrix.iloc[norm_row, norm_col] = interp_mat.iloc[
+                                                                           norm_row, norm_col] / med_value
+        interp_mat = norm_pivot_group_matrix
+
+        # Build inter data set
+    inter_data_set = pivot_transpose_to_column(interp_mat.dropna(), inter_level)
+    inter_data_set['Value Source'] = 'Original'
+    inter_data_set['Data Set'] = interp_method
+    inter_data_set['Treatment Group'] = group_id
+
+    for set_row in range(inter_data_set.shape[0]):
+        time_value = inter_data_set.iloc[set_row, 0]
+        inter_value = inter_data_set.iloc[set_row, 1]
+        if inter_level == 1:
+            null_state = origin_isnull_col[
+                (origin_isnull_col['Time'] == time_value) & (origin_isnull_col['MPS User Group'] == inter_value)].iloc[
+                0, 2]
+        else:
+            null_state = origin_isnull_col[
+                (origin_isnull_col['Time'] == time_value) & (origin_isnull_col['Study ID'] == inter_value)].iloc[0, 2]
+
+        if null_state == True:
+            inter_data_set.iloc[set_row, inter_data_set.columns.get_loc('Value Source')] = 'Interpolated'
+
+    icc_data = interp_mat.dropna()
+    group_rep_mtarix = pd.DataFrame(index=[0], columns=header_list)
+    group_rep_mtarix.iloc[0, group_rep_mtarix.columns.get_loc('Treatment Group')] = group_id
+    group_rep_mtarix.iloc[0, 3] = icc_data.shape[1]
+    group_rep_mtarix.iloc[0, 4] = icc_data.shape[0]
+    group_rep_mtarix.iloc[0, group_rep_mtarix.columns.get_loc('Interpolation Method')] = interp_method.title()
+    group_rep_mtarix.iloc[0, group_rep_mtarix.columns.get_loc('Max Interpolation Size')] = max_interpolation_size
+    rep_index = Inter_Reproducibility_Index(icc_data)
+    group_rep_mtarix = update_group_reproducibility_index_status(group_rep_mtarix, rep_index)
+
+    return group_rep_mtarix, inter_data_set
+
+
+def pivot_transpose_to_column(pivot_data, inter_level):
+    row_count = pivot_data.shape[0]
+    col_count = pivot_data.shape[1]
+    if inter_level == 1:
+        col_name = ['Time', 'MPS User Group', 'Value']
+    else:
+        col_name = ['Time', 'Study ID', 'Value']
+    df_one = pd.DataFrame(index=[0], columns=col_name)
+    column_data = pd.DataFrame(columns=col_name)
+    for row in range(row_count):
+        for col in range(col_count):
+            df_one.iloc[0, 0] = pivot_data.index[row]
+            df_one.iloc[0, 1] = pivot_data.columns.values[col]
+            df_one.iloc[0, 2] = pivot_data.iloc[row, col]
+            column_data = column_data.append(df_one, ignore_index=True)
+    return column_data
+
+
+def Inter_reproducibility(group_count, inter_data_df, inter_level=1, max_interpolation_size=2, initial_Norm=0):
+    # Evaluate inter-center/study reproducibility
+
+    inter_data_df[['Chip ID']] = inter_data_df[['Chip ID']].astype(str)
+    inter_data_df[['Study ID']] = inter_data_df[['Study ID']].astype(str)
+
+    # Calculate the average value group by chip level
+    chip_data = \
+    inter_data_df.groupby(['Treatment Group', 'Chip ID', 'Time', 'Study ID', 'MPS User Group'], as_index=False)[
+        'Value'].mean()
+
+    # create reproducibility report table
+    # reproducibility_results_table=group_df
+    # header_list=group_df.columns.values.tolist()
+    inter_data_header_list = []
+    inter_data_header_list.append('Time')
+    if inter_level == 1:
+        inter_data_header_list.append('MPS User Group')
+    else:
+        inter_data_header_list.append('Study ID')
+    inter_data_header_list.append('Value')
+    inter_data_header_list.append('Value Source')
+    inter_data_header_list.append('Data Set')
+    inter_data_header_list.append('Treatment Group')
+    inter_data_table = pd.DataFrame(columns=inter_data_header_list)
+
+    header_list = []
+    header_list.append('Treatment Group')
+    header_list.append('Interpolation Method')
+    header_list.append('Max Interpolation Size')
+    if inter_level == 1:
+        header_list.append('# of Centers')
+        header_list.append('# of Overlaped Cross-Center Time Points')
+    else:
+        header_list.append('# of Studies')
+        header_list.append('# of Overlaped Cross-Study Time Points')
+    header_list.append('Max CV')
+    header_list.append('ICC Absolute Agreement')
+    header_list.append('ANOVA P-Value')
+    header_list.append('Reproducibility Status')
+    header_list.append('Reproducibility Note')
+
+    # Define all columns of reproducibility report table
+    reproducibility_results_table = pd.DataFrame(columns=header_list)
+
+    # Define all columns of original and
+    # Loop every unique replicate group
+    for row in range(group_count):
+        group_id = str(row + 1)
+        # group_chip_data = chip_data[chip_data['Treatment Group'] == 'Group ' + str(row + 1)]
+        group_chip_data = chip_data[chip_data['Treatment Group'] == str(row + 1)]
+
+        if group_chip_data.shape[0] < 1:
+            group_rep_mtarix = pd.DataFrame(index=[0], columns=header_list)
+            group_rep_mtarix.iloc[0, group_rep_mtarix.columns.get_loc('Treatment Group')] = group_id
+            group_rep_mtarix.iloc[0, 3] = np.nan
+            group_rep_mtarix.iloc[
+                0, group_rep_mtarix.columns.get_loc('Reproducibility Note')] = 'No data for this group'
+            reproducibility_results_table = reproducibility_results_table.append(group_rep_mtarix, ignore_index=True)
+        else:
+            if inter_level == 1:
+                pivot_group_matrix = pd.pivot_table(group_chip_data, values='Value', index='Time',
+                                                    columns=['MPS User Group'], aggfunc=np.mean)
+            else:
+                pivot_group_matrix = pd.pivot_table(group_chip_data, values='Value', index='Time', columns=['Study ID'],
+                                                    aggfunc=np.mean)
+
+            if pivot_group_matrix.shape[1] < 2:
+
+                group_rep_mtarix = pd.DataFrame(index=[0], columns=header_list)
+                group_rep_mtarix.iloc[0, group_rep_mtarix.columns.get_loc('Treatment Group')] = group_id
+                group_rep_mtarix.iloc[0, 3] = pivot_group_matrix.shape[1]
+                group_rep_mtarix.iloc[
+                    0, group_rep_mtarix.columns.get_loc('Reproducibility Note')] = 'Fewer than two centers/studies'
+                reproducibility_results_table = reproducibility_results_table.append(group_rep_mtarix,
+                                                                                     ignore_index=True)
+            else:
+                if initial_Norm == 1 and pivot_group_matrix.shape[0] > 0:
+                    # Normalize each center data by the median value
+                    norm_pivot_group_matrix = pivot_group_matrix
+                    for norm_col in range(pivot_group_matrix.shape[1]):
+                        med_value = pivot_group_matrix.iloc[:, norm_col].dropna().median()
+
+                        for norm_row in range(pivot_group_matrix.shape[0]):
+                            if pd.isnull(pivot_group_matrix.iloc[norm_row, norm_col]) == False and med_value > 0:
+                                norm_pivot_group_matrix.iloc[norm_row, norm_col] = pivot_group_matrix.iloc[
+                                                                                       norm_row, norm_col] / med_value
+                    pivot_group_matrix = norm_pivot_group_matrix
+
+                # Trim nan data points
+                no_nan_matrix = pivot_group_matrix.dropna()
+
+                # Add trimmed data to the inter data table when there are overlaped time points existing
+                if no_nan_matrix.shape[0] > 0:
+                    inter_data_set = pivot_transpose_to_column(no_nan_matrix, inter_level)
+                    inter_data_set['Value Source'] = 'Original'
+                    inter_data_set['Data Set'] = 'trimmed'
+                    inter_data_set['Treatment Group'] = group_id
+                    inter_data_table = inter_data_table.append(inter_data_set, ignore_index=True)
+
+                if no_nan_matrix.shape[1] < 2:
+                    group_rep_mtarix = pd.DataFrame(index=[0], columns=header_list)
+                    group_rep_mtarix.iloc[0, group_rep_mtarix.columns.get_loc('Treatment Group')] = group_id
+                    group_rep_mtarix.iloc[0, 3] = no_nan_matrix.shape[1]
+                    group_rep_mtarix.iloc[
+                        0, group_rep_mtarix.columns.get_loc('Reproducibility Note')] = 'Fewer than two centers/studies'
+                    reproducibility_results_table = reproducibility_results_table.append(group_rep_mtarix,
+                                                                                         ignore_index=True)
+                elif no_nan_matrix.shape[0] < 1:
+                    group_rep_mtarix = pd.DataFrame(index=[0], columns=header_list)
+                    group_rep_mtarix.iloc[0, group_rep_mtarix.columns.get_loc('Treatment Group')] = group_id
+                    group_rep_mtarix.iloc[0, 3] = no_nan_matrix.shape[1]
+                    group_rep_mtarix.iloc[0, 4] = 0
+                    group_rep_mtarix.iloc[
+                        0, group_rep_mtarix.columns.get_loc('Reproducibility Note')] = 'No overlaped time for comparing'
+
+                    reproducibility_results_table = reproducibility_results_table.append(group_rep_mtarix,
+                                                                                         ignore_index=True)
+                elif no_nan_matrix.shape[0] == 1 and no_nan_matrix.shape[1] >= 2:
+                    if initial_Norm == 1:
+                        single_time = no_nan_matrix.index[0]
+                        group_rep_mtarix = pd.DataFrame(index=[0], columns=header_list)
+                        group_rep_mtarix.iloc[0, group_rep_mtarix.columns.get_loc('Treatment Group')] = group_id
+                        group_rep_mtarix.iloc[0, 3] = no_nan_matrix.shape[1]
+                        group_rep_mtarix.iloc[0, 4] = no_nan_matrix.shape[0]
+                        group_rep_mtarix.iloc[0, group_rep_mtarix.columns.get_loc('ANOVA P-Value')] = np.nan
+                        group_rep_mtarix.iloc[0, group_rep_mtarix.columns.get_loc('Max CV')] = np.nan
+                        group_rep_mtarix.iloc[
+                            0, group_rep_mtarix.columns.get_loc('Reproducibility Note')
+                        ] = 'Normalized by median is not applicable to single time point'
+                    else:
+                        single_time = no_nan_matrix.index[0]
+                        group_rep_mtarix = pd.DataFrame(index=[0], columns=header_list)
+                        group_rep_mtarix.iloc[0, group_rep_mtarix.columns.get_loc('Treatment Group')] = group_id
+                        group_rep_mtarix.iloc[0, 3] = no_nan_matrix.shape[1]
+                        group_rep_mtarix.iloc[0, 4] = no_nan_matrix.shape[0]
+                        anova_data = group_chip_data[group_chip_data['Time'] == single_time]
+
+                        p_value = Single_Time_ANOVA(anova_data, inter_level)
+
+                        group_rep_mtarix.iloc[0, group_rep_mtarix.columns.get_loc('ANOVA P-Value')] = '{0:.4g}'.format(p_value)
+
+                        # Calcualate CV
+                        single_array = no_nan_matrix.dropna()
+                        single_array_val = single_array.values
+                        single_CV = np.std(single_array_val, ddof=1) / np.mean(single_array_val) * 100
+
+                        group_rep_mtarix.iloc[0, group_rep_mtarix.columns.get_loc('Max CV')] = '{0:.4g}'.format(single_CV)
+
+                        if p_value >= 0.05:
+                            if single_CV <= 5:
+                                group_rep_mtarix.iloc[
+                                    0, group_rep_mtarix.columns.get_loc('Reproducibility Status')] = 'Excellent (CV)'
+                            elif single_CV > 5 and single_CV <= 15:
+                                group_rep_mtarix.iloc[
+                                    0, group_rep_mtarix.columns.get_loc('Reproducibility Status')] = 'Acceptable (CV)'
+                            else:
+                                group_rep_mtarix.iloc[0, group_rep_mtarix.columns.get_loc(
+                                    'Reproducibility Status')] = 'Acceptable (P-Value)'
+                        elif p_value < 0.05:
+                            group_rep_mtarix.iloc[
+                                0, group_rep_mtarix.columns.get_loc('Reproducibility Status')] = 'Poor (P-Value)'
+                        else:
+                            if single_CV <= 5:
+                                group_rep_mtarix.iloc[
+                                    0, group_rep_mtarix.columns.get_loc('Reproducibility Status')] = 'Excellent (CV)'
+                            elif single_CV > 5 and single_CV <= 15:
+                                group_rep_mtarix.iloc[
+                                    0, group_rep_mtarix.columns.get_loc('Reproducibility Status')] = 'Acceptable (CV)'
+                            else:
+                                group_rep_mtarix.iloc[
+                                    0, group_rep_mtarix.columns.get_loc('Reproducibility Status')] = 'Poor (CV)'
+
+                        group_rep_mtarix.iloc[0, group_rep_mtarix.columns.get_loc(
+                            'Reproducibility Note')] = 'Single overlaped time for comparing'
+                    reproducibility_results_table = reproducibility_results_table.append(group_rep_mtarix,
+                                                                                         ignore_index=True)
+                elif no_nan_matrix.shape[0] > 1 and no_nan_matrix.shape[1] >= 2:
+                    group_rep_mtarix = pd.DataFrame(index=[0], columns=header_list)
+                    group_rep_mtarix.iloc[0, group_rep_mtarix.columns.get_loc('Treatment Group')] = group_id
+                    group_rep_mtarix.iloc[0, 3] = no_nan_matrix.shape[1]
+                    group_rep_mtarix.iloc[0, 4] = no_nan_matrix.shape[0]
+                    icc_data = no_nan_matrix
+
+                    rep_index = Inter_Reproducibility_Index(icc_data)
+                    group_rep_mtarix = update_group_reproducibility_index_status(group_rep_mtarix, rep_index)
+                    group_rep_mtarix.iloc[0, group_rep_mtarix.columns.get_loc('Interpolation Method')] = 'Trimmed'
+                    reproducibility_results_table = reproducibility_results_table.append(group_rep_mtarix,
+                                                                                         ignore_index=True)
+
+                    # Interpolation Analysis
+                if pivot_group_matrix.shape[0] > 2 and pivot_group_matrix.shape[1] > 1 and max_in_nan_size_matrix(
+                        pivot_group_matrix) > 0:
+                    # nearest interpolation
+                    [group_rep_mtarix, inter_data_set] = interpolate_group_rep_index(header_list, group_chip_data,
+                                                                                     'nearest', inter_level,
+                                                                                     max_interpolation_size, group_id,
+                                                                                     initial_Norm)
+                    reproducibility_results_table = reproducibility_results_table.append(group_rep_mtarix,
+                                                                                         ignore_index=True)
+                    inter_data_table = inter_data_table.append(inter_data_set, ignore_index=True)
+
+                    # linear interpolation
+                    [group_rep_mtarix, inter_data_set] = interpolate_group_rep_index(header_list, group_chip_data,
+                                                                                     'linear', inter_level,
+                                                                                     max_interpolation_size, group_id,
+                                                                                     initial_Norm)
+                    reproducibility_results_table = reproducibility_results_table.append(group_rep_mtarix,
+                                                                                         ignore_index=True)
+                    inter_data_table = inter_data_table.append(inter_data_set, ignore_index=True)
+
+                    # quadratic interpolation
+                    [group_rep_mtarix, inter_data_set] = interpolate_group_rep_index(header_list, group_chip_data,
+                                                                                     'quadratic', inter_level,
+                                                                                     max_interpolation_size, group_id,
+                                                                                     initial_Norm)
+                    reproducibility_results_table = reproducibility_results_table.append(group_rep_mtarix,
+                                                                                         ignore_index=True)
+                    inter_data_table = inter_data_table.append(inter_data_set, ignore_index=True)
+
+                    # cubic interpolation
+                    [group_rep_mtarix, inter_data_set] = interpolate_group_rep_index(header_list, group_chip_data,
+                                                                                     'cubic', inter_level,
+                                                                                     max_interpolation_size, group_id,
+                                                                                     initial_Norm)
+                    reproducibility_results_table = reproducibility_results_table.append(group_rep_mtarix,
+                                                                                         ignore_index=True)
+                    inter_data_table = inter_data_table.append(inter_data_set, ignore_index=True)
+
+    return reproducibility_results_table, inter_data_table
+
+
+def get_inter_study_reproducibility_report(group_count, inter_data, inter_level, max_interpolation_size, initial_norm):
+    """
+    @author: Tongying Shun (tos8@pitt.edu)
+    """
+    # load inter data
+    inter_head = inter_data.pop(0)
+    inter_data_df = pd.DataFrame(inter_data)
+    inter_data_df.columns = inter_head
+
+    # Counter centers or studies
+    if inter_level == 1:
+        center_group = inter_data_df[["MPS User Group"]]
+        center_unique_group = center_group.drop_duplicates()
+        if len(center_unique_group.axes[0]) < 2:
+            return [{}, {
+                'errors': 'Only one MPS User Group! The cross-center reproducibility can not be analyzed.'
+                          '\nPlease try selecting the "By Study" option and clicking "Refresh."'
+            }]
+    else:
+        study_group = inter_data_df[["Study ID"]]
+        study_unique_group = study_group.drop_duplicates()
+        if len(study_unique_group.axes[0]) < 2:
+            return [{}, {
+                'errors': 'Only one Study! The cross-study reproducibility can not be analyzed.'
+            }]
+
+    # Return the summary and datatable
+    return Inter_reproducibility(
+        group_count,
+        inter_data_df,
+        inter_level,
+        max_interpolation_size,
+        initial_norm
+    )

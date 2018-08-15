@@ -243,7 +243,7 @@ $(document).ready(function () {
             vAxis: {
                 // TODO YOU'LL NEED TO SNAG THE UNITS
                 title: valueUnit,
-                format: 'short',
+                format: 'scientific',
                 textStyle: {
                     bold: true
                 },

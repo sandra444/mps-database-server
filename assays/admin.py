@@ -2414,7 +2414,7 @@ class AssayStudyAdmin(LockableAdmin):
             }
         ),
         (
-            'Group Access', {
+            'Study Data Group and Access Group Info', {
                 'fields': (
                     'group', 'restricted', 'access_groups'
                 ),
