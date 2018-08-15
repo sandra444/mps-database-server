@@ -1035,9 +1035,11 @@ $(document).ready(function() {
         var current_full_data = repro_table_data_full[set];
 
         current_repro_set_selector.find('[data-id="tooltip_trimmed"]').hide();
+        current_repro_set_selector.find('[data-id="trimmed_chart"]').hide();
 
         if (current_full_data['Trimmed']) {
             current_repro_set_selector.find('[data-id="tooltip_trimmed"]').show();
+            current_repro_set_selector.find('[data-id="trimmed_chart"]').show();
         }
 
         var current_max = 0;
