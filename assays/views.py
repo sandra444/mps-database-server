@@ -1590,7 +1590,7 @@ class AssayStudyImages(StudyViewerMixin, DetailView):
         return context
 
 
-class TestFilterView(TemplateView):
+class GraphingReproducibilityFilterView(TemplateView):
     template_name = 'assays/assay_filter.html'
 
 
