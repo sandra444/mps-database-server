@@ -28,7 +28,9 @@ $(document).ready(function () {
         autoOpen: false,
         buttons: [
         {
-            text: 'Download Full Size Image'
+            text: 'Download Unaltered Image',
+            // Keep JQuery UI from throwing a hissy fit, with Luke's approval.
+            click: function() {}
         },
         {
             text: 'Back',
@@ -114,14 +116,25 @@ $(document).ready(function () {
                 sampleLabelTooltip = ' <span data-toggle="tooltip" title="'+iSampleLabelDescription+'" class="glyphicon glyphicon-info-sign" aria-hidden="true"></span>';
             }
 
+            // Check filetype
+            var type = '';
+            var detailDisplay = '';
+            if (popupDialogData["file_name"].match(/.(jpg|jpeg|png|gif|tif|tiff)$/i)){
+                type = "Image";
+                detailDisplay = '<a href="/media/assay_images/'+study_pk+'/'+popupDialogData["file_name"]+'"><div class="thumbnail col-md-12 col-lg-4"><img alt="'+popupDialogData["file_name"]+'" style="filter: contrast('+contrast+'%)  brightness('+brightness+'%);" src="/media/assay_thumbs/'+study_pk+'/thumbnail_'+popupDialogData["file_name"].split(".").slice(0, -1).join('.') +'_600_600.jpg"/></div></a>'
+            } else {
+                type = "Video";
+                detailDisplay = '<div class="thumbnail col-md-12 col-lg-4"><video style="max-width: 100%; max-height: 100%;" width="600" height="600" controls><source src="/media/assay_images/'+study_pk+'/'+popupDialogData["file_name"]+'" type="video/mp4"></source></video></div>'
+            }
+
             // Add tooltip to "Download" button and trigger download on click
             downloadFilename = popupDialogData["file_name"];
-            $(".ui-dialog").find(".ui-button-text-only:first").html('<a style="text-decoration: none;" download href="/media/assay_images/'+study_pk+'/'+downloadFilename+'"><span class="ui-button-text">Download Full Size Image <span data-toggle="tooltip" title="Some images are dark and may require\n intensity adjustment to discern details." class="glyphicon glyphicon-info-sign" aria-hidden="true"></span></span>')
+            $(".ui-dialog").find(".ui-button-text-only:first").html('<a style="text-decoration: none; color: white;" download href="/media/assay_images/'+study_pk+'/'+downloadFilename+'"><span class="ui-button-text">Download Unaltered '+type+' <span data-toggle="tooltip" title="Some '+type+'s are dark and may require\n intensity adjustment to discern details." class="glyphicon glyphicon-info-sign" aria-hidden="true"></span></span></a>');
 
             // $("#myDialogText").html('<div class="row no-padding"><div class="thumbnail col-md-12 col-lg-4"><img style="filter: contrast('+contrast+'%)  brightness('+brightness+'%);" src="/media/assay_thumbs/'+study_pk+'/thumbnail_'+popupDialogData["file_name"].split(".")[0]+'_600_600.jpg"/></div><div class="col-md-12 col-lg-7"><table class="table table-hover table-striped table-bordered table-condensed small"><tr><th style="width: 250px;">Chip ID</th><td>'+iChip+'</td></tr><tr><th>Assay Plate ID</th><td>'+iPlate+'</td></tr><tr><th>Assay Well ID</th><td>'+iWell+'</td></tr><tr><th>Time</th><td>'+iTime+'</td></tr><tr><th>Method/Kit</th><td>'+iMethodKit+'</td></tr><tr><th>Target/Analyte</th><td>'+iTargetAnalyte+'</td></tr><tr><th>Subtarget</th><td>'+iSubtarget+'</td></tr><tr><th>Sample Location</th><td>'+iSampleLocation+'</td></tr><tr><th>Replicate</th><td>'+iReplicate+'</td></tr><tr><th>Notes</th><td>'+iNotes+'</td></tr><tr><th>Image File Name</th><td>'+iFileName+'</td></tr><tr><th>Image Field</th><td>'+iField+'</td></tr><tr><th>Image Field Description</th><td>'+iFieldDescription+'</td></tr><tr><th>Image Magnification</th><td>'+iMagnification+'</td></tr><tr><th>Image Resolution</th><td>'+iResolution+'</td></tr><tr><th>Image Resolution Unit</th><td>'+iResolutionUnit+'</td></tr><tr><th>Image Sample Label</th><td>'+iSampleLabel+'</td></tr><tr><th>Image Sample Label Description</th><td>'+iSampleLabelDescription+'</td></tr><tr><th>Image Wavelength (ex/em nm)</th><td>'+iWavelength+'</td></tr><tr><th>Image Color Mapping</th><td>'+iColorMapping+'</td></tr><tr><th>Image Setting Note</th><td>'+iSettingNote+'</td></tr></table></div></div>');
-            $("#myDialogText").html('<div class="row no-padding"><div class="thumbnail col-md-12 col-lg-4"><img style="filter: contrast('+contrast+'%)  brightness('+brightness+'%);" src="/media/assay_thumbs/'+study_pk+'/thumbnail_'+popupDialogData["file_name"].split(".").slice(0, -1).join('.') +'_600_600.jpg"/></div><div class="col-md-12 col-lg-7"><table class="table table-hover table-striped table-bordered table-condensed small">'+
-                '<div class="text-center"><label>Note: Images may have been auto-leveled to assist with viewing. Do not use them to perform comparisons of relative intensity.</label></div><br>'+
-                '<tr><th style="width: 250px;">Chip ID</th><td>'+iChip+'</td></tr>'+
+            $("#myDialogText").html('<div class="row no-padding">'+detailDisplay+'<div class="col-md-12 col-lg-7"><table class="table table-hover table-striped table-bordered table-condensed small">'+
+                '<div class="text-center"><label>Note: This '+type.toLowerCase()+' may have been altered to assist with viewing.<br>To perform analysis, please download the unaltered '+type.toLowerCase()+'.</label></div><br>'+
+                '<tr><th style="width: 200px;">Chip ID</th><td>'+iChip+'</td></tr>'+
                 '<tr><th>Assay Plate ID</th><td>'+iPlate+'</td></tr>'+
                 '<tr><th>Assay Well ID</th><td>'+iWell+'</td></tr>'+
                 '<tr><th>Time</th><td>'+iTime+'</td></tr>'+
@@ -130,14 +143,14 @@ $(document).ready(function () {
                 '<tr><th>Target/Analyte</th><td>'+iTargetAnalyte+'</td></tr>'+
                 '<tr><th>Sample Location</th><td>'+iSampleLocation+'</td></tr>'+
                 '<tr><th>Notes</th><td>'+iNotes+'</td></tr>'+
-                '<tr><th>Image File Name</th><td>'+iFileName+'</td></tr>'+
-                '<tr><th>Image Field</th><td>'+iField.split(".")[0]+fieldTooltip+'</td></tr>'+
-                '<tr><th>Image Magnification</th><td>'+iMagnification.split(".")[0]+'x</td></tr>'+
-                '<tr><th>Image Resolution</th><td>'+iResolution+" "+iResolutionUnit+'</td></tr>'+
-                '<tr><th>Image Sample Label</th><td>'+iSampleLabel+sampleLabelTooltip+'</td></tr>'+
-                '<tr><th>Image Wavelength (ex/em nm)</th><td>'+iWavelength+'</td></tr>'+
-                '<tr><th>Image Color Mapping</th><td>'+iColorMapping+'</td></tr>'+
-                '<tr><th>Image Setting Note</th><td>'+iSettingNote+'</td></tr></table></div></div>');
+                '<tr><th>'+type+' File Name</th><td>'+iFileName+'</td></tr>'+
+                '<tr><th>'+type+' Field</th><td>'+iField.split(".")[0]+fieldTooltip+'</td></tr>'+
+                '<tr><th>'+type+' Magnification</th><td>'+iMagnification.split(".")[0]+'x</td></tr>'+
+                '<tr><th>'+type+' Resolution</th><td>'+iResolution+" "+iResolutionUnit+'</td></tr>'+
+                '<tr><th>'+type+' Sample Label</th><td>'+iSampleLabel+sampleLabelTooltip+'</td></tr>'+
+                '<tr><th>'+type+' Wavelength (ex/em nm)</th><td>'+iWavelength+'</td></tr>'+
+                '<tr><th>'+type+' Color Mapping</th><td>'+iColorMapping+'</td></tr>'+
+                '<tr><th>'+type+' Setting Note</th><td>'+iSettingNote+'</td></tr></table></div></div>');
             $("#ui-id-1")[0].innerHTML = titleText;
         }
     };
@@ -146,7 +159,7 @@ $(document).ready(function () {
     var filter_elements = "";
     for (var i=0; i<tableCols.length; i++) {
         var col = tableCols[i].replace(/\s/g, '').replace(/[,]/g, '');
-        filter_elements += "<button aria-pressed='true' style='max-width: 160px; min-height: 80px; white-space: normal; margin-bottom: 1em;' class='col-lg-2 col-md-4 col-sm-6 col-xs-12 btn btn-3d btn-default btn-checkbox active'><label class='hand-cursor'>"+tableCols[i].toUpperCase()+"</label><input checked data-column='"+col+"' type=checkbox></button>";
+        filter_elements += "<button aria-pressed='true' style='max-width: 160px; min-height: 80px; white-space: normal; margin-bottom: 1em;' class='hand-cursor col-lg-2 col-md-4 col-sm-6 col-xs-12 btn btn-3d btn-default btn-checkbox active'>"+tableCols[i].toUpperCase()+"<input checked data-column='"+col+"' type=checkbox></button>";
     }
     // for (i=0; i<tableRows.length; i++){
     //     filter_elements += "<tr><th>"+tableRows[i]+"</th><td><input id='"+tableRows[i].split(" ").join("").split(",").join("")+"' type=checkbox></td></tr>";
@@ -172,7 +185,7 @@ $(document).ready(function () {
     table_elements += "</tbody>";
     image_table.html(table_elements);
 
-    image_table.on('click', '#image_thumbnail', function () {
+    image_table.on('click', '.image_thumbnail', function () {
         popupDialogData = metadata_list[this.getAttribute("data-pic")];
         dialogConfirm.dialog("open");
     });
@@ -198,7 +211,7 @@ $(document).ready(function () {
         for (var i=0; i<Object.keys(tableData).length; i++) {
             if (tableData[Object.keys(tableData)[i]][1] == cls) {
                 var caption = metadata_list[Object.keys(tableData)[i]]["target_analyte"] + " (" + metadata_list[Object.keys(tableData)[i]]["sample_location"] + "), "+metadata_list[Object.keys(tableData)[i]]["sample_label"]+", "+metadata_list[Object.keys(tableData)[i]]["magnification"].split(".")[0]+"x at " + metadata_list[Object.keys(tableData)[i]]["time"];
-                $('[data-column="' + cls + '"][data-row="' + tableData[Object.keys(tableData)[i]][0] + '"]').append('<span data-pic="'+Object.keys(tableData)[i]+'" style="vertical-align: top; display: inline-block; margin:2px;" id="image_thumbnail"><figure><img style="height: 120px; width: 120px; filter: contrast('+contrast+'%) brightness('+brightness+'%);" src="/media/assay_thumbs/'+study_pk+'/thumbnail_'+metadata_list[Object.keys(tableData)[i]]["file_name"].split(".").slice(0, -1).join('.') +'_120_120.jpg"/><figcaption style="width: 120px; word-wrap: break-word;" class="text-center">'+ caption +'</figcaption></figure></span>');
+                $('[data-column="' + cls + '"][data-row="' + tableData[Object.keys(tableData)[i]][0] + '"]').append('<span data-pic="'+Object.keys(tableData)[i]+'" style="vertical-align: top; display: inline-block; margin:2px;" class="image_thumbnail"><figure><img alt="'+metadata_list[Object.keys(tableData)[i]]["file_name"]+'" style="height: 120px; width: 120px; filter: contrast('+contrast+'%) brightness('+brightness+'%);" src="/media/assay_thumbs/'+study_pk+'/thumbnail_'+metadata_list[Object.keys(tableData)[i]]["file_name"].split(".").slice(0, -1).join('.') +'_120_120.jpg"/><figcaption style="width: 120px; word-wrap: break-word;" class="text-center">'+ caption +'</figcaption></figure></span>');
             }
         }
     }
