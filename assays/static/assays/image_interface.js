@@ -124,7 +124,7 @@ $(document).ready(function () {
                 detailDisplay = '<a href="/media/assay_images/'+study_pk+'/'+popupDialogData["file_name"]+'"><div class="thumbnail col-md-12 col-lg-4"><img alt="'+popupDialogData["file_name"]+'" style="filter: contrast('+contrast+'%)  brightness('+brightness+'%);" src="/media/assay_thumbs/'+study_pk+'/thumbnail_'+popupDialogData["file_name"].split(".").slice(0, -1).join('.') +'_600_600.jpg"/></div></a>'
             } else {
                 type = "Video";
-                var videoName = popupDialogData["file_name"].substr(0, filename.lastIndexOf("."))
+                var videoName = popupDialogData["file_name"].substr(0, popupDialogData["file_name"].lastIndexOf("."))
                 detailDisplay = '<div class="thumbnail col-md-12 col-lg-4"><video style="max-width: 100%; max-height: 100%;" width="600" height="600" controls><source src="/media/assay_images/'+study_pk+'/'+videoName+'.mp4" type="video/mp4"></source></video></div>'
             }
 
