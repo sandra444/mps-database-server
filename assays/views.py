@@ -1590,12 +1590,12 @@ class AssayStudyImages(StudyViewerMixin, DetailView):
         return context
 
 
-class GraphingReproducibilityFilterView(TemplateView):
+class GraphingReproducibilityFilterView(LoginRequiredMixin, TemplateView):
     template_name = 'assays/assay_filter.html'
 
 
 # Inappropriate use of CBV
-class AssayDataFromFilters(TemplateView):
+class AssayDataFromFilters(LoginRequiredMixin, TemplateView):
     """Returns a combined file for all data for given filters"""
     template_name = 'assays/assay_filter.html'
 
