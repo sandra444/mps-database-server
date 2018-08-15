@@ -98,7 +98,7 @@ urlpatterns = [
     url(r'^assays/methods/(?P<pk>[0-9]+)/$', AssayMethodDetail.as_view(), name='assay-methods-detail'),
 
     # Location for test filter, for now
-    url(r'^assays/test_filter/$', TestFilterView.as_view(), name='test-filter'),
+    url(r'^assays/graphing_reproducibility/$', GraphingReproducibilityFilterView.as_view(), name='graphing-reproducibility'),
 
     # Data from filters
     url(r'^assays/data_from_filters/$', AssayDataFromFilters.as_view(), name='data-from-filters'),

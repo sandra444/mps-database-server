@@ -14,12 +14,15 @@
 {% block fluid-content %}
     <div class="row padded-row text-center padded-bottom large-padding-top">
         <a href="#charts" type="button" class="btn btn-xlarge btn-primary text-center submit-button" id="charts_submit">
+            <span class="glyphicon glyphicon glyphicon-stats" aria-hidden="true"></span>
             Show Plots
         </a>
         <a href="#inter_repro" type="button" class="btn btn-xlarge btn-primary text-center submit-button" id="repro_submit">
+            <span class="glyphicon glyphicon glyphicon-random" aria-hidden="true"></span>
             Show Reproducibility
         </a>
         <a href="/assays/data_from_filters/?" type="button" class="btn btn-xlarge btn-info text-center submit-button" id="download_submit">
+            <span class="glyphicon glyphicon glyphicon-download-alt" aria-hidden="true"></span>
             Download
         </a>
         <a href="#filter" id="back" class="btn btn-xlarge btn-info hidden">
@@ -223,31 +226,25 @@
                 </div>
             </div>
             <div class='row'>
+                <div class='row'>
                 <div class='col-md-6' data-id='tooltip_item'></div>
                 <div class='col-md-6' data-id='tooltip_average'></div>
-                <div class='col-md-6' data-id='item_chart'>
-
                 </div>
-                <div class='col-md-6' data-id='average_chart'>
 
-                </div>
+                <div class='col-md-6' data-id='item_chart'></div>
+                <div class='col-md-6' data-id='average_chart'></div>
+
+                <div class='row'>
                 <div class='col-md-6' data-id='tooltip_trimmed'></div>
                 <div class='col-md-6' data-id='tooltip_interpolated'></div>
-                <div class='col-md-6' data-id='trimmed_chart'>
-
                 </div>
-                <div class='col-md-6' data-id='nearest_chart'>
 
-                </div>
-                <div class='col-md-6' data-id='linear_chart'>
+                <div class='col-md-6' data-id='trimmed_chart'></div>
+                <div class='col-md-6' data-id='nearest_chart'></div>
 
-                </div>
-                <div class='col-md-6' data-id='quadratic_chart'>
-
-                </div>
-                <div class='col-md-6' data-id='cubic_chart'>
-
-                </div>
+                <div class='col-md-6' data-id='linear_chart'></div>
+                <div class='col-md-6' data-id='quadratic_chart'></div>
+                <div class='col-md-6' data-id='cubic_chart'></div>
                 {# This is just a buffer #}
                 <div class="col-md-6"></div>
             </div>
