@@ -1995,7 +1995,7 @@ class AssaySetupCell(models.Model):
             #     full_string.append('Duration of: ' + self.get_duration_string())
             if 'addition_location_id' in criteria:
                 full_string.append(unicode(self.addition_location))
-            return ' '.join(full_string)
+            return u'{}; '.format(u' '.join(full_string))
         else:
             return unicode(self)
 
@@ -2221,7 +2221,7 @@ class AssaySetupCompound(models.Model):
                 full_string.append('Duration of: ' + self.get_duration_string())
             if 'addition_location_id' in criteria:
                 full_string.append(unicode(self.addition_location))
-            return ' '.join(full_string)
+            return u'{}; '.format(u' '.join(full_string))
         else:
             return unicode(self)
 
@@ -2408,7 +2408,7 @@ class AssaySetupSetting(models.Model):
                 full_string.append('Duration of: ' + self.get_duration_string())
             if 'addition_location_id' in criteria:
                 full_string.append(unicode(self.addition_location))
-            return ' '.join(full_string)
+            return u'{}; '.format(u' '.join(full_string))
         else:
             return unicode(self)
 
