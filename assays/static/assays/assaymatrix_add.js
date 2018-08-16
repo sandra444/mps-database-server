@@ -529,6 +529,8 @@ $(document).ready(function () {
         // NOTE: Show all displays if there are errors
         if (errors_exist) {
             $('.visibility-checkbox').prop('checked', true);
+            // Be sure to show "Show Errors" as well
+            $('#show_errors').parent().parent().show();
             change_matrix_visibility();
         }
     }
