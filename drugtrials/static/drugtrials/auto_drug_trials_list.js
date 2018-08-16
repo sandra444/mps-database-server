@@ -192,6 +192,10 @@ $(document).ready(function() {
         ],
         "aoColumnDefs": [ {},{},{},{},{ "width": "30%"},{},{},{} ]
     });
+
+    window.onresize = function(){
+        $($.fn.dataTable.tables(true)).DataTable().columns.adjust();
+    }
 });
 
 $.urlParam = function(name){
