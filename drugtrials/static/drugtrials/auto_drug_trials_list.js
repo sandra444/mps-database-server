@@ -53,7 +53,7 @@ $(document).ready(function() {
                         });
                     }
 
-                    return methods.join(', \n');
+                    return methods.join(', <br>');
                 }
             },
             {
@@ -67,6 +67,11 @@ $(document).ready(function() {
                                 if(value.name.toLowerCase().includes("placebo") || value.name.toLowerCase() == "placebo"){
 
                                 }
+                                else if(value.description){
+                                    drugName = value.name;
+                                    drugName = drugName.charAt(0).toUpperCase() + drugName.substring(1);
+                                    methods.push(drugName + '<span data-toggle="tooltip" title="'+ value.description +'" class="glyphicon glyphicon-info-sign" aria-hidden="true"></span>');
+                                }
                                 else{
                                     drugName = value.name;
                                     drugName = drugName.charAt(0).toUpperCase() + drugName.substring(1);
@@ -75,9 +80,17 @@ $(document).ready(function() {
                             }
                         });
                     }
-                    return methods.join(', \n');
+                    return methods.join(', <br>');
                 }
             },
+            /*{
+                data: 'enrollment',
+                render:function (data, type, row, meta) {
+                    var methods = [];
+                    methods.push(data);
+                    return methods;
+                }
+            },*/
             {
                 data: 'outcomeAll',
                 render:function (data, type, row, meta) {
@@ -101,6 +114,13 @@ $(document).ready(function() {
                                 });
                                 count = 1
                                 for(var i = 0; i < resultGroups.length; i++){
+                                    var resultID = data[1].result_group_id;
+                                    /*var resultGroupName;
+                                    for(var j = 0; j < data[3].length; j++){
+                                        if(resultID == data[3][j].id){
+                                            resultGroupName = data[3][j].title;
+                                        }
+                                    } */
                                     methods.push("<strong><u> Result Group " + count + "</u></strong><br>")
                                     $.each(data[1], function(index, value){
                                         if(value.result_group_id == resultGroups[i]){
