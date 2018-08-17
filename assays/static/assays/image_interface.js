@@ -360,7 +360,7 @@ $(document).ready(function () {
                 var current_column = $(this).parent().parent().parent();
                 var current_fig = $(this).parent().parent();
                 var buttonActive = $('input[data-column="' + current_column.attr("data-column") + '"]').prop('checked');
-                if ($(this).text().toUpperCase().includes(query)) {
+                if ($(this).text().toUpperCase().includes(query) || $(this).attr("data-text").toUpperCase().includes(query)) {
                     if (buttonActive) {
                         current_fig.removeClass('hidden');
                     } else {
@@ -424,6 +424,8 @@ $(document).ready(function () {
                 $(obj).text($(obj).attr('data-text').substring(0,50)+'...');
             });
             $(obj).text($(obj).text().substring(0,50)+"...");
+        } else {
+            $(obj).attr("data-text", $(obj).text());
         }
     });
 
