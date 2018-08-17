@@ -100,7 +100,7 @@ $(document).ready(function() {
                         //$.each(data, function(index, value) {
                             if(data[1]){
                                 var count = 1;
-                                resultGroups = []
+                                resultGroups = [];
                                 $.each(data[1], function(index, value) {
                                     if (value.outcome_id == data[0].id){
                                         if(resultGroups.indexOf(value.result_group_id) == -1){
@@ -112,18 +112,17 @@ $(document).ready(function() {
                                         //count = count + 1
                                     //}
                                 });
-                                count = 1
-                                for(var i = 0; i < resultGroups.length; i++){
-                                    var resultID = data[1].result_group_id;
-                                    /*var resultGroupName;
-                                    for(var j = 0; j < data[3].length; j++){
-                                        if(resultID == data[3][j].id){
-                                            resultGroupName = data[3][j].title;
+                                resultGroups.forEach(function(groupID) {
+                                    var currID = groupID;
+                                    groupName = "";
+                                    $.each(data[3], function(index, value){
+                                        if(value.id == groupID){
+                                            groupName = value.title;
                                         }
-                                    } */
-                                    methods.push("<strong><u> Result Group " + count + "</u></strong><br>")
+                                    });
+                                    methods.push("<strong><u>" + groupName + "</u></strong><br>");
                                     $.each(data[1], function(index, value){
-                                        if(value.result_group_id == resultGroups[i]){
+                                        if(value.result_group_id == groupID){
                                             if(value.classification){
                                                 methods.push("<strong>" + value.classification + ":</strong> " + value.param_value + " " + value.units + "<br>");
                                             }
@@ -132,14 +131,14 @@ $(document).ready(function() {
                                             }
                                         }
                                     });
-                                    count = count + 1
-                                }
+                                    });
+
                             }
                         //});
                     //}
 
                     return methods.join('\n');
-                },
+                }
             },
 
             {
