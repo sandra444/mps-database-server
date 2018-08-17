@@ -1087,9 +1087,10 @@ def fetch_data_points(request):
         matrix_item = matrix_items[0]
         study = matrix_item.study
     elif request.POST.get('matrix', ''):
+        matrix = AssayMatrix.objects.get(pk=int(request.POST.get('matrix', None)))
         matrix_items = AssayMatrixItem.objects.filter(matrix_id=int(request.POST.get('matrix')))
-        matrix_item = matrix_items[0]
-        study = matrix_item.study
+        matrix_item = None
+        study = matrix.study
     else:
         matrix_item = None
         study = AssayStudy.objects.get(pk=int(request.POST.get('study', None)))
