@@ -1281,9 +1281,9 @@ def fetch_data_points(request):
             'matrix_item_id__in': matrix_items
         })
     elif request.POST.get('matrix', ''):
+        matrix = AssayMatrix.objects.get(pk=int(request.POST.get('matrix', None)))
         matrix_items = AssayMatrixItem.objects.filter(matrix_id=int(request.POST.get('matrix')))
-        matrix_item = matrix_items[0]
-        study = matrix_item.study
+        study = matrix.study
         pre_filter.update({
             'matrix_item_id__in': matrix_items
         })
@@ -1861,11 +1861,12 @@ def acquire_post_filter(studies, assays, matrix_items, data_points):
             matrix_item.matrix_id: u'{} ({})'.format(matrix_item.matrix.name, matrix_item.study.name)
         })
 
-        current.setdefault(
-            'organ_model_id__in', {}
-        ).update({
-            matrix_item.organ_model_id: matrix_item.organ_model.name
-        })
+        if matrix_item.organ_model_id:
+            current.setdefault(
+                'organ_model_id__in', {}
+            ).update({
+                matrix_item.organ_model_id: matrix_item.organ_model.name
+            })
 
         for compound in matrix_item.assaysetupcompound_set.all():
             current.setdefault(

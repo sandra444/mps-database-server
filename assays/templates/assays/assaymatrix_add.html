@@ -539,7 +539,7 @@
     {# FLUID CONTENT HERE ON #}
     {# Section for visibility checkboxes #}
     <div class="row no-padding large-padding-top">
-        <div class="col-sm-4 col-md-3 col-lg-2">
+        <div class="col-md-4 col-lg-2">
             <div class="fancy-checkbox table-filter padded-bottom" align="left">
                 <input class="visibility-checkbox" type="checkbox" name="show_items" id="show_items" value=".item-display" checked/>
                 <div class="btn-group">
@@ -554,7 +554,7 @@
             </div>
         </div>
 
-        <div class="col-sm-4 col-md-3 col-lg-2">
+        <div class="col-md-4 col-lg-2">
             <div class="fancy-checkbox table-filter padded-bottom" align="left">
                 <input class="visibility-checkbox" type="checkbox" name="show_settings" id="show_settings" value=".setting-display" />
                 <div class="btn-group">
@@ -569,7 +569,7 @@
             </div>
         </div>
 
-        <div class="col-sm-4 col-md-3 col-lg-2">
+        <div class="col-md-4 col-lg-2">
             <div class="fancy-checkbox table-filter padded-bottom" align="left">
                 <input class="visibility-checkbox" type="checkbox" name="show_compounds" id="show_compounds" value=".compound-display"/>
                 <div class="btn-group">
@@ -584,7 +584,7 @@
             </div>
         </div>
 
-        <div class="col-sm-4 col-md-3 col-lg-4">
+        <div class="col-md-4 col-lg-2">
             <div class="fancy-checkbox table-filter padded-bottom" align="left">
                 <input class="visibility-checkbox" type="checkbox" name="show_cells" id="show_cells" value=".cell-display"/>
                 <div class="btn-group">
@@ -599,7 +599,20 @@
             </div>
         </div>
 
-        <div class="col-md-3 col-lg-4"></div>
+        <div hidden class="col-md-4 col-lg-2">
+            <div class="fancy-checkbox table-filter padded-bottom" align="left">
+                <input class="visibility-checkbox" type="checkbox" name="show_errors" id="show_errors" value=".error-display"/>
+                <div class="btn-group">
+                    <label for="show_errors" class="btn btn-danger">
+                        <span class="glyphicon glyphicon-ok"></span>
+                        <span> </span>
+                    </label>
+                    <label for="show_errors" class="btn btn-default active">
+                        Show Errors
+                    </label>
+                </div>
+            </div>
+        </div>
     </div>
 
     {#        <label>#}
@@ -727,11 +740,14 @@
     <table>
     <tr id="empty_item_html">
     <td data-prefix="{{ item_formset.prefix }}" class="item-td">
-        <div class="error-message-section item-setup_set_section">
+        <div class="error-message-section error-display item-setup_set_section">
         </div>
         <div align="center">
             <span><a disabled href="#" class="item-name lead item-setup_set_section"></a></span>
 {#            <span class="item-current_setup"></span>#}
+{#            <a class="pull-right btn btn-xs">#}
+{#                <span class="glyphicon glyphicon-pencil"></span>#}
+{#            </a>#}
         </div>
         {% if detail %}
         <div class="well item-display no-margins">
@@ -747,10 +763,6 @@
                 {% endif %}
 {#                <a class="pull-right btn btn-xs form-view">#}
 {#                    <span class="glyphicon glyphicon-eye-open"></span>#}
-{#                </a>#}
-                {# Add back in when editing functionality available #}
-{#                <a class="pull-right btn btn-xs">#}
-{#                    <span class="glyphicon glyphicon-pencil"></span>#}
 {#                </a>#}
             </div>
             <div>
@@ -791,7 +803,7 @@
         {% else %}
         <div data-prefix="{{ cell_formset.prefix }}" class="alert alert-success force-off-black-text cell-display">
         {% endif %}
-            <div class="error-message-section">
+            <div class="error-message-section error-display">
             </div>
             <div>
                 <span class="cell-cell_sample"></span>
@@ -800,6 +812,9 @@
                 <a class="pull-right btn btn-xs subform-delete">
                     <span class="glyphicon glyphicon-remove text-danger"></span>
                 </a>
+{#                <a class="pull-right btn btn-xs">#}
+{#                    <span class="glyphicon glyphicon-pencil"></span>#}
+{#                </a>#}
                 {% endif %}
             </div>
             <div class="cell-biosensor"></div>
@@ -828,7 +843,7 @@
         {% else %}
         <div data-prefix="{{ compound_formset.prefix }}" class="alert alert-info force-off-black-text compound-display">
         {% endif %}
-            <div class="error-message-section">
+            <div class="error-message-section error-display">
             </div>
             <div>
                 <span class="compound-compound"></span>
@@ -838,6 +853,9 @@
                 <a class="pull-right btn btn-xs subform-delete">
                     <span class="glyphicon glyphicon-remove text-danger"></span>
                 </a>
+{#                <a class="pull-right btn btn-xs">#}
+{#                    <span class="glyphicon glyphicon-pencil"></span>#}
+{#                </a>#}
                 {% endif %}
             </div>
             <div>
@@ -874,7 +892,7 @@
         {% else %}
         <div data-prefix="{{ setting_formset.prefix }}" class="alert alert-warning force-off-black-text setting-display">
         {% endif %}
-            <div class="error-message-section">
+            <div class="error-message-section error-display">
             </div>
             <div>
                 <span class="setting-setting"></span>
@@ -884,6 +902,9 @@
                 <a class="pull-right btn btn-xs subform-delete">
                     <span class="glyphicon glyphicon-remove text-danger"></span>
                 </a>
+{#                <a class="pull-right btn btn-xs">#}
+{#                    <span class="glyphicon glyphicon-pencil"></span>#}
+{#                </a>#}
                 {% endif %}
             </div>
             <div class="setting-addition_time_section">
@@ -909,12 +930,7 @@
     </div>
 
     <div id="empty_error_html">
-        {% if detail %}
-        <div class="alert alert-danger force-off-black-text item-error-message-box no-margins">
-        {% else %}
         <div class="alert alert-danger force-off-black-text item-error-message-box">
-        {% endif %}
-
         </div>
     </div>
 
