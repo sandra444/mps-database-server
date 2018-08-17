@@ -307,30 +307,69 @@ $(document).ready(function () {
         matrix_body_selector.empty();
 
         // Check to see if new forms will be generated
-        for (var row_index=0; row_index < number_of_rows; row_index++) {
+        for (var row_index=-1; row_index < number_of_rows; row_index++) {
             var row_id = 'row_' + row_index;
             var current_row = $('<tr>')
                 .attr('id', row_id);
 
             var all_matching_for_row_value = $('.' + item_prefix).has('input[name$="-row_index"][value="' + row_index + '"]');
 
-            for (var column_index=0; column_index < number_of_columns; column_index++) {
+            for (var column_index=-1; column_index < number_of_columns; column_index++) {
                 var item_id = item_prefix + '_' + row_index + '_' + column_index;
-                var new_cell = empty_item_html
-                    .clone()
-                    .attr('id', item_id);
+                var new_cell = null;
 
-                // If the form does not exist, then add it!
-                if (!all_matching_for_row_value.has('input[name$="-column_index"][value="' + column_index + '"]')[0]) {
-                    var new_form = generate_form(
-                        item_prefix, {'row_index': row_index, 'column_index': column_index}
-                    );
-                    // Get number of forms and add as attribute to the display
-                    // A little inefficient, but relatively safe
-                    var number_of_forms = $('.' + item_prefix).length;
-                    new_cell.attr(item_form_index_attribute, number_of_forms);
+                // If this is an apply to row
+                if (column_index === -1) {
+                    if (row_index === -1) {
+                        new_cell = $('<td>')
+                    }
+                    else {
+                        new_cell = $('<td>')
+                            .addClass('text-center')
+                            // Note: CRUDE
+                            .css('vertical-align', 'middle')
+                            .append(
+                                $('<a>')
+                                    .html('Apply to Row')
+                                    .attr('data-row-to-apply', row_index)
+                                    .addClass('btn btn-sm btn-primary')
+                                    .click(apply_action_to_row)
+                            );
+                    }
+                }
+                // If this is an apply to column
+                else if (row_index === -1) {
+                    new_cell = $('<td>')
+                        .addClass('text-center')
+                        .append(
+                            $('<a>')
+                                .html('Apply to Column')
+                                .attr('data-column-to-apply', column_index)
+                                .addClass('btn btn-sm btn-primary')
+                                .click(apply_action_to_column)
+                        );
+                }
+                // If this is for actual contents
+                else {
+                    new_cell = empty_item_html
+                        .clone()
+                        .attr('id', item_id)
+                        .attr('data-row-index', row_index)
+                        .attr('data-column-index', column_index)
+                    ;
 
-                    add_form(item_prefix, new_form);
+                    // If the form does not exist, then add it!
+                    if (!all_matching_for_row_value.has('input[name$="-column_index"][value="' + column_index + '"]')[0]) {
+                        var new_form = generate_form(
+                            item_prefix, {'row_index': row_index, 'column_index': column_index}
+                        );
+                        // Get number of forms and add as attribute to the display
+                        // A little inefficient, but relatively safe
+                        var number_of_forms = $('.' + item_prefix).length;
+                        new_cell.attr(item_form_index_attribute, number_of_forms);
+
+                        add_form(item_prefix, new_form);
+                    }
                 }
 
                 // Add
@@ -769,6 +808,28 @@ $(document).ready(function () {
         matrix_add_content_to_selected();
     }
 
+    function apply_action_to_row() {
+        // Remove ui-selected class manually
+        $(item_display_class).removeClass('ui-selected');
+        // Get the column index
+        var row_index = $(this).attr('data-row-to-apply');
+        // Add the ui-selected class to the column
+        $(item_display_class + '[data-row-index="' + row_index + '"]').addClass('ui-selected');
+        // Make the call
+        matrix_add_content_to_selected();
+    }
+
+    function apply_action_to_column() {
+        // Remove ui-selected class manually
+        $(item_display_class).removeClass('ui-selected');
+        // Get the column index
+        var column_index = $(this).attr('data-column-to-apply');
+        // Add the ui-selected class to the column
+        $(item_display_class + '[data-column-index="' + column_index + '"]').addClass('ui-selected');
+        // Make the call
+        matrix_add_content_to_selected();
+    }
+
     function matrix_add_content_to_selected() {
         var current_action = action_selector.val();
 
@@ -797,6 +858,9 @@ $(document).ready(function () {
         else {
             add_to_item();
         }
+
+        // Remove ui-selected class manually
+        $(item_display_class).removeClass('ui-selected');
     }
 
     // Matrix Listeners
