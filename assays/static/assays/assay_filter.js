@@ -138,6 +138,12 @@ $(document).ready(function() {
         // $('.filter-checkbox').attr('disabled', 'disabled');
         $('.filter-table').addClass('gray-out');
 
+        // Change the download href to include the filters
+        var current_download_href = $('#download_submit').attr('href');
+        var initial_href = current_download_href.split('?')[0];
+        var get_for_href = 'filters=' + JSON.stringify(filters);
+        $('#download_submit').attr('href', initial_href + '?' + get_for_href);
+
         $.ajax({
             url: "/assays_ajax/",
             type: "POST",
@@ -368,6 +374,21 @@ $(document).ready(function() {
     var icc_tooltip = '<span data-toggle="tooltip" title="The ICC Absolute Agreement of the measurements across multiple time points is a correlation coefficient that ranges from -1 to 1 with values closer to 1 being more correlated.  When the Max CV > 15%, the reproducibility status is reported to be excellent if > 0.8 (Excellent (ICC), acceptable if > 0.2 (Acceptable (ICC)), and poor if < 0.2 (Poor (ICC))" class="glyphicon glyphicon-question-sign" aria-hidden="true" data-placement="bottom"></span>';
     var repro_tooltip = '<span data-toggle="tooltip" title="Our classification of this grouping\'s reproducibility (Excellent > Acceptable > Poor/NA). If Max CV < 15% then the status is based on the  Max CV criteria, otherwise the status is based on the ICC criteria when the number of overlapping time points is more than one. For single time point data, if CV <15% then the status is based on the CV criteria, otherwise the status is based on the ANOVA P-Value" class="glyphicon glyphicon-question-sign" aria-hidden="true" data-placement="bottom"></span>';
     var anova_tooltip = '<span data-toggle="tooltip" title="The ANOVA p-value is calculated for the single overlapping time point data across MPS centers or studies. The reproducibility status is Acceptable (P-Value) if ANOVA p-value >= 0.05, and Poor (P-Value) if ANOVA p-value <0.05." class="glyphicon glyphicon-question-sign" aria-hidden="true" data-placement="bottom"></span>';
+    // Bad
+    var chart_tooltips = {
+        'item': '“Item” graph displays selected Target/Analyte’s measurements on each item (chip or well) against time cross centers or studies.',
+        'average': '“Average” graph displays the average plus error bar (standard deviation) of selected Target/Analyte’s measurements aggregated by centers or studies against time.',
+        'trimmed': '“Trimmed” graph displays the average of selected Target/Analyte’s measurements aggregated by centers or studies against time by dropping the data points which timely consistent measurement is missing from one or more center/study. It means the time observations are excluded from the analysis when any observations by center/study  are missing at that time.',
+        'interpolated': '“Interpolated” graph displays the average of selected Target/Analyte’s measurements aggregated by centers or studies against time by interpolating the data points which timely consistent measurement(s) is(are) missing from a center/study. Four interpolation methods are applied for filling missing points, which are “nearest”, “linear spline”,” quadratic spline” and “cubic spline”. The overlapped data against time from one of four interpolation methods which has highest ICC value is depicted as a graph . The inter reproducibility results from all four interpolation methods are displayed in the table above the graphs.'
+    };
+
+    var interpolation_tooltips = {
+        'Trimmed': 'These values use no interpolation method, they are based only on overlapping data.',
+        'Nearest': 'This method sets the value of an interpolated point to the value of the nearest data point.',
+        'Linear': 'This method fits a different linear polynomial between each pair of data points for curves, or between sets of three points for surfaces.',
+        'Quadratic': 'This method fits a different quadratic polynomial between each pair of data points for curves, or between sets of three points for surfaces.',
+        'Cubic': 'This method fits a different cubic polynomial between each pair of data points for curves, or between sets of three points for surfaces.'
+    };
 
     // For making the table
     var repro_table_data_full = null;
@@ -377,6 +398,9 @@ $(document).ready(function() {
     // For getting info on treatment groups
     var data_groups = null;
     var header_keys = null;
+
+    var data_group_to_studies = null;
+    var data_group_to_sample_locations = null;
 
     var value_unit_index = null;
 
@@ -389,6 +413,8 @@ $(document).ready(function() {
     var inter_level = $('#inter_level_by_center').prop('checked') ? 1 : 0;
     var max_interpolation_size = $('#max_interpolation_size').val();
     var initial_norm = $('#initial_norm').prop('checked') ? 1 : 0;
+
+    var status_column_index = 14;
 
     function show_repro() {
         // Hide fixed headers
@@ -425,6 +451,105 @@ $(document).ready(function() {
             document.getElementById("spinner")
         );
 
+        var columns = [
+            {
+                title: "Show Details",
+                "render": function (data, type, row, meta) {
+                    // if (type === 'display' && row[1] === '') {
+                    if (type === 'display') {
+                        // var groupNum = row[10];
+                        return '<input type="checkbox" class="big-checkbox repro-checkbox" data-table-index="' + meta.row + '" data-repro-set="' + row[0] + '">';
+                    }
+                    return '';
+                },
+                "className": "dt-body-center",
+                "createdCell": function (td, cellData, rowData, row, col) {
+                    if (cellData) {
+                        $(td).css('vertical-align', 'middle')
+                    }
+                },
+                "sortable": false,
+                width: '7.5%'
+            },
+            {
+                title: "Set",
+                type: "brute-numeric",
+                "render": function (data, type, row) {
+                        return '<span class="badge badge-primary repro-set-info">' + row[0] + '</span>';
+                }
+            },
+            {
+                title: "Target",
+                "render": function (data, type, row) {
+                    return data_groups[row[0]][0];
+                },
+                width: '20%'
+            },
+            {
+                title: "Unit",
+                "render": function (data, type, row) {
+                    return data_groups[row[0]][value_unit_index];
+                }
+            },
+            {
+                title: "Studies",
+                "render": function (data, type, row) {
+                    return data_group_to_studies[row[0]].join('<br>');
+                },
+                width: '20%'
+            },
+            {
+                title: "Compounds",
+                "render": function (data, type, row) {
+                    return treatment_groups[data_groups[row[0]][data_groups[row[0]].length - 1]]['Trimmed Compounds'];
+                },
+                width: '20%'
+            },
+            {
+                title: "Organ Models",
+                "render": function (data, type, row) {
+                    return data_group_to_organ_models[row[0]].join('<br>');
+                }
+            },
+            {
+                title: "Sample Locations",
+                "render": function (data, type, row) {
+                    return data_group_to_sample_locations[row[0]].join('<br>');
+                }
+            },
+            {
+                title: "Interpolation",
+                "render": function (data, type, row) {
+                    if (type === 'display' && row[1] !== '') {
+                        // var groupNum = row[10];
+                        return row[1];
+                    }
+                    return '';
+                }
+            },
+            // {title: "Max Interpolated", data: '2'},
+            {title: legend_key, data: '3'},
+            {title: "Time Point Overlap", data: '4', width: '5%'},
+            {title: "<span style='white-space: nowrap;'>Max CV<br>or CV " + cv_tooltip + "</span>", data: '5'},
+            {title: "<span style='white-space: nowrap;'>ICC " + icc_tooltip + "</span>", data: '6'},
+            {title: "<span>ANOVA<br>P-Value " + anova_tooltip + "</span>", data: '7', width: '10%'},
+            {
+                title: "Reproducibility<br>Status " + repro_tooltip,
+                data: '8',
+                render: function (data, type, row, meta) {
+                    if (data == "Excellent (ICC)" || data == "Excellent (CV)") {
+                        return '<td><span class="hidden">3</span>' + data + '</td>';
+                    } else if (data == "Acceptable (ICC)" || data == "Acceptable (CV)") {
+                        return '<td><span class="hidden">2</span>' + data + '</td>';
+                    } else if (data == "Poor (ICC)" || data == "Poor (CV)") {
+                        return '<td><span class="hidden">1</span>' + data + '</td>';
+                    } else {
+                        return '<td><span class="hidden">0</span>' + data + '<span data-toggle="tooltip" title="' + row[9] + '" class="glyphicon glyphicon-question-sign" aria-hidden="true"></span></td>';
+                    }
+                }
+            }
+        ];
+
         repro_table = $('#repro_table').DataTable({
             ajax: {
                 url: '/assays_ajax/',
@@ -459,6 +584,10 @@ $(document).ready(function() {
                     header_keys = json.header_keys;
                     treatment_groups = json.treatment_groups;
 
+                    data_group_to_studies = json.data_group_to_studies;
+                    data_group_to_sample_locations = json.data_group_to_sample_locations;
+                    data_group_to_organ_models = json.data_group_to_organ_models;
+
                     value_unit_index = json.header_keys.data.indexOf('Value Unit');
 
                     if (window.GROUPING.full_post_filter === null) {
@@ -477,84 +606,20 @@ $(document).ready(function() {
                     console.log(xhr.status + ": " + xhr.responseText);
                 }
             },
-            columns: [
-                {
-                    title: "Show Details",
-                    "render": function (data, type, row, meta) {
-                        // if (type === 'display' && row[1] === '') {
-                        if (type === 'display') {
-                            // var groupNum = row[10];
-                            return '<input type="checkbox" class="big-checkbox repro-checkbox" data-table-index="' + meta.row + '" data-repro-set="' + row[0] + '">';
-                        }
-                        return '';
-                    },
-                    "className": "dt-body-center",
-                    "createdCell": function (td, cellData, rowData, row, col) {
-                        if (cellData) {
-                            $(td).css('vertical-align', 'middle')
-                        }
-                    },
-                    "sortable": false,
-                    width: '7.5%'
-                },
-                {
-                    title: "Set",
-                    type: "brute-numeric",
-                    "render": function (data, type, row) {
-                            return '<span class="badge badge-primary repro-set-info">' + row[0] + '</span>';
-                    }
-                },
-                {
-                    title: "Target",
-                    "render": function (data, type, row) {
-                        return data_groups[row[0]][0];
-                    }
-                },
-                {
-                    title: "Interpolation",
-                    "render": function (data, type, row) {
-                        if (type === 'display' && row[1] !== '') {
-                            // var groupNum = row[10];
-                            return row[1] + ' (' + row[2] + ')';
-                        }
-                        return '';
-                    }
-                },
-                // {title: "Max Interpolated", data: '2'},
-                {title: legend_key, data: '3'},
-                {title: "# of Overlapping Time Points", data: '4', width: '10%'},
-                {title: "<span style='white-space: nowrap;'>Max CV<br>or CV " + cv_tooltip + "</span>", data: '5'},
-                {title: "<span style='white-space: nowrap;'>ICC " + icc_tooltip + "</span>", data: '6'},
-                {title: "<span>ANOVA<br>P-Value " + anova_tooltip + "</span>", data: '7', width: '10%'},
-                {
-                    title: "Reproducibility<br>Status " + repro_tooltip,
-                    data: '8',
-                    render: function (data, type, row, meta) {
-                        if (data == "Excellent (ICC)" || data == "Excellent (CV)") {
-                            return '<td><span class="hidden">3</span>' + data + '</td>';
-                        } else if (data == "Acceptable (ICC)" || data == "Acceptable (CV)") {
-                            return '<td><span class="hidden">2</span>' + data + '</td>';
-                        } else if (data == "Poor (ICC)" || data == "Poor (CV)") {
-                            return '<td><span class="hidden">1</span>' + data + '</td>';
-                        } else {
-                            return '<td><span class="hidden">0</span>' + data + '<span data-toggle="tooltip" title="' + row[9] + '" class="glyphicon glyphicon-question-sign" aria-hidden="true"></span></td>';
-                        }
-                    }
-                }
-            ],
-            "order": [[9, 'desc'], [ 1, "asc" ]],
+            columns: columns,
+            "order": [[status_column_index, 'desc'], [ 1, "asc" ]],
             "createdRow": function(row, data, dataIndex) {
                 if (data[8][0] === "E") {
-                    $(row).find('td:eq(9)').css("background-color", "#74ff5b").css("font-weight", "bold");
+                    $(row).find('td:eq(' + status_column_index + ')').css("background-color", "#74ff5b").css("font-weight", "bold");
                 }
                 else if (data[8][0] === "A") {
-                    $(row).find('td:eq(9)').css("background-color", "#fcfa8d").css("font-weight", "bold");
+                    $(row).find('td:eq(' + status_column_index + ')').css("background-color", "#fcfa8d").css("font-weight", "bold");
                 }
                 else if (data[8][0] === "P") {
-                    $(row).find('td:eq(9)').css("background-color", "#ff7863").css("font-weight", "bold");
+                    $(row).find('td:eq(' + status_column_index + ')').css("background-color", "#ff7863").css("font-weight", "bold");
                 }
                 else {
-                    $(row).find('td:eq(9)').css("background-color", "Grey").css("font-weight", "bold");
+                    $(row).find('td:eq(' + status_column_index + ')').css("background-color", "Grey").css("font-weight", "bold");
                 }
             },
             "responsive": true,
@@ -606,12 +671,26 @@ $(document).ready(function() {
 
             repro_title.html('Set ' + group);
 
-            get_repro_status(icc_status, data[13], repro_status);
+            get_repro_status(icc_status, data[9], repro_status);
 
             populate_selection_table(group, data_table);
-            populate_icc_table(group, icc_table);
+            if (repro_table_data_full[group].best[1]) {
+                populate_icc_table(group, icc_table);
+            }
+            else {
+                icc_table.hide();
+            }
+
+            // UGLY
+            $.each(chart_tooltips, function(tooltip_name, tooltip_title) {
+                var charts_section_title = current_clone.find('[data-id="tooltip_' + tooltip_name + '"]');
+                charts_section_title.html(help_span(tooltip_title));
+            });
 
             area_to_copy_to.append(current_clone);
+
+            // Activates Bootstrap tooltips
+            $('[data-toggle="tooltip"]').tooltip({container:"body"});
         });
     }
 
@@ -623,9 +702,7 @@ $(document).ready(function() {
         } else if (icc_status[0] === 'P'){
             repro_status.html('<em>'+icc_status+'</em>').css("background-color", "#ff7863");
         } else {
-            repro_status.html(
-                '<em>'+icc_status+'</em><small style="color: black;"><span data-toggle="tooltip" title="'+ repro_status_string +'" class="glyphicon glyphicon-question-sign" aria-hidden="true"></span></small>'
-            ).css("background-color", "Grey");
+            repro_status.html('<em>'+repro_status_string+'</em>').css("background-color", "Grey");
         }
     }
 
@@ -648,8 +725,19 @@ $(document).ready(function() {
             );
         });
 
+        rows.push(
+            '<tr><th>Studies</th><td>' + data_group_to_studies[set].join('<br>') + '</td></tr>'
+        );
+
         rows = rows.join('');
         current_body.html(rows);
+    }
+
+    function help_span(title, pull) {
+        if (pull) {
+            return '<span data-toggle="tooltip" class="pull-right glyphicon glyphicon-question-sign" aria-hidden="true" title="' + title + '"></span>';
+        }
+        return '<span data-toggle="tooltip" class="glyphicon glyphicon-question-sign" aria-hidden="true" title="' + title + '"></span>';
     }
 
     function populate_icc_table(set, current_table) {
@@ -660,7 +748,7 @@ $(document).ready(function() {
         // TO SORT
         var all_icc = repro_table_data_full[set];
         var methods = [
-            '',
+            'Trimmed',
             'Nearest',
             'Linear',
             'Quadratic',
@@ -671,8 +759,8 @@ $(document).ready(function() {
             var data = all_icc[interpolation];
             if (data) {
                 var row = '<tr>' +
-                    '<td>' + interpolation + '</td>' +
-                    '<td>' + data[2] + '</td>' +
+                    '<td>' + interpolation + ' ' + help_span(interpolation_tooltips[interpolation], true) +'</td>' +
+                    // '<td>' + data[2] + '</td>' +
                     '<td>' + data[5] + '</td>' +
                     '<td>' + data[6] +'</td>' +
                     '<td>' + data[7] +'</td>';
@@ -691,6 +779,10 @@ $(document).ready(function() {
 
         rows = rows.join('');
         current_body.html(rows);
+    }
+
+    function isNumber(obj) {
+        return obj !== undefined && typeof(obj) === 'number' && !isNaN(obj);
     }
 
     function draw_charts(set) {
@@ -730,12 +822,13 @@ $(document).ready(function() {
 
             // Beware magic strings
             if (initial_norm && content_type !== 'item' && content_type !== 'average') {
-                current_value_unit = 'Normalized by Initial Value';
+                current_value_unit = 'Normalized by Median Value';
             }
 
-            if (values == null) {
+            if (!values) {
                 return true;
             }
+
             var all_null = true;
             for (var i = 1; i < values.length; i++) {
                 for (var j = 1; j < values[i].length; j++) {
@@ -747,9 +840,32 @@ $(document).ready(function() {
                 }
             }
             if (all_null) {
-                return false;
+                return true;
             }
-            var data = google.visualization.arrayToDataTable(values);
+
+            var y_axis_label_type = '';
+
+            $.each(values.slice(1), function(index, current_values) {
+                // Idiomatic way to remove NaNs
+                var trimmed_values = current_values.slice(1).filter(isNumber);
+
+                var current_max = Math.abs(Math.max.apply(null, trimmed_values));
+                var current_min = Math.abs(Math.min.apply(null, trimmed_values));
+
+                if (current_max > 1000 || current_max < 0.001) {
+                    y_axis_label_type = '0.00E0';
+                    return false;
+                }
+                else if (Math.abs(current_max - current_min) < 10 && Math.abs(current_max - current_min) > 0.1 && Math.abs(current_max - current_min) !== 0) {
+                    y_axis_label_type = '0.00';
+                    return false;
+                }
+                else if (Math.abs(current_max - current_min) < 0.1 && Math.abs(current_max - current_min) !== 0) {
+                    y_axis_label_type = '0.00E0';
+                    return false;
+                }
+            });
+
             var options = {
                 // Make sure title case
                 title: content_type[0].toUpperCase() + content_type.substr(1),
@@ -785,8 +901,9 @@ $(document).ready(function() {
                 },
                 vAxis: {
                     title: current_value_unit,
-                    // format: y_axis_label_type,
-                    format: 'scientific',
+                    format: y_axis_label_type,
+                    // format: 'scientific',
+                    // format:'0.00E0',
                     textStyle: {
                         bold: true
                     },
@@ -800,7 +917,7 @@ $(document).ready(function() {
                 },
                 pointSize: 5,
                 'chartArea': {
-                    'width': '80%',
+                    'width': '75%',
                     'height': '75%'
                 },
                 'height': 400,
@@ -811,49 +928,98 @@ $(document).ready(function() {
                 // TODO TODO TODO
                 // tooltip: {isHtml: true},
                 intervals: {
-                    style: 'sticks'
+                    // style: 'bars'
+                    'lineWidth':2, 'barWidth': 1
                 }
             };
 
             // CONTRIVANCE FOR NOW
-            if (content_type !== 'item') {
-                chart = new google.visualization.LineChart(
-                    $('.repro-' + set).find(
-                        '[data-id="' + content_type + '_chart"]'
-                    ).first()[0]);
+            // if (content_type !== 'item') {
+                // chart = new google.visualization.LineChart(
+                //     $('.repro-' + set).find(
+                //         '[data-id="' + content_type + '_chart"]'
+                //     ).first()[0]);
+            // }
+            // else {
+                // chart = new google.visualization.ScatterChart(
+                //     $('.repro-' + set).find(
+                //         '[data-id="' + content_type + '_chart"]'
+                //     ).first()[0]);
+
+                // Make sure isHtml true for items
+                // options.tooltip = {isHtml: true};
+            // }
+
+            var chart_type = 'LineChart';
+            var container_id = $('.repro-' + set).find(
+                    '[data-id="' + content_type + '_chart"]'
+                ).first()[0];
+            if (content_type === 'item') {
+                chart_type = 'ScatterChart';
+                // Make sure isHtml true for items
+                options.tooltip = {isHtml: true};
             }
-            else {
-                chart = new google.visualization.ScatterChart(
-                    $('.repro-' + set).find(
-                        '[data-id="' + content_type + '_chart"]'
-                    ).first()[0]);
-            }
 
 
-            if (chart) {
-                var dataView = new google.visualization.DataView(data);
-
+            if (chart_type) {
                 // Change interval columns to intervals
                 // ALSO CHANGES ROLE FOR STYLE COLUMNS
                 var interval_setter = [0];
 
                 i = 1;
-                while (i < data.getNumberOfColumns()) {
+                while (i < values[0].length) {
                     interval_setter.push(i);
-                    if (i + 2 < data.getNumberOfColumns() && values[0][i + 1].indexOf(' ~@i1') > -1) {
+                    if (i + 2 < values[0].length && values[0][i + 1].indexOf(' ~@i1') > -1) {
                         interval_setter.push({sourceColumn: i + 1, role: 'interval'});
                         interval_setter.push({sourceColumn: i + 2, role: 'interval'});
+
+                        if (i + 3 < values[0].length && values[0][i + 3].indexOf(' ~@s') > -1) {
+                            interval_setter.push({sourceColumn: i + 3, type: 'string', role: 'style'});
+                            i += 1;
+                        }
+
                         i += 2;
                     }
-                    else if (i + 1 < data.getNumberOfColumns() && values[0][i + 1].indexOf(' ~@s') > -1) {
-                        interval_setter.push({sourceColumn: i + 1, type: 'string', role: 'style'});
+                    // Item only
+                    if (i + 1 < values[0].length && values[0][i + 1].indexOf(' ~@t') > -1) {
+                        for (var row_index = 1; row_index < values.length; row_index++) {
+                            var current_contents = values[row_index][i + 1];
+                            if (current_contents) {
+                                values[row_index][i + 1] = generate_data_point_tooltip(
+                                    current_contents[0],
+                                    current_contents[1],
+                                    current_contents[2],
+                                    current_contents[3]
+                                );
+                            }
+                        }
+
+                        interval_setter.push(
+                            {
+                                sourceColumn: i + 1, type: 'string', role: 'tooltip', 'p': {'html': true}
+                            }
+                        );
+
                         i += 1;
                     }
+
                     i += 1;
                 }
-                dataView.setColumns(interval_setter);
 
-                chart.draw(dataView, options);
+                var data = google.visualization.arrayToDataTable(values);
+                // var dataView = new google.visualization.DataView(data);
+                // dataView.setColumns(interval_setter);
+
+                var wrapper = new google.visualization.ChartWrapper({
+                    chartType: chart_type,
+                    dataTable: data,
+                    options: options,
+                    containerId: container_id
+                });
+
+                wrapper.setView({columns:interval_setter});
+
+                wrapper.draw();
             }
         });
 
@@ -864,18 +1030,33 @@ $(document).ready(function() {
             'Cubic'
         ];
 
+        // Decide whether or not to show trimmed
+        var current_repro_set_selector = $('.repro-' + set);
         var current_full_data = repro_table_data_full[set];
+
+        current_repro_set_selector.find('[data-id="tooltip_trimmed"]').hide();
+        current_repro_set_selector.find('[data-id="trimmed_chart"]').hide();
+
+        if (current_full_data['Trimmed']) {
+            current_repro_set_selector.find('[data-id="tooltip_trimmed"]').show();
+            current_repro_set_selector.find('[data-id="trimmed_chart"]').show();
+        }
+
         var current_max = 0;
+        var current_min = 999;
         var method_to_show = '';
 
         // Hide all but highest interpolation
         // See which interpolation method is best
         // Also hide the charts at first
+        // Redundant!
+        current_repro_set_selector.find('[data-id="tooltip_interpolated"]').hide();
+
         $.each(interpolation_methods, function(index, method) {
             var current_row = current_full_data[method];
             var lower_method = method.toLowerCase();
 
-            $('.repro-' + set).find(
+            current_repro_set_selector.find(
                 '[data-id="' + lower_method + '_chart"]'
             ).hide();
 
@@ -885,38 +1066,45 @@ $(document).ready(function() {
             }
         });
 
-        // Show best
-        $('.repro-' + set).find(
-            '[data-id="' + method_to_show + '_chart"]'
-        ).show();
+        if (!method_to_show) {
+            $.each(interpolation_methods, function(index, method) {
+                var current_row = current_full_data[method];
+                var lower_method = method.toLowerCase();
+
+                if (current_row && current_row[5] < current_min) {
+                    current_min = current_row[5];
+                    method_to_show = lower_method;
+                }
+            });
+        }
+
+        if (method_to_show) {
+            // Show best
+            current_repro_set_selector.find(
+                '[data-id="' + method_to_show + '_chart"]'
+            ).show();
+
+            current_repro_set_selector.find('[data-id="tooltip_interpolated"]').show();
+        }
     }
 
-    function generate_data_point_tooltip(time, value, chip_id) {
-        return '<div style="padding:5px 5px 5px 5px;">' +
-        '<table class="table">' +
-        '<tr>' +
-        '<td><b>' + time + '</b></td>' +
-        '</tr>' +
-        '<tr>' +
-        '<td><b>Value</b></td>' +
-        '<td>' + value + '</td>' +
-        '</tr>' +
-        '<tr>' +
-        '<td><b>Item</b></td>' +
-        '<td>' + chip_id + '</td>' +
-        '</tr>' +
-        '</table>' +
-        '</div>';
-    }
-
-    function build_group_table(group_id) {
-        var content = '';
-        return content;
-    }
-
-    function build_cv_icc(cv, icc){
-        content = '<tr><th>CV(%)</th><th>ICC-Absolute Agreement</th></tr><tr><td>'+cv+'</td><td>'+icc+'</td></tr>';
-        return content;
+    function generate_data_point_tooltip(time, legend, value, chip_id) {
+        // return '<div style="padding:5px 5px 5px 5px;">' +
+        // '<table class="table">' +
+        // '<tr>' +
+        // '<td><b>' + time + '</b></td>' +
+        // '</tr>' +
+        // '<tr>' +
+        // '<td><b>Value</b></td>' +
+        // '<td>' + value + '</td>' +
+        // '</tr>' +
+        // '<tr>' +
+        // '<td><b>Item</b></td>' +
+        // '<td>' + chip_id + '</td>' +
+        // '</tr>' +
+        // '</table>' +
+        // '</div>';
+        return time + '\n' + legend + ': ' + value + '\n' + chip_id;
     }
 
     //Checkbox click event

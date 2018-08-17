@@ -606,7 +606,8 @@ def get_control_data(
         mean_type,
         include_all,
         truncate_negative,
-        new_data_for_control=None
+        new_data_for_control=None,
+        normalize_units=False
 ):
     """Gets control data for performing percent control calculations
 
@@ -620,13 +621,13 @@ def get_control_data(
     controls = {}
 
     data_points = list(AssayDataPoint.objects.filter(
-        study_id=study,
+        study_id__in=study,
         replaced=False
     ).prefetch_related(
         'study',
         'study_assay__target',
         'study_assay__method',
-        'study_assay__unit',
+        'study_assay__unit__base_unit',
         'matrix_item',
         'sample_location'
     ))
@@ -642,6 +643,10 @@ def get_control_data(
         study_assay = raw.study_assay
         target = study_assay.target.name
         unit = study_assay.unit.unit
+
+        if normalize_units and study_assay.unit.base_unit:
+            unit = study_assay.unit.base_unit.unit
+
         # Not currently used
         method = study_assay.method.name
 
@@ -673,7 +678,7 @@ def get_control_data(
                 ).setdefault(
                     time, []
                 ).append(
-                    value
+                    raw
                 )
 
     targets = [target_method[0] for target_method in initial_control_data.keys()]
@@ -682,8 +687,9 @@ def get_control_data(
         target = target_method[0]
         method = target_method[1]
 
-        if targets.count(target) > 1:
-            target = u'{} [{}]'.format(target, method)
+        # JUST IGNORE METHOD FOR NOW
+        # if targets.count(target) > 1:
+        #     target = u'{} [{}]'.format(target, method)
 
         initial_control_data.update({
             target: units
@@ -695,25 +701,35 @@ def get_control_data(
         for unit, tags in units.items():
             for tag, sample_locations in tags.items():
                 for sample_location, time_values in sample_locations.items():
-                    for time, values in time_values.items():
-                        if len(values) > 1:
-                            # If geometric mean
-                            if mean_type == 'geometric':
-                                # Geometric mean will sometimes fail (due to zero values and so on)
-                                average = gmean(values)
-                                if np.isnan(average):
-                                    return {
-                                        'errors': 'Geometric mean could not be calculated (probably due to negative values), please use an arithmetic mean instead.'
-                                    }
-                            # If arithmetic mean
-                            else:
-                                average = np.average(values)
-                        else:
-                            average = values[0]
+                    for time, points in time_values.items():
+                        # TODO TODO TODO More than a little crude: PLEASE REVISE THESE NESTED LOOPS SO THAT THEY ARE MORE ROBUST
+                        study_values = {}
 
-                        controls.update(
-                                {(target, unit, sample_location, time): average}
-                        )
+                        for point in points:
+                            if normalize_units:
+                                study_values.setdefault(point.study_id, []).append(point.value * point.study_assay.unit.scale_factor)
+                            else:
+                                study_values.setdefault(point.study_id, []).append(point.value)
+
+                        for study_id, values in study_values.items():
+                            if len(values) > 1:
+                                # If geometric mean
+                                if mean_type == 'geometric':
+                                    # Geometric mean will sometimes fail (due to zero values and so on)
+                                    average = gmean(values)
+                                    if np.isnan(average):
+                                        return {
+                                            'errors': 'Geometric mean could not be calculated (probably due to negative values), please use an arithmetic mean instead.'
+                                        }
+                                # If arithmetic mean
+                                else:
+                                    average = np.average(values)
+                            else:
+                                average = values[0]
+
+                            controls.update(
+                                    {(study_id, target, unit, sample_location, time): average}
+                            )
 
     return controls
 
@@ -817,42 +833,43 @@ def get_item_groups(study, criteria, matrix_items=None):
     return (sorted_treatment_groups, setup_to_treatment_group, header_keys)
 
 
-def get_paired_id_and_name(field):
-    return '\n'.join((field.name, unicode(field.id)))
-
-
-def get_data_for_heatmap(raw_data):
-    data = {
-        'matrices': {},
-        'values': {}
-    }
-
-    # Nesting like this is a serious violation of style
-    for raw in raw_data:
-        data.get('values').setdefault(
-            get_paired_id_and_name(raw.matrix_item.matrix), {}
-        ).setdefault(
-            get_paired_id_and_name(raw.study_assay.target), {}
-        ).setdefault(
-            get_paired_id_and_name(raw.study_assay.method), {}
-        ).setdefault(
-            # Dumb exception
-            '\n'.join((raw.study_assay.unit.unit, unicode(raw.study_assay.unit.id))), {}
-        ).setdefault(
-            get_paired_id_and_name(raw.sample_location), {}
-        ).setdefault(
-            get_paired_id_and_name(raw.subtarget), {}
-        ).setdefault(
-            '\n'.join((raw.get_time_string(), unicode(raw.time))), {}
-        ).setdefault(
-            '_'.join([unicode(raw.matrix_item.row_index), unicode(raw.matrix_item.column_index)]), []
-        ).append(raw.value)
-
-        data.get('matrices').setdefault(
-            get_paired_id_and_name(raw.matrix_item.matrix), [[''] * raw.matrix_item.matrix.number_of_columns for _ in range(raw.matrix_item.matrix.number_of_rows)]
-        )[raw.matrix_item.row_index][raw.matrix_item.column_index] = raw.matrix_item.name
-
-    return data
+# TODO PROTOTYPE ONLY
+# def get_paired_id_and_name(field):
+#     return '\n'.join((field.name, unicode(field.id)))
+#
+#
+# def get_data_for_heatmap(raw_data):
+#     data = {
+#         'matrices': {},
+#         'values': {}
+#     }
+#
+#     # Nesting like this is a serious violation of style
+#     for raw in raw_data:
+#         data.get('values').setdefault(
+#             get_paired_id_and_name(raw.matrix_item.matrix), {}
+#         ).setdefault(
+#             get_paired_id_and_name(raw.study_assay.target), {}
+#         ).setdefault(
+#             get_paired_id_and_name(raw.study_assay.method), {}
+#         ).setdefault(
+#             # Dumb exception
+#             '\n'.join((raw.study_assay.unit.unit, unicode(raw.study_assay.unit.id))), {}
+#         ).setdefault(
+#             get_paired_id_and_name(raw.sample_location), {}
+#         ).setdefault(
+#             get_paired_id_and_name(raw.subtarget), {}
+#         ).setdefault(
+#             '\n'.join((raw.get_time_string(), unicode(raw.time))), {}
+#         ).setdefault(
+#             '_'.join([unicode(raw.matrix_item.row_index), unicode(raw.matrix_item.column_index)]), []
+#         ).append(raw.value)
+#
+#         data.get('matrices').setdefault(
+#             get_paired_id_and_name(raw.matrix_item.matrix), [[''] * raw.matrix_item.matrix.number_of_columns for _ in range(raw.matrix_item.matrix.number_of_rows)]
+#         )[raw.matrix_item.row_index][raw.matrix_item.column_index] = raw.matrix_item.name
+#
+#     return data
 
 
 # TODO TODO TODO MAKE SURE STUDY NO LONGER REQUIRED
@@ -871,7 +888,8 @@ def get_data_points_for_charting(
         matrix_item=None,
         matrix_items=None,
         new_data=False,
-        additional_data=None
+        additional_data=None,
+        normalize_units=False
 ):
     """Get all readout data for a study and return it in JSON format
 
@@ -921,7 +939,8 @@ def get_data_points_for_charting(
             mean_type,
             include_all,
             truncate_negative,
-            new_data_for_control=new_data_for_control
+            new_data_for_control=new_data_for_control,
+            normalize_units=normalize_units
         )
 
         if controls.get('errors' , ''):
@@ -1047,7 +1066,7 @@ def get_data_points_for_charting(
                 sample_location, {}
             ).setdefault(
                 time, []
-            ).append(value)
+            ).append(raw)
 
             # Update all_sample_locations
             all_sample_locations.update({sample_location: True})
@@ -1071,36 +1090,44 @@ def get_data_points_for_charting(
     for target, units in initial_data.items():
         for unit, tags in units.items():
             for tag, sample_locations in tags.items():
-                for sample_location, time_values in sample_locations.items():
-                    for time, values in time_values.items():
-                        if len(values) > 1:
-                            # If geometric mean
-                            if mean_type == 'geometric':
-                                # Geometric mean will sometimes fail (due to zero values and so on)
-                                average = gmean(values)
-                                if np.isnan(average):
-                                    return {'errors': 'Geometric mean could not be calculated (probably due to negative values), please use an arithmetic mean instead.'}
-                            # If arithmetic mean
+                for sample_location, time_points in sample_locations.items():
+                    for time, points in time_points.items():
+                        # TODO TODO TODO More than a little crude: PLEASE REVISE THESE NESTED LOOPS SO THAT THEY ARE MORE ROBUST
+                        study_values = {}
+
+                        for point in points:
+                            study_values.setdefault(point.study_id, []).append(point.value)
+
+                        for study_id, values in study_values.items():
+                            if len(values) > 1:
+                                # If geometric mean
+                                if mean_type == 'geometric':
+                                    # Geometric mean will sometimes fail (due to zero values and so on)
+                                    average = gmean(values)
+                                    if np.isnan(average):
+                                        return {'errors': 'Geometric mean could not be calculated (probably due to negative values), please use an arithmetic mean instead.'}
+                                # If arithmetic mean
+                                else:
+                                    average = np.average(values)
                             else:
-                                average = np.average(values)
-                        else:
-                            average = values[0]
+                                average = values[0]
 
-                        # If standard deviation
-                        if interval_type == 'std':
-                            interval = np.std(values)
-                        # Standard error if not std
-                        else:
-                            interval = np.std(values) / len(values) ** 0.5
+                            # If standard deviation
+                            if interval_type == 'std':
+                                interval = np.std(values)
+                            # Standard error if not std
+                            else:
+                                interval = np.std(values) / len(values) ** 0.5
 
-                        average_and_interval = (
-                            average,
-                            interval
-                        )
+                            average_interval_study_id = (
+                                average,
+                                interval,
+                                study_id
+                            )
 
-                        averaged_data.setdefault(target, {}).setdefault(unit, {}).setdefault(tag, {}).setdefault(sample_location, {}).update({
-                            time: average_and_interval
-                        })
+                            averaged_data.setdefault(target, {}).setdefault(unit, {}).setdefault(tag, {}).setdefault(sample_location, {}).update({
+                                time: average_interval_study_id
+                            })
 
     accommodate_sample_location = group_sample_location and len(all_sample_locations) > 1
 
@@ -1132,7 +1159,7 @@ def get_data_points_for_charting(
             for tag, sample_locations in tags.items():
                 # TODO: A little naive
                 if use_key_discrimination and key_discrimination.get(tag[1], ''):
-                    tag = '{} || {}'.format(tag[1], tag[0])
+                    tag = u'{} || {}'.format(tag[1], tag[0])
                 elif use_key_discrimination:
                     tag = tag[1]
 
@@ -1150,9 +1177,10 @@ def get_data_points_for_charting(
 
                     # all_keys.update({current_key: True})
 
-                    for time, value_and_interval in time_values.items():
-                        value = value_and_interval[0]
-                        interval = value_and_interval[1]
+                    for time, value_interval_study_id in time_values.items():
+                        value = value_interval_study_id[0]
+                        interval = value_interval_study_id[1]
+                        study_id = value_interval_study_id[2]
 
                         if interval != 0:
                             accommodate_intervals = True
@@ -1164,8 +1192,8 @@ def get_data_points_for_charting(
                             y_header.update({time: True})
                             include_current = True
 
-                        elif controls.get((target, unit, sample_location, time), False):
-                            control_value = controls.get((target, unit, sample_location, time))
+                        elif controls.get((study_id, target, unit, sample_location, time), False):
+                            control_value = controls.get((study_id, target, unit, sample_location, time))
 
                             # We can not divide by zero
                             if control_value == 0:
@@ -1759,7 +1787,7 @@ def acquire_post_filter(studies, assays, matrix_items, data_points):
         current.setdefault(
             'id__in', {}
         ).update({
-            study.id: study.name
+            study.id: u'{} ({})'.format(study.name, study.group.name)
         })
 
     assays = assays.prefetch_related(
@@ -1814,7 +1842,8 @@ def acquire_post_filter(studies, assays, matrix_items, data_points):
         'assaysetupsetting_set__setting',
         'assaysetupsetting_set__addition_location',
         'organ_model',
-        'matrix'
+        'matrix',
+        'study'
     )
 
     for matrix_item in matrix_items:
@@ -1823,13 +1852,13 @@ def acquire_post_filter(studies, assays, matrix_items, data_points):
         current.setdefault(
             'id__in', {}
         ).update({
-            matrix_item.id: matrix_item.name
+            matrix_item.id: u'{} ({})'.format(matrix_item.name, matrix_item.study.name)
         })
 
         current.setdefault(
             'matrix_id__in', {}
         ).update({
-            matrix_item.matrix_id: matrix_item.matrix.name
+            matrix_item.matrix_id: u'{} ({})'.format(matrix_item.matrix.name, matrix_item.study.name)
         })
 
         current.setdefault(
@@ -1921,7 +1950,7 @@ def acquire_post_filter(studies, assays, matrix_items, data_points):
 
         for setting in matrix_item.assaysetupsetting_set.all():
             current.setdefault(
-                'assaysetupsetting__setting__setting_id__in', {}
+                'assaysetupsetting__setting_id__in', {}
             ).update({
                 setting.setting_id: setting.setting.name
             })
@@ -2077,6 +2106,7 @@ def fetch_data_points_from_filters(request):
             'study_assay__unit__base_unit',
             'sample_location',
             'matrix_item__matrix',
+            'matrix_item__organ_model',
             'subtarget'
         ).filter(
             replaced=False,
@@ -2250,10 +2280,17 @@ def get_inter_study_reproducibility(
         matrix_items
     )
 
+    matrix_item_id_to_tooltip_string = {
+        matrix_item.id: u'{} ({})'.format(matrix_item.name, matrix_item.matrix.name) for matrix_item in matrix_items
+    }
+
     inter_data = []
 
     data_point_treatment_groups = {}
     treatment_group_table = {}
+    data_group_to_studies = {}
+    data_group_to_sample_locations = {}
+    data_group_to_organ_models = {}
 
     # CONTRIVED FOR NOW
     data_header_keys = [
@@ -2322,7 +2359,7 @@ def get_inter_study_reproducibility(
                 setup_to_treatment_group.get(item_id).get('index')
             ),
             # 'Group {}'.format(len(data_point_treatment_groups) + 1)
-            '{}'.format(len(data_point_treatment_groups) + 1)
+            u'{}'.format(len(data_point_treatment_groups) + 1)
         )
         point.data_group = current_group
         if current_group not in treatment_group_table:
@@ -2338,6 +2375,24 @@ def get_inter_study_reproducibility(
                         data_point_attribute_getter_current_values(point)
                     ) + [setup_to_treatment_group.get(item_id).get('index')]]
                 })
+
+        data_group_to_studies.setdefault(
+            current_group, {}
+        ).update({
+            u'<a href="{}" target="_blank">{} ({})</a>'.format(point.study.get_absolute_url(), point.study.name, point.study.group.name): point.study.name
+        })
+
+        data_group_to_sample_locations.setdefault(
+            current_group, {}
+        ).update({
+            point.sample_location.name: True
+        })
+
+        data_group_to_organ_models.setdefault(
+            current_group, {}
+        ).update({
+            point.matrix_item.organ_model.name: True
+        })
 
     inter_data.append([
         'Study ID',
@@ -2379,7 +2434,7 @@ def get_inter_study_reproducibility(
         ).setdefault(
             # NOTE CONVERT TO DAYS
             point.time / 1440.0, []
-        ).append(point.standard_value)
+        ).append((point.standard_value, matrix_item_id_to_tooltip_string.get(point.matrix_item_id)))
 
         initial_chart_data.setdefault(
             point.data_group, {}
@@ -2411,12 +2466,25 @@ def get_inter_study_reproducibility(
                         legend + ' ~@i1': True,
                         legend + ' ~@i2': True,
                     })
+                else:
+                    x_header.update({
+                        legend: True,
+                        # This is to deal with custom tooltips
+                        legend + ' ~@t': True,
+                    })
 
                 for time, values in times.items():
                     if chart_group == 'item':
-                        for index, value in enumerate(values):
-                            current_data.setdefault(legend, {}).update({'{}~{}'.format(time, index): value})
-                            y_header.update({'{}~{}'.format(time, index): True})
+                        for index, value_pair in enumerate(values):
+                            value = value_pair[0]
+                            matrix_item_id = value_pair[1]
+                            current_data.setdefault(legend, {}).update({u'{}~{}'.format(time, index): value})
+                            current_data.setdefault(legend + ' ~@t', {}).update(
+                                {
+                                    u'{}~{}'.format(time, index): [time, legend, value, matrix_item_id]
+                                }
+                            )
+                            y_header.update({u'{}~{}'.format(time, index): True})
                             # x_header.update({
                             #     '{}~@x{}'.format(legend, index): True
                             # })
@@ -2460,7 +2528,7 @@ def get_inter_study_reproducibility(
                     current_table[y_header.get(y)][x_header.get(x)] = value
 
     # Reset chart data again
-    initial_chart_data = {}
+    # initial_chart_data = {}
 
     reproducibility_results_table, inter_data_table = get_inter_study_reproducibility_report(
         len(treatment_group_table),
@@ -2490,9 +2558,10 @@ def get_inter_study_reproducibility(
             row[1]: row
         })
 
+        # Get numeric ICC
         current_icc = row[6] if row[6] else 0
 
-        if current_dic.get('best', '') and current_icc > current_dic.get('best')[6]:
+        if current_dic.get('best', '') and (current_icc > current_dic.get('best')[6] or not current_dic.get('best')[6]):
             current_dic.update({
                 'best': row
             })
@@ -2502,23 +2571,49 @@ def get_inter_study_reproducibility(
                 'best': row
             })
 
-    for set, dic in results_rows_full.items():
-        current_best = dic.get('best')
+    for set, current_dic in results_rows_full.items():
+        current_best = current_dic.get('best')
 
-        # Make sure it actually has multiple centers/studies
-        if current_best[3] > 1:
-            results_rows_best.append(current_best)
+        # If the current best has no ICC, try CV
+        if not current_best[6]:
+            for current_type, row in current_dic.items():
+                current_cv = row[5] if row[5] else 999
+
+                if current_cv < current_dic.get('best')[5]:
+                    current_dic.update({
+                        'best': row
+                    })
+
+    for set, current_dic in results_rows_full.items():
+        current_best = current_dic.get('best')
+
+        for current_type, row in current_dic.items():
+            # Format the ICC
+            if row[6] and not type(row[6]) == str:
+                row[6] = '{0:.4g}'.format(row[6])
+
+            # Format Max CV while I am at it
+            if row[5] and not type(row[5]) == str:
+                row[5] = '{0:.4g}'.format(row[5])
+
+        # Removed for now
+        # Make sure it actually has points overlapping
+        # if current_best[4]:
+        #     results_rows_best.append(current_best)
+        results_rows_best.append(current_best)
 
     inter_data_table = inter_data_table.astype(object).replace(np.nan, '')
     # inter_data_columns = [i for i in inter_data_table.columns]
     inter_data_rows = [[row[i] for i in range(1, len(row))] for row in inter_data_table.itertuples()]
 
+    inter_chart_data = {}
+
     for row in inter_data_rows:
         # BE CAREFUL, INDICES MAY CHANGE
         shape = ''
         if row[3] != 'Original':
-            shape = 'point {shape-type: star; size: 8;}'
-        initial_chart_data.setdefault(
+            shape = 'point {shape-type: star; size: 9;}'
+        inter_chart_data.setdefault(
             row[5], {}
         ).setdefault(
             row[4], {}
@@ -2529,7 +2624,7 @@ def get_inter_study_reproducibility(
             row[0] / 1440.0, (row[2], shape)
         )
 
-    for set, chart_groups in initial_chart_data.items():
+    for set, chart_groups in inter_chart_data.items():
         current_set = final_chart_data.setdefault(set, {})
         for chart_group, legends in chart_groups.items():
             current_data = {}
@@ -2537,16 +2632,57 @@ def get_inter_study_reproducibility(
             x_header = {}
             y_header = {}
             for legend, times in legends.items():
+                # Get the median
+                current_median = np.median([
+                    np.median(x) for x in initial_chart_data.get(
+                        set
+                    ).get(
+                        'average'
+                    ).get(
+                        legend
+                    ).values()
+                ])
+
                 x_header.update({
                     legend: True,
                     # This is to deal with the style
                     legend + ' ~@s': True,
+                    # This is to deal with intervals
+                    legend + ' ~@i1': True,
+                    legend + ' ~@i2': True,
                 })
                 for time, value_shape in times.items():
                     value, shape = value_shape[0], value_shape[1]
-                    current_data.setdefault(legend, {}).update({time: value})
-                    current_data.setdefault(legend + ' ~@s', {}).update({time: shape})
-                    y_header.update({time: True})
+                    if shape:
+                        current_data.setdefault(legend, {}).update({time: value})
+                        current_data.setdefault(legend + ' ~@s', {}).update({time: shape})
+                        y_header.update({time: True})
+                    else:
+                        values = initial_chart_data.get(
+                            set
+                        ).get(
+                            'average'
+                        ).get(
+                            legend
+                        ).get(
+                            time
+                        )
+
+                        if initial_norm == 1 and current_median:
+                            values = [current_value / current_median for current_value in values]
+
+                        if len(values) > 1:
+                            # TODO TODO TODO ONLY ARITHMETIC MEAN RIGHT NOW
+                            value = np.mean(values)
+                            std = np.std(values)
+                            current_data.setdefault(legend, {}).update({time: value})
+                            current_data.setdefault(legend + ' ~@i1', {}).update({time: value - std})
+                            current_data.setdefault(legend + ' ~@i2', {}).update({time: value + std})
+                            current_data.setdefault(legend + ' ~@s', {}).update({time: shape})
+                        else:
+                            current_data.setdefault(legend, {}).update({time: values[0]})
+
+                        y_header.update({time: True})
 
             x_header_keys = x_header.keys()
             x_header_keys.sort(key=alphanum_key)
@@ -2566,6 +2702,18 @@ def get_inter_study_reproducibility(
                 for y, value in data_point.items():
                     current_table[y_header.get(y)][x_header.get(x)] = value
 
+    final_data_group_to_studies = {}
+    for data_group, current_studies in data_group_to_studies.items():
+        final_data_group_to_studies[data_group] = sorted(current_studies, key=current_studies.get)
+
+    final_data_group_to_sample_locations = {}
+    for data_group, current_sample_location in data_group_to_sample_locations.items():
+        final_data_group_to_sample_locations[data_group] = sorted(current_sample_location)
+
+        final_data_group_to_organ_models = {}
+    for data_group, current_organ_model in data_group_to_organ_models.items():
+        final_data_group_to_organ_models[data_group] = sorted(current_organ_model)
+
     data = {
         'chart_data': final_chart_data,
         'repro_table_data_full': results_rows_full,
@@ -2575,7 +2723,11 @@ def get_inter_study_reproducibility(
             'treatment': treatment_header_keys,
             'data': data_header_keys
         },
-        'treatment_groups': treatment_group_representatives
+        'treatment_groups': treatment_group_representatives,
+        'data_group_to_studies': final_data_group_to_studies,
+        # BAD
+        'data_group_to_sample_locations': final_data_group_to_sample_locations,
+        'data_group_to_organ_models': final_data_group_to_organ_models
     }
 
     return data

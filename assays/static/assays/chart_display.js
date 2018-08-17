@@ -329,6 +329,11 @@ $(document).ready(function () {
     //
     // };
 
+    // TODO THIS SHOULDN'T BE REDUNDANT
+    function isNumber(obj) {
+        return obj !== undefined && typeof(obj) === 'number' && !isNaN(obj);
+    }
+
     window.CHARTS.make_charts = function(json, charts, changes_to_options) {
         // post_filter setup
         if (window.GROUPING.full_post_filter === null) {
@@ -379,6 +384,29 @@ $(document).ready(function () {
 
             var data = google.visualization.arrayToDataTable(assays[index]);
 
+            var y_axis_label_type = '';
+
+            $.each(assays[index].slice(1), function(index, current_values) {
+                // Idiomatic way to remove NaNs
+                var trimmed_values = current_values.slice(1).filter(isNumber);
+
+                var current_max = Math.abs(Math.max.apply(null, trimmed_values));
+                var current_min = Math.abs(Math.min.apply(null, trimmed_values));
+
+                if (current_max > 1000 || current_max < 0.001) {
+                    y_axis_label_type = '0.00E0';
+                    return false;
+                }
+                else if (Math.abs(current_max - current_min) < 10 && Math.abs(current_max - current_min) > 0.1 && Math.abs(current_max - current_min) !== 0) {
+                    y_axis_label_type = '0.00';
+                    return false;
+                }
+                else if (Math.abs(current_max - current_min) < 0.1 && Math.abs(current_max - current_min) !== 0) {
+                    y_axis_label_type = '0.00E0';
+                    return false;
+                }
+            });
+
             var options = {
                 title: assay,
                 interpolateNulls: true,
@@ -415,7 +443,8 @@ $(document).ready(function () {
                 },
                 vAxis: {
                     title: unit,
-                    format: 'scientific',
+                    // If < 1000 and > 0.001 don't use scientific! (absolute value)
+                    format: y_axis_label_type,
                     textStyle: {
                         bold: true
                     },
@@ -432,14 +461,15 @@ $(document).ready(function () {
                 },
                 pointSize: 5,
                 'chartArea': {
-                    'width': '80%',
+                    'width': '75%',
                     'height': '65%'
                 },
                 'height':400,
                 // Individual point tooltips, not aggregate
                 focusTarget: 'datum',
                 intervals: {
-                    style: 'bars'
+                    // style: 'bars'
+                    'lineWidth':2, 'barWidth': 1
                 }
             };
 
