@@ -149,7 +149,6 @@ def fetch_auto_drug_trial_data(request):
                     }
             studiesWithResults.append(study)
 
-
     outcomeData = []
     for i in range(0, len(studiesWithResults)):
         for j in range(0, len(studiesWithResults[i]["outcomes"])):
