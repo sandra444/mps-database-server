@@ -198,6 +198,26 @@ def get_user_status_context(self, context):
             break
 
 
+def get_queryset_with_group_center_dictionary(queryset):
+    """Takes the queryset, adds a dictionary 'group_center_map' mapping each group to its center"""
+
+    # INSTEAD OF GRABBING THE GROUPS FIRST, GET ALL CENTERS AND THEIR GROUPS, AND FOR EACH STUDY APPLY CORRECT CENTER
+    # THEN DO COMPOUND STUFF ELSEWHERE
+
+    groups = queryset.values_list('group__name', flat=True)
+    group_center_map = {}
+
+    centers = MicrophysiologyCenter.objects.all().prefetch_related(
+        'groups'
+    )
+
+    for group in groups:
+        group_center_map[group] = centers.filter(groups__name__contains=group).first()
+
+    for study in queryset:
+        study.center = group_center_map[study.group.name]
+
+
 # Class-based views for study configuration
 class AssayStudyConfigurationList(LoginRequiredMixin, ListView):
     """Display a list of Study Configurations"""
@@ -373,6 +393,7 @@ class AssayStudyEditableList(OneGroupRequiredMixin, ListView):
 
         get_queryset_with_organ_model_map(queryset)
         get_queryset_with_number_of_data_points(queryset)
+        get_queryset_with_group_center_dictionary(queryset)
         # DOESN'T MATTER, ANYTHING THAT IS SIGNED OFF CAN'T BE EDITED
         # get_queryset_with_stakeholder_sign_off(queryset)
 
@@ -398,6 +419,7 @@ class AssayStudyList(LoginRequiredMixin, ListView):
         get_queryset_with_organ_model_map(combined)
         get_queryset_with_number_of_data_points(combined)
         get_queryset_with_stakeholder_sign_off(combined)
+        get_queryset_with_group_center_dictionary(combined)
 
         centers = MicrophysiologyCenter.objects.all().prefetch_related(
             'groups'
