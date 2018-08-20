@@ -1863,7 +1863,10 @@ class AssayMatrixItem(FlaggableModel):
             'Compounds': self.stringify_compounds(criteria.get('compound', None)),
             'Cells': self.stringify_cells(criteria.get('cell', None)),
             'Settings': self.stringify_settings(criteria.get('setting', None)),
-            'Trimmed Compounds': self.stringify_compounds({'compound_instance.compound_id': True}),
+            'Trimmed Compounds': self.stringify_compounds({
+                'compound_instance.compound_id': True,
+                'concentration': True
+            }),
             'Items with Same Treatment': []
         }
         return dic
