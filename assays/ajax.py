@@ -1861,11 +1861,12 @@ def acquire_post_filter(studies, assays, matrix_items, data_points):
             matrix_item.matrix_id: u'{} ({})'.format(matrix_item.matrix.name, matrix_item.study.name)
         })
 
-        current.setdefault(
-            'organ_model_id__in', {}
-        ).update({
-            matrix_item.organ_model_id: matrix_item.organ_model.name
-        })
+        if matrix_item.organ_model_id:
+            current.setdefault(
+                'organ_model_id__in', {}
+            ).update({
+                matrix_item.organ_model_id: matrix_item.organ_model.name
+            })
 
         for compound in matrix_item.assaysetupcompound_set.all():
             current.setdefault(
