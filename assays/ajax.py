@@ -20,7 +20,11 @@ from .utils import (
     DEFAULT_EXPORT_HEADER,
     get_repro_data,
     get_user_accessible_studies,
-    get_inter_study_reproducibility_report
+    get_inter_study_reproducibility_report,
+    # GLOBAL STRINGS
+    NO_COMPOUNDS_STRING,
+    NO_CELLS_STRING,
+    NO_SETTINGS_STRING,
 )
 
 from StringIO import StringIO
@@ -1311,7 +1315,7 @@ def fetch_data_points(request):
     )
 
     # Very odd, but expedient
-    study = AssayStudy.objects.filter(id=study.id)
+    studies = AssayStudy.objects.filter(id=study.id)
 
     # A little contrived
     assays = AssayStudyAssay.objects.filter(
@@ -1325,105 +1329,10 @@ def fetch_data_points(request):
             'method'
         )
 
-        post_filter = acquire_post_filter(study, assays, matrix_items, data_points)
+        post_filter = acquire_post_filter(studies, assays, matrix_items, data_points)
     else:
-        # Not very elegant...
-        study_post_filters = {
-            current_filter: [
-                x for x in post_filter.get('study', {}).get(current_filter, [])
-            ] for current_filter in post_filter.get('study')
-        }
-
-        study = study.filter(
-            **study_post_filters
-        )
-
-        assay_post_filters = {
-            current_filter: [
-                x for x in post_filter.get('assay', {}).get(current_filter, [])
-            ] for current_filter in post_filter.get('assay')
-        }
-
-        assays = assays.filter(
-            study_id__in=study
-        ).filter(
-            **assay_post_filters
-        )
-
-        # Matrix Items somewhat contrived to deal with null compounds
-        matrix_item_post_filters = {
-            current_filter: [
-                x for x in post_filter.get('matrix_item', {}).get(current_filter, [])
-            ] for current_filter in post_filter.get('matrix_item') if not current_filter.startswith('assaysetup')
-        }
-
-        matrix_item_compound_post_filters = {
-            current_filter: [
-                x for x in post_filter.get('matrix_item', {}).get(current_filter, [])
-            ] for current_filter in post_filter.get('matrix_item') if current_filter.startswith('assaysetupcompound__')
-        }
-
-        matrix_item_cell_post_filters = {
-            current_filter: [
-                x for x in post_filter.get('matrix_item', {}).get(current_filter, [])
-            ] for current_filter in post_filter.get('matrix_item') if current_filter.startswith('assaysetupcell__')
-        }
-
-        matrix_item_setting_post_filters = {
-            current_filter: [
-                x for x in post_filter.get('matrix_item', {}).get(current_filter, [])
-            ] for current_filter in post_filter.get('matrix_item') if current_filter.startswith('assaysetupsetting__')
-        }
-
-        matrix_items.filter(study_id__in=study)
-
-        matrix_items = matrix_items.filter(
-            **matrix_item_post_filters
-        )
-
-        # Compounds
-        if post_filter.get('matrix_item', {}).get('assaysetupcompound__compound_instance__compound_id__in', {}).get('0',
-                                                                                                                    None):
-            matrix_items = matrix_items.filter(
-                **matrix_item_compound_post_filters
-            ) | matrix_items.filter(assaysetupcompound__isnull=True)
-        else:
-            matrix_items = matrix_items.filter(
-                **matrix_item_compound_post_filters
-            )
-
-        # Cells
-        if post_filter.get('matrix_item', {}).get('assaysetupcell__cell_sample__cell_type_id__in', {}).get('0', None):
-            matrix_items = matrix_items.filter(
-                **matrix_item_cell_post_filters
-            ) | matrix_items.filter(assaysetupcell__isnull=True)
-        else:
-            matrix_items = matrix_items.filter(
-                **matrix_item_cell_post_filters
-            )
-
-        # Setting
-        if post_filter.get('matrix_item', {}).get('assaysetupsetting__setting_id__in', {}).get('0', None):
-            matrix_items = matrix_items.filter(
-                **matrix_item_setting_post_filters
-            ) | matrix_items.filter(assaysetupsetting__isnull=True)
-        else:
-            matrix_items = matrix_items.filter(
-                **matrix_item_setting_post_filters
-            )
-
-        data_point_post_filters = {
-            current_filter: [
-                x for x in post_filter.get('data_point', {}).get(current_filter, [])
-            ] for current_filter in post_filter.get('data_point')
-        }
-
-        data_points = data_points.filter(
-            study_id__in=study,
-            study_assay_id__in=assays,
-            matrix_item_id__in=matrix_items,
-        ).filter(
-            **data_point_post_filters
+        studies, assays, matrix_items, data_points = apply_post_filter(
+            post_filter, studies, assays, matrix_items, data_points
         )
 
     data = get_data_points_for_charting(
@@ -1711,7 +1620,7 @@ def fetch_pre_submission_filters(request):
 
         # Prepend contrived no compound
         if compounds:
-            compounds.insert(0, (0, '-Control-'))
+            compounds.insert(0, (0, NO_COMPOUNDS_STRING))
 
         compound_ids = {compound[0]: True for compound in compounds}
 
@@ -1775,7 +1684,7 @@ def fetch_pre_submission_filters(request):
                         content_type='application/json')
 
 
-# TODO NOT VERY DRY
+# TODO RATHER VERBOSE
 def acquire_post_filter(studies, assays, matrix_items, data_points):
     # Table -> Filter -> value -> [name, in_use]
     post_filter = {}
@@ -1815,7 +1724,7 @@ def acquire_post_filter(studies, assays, matrix_items, data_points):
     post_filter.setdefault('matrix_item', {}).setdefault(
         'assaysetupcompound__compound_instance__compound_id__in', {}
     ).update({
-        0: '-Control-'
+        0: NO_COMPOUNDS_STRING
     })
 
     # Contrived: Add no cells
@@ -2004,6 +1913,109 @@ def acquire_post_filter(studies, assays, matrix_items, data_points):
     return post_filter
 
 
+def apply_post_filter(post_filter, studies, assays, matrix_items, data_points):
+    # Not very elegant...
+    study_post_filters = {
+        current_filter: [
+            x for x in post_filter.get('study', {}).get(current_filter, [])
+        ] for current_filter in post_filter.get('study')
+    }
+
+    studies = studies.filter(
+        **study_post_filters
+    )
+
+    assay_post_filters = {
+        current_filter: [
+            x for x in post_filter.get('assay', {}).get(current_filter, [])
+        ] for current_filter in post_filter.get('assay')
+    }
+
+    assays = assays.filter(
+        study_id__in=studies
+    ).filter(
+        **assay_post_filters
+    )
+
+    # Matrix Items somewhat contrived to deal with null compounds
+    matrix_item_post_filters = {
+        current_filter: [
+            x for x in post_filter.get('matrix_item', {}).get(current_filter, [])
+        ] for current_filter in post_filter.get('matrix_item') if not current_filter.startswith('assaysetup')
+    }
+
+    matrix_item_compound_post_filters = {
+        current_filter: [
+            x for x in post_filter.get('matrix_item', {}).get(current_filter, [])
+        ] for current_filter in post_filter.get('matrix_item') if current_filter.startswith('assaysetupcompound__')
+    }
+
+    matrix_item_cell_post_filters = {
+        current_filter: [
+            x for x in post_filter.get('matrix_item', {}).get(current_filter, [])
+        ] for current_filter in post_filter.get('matrix_item') if current_filter.startswith('assaysetupcell__')
+    }
+
+    matrix_item_setting_post_filters = {
+        current_filter: [
+            x for x in post_filter.get('matrix_item', {}).get(current_filter, [])
+        ] for current_filter in post_filter.get('matrix_item') if current_filter.startswith('assaysetupsetting__')
+    }
+
+    matrix_items.filter(study_id__in=studies)
+
+    matrix_items = matrix_items.filter(
+        **matrix_item_post_filters
+    )
+
+    # Compounds
+    if post_filter.get('matrix_item', {}).get('assaysetupcompound__compound_instance__compound_id__in', {}).get('0',
+                                                                                                                None):
+        matrix_items = matrix_items.filter(
+            **matrix_item_compound_post_filters
+        ) | matrix_items.filter(assaysetupcompound__isnull=True)
+    else:
+        matrix_items = matrix_items.filter(
+            **matrix_item_compound_post_filters
+        )
+
+    # Cells
+    if post_filter.get('matrix_item', {}).get('assaysetupcell__cell_sample__cell_type_id__in', {}).get('0', None):
+        matrix_items = matrix_items.filter(
+            **matrix_item_cell_post_filters
+        ) | matrix_items.filter(assaysetupcell__isnull=True)
+    else:
+        matrix_items = matrix_items.filter(
+            **matrix_item_cell_post_filters
+        )
+
+    # Setting
+    if post_filter.get('matrix_item', {}).get('assaysetupsetting__setting_id__in', {}).get('0', None):
+        matrix_items = matrix_items.filter(
+            **matrix_item_setting_post_filters
+        ) | matrix_items.filter(assaysetupsetting__isnull=True)
+    else:
+        matrix_items = matrix_items.filter(
+            **matrix_item_setting_post_filters
+        )
+
+    data_point_post_filters = {
+        current_filter: [
+            x for x in post_filter.get('data_point', {}).get(current_filter, [])
+        ] for current_filter in post_filter.get('data_point')
+    }
+
+    data_points = data_points.filter(
+        study_id__in=studies,
+        study_assay_id__in=assays,
+        matrix_item_id__in=matrix_items,
+    ).filter(
+        **data_point_post_filters
+    )
+
+    return studies, assays, matrix_items, data_points
+
+
 def fetch_data_points_from_filters(request):
     intention = request.POST.get('intention', 'charting')
 
@@ -2089,11 +2101,11 @@ def fetch_data_points_from_filters(request):
         })
 
         matrix_item = None
-        study = accessible_studies
+        studies = accessible_studies
 
         # A little contrived
         assays = AssayStudyAssay.objects.filter(
-            study_id__in=study,
+            study_id__in=studies,
             target_id__in=target_ids
         )
 
@@ -2122,104 +2134,10 @@ def fetch_data_points_from_filters(request):
                 'method'
             )
 
-            post_filter = acquire_post_filter(study, assays, matrix_items, data_points)
+            post_filter = acquire_post_filter(studies, assays, matrix_items, data_points)
         else:
-            # Not very elegant...
-            study_post_filters = {
-                current_filter: [
-                    x for x in post_filter.get('study', {}).get(current_filter, [])
-                ] for current_filter in post_filter.get('study')
-            }
-
-            study = study.filter(
-                **study_post_filters
-            )
-
-            assay_post_filters = {
-                current_filter: [
-                    x for x in post_filter.get('assay', {}).get(current_filter, [])
-                ] for current_filter in post_filter.get('assay')
-            }
-
-            assays = assays.filter(
-                study_id__in=study
-            ).filter(
-                **assay_post_filters
-            )
-
-            # Matrix Items somewhat contrived to deal with null compounds
-            matrix_item_post_filters = {
-                current_filter: [
-                    x for x in post_filter.get('matrix_item', {}).get(current_filter, [])
-                ] for current_filter in post_filter.get('matrix_item') if not current_filter.startswith('assaysetup')
-            }
-
-            matrix_item_compound_post_filters = {
-                current_filter: [
-                    x for x in post_filter.get('matrix_item', {}).get(current_filter, [])
-                ] for current_filter in post_filter.get('matrix_item') if current_filter.startswith('assaysetupcompound__')
-            }
-
-            matrix_item_cell_post_filters = {
-                current_filter: [
-                    x for x in post_filter.get('matrix_item', {}).get(current_filter, [])
-                ] for current_filter in post_filter.get('matrix_item') if current_filter.startswith('assaysetupcell__')
-            }
-
-            matrix_item_setting_post_filters = {
-                current_filter: [
-                    x for x in post_filter.get('matrix_item', {}).get(current_filter, [])
-                ] for current_filter in post_filter.get('matrix_item') if current_filter.startswith('assaysetupsetting__')
-            }
-
-            matrix_items.filter(study_id__in=study)
-
-            matrix_items = matrix_items.filter(
-                **matrix_item_post_filters
-            )
-
-            # Compounds
-            if post_filter.get('matrix_item', {}).get('assaysetupcompound__compound_instance__compound_id__in', {}).get('0', None):
-                matrix_items = matrix_items.filter(
-                    **matrix_item_compound_post_filters
-                ) | matrix_items.filter(assaysetupcompound__isnull=True)
-            else:
-                matrix_items = matrix_items.filter(
-                    **matrix_item_compound_post_filters
-                )
-
-            # Cells
-            if post_filter.get('matrix_item', {}).get('assaysetupcell__cell_sample__cell_type_id__in', {}).get('0', None):
-                matrix_items = matrix_items.filter(
-                    **matrix_item_cell_post_filters
-                ) | matrix_items.filter(assaysetupcell__isnull=True)
-            else:
-                matrix_items = matrix_items.filter(
-                    **matrix_item_cell_post_filters
-                )
-
-            # Setting
-            if post_filter.get('matrix_item', {}).get('assaysetupsetting__setting_id__in', {}).get('0', None):
-                matrix_items = matrix_items.filter(
-                    **matrix_item_setting_post_filters
-                ) | matrix_items.filter(assaysetupsetting__isnull=True)
-            else:
-                matrix_items = matrix_items.filter(
-                    **matrix_item_setting_post_filters
-                )
-
-            data_point_post_filters = {
-                current_filter: [
-                    x for x in post_filter.get('data_point', {}).get(current_filter, [])
-                ] for current_filter in post_filter.get('data_point')
-            }
-
-            data_points = data_points.filter(
-                study_id__in=study,
-                study_assay_id__in=assays,
-                matrix_item_id__in=matrix_items,
-            ).filter(
-                **data_point_post_filters
+            studies, assays, matrix_items, data_points = apply_post_filter(
+                post_filter, studies, assays, matrix_items, data_points
             )
 
         if intention == 'charting':
@@ -2232,7 +2150,7 @@ def fetch_data_points_from_filters(request):
                 request.POST.get('include_all', ''),
                 request.POST.get('truncate_negative', ''),
                 json.loads(request.POST.get('dynamic_excluded', '{}')),
-                study=study,
+                study=studies,
                 matrix_item=matrix_item,
                 matrix_items=matrix_items,
                 criteria=json.loads(request.POST.get('criteria', '{}'))
@@ -2712,7 +2630,7 @@ def get_inter_study_reproducibility(
     for data_group, current_sample_location in data_group_to_sample_locations.items():
         final_data_group_to_sample_locations[data_group] = sorted(current_sample_location)
 
-        final_data_group_to_organ_models = {}
+    final_data_group_to_organ_models = {}
     for data_group, current_organ_model in data_group_to_organ_models.items():
         final_data_group_to_organ_models[data_group] = sorted(current_organ_model)
 
