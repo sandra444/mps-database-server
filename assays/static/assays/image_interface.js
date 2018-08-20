@@ -414,16 +414,36 @@ $(document).ready(function () {
     // Change caption font-size
     $(".caption").css('font-size', '13px');
 
+    // Collapsible Captions
+    var lastX, indexInc, captionEndString = '';
     $(".caption").each(function(i, obj){
+        // if ($(obj).height() > 54){
+        //     $(obj).attr("data-text", $(obj).text());
+        //     obj.addEventListener("mouseover",function(){
+        //         $(obj).text($(obj).attr('data-text'));
+        //     });
+        //     obj.addEventListener("mouseout",function(){
+        //         $(obj).text($(obj).attr('data-text').substring(0,50)+'...');
+        //     });
+        //     $(obj).text($(obj).text().substring(0,50)+"...");
+        // } else {
+        //     $(obj).attr("data-text", $(obj).text());
+        // }
         if ($(obj).height() > 54){
             $(obj).attr("data-text", $(obj).text());
+            lastX = $(obj).text().lastIndexOf('x');
+            indexInc = 2;
+            while ($(obj).text()[lastX-indexInc] != ' '){
+                indexInc += 1
+            }
+            captionEndString = $(obj).text().substring(lastX-indexInc);
             obj.addEventListener("mouseover",function(){
                 $(obj).text($(obj).attr('data-text'));
             });
             obj.addEventListener("mouseout",function(){
-                $(obj).text($(obj).attr('data-text').substring(0,50)+'...');
+                $(obj).text($(obj).attr('data-text').substring(0,50-captionEndString.length)+"..."+captionEndString);
             });
-            $(obj).text($(obj).text().substring(0,50)+"...");
+            $(obj).text($(obj).attr('data-text').substring(0,50-captionEndString.length)+"..."+captionEndString);
         } else {
             $(obj).attr("data-text", $(obj).text());
         }
