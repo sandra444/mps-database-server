@@ -11,13 +11,19 @@
     <li class="active">Query Data</li>
 {% endblock %}
 
-{% block content %}
-    <div class="row text-center padded-bottom">
+{% block fluid-content %}
+    <div class="row padded-row text-center padded-bottom large-padding-top">
         <a href="#charts" type="button" class="btn btn-xlarge btn-primary text-center submit-button" id="charts_submit">
+            <span class="glyphicon glyphicon glyphicon-stats" aria-hidden="true"></span>
             Show Plots
         </a>
         <a href="#inter_repro" type="button" class="btn btn-xlarge btn-primary text-center submit-button" id="repro_submit">
+            <span class="glyphicon glyphicon glyphicon-random" aria-hidden="true"></span>
             Show Reproducibility
+        </a>
+        <a href="/assays/data_from_filters/?" type="button" class="btn btn-xlarge btn-info text-center submit-button" id="download_submit">
+            <span class="glyphicon glyphicon glyphicon-download-alt" aria-hidden="true"></span>
+            Download
         </a>
         <a href="#filter" id="back" class="btn btn-xlarge btn-info hidden">
             <span class="glyphicon glyphicon-hand-left" aria-hidden="true"></span>
@@ -25,7 +31,7 @@
         </a>
     </div>
 
-    <div id="filter">
+    <div class="container" id="filter">
     <div id="number_of_points_container" class="row text-center padded-bottom text-success">
         <h1 id="make_more_selections_message" class="text-danger">Please Select at Least One MPS Model</h1>
         <h2>Number of Points: <span id="number_of_points"></span></h2>
@@ -73,7 +79,7 @@
     </div>
 
     <div class="row padded-bottom">
-        <div class="col-xs-6">
+        <div class="col-md-6">
             <div class="padded-bottom">
                 <a data-target-id="filter_targets" class="btn btn-primary filter-select-all">Select All</a>
                 <a data-target-id="filter_targets" class="btn btn-danger filter-deselect-all">Deselect All</a>
@@ -92,7 +98,7 @@
                 </tbody>
             </table>
         </div>
-        <div class="col-xs-6">
+        <div class="col-md-6">
             <div class="padded-bottom">
                 <a data-target-id="filter_compounds" class="btn btn-primary filter-select-all">Select All</a>
                 <a data-target-id="filter_compounds" class="btn btn-danger filter-deselect-all">Deselect All</a>
@@ -115,11 +121,11 @@
 
     </div>
 
-    <div hidden id="grouping_filtering">
+    <div class="container" hidden id="grouping_filtering">
         {% include 'assays/grouping_filtering.html' %}
     </div>
 
-    <div hidden id="results">
+    <div class="container" hidden id="results">
     {% include 'assays/chart_options.html' with chart_prefix="charts" chart_title="Selected Data" %}
 
     {# Note indicating no data to display initially #}
@@ -147,7 +153,7 @@
 
     {# TODO TODO TODO NEED GROUPING  AND FILTERING STUFF HERE TOO #}
 
-    <div class="well">
+    <div class="well container">
         {# TODO TODO TODO #}
         <div class="row">
         <div class="col-md-4">
@@ -163,20 +169,23 @@
         <div class="col-md-4">
         <label>
             <input type="checkbox" name="initial_norm" id="initial_norm">
-            Normalize by Initial Value
+            Normalize by Median Value
         </label>
         </div>
         <div class="col-md-4">
         <label>Maximum Interpolation Size
-            <input id="max_interpolation_size" type="number" value="2">
+            <input id="max_interpolation_size" type="number" value="2" style="width: 40px;">
         </label>
         </div>
         </div>
     </div>
 
-    <table id='repro_table' class="display table-bordered text-wrapped" cellspacing="0" width="100%">
-
-    </table>
+    <div class="row padded-row">
+        <div class="col-xs-12">
+        <table id='repro_table' class="display table-bordered text-wrapped padded-row" cellspacing="0" width="100%">
+        </table>
+        </div>
+    </div>
 
     <div id="expanded_data">
 
@@ -205,7 +214,7 @@
                             <tr>
                                 {# TODO TOOLTIPS #}
                                 <th>Interpolation</th>
-                                <th>Interpolated Points</th>
+{#                                <th>Interpolated Points</th>#}
                                 <th>Max CV or CV</th>
                                 <th>ICC</th>
                                 <th>ANOVA P-Value</th>
@@ -217,27 +226,25 @@
                 </div>
             </div>
             <div class='row'>
-                <div class='col-md-6' data-id='item_chart'>
-
+                <div class='row'>
+                <div class='col-md-6' data-id='tooltip_item'></div>
+                <div class='col-md-6' data-id='tooltip_average'></div>
                 </div>
-                <div class='col-md-6' data-id='average_chart'>
 
-                </div>
-                <div class='col-md-6' data-id='trimmed_chart'>
+                <div class='col-md-6' data-id='item_chart'></div>
+                <div class='col-md-6' data-id='average_chart'></div>
 
+                <div class='row'>
+                <div class='col-md-6' data-id='tooltip_trimmed'></div>
+                <div class='col-md-6' data-id='tooltip_interpolated'></div>
                 </div>
-                <div class='col-md-6' data-id='nearest_chart'>
 
-                </div>
-                <div class='col-md-6' data-id='linear_chart'>
+                <div class='col-md-6' data-id='trimmed_chart'></div>
+                <div class='col-md-6' data-id='nearest_chart'></div>
 
-                </div>
-                <div class='col-md-6' data-id='quadratic_chart'>
-
-                </div>
-                <div class='col-md-6' data-id='cubic_chart'>
-
-                </div>
+                <div class='col-md-6' data-id='linear_chart'></div>
+                <div class='col-md-6' data-id='quadratic_chart'></div>
+                <div class='col-md-6' data-id='cubic_chart'></div>
                 {# This is just a buffer #}
                 <div class="col-md-6"></div>
             </div>
