@@ -360,7 +360,7 @@ $(document).ready(function () {
                 var current_column = $(this).parent().parent().parent();
                 var current_fig = $(this).parent().parent();
                 var buttonActive = $('input[data-column="' + current_column.attr("data-column") + '"]').prop('checked');
-                if ($(this).text().toUpperCase().includes(query) || $(this).attr("data-text").toUpperCase().includes(query)) {
+                if ($(this).text().toUpperCase().includes(query) || $(this).attr("data-text-long").toUpperCase().includes(query)) {
                     if (buttonActive) {
                         current_fig.removeClass('hidden');
                     } else {
@@ -430,22 +430,23 @@ $(document).ready(function () {
         //     $(obj).attr("data-text", $(obj).text());
         // }
         if ($(obj).height() > 54){
-            $(obj).attr("data-text", $(obj).text());
-            lastX = $(obj).text().lastIndexOf('x');
+            $(obj).attr("data-text-long", $(obj).text());
+            lastX = $(obj).attr('data-text-long').lastIndexOf('x');
             indexInc = 2;
-            while ($(obj).text()[lastX-indexInc] != ' '){
+            while ($(obj).attr('data-text-long')[lastX-indexInc] != ' '){
                 indexInc += 1
             }
-            captionEndString = $(obj).text().substring(lastX-indexInc);
+            captionEndString = $(obj).attr('data-text-long').substring(lastX-indexInc);
+            $(obj).attr("data-text-short", $(obj).attr('data-text-long').substring(0,50-captionEndString.length)+"..."+captionEndString);
             obj.addEventListener("mouseover",function(){
-                $(obj).text($(obj).attr('data-text'));
+                $(obj).text($(obj).attr('data-text-long'));
             });
             obj.addEventListener("mouseout",function(){
-                $(obj).text($(obj).attr('data-text').substring(0,50-captionEndString.length)+"..."+captionEndString);
+                $(obj).text($(obj).attr('data-text-short'));
             });
-            $(obj).text($(obj).attr('data-text').substring(0,50-captionEndString.length)+"..."+captionEndString);
+            $(obj).text($(obj).attr('data-text-short'));
         } else {
-            $(obj).attr("data-text", $(obj).text());
+            $(obj).attr("data-text-long", $(obj).text());
         }
     });
 
