@@ -53,7 +53,7 @@ $(document).ready(function() {
                         });
                     }
 
-                    return methods.join(', \n');
+                    return methods.join(', <br>');
                 }
             },
             {
@@ -67,6 +67,11 @@ $(document).ready(function() {
                                 if(value.name.toLowerCase().includes("placebo") || value.name.toLowerCase() == "placebo"){
 
                                 }
+                                else if(value.description){
+                                    drugName = value.name;
+                                    drugName = drugName.charAt(0).toUpperCase() + drugName.substring(1);
+                                    methods.push(drugName + '<span data-toggle="tooltip" title="'+ value.description +'" class="glyphicon glyphicon-info-sign" aria-hidden="true"></span>');
+                                }
                                 else{
                                     drugName = value.name;
                                     drugName = drugName.charAt(0).toUpperCase() + drugName.substring(1);
@@ -75,9 +80,17 @@ $(document).ready(function() {
                             }
                         });
                     }
-                    return methods.join(', \n');
+                    return methods.join(', <br>');
                 }
             },
+            /*{
+                data: 'enrollment',
+                render:function (data, type, row, meta) {
+                    var methods = [];
+                    methods.push(data);
+                    return methods;
+                }
+            },*/
             {
                 data: 'outcomeAll',
                 render:function (data, type, row, meta) {
@@ -87,7 +100,7 @@ $(document).ready(function() {
                         //$.each(data, function(index, value) {
                             if(data[1]){
                                 var count = 1;
-                                resultGroups = []
+                                resultGroups = [];
                                 $.each(data[1], function(index, value) {
                                     if (value.outcome_id == data[0].id){
                                         if(resultGroups.indexOf(value.result_group_id) == -1){
@@ -99,11 +112,17 @@ $(document).ready(function() {
                                         //count = count + 1
                                     //}
                                 });
-                                count = 1
-                                for(var i = 0; i < resultGroups.length; i++){
-                                    methods.push("<strong><u> Result Group " + count + "</u></strong><br>")
+                                resultGroups.forEach(function(groupID) {
+                                    var currID = groupID;
+                                    groupName = "";
+                                    $.each(data[3], function(index, value){
+                                        if(value.id == groupID){
+                                            groupName = value.title;
+                                        }
+                                    });
+                                    methods.push("<strong><u>" + groupName + "</u></strong><br>");
                                     $.each(data[1], function(index, value){
-                                        if(value.result_group_id == resultGroups[i]){
+                                        if(value.result_group_id == groupID){
                                             if(value.classification){
                                                 methods.push("<strong>" + value.classification + ":</strong> " + value.param_value + " " + value.units + "<br>");
                                             }
@@ -112,14 +131,14 @@ $(document).ready(function() {
                                             }
                                         }
                                     });
-                                    count = count + 1
-                                }
+                                    });
+
                             }
                         //});
                     //}
 
                     return methods.join('\n');
-                },
+                }
             },
 
             {
@@ -172,6 +191,10 @@ $(document).ready(function() {
         ],
         "aoColumnDefs": [ {},{},{},{},{ "width": "30%"},{},{},{} ]
     });
+
+    window.onresize = function(){
+        $($.fn.dataTable.tables(true)).DataTable().columns.adjust();
+    }
 });
 
 $.urlParam = function(name){

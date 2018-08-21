@@ -29,15 +29,20 @@ def fetch_auto_drug_trial_data(request):
     #startTime = time.time()
     #print('Starting..')
 # https://clinicaltrials.gov/ct2/results?cond=&term=&type=Intr&rslt=With&recrs=e&age_v=&gndr=&intr=&titles=&outc=&spons=&lead=&id=&cntry=US&state=&city=&dist=&locn=&strd_s=&strd_e=&prcd_s=&prcd_e=&sfpd_s=&sfpd_e=&lupd_s=&lupd_e=
-    url = "https://clinicaltrials.gov/ct2/results/download_fields?cond=" + disease + "&term=&type=Intr&rslt=With&recrs=e&age_v=&gndr=&intr=&titles=&outc=&spons=&lead=&id=&cntry=US&state=&city=&dist=&locn=&strd_s=&strd_e=&prcd_s=&prcd_e=&sfpd_s=&sfpd_e=&lupd_s=&lupd_e=&down_count=10000&down_fmt=plain"
-    file = urllib2.urlopen(url)
     studyIDs = []
-    link = "https://ClinicalTrials.gov/show/"
-    for line in file:
-        if link in line:
-            ID = line[line.find(link)+len(link):line.find(link)+len(link)+11]
-            studyIDs.append(ID)
-
+    try:
+        url = "https://clinicaltrials.gov/ct2/results/download_fields?cond=" + disease + "&term=&type=Intr&rslt=With&recrs=e&age_v=&gndr=&intr=&titles=&outc=&spons=&lead=&id=&cntry=US&state=&city=&dist=&locn=&strd_s=&strd_e=&prcd_s=&prcd_e=&sfpd_s=&sfpd_e=&lupd_s=&lupd_e=&down_count=10000&down_fmt=plain"
+        file = urllib2.urlopen(url)
+        link = "https://ClinicalTrials.gov/show/"
+        for line in file:
+            if link in line:
+                ID = line[line.find(link)+len(link):line.find(link)+len(link)+11]
+                studyIDs.append(ID)
+    except:
+        return HttpResponse(
+            json.dumps({'data':{'nct_id':'','outcomeAll':['','',''],'conditions':'','drugs':'','studies':''}}),
+            content_type="application/json"
+            )
 
     def lst2pgarr(alist):
         return '{' + ','.join(alist) + '}'
@@ -62,7 +67,7 @@ def fetch_auto_drug_trial_data(request):
 
     cur.execute("SELECT nct_id,last_update_posted_date,start_date,completion_date,target_duration, \
                 study_type,brief_title,official_title,overall_status,phase,results_first_posted_date, \
-                source,why_stopped FROM studies WHERE nct_id = ANY(%s)",(studyIDs,))
+                source,why_stopped,enrollment FROM studies WHERE nct_id = ANY(%s)",(studyIDs,))
     studies = cur.fetchall()
     #cur.execute("SELECT nct_id,description FROM brief_summaries WHERE nct_id = ANY(%s)",(studyIDs,))
     #brief_summaries = cur.fetchall()
@@ -94,11 +99,12 @@ def fetch_auto_drug_trial_data(request):
     #cur.execute("SELECT nct_id,result_group_id,time_frame,event_type,description,event_count, \
     #            organ_system,adverse_event_term,frequency_threshold FROM reported_events WHERE nct_id = ANY(%s)",(studyIDs,))
     #reported_events = cur.fetchall()
-    #cur.execute("SELECT id,nct_id,result_type,title,description FROM result_groups \
-#                WHERE nct_id = ANY(%s)",(studyIDs,)) # IN (SELECT nct_id FROM conditions WHERE downcase_name= %s )", [condition])
-#    result_groups = cur.fetchall()
+    cur.execute("SELECT id,nct_id,result_type,title,description FROM result_groups \
+                WHERE nct_id = ANY(%s)",(studyIDs,)) # IN (SELECT nct_id FROM conditions WHERE downcase_name= %s )", [condition])
+    result_groups = cur.fetchall()
     cur.execute("SELECT nct_id,outcome_id,result_group_id,classification,category,title, \
-                description,units,param_type,param_value,param_value_num, dispersion_value_num, \
+                description,units,param_type,param_value,param_value_num, dispersion_type, \
+                dispersion_value, dispersion_value_num, \
                 explanation_of_na FROM outcome_measurements WHERE nct_id = ANY(%s)",(studyIDs,))
     outcome_measurements = cur.fetchall()
     cur.execute("SELECT nct_id,outcome_id,param_type,param_value,p_value_modifier,p_value, \
@@ -141,7 +147,7 @@ def fetch_auto_drug_trial_data(request):
                      'outcome_measurements': rList(nct_id,outcome_measurements), \
                      'outcomes': rList(nct_id, outcomes), \
                     # 'reported_events': rList(nct_id,reported_events), \
-                    # 'result_groups': rList(nct_id,result_groups), \
+                     'result_groups': rList(nct_id,result_groups), \
                     # 'sponsors': rList(nct_id,sponsors), \
                      'studies': (item for item in studies if item["nct_id"] == nct_id).next(), \
                      #'study_references': rList(nct_id,study_references), \
@@ -153,7 +159,8 @@ def fetch_auto_drug_trial_data(request):
     for i in range(0, len(studiesWithResults)):
         for j in range(0, len(studiesWithResults[i]["outcomes"])):
             outcomeInfo = {'nct_id': studiesWithResults[i]["nct_id"],\
-                            'outcomeAll': [studiesWithResults[i]["outcomes"][j], studiesWithResults[i]["outcome_measurements"], studiesWithResults[i]["outcome_analyses"]],\
+                            #'enrollment': studiesWithResults[i]["enrollment"],\
+                            'outcomeAll': [studiesWithResults[i]["outcomes"][j], studiesWithResults[i]["outcome_measurements"], studiesWithResults[i]["outcome_analyses"], studiesWithResults[i]["result_groups"]],\
                             'conditions':studiesWithResults[i]["conditions"],\
                             'drugs':studiesWithResults[i]["drugs"],\
                             'studies':studiesWithResults[i]["studies"]}
