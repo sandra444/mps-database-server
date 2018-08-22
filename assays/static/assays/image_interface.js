@@ -211,8 +211,25 @@ $(document).ready(function () {
         cls = tableCols[j].split(" ").join("").split(",").join("");
         for (var i=0; i<Object.keys(tableData).length; i++) {
             if (tableData[Object.keys(tableData)[i]][1] == cls) {
-                var caption = metadata_list[Object.keys(tableData)[i]]["target_analyte"] + " (" + metadata_list[Object.keys(tableData)[i]]["sample_location"] + "), "+metadata_list[Object.keys(tableData)[i]]["sample_label"]+", "+metadata_list[Object.keys(tableData)[i]]["magnification"].split(".")[0]+"x at " + metadata_list[Object.keys(tableData)[i]]["time"];
-                $('[data-column="' + cls + '"][data-row="' + tableData[Object.keys(tableData)[i]][0] + '"]').append('<span data-pic="'+Object.keys(tableData)[i]+'" style="vertical-align: top; display: inline-block; margin:2px;" class="image_thumbnail"><figure><img alt="'+metadata_list[Object.keys(tableData)[i]]["file_name"]+'" style="height: 120px; width: 120px; filter: contrast('+contrast+'%) brightness('+brightness+'%);" src="/media/assay_thumbs/'+study_pk+'/thumbnail_'+metadata_list[Object.keys(tableData)[i]]["file_name"].split(".").slice(0, -1).join('.') +'_120_120.jpg"/><figcaption style="width: 120px; word-wrap: break-word;" class="text-center">'+ caption +'</figcaption></figure></span>');
+                var caption = metadata_list[Object.keys(tableData)[i]]["target_analyte"] + " (" + metadata_list[Object.keys(tableData)[i]]["sample_location"] + "), "
+                +metadata_list[Object.keys(tableData)[i]]["sample_label"]+", "+metadata_list[Object.keys(tableData)[i]]["magnification"].split(".")[0]
+                +"x at " + metadata_list[Object.keys(tableData)[i]]["time"];
+
+                var extension = metadata_list[Object.keys(tableData)[i]]["file_name"].split(".").pop().toLowerCase();
+                if (['flv', 'avi', 'mp4', 'mov', 'wmv'].indexOf(extension) >= 0){
+                    $('[data-column="' + cls + '"][data-row="' + tableData[Object.keys(tableData)[i]][0] + '"]').append('<span data-pic="'+Object.keys(tableData)[i]
+                    +'" style="vertical-align: top; display: inline-block; margin:2px;" class="image_thumbnail"><figure><div style="position: absolute; z-index: 0;"><img alt="'
+                    +metadata_list[Object.keys(tableData)[i]]["file_name"]+'" style="height: 120px; width: 120px; filter: contrast('+contrast+'%) brightness('+brightness+'%);" src="/media/assay_thumbs/'
+                    +study_pk+'/thumbnail_'+metadata_list[Object.keys(tableData)[i]]["file_name"].split(".").slice(0, -1).join('.')
+                    +'_120_120.jpg"/></div><div onMouseOver="this.style.opacity='+"1"+'" onMouseOut="this.style.opacity='+"0.5"+'" style="position: absolute; z-index: 1; opacity: 0.5;"><img src="/media/assay_images/playbutton.png" style="padding: 30px; filter: invert(1);"/></div><div style="padding-top:120px;"><figcaption style="width: 120px; word-wrap: break-word;" class="caption text-center">'+ caption +'</figcaption></div></figure></span>');
+                }
+                else {
+                    $('[data-column="' + cls + '"][data-row="' + tableData[Object.keys(tableData)[i]][0] + '"]').append('<span data-pic="'+Object.keys(tableData)[i]
+                    +'" style="vertical-align: top; display: inline-block; margin:2px;" class="image_thumbnail"><figure><img alt="'
+                    +metadata_list[Object.keys(tableData)[i]]["file_name"]+'" style="height: 120px; width: 120px; filter: contrast('+contrast+'%) brightness('+brightness+'%);" src="/media/assay_thumbs/'
+                    +study_pk+'/thumbnail_'+metadata_list[Object.keys(tableData)[i]]["file_name"].split(".").slice(0, -1).join('.')
+                    +'_120_120.jpg"/><figcaption style="width: 120px; word-wrap: break-word;" class="text-center caption">'+ caption +'</figcaption></figure></span>');
+                }
             }
         }
     }
@@ -343,7 +360,7 @@ $(document).ready(function () {
                 var current_column = $(this).parent().parent().parent();
                 var current_fig = $(this).parent().parent();
                 var buttonActive = $('input[data-column="' + current_column.attr("data-column") + '"]').prop('checked');
-                if ($(this).text().toUpperCase().includes(query)) {
+                if ($(this).text().toUpperCase().includes(query) || $(this).attr("data-text-long").toUpperCase().includes(query)) {
                     if (buttonActive) {
                         current_fig.removeClass('hidden');
                     } else {
@@ -394,6 +411,44 @@ $(document).ready(function () {
     // "Close" and "Download" buttons as Bootstrap buttons
     $(".ui-dialog").find(".ui-button-text-only").addClass('btn btn-primary').removeClass('ui-state-default');
 
+    // Change caption font-size
+    $(".caption").css('font-size', '13px');
+
+    // Collapsible Captions
+    var lastX, indexInc, captionEndString = '';
+    $(".caption").each(function(i, obj){
+        // if ($(obj).height() > 54){
+        //     $(obj).attr("data-text", $(obj).text());
+        //     obj.addEventListener("mouseover",function(){
+        //         $(obj).text($(obj).attr('data-text'));
+        //     });
+        //     obj.addEventListener("mouseout",function(){
+        //         $(obj).text($(obj).attr('data-text').substring(0,50)+'...');
+        //     });
+        //     $(obj).text($(obj).text().substring(0,50)+"...");
+        // } else {
+        //     $(obj).attr("data-text", $(obj).text());
+        // }
+        if ($(obj).height() > 54){
+            $(obj).attr("data-text-long", $(obj).text());
+            lastX = $(obj).attr('data-text-long').lastIndexOf('x');
+            indexInc = 2;
+            while ($(obj).attr('data-text-long')[lastX-indexInc] != ' '){
+                indexInc += 1
+            }
+            captionEndString = $(obj).attr('data-text-long').substring(lastX-indexInc);
+            $(obj).attr("data-text-short", $(obj).attr('data-text-long').substring(0,50-captionEndString.length)+"..."+captionEndString);
+            $($(obj).parent())[0].addEventListener("mouseover",function(){
+                $(obj).text($(obj).attr('data-text-long'));
+            });
+            $($(obj).parent())[0].addEventListener("mouseout",function(){
+                $(obj).text($(obj).attr('data-text-short'));
+            });
+            $(obj).text($(obj).attr('data-text-short'));
+        } else {
+            $(obj).attr("data-text-long", $(obj).text());
+        }
+    });
 
     //TODO Unintelligently play with table sizing at different image quantities
     // var mostImages = 0;
