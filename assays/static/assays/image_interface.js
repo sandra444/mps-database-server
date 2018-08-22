@@ -429,7 +429,6 @@ $(document).ready(function () {
         // } else {
         //     $(obj).attr("data-text", $(obj).text());
         // }
-        console.log();
         if ($(obj).height() > 54){
             $(obj).attr("data-text-long", $(obj).text());
             lastX = $(obj).attr('data-text-long').lastIndexOf('x');
