@@ -168,6 +168,12 @@ class OrganModel(LockableModel):
 
     model_image = models.ImageField(upload_to='models', null=True, blank=True)
 
+    # "Base Model" represents the "parent" of the model in question
+    base_model = models.ForeignKey('microdevices.OrganModel')
+    # Alternative name, especially for filters
+    alt_name = models.CharField(max_length=1000, blank=True, default='')
+
+    # NAIVE
     epa = models.BooleanField(
         default=False,
         help_text='Whether this compound is part of the EPA project'
