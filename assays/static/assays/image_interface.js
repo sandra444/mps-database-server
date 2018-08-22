@@ -429,6 +429,7 @@ $(document).ready(function () {
         // } else {
         //     $(obj).attr("data-text", $(obj).text());
         // }
+        console.log();
         if ($(obj).height() > 54){
             $(obj).attr("data-text-long", $(obj).text());
             lastX = $(obj).attr('data-text-long').lastIndexOf('x');
@@ -438,10 +439,10 @@ $(document).ready(function () {
             }
             captionEndString = $(obj).attr('data-text-long').substring(lastX-indexInc);
             $(obj).attr("data-text-short", $(obj).attr('data-text-long').substring(0,50-captionEndString.length)+"..."+captionEndString);
-            obj.addEventListener("mouseover",function(){
+            $($(obj).parent())[0].addEventListener("mouseover",function(){
                 $(obj).text($(obj).attr('data-text-long'));
             });
-            obj.addEventListener("mouseout",function(){
+            $($(obj).parent())[0].addEventListener("mouseout",function(){
                 $(obj).text($(obj).attr('data-text-short'));
             });
             $(obj).text($(obj).attr('data-text-short'));
