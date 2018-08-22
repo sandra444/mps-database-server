@@ -138,7 +138,10 @@ class MicrodeviceAdmin(LockableAdmin):
                         'center', 'manufacturer',
                     ),
                     (
-                        'name', 'organ',
+                        'name', 'organ', 'alt_name', 'base_model', 'model_type'
+                    ),
+                    (
+                        'disease', 'disease_trigger'
                     ),
                     (
                         'description', 'barcode',

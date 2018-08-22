@@ -4,16 +4,20 @@ $(document).ready(function() {
         "sDom": '<B<"row">lfrtip>',
         fixedHeader: {headerOffset: 50},
         responsive: true,
-        "order": [[3, "asc"], [2, "asc"]],
+        "order": [[4, "asc"], [3, "asc"], [2, "asc"]],
         "aoColumnDefs": [
             {
                 "bSortable": false,
                 "aTargets": [0, 1]
             },
             {
+                'className': 'none',
+                'targets': [8]
+            },
+            {
                 'sortable': true,
                 'visible': false,
-                'targets': [7]
+                'targets': [9]
             },
             {
                 "width": "10%",
