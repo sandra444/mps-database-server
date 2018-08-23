@@ -1999,6 +1999,8 @@ def apply_post_filter(post_filter, studies, assays, matrix_items, data_points):
             **matrix_item_setting_post_filters
         )
 
+    matrix_items = matrix_items.distinct()
+
     data_point_post_filters = {
         current_filter: [
             x for x in post_filter.get('data_point', {}).get(current_filter, [])

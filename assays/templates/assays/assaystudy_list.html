@@ -49,6 +49,7 @@
                     <th>Data Provider</th>
                     <th>Data Entry</th>
                     <th>Review</th>
+                    <th>Supporting Data</th>
                 </tr>
             </thead>
 
@@ -100,6 +101,11 @@
                             <span title="This entry is flagged for review: '{{ study.reason_for_flag }}'" class="glyphicon glyphicon-flag text-danger" aria-hidden="true"></span>
                         {% endif %}
                     </td>
+                    {% if study.supporting_data %}
+                        <td class="text-success">{{ study.supporting_data|intcomma }}</td>
+                    {% else %}
+                        <td class="text-danger">0</td>
+                    {% endif %}
                 </tr>
                 {% endif %}
             {% endfor %}
