@@ -121,8 +121,18 @@ class MicrodeviceAdmin(LockableAdmin):
     save_as = True
     save_on_top = True
     list_per_page = 300
-    list_display = ('name', 'organ', 'center', 'manufacturer',
-                    'description')
+    list_display = (
+        'name',
+        'center',
+        'base_model',
+        'organ',
+        'device',
+        'disease',
+        'description',
+        'alt_name',
+        'model_type',
+        'disease_trigger',
+    )
     # TODO REVISE ORGAN_NAME
     search_fields = ['name', 'organ__organ_name', 'center__name',  'description']
     list_filter = ['organ', 'center', ]
