@@ -364,9 +364,24 @@ def get_queryset_with_number_of_data_points(queryset):
             image.matrix_item.study_id: current_value + 1
         })
 
+    supporting_data = AssayStudySupportingData.objects.filter(
+        study_id__in=study_ids
+    ).only('id', 'study_id')
+
+    supporting_data_map = {}
+
+    for supporting in supporting_data:
+        current_value = supporting_data_map.setdefault(
+            supporting.study_id, 0
+        )
+        supporting_data_map.update({
+            supporting.study_id: current_value + 1
+        })
+
     for study in queryset:
         study.data_points = data_points_map.get(study.id, 0)
         study.images = images_map.get(study.id, 0)
+        study.supporting_data = supporting_data_map.get(study.id, 0)
 
 
 # TODO GET NUMBER OF DATA POINTS
