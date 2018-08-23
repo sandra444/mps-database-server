@@ -62,7 +62,7 @@ $(document).ready(function () {
     // Defines the options for the print, copy, and save as buttons
     $.extend(true, $.fn.dataTable.defaults, {
         buttons: [
-            'copy', 'csv', 'print'
+            'copy', 'csv', 'print', 'colvis'
         ]
         // swfPath: '/static/swf/flashExport.swf'
     });
