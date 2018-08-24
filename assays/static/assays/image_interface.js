@@ -268,14 +268,14 @@ $(document).ready(function () {
 
     function adjustContrast(newContrast){
         contrast = newContrast;
-        $( "img" ).not('img[src$="/static/img/brand.png"]').each(function() {
+        $( "img" ).not('img[src$="/static/img/brand.png"]').not('img[src$="/media/assay_images/playbutton.png"]').each(function() {
             $( this ).css( "filter", "contrast("+contrast+"%) brightness("+brightness+"%)");
         });
     }
 
     function adjustBrightness(newBrightness){
         brightness = newBrightness;
-        $( "img" ).not('img[src$="/static/img/brand.png"]').each(function() {
+        $( "img" ).not('img[src$="/static/img/brand.png"]').not('img[src$="/media/assay_images/playbutton.png"]').each(function() {
             $( this ).css( "filter", "contrast("+contrast+"%) brightness("+brightness+"%)");
         });
     }
