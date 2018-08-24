@@ -5,6 +5,9 @@
 {% load humanize %}
 
 {% block load %}
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script src="{% static "assays/chart_display.js" %}"></script>
+    <script src="{% static "js/display_datatable.js" %}"></script>
     <script src="{% static "assays/assaystudy_list.js" %}"></script>
 {% endblock %}
 
@@ -46,6 +49,7 @@
                     <th>Images</th>
 {#                    <th>Integrated Study Configuration</th>#}
                     <th>Description</th>
+                    <th>Reproducibility Status</th>
                     <th>Data Provider</th>
                     <th>Data Entry</th>
                     <th>Review</th>
@@ -78,7 +82,12 @@
                         <td class="text-danger">0</td>
                     {% endif %}
                     <td>{{ study.description }}</td>
-                    <td><a href='/microdevices/center/{{ study.center.id }}/' target='_blank'>{{ study.center.name }}</a></td>
+                    <td>
+                        {% if study.repro_nums %}
+                            <div id="piechart{{ forloop.counter }}" data-nums="{{study.repro_nums}}" class="text-center" style="width: 100px; height: 100px; margin: auto; display: block;">Loading...</div>
+                        {% endif %}
+                    </td>
+                    <td><a href='/microdevices/center/{{ study.center.id }}/' target='_blank' title="{{ study.center.name }}">{{ study.center.center_id }}</a></td>
                     <td>
                         {{ study.full_creator }}
                     </td>

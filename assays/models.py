@@ -1566,6 +1566,9 @@ class AssayStudy(FlaggableModel):
     # Special addition, would put in base model, but don't want excess...
     signed_off_notes = models.CharField(max_length=255, blank=True, default='')
 
+    # Delimited string of reproducibility (Excellent|Acceptable|Poor)
+    repro_nums = models.CharField(max_length=40, blank=True, default='', help_text='Excellent|Acceptable|Poor')
+
     # TODO SOMEWHAT CONTRIVED
     bulk_file = models.FileField(
         upload_to=upload_file_location,

@@ -1,5 +1,8 @@
 $(document).ready(function () {
+    // Load core chart package
     google.charts.load('current', {'packages':['corechart']});
+    // Set the callback
+    google.charts.setOnLoadCallback(reproPie1);
 
     // FILE-SCOPE VARIABLES
     var study_id = Math.floor(window.location.href.split('/')[5]);
@@ -11,6 +14,7 @@ $(document).ready(function () {
         chip_list: null,
         cv_list: null
     };
+    var pie = null;
 
     var cv_tooltip = '<span data-toggle="tooltip" title="The CV is calculated for each time point and the value reported is the max CV across time points, or the CV if a single time point is present.  The reproducibility status is excellent if Max CV/CV < 5% (Excellent (CV)), acceptable if Max CV/CV < 15% (Acceptable (CV)), and poor if CV > 15% for a single time point (Poor (CV))" class="glyphicon glyphicon-question-sign" aria-hidden="true" data-placement="bottom"></span>';
     var icc_tooltip = '<span data-toggle="tooltip" title="The ICC Absolute Agreement of the measurements across multiple time points is a correlation coefficient that ranges from -1 to 1 with values closer to 1 being more correlated.  When the Max CV > 15%, the reproducibility status is reported to be excellent if > 0.8 (Excellent (ICC), acceptable if > 0.2 (Acceptable (ICC)), and poor if < 0.2 (Poor (ICC))" class="glyphicon glyphicon-question-sign" aria-hidden="true" data-placement="bottom"></span>';
@@ -37,6 +41,8 @@ $(document).ready(function () {
                 comp_list = json.comp_list;
                 lists.cv_list = json.cv_list;
                 lists.chip_list = json.chip_list;
+                pie = json.pie;
+                reproPie2();
 
                 return gas_list;
             }
@@ -355,5 +361,54 @@ $(document).ready(function () {
         for (var i=0; i < orderList.length; i++){
             $('#clone-container .repro-'+orderList[i]).appendTo('#clone-container');
         }
+    }
+
+    function reproPie1() {
+        var data = google.visualization.arrayToDataTable([
+            ['Status', 'Count'],
+            ['Loading...', 1]
+        ]);
+        var options = {
+            legend: 'none',
+            pieSliceText: 'label',
+            'chartArea': {'width': '90%', 'height': '90%'},
+            tooltip: {trigger : 'none'},
+            pieSliceTextStyle: {
+                color: 'white',
+                bold: true,
+                fontSize: 12
+            },
+        };
+        var chart = new google.visualization.PieChart(document.getElementById('piechart'));
+        chart.draw(data, options);
+    }
+
+    function reproPie2() {
+        var data = google.visualization.arrayToDataTable([
+            ['Status', 'Count'],
+            ['Excellent', pie[0]],
+            ['Acceptable', pie[1]],
+            ['Poor', pie[2]]
+        ]);
+        var options = {
+            // title: 'Reproducibility Breakdown\n(Click Slices for Details)',
+            // titleFontSize:16,
+            legend: 'none',
+            slices: {
+                0: { color: '#74ff5b' },
+                1: { color: '#fcfa8d' },
+                2: { color: '#ff7863' }
+            },
+            pieSliceText: 'label',
+            pieSliceTextStyle: {
+                color: 'black',
+                bold: true,
+                fontSize: 12
+            },
+            'chartArea': {'width': '90%', 'height': '90%'},
+            // pieSliceBorderColor:"transparent",
+        };
+        var chart = new google.visualization.PieChart(document.getElementById('piechart'));
+        chart.draw(data, options);
     }
 });
