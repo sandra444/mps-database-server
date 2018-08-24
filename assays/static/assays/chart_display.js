@@ -55,7 +55,7 @@ $(document).ready(function () {
         'MPS Model': 'MPS Model',
         'Cells': 'Cells Added',
         'Compounds': 'Compound Treatment',
-        'Settings': 'Extra Settings/Treatments',
+        'Settings': 'Settings (Non-Compound Treatments)',
         'Items with Same Treatment': 'Matrix Items (Chips/Wells) in Group'
     };
 
