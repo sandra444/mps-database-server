@@ -2627,14 +2627,16 @@ class AssayStudyDataUploadForm(forms.ModelForm):
         # test_file = None
 
         # TODO TODO TODO TODO TODO
-        if self.request and self.request.FILES:
-            test_file = data.get('bulk_file', '')
+        if self.request and self.request.FILES and data.get('bulk_file'):
+            # Make sure that this isn't the current file
+            if not study.bulk_file or study.bulk_file != data.get('bulk_file'):
+                test_file = data.get('bulk_file', '')
 
-            file_processor = AssayFileProcessor(test_file, study, self.request.user)
-            # Process the file
-            file_processor.process_file()
+                file_processor = AssayFileProcessor(test_file, study, self.request.user)
+                # Process the file
+                file_processor.process_file()
 
-            # Evil attempt to acquire preview data
-            self.cleaned_data['preview_data'] = file_processor.preview_data
+                # Evil attempt to acquire preview data
+                self.cleaned_data['preview_data'] = file_processor.preview_data
 
         return self.cleaned_data

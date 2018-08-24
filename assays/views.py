@@ -999,10 +999,24 @@ class AssayStudyDataUpload(ObjectGroupRequiredMixin, UpdateView):
 
         context['data_file_uploads'] = get_data_file_uploads(study=self.object)
 
+        if self.request.POST:
+            if 'supporting_data_formset' not in context:
+                context['supporting_data_formset'] = AssayStudySupportingDataFormSetFactory(self.request.POST, self.request.FILES, instance=self.object)
+        else:
+            context['supporting_data_formset'] = AssayStudySupportingDataFormSetFactory(instance=self.object)
+
+        context['update'] = True
+
         return context
 
     def form_valid(self, form):
-        if form.is_valid():
+        supporting_data_formset = AssayStudySupportingDataFormSetFactory(
+            self.request.POST,
+            self.request.FILES,
+            instance=self.object
+        )
+
+        if form.is_valid() and supporting_data_formset.is_valid():
             data = form.cleaned_data
             overwrite_option = data.get('overwrite_option')
 
@@ -1010,18 +1024,28 @@ class AssayStudyDataUpload(ObjectGroupRequiredMixin, UpdateView):
 
             # Add user to Study's modified by
             # TODO
-            if self.request and self.request.FILES:
-                self.object.bulk_file = data.get('bulk_file')
-                self.object.modified_by = self.request.user
-                self.object.save()
+            if self.request and self.request.FILES and data.get('bulk_file', ''):
+                # Be positive it is not just processing the same file again
+                if not self.object.bulk_file or self.object.bulk_file != data.get('bulk_file'):
+                    self.object.bulk_file = data.get('bulk_file')
+                    self.object.modified_by = self.request.user
+                    self.object.save()
 
-                file_processor = AssayFileProcessor(self.object.bulk_file, self.object, self.request.user, save=True)
-                # Process the file
-                file_processor.process_file()
-                # parse_file_and_save(self.object.bulk_file, self.object.modified_by, study_id, overwrite_option, 'Bulk', form=None)
+                    file_processor = AssayFileProcessor(self.object.bulk_file, self.object, self.request.user, save=True)
+                    # Process the file
+                    file_processor.process_file()
+                    # parse_file_and_save(self.object.bulk_file, self.object.modified_by, study_id, overwrite_option, 'Bulk', form=None)
 
             # Only check if user is qualified editor
             if is_group_editor(self.request.user, self.object.group.name):
+                # Contrived save for supporting data
+                save_forms_with_tracking(
+                    self,
+                    None,
+                    formset=[supporting_data_formset],
+                    update=True
+                )
+
                 # Contrived method for marking data
                 for key, value in form.data.iteritems():
                     if key.startswith('data_upload_'):
