@@ -75,6 +75,11 @@ $(document).ready(function () {
             $($.fn.dataTable.tables(true)).DataTable().fixedHeader.adjust();
         }, 1000);
     });
+
+    // Fix some issues with column width on resize.
+    window.onresize = function() {
+        $($.fn.dataTable.tables(true)).DataTable().columns.adjust();
+    }
 });
 // $.fn.dataTable.TableTools.defaults.aButtons = [
 //     {
