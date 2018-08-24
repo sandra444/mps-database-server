@@ -1498,6 +1498,19 @@ def fetch_assay_study_reproducibility(request):
 
     data['comp_list'] = comp_list
 
+    # Get pie chart data
+    excellentCounter = acceptableCounter = poorCounter = 0
+
+    for x in range(0, len(data['gas_list'])):
+        if data['gas_list'][x][10][0] == 'E':
+            excellentCounter += 1
+        elif data['gas_list'][x][10][0] == 'A':
+            acceptableCounter += 1
+        elif data['gas_list'][x][10][0] == 'P':
+            poorCounter += 1
+
+    data['pie'] = [excellentCounter, acceptableCounter, poorCounter]
+
     return HttpResponse(json.dumps(data),
                         content_type='application/json')
 
