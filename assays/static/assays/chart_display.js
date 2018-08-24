@@ -40,10 +40,24 @@ $(document).ready(function () {
     var treatment_group_head = $('#treatment_group_head');
     var treatment_group_data_table = null;
 
+    var group_display = $('#group_display');
+    var group_display_body = $('#group_display_body');
+    var group_display_head = $('#group_display_head');
+
     // Probably should just have full data!
     var group_to_data = [];
     var device_to_group = {};
     var all_treatment_groups = [];
+
+    // Conversion dictionary
+    var headers = {
+        // 'device': 'Device',
+        'MPS Model': 'MPS Model',
+        'Cells': 'Cells Added',
+        'Compounds': 'Compound Treatment',
+        'Settings': 'Settings (Non-Compound Treatments)',
+        'Items with Same Treatment': 'Matrix Items (Chips/Wells) in Group'
+    };
 
     window.CHARTS.prepare_chart_options = function(charts) {
         var options = {};
@@ -138,15 +152,6 @@ $(document).ready(function () {
             ];
         }
 
-        var headers = {
-            // 'device': 'Device',
-            'MPS Model': 'MPS Model',
-            'Cells': 'Cells',
-            'Compounds': 'Compounds',
-            'Settings': 'Settings',
-            'Items with Same Treatment': 'Chips/Wells'
-        };
-
         if (treatment_group_data_table) {
             treatment_group_table.DataTable().clear();
             treatment_group_table.DataTable().destroy();
@@ -166,6 +171,9 @@ $(document).ready(function () {
         });
 
         treatment_group_head.append(new_row);
+        // Add the header to the group display as well
+        group_display_head.empty();
+        group_display_head.append(new_row.clone().addClass('bg-warning'));
 
         $.each(treatment_groups, function(index, treatment) {
             var group_index = (index + 1);
@@ -610,9 +618,9 @@ $(document).ready(function () {
                         if (entry.row === null && entry.column) {
                             var row_clone = all_treatment_groups[group_to_data[charts][chart_index][entry.column]].clone().addClass('bg-warning');
                             if (row_clone) {
-                                $('#group_display_body').empty().append(row_clone);
+                                group_display_body.empty().append(row_clone);
 
-                                $('#group_display').show()
+                                group_display.show()
                                     .css({top: current_top, left: current_left, position: 'absolute'});
                             }
                         }
@@ -622,7 +630,7 @@ $(document).ready(function () {
             all_events[charts].push(current_event);
 
             current_event = google.visualization.events.addListener(all_charts[charts][index], 'onmouseout', function () {
-                $('#group_display').hide();
+                group_display.hide();
             });
             all_events[charts].push(current_event);
         }
