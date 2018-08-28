@@ -406,7 +406,7 @@ $(document).ready(function () {
                 fontSize: 12
             },
             'chartArea': {'width': '90%', 'height': '90%'},
-            // pieSliceBorderColor:"transparent",
+            pieSliceBorderColor: "black",
         };
         var chart = new google.visualization.PieChart(document.getElementById('piechart'));
         chart.draw(data, options);
