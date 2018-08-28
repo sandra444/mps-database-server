@@ -134,7 +134,7 @@ $(document).ready(function () {
                 //selector: selection,
 
                 // Always pass the CSRF middleware token with every AJAX call
-                csrfmiddlewaretoken: middleware_token
+                csrfmiddlewaretoken: window.COOKIES.csrfmiddlewaretoken
             },
             success: function (json) {
 
@@ -187,7 +187,7 @@ $(document).ready(function () {
             data: {
                 call: 'fetch_drugbank_data',
                 chembl_id: chemblid,
-                csrfmiddlewaretoken: middleware_token
+                csrfmiddlewaretoken: window.COOKIES.csrfmiddlewaretoken
             },
             success: function (json) {
                 if (json.error) {
@@ -234,7 +234,7 @@ $(document).ready(function () {
             data: {
                 call: 'fetch_chembl_search_results',
                 query: chembl_search.val(),
-                csrfmiddlewaretoken: middleware_token
+                csrfmiddlewaretoken: window.COOKIES.csrfmiddlewaretoken
             },
             success: function (json) {
                 if (json) {

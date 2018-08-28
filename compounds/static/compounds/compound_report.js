@@ -3,12 +3,6 @@
 // 2.) Display all of the requested compound data in the desired table
 // 3.) Display D3 "Sparklines" for every assay for the given compound (TODO LOOK AT D3 TECHNIQUE)
 $(document).ready(function () {
-    // Prevent CSS conflict with Bootstrap
-    $.fn.button.noConflict();
-
-    // Middleware token for CSRF validation
-    var middleware_token = getCookie('csrftoken');
-
     // Object of all selected compounds
     var compounds = {};
 
@@ -112,7 +106,7 @@ $(document).ready(function () {
 
         dialog.dialog('open');
         // Remove focus
-        $('.ui-dialog :button').blur();
+        // $('.ui-dialog :button').blur();
     }
 
     function check_selection(value) {
@@ -186,7 +180,7 @@ $(document).ready(function () {
             data: {
                 call: 'fetch_compound_report',
                 compounds: JSON.stringify(compounds),
-                csrfmiddlewaretoken: middleware_token
+                csrfmiddlewaretoken: window.COOKIES.csrfmiddlewaretoken
             },
             success: function (json) {
                 // console.log(json);
@@ -379,7 +373,7 @@ $(document).ready(function () {
     });
 
     window.onhashchange = function() {
-        if (location.hash != '#show') {
+        if (location.hash !== '#show') {
             $('#graphic').prop('hidden', true);
             $('#selection').prop('hidden', false);
             // Hide the header for results
@@ -414,7 +408,7 @@ $(document).ready(function () {
                 "searchable": true
             },
             {
-                "sSortDataType": "dom-checkbox",
+                sortable: false,
                 "targets": [0]
             }
         ],

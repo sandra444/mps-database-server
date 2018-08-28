@@ -1,8 +1,9 @@
 from django import forms
 from django.forms.models import BaseInlineFormSet
 from .models import *
-from assays.models import AssayChipSetup
+from assays.models import AssayMatrixItem
 from mps.forms import SignOffMixin
+from django.forms.models import inlineformset_factory
 
 # These are all of the tracking fields
 tracking = ('created_by', 'created_on', 'modified_on', 'modified_by', 'signed_off_by', 'signed_off_date')
@@ -15,7 +16,7 @@ class MicrodeviceForm(SignOffMixin, forms.ModelForm):
         exclude = tracking + ('center', 'organ')
 
         widgets = {
-            'device_name': forms.Textarea(attrs={'rows': 1}),
+            'name': forms.Textarea(attrs={'rows': 1}),
             'references': forms.Textarea(attrs={'rows': 3}),
             'description': forms.Textarea(attrs={'rows': 3}),
         }
@@ -28,10 +29,29 @@ class OrganModelForm(SignOffMixin, forms.ModelForm):
         exclude = tracking
 
         widgets = {
-            'model_name': forms.Textarea(attrs={'rows': 1}),
+            'name': forms.Textarea(attrs={'rows': 1}),
             'references': forms.Textarea(attrs={'rows': 3}),
             'description': forms.Textarea(attrs={'rows': 3}),
         }
+
+
+class OrganModelLocationInlineFormset(BaseInlineFormSet):
+    """Form for Organ Model Locations"""
+    class Meta(object):
+        model = OrganModelLocation
+        exclude = ('',)
+
+
+OrganModelLocationFormsetFactory = inlineformset_factory(
+    OrganModel,
+    OrganModelLocation,
+    formset=OrganModelLocationInlineFormset,
+    extra=1,
+    exclude=[],
+    widgets={
+        'notes': forms.Textarea(attrs={'rows': 6})
+    }
+)
 
 
 class OrganModelProtocolInlineFormset(BaseInlineFormSet):
@@ -50,8 +70,20 @@ class OrganModelProtocolInlineFormset(BaseInlineFormSet):
 
             # Make sure that no protocol in use is checked for deletion
             if protocol_id and delete_checked:
-                if AssayChipSetup.objects.filter(organ_model_protocol=protocol_id):
-                    raise forms.ValidationError('You cannot remove protocols that are referenced by a chip setup.')
+                if AssayMatrixItem.objects.filter(organ_model_protocol=protocol_id):
+                    raise forms.ValidationError('You cannot remove protocols that are referenced by a chip/well.')
+
+
+OrganModelProtocolFormsetFactory = inlineformset_factory(
+    OrganModel,
+    OrganModelProtocol,
+    formset=OrganModelProtocolInlineFormset,
+    extra=1,
+    exclude=[],
+    widgets={
+        'version': forms.TextInput(attrs={'size': 10})
+    }
+)
 
 
 class MicrophysiologyCenterForm(forms.ModelForm):

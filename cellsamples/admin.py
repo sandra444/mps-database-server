@@ -175,7 +175,7 @@ class CellSampleAdmin(LockableAdmin):
         (
             'Group Access', {
                 'fields': (
-                    'group', 'restricted'
+                    'group',
                 ),
             }
         ),

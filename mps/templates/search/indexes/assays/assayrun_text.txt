@@ -1,8 +1,0 @@
-{{ object.assay_run_id }}
-{{ object.name }}
-{{ object.study_configuration }}
-{# {{ object.assay_run_id }} #}
-{{ object.description }}
-{{ object.created_by.first_name }}
-{{ object.created_by.last_name }}
-{{ object.group }}

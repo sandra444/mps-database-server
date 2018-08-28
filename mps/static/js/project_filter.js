@@ -18,7 +18,7 @@ $(document).ready(function() {
     // This function filters the dataTable rows
     $.fn.dataTableExt.afnFiltering.push(function(oSettings, aData, iDataIndex) {
         // This is a special exception to make sure that that the results table is not filtered in Compound Report
-        if (oSettings.nTable.getAttribute('id') == 'results_table') {
+        if (oSettings.nTable.getAttribute('id') == 'results_table' || oSettings.nTable.getAttribute('id') == 'studies') {
             return true;
         }
 

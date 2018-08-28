@@ -1,9 +1,8 @@
 {% extends "base.html" %}
-{% load staticfiles %}
+{% load static %}
 {% load humanize %}
 
 {% block load %}
-    <script src="{% static "js/cookies.js" %}"></script>
     <script src="{% static "js/project_filter.js" %}"></script>
     <script src="{% static "drugtrials/adverse_events_list.js" %}"></script>
 {% endblock %}

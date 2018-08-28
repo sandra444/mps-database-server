@@ -3,7 +3,6 @@
 {% load custom_filters %}
 
 {% block load %}
-    <script src="{% static "js/cookies.js" %}"></script>
     <script src="{% static "js/search.js" %}"></script>
 {% endblock %}
 
@@ -29,11 +28,14 @@
 
         <div class="hidden-print">
             <div class="row">
-            <button id="clear_filters" class="btn-danger" type="button">Clear Filters</button>
+                <div class="col-xs-12">
+                    <button id="clear_filters" class="btn btn-danger" type="button">Clear Filters</button>
+                </div>
             </div>
-            <div id="filter" class="row">
+
+            <div id="filter" class="row no-padding">
             {% for model in form.models %}
-                <div class="{% cycle 'bg-primary' 'bg-success' 'bg-info' 'bg-warning'%} col-xs-12 col-sm-4 col-md-3">
+                <div class="{% cycle 'bg-success' 'bg-info' 'bg-warning'%} col-xs-12 col-sm-4">
                     {{ model }}
                 </div>
             {% endfor %}

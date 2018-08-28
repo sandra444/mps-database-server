@@ -9,6 +9,9 @@ from haystack.query import SearchQuerySet
 import logging
 logger = logging.getLogger(__name__)
 
+# Kind of a weird import, probably should have a utils file or something
+from .views import get_search_queryset_with_permissions
+
 
 def main(request):
     """Default to Server Error"""
@@ -27,10 +30,7 @@ def fetch_global_search_suggestions(request):
     text = request.POST.get('text', '')
 
     # Filter on group: either get all with no group or those with a group the user has
-    sqs = SearchQuerySet().exclude(group__in=Group.objects.all())
-
-    if request.user and request.user.groups.all():
-        sqs = sqs | SearchQuerySet().filter(group__in=request.user.groups.all())
+    sqs = get_search_queryset_with_permissions(request)
 
     suggestions = sqs.autocomplete(text=text)
     # At the moment, I just take the first ten results

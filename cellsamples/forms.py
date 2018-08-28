@@ -4,8 +4,6 @@ from mps.forms import SignOffMixin
 
 # These are all of the tracking fields
 tracking = ('created_by', 'created_on', 'modified_on', 'modified_by', 'signed_off_by', 'signed_off_date')
-# Excluding restricted is likewise useful
-restricted = ('restricted',)
 
 
 class CellSampleForm(SignOffMixin, forms.ModelForm):
@@ -23,7 +21,7 @@ class CellSampleForm(SignOffMixin, forms.ModelForm):
 
     class Meta(object):
         model = CellSample
-        exclude = tracking + restricted
+        exclude = tracking
         widgets = {
             'isolation_method': forms.Textarea(attrs={'rows': 3}),
             'isolation_notes': forms.Textarea(attrs={'rows': 3}),

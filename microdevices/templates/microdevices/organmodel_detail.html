@@ -2,11 +2,11 @@
 
 {% block breadcrumbs %}
     <li><a href="/microdevices/model">Organ Models</a></li>
-    <li class="active">{{ object.model_name }}</li>
+    <li class="active">{{ object.name }}</li>
 {% endblock %}
 
 {% block content %}
-    <legend><h1>{{ object.model_name }}</h1></legend>
+    <legend><h1>{{ object.name }}</h1></legend>
 
     <div>
         <div class="col-xs-12">
@@ -14,30 +14,26 @@
             <tbody>
                 <tr>
                     <td>
-                        <b>Center</b>
+                        <b>Center ID</b>
                     </td>
                     <td>
-                        {{ object.center|default:'Unspecified' }}
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <b>Organ</b>
-                    </td>
-                    <td>
-                        {{ object.organ|default:'Unspecified' }}
+                        {{ object.center_id }}
                     </td>
                 </tr>
                 <tr>
                     <td>
-                        <b>Device</b>
+                        <b>Institution</b>
                     </td>
                     <td>
-                        {% if object.device.id %}
-                            <a href="/microdevices/device/{{ object.device.id }}">{{ object.device }}</a>
-                        {% else %}
-                            Unspecified
-                        {% endif %}
+                        {{ object.institution|default:'Unspecified' }}
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <b></b>
+                    </td>
+                    <td>
+
                     </td>
                 </tr>
                 {% if object.description %}
@@ -95,7 +91,7 @@
                 </tr>
                 <tr>
                     <td>
-                        References
+                        <b>References</b>
                     </td>
                     <td>
                         {{ object.references|linebreaksbr }}
@@ -105,50 +101,4 @@
         </table>
         </div>
     </div>
-
-    {% if protocols %}
-    <legend>Protocols</legend>
-
-    <table class="table table-striped">
-        <thead>
-        <tr>
-            <th>Version</th>
-            <th>Protocol</th>
-        </tr>
-        </thead>
-        <tbody>
-        {% for protocol in protocols %}
-            <tr>
-                <td>{{ protocol.version }}</td>
-                <td><a href="/media/{{ protocol.file }}">{{ protocol.file }}</a></td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
-    {% endif %}
-
-    {% if assays %}
-    <legend>Validated Assays</legend>
-
-    <table class="table table-striped">
-        <thead>
-        <tr>
-            <th>Assay Name</th>
-            <th>Assay Type</th>
-            <th>Test Type</th>
-            <th>Description</th>
-        </tr>
-        </thead>
-        <tbody>
-        {% for assay in assays %}
-            <tr>
-                <td>{{ assay.assay.assay_name }}</td>
-                <td>{{ assay.assay.assay_type }}</td>
-                <td>{{ assay.assay.test_type }}</td>
-                <td>{{ assay.assay.assay_description }}</td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
-    {% endif %}
 {% endblock %}

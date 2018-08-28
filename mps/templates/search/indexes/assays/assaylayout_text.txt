@@ -1,4 +1,0 @@
-Assay Layout: {{ object.layout_name }}
-{{ object.layout_name }}
-{{ object.device }}
-{{ object.group }}

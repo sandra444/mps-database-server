@@ -3,6 +3,8 @@
 from django.http import *
 from .models import CompoundAdverseEvent, OpenFDACompound, AdverseEvent
 import ujson as json
+# TODO TODO TODO REVISE IN PYTHON 3
+import cgi
 
 
 def main(request):
@@ -54,10 +56,10 @@ def fetch_adverse_events_data(request):
         if ae.get('event__organ__organ_name'):
             organ_name = ae.get('event__organ__organ_name')
 
-        black_box_warning = u''
+        black_box_warning = False
 
         if ae.get('compound__black_box'):
-            black_box_warning = u'<span title="This compound has a Black Box Warning" class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>'
+            black_box_warning = True
 
         normalized_reports = u''
         estimated_usage = u''
@@ -70,15 +72,15 @@ def fetch_adverse_events_data(request):
 
         data.append(
             {
-                'view': u'<a class="btn btn-primary" href="{}">View</a>'.format(
-                    ae.get('compound_id')
-                ),
-                'compound': u'<a href="/compounds/{}">{}</a>'.format(
-                    ae.get('compound__compound_id'), ae.get('compound__compound__name')
-                ),
-                'event': u'<a href="https://en.wikipedia.org/wiki/{}">{}</a>'.format(
-                    ae.get('event__event').lower(), ae.get('event__event')
-                ),
+                'view': ae.get('compound_id'),
+                'compound': {
+                    'id': ae.get('compound__compound_id'),
+                    'name': cgi.escape(ae.get('compound__compound__name'))
+                },
+                'event': {
+                    'lower': cgi.escape(ae.get('event__event').lower()),
+                    'name': cgi.escape(ae.get('event__event'))
+                },
                 'number_of_reports': u'{:,}'.format(
                     ae.get('frequency')
                 ),
@@ -119,7 +121,7 @@ def fetch_aggregate_ae_by_compound(request):
             estimated_usage = u'{:,}'.format(compound.estimated_usage)
 
         data.append({
-            'checkbox': u'<input class="checkbox compound" type="checkbox" value="{}">'.format(compound.compound.name),
+            'checkbox': cgi.escape(compound.compound.name),
             'compound': compound.compound.name,
             'estimated_usage': estimated_usage,
             'frequency':  u'{:,}'.format(sum(compound_frequency.get(compound.id, [0])))
@@ -154,7 +156,7 @@ def fetch_aggregate_ae_by_event(request):
             organ_name = adverse_event.organ.organ_name
 
         data.append({
-            'checkbox':u'<input class="checkbox adverse-event" type="checkbox" value="{}">'.format(adverse_event.event),
+            'checkbox': cgi.escape(adverse_event.event),
             'event': adverse_event.event,
             'organ': organ_name,
             'frequency': u'{:,}'.format(sum(adverse_event_frequency.get(adverse_event.id, [0])))

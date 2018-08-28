@@ -3,7 +3,7 @@
     (either because they have no stakeholders or every stakeholder approved)
     and moves them to the public automatically after approximately one year's time
 """
-from assays.models import AssayRun, AssayRunStakeholder
+from assays.models import AssayStudy, AssayStudyStakeholder
 from datetime import datetime, timedelta
 import pytz
 
@@ -31,7 +31,7 @@ def run():
     tz = pytz.timezone('US/Eastern')
     datetime_now_local = datetime.now(tz)
 
-    signed_off_restricted_studies = AssayRun.objects.filter(
+    signed_off_restricted_studies = AssayStudy.objects.filter(
         restricted=True,
         # PLEASE NOTE: Locking a study will prevent this script from interacting with it
         locked=False
@@ -45,13 +45,13 @@ def run():
     # Now check to see if any stakeholders need to be auto-approved!
     for study in signed_off_restricted_studies:
         # NOTE: This uses the study's last update data, NOT the time it was signed off
-        # Check if 30 days since last update
+        # Check if 17 days since last update
         # Really, this should be in the queryset filter
-        thirty_days_since_update = study.modified_on < datetime_now - timedelta(days=30)
+        seventeen_days_since_update = study.modified_on < datetime_now - timedelta(days=17)
 
         # Force approval of all stakeholders
-        if thirty_days_since_update:
-            current_stakeholders = AssayRunStakeholder.objects.filter(
+        if seventeen_days_since_update:
+            current_stakeholders = AssayStudyStakeholder.objects.filter(
                 # signed_off_by=None,
                 study_id=study.id
             )
@@ -64,7 +64,7 @@ def run():
                 current_unapproved_stakeholders.update(
                     signed_off_by=auto_approval_user,
                     signed_off_date=datetime_now_local,
-                    signed_off_notes="Expiration of 30 day period"
+                    signed_off_notes="Expiration of two week period"
                 )
 
                 # Send emails
@@ -125,7 +125,7 @@ def run():
     # Indicates whether there are required stakeholders that have not approved
     required_stakeholder_map = {}
 
-    relevant_required_stakeholders_without_approval = AssayRunStakeholder.objects.filter(
+    relevant_required_stakeholders_without_approval = AssayStudyStakeholder.objects.filter(
         sign_off_required=True,
         signed_off_by_id=None,
         study__id__in=signed_off_restricted_studies
@@ -141,7 +141,7 @@ def run():
     # Contains as a datetime the lastest approval for a study
     latest_approval = {}
 
-    approved_stakeholders = AssayRunStakeholder.objects.filter(
+    approved_stakeholders = AssayStudyStakeholder.objects.filter(
         sign_off_required=True,
         study__id__in=signed_off_restricted_studies
     ).exclude(

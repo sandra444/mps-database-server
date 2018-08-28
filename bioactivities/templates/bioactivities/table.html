@@ -1,13 +1,9 @@
 {% extends "bioactivities/cluster.html" %}
-{% load staticfiles %}
+{% load static %}
 
 {% block load %}
-    <script src="{% static "js/cookies.js" %}"></script>
-    <script src="{% static "js/spin.min.js" %}"></script>
-    <script src="{% static "js/mps_spinner.js" %}"></script>
     <script src="{% static "bioactivities/filter.js" %}"></script>
     <script src="{% static "bioactivities/table.js" %}"></script>
-    <script src="{% static "js/cookies.js" %}"></script>
     <script src="{% static "bioactivities/bioactivities_search.js" %}"></script>
 {% endblock %}
 
@@ -222,6 +218,4 @@
 
         {# Headers to plug-in, odd way to achieve this #}
     </div>
-
-    <div id="spinner"></div>
 {% endblock %}

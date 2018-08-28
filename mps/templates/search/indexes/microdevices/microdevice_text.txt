@@ -1,5 +1,5 @@
-{{ object.device_name }}
-{{ object.device_name }}
+{{ object.name }}
+{{ object.name }}
 {{ object.organ }}
 {{ object.center }}
 {{ object.manufacturer }}

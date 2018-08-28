@@ -2,12 +2,12 @@
 {% load static %}
 
 {% block breadcrumbs %}
-    <li><a href="/microdevices/model">Organ Models</a></li>
+    <li><a href="/microdevices/model">MPS Models</a></li>
     <li class="active">
         {% if object %}
             Edit <em>{{ object }}</em>
         {% else %}
-            Add Organ Model
+            Add MPS Model
         {% endif %}
     </li>
 {% endblock %}
@@ -29,7 +29,7 @@
     <form class="form-horizontal" method="post" enctype="multipart/form-data">
 
     <h1>
-        Add Organ Model
+        Add MPS Model
     {% endif %}
     <br>
     {% csrf_token %}
@@ -41,9 +41,9 @@
 
     {% include 'tracking.html' %}
 
-    <legend>Organ Model</legend>
+    <legend>MPS Model</legend>
 
-    {% include 'generic_field.html' with field=form.model_name label="Model Name*" %}
+    {% include 'generic_field.html' with field=form.name label="Model Name*" %}
 
     {% if form.device.errors %}
         {% for error in form.device.errors %}
@@ -71,6 +71,9 @@
     {% include 'generic_field.html' with field=form.organ label="Organ*" %}
 
     {% include 'generic_field.html' with field=form.center label="Center*" %}
+
+    {% include 'generic_field.html' with field=form.disease label="Disease" %}
+    {# <h6 class="text-center">Note: Leave "Disease" blank for models that are healthy at the start of a study.</h6>#}
 
     {% include 'generic_field.html' with field=form.description label="Description" %}
 
@@ -103,18 +106,18 @@
 
     {% include 'generic_field.html' with field=form.references label="References" %}
 
-    {{ formset.management_form }}
-    <legend>Protocols</legend>
-    {% if formset.non_form_errors %}
+    {{ location_formset.management_form }}
+    <legend>Locations</legend>
+    {% if location_formset.non_form_errors %}
         <div class="alert alert-danger" role="alert">
             <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
             <span class="sr-only">Error:</span>
-            {{ formset.non_form_errors }}
+            {{ location_formset.non_form_errors }}
         </div>
     {% endif %}
 
-    {% if formset.errors %}
-        {% for dict in formset.errors %}
+    {% if location_formset.errors %}
+        {% for dict in location_formset.errors %}
             {% for key,value in dict.items %}
                 {% if key %}
                     <div class="alert alert-danger" role="alert">
@@ -127,8 +130,60 @@
         {% endfor %}
     {% endif %}
 
-    <a id="add_button-organmodelprotocol_set" class="btn btn-success" role="button">Add Protocol</a>
-    <table class="table table-striped inlines" id="organmodelprotocol_set-group" name="protocols">
+    <a id="add_button-{{ location_formset.prefix }}" class="btn btn-success" role="button">Add Location</a>
+    <table class="table table-striped inlines" id="{{ location_formset.prefix }}-group" name="locations">
+        <thead>
+            <tr>
+                <th>Sample Location*</th>
+                <th>Notes*</th>
+                <th>Delete</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for location in location_formset %}
+                <tr class="inline" id="protocols-{{ forloop.counter0 }}">
+                    {% if location.id.value %}
+                    <td class="original" hidden>
+                        <input type="hidden"
+                               id="id_{{ location_formset.prefix }}-{{ forloop.counter0 }}-id"
+                               name="{{ location_formset.prefix }}-{{ forloop.counter0 }}-id"
+                               value="{{ location.id.value }}">
+                    </td>
+                    {% endif %}
+                    <td>{{ location.sample_location }}</td>
+                    <td>{{ location.notes }}</td>
+                    <td>{{ location.DELETE }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    {{ protocol_formset.management_form }}
+    <legend>Protocols</legend>
+    {% if protocol_formset.non_form_errors %}
+        <div class="alert alert-danger" role="alert">
+            <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+            <span class="sr-only">Error:</span>
+            {{ protocol_formset.non_form_errors }}
+        </div>
+    {% endif %}
+
+    {% if protocol_formset.errors %}
+        {% for dict in protocol_formset.errors %}
+            {% for key,value in dict.items %}
+                {% if key %}
+                    <div class="alert alert-danger" role="alert">
+                        <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                        <span class="sr-only">Error:</span>
+                        {{ forloop.parentloop.counter }}.) {{ key }} : {{ value }}
+                    </div>
+                {% endif %}
+            {% endfor %}
+        {% endfor %}
+    {% endif %}
+
+    <a id="add_button-{{ protocol_formset.prefix }}" class="btn btn-success" role="button">Add Protocol</a>
+    <table class="table table-striped inlines" id="{{ protocol_formset.prefix }}-group" name="protocols">
         <thead>
             <tr>
                 <th>Version*</th>
@@ -137,13 +192,13 @@
             </tr>
         </thead>
         <tbody>
-            {% for protocol in formset %}
+            {% for protocol in protocol_formset %}
                 <tr class="inline" id="protocols-{{ forloop.counter0 }}">
                     {% if protocol.id.value %}
                     <td class="original" hidden>
                         <input type="hidden"
-                               id="id_organmodelprotocol_set-{{ forloop.counter0 }}-id"
-                               name="organmodelprotocol_set-{{ forloop.counter0 }}-id"
+                               id="id_{{ protocol_formset.prefix }}-{{ forloop.counter0 }}-id"
+                               name="{{ protocol_formset.prefix }}-{{ forloop.counter0 }}-id"
                                value="{{ protocol.id.value }}">
                     </td>
                     {% endif %}

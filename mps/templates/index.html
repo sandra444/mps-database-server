@@ -1,8 +1,7 @@
 {% extends "base.html" %}
-{% load staticfiles %}
+{% load static %}
 
 {% block load %}
-    <script src="{% static "js/cookies.js" %}"></script>
     <script src="{% static "js/index.js" %}"></script>
     <script src="{% static "bioactivities/bioactivities_search.js" %}"></script>
 {% endblock %}
@@ -40,12 +39,12 @@
             <span class="col-sm-2">
               <img src="/static/img/test_dots.png" style="width:100px;height:100px;">
             </span>
-            <h1 class="col-sm-8">
-              Microphysiology Systems Database
+            <div class="col-sm-8">
+                <h1>Microphysiology Systems Database</h1>
               <div class="row">
                   <h5>University of Pittsburgh Drug Discovery Institute</h5>
               </div>
-            </h1>
+            </div>
             <span class="col-sm-2">
                 <img src="/static/img/Pitt_Logo.png" style="width:100px;height:100px;">
             </span>
@@ -55,8 +54,8 @@
         </div>
         <div class="row">
             <div class="col-sm-6 col-md-4">
-                <div title="View organ models and microdevices" class="well">
-                    {# Note that this doesn't work unless stopPropagation i used #}
+                <div title="View MPS models and microdevices" class="well">
+                    {# Note that this doesn't work unless stopPropagation is used #}
                     <a onclick="event.stopPropagation(); $('#models_button').click();">
                         <img src="/static/img/liver_model.png"
                              style="height: 70px;">
@@ -67,8 +66,9 @@
                                 Models &amp; Devices <span class="caret"></span>
                             </button>
                             <ul class="dropdown-menu" role="menu">
-                                <li title="View organ models"><a href="/microdevices/model">View Organ Models</a></li>
+                                <li title="View MPS models"><a href="/microdevices/model">View MPS Models</a></li>
                                 <li title="View microdevices"><a href="/microdevices/device">View Microdevices</a></li>
+                                <li title="View diseases"><a href="/diseases">View Diseases</a></li>
                             </ul>
                         </div>
                     </div>
@@ -140,12 +140,12 @@
                             </button>
                             <ul class="dropdown-menu" role="menu">
                                 <li title="Index of all the studies created by groups you are a member of">
-                                    <a href="/assays/editable_studies/">View Editable Studies</a>
+                                    <a href="/assays/assaystudy/editable_studies/">View Editable Studies</a>
                                 </li>
-                                <li><a href="/assays/study/">View All Studies</a></li>
+                                <li><a href="/assays/assaystudy/">View All Studies</a></li>
                                 <li class="divider"></li>
                                 <li class="dropdown-header">Requires Permission</li>
-                                <li><a href="/assays/study/add/">Add Study</a></li>
+                                <li><a href="/assays/assaystudy/add/">Add Study</a></li>
                             </ul>
                         </div>
                     </div>
@@ -173,12 +173,9 @@
                                         Cluster Compounds
                                     </a>
                                 </li>
-                                <li title="This feature is still in development">
-                                    <a href="/under_construction/">
-                                        <span id="generic_alert_symbol" class="glyphicon glyphicon-wrench" aria-hidden="true"></span>
-                                        Reproducibility
-                                    </a>
-                                </li>
+                                <li title="View plots and reproducibility"><a href="/assays/graphing_reproducibility/">
+                                  Graphing/Reproducibility
+                                </a></li>
                             </ul>
                         </div>
                     </div>
@@ -198,13 +195,13 @@
                             <ul class="dropdown-menu" role="menu">
                                 <li title="This feature is still in development">
                                     <a href="/under_construction/">
-                                        <span id="generic_alert_symbol" class="glyphicon glyphicon-wrench" aria-hidden="true"></span>
+                                        <span class="glyphicon glyphicon-wrench" aria-hidden="true"></span>
                                         PBPK
                                     </a>
                                 </li>
                                 <li title="This feature is still in development">
                                     <a href="/bioactivities/model/">
-                                        <span id="generic_alert_symbol" class="glyphicon glyphicon-wrench" aria-hidden="true"></span>
+                                        <span class="glyphicon glyphicon-wrench" aria-hidden="true"></span>
                                         Predictive Modeling
                                     </a>
                                 </li>
