@@ -2398,7 +2398,7 @@ class AssaySetupSetting(models.Model):
         if criteria:
             full_string = []
             if 'setting_id' in criteria:
-                full_string.append(unicode(self.setting_id))
+                full_string.append(unicode(self.setting))
             if 'value' in criteria:
                 full_string.append('{:g}'.format(self.value))
                 full_string.append(self.unit.unit)
