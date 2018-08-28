@@ -431,6 +431,13 @@ $(document).ready(function() {
         max_interpolation_size = $('#max_interpolation_size').val();
         initial_norm = $('#initial_norm').prop('checked') ? 1 : 0;
 
+        // Special check to see whether to default to studies (only one center selected)
+        if (Object.keys(filters['groups']).length === 1) {
+            $('#inter_level_by_center').prop('checked', false);
+            $('#inter_level_by_study').prop('checked', true);
+            inter_level = 0;
+        }
+
         // Define what the legend is
         // TODO TODO TODO CONTRIVED FOR NOW
         var legend_key = 'Centers';
