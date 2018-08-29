@@ -123,6 +123,7 @@ class DefinitionAdmin(LockableAdmin):
     save_on_top = True
     list_per_page = 300
     list_display = ('term', 'definition', 'show_url')
+    search_fields = ['term', 'definition', 'reference']
 
     fieldsets = (
         (
