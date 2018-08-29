@@ -1581,17 +1581,6 @@ class AssayStudyReproducibility(StudyViewerMixin, DetailView):
     template_name = 'assays/assaystudy_reproducibility.html'
 
 
-# TODO Class-based view for direct reproducibility access.
-# class AssayStudyReproducibilityList(AssayStudyList):
-#     """Displays all of the studies linked to groups that the user is part of"""
-#     def get_context_data(self, **kwargs):
-#         context = super(AssayStudyReproducibilityList, self).get_context_data()
-#
-#         context['reproducibility'] = True
-#
-#         return context
-
-
 class AssayStudyImages(StudyViewerMixin, DetailView):
     """Displays all of the images linked to the current study"""
     model = AssayStudy
