@@ -578,10 +578,14 @@ $(document).ready(function () {
         var original_name = $('#id_item_name').val();
         var split_name = original_name.split(/(\d+)/).filter(Boolean);
 
-        var numeric_index = 0;
+        var numeric_index = original_name.length - 1;
         // Increment the first number encountered
-        while (!$.isNumeric(split_name[numeric_index]) && numeric_index < original_name.length) {
-            numeric_index += 1;
+        while (!$.isNumeric(split_name[numeric_index]) && numeric_index >= 0) {
+            numeric_index -= 1;
+        }
+
+        if (numeric_index === -1) {
+            numeric_index = original_name.length;
         }
 
         var first_half = split_name.slice(0, numeric_index).join('');
@@ -603,7 +607,7 @@ $(document).ready(function () {
                 incremented_value = '0' + incremented_value;
             }
 
-            value = first_half + incremented_value + second_half;
+            var value = first_half + incremented_value + second_half;
 
             // Set display
             $(this).find('.item-name').html(value);
