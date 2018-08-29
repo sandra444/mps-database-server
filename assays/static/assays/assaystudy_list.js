@@ -11,9 +11,9 @@ $(document).ready(function() {
                 var pie = $("#piechart"+x).data('nums').split("|");
                 var pieData = google.visualization.arrayToDataTable([
                     ['Status', 'Count'],
-                    ['E', parseInt(pie[0])],
-                    ['A', parseInt(pie[1])],
-                    ['P', parseInt(pie[2])]
+                    ['Excellent', parseInt(pie[0])],
+                    ['Acceptable', parseInt(pie[1])],
+                    ['Poor', parseInt(pie[2])]
                 ]);
                 var pieOptions = {
                     // title: 'Reproducibility Breakdown\n(Click Slices for Details)',
@@ -32,9 +32,14 @@ $(document).ready(function() {
                     },
                     'chartArea': {'width': '90%', 'height': '90%'},
                     backgroundColor: { fill:'transparent' },
-                    is3D: true,
-                    pieSliceBorderColor:"transparent",
-                    enableInteractivity: false
+                    // is3D: true,
+                    pieSliceBorderColor: "black",
+                    tooltip: {
+                        textStyle: {
+                            fontName: 'verdana', fontSize: 10
+                        }
+                    }
+                    // enableInteractivity: false
                 };
                 var pieChart = new google.visualization.PieChart(document.getElementById('piechart'+x));
                 pieChart.draw(pieData, pieOptions);

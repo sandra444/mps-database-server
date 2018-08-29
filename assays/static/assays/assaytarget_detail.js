@@ -4,14 +4,26 @@ $(document).ready(function() {
         "sDom": '<B<"row">lfrtip>',
         fixedHeader: {headerOffset: 50},
         responsive: true,
-        "order": [[0, "asc"]]
+        "order": [[0, "asc"]],
+        "aoColumnDefs": [
+            {
+                "bSortable": false,
+                "aTargets": [1]
+            },
+        ]
     });
     window.TABLE2 = $('#studies-table').DataTable({
         "iDisplayLength": 10,
         "sDom": '<B<"row">lfrtip>',
         fixedHeader: {headerOffset: 50},
         responsive: true,
-        "order": [[0, "asc"]]
+        "order": [[0, "asc"]],
+        "aoColumnDefs": [
+            {
+                "bSortable": false,
+                "aTargets": [3]
+            },
+        ]
     });
 
     // Prevent "pop in".

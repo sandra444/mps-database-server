@@ -9,6 +9,14 @@
     <script src="{% static "assays/chart_display.js" %}"></script>
     <script src="{% static "js/display_datatable.js" %}"></script>
     <script src="{% static "assays/assaystudy_list.js" %}"></script>
+    <style>
+        svg > g:last-child > g:last-child {
+            pointer-events: none;
+        }
+        div.google-visualization-tooltip {
+            pointer-events: none;
+        }
+    </style>
 {% endblock %}
 
 {% block breadcrumbs %}
@@ -19,11 +27,7 @@
     <div class="padded-bottom">
         <legend>
             <h2 class="text-center">
-                {% if reproducibility %}
-                Reproducibility List
-                {% else %}
                 {{ editable }}Studies
-                {% endif %}
             </h2>
         </legend>
 
@@ -43,13 +47,13 @@
 {#                    <th>Study ID</th>#}
                     <th>Study Name</th>
                     <th>Start Date</th>
-                    <th>Study Types</th>
+                    <th>Study Types <span data-toggle="tooltip" title="CC = Chip Characterization, DM = Disease Model, EFF = Efficacy, TOX = Toxicity" class="glyphicon glyphicon-question-sign" aria-hidden="true" data-placement="bottom"></span></th>
                     <th>Organ Models</th>
                     <th>Data Points</th>
                     <th>Images</th>
 {#                    <th>Integrated Study Configuration</th>#}
                     <th>Description</th>
-                    <th>Reproducibility Status</th>
+                    <th>Intra-Study Reproducibility Status <span data-toggle="tooltip" title="Hover over pie charts for details." class="glyphicon glyphicon-question-sign" aria-hidden="true" data-placement="bottom"></span></th>
                     <th>Data Provider</th>
                     <th>Data Entry</th>
                     <th>Review</th>
@@ -85,7 +89,7 @@
                     <td>{{ study.description }}</td>
                     <td>
                         {% if study.repro_nums %}
-                            <div id="piechart{{ forloop.counter }}" data-nums="{{study.repro_nums}}" class="text-center" style="width: 100px; height: 100px; margin: auto; display: block;">Loading...</div>
+                            <div id="piechart{{ forloop.counter }}" data-nums="{{study.repro_nums}}" class="text-center" style="width: 70px; height: 70px; margin: auto; display: block;">Loading...</div>
                         {% endif %}
                     </td>
                     <td><a href='/microdevices/center/{{ study.center.id }}/' target='_blank' title="{{ study.center.name }}">{{ study.center.center_id }}</a></td>

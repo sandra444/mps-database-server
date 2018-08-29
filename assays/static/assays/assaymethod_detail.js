@@ -1,17 +1,29 @@
 $(document).ready(function() {
-    window.TABLE = $('#assays-table').DataTable({
+    window.TABLE1 = $('#assays-table').DataTable({
         "iDisplayLength": 10,
         "sDom": '<B<"row">lfrtip>',
         fixedHeader: {headerOffset: 50},
         responsive: true,
-        "order": [[0, "asc"]]
+        "order": [[0, "asc"]],
+        "aoColumnDefs": [
+            {
+                "bSortable": false,
+                "aTargets": [2]
+            },
+        ]
     });
-    var table2 = $('#studies-table').DataTable({
+    window.TABLE2 = $('#studies-table').DataTable({
         "iDisplayLength": 10,
         "sDom": '<B<"row">lfrtip>',
         fixedHeader: {headerOffset: 50},
         responsive: true,
-        "order": [[0, "asc"]]
+        "order": [[0, "asc"]],
+        "aoColumnDefs": [
+            {
+                "bSortable": false,
+                "aTargets": [3]
+            },
+        ]
     });
 
     // Prevent "pop in".
