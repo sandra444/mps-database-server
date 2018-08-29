@@ -30,6 +30,7 @@ class OrganModelForm(SignOffMixin, forms.ModelForm):
 
         widgets = {
             'name': forms.Textarea(attrs={'rows': 1}),
+            'alt_name': forms.Textarea(attrs={'rows': 1}),
             'references': forms.Textarea(attrs={'rows': 3}),
             'description': forms.Textarea(attrs={'rows': 3}),
         }
