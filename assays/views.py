@@ -352,17 +352,38 @@ def get_queryset_with_number_of_data_points(queryset):
     ).prefetch_related(
         'matrix_item',
         'setting'
-    ).only('id', 'matrix_item', 'setting')
+    ).only('id', 'matrix_item', 'setting', 'file_name')
+
+    video_formats = {x: True for x in [
+        'webm',
+        'avi',
+        'ogv',
+        'mov',
+        'wmv',
+        'mp4',
+        '3gp',
+    ]}
 
     images_map = {}
+    videos_map = {}
 
     for image in images:
-        current_value = images_map.setdefault(
-            image.matrix_item.study_id, 0
-        )
-        images_map.update({
-            image.matrix_item.study_id: current_value + 1
-        })
+        is_video = image.file_name.split('.')[-1].lower() in video_formats
+
+        if is_video:
+            current_value = videos_map.setdefault(
+                image.matrix_item.study_id, 0
+            )
+            videos_map.update({
+                image.matrix_item.study_id: current_value + 1
+            })
+        else:
+            current_value = images_map.setdefault(
+                image.matrix_item.study_id, 0
+            )
+            images_map.update({
+                image.matrix_item.study_id: current_value + 1
+            })
 
     supporting_data = AssayStudySupportingData.objects.filter(
         study_id__in=study_ids
@@ -381,6 +402,7 @@ def get_queryset_with_number_of_data_points(queryset):
     for study in queryset:
         study.data_points = data_points_map.get(study.id, 0)
         study.images = images_map.get(study.id, 0)
+        study.videos = videos_map.get(study.id, 0)
         study.supporting_data = supporting_data_map.get(study.id, 0)
 
 

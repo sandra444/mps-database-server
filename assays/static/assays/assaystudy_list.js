@@ -1,5 +1,5 @@
 $(document).ready(function() {
-    var  data_table = $('#studies').DataTable( {
+    $('#studies').DataTable( {
         dom: 'B<"row">lfrtip',
         fixedHeader: {headerOffset: 50},
         responsive: true,
@@ -17,11 +17,15 @@ $(document).ready(function() {
             },
             {
                 "type": "numeric-comma",
-                "targets": [5, 6]
+                "targets": [5, 6, 7, 8]
+            },
+            {
+                'visible': false,
+                'targets': [7, 8, 11]
             },
             {
                 'className': 'none',
-                'targets': [7]
+                'targets': [9]
             }
         ]
     });
