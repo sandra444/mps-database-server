@@ -936,7 +936,7 @@ $(document).ready(function() {
                 // tooltip: {isHtml: true},
                 intervals: {
                     // style: 'bars'
-                    'lineWidth':2, 'barWidth': 1
+                    'lineWidth': 0.75
                 }
             };
 
