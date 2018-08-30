@@ -1837,6 +1837,12 @@ def acquire_post_filter(studies, assays, matrix_items, data_points):
 
         for cell in matrix_item.assaysetupcell_set.all():
             current.setdefault(
+                'assaysetupcell__cell_sample_id__in', {}
+            ).update({
+                cell.cell_sample_id: unicode(cell.cell_sample)
+            })
+
+            current.setdefault(
                 'assaysetupcell__cell_sample__cell_type_id__in', {}
             ).update({
                 cell.cell_sample.cell_type_id: cell.cell_sample.cell_type.cell_type
