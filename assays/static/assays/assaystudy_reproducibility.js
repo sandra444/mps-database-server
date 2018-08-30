@@ -263,7 +263,11 @@ $(document).ready(function () {
             'height':250,
             'width':450,
             // Individual point tooltips, not aggregate
-            focusTarget: 'datum'
+            focusTarget: 'datum',
+            intervals: {
+                // style: 'bars'
+                'lineWidth': 0.75
+            }
         };
         if (title === 'Chip Values/Time') {
             options['series'] = {0: { lineDashStyle: [4, 4], pointShape: { type: 'diamond', sides: 4 } }};
