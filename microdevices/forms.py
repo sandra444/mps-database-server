@@ -1,7 +1,7 @@
 from django import forms
 from django.forms.models import BaseInlineFormSet
 from .models import *
-from assays.models import AssayMatrixItem
+from assays.models import AssayMatrixItem, AssaySampleLocation
 from mps.forms import SignOffMixin
 from django.forms.models import inlineformset_factory
 
@@ -40,6 +40,16 @@ class OrganModelLocationInlineFormset(BaseInlineFormSet):
     class Meta(object):
         model = OrganModelLocation
         exclude = ('',)
+
+    def __init__(self, *args, **kwargs):
+        super(OrganModelLocationInlineFormset, self).__init__(*args, **kwargs)
+
+        sample_location_queryset = AssaySampleLocation.objects.all().order_by(
+            'name'
+        )
+
+        for form in self.forms:
+            form.fields['sample_location'].queryset = sample_location_queryset
 
 
 OrganModelLocationFormsetFactory = inlineformset_factory(
