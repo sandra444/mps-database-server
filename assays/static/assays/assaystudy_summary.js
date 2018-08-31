@@ -13,6 +13,16 @@ $(document).ready(function() {
     // Name for the charts for binding events etc
     var charts_name = 'charts';
 
+    // Datatable for assays
+    $('#assay_table').DataTable( {
+        dom: 'B<"row">lfrtip',
+        fixedHeader: {headerOffset: 50},
+        responsive: true,
+        "iDisplayLength": 10,
+        // Initially sort on target (ascending)
+        "order": [ 0, "asc" ]
+    });
+
     function get_readouts() {
         var data = {
             // TODO TODO TODO CHANGE CALL
