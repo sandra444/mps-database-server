@@ -1580,6 +1580,59 @@ class AssayStudy(FlaggableModel):
     #     )
     #     return study_types
 
+    # TODO VERY INEFFICIENT, BUT SHOULD WORK
+    def get_indexing_information(self):
+        """Exceedingly inefficient way to add some data for indexing studies"""
+        matrix_items = AssayMatrixItem.objects.filter(matrix__study_id=self.id).prefetch_related(
+            'matrix',
+            'assaysetupsetting_set__setting',
+            'assaysetupsetting_set__addition_location',
+            'assaysetupsetting_set__unit',
+            'assaysetupcell_set__cell_sample__cell_subtype',
+            'assaysetupcell_set__cell_sample__cell_type__organ',
+            'assaysetupcell_set__cell_sample__supplier',
+            'assaysetupcell_set__density_unit',
+            'assaysetupcell_set__addition_location',
+            'assaysetupcompound_set__compound_instance__compound',
+            'assaysetupcompound_set__concentration_unit',
+            'assaysetupcompound_set__addition_location',
+        )
+
+        current_study = {}
+
+        for matrix_item in matrix_items:
+            organ_model_name = u''
+
+            if matrix_item.organ_model:
+                organ_model_name = matrix_item.organ_model.name
+
+            current_study.setdefault('items', {}).update({
+                matrix_item.name: True
+            })
+            current_study.setdefault('organ_models', {}).update({
+                organ_model_name: True
+            })
+            current_study.setdefault('devices', {}).update({
+                matrix_item.device.name: True
+            })
+
+            for compound in matrix_item.assaysetupcompound_set.all():
+                current_study.setdefault('compounds', {}).update({
+                    unicode(compound): True
+                })
+
+            for cell in matrix_item.assaysetupcell_set.all():
+                current_study.setdefault('cells', {}).update({
+                    unicode(cell): True
+                })
+
+            for setting in matrix_item.assaysetupsetting_set.all():
+                current_study.setdefault('settings', {}).update({
+                    unicode(setting): True
+                })
+
+        return u'\n'.join([u' '.join(x) for x in current_study.values()])
+
     def get_study_types_string(self):
         current_types = []
         if self.toxicity:
