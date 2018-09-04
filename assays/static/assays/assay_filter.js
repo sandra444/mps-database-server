@@ -661,6 +661,27 @@ $(document).ready(function() {
         });
     }
 
+    // This function filters the dataTable rows
+    $.fn.dataTableExt.afnFiltering.push(function(oSettings, aData, iDataIndex) {
+        // This is a special exception to make sure that other tables are not filtered on the page
+        if (oSettings.nTable.getAttribute('id') !== 'repro_table') {
+            return true;
+        }
+
+        // If show all is not toggled on, then exclude those without overlap
+        // BEWARE MAGIC NUMBERS
+        if ($('#show_all_repro').prop('checked') || aData[11] || aData[12] || aData[13]) {
+            return true;
+        }
+    });
+
+    // When a filter is clicked, set the filter values and redraw the table
+    $('#show_all_repro_wrapper').click(function() {
+        $('#show_all_repro').prop('checked', !$('#show_all_repro').prop('checked'));
+        // Redraw the table
+        repro_table.draw();
+    });
+
     function draw_subsections() {
         var item_to_copy = $("#clone_container").find('[data-id="repro-data"]');
         repro_table.rows().every(function() {
