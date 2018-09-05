@@ -10,7 +10,7 @@ import cgi
 import urllib2
 import psycopg2
 import psycopg2.extras
-import time
+#import time
 
 import mps_AATCcredentials
 
@@ -33,8 +33,8 @@ def fetch_auto_drug_trial_data(request):
     else:
         disease = "nafld"
 
-    startTime = time.time()
-    print('Starting..')
+    #startTime = time.time()
+    #print'Starting..')
 # https://clinicaltrials.gov/ct2/results?cond=&term=&type=Intr&rslt=With&recrs=e&age_v=&gndr=&intr=&titles=&outc=&spons=&lead=&id=&cntry=US&state=&city=&dist=&locn=&strd_s=&strd_e=&prcd_s=&prcd_e=&sfpd_s=&sfpd_e=&lupd_s=&lupd_e=
     studyIDs = []
     try:
@@ -58,7 +58,7 @@ def fetch_auto_drug_trial_data(request):
     #studyIDs = (lst2pgarr(studyIDs))
 
 
-    print('Collected Study IDs from Clinical Trials: ' + str(time.time() - startTime))
+    #print'Collected Study IDs from Clinical Trials: ' + str(time.time() - startTime))
     userName = mps_AATCcredentials.userid
     passWord = mps_AATCcredentials.pw
 
@@ -75,7 +75,7 @@ def fetch_auto_drug_trial_data(request):
 
     studyInfo = []
     for ID in studyIDs:
-        #print(ID)
+        ##printID)
         ID = [ID]
         cur.execute("SELECT nct_id,name,description FROM interventions WHERE \
                     nct_id = ANY(%s)",(ID,))  # (SELECT nct_id FROM conditions WHERE downcase_name= %s )", [condition])
@@ -157,7 +157,7 @@ def fetch_auto_drug_trial_data(request):
 
     cur.close()
     conn.close()
-    print('All study info collected ' + str(time.time() - startTime))
+    #print'All study info collected ' + str(time.time() - startTime))
 
     outcomeData = []
     for i in range(0, len(studyInfo)):
@@ -171,7 +171,7 @@ def fetch_auto_drug_trial_data(request):
             outcomeData.append(outcomeInfo)
     outcomeDataDisplay = {'data': outcomeData}
     #studyData = { 'data' : studyInfo }
-    print('Data formatted and sent to dispaly ' + str(time.time() - startTime))
+    #print'Data formatted and sent to dispaly ' + str(time.time() - startTime))
     return HttpResponse(
         json.dumps(outcomeDataDisplay),
         content_type="application/json"
