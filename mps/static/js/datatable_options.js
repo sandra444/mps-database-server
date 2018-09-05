@@ -7,14 +7,6 @@ $(document).ready(function () {
     //     });
     // };
 
-    // Add method to sort by checkbox
-    // (I reversed it so that ascending will place checked first)
-    $.fn.dataTable.ext.order['dom-checkbox-defer'] = function(settings, col) {
-        return settings.aoData.map(function(data, index) {
-            return data._aData.checkbox.indexOf(' checked>') > -1 ? 0 : 1;
-        });
-    };
-
     $.fn.dataTable.ext.order['dom-checkbox'] = function(settings, col) {
         return settings.aoData.map(function(data, index) {
             return data._aData[0].indexOf(' checked>') > -1 ? 0 : 1;
