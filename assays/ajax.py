@@ -1045,14 +1045,26 @@ def get_data_points_for_charting(
                 for compound in raw.matrix_item.assaysetupcompound_set.all():
                     if compound.addition_time <= raw_time and compound.addition_time + compound.duration >= raw_time:
                         concentration += compound.concentration * compound.concentration_unit.scale_factor
-                        tag.append(compound.compound_instance.compound.name)
+                        tag.append(
+                            # May need this to have float minutes, unsure
+                            '{} at D{}H{}M{}'.format(
+                                compound.compound_instance.compound.name,
+                                int(raw_time / 24 / 60),
+                                int(raw_time / 60 % 24),
+                                int(raw_time % 60)
+                            )
+                        )
 
                 # CONTRIVED: Set time to concentration
                 time = concentration
                 if tag:
                     tag = ' & '.join(tag)
                 else:
-                    tag = '-No Compound-'
+                    tag = '-No Compound- at D{}H{}M{}'.format(
+                        int(raw_time / 24 / 60),
+                        int(raw_time / 60 % 24),
+                        int(raw_time % 60)
+                    )
             # If by device
             else:
                 tag = (matrix_item_id, matrix_item_name)
