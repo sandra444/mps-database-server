@@ -53,6 +53,28 @@ $(document).ready(function() {
                         });
                     }
 
+                    return methods.join('; <br>');
+                }
+            },
+            {
+                data: 'drugs',
+                render:function (data, type, row, meta) {
+                    var methods = [];
+
+                    if (data) {
+                        $.each(data, function(index, value) {
+                            if(value.name){
+                                if(value.name.toLowerCase().includes("placebo") || value.name.toLowerCase() == "placebo"){
+
+                                }
+                                else{
+                                    drugName = value.name;
+                                    drugName = drugName.charAt(0).toUpperCase() + drugName.substring(1);
+                                    methods.push(drugName);
+                                }
+                            }
+                        });
+                    }
                     return methods.join(', <br>');
                 }
             },
@@ -70,27 +92,25 @@ $(document).ready(function() {
                                 else if(value.description){
                                     drugName = value.name;
                                     drugName = drugName.charAt(0).toUpperCase() + drugName.substring(1);
-                                    methods.push(drugName + '<span data-toggle="tooltip" title="'+ value.description +'" class="glyphicon glyphicon-info-sign" aria-hidden="true"></span>');
+                                    methods.push(value.description);
                                 }
                                 else{
-                                    drugName = value.name;
-                                    drugName = drugName.charAt(0).toUpperCase() + drugName.substring(1);
-                                    methods.push(drugName);
+                                    methods.push(" ");
                                 }
                             }
                         });
                     }
-                    return methods.join(', <br>');
+                    return methods.join('; <br>');
                 }
             },
-            /*{
-                data: 'enrollment',
+            {
+                data: 'studies',
                 render:function (data, type, row, meta) {
                     var methods = [];
-                    methods.push(data);
+                    methods.push(data.enrollment);
                     return methods;
                 }
-            },*/
+            },
             {
                 data: 'outcomeAll',
                 render:function (data, type, row, meta) {
@@ -163,7 +183,8 @@ $(document).ready(function() {
 
                     return methods.join('\n');
                 }
-            },
+            }
+            /*,
             {
                 data: 'studies',
                 render:function (data, type, row, meta) {
@@ -187,7 +208,7 @@ $(document).ready(function() {
                         }
                 return methods.join(',')
                 }
-            }
+            } */
         ],
         "aoColumnDefs": [ {},{},{},{},{ "width": "30%"},{},{},{} ]
     });

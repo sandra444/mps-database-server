@@ -15,6 +15,13 @@ import psycopg2.extras
 import mps_AATCcredentials
 
 
+def rList(nct_id,key):
+    l = [d for d in key if d['nct_id'] == nct_id]
+    if len(l) < 1:
+        return None
+    else:
+        return l
+
 def main(request):
     """Default to Server Error"""
     return HttpResponseServerError()
@@ -27,7 +34,7 @@ def fetch_auto_drug_trial_data(request):
         disease = "nafld"
 
     #startTime = time.time()
-    #print('Starting..')
+    #print'Starting..')
 # https://clinicaltrials.gov/ct2/results?cond=&term=&type=Intr&rslt=With&recrs=e&age_v=&gndr=&intr=&titles=&outc=&spons=&lead=&id=&cntry=US&state=&city=&dist=&locn=&strd_s=&strd_e=&prcd_s=&prcd_e=&sfpd_s=&sfpd_e=&lupd_s=&lupd_e=
     studyIDs = []
     try:
@@ -44,13 +51,14 @@ def fetch_auto_drug_trial_data(request):
             content_type="application/json"
             )
 
-    def lst2pgarr(alist):
-        return '{' + ','.join(alist) + '}'
+    #def lst2pgarr(alist):
+        #return '{' + ','.join(alist) + '}'
 
 
-    studyIDs = (lst2pgarr(studyIDs))
+    #studyIDs = (lst2pgarr(studyIDs))
 
-    ##print('Collected Study IDs from Clinical Trials: ' + str(time.time() - startTime))
+
+    #print'Collected Study IDs from Clinical Trials: ' + str(time.time() - startTime))
     userName = mps_AATCcredentials.userid
     passWord = mps_AATCcredentials.pw
 
@@ -65,109 +73,105 @@ def fetch_auto_drug_trial_data(request):
 
     cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
 
-    cur.execute("SELECT nct_id,last_update_posted_date,start_date,completion_date,target_duration, \
-                study_type,brief_title,official_title,overall_status,phase,results_first_posted_date, \
-                source,why_stopped,enrollment FROM studies WHERE nct_id = ANY(%s)",(studyIDs,))
-    studies = cur.fetchall()
-    #cur.execute("SELECT nct_id,description FROM brief_summaries WHERE nct_id = ANY(%s)",(studyIDs,))
-    #brief_summaries = cur.fetchall()
-    cur.execute("SELECT nct_id,name,downcase_name FROM conditions WHERE nct_id = ANY(%s)",(studyIDs,))
-    conditions = cur.fetchall()
-    #cur.execute("SELECT nct_id,agency_class,lead_or_collaborator,name FROM sponsors WHERE nct_id = ANY(%s)",(studyIDs,))
-    #sponsors = cur.fetchall()
-    #cur.execute("SELECT nct_id,description FROM detailed_descriptions WHERE nct_id = ANY(%s)",(studyIDs,))
-    #detailed_descriptions = cur.fetchall()
-    #cur.execute("SELECT nct_id,group_type,title,description FROM design_groups WHERE nct_id = ANY(%s)",(studyIDs,))
-    #design_groups = cur.fetchall()
-    cur.execute("SELECT nct_id,intervention_type,name,description FROM interventions WHERE \
-                nct_id = ANY(%s)",(studyIDs,))  # (SELECT nct_id FROM conditions WHERE downcase_name= %s )", [condition])
-    interventions = cur.fetchall()
-    drugs = interventions
-    #for i in range(0,len(interventions)):
-        #if interventions[i]['intervention_type']=='Drug':
-            #drugs.append(interventions[i])
-    #cur.execute("SELECT nct_id,outcome_type,measure,time_frame,population,description \
-#                FROM design_outcomes WHERE (nct_id = ANY(%s))",(studyIDs,))
-    #design_outcomes = cur.fetchall()
-    #cur.execute("SELECT nct_id,gender,minimum_age,maximum_age,population,criteria FROM eligibilities WHERE \
-                #nct_id = ANY(%s)",(studyIDs,))  # (SELECT nct_id FROM conditions WHERE downcase_name= %s )", [condition])
-    #eligibilities = cur.fetchall()
-    #cur.execute("SELECT nct_id,url,description FROM links WHERE nct_id = ANY(%s)",(studyIDs,))
-    #links = cur.fetchall()
-    #cur.execute("SELECT nct_id,pmid,reference_type FROM study_references WHERE nct_id = ANY(%s)",(studyIDs,))
-    #study_references = cur.fetchall()
-    #cur.execute("SELECT nct_id,result_group_id,time_frame,event_type,description,event_count, \
-    #            organ_system,adverse_event_term,frequency_threshold FROM reported_events WHERE nct_id = ANY(%s)",(studyIDs,))
-    #reported_events = cur.fetchall()
-    cur.execute("SELECT id,nct_id,result_type,title,description FROM result_groups \
-                WHERE nct_id = ANY(%s)",(studyIDs,)) # IN (SELECT nct_id FROM conditions WHERE downcase_name= %s )", [condition])
-    result_groups = cur.fetchall()
-    cur.execute("SELECT nct_id,outcome_id,result_group_id,classification,category,title, \
-                description,units,param_type,param_value,param_value_num, dispersion_type, \
-                dispersion_value, dispersion_value_num, \
-                explanation_of_na FROM outcome_measurements WHERE nct_id = ANY(%s)",(studyIDs,))
-    outcome_measurements = cur.fetchall()
-    cur.execute("SELECT nct_id,outcome_id,param_type,param_value,p_value_modifier,p_value, \
-                method,method_description,groups_description FROM outcome_analyses WHERE nct_id = ANY(%s)",(studyIDs,))
-    outcome_analyses = cur.fetchall()
-    cur.execute("SELECT id,nct_id,outcome_type,title,description,time_frame,population,units, \
-                units_analyzed FROM outcomes WHERE nct_id = ANY(%s)",(studyIDs,))
-    cur.execute("SELECT * FROM outcomes WHERE nct_id = ANY(%s) AND outcome_type='Primary'",(studyIDs,))
-    outcomes = cur.fetchall()
+    studyInfo = []
+    for ID in studyIDs:
+        ##printID)
+        ID = [ID]
+        cur.execute("SELECT nct_id,name,description FROM interventions WHERE \
+                    nct_id = ANY(%s)",(ID,))  # (SELECT nct_id FROM conditions WHERE downcase_name= %s )", [condition])
+        drugs = cur.fetchall()
+        cur.execute("SELECT nct_id,start_date, enrollment, completion_date, \
+                    overall_status,phase,results_first_posted_date \
+                    FROM studies WHERE nct_id = ANY(%s)",(ID,))
+        studies = cur.fetchall()
+        #cur.execute("SELECT nct_id,description FROM brief_summaries WHERE nct_id = ANY(%s)",(studyIDs,))
+        #brief_summaries = cur.fetchall()
+        cur.execute("SELECT nct_id,name FROM conditions WHERE nct_id = ANY(%s)",(ID,))
+        conditions = cur.fetchall()
+        #cur.execute("SELECT nct_id,agency_class,lead_or_collaborator,name FROM sponsors WHERE nct_id = ANY(%s)",(studyIDs,))
+        #sponsors = cur.fetchall()
+        #cur.execute("SELECT nct_id,description FROM detailed_descriptions WHERE nct_id = ANY(%s)",(studyIDs,))
+        #detailed_descriptions = cur.fetchall()
+        #cur.execute("SELECT nct_id,group_type,title,description FROM design_groups WHERE nct_id = ANY(%s)",(studyIDs,))
+        #design_groups = cur.fetchall()
+        #for i in range(0,len(interventions)):
+            #if interventions[i]['intervention_type']=='Drug':
+                #drugs.append(interventions[i])
+        #cur.execute("SELECT nct_id,outcome_type,measure,time_frame,population,description \
+    #                FROM design_outcomes WHERE (nct_id = ANY(%s))",(studyIDs,))
+        #design_outcomes = cur.fetchall()
+        #cur.execute("SELECT nct_id,gender,minimum_age,maximum_age,population,criteria FROM eligibilities WHERE \
+                    #nct_id = ANY(%s)",(studyIDs,))  # (SELECT nct_id FROM conditions WHERE downcase_name= %s )", [condition])
+        #eligibilities = cur.fetchall()
+        #cur.execute("SELECT nct_id,url,description FROM links WHERE nct_id = ANY(%s)",(studyIDs,))
+        #links = cur.fetchall()
+        #cur.execute("SELECT nct_id,pmid,reference_type FROM study_references WHERE nct_id = ANY(%s)",(studyIDs,))
+        #study_references = cur.fetchall()
+        #cur.execute("SELECT nct_id,result_group_id,time_frame,event_type,description,event_count, \
+        #            organ_system,adverse_event_term,frequency_threshold FROM reported_events WHERE nct_id = ANY(%s)",(studyIDs,))
+        #reported_events = cur.fetchall()
+        cur.execute("SELECT id,nct_id,result_type,title,description FROM result_groups \
+                    WHERE nct_id = ANY(%s)",(ID,)) # IN (SELECT nct_id FROM conditions WHERE downcase_name= %s )", [condition])
+        result_groups = cur.fetchall()
+        cur.execute("SELECT nct_id,outcome_id,result_group_id,classification,category,title, \
+                    description,units,param_type,param_value,param_value_num, dispersion_type, \
+                    dispersion_value, dispersion_value_num, \
+                    explanation_of_na FROM outcome_measurements WHERE nct_id = ANY(%s)",(ID,))
+        outcome_measurements = cur.fetchall()
+        cur.execute("SELECT nct_id,outcome_id,param_type,param_value,p_value_modifier,p_value, \
+                    method,method_description,groups_description FROM outcome_analyses WHERE nct_id = ANY(%s)",(ID,))
+        outcome_analyses = cur.fetchall()
+        cur.execute("SELECT id,nct_id,outcome_type,title,description,time_frame,population,units, \
+                    units_analyzed FROM outcomes WHERE nct_id = ANY(%s)",(ID,))
+        cur.execute("SELECT * FROM outcomes WHERE nct_id = ANY(%s) AND outcome_type='Primary'",(ID,))
+        outcomes = cur.fetchall()
+
+        study = {#'brief_summaries': (item for item in brief_summaries if item["nct_id"] == nct_id).next(), \
+                 'conditions': conditions,\
+                 #rList(nct_id,conditions), \
+                # 'design_groups': rList(nct_id,design_groups), \
+                # 'design_outcomes': rList(nct_id,design_outcomes), \
+                # 'detailed_descriptions': rList(nct_id,detailed_descriptions), \
+                 'drugs': drugs,\
+                 #rList(nct_id,drugs), \
+                # 'eligibilities': (item for item in eligibilities if item["nct_id"] == nct_id).next(), \
+                # 'interventions': rList(nct_id,interventions), \
+                # 'links': rList(nct_id,links), \
+                 'outcome_analyses': outcome_analyses, \
+                 #rList(nct_id,outcome_analyses), \
+                 'outcome_measurements': outcome_measurements, \
+                 #rList(nct_id,outcome_measurements), \
+                 'outcomes': outcomes, \
+                 #rList(nct_id, outcomes), \
+                # 'reported_events': rList(nct_id,reported_events), \
+                 'result_groups': result_groups, \
+                 #rList(nct_id,result_groups), \
+                # 'sponsors': rList(nct_id,sponsors), \
+                 'studies': studies[0], \
+                 #'study_references': rList(nct_id,study_references), \
+                 'nct_id': studies[0]['nct_id']
+                }
+        studyInfo.append(study)
+
+
+
     cur.close()
     conn.close()
-
-    #print('Collected Field Information from AACT: ' + str(time.time() - startTime))
-    def rList(nct_id,key):
-        l = [d for d in key if d['nct_id'] == nct_id]
-
-        if len(l) < 1:
-            return None
-        # elif len(l) == 1:
-        #     return (item for item in key if item["nct_id"] == nct_id).next()
-        else:
-            return l
-
-    studiesWithResults = []
-    for i in range(0,len(studies)):
-        #for j in range(0, len(outcomes)):
-        #if studies[i]['results_first_posted_date'] is not None:
-            #studiesWithResults.append(studies[i]['nct_id'])
-            nct_id = studies[i]['nct_id']
-            study = {#'brief_summaries': (item for item in brief_summaries if item["nct_id"] == nct_id).next(), \
-                     'conditions': rList(nct_id,conditions), \
-                    # 'design_groups': rList(nct_id,design_groups), \
-                    # 'design_outcomes': rList(nct_id,design_outcomes), \
-                    # 'detailed_descriptions': rList(nct_id,detailed_descriptions), \
-                     'drugs': rList(nct_id,drugs), \
-                    # 'eligibilities': (item for item in eligibilities if item["nct_id"] == nct_id).next(), \
-                    # 'interventions': rList(nct_id,interventions), \
-                    # 'links': rList(nct_id,links), \
-                     'outcome_analyses': rList(nct_id,outcome_analyses), \
-                     'outcome_measurements': rList(nct_id,outcome_measurements), \
-                     'outcomes': rList(nct_id, outcomes), \
-                    # 'reported_events': rList(nct_id,reported_events), \
-                     'result_groups': rList(nct_id,result_groups), \
-                    # 'sponsors': rList(nct_id,sponsors), \
-                     'studies': (item for item in studies if item["nct_id"] == nct_id).next(), \
-                     #'study_references': rList(nct_id,study_references), \
-                     'nct_id': nct_id #?
-                    }
-            studiesWithResults.append(study)
+    #print'All study info collected ' + str(time.time() - startTime))
 
     outcomeData = []
-    for i in range(0, len(studiesWithResults)):
-        for j in range(0, len(studiesWithResults[i]["outcomes"])):
-            outcomeInfo = {'nct_id': studiesWithResults[i]["nct_id"],\
-                            #'enrollment': studiesWithResults[i]["enrollment"],\
-                            'outcomeAll': [studiesWithResults[i]["outcomes"][j], studiesWithResults[i]["outcome_measurements"], studiesWithResults[i]["outcome_analyses"], studiesWithResults[i]["result_groups"]],\
-                            'conditions':studiesWithResults[i]["conditions"],\
-                            'drugs':studiesWithResults[i]["drugs"],\
-                            'studies':studiesWithResults[i]["studies"]}
+    for i in range(0, len(studyInfo)):
+        for j in range(0, len(studyInfo[i]["outcomes"])):
+            outcomeInfo = {'nct_id': studyInfo[i]["nct_id"],\
+                            #'enrollment': studyInfo[i]["enrollment"],\
+                            'outcomeAll': [studyInfo[i]["outcomes"][j], studyInfo[i]["outcome_measurements"], studyInfo[i]["outcome_analyses"], studyInfo[i]["result_groups"]],\
+                            'conditions':studyInfo[i]["conditions"],\
+                            'drugs':studyInfo[i]["drugs"],\
+                            'studies':studyInfo[i]["studies"]}
             outcomeData.append(outcomeInfo)
     outcomeDataDisplay = {'data': outcomeData}
-    #studyData = { 'data' : studiesWithResults }
-    ##print('Done ' + str(time.time() - startTime))
+    #studyData = { 'data' : studyInfo }
+    #print'Data formatted and sent to dispaly ' + str(time.time() - startTime))
     return HttpResponse(
         json.dumps(outcomeDataDisplay),
         content_type="application/json"
