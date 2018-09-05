@@ -79,8 +79,9 @@
     </div>
 
     {% if object.assaystudyassay_set.count %}
+    <div class="padded-bottom">
     <legend>Assays</legend>
-    <table class="table table-striped table-bordered">
+    <table id="assay_table" class="table table-striped table-bordered">
         <thead>
             <tr>
                 <th>Target/Analyte</th>
@@ -91,14 +92,17 @@
         <tbody>
             {% for assay in object.assaystudyassay_set.all %}
                 <tr class="inline" id="assay-{{ forloop.counter0 }}">
-                    <td>{{ assay.target }}</td>
-                    <td>{{ assay.method }}</td>
+                    <td><a href="/assays/targets/{{ assay.target.id }}" target="_blank">{{ assay.target }}</a></td>
+                    <td><a href="/assays/methods/{{ assay.method.id }}" target="_blank">{{ assay.method }}</a></td>
                     <td>{{ assay.unit }}</td>
                 </tr>
             {% endfor %}
         </tbody>
     </table>
+    </div>
     {% endif %}
+
+    {% include 'assays/grouping_filtering.html' %}
 
     {% include 'assays/chart_options.html' with chart_prefix="charts" chart_title="Current Data" %}
 
@@ -107,20 +111,49 @@
         No data to display
     </div>
 
-    <table id="treatment_group_table" class="table table-striped table-bordered">
-        <thead id="treatment_group_head">
-        </thead>
-        <tbody id="treatment_group_display">
-        </tbody>
-    </table>
+{#    <div id="heatmap_wrapper" class="padded-bottom">#}
+{#        <div class="row">#}
+{#            <div id="heatmap_filters" class="col-xs-12">#}
+{#                <label for="id_heatmap_matrix">Matrix#}
+{#                <select id="id_heatmap_matrix" data-heatmap-index="0"></select>#}
+{#                </label>#}
+{#                <label for="id_heatmap_target">Target#}
+{#                <select id="id_heatmap_target" data-heatmap-index="1"></select>#}
+{#                </label>#}
+{#                <label for="id_heatmap_method">Method#}
+{#                <select id="id_heatmap_method" data-heatmap-index="2"></select>#}
+{#                </label>#}
+{#                <label for="id_heatmap_unit">Unit#}
+{#                <select id="id_heatmap_unit" data-heatmap-index="3"></select>#}
+{#                </label>#}
+{#                <label for="id_heatmap_sample_location">Sample Location#}
+{#                <select id="id_heatmap_sample_location" data-heatmap-index="4"></select>#}
+{#                </label>#}
+{#                <label for="id_heatmap_subtarget">Subtarget#}
+{#                <select id="id_heatmap_subtarget" data-heatmap-index="5"></select>#}
+{#                </label>#}
+{#                <label for="id_heatmap_time">Time#}
+{#                <select id="id_heatmap_time" data-heatmap-index="6"></select>#}
+{#                </label>#}
+{#            </div>#}
+{#        </div>#}
+{##}
+{#    <div class="well padded-bottom">#}
+{#        <div id="matrix_wrapper" class="overflow-auto" style="max-height:800px;">#}
+            {# NO INLINE STYLE PLEASE #}
+{#            <table id="matrix_table" class="table">#}
+{#                <tbody id="matrix_body"></tbody>#}
+{#            </table>#}
+{#        </div>#}
+{#    </div>#}
+{#    </div>#}
 
-    <div id="group_display" class="container hidden-print">
-        <table class="table table-bordered">
-            <tbody id="group_display_body">
+    {% if object.repro_nums %}
+        <div id="piechart-title" data-nums="{{object.repro_nums}}" class="text-center"><strong>Reproducibility Breakdown</strong><br><small>(Hover for Details)</small></div>
+        <div id="piechart" class="text-center" style="width: 250px; height: 250px; margin: auto; display: block;">Loading...</div>
+    {% endif %}
 
-            </tbody>
-        </table>
-    </div>
+    {% include 'assays/group_table.html' %}
 
     {% if object.assaystudysupportingdata_set.count %}
         <legend>Supporting Data</legend>

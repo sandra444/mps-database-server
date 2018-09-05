@@ -7,6 +7,16 @@ $(document).ready(function () {
     // Set the callback
     google.charts.setOnLoadCallback(get_readouts);
 
+    window.GROUPING.refresh_function = refresh_current;
+
+    function refresh_current() {
+        get_readouts();
+
+        if ($('#id_bulk_file').val()) {
+            validate_bulk_file();
+        }
+    }
+
     var study_id = Math.floor(window.location.href.split('/')[5]);
 
     function get_readouts() {
@@ -15,6 +25,8 @@ $(document).ready(function () {
         var data = {
             call: 'fetch_data_points',
             study: study_id,
+            criteria: JSON.stringify(window.GROUPING.get_grouping_filtering()),
+            post_filter: JSON.stringify(window.GROUPING.current_post_filter),
             csrfmiddlewaretoken: window.COOKIES.csrfmiddlewaretoken
         };
 
@@ -22,16 +34,27 @@ $(document).ready(function () {
 
         data = $.extend(data, options);
 
+        // Show spinner
+        window.spinner.spin(
+            document.getElementById("spinner")
+        );
+
         $.ajax({
             url: "/assays_ajax/",
             type: "POST",
             dataType: "json",
             data: data,
             success: function (json) {
+                // Stop spinner
+                window.spinner.stop();
+
                 window.CHARTS.prepare_side_by_side_charts(json, charts_name);
                 window.CHARTS.make_charts(json, charts_name);
             },
             error: function (xhr, errmsg, err) {
+                // Stop spinner
+                window.spinner.stop();
+
                 console.log(xhr.status + ": " + xhr.responseText);
             }
         });
@@ -47,6 +70,8 @@ $(document).ready(function () {
         var data = {
             call: 'validate_data_file',
             study: study_id,
+            criteria: JSON.stringify(window.GROUPING.get_grouping_filtering()),
+            post_filter: JSON.stringify(window.GROUPING.current_post_filter),
             csrfmiddlewaretoken: window.COOKIES.csrfmiddlewaretoken
         //    dynamic_quality: JSON.stringify(dynamic_quality),
         //    include_table: include_table
@@ -68,6 +93,11 @@ $(document).ready(function () {
         });
 
         if ($("#id_bulk_file")[0].files[0]) {
+            // Show spinner
+            window.spinner.spin(
+                document.getElementById("spinner")
+            );
+
             $.ajax({
                 url: "/assays_ajax/",
                 type: "POST",
@@ -77,6 +107,9 @@ $(document).ready(function () {
                 processData: false,
                 data: formData,
                 success: function (json) {
+                    // Stop spinner
+                    window.spinner.stop();
+
                     // console.log(json);
                     if (json.errors) {
                         // Display errors
@@ -101,6 +134,9 @@ $(document).ready(function () {
                     }
                 },
                 error: function (xhr, errmsg, err) {
+                    // Stop spinner
+                    window.spinner.stop();
+
                     alert('An unknown error has occurred. \nIf you have the file open, you may need to close it.');
                     console.log(xhr.status + ": " + xhr.responseText);
                     // Remove file selection

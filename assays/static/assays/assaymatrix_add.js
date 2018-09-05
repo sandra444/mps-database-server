@@ -307,30 +307,69 @@ $(document).ready(function () {
         matrix_body_selector.empty();
 
         // Check to see if new forms will be generated
-        for (var row_index=0; row_index < number_of_rows; row_index++) {
+        for (var row_index=-1; row_index < number_of_rows; row_index++) {
             var row_id = 'row_' + row_index;
             var current_row = $('<tr>')
                 .attr('id', row_id);
 
             var all_matching_for_row_value = $('.' + item_prefix).has('input[name$="-row_index"][value="' + row_index + '"]');
 
-            for (var column_index=0; column_index < number_of_columns; column_index++) {
+            for (var column_index=-1; column_index < number_of_columns; column_index++) {
                 var item_id = item_prefix + '_' + row_index + '_' + column_index;
-                var new_cell = empty_item_html
-                    .clone()
-                    .attr('id', item_id);
+                var new_cell = null;
 
-                // If the form does not exist, then add it!
-                if (!all_matching_for_row_value.has('input[name$="-column_index"][value="' + column_index + '"]')[0]) {
-                    var new_form = generate_form(
-                        item_prefix, {'row_index': row_index, 'column_index': column_index}
-                    );
-                    // Get number of forms and add as attribute to the display
-                    // A little inefficient, but relatively safe
-                    var number_of_forms = $('.' + item_prefix).length;
-                    new_cell.attr(item_form_index_attribute, number_of_forms);
+                // If this is an apply to row
+                if (column_index === -1) {
+                    if (row_index === -1) {
+                        new_cell = $('<td>')
+                    }
+                    else {
+                        new_cell = $('<td>')
+                            .addClass('text-center')
+                            // Note: CRUDE
+                            .css('vertical-align', 'middle')
+                            .append(
+                                $('<a>')
+                                    .html('Apply to Row')
+                                    .attr('data-row-to-apply', row_index)
+                                    .addClass('btn btn-sm btn-primary')
+                                    .click(apply_action_to_row)
+                            );
+                    }
+                }
+                // If this is an apply to column
+                else if (row_index === -1) {
+                    new_cell = $('<td>')
+                        .addClass('text-center')
+                        .append(
+                            $('<a>')
+                                .html('Apply to Column')
+                                .attr('data-column-to-apply', column_index)
+                                .addClass('btn btn-sm btn-primary')
+                                .click(apply_action_to_column)
+                        );
+                }
+                // If this is for actual contents
+                else {
+                    new_cell = empty_item_html
+                        .clone()
+                        .attr('id', item_id)
+                        .attr('data-row-index', row_index)
+                        .attr('data-column-index', column_index)
+                    ;
 
-                    add_form(item_prefix, new_form);
+                    // If the form does not exist, then add it!
+                    if (!all_matching_for_row_value.has('input[name$="-column_index"][value="' + column_index + '"]')[0]) {
+                        var new_form = generate_form(
+                            item_prefix, {'row_index': row_index, 'column_index': column_index}
+                        );
+                        // Get number of forms and add as attribute to the display
+                        // A little inefficient, but relatively safe
+                        var number_of_forms = $('.' + item_prefix).length;
+                        new_cell.attr(item_form_index_attribute, number_of_forms);
+
+                        add_form(item_prefix, new_form);
+                    }
                 }
 
                 // Add
@@ -529,6 +568,8 @@ $(document).ready(function () {
         // NOTE: Show all displays if there are errors
         if (errors_exist) {
             $('.visibility-checkbox').prop('checked', true);
+            // Be sure to show "Show Errors" as well
+            $('#show_errors').parent().parent().show();
             change_matrix_visibility();
         }
     }
@@ -537,10 +578,14 @@ $(document).ready(function () {
         var original_name = $('#id_item_name').val();
         var split_name = original_name.split(/(\d+)/).filter(Boolean);
 
-        var numeric_index = 0;
+        var numeric_index = original_name.length - 1;
         // Increment the first number encountered
-        while (!$.isNumeric(split_name[numeric_index]) && numeric_index < original_name.length) {
-            numeric_index += 1;
+        while (!$.isNumeric(split_name[numeric_index]) && numeric_index >= 0) {
+            numeric_index -= 1;
+        }
+
+        if (numeric_index === -1) {
+            numeric_index = original_name.length;
         }
 
         var first_half = split_name.slice(0, numeric_index).join('');
@@ -562,7 +607,7 @@ $(document).ready(function () {
                 incremented_value = '0' + incremented_value;
             }
 
-            value = first_half + incremented_value + second_half;
+            var value = first_half + incremented_value + second_half;
 
             // Set display
             $(this).find('.item-name').html(value);
@@ -767,6 +812,28 @@ $(document).ready(function () {
         matrix_add_content_to_selected();
     }
 
+    function apply_action_to_row() {
+        // Remove ui-selected class manually
+        $(item_display_class).removeClass('ui-selected');
+        // Get the column index
+        var row_index = $(this).attr('data-row-to-apply');
+        // Add the ui-selected class to the column
+        $(item_display_class + '[data-row-index="' + row_index + '"]').addClass('ui-selected');
+        // Make the call
+        matrix_add_content_to_selected();
+    }
+
+    function apply_action_to_column() {
+        // Remove ui-selected class manually
+        $(item_display_class).removeClass('ui-selected');
+        // Get the column index
+        var column_index = $(this).attr('data-column-to-apply');
+        // Add the ui-selected class to the column
+        $(item_display_class + '[data-column-index="' + column_index + '"]').addClass('ui-selected');
+        // Make the call
+        matrix_add_content_to_selected();
+    }
+
     function matrix_add_content_to_selected() {
         var current_action = action_selector.val();
 
@@ -795,6 +862,9 @@ $(document).ready(function () {
         else {
             add_to_item();
         }
+
+        // Remove ui-selected class manually
+        $(item_display_class).removeClass('ui-selected');
     }
 
     // Matrix Listeners
@@ -963,6 +1033,14 @@ $(document).ready(function () {
 
     window.display_protocol(window.organ_model_protocol.val());
 
+    // Hide all
+    function hide_all_sections() {
+        $('.visibility-checkbox').each(function() {
+            var class_to_hide = $(this).attr('value');
+                $(class_to_hide).hide();
+        });
+    }
+
     // Triggers for hiding elements
     function change_matrix_visibility() {
         $('.visibility-checkbox').each(function() {
@@ -978,6 +1056,19 @@ $(document).ready(function () {
 
     $('.visibility-checkbox').change(change_matrix_visibility);
     change_matrix_visibility();
+
+    // On shift press hide all for dragging
+    $(document).keydown(function (e) {
+        if (e.keyCode === 16) {
+            hide_all_sections();
+        }
+    });
+
+    $(document).keyup(function (e) {
+        if (e.keyCode === 16) {
+            change_matrix_visibility();
+        }
+    });
 
     // Special operations for pre-submission
     $('form').submit(function() {
@@ -1020,11 +1111,15 @@ $(document).ready(function () {
         // Name for the charts for binding events etc
         var charts_name = 'charts';
 
+        window.GROUPING.refresh_function = get_readouts;
+
         function get_readouts() {
             var data = {
                 // TODO TODO TODO CHANGE CALL
                 call: 'fetch_data_points',
                 matrix: matrix_id,
+                criteria: JSON.stringify(window.GROUPING.get_grouping_filtering()),
+                post_filter: JSON.stringify(window.GROUPING.current_post_filter),
                 csrfmiddlewaretoken: window.COOKIES.csrfmiddlewaretoken
             };
 
@@ -1032,12 +1127,20 @@ $(document).ready(function () {
 
             data = $.extend(data, options);
 
+            // Show spinner
+            window.spinner.spin(
+                document.getElementById("spinner")
+            );
+
             $.ajax({
                 url: "/assays_ajax/",
                 type: "POST",
                 dataType: "json",
                 data: data,
                 success: function (json) {
+                    // Stop spinner
+                    window.spinner.stop();
+
                     window.CHARTS.prepare_side_by_side_charts(json, charts_name);
                     window.CHARTS.make_charts(json, charts_name);
 
@@ -1046,6 +1149,9 @@ $(document).ready(function () {
                     $($.fn.dataTable.tables(true)).DataTable().fixedHeader.adjust();
                 },
                 error: function (xhr, errmsg, err) {
+                    // Stop spinner
+                    window.spinner.stop();
+
                     console.log(xhr.status + ": " + xhr.responseText);
                 }
             });

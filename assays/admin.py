@@ -2305,6 +2305,22 @@ class AssayStudyAssayInline(admin.TabularInline):
     model = AssayStudyAssay
     exclude = []
 
+    # TODO REVIEW
+    # TODO NOT DRY
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == 'target':
+            target_queryset = AssayTarget.objects.all().order_by('name')
+            kwargs["queryset"] = target_queryset
+        elif db_field.name == 'method':
+            method_queryset = AssayMethod.objects.all().order_by('name')
+            kwargs["queryset"] = method_queryset
+        elif db_field.name == 'unit':
+            unit_queryset = PhysicalUnits.objects.filter(
+                availability__icontains='readout'
+            ).order_by('unit_type', 'base_unit', 'scale_factor')
+            kwargs["queryset"] = unit_queryset
+        return super(AssayStudyAssayInline, self).formfield_for_foreignkey(db_field, request, **kwargs)
+
 
 class AssayStudySupportingDataInline(admin.TabularInline):
     """Inline for Studies"""
@@ -2347,10 +2363,11 @@ class AssayStudyAdmin(LockableAdmin):
     form = AssayStudyFormAdmin
     save_on_top = True
     list_per_page = 300
-    search_fields = ('name', 'start_date', 'description')
+    search_fields = ('name', 'group__name', 'start_date', 'description')
     date_hierarchy = 'start_date'
     list_display = (
         'name',
+        'group',
         'get_study_types_string',
         'start_date',
         'signed_off_by',
@@ -2397,7 +2414,7 @@ class AssayStudyAdmin(LockableAdmin):
             }
         ),
         (
-            'Group Access', {
+            'Study Data Group and Access Group Info', {
                 'fields': (
                     'group', 'restricted', 'access_groups'
                 ),

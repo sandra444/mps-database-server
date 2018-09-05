@@ -14,7 +14,7 @@ urlpatterns = [
     url(r'^assays/assaystudy/(?P<pk>[0-9]+)/$', AssayStudyIndex.as_view(), name='assay_study_index'),
     # Update page for studies
     # url(r'^assays/(?P<pk>[0-9]+)/update/$', AssayRunUpdate.as_view(), name='study-update'),
-    url(r'^assays/assaystudy/(?P<pk>[0-9]+)/update/$', AssayStudyUpdate.as_view(), name='asssay_study_update'),
+    url(r'^assays/assaystudy/(?P<pk>[0-9]+)/update/$', AssayStudyUpdate.as_view(), name='assay_study_update'),
     # Delete view for studies
     url(r'^assays/assaystudy/(?P<pk>[0-9]+)/delete/$', AssayStudyDelete.as_view(), name='study-delete'),
     # Summary view for studies
@@ -90,6 +90,18 @@ urlpatterns = [
 
     # Images
     url(r'^assays/assaystudy/(?P<pk>[0-9]+)/images/$', AssayStudyImages.as_view(), name='study-images'),
+  
+    # Targets and Methods
+    url(r'^assays/targets/$', AssayTargetList.as_view(), name='assay-targets-list'),
+    url(r'^assays/targets/(?P<pk>[0-9]+)/$', AssayTargetDetail.as_view(), name='assay-targets-detail'),
+    url(r'^assays/methods/$', AssayMethodList.as_view(), name='assay-methods-list'),
+    url(r'^assays/methods/(?P<pk>[0-9]+)/$', AssayMethodDetail.as_view(), name='assay-methods-detail'),
+
+    # Location for test filter, for now
+    url(r'^assays/graphing_reproducibility/$', GraphingReproducibilityFilterView.as_view(), name='graphing-reproducibility'),
+
+    # Data from filters
+    url(r'^assays/data_from_filters/$', AssayDataFromFilters.as_view(), name='data-from-filters'),
 
     # Ajax
     url(r'^assays_ajax/$', assays.ajax.ajax),

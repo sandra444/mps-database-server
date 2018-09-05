@@ -1,5 +1,8 @@
 $(document).ready(function () {
+    // Load core chart package
     google.charts.load('current', {'packages':['corechart']});
+    // Set the callback
+    google.charts.setOnLoadCallback(reproPie1);
 
     // FILE-SCOPE VARIABLES
     var study_id = Math.floor(window.location.href.split('/')[5]);
@@ -11,6 +14,7 @@ $(document).ready(function () {
         chip_list: null,
         cv_list: null
     };
+    var pie = null;
 
     var cv_tooltip = '<span data-toggle="tooltip" title="The CV is calculated for each time point and the value reported is the max CV across time points, or the CV if a single time point is present.  The reproducibility status is excellent if Max CV/CV < 5% (Excellent (CV)), acceptable if Max CV/CV < 15% (Acceptable (CV)), and poor if CV > 15% for a single time point (Poor (CV))" class="glyphicon glyphicon-question-sign" aria-hidden="true" data-placement="bottom"></span>';
     var icc_tooltip = '<span data-toggle="tooltip" title="The ICC Absolute Agreement of the measurements across multiple time points is a correlation coefficient that ranges from -1 to 1 with values closer to 1 being more correlated.  When the Max CV > 15%, the reproducibility status is reported to be excellent if > 0.8 (Excellent (ICC), acceptable if > 0.2 (Acceptable (ICC)), and poor if < 0.2 (Poor (ICC))" class="glyphicon glyphicon-question-sign" aria-hidden="true" data-placement="bottom"></span>';
@@ -37,6 +41,8 @@ $(document).ready(function () {
                 comp_list = json.comp_list;
                 lists.cv_list = json.cv_list;
                 lists.chip_list = json.chip_list;
+                pie = json.pie;
+                reproPie2();
 
                 return gas_list;
             }
@@ -45,7 +51,7 @@ $(document).ready(function () {
             { title: "Show Details",
              "render": function(data, type, row) {
                 if (type === 'display') {
-                    var groupNum = row[10];
+                    var groupNum = row[11];
                     return '<input type="checkbox" class="big-checkbox gas-checkbox-'+groupNum+'">';
                 }
                 return data;
@@ -58,7 +64,7 @@ $(document).ready(function () {
             },
             "sortable": false
             },
-            { title: "Set", data: '10', type: "num" },
+            { title: "Set", data: '11', type: "num" },
             { title: "Organ Model", data: '0' },
             { title: "<span style='white-space: nowrap;'>Full Compound<br>Treatment(s)</span>", data: '2', className: 'none',
                 render:function (data, type, row, meta) {
@@ -83,9 +89,9 @@ $(document).ready(function () {
             { title: "Method/Kit", data: '4', width: '8%' },
             { title: "Sample Location", data: '5', width: '8%' },
             { title: "Value Unit", data: '6' },
-            { title: "<span style='white-space: nowrap;'>Max CV<br>or CV "+cv_tooltip+"</span>", data: '7' },
-            { title: "<span style='white-space: nowrap;'>ICC "+icc_tooltip+"</span>", data: '8' },
-            { title: "Reproducibility<br>Status "+repro_tooltip, data: '9', render: function(data, type, row, meta) {
+            { title: "<span style='white-space: nowrap;'>Max CV<br>or CV "+cv_tooltip+"</span>", data: '8' },
+            { title: "<span style='white-space: nowrap;'>ICC "+icc_tooltip+"</span>", data: '9' },
+            { title: "Reproducibility<br>Status "+repro_tooltip, data: '10', render: function(data, type, row, meta) {
                 if (data == "Excellent (ICC)" || data == "Excellent (CV)"){
                     return '<td><span class="hidden">3</span>'+data+'</td>';
                 } else if (data == "Acceptable (ICC)" || data == "Acceptable (CV)") {
@@ -93,23 +99,24 @@ $(document).ready(function () {
                 } else if (data == "Poor (ICC)" || data == "Poor (CV)") {
                     return '<td><span class="hidden">1</span>'+data+'</td>';
                 } else {
-                    return '<td><span class="hidden">0</span>'+data+'<span data-toggle="tooltip" title="'+row[13]+'" class="glyphicon glyphicon-question-sign" aria-hidden="true"></span></td>';
+                    return '<td><span class="hidden">0</span>'+data+'<span data-toggle="tooltip" title="'+row[14]+'" class="glyphicon glyphicon-question-sign" aria-hidden="true"></span></td>';
                 }
             }},
-            { title: "# of Chips/Wells", data: '11' },
-            { title: "# of Time Points", data: '12' },
+            { title: "# of Chips/Wells", data: '12' },
+            { title: "# of Time Points", data: '13' },
             { title: "Cells", data: '1', 'className': 'none'},
-            { title: "NA Explanation", data: '13', visible: false, 'name': 'naText' }
+            { title: "Settings", data: '7', 'className': 'none'},
+            { title: "NA Explanation", data: '14', visible: false, 'name': 'naText' }
         ],
         "order": [[11, 'desc'], [ 1, "asc" ]],
         "createdRow": function( row, data, dataIndex ) {
-            if ( data[9][0] === "E" ) {
+            if ( data[10][0] === "E" ) {
                 $( row ).find('td:eq(11)').css( "background-color", "#74ff5b" ).css( "font-weight", "bold"  );
             }
-            else if ( data[9][0] === "A" ) {
+            else if ( data[10][0] === "A" ) {
                 $( row ).find('td:eq(11)').css( "background-color", "#fcfa8d" ).css( "font-weight", "bold"  );
             }
-            else if ( data[9][0] === "P" ) {
+            else if ( data[10][0] === "P" ) {
                 $( row ).find('td:eq(11)').css( "background-color", "#ff7863" ).css( "font-weight", "bold" );
             }
             else {
@@ -141,15 +148,15 @@ $(document).ready(function () {
             var sampleLocation = data[5];
             var compoundTreatments = data[2].replace(/\n/g, '<br>');
             var valueUnit = data[6];
-            var group = data[10];
-            var icc_status = data[9];
+            var group = data[11];
+            var icc_status = data[10];
             var $elem = $( "#repro-data" );
             var $clone = $elem.first().clone( true ).addClass('repro-'+group).appendTo("#clone-container");
             mad_list[group]['columns'].unshift("Time");
             $clone.find('#repro-title').text('Set ' + group);
             $clone.find('#selection-parameters').html(buildSelectionParameters(studyID, organModel, targetAnalyte, methodKit, sampleLocation, compoundTreatments, valueUnit));
             $clone.find('#selection-parameters').find('td, th').css('padding','8px 10px');
-            $clone.find('#chip-rep-rep-ind').html(buildCV_ICC(data[7],data[8]));
+            $clone.find('#chip-rep-rep-ind').html(buildCV_ICC(data[8],data[9]));
             $clone.find('#chip-rep-rep-ind').find('td, th').css('padding','8px 10px');
             $clone.find('#chart1').attr('id', 'chart1-'+group);
             $clone.find('#chart2').attr('id', 'chart2-'+group);
@@ -162,7 +169,7 @@ $(document).ready(function () {
             } else if (icc_status[0] === 'P'){
                 $clone.find('#repro-status').html('<em>'+icc_status+'</em>').css("background-color", "#ff7863");
             } else {
-                $clone.find('#repro-status').html('<em>'+icc_status+'</em><small style="color: black;"><span data-toggle="tooltip" title="'+data[13]+'" class="glyphicon glyphicon-question-sign" aria-hidden="true"></span></small>').css("background-color", "Grey");
+                $clone.find('#repro-status').html('<em>'+icc_status+'</em><small style="color: black;"><span data-toggle="tooltip" title="'+data[14]+'" class="glyphicon glyphicon-question-sign" aria-hidden="true"></span></small>').css("background-color", "Grey");
             }
             $clone.find('#mad-score-matrix').DataTable( {
                 columns: mad_columns(group),
@@ -242,7 +249,7 @@ $(document).ready(function () {
             vAxis: {
                 // TODO YOU'LL NEED TO SNAG THE UNITS
                 title: valueUnit,
-                format: 'short',
+                format: 'scientific',
                 textStyle: {
                     bold: true
                 },
@@ -262,7 +269,11 @@ $(document).ready(function () {
             'height':250,
             'width':450,
             // Individual point tooltips, not aggregate
-            focusTarget: 'datum'
+            focusTarget: 'datum',
+            intervals: {
+                // style: 'bars'
+                'lineWidth': 0.75
+            }
         };
         if (title === 'Chip Values/Time') {
             options['series'] = {0: { lineDashStyle: [4, 4], pointShape: { type: 'diamond', sides: 4 } }};
@@ -354,5 +365,54 @@ $(document).ready(function () {
         for (var i=0; i < orderList.length; i++){
             $('#clone-container .repro-'+orderList[i]).appendTo('#clone-container');
         }
+    }
+
+    function reproPie1() {
+        var data = google.visualization.arrayToDataTable([
+            ['Status', 'Count'],
+            ['Loading...', 1]
+        ]);
+        var options = {
+            legend: 'none',
+            pieSliceText: 'label',
+            'chartArea': {'width': '90%', 'height': '90%'},
+            tooltip: {trigger : 'none'},
+            pieSliceTextStyle: {
+                color: 'white',
+                bold: true,
+                fontSize: 12
+            },
+        };
+        var chart = new google.visualization.PieChart(document.getElementById('piechart'));
+        chart.draw(data, options);
+    }
+
+    function reproPie2() {
+        var data = google.visualization.arrayToDataTable([
+            ['Status', 'Count'],
+            ['Excellent', pie[0]],
+            ['Acceptable', pie[1]],
+            ['Poor', pie[2]]
+        ]);
+        var options = {
+            // title: 'Reproducibility Breakdown\n(Click Slices for Details)',
+            // titleFontSize:16,
+            legend: 'none',
+            slices: {
+                0: { color: '#74ff5b' },
+                1: { color: '#fcfa8d' },
+                2: { color: '#ff7863' }
+            },
+            pieSliceText: 'label',
+            pieSliceTextStyle: {
+                color: 'black',
+                bold: true,
+                fontSize: 12
+            },
+            'chartArea': {'width': '90%', 'height': '90%'},
+            pieSliceBorderColor: "black",
+        };
+        var chart = new google.visualization.PieChart(document.getElementById('piechart'));
+        chart.draw(data, options);
     }
 });

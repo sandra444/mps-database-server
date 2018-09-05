@@ -226,12 +226,12 @@ INSTALLED_APPS = (
 
     # MPS applications:
     'mps',
+    'assays',
     'cellsamples',
     'compounds',
     'microdevices',
     'bioactivities',
     'drugtrials',
-    'assays',
     'resources',
     'diseases'
 )
@@ -241,11 +241,13 @@ INSTALLED_APPS = (
 # This is disabled for the moment and a CRON job will be used for now
 # HAYSTACK_SIGNAL_PROCESSOR = 'haystack.signals.RealtimeSignalProcessor'
 
+WHOOSH_INDEX = os.path.join(os.path.dirname(__file__), 'whoosh_index')
+
 # For whoosh
 HAYSTACK_CONNECTIONS = {
     'default': {
         'ENGINE': 'mps.backends.ConfigurableWhooshEngine',
-        'PATH': os.path.join(os.path.dirname(__file__), 'whoosh_index'),
+        'PATH': WHOOSH_INDEX,
         # can cause problems when dealing with data outside ascii
         # 'INCLUDE_SPELLING': True,
     },

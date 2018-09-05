@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block load %}
+    <script src="{% static "assays/assaytarget_detail.js" %}"></script>
+{% endblock %}
+
+{% block breadcrumbs %}
+    <li><a href="/assays/targets/">Targets</a></li>
+    <li class="active">{{ object.name }}</li>
+{% endblock %}
+
+{% block content %}
+    <div class="padded-bottom">
+        <legend>
+            <h2 class="text-center">
+                Target/Analyte:<br>{{ object.name }}
+            </h2>
+        </legend>
+        <div class="row">
+            <div class="col-xs-12">
+                <table class="table table-striped table-bordered table-nonfluid" style="background-color: #AAB3AB; float:none; margin-bottom:18px;">
+                    <tbody>
+                        {% if object.short_name %}
+                        <tr>
+                            <td>
+                                <b>Short Name</b>
+                            </td>
+                            <td style="white-space: nowrap">
+                                {{ object.short_name }}
+                            </td>
+                        </tr>
+                        {% endif %}
+                        {% if object.description %}
+                        <tr>
+                            <td>
+                                <b>Description</b>
+                            </td>
+                            <td>
+                                {{ object.description|linebreaksbr }}
+                            </td>
+                        </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <br>
+        <legend>Method/Kits with this Target/Analyte</legend>
+        <div id="assays" style="display: none;">
+            <table id="assays-table" class="display" cellspacing="0" width="100%">
+                <thead>
+                    <tr>
+                        <th>Method/Kit</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                {% for assay in assays %}
+                     <tr class="assay">
+                        <td><a href= "/assays/methods/{{ assay.1 }}/">{{ assay.0 }}</a></td>
+                        <td>{{ assay.2 }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <br>
+        <legend>Studies Utilizing this Target/Analyte</legend>
+        <div id="studies" style="display: none;">
+            <table id="studies-table" class="display" cellspacing="0" width="100%">
+                <thead>
+                    <tr>
+                        <th>Study</th>
+                        <th>Start Date</th>
+                        <th>Study Types <span data-toggle="tooltip" title="CC = Chip Characterization, DM = Disease Model, EFF = Efficacy, TOX = Toxicity" class="glyphicon glyphicon-question-sign" aria-hidden="true" data-placement="bottom"></span></th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                {% for study in studies %}
+                     <tr class="study">
+                        <td><a href= "/assays/assaystudy/{{ study.id }}/">{{ study.name }}</a></td>
+                        <td>{{ study.start_date }}</td>
+                        <td>{{ study.get_study_types_string }}</td>
+                        <td>{{ study.description }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <script src="{% static "js/display_datatable.js" %}"></script>
+{% endblock %}

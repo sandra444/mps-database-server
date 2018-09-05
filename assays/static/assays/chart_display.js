@@ -12,6 +12,24 @@ window.CHARTS = {};
 // google.charts.setOnLoadCallback(window.CHARTS.callback);
 
 $(document).ready(function () {
+    // Heatmap stuff for later
+    // var colors = [
+    //     "rgba(0,128,0,0.4)", "rgba(26,140,0,0.4)", "rgba(51,152,0,0.4)",
+    //     "rgba(77,164,0,0.4)", "rgba(102,176,0,0.4)", "rgba(128,188,0,0.4)",
+    //     "rgba(153,200,0,0.4)", "rgba(179,212,0,0.4)", "rgba(204,224,0,0.4)",
+    //     "rgba(230,236,0,0.4)", "rgba(255,255,0,0.4)", "rgba(243,230,0,0.4)",
+    //     "rgba(231,204,0,0.4)", "rgba(219,179,0,0.4)", "rgba(207,153,0,0.4)",
+    //     "rgba(195,128,0,0.4)", "rgba(183,102,0,0.4)", "rgba(171,77,0,0.4)",
+    //     "rgba(159,51,0,0.4)", "rgba(147,26,0,0.4)", "rgba(135,0,0,0.4)"
+    // ];
+    //
+    // // Avoid magic strings for heatmap elements
+    // var heatmap_filters_selector = $('#heatmap_filters').find('select');
+    // var matrix_body_selector = $('#matrix_body');
+    // var heatmap_wrapper_selector = $('#heatmap_wrapper');
+    // // TODO TODO TODO TEMPORARILY EXPOSE
+    // var heatmap_data = {};
+
     // Charts
     var all_charts = {};
     var all_events = {};
@@ -22,10 +40,24 @@ $(document).ready(function () {
     var treatment_group_head = $('#treatment_group_head');
     var treatment_group_data_table = null;
 
+    var group_display = $('#group_display');
+    var group_display_body = $('#group_display_body');
+    var group_display_head = $('#group_display_head');
+
     // Probably should just have full data!
     var group_to_data = [];
     var device_to_group = {};
     var all_treatment_groups = [];
+
+    // Conversion dictionary
+    var headers = {
+        // 'device': 'Device',
+        'MPS Model': 'MPS Model',
+        'Cells': 'Cells Added',
+        'Compounds': 'Compound Treatment',
+        'Settings': 'Settings (Non-Compound Treatments)',
+        'Items with Same Treatment': 'Matrix Items (Chips/Wells) in Group'
+    };
 
     window.CHARTS.prepare_chart_options = function(charts) {
         var options = {};
@@ -106,27 +138,19 @@ $(document).ready(function () {
 
     window.CHARTS.display_treatment_groups = function(treatment_groups, header_keys) {
         device_to_group = {};
+        all_treatment_groups = [];
 
         // TODO KIND OF UGLY
         if (!header_keys) {
             header_keys = [
                 // 'device',
-                'organ_model',
-                'cells',
-                'compounds',
-                'settings',
-                'setups_with_same_group'
+                'MPS Model',
+                'Cells',
+                'Compounds',
+                'Settings',
+                'Items with Same Treatment'
             ];
         }
-
-        var headers = {
-            // 'device': 'Device',
-            'organ_model': 'MPS Model',
-            'cells': 'Cells',
-            'compounds': 'Compounds',
-            'settings': 'Settings',
-            'setups_with_same_group': 'Chips/Wells'
-        };
 
         if (treatment_group_data_table) {
             treatment_group_table.DataTable().clear();
@@ -147,6 +171,9 @@ $(document).ready(function () {
         });
 
         treatment_group_head.append(new_row);
+        // Add the header to the group display as well
+        group_display_head.empty();
+        group_display_head.append(new_row.clone().addClass('bg-warning'));
 
         $.each(treatment_groups, function(index, treatment) {
             var group_index = (index + 1);
@@ -165,7 +192,7 @@ $(document).ready(function () {
                 new_row.append(new_td);
 
                 // Somewhat sloppy conditional
-                if (current_header === 'setups_with_same_group') {
+                if (current_header === 'Items with Same Treatment') {
                     $.each(new_td.find('a'), function (anchor_index, anchor) {
                         device_to_group[anchor.text] = index;
                     });
@@ -206,13 +233,122 @@ $(document).ready(function () {
         // Reposition download/print/copy
         $('.DTTT_container').css('float', 'none');
 
-
         // Recalculate responsive and fixed headers
         $($.fn.dataTable.tables(true)).DataTable().responsive.recalc();
         $($.fn.dataTable.tables(true)).DataTable().fixedHeader.adjust();
+
+        // Make sure the header is fixed and active
+        treatment_group_data_table.fixedHeader.enable();
     };
 
+    window.CHARTS.get_heatmap_dropdowns = function(starting_index) {
+        if (heatmap_data.matrices && _.keys(heatmap_data.matrices).length > 0) {
+            heatmap_wrapper_selector.show();
+
+            var current_index = 0;
+            var data_level = heatmap_data.values;
+            var current;
+
+            while (current_index < starting_index) {
+                current = heatmap_filters_selector.eq(current_index);
+                data_level = data_level[current.val()];
+                current_index++;
+            }
+
+            while (current_index < heatmap_filters_selector.length) {
+                current = heatmap_filters_selector.eq(current_index);
+                var former_value = current.val();
+
+                if (former_value === null || starting_index < current_index) {
+                    current.empty();
+                    $.each(_.sortBy(_.keys(data_level)), function (index, key) {
+                        var dropdown_text = key.split('\n')[0];
+                        current.append($('<option>').val(key).text(dropdown_text));
+                    });
+
+                    if (former_value && current.find('option[value="' + former_value + '"]').length > 0) {
+                        current.val(former_value);
+                    }
+                }
+
+                data_level = data_level[current.val()];
+                current_index++;
+            }
+
+            // Make the heatmap
+            // Get the values for the heatmap
+            var means = {};
+
+            $.each(data_level, function (key, values) {
+                means[key] = d3.mean(values);
+            });
+
+            var median = d3.median(means);
+            // Get the min
+            var min_value = _.min(means);
+            min_value -= min_value * 0.000001;
+            // Get the max
+            var max_value = _.max(means);
+            max_value += max_value * 0.000001;
+            // Get the colorscale
+            var color_scale = d3.scale.quantile()
+                .domain([min_value, median, max_value])
+                .range(colors);
+
+            // Actually display the heatmap
+            var current_matrix = heatmap_data.matrices[$('#id_heatmap_matrix').val()];
+
+            matrix_body_selector.empty();
+
+            // Check to see if new forms will be generated
+            for (var row_index = 0; row_index < current_matrix.length; row_index++) {
+                var row_id = 'row_' + row_index;
+                var current_row = $('<tr>')
+                    .attr('id', row_id);
+
+                for (var column_index = 0; column_index < current_matrix[row_index].length; column_index++) {
+                    var new_cell = $('<td>');
+
+                    var current_key = row_index + '_' + column_index;
+                    var value = data_level[current_key];
+                    var mean_value = means[current_key];
+
+                    if (value) {
+                        new_cell.html(value.join(', '));
+                        new_cell.css('background-color', color_scale(mean_value));
+                    }
+                    else {
+                        new_cell.css('background-color', '#606060');
+                    }
+
+                    // Add
+                    current_row.append(new_cell);
+                }
+
+                matrix_body_selector.append(current_row);
+            }
+        }
+        else {
+            heatmap_wrapper_selector.hide();
+        }
+    };
+
+    // window.CHARTS.make_heatmap = function() {
+    //
+    // };
+
+    // TODO THIS SHOULDN'T BE REDUNDANT
+    function isNumber(obj) {
+        return obj !== undefined && typeof(obj) === 'number' && !isNaN(obj);
+    }
+
     window.CHARTS.make_charts = function(json, charts, changes_to_options) {
+        // post_filter setup
+        if (window.GROUPING.full_post_filter === null) {
+            window.GROUPING.full_post_filter = json.post_filter;
+            window.GROUPING.current_post_filter = JSON.parse(JSON.stringify(json.post_filter));
+        }
+
         // Remove triggers
         if (all_events[charts]) {
             $.each(all_events[charts], function(index, event) {
@@ -227,6 +363,20 @@ $(document).ready(function () {
 
         // Show the chart options
         // NOTE: the chart options are currently shown by default, subject to change
+
+        // heatmap WIP
+        // heatmap_data = json.heatmap;
+        //
+        // window.CHARTS.get_heatmap_dropdowns(0);
+
+        // Naive way to learn whether dose vs. time
+        var is_dose = $('#' + charts + 'dose_select').prop('checked');
+
+        var x_axis_label = 'Time (Days)';
+        if (is_dose) {
+            x_axis_label = 'Dose (μM)';
+        }
+
         // If nothing to show
         if (!json.assays) {
             $('#' + charts).html('No data to display');
@@ -241,6 +391,29 @@ $(document).ready(function () {
             var unit = assay_unit.split('\n')[1];
 
             var data = google.visualization.arrayToDataTable(assays[index]);
+
+            var y_axis_label_type = '';
+
+            $.each(assays[index].slice(1), function(index, current_values) {
+                // Idiomatic way to remove NaNs
+                var trimmed_values = current_values.slice(1).filter(isNumber);
+
+                var current_max = Math.abs(Math.max.apply(null, trimmed_values));
+                var current_min = Math.abs(Math.min.apply(null, trimmed_values));
+
+                if (current_max > 1000 || current_max < 0.001) {
+                    y_axis_label_type = '0.00E0';
+                    return false;
+                }
+                else if (Math.abs(current_max - current_min) < 10 && Math.abs(current_max - current_min) > 0.1 && Math.abs(current_max - current_min) !== 0) {
+                    y_axis_label_type = '0.00';
+                    return false;
+                }
+                else if (Math.abs(current_max - current_min) < 0.1 && Math.abs(current_max - current_min) !== 0) {
+                    y_axis_label_type = '0.00E0';
+                    return false;
+                }
+            });
 
             var options = {
                 title: assay,
@@ -264,7 +437,7 @@ $(document).ready(function () {
                     }
                 },
                 hAxis: {
-                    title: 'Time (Days)',
+                    title: x_axis_label,
                     textStyle: {
                         bold: true
                     },
@@ -278,7 +451,8 @@ $(document).ready(function () {
                 },
                 vAxis: {
                     title: unit,
-                    format: 'short',
+                    // If < 1000 and > 0.001 don't use scientific! (absolute value)
+                    format: y_axis_label_type,
                     textStyle: {
                         bold: true
                     },
@@ -295,14 +469,15 @@ $(document).ready(function () {
                 },
                 pointSize: 5,
                 'chartArea': {
-                    'width': '80%',
+                    'width': '75%',
                     'height': '65%'
                 },
                 'height':400,
                 // Individual point tooltips, not aggregate
                 focusTarget: 'datum',
                 intervals: {
-                    style: 'bars'
+                    // style: 'bars'
+                    'lineWidth': 0.75
                 }
             };
 
@@ -334,7 +509,7 @@ $(document).ready(function () {
             var num_colors = 0;
 
             $.each(assays[index][0].slice(1), function(index, value) {
-                if (value.indexOf('~@i1') === -1) {
+                if (value.indexOf(' ~@i1') === -1) {
                     num_colors++;
                 }
             });
@@ -392,7 +567,7 @@ $(document).ready(function () {
                 i = 1;
                 while (i < data.getNumberOfColumns()) {
                     interval_setter.push(i);
-                    if (i + 2 < data.getNumberOfColumns() && assays[index][0][i+1].indexOf('~@i1') > -1) {
+                    if (i + 2 < data.getNumberOfColumns() && assays[index][0][i+1].indexOf(' ~@i1') > -1) {
                         interval_setter.push({sourceColumn: i + 1, role: 'interval'});
                         interval_setter.push({sourceColumn: i + 2, role: 'interval'});
                         i += 2;
@@ -415,7 +590,7 @@ $(document).ready(function () {
             group_to_data[charts].push({});
 
             for (i=0; i < assays[index][0].length; i++) {
-                if (assays[index][0][i].indexOf('~@i1') === -1 && assays[index][0][i].indexOf('~@i2') === -1) {
+                if (assays[index][0][i].indexOf(' ~@i1') === -1 && assays[index][0][i].indexOf(' ~@i2') === -1) {
                     // Need to link EACH CHARTS values to the proper group
                     // EMPHASIS ON EACH CHART
                     // Somewhat naive
@@ -435,16 +610,19 @@ $(document).ready(function () {
             // Makes use of a somewhat zany closure
             var current_event = google.visualization.events.addListener(all_charts[charts][index], 'onmouseover', (function (charts, chart_index) {
                 return function (entry) {
-                    var current_pos = $(all_charts[charts][chart_index].container).position();
-                    var current_top = current_pos.top + 75;
-                    var current_left = $('#breadcrumbs').position.left;
-                    if (entry.row === null && entry.column) {
-                        var row_clone = all_treatment_groups[group_to_data[charts][chart_index][entry.column]].clone().addClass('bg-warning');
-                        if (row_clone) {
-                            $('#group_display_body').empty().append(row_clone);
+                    // Only attempts to display if there is a valid treatment group
+                    if (all_treatment_groups[group_to_data[charts][chart_index][entry.column]]) {
+                        var current_pos = $(all_charts[charts][chart_index].container).position();
+                        var current_top = current_pos.top + 75;
+                        var current_left = $('#breadcrumbs').position.left;
+                        if (entry.row === null && entry.column) {
+                            var row_clone = all_treatment_groups[group_to_data[charts][chart_index][entry.column]].clone().addClass('bg-warning');
+                            if (row_clone) {
+                                group_display_body.empty().append(row_clone);
 
-                            $('#group_display').show()
-                                .css({top: current_top, left: current_left, position:'absolute'});
+                                group_display.show()
+                                    .css({top: current_top, left: current_left, position: 'absolute'});
+                            }
                         }
                     }
                 }
@@ -452,9 +630,9 @@ $(document).ready(function () {
             all_events[charts].push(current_event);
 
             current_event = google.visualization.events.addListener(all_charts[charts][index], 'onmouseout', function () {
-                $('#group_display').hide();
+                group_display.hide();
             });
             all_events[charts].push(current_event);
         }
-    }
+    };
 });

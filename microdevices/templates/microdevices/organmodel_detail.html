@@ -17,7 +17,23 @@
                         <b>Center</b>
                     </td>
                     <td>
-                        {{ object.center|default:'Unspecified' }}
+                        {{ object.center.name }} ({{ object.center.center_id }})
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <b>Institution</b>
+                    </td>
+                    <td>
+                        {{ object.institution|default:'Unspecified' }}
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <b>Base Model</b>
+                    </td>
+                    <td>
+                        {{ object.base_model }}
                     </td>
                 </tr>
                 <tr>
@@ -25,28 +41,19 @@
                         <b>Organ</b>
                     </td>
                     <td>
-                        {{ object.organ|default:'Unspecified' }}
+                        {{ object.organ }}
                     </td>
                 </tr>
+                {% if object.disease %}
                 <tr>
                     <td>
-                        <b>Device</b>
+                        <b>Disease</b>
                     </td>
                     <td>
-                        {% if object.device.id %}
-                            <a href="/microdevices/device/{{ object.device.id }}">{{ object.device }}</a>
-                        {% else %}
-                            Unspecified
+                        {{ object.disease }}
+                        {% if object.disease_trigger %}
+                            ({{ object.get_disease_trigger_display }})
                         {% endif %}
-                    </td>
-                </tr>
-                {% if object.description %}
-                <tr>
-                    <td>
-                        <b>Description</b>
-                    </td>
-                    <td>
-                        {{ object.description|linebreaksbr }}
                     </td>
                 </tr>
                 {% endif %}
@@ -93,6 +100,16 @@
                         {% endif %}
                     </td>
                 </tr>
+                {% if object.description %}
+                <tr>
+                    <td>
+                        <b>Description</b>
+                    </td>
+                    <td>
+                        {{ object.description|linebreaksbr }}
+                    </td>
+                </tr>
+                {% endif %}
                 <tr>
                     <td>
                         <b>References</b>
@@ -105,71 +122,4 @@
         </table>
         </div>
     </div>
-
-    {% if object.organmodellocation_set.count %}
-    <legend>Locations</legend>
-
-    <table class="table table-striped">
-        <thead>
-        <tr>
-            <th>Location</th>
-            <th>Description</th>
-        </tr>
-        </thead>
-        <tbody>
-        {% for location in object.organmodellocation_set.all %}
-            <tr>
-                <td>{{ location.sample_location }}</td>
-                <td>{{ location.notes }}</td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
-    {% endif %}
-
-    {% if protocols %}
-    <legend>Protocols</legend>
-
-    <table class="table table-striped">
-        <thead>
-        <tr>
-            <th>Version</th>
-            <th>Protocol</th>
-        </tr>
-        </thead>
-        <tbody>
-        {% for protocol in protocols %}
-            <tr>
-                <td>{{ protocol.version }}</td>
-                <td><a href="/media/{{ protocol.file }}">{{ protocol.file }}</a></td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
-    {% endif %}
-
-    {% if assays %}
-    <legend>Validated Assays</legend>
-
-    <table class="table table-striped">
-        <thead>
-        <tr>
-            <th>Assay Name</th>
-            <th>Assay Type</th>
-            <th>Test Type</th>
-            <th>Description</th>
-        </tr>
-        </thead>
-        <tbody>
-        {% for assay in assays %}
-            <tr>
-                <td>{{ assay.assay.assay_name }}</td>
-                <td>{{ assay.assay.assay_type }}</td>
-                <td>{{ assay.assay.test_type }}</td>
-                <td>{{ assay.assay.assay_description }}</td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
-    {% endif %}
 {% endblock %}

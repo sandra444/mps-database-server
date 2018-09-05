@@ -132,8 +132,7 @@ class DrugTrial(LockableModel):
                                   verbose_name='Trial ID/Reference')
 
     def __unicode__(self):
-        return u'{} for {} from {}'.format(dict(TRIALTYPES)[self.trial_type],
-                                           self.compound.name,
+        return u'{} from {}'.format(dict(TRIALTYPES)[self.trial_type],
                                            self.source.source_name)
 
     def get_absolute_url(self):
