@@ -103,14 +103,14 @@ $(document).ready(function() {
                     return methods.join('; <br>');
                 }
             },
-            /* {
+            {
                 data: 'studies',
                 render:function (data, type, row, meta) {
                     var methods = [];
                     methods.push(data.enrollment);
                     return methods;
                 }
-            }, */
+            },
             {
                 data: 'outcomeAll',
                 render:function (data, type, row, meta) {
