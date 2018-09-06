@@ -440,9 +440,9 @@ $(document).ready(function() {
 
         // Define what the legend is
         // TODO TODO TODO CONTRIVED FOR NOW
-        var legend_key = 'Centers';
+        var legend_key = 'Center Count';
         if (!inter_level) {
-            legend_key = 'Studies';
+            legend_key = 'Study Count';
         }
 
         if (repro_table) {
@@ -614,6 +614,16 @@ $(document).ready(function() {
                 }
             },
             columns: columns,
+            columnDefs: [
+                { "responsivePriority": 1, "targets": 14 },
+                { "responsivePriority": 2, "targets": [0,1,2,3] },
+                { "responsivePriority": 3, "targets": 5 },
+                { "responsivePriority": 4, "targets": 12 },
+                { "responsivePriority": 5, "targets": 11 },
+                { "responsivePriority": 6, "targets": 13 },
+                { "responsivePriority": 7, "targets": 6 },
+                { "responsivePriority": 8, "targets": 4 }
+            ],
             "order": [[status_column_index, 'desc'], [ 1, "asc" ]],
             "createdRow": function(row, data, dataIndex) {
                 if (data[8][0] === "E") {
