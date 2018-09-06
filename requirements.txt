@@ -1,7 +1,7 @@
 matplotlib
 django-uwsgi-cache
 networkx
-Django==1.11.13
+Django==1.11.14
 Jinja2
 Markdown
 MarkupSafe
@@ -38,7 +38,9 @@ logilab-common
 mccabe
 numpy
 pandas
-pep8
+# Deprecated, use pycodestyle instead
+# pep8
+pycodestyle
 profilehooks
 psycopg2
 pycosat

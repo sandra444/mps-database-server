@@ -1,6 +1,7 @@
 // Name subject to change
 // This file allows the user to compare data of different adverse events for differing compounds
 // TODO THIS SCRIPT NEEDS TO BE REVISED TO LIMIT HITS
+// TODO REVISE CHECKBOXES
 $(document).ready(function () {
     // Prevent CSS conflict with Bootstrap
     // $.fn.button.noConflict();
@@ -62,14 +63,6 @@ $(document).ready(function () {
         }
     });
     dialog.removeProp('hidden');
-
-    // Add method to sort by checkbox
-    // (I reversed it so that ascending will place checked first)
-    $.fn.dataTable.ext.order['dom-checkbox-defer'] = function(settings, col) {
-        return settings.aoData.map(function(data, index) {
-            return data._aData.checkbox.indexOf(' checked>') > -1 ? 0 : 1;
-        });
-    };
 
     // Plugin to show/hide extra axis
     c3.chart.fn.axis.show_y2 = function(shown) {
@@ -473,7 +466,7 @@ $(document).ready(function () {
                 sSortDataType: 'dom-checkbox-defer',
                 width: '10%',
                 render:function (data, type, row, meta) {
-                    return '<input class="checkbox adverse-event" type="checkbox" value="' + data + '">';
+                    return '<input class="checkbox big-checkbox adverse-event" type="checkbox" value="' + data + '">';
                 }
             },
             // {data: 'checkbox', type: 'dom-checkbox-defer', width: '10%'},
@@ -502,7 +495,7 @@ $(document).ready(function () {
                 sSortDataType: 'dom-checkbox-defer',
                 width: '10%',
                 render:function (data, type, row, meta) {
-                    return '<input class="checkbox compound" type="checkbox" value="' + data + '">';
+                    return '<input class="checkbox big-checkbox compound" type="checkbox" value="' + data + '">';
                 }
             },
             // {data: 'checkbox', type: 'dom-checkbox-defer', width: '10%'},

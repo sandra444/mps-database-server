@@ -45,7 +45,7 @@ $(document).ready(function () {
             { title: "Show Details",
              "render": function(data, type, row) {
                 if (type === 'display') {
-                    var groupNum = row[10];
+                    var groupNum = row[11];
                     return '<input type="checkbox" class="big-checkbox gas-checkbox-'+groupNum+'">';
                 }
                 return data;
@@ -58,7 +58,7 @@ $(document).ready(function () {
             },
             "sortable": false
             },
-            { title: "Set", data: '10', type: "num" },
+            { title: "Set", data: '11', type: "num" },
             { title: "Organ Model", data: '0' },
             { title: "<span style='white-space: nowrap;'>Full Compound<br>Treatment(s)</span>", data: '2', className: 'none',
                 render:function (data, type, row, meta) {
@@ -83,9 +83,9 @@ $(document).ready(function () {
             { title: "Method/Kit", data: '4', width: '8%' },
             { title: "Sample Location", data: '5', width: '8%' },
             { title: "Value Unit", data: '6' },
-            { title: "<span style='white-space: nowrap;'>Max CV<br>or CV "+cv_tooltip+"</span>", data: '7' },
-            { title: "<span style='white-space: nowrap;'>ICC "+icc_tooltip+"</span>", data: '8' },
-            { title: "Reproducibility<br>Status "+repro_tooltip, data: '9', render: function(data, type, row, meta) {
+            { title: "<span style='white-space: nowrap;'>Max CV<br>or CV "+cv_tooltip+"</span>", data: '8' },
+            { title: "<span style='white-space: nowrap;'>ICC "+icc_tooltip+"</span>", data: '9' },
+            { title: "Reproducibility<br>Status "+repro_tooltip, data: '10', render: function(data, type, row, meta) {
                 if (data == "Excellent (ICC)" || data == "Excellent (CV)"){
                     return '<td><span class="hidden">3</span>'+data+'</td>';
                 } else if (data == "Acceptable (ICC)" || data == "Acceptable (CV)") {
@@ -93,23 +93,24 @@ $(document).ready(function () {
                 } else if (data == "Poor (ICC)" || data == "Poor (CV)") {
                     return '<td><span class="hidden">1</span>'+data+'</td>';
                 } else {
-                    return '<td><span class="hidden">0</span>'+data+'<span data-toggle="tooltip" title="'+row[13]+'" class="glyphicon glyphicon-question-sign" aria-hidden="true"></span></td>';
+                    return '<td><span class="hidden">0</span>'+data+'<span data-toggle="tooltip" title="'+row[14]+'" class="glyphicon glyphicon-question-sign" aria-hidden="true"></span></td>';
                 }
             }},
-            { title: "# of Chips/Wells", data: '11' },
-            { title: "# of Time Points", data: '12' },
+            { title: "# of Chips/Wells", data: '12' },
+            { title: "# of Time Points", data: '13' },
             { title: "Cells", data: '1', 'className': 'none'},
-            { title: "NA Explanation", data: '13', visible: false, 'name': 'naText' }
+            { title: "Settings", data: '7', 'className': 'none'},
+            { title: "NA Explanation", data: '14', visible: false, 'name': 'naText' }
         ],
         "order": [[11, 'desc'], [ 1, "asc" ]],
         "createdRow": function( row, data, dataIndex ) {
-            if ( data[9][0] === "E" ) {
+            if ( data[10][0] === "E" ) {
                 $( row ).find('td:eq(11)').css( "background-color", "#74ff5b" ).css( "font-weight", "bold"  );
             }
-            else if ( data[9][0] === "A" ) {
+            else if ( data[10][0] === "A" ) {
                 $( row ).find('td:eq(11)').css( "background-color", "#fcfa8d" ).css( "font-weight", "bold"  );
             }
-            else if ( data[9][0] === "P" ) {
+            else if ( data[10][0] === "P" ) {
                 $( row ).find('td:eq(11)').css( "background-color", "#ff7863" ).css( "font-weight", "bold" );
             }
             else {
@@ -141,15 +142,15 @@ $(document).ready(function () {
             var sampleLocation = data[5];
             var compoundTreatments = data[2].replace(/\n/g, '<br>');
             var valueUnit = data[6];
-            var group = data[10];
-            var icc_status = data[9];
+            var group = data[11];
+            var icc_status = data[10];
             var $elem = $( "#repro-data" );
             var $clone = $elem.first().clone( true ).addClass('repro-'+group).appendTo("#clone-container");
             mad_list[group]['columns'].unshift("Time");
             $clone.find('#repro-title').text('Set ' + group);
             $clone.find('#selection-parameters').html(buildSelectionParameters(studyID, organModel, targetAnalyte, methodKit, sampleLocation, compoundTreatments, valueUnit));
             $clone.find('#selection-parameters').find('td, th').css('padding','8px 10px');
-            $clone.find('#chip-rep-rep-ind').html(buildCV_ICC(data[7],data[8]));
+            $clone.find('#chip-rep-rep-ind').html(buildCV_ICC(data[8],data[9]));
             $clone.find('#chip-rep-rep-ind').find('td, th').css('padding','8px 10px');
             $clone.find('#chart1').attr('id', 'chart1-'+group);
             $clone.find('#chart2').attr('id', 'chart2-'+group);
@@ -162,7 +163,7 @@ $(document).ready(function () {
             } else if (icc_status[0] === 'P'){
                 $clone.find('#repro-status').html('<em>'+icc_status+'</em>').css("background-color", "#ff7863");
             } else {
-                $clone.find('#repro-status').html('<em>'+icc_status+'</em><small style="color: black;"><span data-toggle="tooltip" title="'+data[13]+'" class="glyphicon glyphicon-question-sign" aria-hidden="true"></span></small>').css("background-color", "Grey");
+                $clone.find('#repro-status').html('<em>'+icc_status+'</em><small style="color: black;"><span data-toggle="tooltip" title="'+data[14]+'" class="glyphicon glyphicon-question-sign" aria-hidden="true"></span></small>').css("background-color", "Grey");
             }
             $clone.find('#mad-score-matrix').DataTable( {
                 columns: mad_columns(group),
@@ -242,7 +243,7 @@ $(document).ready(function () {
             vAxis: {
                 // TODO YOU'LL NEED TO SNAG THE UNITS
                 title: valueUnit,
-                format: 'short',
+                format: 'scientific',
                 textStyle: {
                     bold: true
                 },

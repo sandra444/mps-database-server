@@ -69,6 +69,10 @@
 
     <script src="{% static "js/cookies.js" %}"></script>
 
+    {# Spinner #}
+    <script src="{% static "js/spin.min.js" %}"></script>
+    <script src="{% static "js/mps_spinner.js" %}"></script>
+
     {# Yes, I know this violates SOC #}
     <script>
       {# Smart menus removed #}
@@ -162,7 +166,7 @@
 
         function autocollapse() {
             navbar.removeClass('collapsed');
-            if(navbar.innerHeight() > 50) {
+            if (navbar.innerHeight() > 51) {
                 navbar.addClass('collapsed');
             }
         }
@@ -224,6 +228,9 @@
           <li title="Generate a dendrogram for selected compound/bioactivity data">
               <a href="/bioactivities/cluster/#filter">Cluster</a>
           </li>
+          <li title="View plots and reproducibility"><a href="/assays/graphing_reproducibility/">
+              Graphing/Reproducibility
+          </a></li>
 {#          <li title="This feature is still in development"><a href="/under_construction/">#}
 {#              <span class="glyphicon glyphicon-wrench" aria-hidden="true"></span>#}
 {#              Reproducibility#}
@@ -394,6 +401,10 @@
       </div>
     </footer>
   </div>
+
+  {# Spinner #}
+  <div id="spinner"></div>
+
   </div>
 </body>
 </html>
