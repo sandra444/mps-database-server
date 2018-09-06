@@ -45,652 +45,309 @@
 {# MAKE SURE THIS OFFSET IS EQUAL TO THE OFFSET LISTED IN THE SCRIPT #}
 <body data-spy="scroll" data-target=".navbar" data-offset="80">
 <nav class="navbar navbar-inverse navbar-fixed-top">
-  <div class="container">
-    <div class="navbar-header">
-      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-      </button>
-      {# <span class="navbar-brand navbar-help"><b>MPS Help</b></span> #}
-    </div>
-    <div>
-      <div class="collapse navbar-collapse" id="myNavbar">
-        <ul class="nav navbar-nav">
-          <li><a href="#recentupgrades">What's New</a></li>
+    {# Open class container - use Ctrl+Shift+M to jump to close#}
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <span class="navbar-brand navbar-help"><b>MPS Help</b></span>
+        </div>
 
-          <li><a href="#search">Search</a></li>
+        <div>
+            <div class="collapse navbar-collapse" id="myNavbar">
+                <ul class="nav navbar-nav">
+                    <li><a href="#recentupgrades">What's New</a></li>
+                    <li><a href="#search">Search</a></li>
 
-          <li class="dropdown">
-            <a class="dropdown-toggle" data-toggle="dropdown" href="#">Studies<span class="caret"></span></a>
-            <ul class="dropdown-menu">
-              <li><a href="#studies">Studies</a></li>
-              <li><a href="#studyconfigurations">Integrated Study Configurations</a></li>
-              <li><a href="#matrices">Matrix</a></li>
-              <li><a href="#matrixitems">Matrix Item</a></li>
-              <li class="divider"></li>
-              <li><a href="#upload">Upload Data Points</a></li>
-            </ul>
-          </li>
-          <li class="dropdown">
-            <a class="dropdown-toggle" data-toggle="dropdown" href="#">Models<span class="caret"></span></a>
-            <ul class="dropdown-menu">
-              <li><a href="#organmodels">Organ Models</a></li>
-              <li><a href="#microdevices">Microdevices</a></li>
-            </ul>
-          </li>
-          <li class="dropdown">
-            <a class="dropdown-toggle" data-toggle="dropdown" href="#">Compounds<span class="caret"></span></a>
-            <ul class="dropdown-menu">
-              <li><a href="#chemicaldata">Chemical Data</a></li>
-              <li><a href="#bioactivities">Bioactivities</a></li>
-              <li><a href="#drugtrials">Drug Trials</a></li>
-              <li><a href="#adverseevents">Adverse Events</a></li>
-              <li><a href="#compoundreport">Compound Report</a></li>
-            </ul>
-          </li>
-          <li class="dropdown">
-            <a class="dropdown-toggle" data-toggle="dropdown" href="#">Cell Samples<span class="caret"></span></a>
-            <ul class="dropdown-menu">
-              <li><a href="#celltypes">Cell Types</a></li>
-              <li><a href="#cellsubtypes">Cell Origins</a></li>
-              <li><a href="#cellsamples">Cell Samples</a></li>
-            </ul>
-          </li>
-          <li class="dropdown">
-            <a class="dropdown-toggle" data-toggle="dropdown" href="#">Data Analysis<span class="caret"></span></a>
-            <ul class="dropdown-menu">
-              <li><a href="#heatmap">Heatmap</a></li>
-              <li><a href="#cluster">Cluster</a></li>
-            </ul>
-          </li>
-          <li><a href="#glossary">Glossary</a></li>
-        </ul>
-      </div>
+                    <li class="dropdown">
+                        <a class="dropdown-toggle" data-toggle="dropdown" href="#">Studies<span class="caret"></span></a>
+                        <ul class="dropdown-menu">
+                            <li><a href="#upload">Upload Data Points</a></li>
+                        </ul>
+                    </li>
+                    <li class="dropdown">
+                        <a class="dropdown-toggle" data-toggle="dropdown" href="#">Compounds<span class="caret"></span></a>
+                        <ul class="dropdown-menu">
+                            <li><a href="#chemicaldata">Chemical Data</a></li>
+                            <li><a href="#bioactivities">Bioactivities</a></li>
+                            <li><a href="#drugtrials">Drug Trials</a></li>
+                            <li><a href="#adverseevents">Adverse Events</a></li>
+                            <li><a href="#compoundreport">Compound Report</a></li>
+                        </ul>
+                    </li>
+
+                    <li class="dropdown">
+                        <a class="dropdown-toggle" data-toggle="dropdown" href="#">Data Analysis<span class="caret"></span></a>
+                        <ul class="dropdown-menu">
+                            <li><a href="#heatmap">Heatmap</a></li>
+                            <li><a href="#cluster">Cluster</a></li>
+                        </ul>
+                    </li>
+
+                    <li><a href="#glossary">Glossary</a></li>
+
+                </ul>
+            </div>
+        </div>
     </div>
-  </div>
+  {# Close class container #}
 </nav>
 
 <div class="offset-help-navbar">
 
-<div id="recentupgrades_section" class="container">
- <h1>What's New</h1>
-  <div id="recentupgrades">
-      <h2>Recent Upgrades to the MPS Database</h2>
-      <ul class="list-group">
-        <li class="list-group-item active">
-          Major MPS Database Upgrades in the Past 6 months
-        </li>
-          <li class="list-group-item"> <b><em>Integrated Reproducibility Analysis</em></b> An intra- and inter-study reproducibility analysis tool is now available in the MPS database. The inter-study reproducibility analysis tool can be accessed through the Data Analysis icon. This tool offers the user a wide range of options for grouping and filtering data prior to performing analysis. The intra-study tool can be accessed through the Study Summary Page.
-        </li>
-        <li class="list-group-item"> <b><em>Matrix Items in a Matrix</em></b> Matrix Items can now be assigned to a matrix and data can be summarized by matrix. To learn more about matrix and matrix items, review the descriptions in the glossary section of the help.
-        </li>
-        <li class="list-group-item"> <b><em>Integration of Images and Videos</em></b> Images and videos can now be associated to a matrix item within a study. Images/videos are provided with metadata explaining what is being displayed. Images/videos are auto-scaled for optimal viewing online, and the unaltered images/videos can be downloaded to perform relative comparisons. Images/videos can be accessed from the main study page (Study Matrices and Items List Page).
-        </li>
-        <li class="list-group-item"> <b><em>Inter-Study Grouping and Filtering</em></b> The grouping and filtering feature is a powerful tool that offers the user a wide range of options for grouping and filtering data. The tool can be accessed in several places throughout the database, including: through the Data Analysis icon and the Study Summary Page. The tool can be used to customize what data are used (via the filtering feature) and how data will be grouped (via the grouping feature) graphing and analysis.
-        </li>
-      <li class="list-group-item"> <b><em>Disease Model Portal</em></b> The disease model portal allows users to quickly determine what information regarding a specific disease is available in the MPS Database, lets the user drill down on data stored in the MPS database (study data and data extracted from the clinicaltrials.gov), and provides users with a links to clinicaltrials.gov where addition drug trial information can be accessed. The disease model portal can be accessed through the Models tab (via the View Diseases option).
-      </li>
-      </ul>
-  </div>
-</div>
+    <div id="recentupgrades_section" class="container">
+        <h1>What's New</h1>
+        <div id="recentupgrades">
+            <h2>Recent Upgrades to the MPS Database</h2>
+            <ul class="list-group">
+                <li class="list-group-item active">
+                Major MPS Database Upgrades in the Past 6 months
+                </li>
+                <li class="list-group-item"> <b><em>Integrated Reproducibility Analysis</em></b> An intra- and inter-study reproducibility analysis tool is now available in the MPS database. The inter-study reproducibility analysis tool can be accessed through the Data Analysis icon. This tool offers the user a wide range of options for grouping and filtering data prior to performing analysis. The intra-study tool can be accessed through the Study Summary Page.
+                </li>
+                <li class="list-group-item"> <b><em>Matrix Items in a Matrix</em></b> Matrix Items can now be assigned to a matrix and data can be summarized by matrix. To learn more about matrix and matrix items, review the descriptions in the glossary section of the help.
+                </li>
+                <li class="list-group-item"> <b><em>Integration of Images and Videos</em></b> Images and videos can now be associated to a matrix item within a study. Images/videos are provided with metadata explaining what is being displayed. Images/videos are auto-scaled for optimal viewing online, and the unaltered images/videos can be downloaded to perform relative comparisons. Images/videos can be accessed from the main study page (Study Matrices and Items List Page).
+                </li>
+                <li class="list-group-item"> <b><em>Inter-Study Grouping and Filtering</em></b> The grouping and filtering feature is a powerful tool that offers the user a wide range of options for grouping and filtering data. The tool can be accessed in several places throughout the database, including: through the Data Analysis icon and the Study Summary Page. The tool can be used to customize what data are used (via the filtering feature) and how data will be grouped (via the grouping feature) graphing and analysis.
+                </li>
+                <li class="list-group-item"> <b><em>Disease Model Portal</em></b> The disease model portal allows users to quickly determine what information regarding a specific disease is available in the MPS Database, lets the user drill down on data stored in the MPS database (study data and data extracted from the clinicaltrials.gov), and provides users with a links to clinicaltrials.gov where addition drug trial information can be accessed. The disease model portal can be accessed through the Models tab (via the View Diseases option).
+                </li>
+            </ul>
+        </div>
+    </div>
 
-<div id="search_section" class="container">
-  <h1>Search</h1>
-  <div id="search">
-      <h2>Searching the Database</h2>
-      <ul class="list-group">
-        <li class="list-group-item active">
-          From the home page, you can perform a <b>Global Search</b> with the provided text input
-        </li>
-        <li class="list-group-item">
-          To search, type a query in the search input field and hit enter or click the blue <b>Search</b> button
-        </li>
-        <li class="list-group-item">
-          As you type in the search bar, suggestions will appear
-          <br>
-          Clicking a suggestion will place a term broader than the suggestion into the search bar
-          <br>
-          This is done so that clicking a search suggestion for, say, a drug trial, will also display other results with the compound in question
-        </li>
-        <li class="list-group-item">
-          Clicking the white button reading <b>Global</b> lets you switch to a <b>Bioactivites Search</b> described
-            <a href="#bioactivities">here</a>
-        </li>
-        <li class="list-group-item">
-          After submitting a <em>global</em> query, you are brought to the <b>Search Results</b> page
-          <br>
-          This page has a text input so that you can submit another <em>global</em> search
-          <br>
-          Below the text input, you will see a number of checkboxes with labels for different types of data
-          <br>
-          Clicking a checkbox will restrict the results to only display results that have a checked-off type
-          <br>
-          You can clear all of the checkboxes and show all of the results again by clicking the red <b>Clear Filters</b> button
-        </li>
-      </ul>
-  </div>
-</div>
+    <div id="search_section" class="container">
+        <h1>Search</h1>
+        <div id="search">
+          <h2>Searching the Database</h2>
+          <ul class="list-group">
+            <li class="list-group-item active">
+              From the home page, you can perform a <b>Global Search</b> with the provided text input
+            </li>
+            <li class="list-group-item">
+              To search, type a query in the search input field and hit enter or click the blue <b>Search</b> button
+            </li>
+            <li class="list-group-item">
+              As you type in the search bar, suggestions will appear
+              <br>
+              Clicking a suggestion will place a term broader than the suggestion into the search bar
+              <br>
+              This is done so that clicking a search suggestion for, say, a drug trial, will also display other results with the compound in question
+            </li>
+            <li class="list-group-item">
+              Clicking the white button reading <b>Global</b> lets you switch to a <b>Bioactivites Search</b> described
+                <a href="#bioactivities">here</a>
+            </li>
+            <li class="list-group-item">
+              After submitting a <em>global</em> query, you are brought to the <b>Search Results</b> page
+              <br>
+              This page has a text input so that you can submit another <em>global</em> search
+              <br>
+              Below the text input, you will see a number of checkboxes with labels for different types of data
+              <br>
+              Clicking a checkbox will restrict the results to only display results that have a checked-off type
+              <br>
+              You can clear all of the checkboxes and show all of the results again by clicking the red <b>Clear Filters</b> button
+            </li>
+          </ul>
+        </div>
+    </div>
 
-<div id="studies_section" class="container">
-  <h1>Studies</h1>
-  <div id="studies">
-    <h2>Studies</h2>
-    <h4>Adding or Editing a Study</h4>
-    <ul class="list-group">
-      <li class="list-group-item active">
-        <b>Studies</b> serve to organize plates, chips, and their related data
-      </li>
-      <li class="list-group-item">
-        The <b>Study Type</b> indicates the general purpose of the study
-        <br>
-        Multiple <b>Study Types</b> can be chosen and at least one is required
-      </li>
-      <li class="list-group-item">
-        Please try to name the study informatively
-        <br>
-        e.g. "Kidney-Liver Vitamin C Metabolism" is more useful than "Study-1"
-      </li>
-      <li class="list-group-item">
-        Checking <b>Use in Calculations</b> tells the database to use this study's data in predictive modeling and other calculations
-      </li>
-      <li class="list-group-item">
-        You can upload an image, such as a picture of the setup or an illustration of the protocol
-        <br>
-        If a preview of the uploaded image does not appear, something went wrong
-      </li>
-      <li class="list-group-item">
-        You can upload a PDF or word file which contains the study's <b>Protocol</b>
-      </li>
-      <li class="list-group-item">
-        An <b>Integrated Study Configuration</b> needs to be specified for integrated studies
-        <br>
-        If the <b>Integrated Study Configuration</b> you need is not available, click the provided link to add one
-      </li>
-    </ul>
-    <h4>Adding or Editing Assays</h4>
-    <ul class="list-group">
-        <li class="list-group-item">
-            The section entitled <b>Assays</b> gives a list of assays performed for the study
-        </li>
-        <li class="list-group-item">
-            The column for <b>Target/Analyte</b> specifies what the assay was analyzing, e.g. the protein Albumin
+    <div id="studies_section" class="container">
+      <h1>Studies</h1>
+      <div id="upload">
+        <h2>Uploading Data Points</h2>
+    {#    <h4></h4>#}
+        <ul class="list-group">
+          <li class="list-group-item active">
+            It is possible to upload multiple sets of data points by uploading an Excel file (.xls or .xlsx) or CSV (.csv)
+          </li>
+          <li class="list-group-item">
+            To access this interface, go to the desired study's page and click this button:
+              <a class="btn btn-warning" role="button">Upload Data</a>
+          </li>
+          <li class="list-group-item">
+            Click the following links to download Excel templates:
             <br>
-            If a target you need is not on the list, please contact an administrator or post in <b>Feedback</b>
-        </li>
-        <li class="list-group-item">
-            The column for <b>Method/Kit</b> shows how the assay was performed
-            <br>
-            If a method you need is not on the list, please contact an administrator or post in <b>Feedback</b>
-        </li>
-        <li class="list-group-item">
-          The column for <b>Readout Unit</b> shows what units the data (namely the data you wish to upload) from the assay were recorded in
-          <br>
-          If a unit you need is not on the list, please contact an administrator or post in <b>Feedback</b>
-        </li>
-        <li class="list-group-item">
-            If you need another row, click the <b>Add Assay</b> button
-        </li>
-    </ul>
-    <h4>Adding Supporting Data</h4>
-    <ul class="list-group">
-      <li class="list-group-item">
-        You can add <b>Supporting Data</b> such as the raw values used to acquire the data uploaded in the Readouts
-      </li>
-      <li class="list-group-item">
-        This data will not be used in calculations and does not need to be formatted in a specific way
-      </li>
-      <li class="list-group-item">
-        If you need another row, click the green "Add Supporting Data" button
-      </li>
-      <li class="list-group-item">
-        If you still need to acquire this data, you can edit the study later and add it then
-      </li>
-    </ul>
-  </div>
-
-  <div id="studyconfigurations">
-  <h2>Integrated Study Configurations</h2>
-    <h4>Adding or Editing an Integrated Study Configuration</h4>
-    <ul class="list-group">
-      <li class="list-group-item active">
-        An <b>Integrated Study Configuration</b> shows how different devices in an integrated study associate with eachother
-      </li>
-      <li class="list-group-item">
-        Please be sure to use an informative name
-      </li>
-    </ul>
-    <h4>Defining How the Models are Associated</h4>
-    <ul class="list-group">
-      <li class="list-group-item">
-        Each model has a <b>Label</b> which can be one or two characters long
-      </li>
-      <li class="list-group-item">
-        <b>Organ</b> specifies which organ model is associated with the label
-      </li>
-      <li class="list-group-item">
-        <b>Sequence Number</b> shows the order of input for the models
-      </li>
-      <li class="list-group-item">
-        <b>Output</b> lists all of the other models the current model feeds into
-        <br>
-        Output should be a list of labels separated by dashes: e.g. "AB-CD" means the model is connected to AB and CD
-      </li>
-      <li class="list-group-item">
-        <b>Coupling</b> indicates whether or not the model is directly hooked up to the other models
-        <br>
-        <b>Physical</b> shows that the models are physically connected while <b>Functional</b> shows that the model is not receiving media directly
-      </li>
-      <li class="list-group-item">
-        Click <b>Add Model</b> to add another row
-      </li>
-    </ul>
-  </div>
-
-  <div id="matrices">
-    <h2>Matrices</h2>
-    <h4>Adding or Editing a Matrix</h4>
-    <ul class="list-group">
-        <li class="list-group-item active">
-            <b>Matrices</b> represent either a plate or collection of chips
-        </li>
-        <li class="list-group-item">
-            Each section of the <b>Matrix</b> is called a <b>Matrix Item</b>, these <b>Items</b> represent a plate well or chip
-        </li>
-    </ul>
-    <h4>Flagging for Review</h4>
-    <ul class="list-group">
-        <li class="list-group-item">
-            Clicking
-            <a role='button' class="btn btn-sm" style="color:#337AB7">
-                <span class="glyphicon glyphicon-flag" aria-hidden="true"></span>
+            <a href="/media/excel_templates/chip_template-{{ version }}.xlsx">
+                Click Here For Upload Template
             </a>
-            flags the current results for review
-        </li>
-        <li class="list-group-item">
-            Clicking
-            <a role='button' class="btn btn-sm btn-warning">
-                Notes
-            </a>
-            brings up an input dialog where you can explain why these results were flagged
-        </li>
-        <li class="list-group-item">
-            Clicking
-            <a role='button' class="btn btn-sm btn-danger">
-                <span class="glyphicon glyphicon-flag" aria-hidden="true"></span>
-            </a>
-            removes the flag from the current results
-        </li>
-    </ul>
-  </div>
-
-  <div id="matrixitems">
-    <h2>Matrix Item</h2>
-    <h4>Editing a Matrix Item</h4>
-    <ul class="list-group">
-        <li class="list-group-item active">
-            A <b>Matrix Item</b> describes the protocols taken to prepare a chip or well
-        </li>
-        <li class="list-group-item">
-            After selecting an <b>Organ Model</b>, a link to view its standard protocol will appear (granted a PDF has been uploaded)
-        </li>
-        <li class="list-group-item">
-            <b>Variance from Protocol</b> should list the ways this setup diverged from the organ model's standard protocols
-        </li>
-        <li class="list-group-item">
-            The <b>Chip ID/Barcode</b> can not be the same as another chip in the study
-        </li>
-        <li class="list-group-item">
-            <b>Test Type</b> specifies whether the chip functions as a control or not
-        </li>
-    </ul>
-    <h4>Adding Compounds</h4>
-    <ul class="list-group">
-        <li class="list-group-item">
-            Each row under the header <b>Compounds</b> describes a compound added to the chip
-        </li>
-        <li class="list-group-item">
-            If this chip does not have any compounds, do not modify this section
-        </li>
-        <li class="list-group-item">
-            To get another row, click the <b>Add Compound</b> button
-        </li>
-        <li class="list-group-item">
-            Be sure to specify the supplier, lot, receipt date, concentration (and unit), addition time, and duration
-        </li>
-        <li class="list-group-item">
-            If necessary, please use "N/A" for suppliers and lots that are unknown
-        </li>
-        <li class="list-group-item">
-            If necessary, please enter <b>nothing</b> into the receipt date if the date is unknown
-        </li>
-        <li class="list-group-item">
-            Suggestions for supplier and lot will be shown depending on your previous selections
-        </li>
-        <li class="list-group-item">
-            Suggestion lists are shortened depending on what you type into the text boxes
-        </li>
-        <li class="list-group-item">
-            Please choose applicable suggestions when possible
-        </li>
-        <li class="list-group-item">
-            Use 'e' for scientific notation: e.g. 1e+3 = 1000
-        </li>
-    </ul>
-    <h4>Adding Cells</h4>
-    <ul class="list-group">
-        <li class="list-group-item">
-            Each row under the header <b>Cell Samples</b> describes cells added to the chip
-        </li>
-        <li class="list-group-item">
-            If this chip does not have any cells, do not modify this section
-        </li>
-        <li class="list-group-item">
-            To get another row, click the <b>Add Cells</b> button
-        </li>
-        <li class="list-group-item">
-            Click a magnifying glass to see a list of available cell samples then click the desired row to select that sample
-        </li>
-        <li class="list-group-item">
-            Use 'e' for scientific notation: e.g. 1e+3 = 1000
-        </li>
-        <li class="list-group-item">
-            If you need a cell sample that is not listed, click the provided link to add it
-        </li>
-    </ul>
-    <h4>Changing QC</h4>
-    <ul class="list-group">
-        <li class="list-group-item">
-            To invalidate a reading, click the checkbox in the "Exclude" column
-        </li>
-        <li class="list-group-item">
-            Rows in <span class="text-danger">red</span> are excluded
+          </li>
+          <li class="list-group-item">
+            The templates indicate where to place the Chip/Plate IDs
+          </li>
+          <li class="list-group-item">
+            The Chip/Plate IDs must be for Chips/Plates in the current study
+          </li>
+          <li class="list-group-item">
+            All valid sheets (based on the header) of an Excel file are considered for upload
+          </li>
+          <li class="list-group-item">
+            Before uploading data, please be sure to add every assay performed in the section entitled <b>Assays</b>
             <br>
-            Rows in <span class="text-success">green</span> are in the database
+            You can change this list by going to the Study's edit page and finding the section <b>Assays</b>
             <br>
-            Rows in <span class="text-warning">yellow</span> have been marked as questionable
-            <br>
-            Rows in <span class="text-info">blue</span> were initially excluded, but will be marked included after submission
-        </li>
-    </ul>
-    <h4>Flagging for Review</h4>
-    <ul class="list-group">
-        <li class="list-group-item">
-            Clicking
-            <a role='button' class="btn btn-sm" style="color:#337AB7">
-                <span class="glyphicon glyphicon-flag" aria-hidden="true"></span>
-            </a>
-            flags the current setup for review
-        </li>
-        <li class="list-group-item">
-            Clicking
-            <a role='button' class="btn btn-sm btn-warning">
-                Notes
-            </a>
-            brings up an input dialog where you can explain why this setup was flagged
-        </li>
-        <li class="list-group-item">
-            Clicking
-            <a role='button' class="btn btn-sm btn-danger">
-                <span class="glyphicon glyphicon-flag" aria-hidden="true"></span>
-            </a>
-            removes the flag from the current setup
-        </li>
-    </ul>
-  </div>
-
-  <div id="upload">
-    <h2>Uploading Data Points</h2>
-{#    <h4></h4>#}
-    <ul class="list-group">
-      <li class="list-group-item active">
-        It is possible to upload multiple sets of data points by uploading an Excel file (.xls or .xlsx) or CSV (.csv)
-      </li>
-      <li class="list-group-item">
-        To access this interface, go to the desired study's page and click this button:
-          <a class="btn btn-warning" role="button">Upload Data</a>
-      </li>
-      <li class="list-group-item">
-        Click the following links to download Excel templates:
-        <br>
-        <a href="/media/excel_templates/chip_template-{{ version }}.xlsx">
-            Click Here For Upload Template
-        </a>
-      </li>
-      <li class="list-group-item">
-        The templates indicate where to place the Chip/Plate IDs
-      </li>
-      <li class="list-group-item">
-        The Chip/Plate IDs must be for Chips/Plates in the current study
-      </li>
-      <li class="list-group-item">
-        All valid sheets (based on the header) of an Excel file are considered for upload
-      </li>
-      <li class="list-group-item">
-        Before uploading data, please be sure to add every assay performed in the section entitled <b>Assays</b>
-        <br>
-        You can change this list by going to the Study's edit page and finding the section <b>Assays</b>
-        <br>
-        Please see <a href="#study">Study</a>
-      </li>
-      <li class="list-group-item">
-        <h4>The format for data point uploads is as follows:</h4>
-          <table class="table table-bordered table-condensed small" style="background-color: #F0FFFF;">
-              <thead>
-                    <tr class="active">
-                        <th>Chip ID</th>
-                        <th>Cross Reference</th>
-                        <th>Assay Plate ID</th>
-                        <th>Assay Well ID</th>
-                        <th>Day</th>
-                        <th>Hour</th>
-                        <th>Minute</th>
-                        <th>Target / Analyte</th>
-                        <th>Subtarget</th>
-                        <th>Method / Kit</th>
-                        <th>Sample Location</th>
-                        <th>Value</th>
-                        <th>Value Unit</th>
-                        <th>Replicate</th>
-                        <th>Caution Flag</th>
-                        <th>Exclude</th>
-                        <th>Notes</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>[Chip ID]</td>
-                        <td>[Cross Reference]</td>
-                        <td>[Assay Plate ID]</td>
-                        <td>[Assay Well ID]</td>
-                        <td>[Day]</td>
-                        <td>[Hour]</td>
-                        <td>[Minute]</td>
-                        <td>[Target / Analyte]</td>
-                        <td>[Subtarget]</td>
-                        <td>[Method / Kit]</td>
-                        <td>[Sample Location]</td>
-                        <td>[Value]</td>
-                        <td>[Value Unit]</td>
-                        <td>[Replicate]</td>
-                        <th>[Caution Flag]</th>
-                        <td>[Leave Blank to Pass]</td>
-                        <td>[Notes]</td>
-                    </tr>
-                    <tr>
-                        <td>[Chip ID]</td>
-                        <td>[Cross Reference]</td>
-                        <td>[Assay Plate ID]</td>
-                        <td>[Assay Well ID]</td>
-                        <td>[Day]</td>
-                        <td>[Hour]</td>
-                        <td>[Minute]</td>
-                        <td>[Target / Analyte]</td>
-                        <td>[Subtarget]</td>
-                        <td>[Method / Kit]</td>
-                        <td>[Sample Location]</td>
-                        <td>[Value]</td>
-                        <td>[Value Unit]</td>
-                        <td>[Replicate]</td>
-                        <th>[Caution Flag]</th>
-                        <td>[Any Value in this Column Marks the Reading Invalid]</td>
-                        <td>[Notes]</td>
-                    </tr>
-                </tbody>
-            </table>
-        </li>
-        <li class="list-group-item">
-            File uploads can use either full names ("Albumin") or abbreviations ("ALB") for Target/Analytes
-        </li>
-        <li class="list-group-item">
-            Some assays involve transferring media from a device into a plate
-            <br>
-            For these assays, specify this information with <b>Assay Plate ID</b> and <b>Assay Well ID</b>
-        </li>
-        <li class="list-group-item">
-            Please note that time is split into <b>Day</b>, <b>Hour</b>, and <b>Minute</b>
-        </li>
-        <li class="list-group-item">
-            The <b>Sample Location</b> indicates from where in a device the tested sample was acquired
-            <br>
-            For instance, if an Organ Model is split into a top and bottom compartment, one might put terms like "Apical" or "Basal" in the Sample Location column
-        </li>
-        <li class="list-group-item">
-            <b class="text-danger">
-                <span class="glyphicon glyphicon-exclamation-sign"></span>
-                The brackets ([] and {}) in the above examples and templates are not meant to be taken literally
+            Please see <a href="#study">Study</a>
+          </li>
+          <li class="list-group-item">
+            <h4>The format for data point uploads is as follows:</h4>
+              <table class="table table-bordered table-condensed small" style="background-color: #F0FFFF;">
+                  <thead>
+                        <tr class="active">
+                            <th>Chip ID</th>
+                            <th>Cross Reference</th>
+                            <th>Assay Plate ID</th>
+                            <th>Assay Well ID</th>
+                            <th>Day</th>
+                            <th>Hour</th>
+                            <th>Minute</th>
+                            <th>Target / Analyte</th>
+                            <th>Subtarget</th>
+                            <th>Method / Kit</th>
+                            <th>Sample Location</th>
+                            <th>Value</th>
+                            <th>Value Unit</th>
+                            <th>Replicate</th>
+                            <th>Caution Flag</th>
+                            <th>Exclude</th>
+                            <th>Notes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>[Chip ID]</td>
+                            <td>[Cross Reference]</td>
+                            <td>[Assay Plate ID]</td>
+                            <td>[Assay Well ID]</td>
+                            <td>[Day]</td>
+                            <td>[Hour]</td>
+                            <td>[Minute]</td>
+                            <td>[Target / Analyte]</td>
+                            <td>[Subtarget]</td>
+                            <td>[Method / Kit]</td>
+                            <td>[Sample Location]</td>
+                            <td>[Value]</td>
+                            <td>[Value Unit]</td>
+                            <td>[Replicate]</td>
+                            <th>[Caution Flag]</th>
+                            <td>[Leave Blank to Pass]</td>
+                            <td>[Notes]</td>
+                        </tr>
+                        <tr>
+                            <td>[Chip ID]</td>
+                            <td>[Cross Reference]</td>
+                            <td>[Assay Plate ID]</td>
+                            <td>[Assay Well ID]</td>
+                            <td>[Day]</td>
+                            <td>[Hour]</td>
+                            <td>[Minute]</td>
+                            <td>[Target / Analyte]</td>
+                            <td>[Subtarget]</td>
+                            <td>[Method / Kit]</td>
+                            <td>[Sample Location]</td>
+                            <td>[Value]</td>
+                            <td>[Value Unit]</td>
+                            <td>[Replicate]</td>
+                            <th>[Caution Flag]</th>
+                            <td>[Any Value in this Column Marks the Reading Invalid]</td>
+                            <td>[Notes]</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </li>
+            <li class="list-group-item">
+                File uploads can use either full names ("Albumin") or abbreviations ("ALB") for Target/Analytes
+            </li>
+            <li class="list-group-item">
+                Some assays involve transferring media from a device into a plate
                 <br>
-                When you are actually entering data, remove them
-            </b>
-        </li>
-        <li class="list-group-item">
-            <b class="text-danger">
+                For these assays, specify this information with <b>Assay Plate ID</b> and <b>Assay Well ID</b>
+            </li>
+            <li class="list-group-item">
+                Please note that time is split into <b>Day</b>, <b>Hour</b>, and <b>Minute</b>
+            </li>
+            <li class="list-group-item">
+                The <b>Sample Location</b> indicates from where in a device the tested sample was acquired
+                <br>
+                For instance, if an Organ Model is split into a top and bottom compartment, one might put terms like "Apical" or "Basal" in the Sample Location column
+            </li>
+            <li class="list-group-item">
+                <b class="text-danger">
+                    <span class="glyphicon glyphicon-exclamation-sign"></span>
+                    The brackets ([] and {}) in the above examples and templates are not meant to be taken literally
+                    <br>
+                    When you are actually entering data, remove them
+                </b>
+            </li>
+            <li class="list-group-item">
+                <b class="text-danger">
+                    <span class="glyphicon glyphicon-exclamation-sign"></span>
+                    The Chip ID should be nothing more than the Chip ID/Barcode you entered for a Matrix Item
+                </b>
+            </li>
+            <li class="list-group-item">
+                <b class="text-danger">
+                    <span class="glyphicon glyphicon-exclamation-sign"></span>
+                    The correct header must be in the first three rows for a file to be considered valid
+                </b>
+            </li>
+            <li class="list-group-item">
+                <b class="text-danger">
+                    <span class="glyphicon glyphicon-exclamation-sign"></span>
+                    Uploading overwrites previous conflicting data (an alert will indicate if data is going to be overwritten)
+                </b>
+            </li>
+            <li class="list-group-item">
+                <b class="text-danger">
+                    <span class="glyphicon glyphicon-exclamation-sign"></span>
+                    You will have to reselect the desired file after a failed submission
+                </b>
+            </li>
+        </ul>
+      </div>
+    </div>
+  
+    <div id="compounds_section" class="container">
+      <h1>Compounds</h1>
+
+      <div id="chemicaldata">
+        <h2>Chemical Data</h2>
+        <h4>Viewing Chemical Data</h4>
+          <ul class="list-group">
+            <li class="list-group-item active">
+              The <b>Chemical Data</b> section displays information about pertinent compounds
+            </li>
+            <li class="list-group-item">
+              After choosing a compound to view, you can traverse the list in <em>alphanumeric order</em> with the "Next" and "Previous" buttons
+            </li>
+            <li class="list-group-item">
+              The labels beneath the image of the compound indicate what project or projects the compound is part of
+            </li>
+            <li class="list-group-item">
+              The "Medchem Alerts" field shows whether functional groups that are uncommon in drugs are present in this compound
+              <br>
+              If there are Medchem Alerts for a compound, you can click on the flag to see a list of the functional groups
+            </li>
+          </ul>
+        <h4>Adding Chemical Data</h4>
+          <ul class="list-group">
+            <li class="list-group-item">
+              <b class="text-danger">
                 <span class="glyphicon glyphicon-exclamation-sign"></span>
-                The Chip ID should be nothing more than the Chip ID/Barcode you entered for a Matrix Item
-            </b>
-        </li>
-        <li class="list-group-item">
-            <b class="text-danger">
-                <span class="glyphicon glyphicon-exclamation-sign"></span>
-                The correct header must be in the first three rows for a file to be considered valid
-            </b>
-        </li>
-        <li class="list-group-item">
-            <b class="text-danger">
-                <span class="glyphicon glyphicon-exclamation-sign"></span>
-                Uploading overwrites previous conflicting data (an alert will indicate if data is going to be overwritten)
-            </b>
-        </li>
-        <li class="list-group-item">
-            <b class="text-danger">
-                <span class="glyphicon glyphicon-exclamation-sign"></span>
-                You will have to reselect the desired file after a failed submission
-            </b>
-        </li>
-    </ul>
-  </div>
-</div>
+                Before entering data yourself, please check ChEMBL (follow the link) for the compound you are interested in
+              </b>
+            </li>
+            <li class="list-group-item">
+              If you found one, put the <em>entire ChEMBL ID</em> (including "CHEMBL") into the ChEBML ID field and hit "Retrieve"
+            </li>
+          </ul>
+      </div>
 
-<div id="models_section" class="container">
-  <h1>Models</h1>
-
-  <div id="organmodels">
-    <h2>Organ Models</h2>
-    <ul class="list-group">
-      <li class="list-group-item active">
-        <b>Organ Models</b> illustrate how a microdevice is prepared to mime an organ
-      </li>
-      <li class="list-group-item">
-        You can designate the model as being part of the MPS project, EPA project, both, or neither
-      </li>
-      <li class="list-group-item">
-        You can associate a number of <b>Protocols</b> with a model
-        <br>
-        This allows you to clarify the differences between setups using the same model with different protocols
-      <li class="list-group-item">
-        The version name of the protocol can be any <b>20 characters</b>, but it is recommended that you adhere to a convention such as increasing numbers:
-        <br>
-        i.e. v1.0 -> v1.5 -> v2.0
-      </li>
-      <li class="list-group-item">
-        Please be sure to upload each protocol as a <b>PDF</b> so that it is more accessible
-      </li>
-      <li class="list-group-item">
-        If you need to add a protocol, click the green "Add Protocol" button to add a row in the table
-      </li>
-      <li class="list-group-item">
-        <b class="text-danger">
-          <span class="glyphicon glyphicon-exclamation-sign"></span>
-          If a protocol involves using a different <em>Microdevice</em>, make a new Organ Model using that device
-        </b>
-      </li>
-      <li class="list-group-item">
-        <b class="text-danger">
-          <span class="glyphicon glyphicon-exclamation-sign"></span>
-          You will have to reselect the image file after a failed submission (only when adding a new image)
-        </b>
-      </li>
-    </ul>
-  </div>
-
-  <div id="microdevices">
-    <h2>Microdevices</h2>
-    <ul class="list-group">
-      <li class="list-group-item active">
-        <b>Microdevices</b> describe a device's dimensions along with other characteristics
-      </li>
-      <li class="list-group-item">
-        If you are making a plate and intend on using it for plate setups, please fill out the <b>Layout</b> section
-      </li>
-      <li class="list-group-item">
-        The <b>Layout</b> section is primarily intended for plates, but can be used for chips as well
-      </li>
-      <li class="list-group-item">
-        <b class="text-danger">
-          <span class="glyphicon glyphicon-exclamation-sign"></span>
-          You will have to reselect image files after a failed submission (only when adding new images)
-        </b>
-      </li>
-    </ul>
-  </div>
-</div>
-<div id="compounds_section" class="container">
-  <h1>Compounds</h1>
-
-  <div id="chemicaldata">
-    <h2>Chemical Data</h2>
-    <h4>Viewing Chemical Data</h4>
-      <ul class="list-group">
-        <li class="list-group-item active">
-          The <b>Chemical Data</b> section displays information about pertinent compounds
-        </li>
-        <li class="list-group-item">
-          After choosing a compound to view, you can traverse the list in <em>alphanumeric order</em> with the "Next" and "Previous" buttons
-        </li>
-        <li class="list-group-item">
-          The labels beneath the image of the compound indicate what project or projects the compound is part of
-        </li>
-        <li class="list-group-item">
-          The "Medchem Alerts" field shows whether functional groups that are uncommon in drugs are present in this compound
-          <br>
-          If there are Medchem Alerts for a compound, you can click on the flag to see a list of the functional groups
-        </li>
-      </ul>
-    <h4>Adding Chemical Data</h4>
-      <ul class="list-group">
-        <li class="list-group-item">
-          <b class="text-danger">
-            <span class="glyphicon glyphicon-exclamation-sign"></span>
-            Before entering data yourself, please check ChEMBL (follow the link) for the compound you are interested in
-          </b>
-        </li>
-        <li class="list-group-item">
-          If you found one, put the <em>entire ChEMBL ID</em> (including "CHEMBL") into the ChEBML ID field and hit "Retrieve"
-        </li>
-      </ul>
-  </div>
-
-  <div id="bioactivities">
+    <div id="bioactivities">
     <h2>Bioactivities</h2>
     <h4>About Bioactivities</h4>
       <ul class="list-group">
@@ -761,9 +418,9 @@
         Please note that not every ChEMBL entry has a corresponding PubChem entry and vice versa
       </li>
     </ul>
-  </div>
+    </div>
 
-  <div id="drugtrials">
+    <div id="drugtrials">
     <h2>Drug Trials</h2>
     <ul class="list-group">
       <li class="list-group-item active">
@@ -773,9 +430,9 @@
         After choosing a trial to view, you can traverse the list in <em>alphanumeric order</em> with the "Next" and "Previous" buttons
       </li>
     </ul>
-  </div>
+    </div>
 
-  <div id="adverseevents">
+    <div id="adverseevents">
     <h2>Adverse Events</h2>
     <h4>Viewing Adverse Events</h4>
     <ul class="list-group">
@@ -839,9 +496,9 @@
         To show the raw counts of adverse event reports, click the "Show Raw Counts" button
       </li>
     </ul>
-  </div>
+    </div>
 
-  <div id="compoundreport">
+    <div id="compoundreport">
     <h2>Compound Report</h2>
     <ul class="list-group">
       <li class="list-group-item active">
@@ -863,59 +520,13 @@
         <b>Please note that only normalized data is considered in the plots</b>
       </li>
     </ul>
-  </div>
-</div>
-<div id="cellsamples_section" class="container">
-  <h1>Cell Samples</h1>
+    </div>
+    </div>
 
-  <div id="celltypes">
-    <h2>Cell Types</h2>
-    <ul class="list-group">
-      <li class="list-group-item active">
-        <b>Cell Types</b> describe a variety of cells, such as <em>astrocyte</em> or <em>hepatocyte</em>
-      </li>
-      <li class="list-group-item">
-        Please be sure to specify the organ, as many cell types differ depending on where they are located
-        <br>
-        e.g. hepatic stellate cells differ from pancreatic stellate cells
-      </li>
-    </ul>
-  </div>
+    <div id="analysis_section" class="container">
+    <h1>Data Analysis</h1>
 
-  <div id="cellsubtypes">
-    <h2>Cell Origins</h2>
-    <ul class="list-group">
-      <li class="list-group-item active">
-        <b>Cell Origins</b> elaborate on the origin of the cells, for instance whether they are fresh, cryproeserved, or from a cell line
-      </li>
-      <li class="list-group-item">
-        <b class="text-danger">
-          <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span>
-          Select a Cell Type ONLY if this Origin is SPECIFIC to a certain Cell Type (e.g. a cell line)
-        </b>
-      </li>
-    </ul>
-  </div>
-
-  <div id="cellsamples">
-    <h2>Cell Samples</h2>
-    <ul class="list-group">
-      <li class="list-group-item active">
-        <b>Cell Samples</b> describe a specific instance of cells used for experiments
-      </li>
-      <li class="list-group-item">
-        If the <em>Cell Origin</em> of the sample is a cell line, please be sure to select the <b>Cell Type</b> first
-      </li>
-      <li class="list-group-item">
-        Differentiating cell lots on date received and other criteria can help in quality control if the cells are discovered to be problematic
-      </li>
-    </ul>
-  </div>
-</div>
-<div id="analysis_section" class="container">
-  <h1>Data Analysis</h1>
-
-  <div id="heatmap">
+    <div id="heatmap">
     <h2>Heatmap</h2>
     <h4>About Bioactivities</h4>
     <ul class="list-group">
@@ -972,9 +583,9 @@
         Clicking on a specific square in the heatmap will show that particular value in a pop-up
       </li>
     </ul>
-  </div>
+    </div>
 
-  <div id="cluster">
+    <div id="cluster">
     <h2>Cluster</h2>
     <h4>About Bioactivities</h4>
     <ul class="list-group">
@@ -1030,31 +641,38 @@
         You can dismiss a compound's information by hitting the corresponding red "X" button
       </li>
     </ul>
-  </div>
-</div>
-<div id="glossary" class="container padded-bottom">
-  <h1>Glossary</h1>
-  <table hidden id="glossary_table" class="display" cellspacing="0" width="100%">
-    <thead>
-      <tr>
-        <th>Term</th>
-        <th>Definition</th>
-        <th>Ref</th>
-      </tr>
-    </thead>
+    </div>
+    </div>
 
-    <tbody>
-      {% for term in glossary %}
-        <tr>
-          <td>{{ term.term }}</td>
-          <td>{{ term.definition }}</td>
-          <td>{{ term.show_url }}</td>
-        </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-  <script src="{% static "js/display_datatable.js" %}"></script>
+    <div id="glossary" class="container padded-bottom">
+      <h1>Glossary</h1>
+      <table hidden id="glossary_table" class="display" cellspacing="0" width="100%">
+        <thead>
+          <tr>
+            <th>Term</th>
+            <th>Definition</th>
+            <th>Ref</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {% for term in glossary %}
+            <tr>
+              <td>{{ term.term }}</td>
+              <td>{{ term.definition }}</td>
+              <td>{{ term.show_url }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      <script src="{% static "js/display_datatable.js" %}"></script>
+    </div>
+
 </div>
-</div>
+
 </body>
 </html>
+
+
+
+
