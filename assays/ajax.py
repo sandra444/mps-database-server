@@ -1282,7 +1282,10 @@ def fetch_data_points(request):
         })
     elif request.POST.get('matrix', ''):
         matrix_items = AssayMatrixItem.objects.filter(matrix_id=int(request.POST.get('matrix')))
-        matrix_item = matrix_items[0]
+        if matrix_items:
+            matrix_item = matrix_items[0]
+        else:
+            matrix_item = None
         study = matrix_item.study
         pre_filter.update({
             'matrix_item_id__in': matrix_items
