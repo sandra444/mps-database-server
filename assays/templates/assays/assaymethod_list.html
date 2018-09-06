@@ -32,7 +32,7 @@
                 <tbody>
                 {% for method in object_list %}
                      <tr>
-                        <td><a class="btn btn-{% if method.assays %}primary" title="View paired target/analytes." href="{{ method.id }}"{% else %}default" style="pointer-events: auto;" title="This method has no paired target/analytes." disabled{% endif %}>View</a></td>
+                        <td><a class="btn btn-primary" title="View paired target/analytes." href="{{ method.id }}">View</a></td>
                         <!--<td>{% if method.alt_name %}{{ method.alt_name }}{% else %}{{ method.name }}{% endif %}</td>-->
                         <td>{{ method.name }}</td>
                         <td>{{ method.measurement_type }}</td>

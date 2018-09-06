@@ -63,6 +63,12 @@
                         <td>{{ assay.2 }}</td>
                     </tr>
                 {% endfor %}
+                {% for image in images %}
+                     <tr class="image">
+                        <td><a href= "/assays/methods/{{ image.1 }}/">{{ image.0 }}</a></td>
+                        <td>{{ image.2 }}</td>
+                    </tr>
+                {% endfor %}
                 </tbody>
             </table>
         </div>

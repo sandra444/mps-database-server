@@ -1667,14 +1667,6 @@ class AssayTargetList(ListView):
     model = AssayTarget
     template_name = 'assays/assaytarget_list.html'
 
-    def get_queryset(self):
-        queryset = AssayTarget.objects.all()
-        for target in queryset:
-            target.assays = AssayStudyAssay.objects.filter(
-                target__id=target.id
-            ).exists()
-        return queryset
-
 
 class AssayTargetDetail(DetailView):
     model = AssayTarget
@@ -1685,10 +1677,17 @@ class AssayTargetDetail(DetailView):
         context['assays'] = AssayStudyAssay.objects.filter(
             target__name__icontains=self.object.name
         ).values_list("method__name", "method_id", "method__description").distinct()
+        context['images'] = AssayImage.objects.filter(
+            target__name__icontains=self.object.name
+        ).values_list("method__name", "method_id", "method__description").distinct()
         context['studies'] = get_user_accessible_studies(
             self.request.user
         ).filter(
             assaystudyassay__target__name=self.object.name
+        ).distinct() | get_user_accessible_studies(
+            self.request.user
+        ).filter(
+            assayimagesetting__assayimage__target__name=self.object.name
         ).distinct()
         return context
 
@@ -1696,14 +1695,6 @@ class AssayTargetDetail(DetailView):
 class AssayMethodList(ListView):
     model = AssayMethod
     template_name = 'assays/assaymethod_list.html'
-
-    def get_queryset(self):
-        queryset = AssayMethod.objects.all()
-        for method in queryset:
-            method.assays = AssayStudyAssay.objects.filter(
-                method__id=method.id
-            ).exists()
-        return queryset
 
 
 class AssayMethodDetail(DetailView):
@@ -1715,10 +1706,17 @@ class AssayMethodDetail(DetailView):
         context['assays'] = AssayStudyAssay.objects.filter(
             method__name__icontains=self.object.name
         ).values_list("target__name", "target_id", "target__description", "target__short_name").distinct()
+        context['images'] = AssayImage.objects.filter(
+            method__name__icontains=self.object.name
+        ).values_list("target__name", "target_id", "target__description", "target__short_name").distinct()
         context['studies'] = get_user_accessible_studies(
             self.request.user
         ).filter(
             assaystudyassay__method__name=self.object.name
+        ).distinct() | get_user_accessible_studies(
+            self.request.user
+        ).filter(
+            assayimagesetting__assayimage__method__name=self.object.name
         ).distinct()
         return context
 
