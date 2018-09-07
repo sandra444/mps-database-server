@@ -306,15 +306,18 @@ $(document).ready(function () {
     var build_initial_matrix = function(number_of_rows, number_of_columns) {
         matrix_body_selector.empty();
 
+        // ONLY DISPLAY APPLY ROW/COLUMN BUTTONS IF THIS IS ADD/UPDATE
+        var starting_index_for_matrix = $('#floating-submit-row')[0] ? -1 : 0;
+
         // Check to see if new forms will be generated
-        for (var row_index=-1; row_index < number_of_rows; row_index++) {
+        for (var row_index=starting_index_for_matrix; row_index < number_of_rows; row_index++) {
             var row_id = 'row_' + row_index;
             var current_row = $('<tr>')
                 .attr('id', row_id);
 
             var all_matching_for_row_value = $('.' + item_prefix).has('input[name$="-row_index"][value="' + row_index + '"]');
 
-            for (var column_index=-1; column_index < number_of_columns; column_index++) {
+            for (var column_index=starting_index_for_matrix; column_index < number_of_columns; column_index++) {
                 var item_id = item_prefix + '_' + row_index + '_' + column_index;
                 var new_cell = null;
 
