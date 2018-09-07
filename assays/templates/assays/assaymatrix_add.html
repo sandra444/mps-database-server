@@ -58,9 +58,12 @@
     {% if detail %}
     <div hidden>
     {% endif %}
+
+    {% if not detail %}
     {% include "submit.html" with flag="y" group=study.group.name %}
 
     {% include 'errors.html' %}
+    {% endif %}
 
     {% include 'tracking.html' %}
 
