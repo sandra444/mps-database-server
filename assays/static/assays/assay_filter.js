@@ -370,10 +370,10 @@ $(document).ready(function() {
 
     // TODO TODO TODO REPRO STUFF
     // TODO: UGLY
-    var cv_tooltip = '<span data-toggle="tooltip" title="The CV is calculated for each time point and the value reported is the max CV across time points, or the CV if a single time point is present.  The reproducibility status is excellent if Max CV/CV < 5% (Excellent (CV)), acceptable if Max CV/CV < 15% (Acceptable (CV)), and poor if CV > 15% for a single time point (Poor (CV))" class="glyphicon glyphicon-question-sign" aria-hidden="true" data-placement="bottom"></span>';
-    var icc_tooltip = '<span data-toggle="tooltip" title="The ICC Absolute Agreement of the measurements across multiple time points is a correlation coefficient that ranges from -1 to 1 with values closer to 1 being more correlated.  When the Max CV > 15%, the reproducibility status is reported to be excellent if > 0.8 (Excellent (ICC), acceptable if > 0.2 (Acceptable (ICC)), and poor if < 0.2 (Poor (ICC))" class="glyphicon glyphicon-question-sign" aria-hidden="true" data-placement="bottom"></span>';
-    var repro_tooltip = '<span data-toggle="tooltip" title="Our classification of this grouping\'s reproducibility (Excellent > Acceptable > Poor/NA). If Max CV < 15% then the status is based on the  Max CV criteria, otherwise the status is based on the ICC criteria when the number of overlapping time points is more than one. For single time point data, if CV <15% then the status is based on the CV criteria, otherwise the status is based on the ANOVA P-Value" class="glyphicon glyphicon-question-sign" aria-hidden="true" data-placement="bottom"></span>';
-    var anova_tooltip = '<span data-toggle="tooltip" title="The ANOVA p-value is calculated for the single overlapping time point data across MPS centers or studies. The reproducibility status is Acceptable (P-Value) if ANOVA p-value >= 0.05, and Poor (P-Value) if ANOVA p-value <0.05." class="glyphicon glyphicon-question-sign" aria-hidden="true" data-placement="bottom"></span>';
+    var cv_tooltip = "The CV is calculated for each time point and the value reported is the max CV across time points, or the CV if a single time point is present.  The reproducibility status is excellent if Max CV/CV < 5% (Excellent (CV)), acceptable if Max CV/CV < 15% (Acceptable (CV)), and poor if CV > 15% for a single time point (Poor (CV))";
+    var icc_tooltip = "The ICC Absolute Agreement of the measurements across multiple time points is a correlation coefficient that ranges from -1 to 1 with values closer to 1 being more correlated.  When the Max CV > 15%, the reproducibility status is reported to be excellent if > 0.8 (Excellent (ICC), acceptable if > 0.2 (Acceptable (ICC)), and poor if < 0.2 (Poor (ICC))";
+    var repro_tooltip = "Our classification of this grouping\'s reproducibility (Excellent > Acceptable > Poor/NA). If Max CV < 15% then the status is based on the  Max CV criteria, otherwise the status is based on the ICC criteria when the number of overlapping time points is more than one. For single time point data, if CV <15% then the status is based on the CV criteria, otherwise the status is based on the ANOVA P-Value";
+    var anova_tooltip = "The ANOVA p-value is calculated for the single overlapping time point data across MPS centers or studies. The reproducibility status is Acceptable (P-Value) if ANOVA p-value >= 0.05, and Poor (P-Value) if ANOVA p-value <0.05.";
     // Bad
     var chart_tooltips = {
         'item': '“Item” graph displays selected Target/Analyte’s measurements on each item (chip or well) against time cross centers or studies.',
@@ -381,6 +381,21 @@ $(document).ready(function() {
         'trimmed': '“Trimmed” graph displays the average of selected Target/Analyte’s measurements aggregated by centers or studies against time by dropping the data points which timely consistent measurement is missing from one or more center/study. It means the time observations are excluded from the analysis when any observations by center/study  are missing at that time.',
         'interpolated': '“Interpolated” graph displays the average of selected Target/Analyte’s measurements aggregated by centers or studies against time by interpolating the data points which timely consistent measurement(s) is(are) missing from a center/study. Four interpolation methods are applied for filling missing points, which are “nearest”, “linear spline”,” quadratic spline” and “cubic spline”. The overlapped data against time from one of four interpolation methods which has highest ICC value is depicted as a graph . The inter reproducibility results from all four interpolation methods are displayed in the table above the graphs.'
     };
+
+    // BAD NOT DRY
+    function escapeHtml(html) {
+        return $('<div>').text(html).html();
+    }
+
+    function make_escaped_tooltip(title_text) {
+        var new_span = $('<div>').append($('<span>')
+            .attr('data-toggle', "tooltip")
+            .attr('data-title', escapeHtml(title_text))
+            .addClass("glyphicon glyphicon-question-sign")
+            .attr('aria-hidden', "true")
+            .attr('data-placement', "bottom"));
+        return new_span.html();
+    }
 
     var interpolation_tooltips = {
         'Trimmed': 'These values use no interpolation method, they are based only on overlapping data.',
@@ -430,6 +445,13 @@ $(document).ready(function() {
         inter_level = $('#inter_level_by_center').prop('checked') ? 1 : 0;
         max_interpolation_size = $('#max_interpolation_size').val();
         initial_norm = $('#initial_norm').prop('checked') ? 1 : 0;
+
+        // Special check to see whether to default to studies (only one center selected)
+        if (Object.keys(filters['groups']).length === 1) {
+            $('#inter_level_by_center').prop('checked', false);
+            $('#inter_level_by_study').prop('checked', true);
+            inter_level = 0;
+        }
 
         // Define what the legend is
         // TODO TODO TODO CONTRIVED FOR NOW
@@ -530,11 +552,11 @@ $(document).ready(function() {
             // {title: "Max Interpolated", data: '2'},
             {title: legend_key, data: '3'},
             {title: "Time Point Overlap", data: '4', width: '5%'},
-            {title: "<span style='white-space: nowrap;'>Max CV<br>or CV " + cv_tooltip + "</span>", data: '5'},
-            {title: "<span style='white-space: nowrap;'>ICC " + icc_tooltip + "</span>", data: '6'},
-            {title: "<span>ANOVA<br>P-Value " + anova_tooltip + "</span>", data: '7', width: '10%'},
+            {title: "<span style='white-space: nowrap;'>Max CV<br>or CV " + make_escaped_tooltip(cv_tooltip) + "</span>", data: '5'},
+            {title: "<span style='white-space: nowrap;'>ICC " + make_escaped_tooltip(icc_tooltip) + "</span>", data: '6'},
+            {title: "<span>ANOVA<br>P-Value " + make_escaped_tooltip(anova_tooltip) + "</span>", data: '7', width: '10%'},
             {
-                title: "Reproducibility<br>Status " + repro_tooltip,
+                title: "Reproducibility<br>Status " + make_escaped_tooltip(repro_tooltip),
                 data: '8',
                 render: function (data, type, row, meta) {
                     if (data == "Excellent (ICC)" || data == "Excellent (CV)") {
@@ -640,7 +662,7 @@ $(document).ready(function() {
             drawCallback: function () {
                 // Make sure tooltips displayed properly
                 // TODO TODO TODO
-                $('[data-toggle="tooltip"]').tooltip({container: "body"});
+                $('[data-toggle="tooltip"]').tooltip({container: "body", html: true});
             }
         });
 
@@ -653,6 +675,27 @@ $(document).ready(function() {
             order_info(set_order);
         });
     }
+
+    // This function filters the dataTable rows
+    $.fn.dataTableExt.afnFiltering.push(function(oSettings, aData, iDataIndex) {
+        // This is a special exception to make sure that other tables are not filtered on the page
+        if (oSettings.nTable.getAttribute('id') !== 'repro_table') {
+            return true;
+        }
+
+        // If show all is not toggled on, then exclude those without overlap
+        // BEWARE MAGIC NUMBERS
+        if ($('#show_all_repro').prop('checked') || aData[11] || aData[12] || aData[13]) {
+            return true;
+        }
+    });
+
+    // When a filter is clicked, set the filter values and redraw the table
+    $('#show_all_repro_wrapper').click(function() {
+        $('#show_all_repro').prop('checked', !$('#show_all_repro').prop('checked'));
+        // Redraw the table
+        repro_table.draw();
+    });
 
     function draw_subsections() {
         var item_to_copy = $("#clone_container").find('[data-id="repro-data"]');
@@ -690,7 +733,7 @@ $(document).ready(function() {
             area_to_copy_to.append(current_clone);
 
             // Activates Bootstrap tooltips
-            $('[data-toggle="tooltip"]').tooltip({container:"body"});
+            $('[data-toggle="tooltip"]').tooltip({container:"body", html: true});
         });
     }
 
@@ -929,7 +972,7 @@ $(document).ready(function() {
                 // tooltip: {isHtml: true},
                 intervals: {
                     // style: 'bars'
-                    'lineWidth':2, 'barWidth': 1
+                    'lineWidth': 0.75
                 }
             };
 
@@ -1120,7 +1163,7 @@ $(document).ready(function() {
             current_repro.addClass('hidden')
         }
         // Activates Bootstrap tooltips
-        $('[data-toggle="tooltip"]').tooltip({container:"body"});
+        $('[data-toggle="tooltip"]').tooltip({container:"body", html: true});
     });
 
     $(document).on('mouseover', '.repro-set-info', function() {

@@ -173,6 +173,11 @@ MATRIX_PREFETCH = (
     'device',
 )
 
+# STRINGS FOR WHEN NONE OF THE ENTITY IN QUESTION
+NO_COMPOUNDS_STRING = '-No Compounds-'
+NO_CELLS_STRING = '-No Cells-'
+NO_SETTINGS_STRING = '-No Extra Settings-'
+
 
 def charset_detect(in_file, chunk_size=4096):
     """Use chardet library to detect what encoding is being used"""

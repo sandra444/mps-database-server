@@ -44,6 +44,8 @@
                     <th>Organ Models</th>
                     <th>Data Points</th>
                     <th>Images</th>
+                    <th>Videos</th>
+                    <th>Supporting Data</th>
 {#                    <th>Integrated Study Configuration</th>#}
                     <th>Description</th>
                     <th>Data Provider</th>
@@ -74,6 +76,16 @@
                     {% endif %}
                     {% if study.images %}
                         <td class="text-success">{{ study.images|intcomma }}</td>
+                    {% else %}
+                        <td class="text-danger">0</td>
+                    {% endif %}
+                    {% if study.videos %}
+                        <td class="text-success">{{ study.videos|intcomma }}</td>
+                    {% else %}
+                        <td class="text-danger">0</td>
+                    {% endif %}
+                    {% if study.supporting_data %}
+                        <td class="text-success">{{ study.supporting_data|intcomma }}</td>
                     {% else %}
                         <td class="text-danger">0</td>
                     {% endif %}
