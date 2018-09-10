@@ -1377,7 +1377,7 @@ def fetch_data_points(request):
             ] for current_filter in post_filter.get('matrix_item') if current_filter.startswith('assaysetupsetting__')
         }
 
-        matrix_items.filter(study_id__in=study)
+        matrix_items = matrix_items.filter(study_id__in=study)
 
         matrix_items = matrix_items.filter(
             **matrix_item_post_filters
@@ -2174,7 +2174,7 @@ def fetch_data_points_from_filters(request):
                 ] for current_filter in post_filter.get('matrix_item') if current_filter.startswith('assaysetupsetting__')
             }
 
-            matrix_items.filter(study_id__in=study)
+            matrix_items = matrix_items.filter(study_id__in=study)
 
             matrix_items = matrix_items.filter(
                 **matrix_item_post_filters
