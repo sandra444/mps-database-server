@@ -1002,10 +1002,13 @@ def get_data_points_for_charting(
     target_method_pairs = {}
 
     if group_method:
+        group_method = False
+
         for assay in assays_of_interest:
             if target_method_pairs.get(assay.target_id, assay.method_id) != assay.method_id:
-                group_method = False
+                group_method = True
                 break
+
             target_method_pairs.update({assay.target_id: assay.method_id})
 
     for raw in raw_data:
