@@ -547,7 +547,7 @@ class AssayMatrixForm(SignOffMixin, forms.ModelForm):
     setting_setting = forms.ModelChoiceField(queryset=AssaySetting.objects.all().order_by('name'), required=False)
     setting_unit = forms.ModelChoiceField(queryset=PhysicalUnits.objects.all().order_by('base_unit','scale_factor'), required=False)
 
-    setting_value = forms.FloatField(required=False)
+    setting_value = forms.CharField(required=False)
 
     setting_addition_location = forms.ModelChoiceField(queryset=AssaySampleLocation.objects.all().order_by('name'),
                                                         required=False)
