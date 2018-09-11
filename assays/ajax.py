@@ -992,6 +992,20 @@ def get_data_points_for_charting(
     #     if key == 'device':
     #         raw_data = raw_data.exclude(matrix_item__matrix_id__in=heatmap_matrices)
 
+    assays_of_interest = AssayStudyAssay.objects.filter(study_id__in=study)
+
+    target_method_pairs = {}
+
+    if group_method:
+        group_method = False
+
+        for assay in assays_of_interest:
+            if target_method_pairs.get(assay.target_id, assay.method_id) != assay.method_id:
+                group_method = True
+                break
+
+            target_method_pairs.update({assay.target_id: assay.method_id})
+
     for raw in raw_data:
         # Now uses full name
         # assay = raw.assay_id.assay_id.assay_short_name
@@ -1008,6 +1022,9 @@ def get_data_points_for_charting(
 
         # Not currently used
         method = study_assay.method.name
+
+        if group_method:
+            target = u'{} [{}]'.format(target, method)
 
         sample_location = raw.sample_location.name
 
@@ -1040,14 +1057,26 @@ def get_data_points_for_charting(
                 for compound in raw.matrix_item.assaysetupcompound_set.all():
                     if compound.addition_time <= raw_time and compound.addition_time + compound.duration >= raw_time:
                         concentration += compound.concentration * compound.concentration_unit.scale_factor
-                        tag.append(compound.compound_instance.compound.name)
+                        tag.append(
+                            # May need this to have float minutes, unsure
+                            '{} at D{}H{}M{}'.format(
+                                compound.compound_instance.compound.name,
+                                int(raw_time / 24 / 60),
+                                int(raw_time / 60 % 24),
+                                int(raw_time % 60)
+                            )
+                        )
 
                 # CONTRIVED: Set time to concentration
                 time = concentration
                 if tag:
                     tag = ' & '.join(tag)
                 else:
-                    tag = '-No Compound-'
+                    tag = '-No Compound- at D{}H{}M{}'.format(
+                        int(raw_time / 24 / 60),
+                        int(raw_time / 60 % 24),
+                        int(raw_time % 60)
+                    )
             # If by device
             else:
                 tag = (matrix_item_id, matrix_item_name)
@@ -1057,7 +1086,7 @@ def get_data_points_for_charting(
 
             # Set data in nested monstrosity that is initial_data
             initial_data.setdefault(
-                (target, method), {}
+                target, {}
             ).setdefault(
                 unit, {}
             ).setdefault(
@@ -1070,21 +1099,6 @@ def get_data_points_for_charting(
 
             # Update all_sample_locations
             all_sample_locations.update({sample_location: True})
-
-    targets = [target_method[0] for target_method in initial_data.keys()]
-
-    for target_method, units in initial_data.items():
-        target = target_method[0]
-        method = target_method[1]
-
-        if group_method and targets.count(target) > 1:
-            target = u'{} [{}]'.format(target, method)
-
-        initial_data.update({
-            target: units
-        })
-
-        del initial_data[target_method]
 
     # Nesting like this is a little sloppy, flat > nested
     for target, units in initial_data.items():
