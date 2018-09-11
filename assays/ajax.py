@@ -1359,7 +1359,7 @@ def fetch_data_points(request):
         request.POST.get('include_all', ''),
         request.POST.get('truncate_negative', ''),
         json.loads(request.POST.get('dynamic_excluded', '{}')),
-        study=study,
+        study=studies,
         matrix_item=matrix_item,
         matrix_items=matrix_items,
         criteria=json.loads(request.POST.get('criteria', '{}'))
@@ -1412,6 +1412,9 @@ def validate_data_file(request):
 
     this_study = AssayStudy.objects.get(pk=int(study))
 
+    # Very odd, but expedient
+    studies = AssayStudy.objects.filter(id=this_study.id)
+
     form = AssayStudyDataUploadForm(request.POST, request.FILES, request=request, instance=this_study)
 
     if form.is_valid():
@@ -1430,7 +1433,7 @@ def validate_data_file(request):
             include_all,
             truncate_negative,
             dynamic_quality,
-            study=this_study,
+            study=studies,
             new_data=True,
             criteria=json.loads(request.POST.get('criteria', '{}'))
         )
