@@ -997,6 +997,17 @@ def get_data_points_for_charting(
     #     if key == 'device':
     #         raw_data = raw_data.exclude(matrix_item__matrix_id__in=heatmap_matrices)
 
+    assays_of_interest = AssayStudyAssay.objects.filter(study_id__in=study)
+
+    target_method_pairs = {}
+
+    if group_method:
+        for assay in assays_of_interest:
+            if target_method_pairs.get(assay.target_id, assay.method_id) != assay.method_id:
+                group_method = False
+                break
+            target_method_pairs.update({assay.target_id: assay.method_id})
+
     for raw in raw_data:
         # Now uses full name
         # assay = raw.assay_id.assay_id.assay_short_name
@@ -1013,6 +1024,9 @@ def get_data_points_for_charting(
 
         # Not currently used
         method = study_assay.method.name
+
+        if group_method:
+            target = u'{} [{}]'.format(target, method)
 
         sample_location = raw.sample_location.name
 
@@ -1074,7 +1088,7 @@ def get_data_points_for_charting(
 
             # Set data in nested monstrosity that is initial_data
             initial_data.setdefault(
-                (target, method), {}
+                target, {}
             ).setdefault(
                 unit, {}
             ).setdefault(
@@ -1087,21 +1101,6 @@ def get_data_points_for_charting(
 
             # Update all_sample_locations
             all_sample_locations.update({sample_location: True})
-
-    targets = [target_method[0] for target_method in initial_data.keys()]
-
-    for target_method, units in initial_data.items():
-        target = target_method[0]
-        method = target_method[1]
-
-        if group_method and targets.count(target) > 1:
-            target = u'{} [{}]'.format(target, method)
-
-        initial_data.update({
-            target: units
-        })
-
-        del initial_data[target_method]
 
     # Nesting like this is a little sloppy, flat > nested
     for target, units in initial_data.items():
@@ -1994,7 +1993,7 @@ def apply_post_filter(post_filter, studies, assays, matrix_items, data_points):
         ] for current_filter in post_filter.get('matrix_item') if current_filter.startswith('assaysetupsetting__')
     }
 
-    matrix_items.filter(study_id__in=studies)
+    matrix_items = matrix_items.filter(study__in=studies)
 
     matrix_items = matrix_items.filter(
         **matrix_item_post_filters
