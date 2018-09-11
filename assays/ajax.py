@@ -1504,6 +1504,9 @@ def validate_data_file(request):
 
     this_study = AssayStudy.objects.get(pk=int(study))
 
+    # Very odd, but expedient
+    studies = AssayStudy.objects.filter(id=this_study.id)
+
     form = AssayStudyDataUploadForm(request.POST, request.FILES, request=request, instance=this_study)
 
     if form.is_valid():
@@ -1522,7 +1525,7 @@ def validate_data_file(request):
             include_all,
             truncate_negative,
             dynamic_quality,
-            study=this_study,
+            study=studies,
             new_data=True,
             criteria=json.loads(request.POST.get('criteria', '{}'))
         )
@@ -2728,7 +2731,7 @@ def get_inter_study_reproducibility(
     for data_group, current_sample_location in data_group_to_sample_locations.items():
         final_data_group_to_sample_locations[data_group] = sorted(current_sample_location)
 
-        final_data_group_to_organ_models = {}
+    final_data_group_to_organ_models = {}
     for data_group, current_organ_model in data_group_to_organ_models.items():
         final_data_group_to_organ_models[data_group] = sorted(current_organ_model)
 
