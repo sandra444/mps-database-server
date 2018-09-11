@@ -1011,6 +1011,10 @@ def get_data_points_for_charting(
 
             target_method_pairs.update({assay.target_id: assay.method_id})
 
+    post_filter_compounds = post_filter.get(
+        'matrix_item', {}
+    ).get('assaysetupcompound__compound_instance__compound_id__in', {})
+
     for raw in raw_data:
         # Now uses full name
         # assay = raw.assay_id.assay_id.assay_short_name
@@ -1059,8 +1063,13 @@ def get_data_points_for_charting(
                 tag = []
                 concentration = 0
 
+                is_control = True
+
                 for compound in raw.matrix_item.assaysetupcompound_set.all():
-                    if compound.addition_time <= raw_time and compound.addition_time + compound.duration >= raw_time:
+                    if ((post_filter is None or unicode(compound.compound_instance.compound_id) in post_filter_compounds) and
+                        compound.addition_time <= raw_time and
+                        compound.addition_time + compound.duration >= raw_time
+                    ):
                         concentration += compound.concentration * compound.concentration_unit.scale_factor
                         tag.append(
                             # May need this to have float minutes, unsure
@@ -1072,16 +1081,20 @@ def get_data_points_for_charting(
                             )
                         )
 
+                    is_control = False
+
                 # CONTRIVED: Set time to concentration
                 time = concentration
                 if tag:
                     tag = ' & '.join(tag)
-                else:
+                elif is_control and (post_filter is None or u'0' in post_filter_compounds):
                     tag = '-No Compound- at D{}H{}M{}'.format(
                         int(raw_time / 24 / 60),
                         int(raw_time / 60 % 24),
                         int(raw_time % 60)
                     )
+                else:
+                    continue
             # If by device
             else:
                 tag = (matrix_item_id, matrix_item_name)
@@ -1362,7 +1375,8 @@ def fetch_data_points(request):
         study=studies,
         matrix_item=matrix_item,
         matrix_items=matrix_items,
-        criteria=json.loads(request.POST.get('criteria', '{}'))
+        criteria=json.loads(request.POST.get('criteria', '{}')),
+        post_filter=post_filter
     )
 
     data.update({
@@ -2192,7 +2206,8 @@ def fetch_data_points_from_filters(request):
                 study=studies,
                 matrix_item=matrix_item,
                 matrix_items=matrix_items,
-                criteria=json.loads(request.POST.get('criteria', '{}'))
+                criteria=json.loads(request.POST.get('criteria', '{}')),
+                post_filter=post_filter
             )
 
             data.update({'post_filter': post_filter})
