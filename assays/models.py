@@ -2419,8 +2419,8 @@ class AssaySetupSetting(models.Model):
     # No longer one-to-one
     # setup = models.ForeignKey('assays.AssaySetup')
     setting = models.ForeignKey('assays.AssaySetting')
-    unit = models.ForeignKey('assays.PhysicalUnits')
-    value = models.FloatField()
+    unit = models.ForeignKey('assays.PhysicalUnits', blank=True, null=True)
+    value = models.CharField(max_length=255)
 
     # Will we include these??
     # PLEASE NOTE THAT THIS IS IN MINUTES, CONVERTED FROM D:H:M
@@ -2454,10 +2454,11 @@ class AssaySetupSetting(models.Model):
         if criteria:
             full_string = []
             if 'setting_id' in criteria:
-                full_string.append(unicode(self.setting_id))
+                full_string.append(unicode(self.setting))
             if 'value' in criteria:
-                full_string.append('{:g}'.format(self.value))
-                full_string.append(self.unit.unit)
+                full_string.append(self.value)
+                if self.unit:
+                    full_string.append(self.unit.unit)
             if 'addition_time' in criteria:
                 full_string.append('Added on: ' + self.get_addition_time_string())
             if 'duration' in criteria:
