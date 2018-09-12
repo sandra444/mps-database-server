@@ -116,7 +116,7 @@ $(document).ready(function () {
                 } else {
                     return '<td><span class="hidden">0</span>'+data+'<span data-toggle="tooltip" title="'+row[14]+'" class="glyphicon glyphicon-question-sign" aria-hidden="true"></span></td>';
                 }
-            }},
+            },
             { title: "# of Chips/Wells", data: '12' },
             { title: "# of Time Points", data: '13' },
             { title: "Cells", data: '1', 'className': 'none'},
@@ -138,22 +138,33 @@ $(document).ready(function () {
             { responsivePriority: 12, targets: 13 },
             { responsivePriority: 13, targets: 3 },
             { responsivePriority: 14, targets: 16 },
+            { "aTargets": [11], "fnCreatedCell": function (nTd, sData, oData, iRow, iCol) {
+                if (sData[0] === "E") {
+                    $(nTd).css('background-color', '#74ff5b').css('font-weight', 'bold');
+                } else if (sData[0] === "A") {
+                    $(nTd).css('background-color', '#fcfa8d').css('font-weight', 'bold');
+                } else if (sData[0] === "P") {
+                    $(nTd).css('background-color', '#ff7863').css('font-weight', 'bold');
+                } else {
+                    $(nTd).css('background-color', 'Grey').css('font-weight', 'bold');
+                }
+            }}
         ],
         "order": [[11, 'desc'], [ 1, "asc" ]],
-        "createdRow": function( row, data, dataIndex ) {
-            if ( data[10][0] === "E" ) {
-                $( row ).find('td:eq(11)').css( "background-color", "#74ff5b" ).css( "font-weight", "bold"  );
-            }
-            else if ( data[10][0] === "A" ) {
-                $( row ).find('td:eq(11)').css( "background-color", "#fcfa8d" ).css( "font-weight", "bold"  );
-            }
-            else if ( data[10][0] === "P" ) {
-                $( row ).find('td:eq(11)').css( "background-color", "#ff7863" ).css( "font-weight", "bold" );
-            }
-            else {
-                $( row ).find('td:eq(11)').css( "background-color", "Grey" ).css( "font-weight", "bold" );
-            }
-        },
+        // "createdRow": function( row, data, dataIndex ) {
+        //     if ( data[10][0] === "E" ) {
+        //         $( row ).find('td:eq(11)').css( "background-color", "#74ff5b" ).css( "font-weight", "bold"  );
+        //     }
+        //     else if ( data[10][0] === "A" ) {
+        //         $( row ).find('td:eq(11)').css( "background-color", "#fcfa8d" ).css( "font-weight", "bold"  );
+        //     }
+        //     else if ( data[10][0] === "P" ) {
+        //         $( row ).find('td:eq(11)').css( "background-color", "#ff7863" ).css( "font-weight", "bold" );
+        //     }
+        //     else {
+        //         $( row ).find('td:eq(11)').css( "background-color", "Grey" ).css( "font-weight", "bold" );
+        //     }
+        // },
         "responsive": true,
         dom: 'B<"row">lfrtip',
         fixedHeader: {headerOffset: 50},
@@ -345,7 +356,14 @@ $(document).ready(function () {
     }
 
     function buildSelectionParameters(studyId, organModel, targetAnalyte, methodKit, sampleLocation, compoundTreatments, valueUnit){
-        content = '<tr><th>Study ID</th><td>'+studyId+'</td></tr><tr><th>Organ Model</th><td>'+organModel+'</td></tr><tr><th>Target/Analyte</th><td id="target-analyte-value">'+targetAnalyte+'</td></tr><tr><th>Method/Kit</th><td>'+methodKit+'</td></tr><tr><th>Sample Location</th><td>'+sampleLocation+'</td></tr><tr><th>Compound Treatment(s)</th><td>'+compoundTreatments+'</td></tr><tr><th>Value Unit</th><td id="value-unit">'+valueUnit+'</td></tr>'
+        content =
+        '<tr><th><h4><strong>Target/Analyte</strong></h4></th><td id="target-analyte-value"><h4><strong>'+targetAnalyte+'</strong></h4></td></tr>'+
+        '<tr><th>Study ID</th><td>'+studyId+'</td></tr>'+
+        '<tr><th>Organ Model</th><td>'+organModel+'</td></tr>'+
+        '<tr><th>Method/Kit</th><td>'+methodKit+'</td></tr>'+
+        '<tr><th>Sample Location</th><td>'+sampleLocation+'</td></tr>'+
+        '<tr><th>Compound Treatment(s)</th><td>'+compoundTreatments+'</td></tr>'+
+        '<tr><th>Value Unit</th><td id="value-unit">'+valueUnit+'</td></tr>'
         return content;
     }
 

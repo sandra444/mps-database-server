@@ -81,6 +81,8 @@
     {# Selectize #}
     {# <script type="text/javascript" src="{% static "js/selectize.js" %}"></script>#}
     {# <link rel="stylesheet" type="text/css" href="{% static "css/selectize.bootstrap3.css" %}" />#}
+    <script src="{% static "js/inline_add.js" %}"></script>
+    {# <script src="{% static "js/selectize_script.js" %}"></script>#}
 
     {# Yes, I know this violates SOC #}
     <script>
@@ -212,9 +214,8 @@
         <li title="Add, edit, or view assay data" class="dropdown">
         <a class="dropdown-toggle" data-toggle="dropdown">Studies<span class="caret"></span></a>
         <ul class="dropdown-menu" role="menu">
-          <li title="Index of all the studies created by groups you are a member of">
-              <a href="/assays/assaystudy/editable_studies/">View Editable Studies</a>
-          </li>
+          <li class="dropdown-header">Study Data</li>
+          <li title="Index of all the studies created by groups you are a member of"><a href="/assays/assaystudy/editable_studies/">View Editable Studies</a></li>
           <li><a href="/assays/assaystudy/">View All Studies</a></li>
           <li><a href="/assays/studyconfiguration/">View Integrated Study Configurations</a></li>
           <li class="divider"></li>
@@ -269,6 +270,7 @@
         <li title="View/add MPS models and microdevices" class="dropdown">
         <a class="dropdown-toggle" data-toggle="dropdown">Models<span class="caret"></span></a>
         <ul class="dropdown-menu" role="menu">
+          <li class="dropdown-header">Model Data</li>
           <li title="View MPS models"><a href="/microdevices/model">View MPS Models</a></li>
           <li title="View microdevices"><a href="/microdevices/device">View Microdevices</a></li>
           <li title="View disease models"><a href="/diseases/">View Diseases</a></li>
@@ -282,6 +284,7 @@
         <li title="Curated drug trials and chemical data" class="dropdown">
         <a class="dropdown-toggle" data-toggle="dropdown">Compounds<span class="caret"></span></a>
         <ul class="dropdown-menu" role="menu">
+          <li class="dropdown-header">Compound Data</li>
           <li><a href="/compounds/">View Chemical Data</a></li>
           {# TODO NOTE THAT THIS IS A REPEAT LINK! #}
           <li><a href="/bioactivities/table/#filter">View Bioactivities</a></li>
@@ -289,6 +292,7 @@
           <li><a href="/autodrugtrialsform/">Search Disease Related Drug Trials</a></li>
           <li><a href="/adverse_events/">View Adverse Events</a></li>
           <li class="divider"></li>
+          <li class="dropdown-header">Reports</li>
           <li><a href="/compare_adverse_events/">Compare Adverse Events</a></li>
           <li><a href="/compounds/report/#filter">Compound Report</a></li>
           <li class="divider"></li>
@@ -299,6 +303,7 @@
         <li title="View or add cell samples and cell types" class="dropdown">
         <a class="dropdown-toggle" data-toggle="dropdown">Cell Samples<span class="caret"></span></a>
         <ul class="dropdown-menu" role="menu">
+          <li class="dropdown-header">Cell Data</li>
           <li><a href="/cellsamples/celltype/">View Cell Types</a></li>
           <li><a href="/cellsamples/cellsubtype/">View Cell Origins</a></li>
           <li><a href="/cellsamples/cellsample/">View Cell Samples</a></li>

@@ -501,7 +501,7 @@ $(document).ready(function() {
                 }
             },
             {
-                title: "Target",
+                title: "Target/Analyte",
                 "render": function (data, type, row) {
                     return data_groups[row[0]][0];
                 },
@@ -765,9 +765,15 @@ $(document).ready(function() {
         var rows = [];
 
         $.each(header_keys['data'], function(index, key) {
-            rows.push(
-                '<tr><th>' + key + '</th><td>' + data_groups[set][index] + '</td></tr>'
-            );
+            if (key === 'Target') {
+                rows.push(
+                    '<tr><th><h4><strong>Target/Analyte</strong></h4></th><td><h4><strong>' + data_groups[set][index] + '</strong></h4></td></tr>'
+                );
+            } else {
+                rows.push(
+                    '<tr><th>' + key + '</th><td>' + data_groups[set][index] + '</td></tr>'
+                );
+            }
         });
 
         var current_treatment_group = data_groups[set][data_groups[set].length - 1];

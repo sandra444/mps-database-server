@@ -3,7 +3,6 @@ $(document).ready(function() {
     google.charts.load('current', {'packages':['corechart']});
     // Set the callback
     google.charts.setOnLoadCallback(get_readouts);
-    google.charts.setOnLoadCallback(reproPie);
 
     window.GROUPING.refresh_function = get_readouts;
 
@@ -81,36 +80,4 @@ $(document).ready(function() {
             export_button.attr('href', export_button.attr('href').split('?')[0]);
         }
     }).trigger('change');
-
-    function reproPie() {
-        if ($( "#piechart-title" )[0]) {
-            var pie = $("#piechart-title").data('nums').split("|");
-            var pieData = google.visualization.arrayToDataTable([
-                ['Status', 'Count'],
-                ['Excellent', parseInt(pie[0])],
-                ['Acceptable', parseInt(pie[1])],
-                ['Poor', parseInt(pie[2])]
-            ]);
-            var pieOptions = {
-                // title: 'Reproducibility Breakdown\n(Click Slices for Details)',
-                // titleFontSize:16,
-                legend: 'none',
-                slices: {
-                    0: { color: '#74ff5b' },
-                    1: { color: '#fcfa8d' },
-                    2: { color: '#ff7863' }
-                },
-                pieSliceText: 'label',
-                pieSliceTextStyle: {
-                    color: 'black',
-                    bold: true,
-                    fontSize: 12
-                },
-                'chartArea': {'width': '90%', 'height': '90%'},
-                pieSliceBorderColor: "black",
-            };
-            var pieChart = new google.visualization.PieChart(document.getElementById('piechart'));
-            pieChart.draw(pieData, pieOptions);
-        }
-    }
 });
