@@ -559,11 +559,11 @@ $(document).ready(function() {
                 title: "Reproducibility<br>Status " + make_escaped_tooltip(repro_tooltip),
                 data: '8',
                 render: function (data, type, row, meta) {
-                    if (data == "Excellent (ICC)" || data == "Excellent (CV)") {
+                    if (data[0] === 'E') {
                         return '<td><span class="hidden">3</span>' + data + '</td>';
-                    } else if (data == "Acceptable (ICC)" || data == "Acceptable (CV)") {
+                    } else if (data[0] === 'A') {
                         return '<td><span class="hidden">2</span>' + data + '</td>';
-                    } else if (data == "Poor (ICC)" || data == "Poor (CV)") {
+                    } else if (data[0] === 'P') {
                         return '<td><span class="hidden">1</span>' + data + '</td>';
                     } else {
                         return '<td><span class="hidden">0</span>' + data + '<span data-toggle="tooltip" title="' + row[9] + '" class="glyphicon glyphicon-question-sign" aria-hidden="true"></span></td>';
