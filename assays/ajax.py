@@ -58,6 +58,9 @@ logger = logging.getLogger(__name__)
 # Global variable for what to call control values (avoid magic strings)
 CONTROL_LABEL = '-Control-'
 
+# Variable to indicate that these should be split for special filters
+COMBINED_VALUE_DELIMITER = '~@|'
+
 # Note manipulations for sorting
 # Somewhat contrived
 # THESE SHOULD BE DEFINED, NOT LAMBDA FUNCTIONS
@@ -1842,11 +1845,25 @@ def acquire_post_filter(studies, assays, matrix_items, data_points):
                 compound.compound_instance.lot: compound.compound_instance.lot
             })
 
-            # NAIVE AND CAN CAUSE COLLISIONS
+            # SPECIAL EXCEPTION, CONCENTRATION AND UNITS ARE COMBINED
+            # current.setdefault(
+            #     'assaysetupcompound__concentration__in', {}
+            # ).update({
+            #     compound.concentration: compound.concentration
+            # })
+
             current.setdefault(
-                'assaysetupcompound__concentration__in', {}
+                'assaysetupcompound__concentration__concentration_unit_id__in', {}
             ).update({
-                compound.concentration: compound.concentration
+                '{}{}{}'.format(
+                    compound.concentration,
+                    COMBINED_VALUE_DELIMITER,
+                    compound.concentration_unit_id
+                ): '{}{}{}'.format(
+                    compound.concentration,
+                    COMBINED_VALUE_DELIMITER,
+                    compound.concentration_unit
+                )
             })
 
             current.setdefault(
@@ -1898,10 +1915,26 @@ def acquire_post_filter(studies, assays, matrix_items, data_points):
                 cell.passage: cell.passage
             })
 
+            # SPECIAL EXCEPTION, DENSITY AND UNITS ARE COMBINED
+            # current.setdefault(
+            #     'assaysetupcell__density__in', {}
+            # ).update({
+            #     cell.density: cell.density
+            # })
+
+            # THIS NEEDS TO BE REMOVED BEFORE ACTUAL FILTERS ARE APPLIED
             current.setdefault(
-                'assaysetupcell__density__in', {}
+                'assaysetupcell__density__density_unit_id__in', {}
             ).update({
-                cell.density: cell.density
+                '{}{}{}'.format(
+                    cell.density,
+                    COMBINED_VALUE_DELIMITER,
+                    cell.density_unit_id
+                ): '{}{}{}'.format(
+                    cell.density,
+                    COMBINED_VALUE_DELIMITER,
+                    cell.density_unit
+                )
             })
 
             current.setdefault(
@@ -1917,10 +1950,25 @@ def acquire_post_filter(studies, assays, matrix_items, data_points):
                 setting.setting_id: setting.setting.name
             })
 
+            # SPECIAL EXCEPTION, VALUE AND UNITS ARE COMBINED
+            # current.setdefault(
+            #     'assaysetupsetting__value__in', {}
+            # ).update({
+            #     setting.value: setting.value
+            # })
+
             current.setdefault(
-                'assaysetupsetting__value__in', {}
+                'assaysetupsetting__value__unit_id__in', {}
             ).update({
-                setting.value: setting.value
+                '{}{}{}'.format(
+                    setting.value,
+                    COMBINED_VALUE_DELIMITER,
+                    setting.unit_id
+                ): '{}{}{}'.format(
+                    setting.value,
+                    COMBINED_VALUE_DELIMITER,
+                    setting.unit
+                )
             })
 
             current.setdefault(
@@ -1988,6 +2036,82 @@ def apply_post_filter(post_filter, studies, assays, matrix_items, data_points):
         **assay_post_filters
     )
 
+    # Special exceptions for combined filters
+    combined_compounds_data = post_filter.setdefault('matrix_item', {}).setdefault(
+        'assaysetupcompound__concentration__concentration_unit_id__in', {}
+    )
+
+    compound_concentration_filter = {}
+    compound_unit_filter = {}
+
+    for concentration_unit_id in combined_compounds_data.keys():
+        concentration_unit_id = concentration_unit_id.split(COMBINED_VALUE_DELIMITER)
+        concentration = concentration_unit_id[0]
+        unit = concentration_unit_id[1]
+        compound_concentration_filter.update({
+            concentration: True
+        })
+        compound_unit_filter.update({
+            unit: True
+        })
+
+    post_filter.get('matrix_item', {}).update({
+        'assaysetupcompound__concentration__in': compound_concentration_filter,
+        'assaysetupcompound__concentration_unit_id__in': compound_unit_filter
+    })
+
+    del post_filter['matrix_item']['assaysetupcompound__concentration__concentration_unit_id__in']
+
+    combined_cells_data = post_filter.setdefault('matrix_item', {}).setdefault(
+        'assaysetupcell__density__density_unit_id__in', {}
+    )
+
+    cell_density_filter = {}
+    cell_unit_filter = {}
+
+    for density_unit_id in combined_cells_data.keys():
+        density_unit_id = density_unit_id.split(COMBINED_VALUE_DELIMITER)
+        density = density_unit_id[0]
+        unit = density_unit_id[1]
+        cell_density_filter.update({
+            density: True
+        })
+        cell_unit_filter.update({
+            unit: True
+        })
+
+    post_filter.get('matrix_item', {}).update({
+        'assaysetupcell__density__in': cell_density_filter,
+        'assaysetupcell__density_unit_id__in': cell_unit_filter
+    })
+
+    del post_filter['matrix_item']['assaysetupcell__density__density_unit_id__in']
+
+    combined_settings_data = post_filter.setdefault('matrix_item', {}).setdefault(
+        'assaysetupsetting__value__unit_id__in', {}
+    )
+
+    setting_value_filter = {}
+    setting_unit_filter = {}
+
+    for value_unit_id in combined_settings_data.keys():
+        value_unit_id = value_unit_id.split(COMBINED_VALUE_DELIMITER)
+        value = value_unit_id[0]
+        unit = value_unit_id[1]
+        setting_value_filter.update({
+            value: True
+        })
+        setting_unit_filter.update({
+            unit: True
+        })
+
+    post_filter.get('matrix_item', {}).update({
+        'assaysetupsetting__value__in': setting_value_filter,
+        'assaysetupsetting__unit_id__in': setting_unit_filter
+    })
+
+    del post_filter['matrix_item']['assaysetupsetting__value__unit_id__in']
+
     # Matrix Items somewhat contrived to deal with null compounds
     matrix_item_post_filters = {
         current_filter: [
@@ -2020,8 +2144,9 @@ def apply_post_filter(post_filter, studies, assays, matrix_items, data_points):
     )
 
     # Compounds
-    if post_filter.get('matrix_item', {}).get('assaysetupcompound__compound_instance__compound_id__in', {}).get('0',
-                                                                                                                None):
+    if post_filter.get('matrix_item', {}).get('assaysetupcompound__compound_instance__compound_id__in', {}).get(
+            '0', None
+    ):
         matrix_items = matrix_items.filter(
             **matrix_item_compound_post_filters
         ) | matrix_items.filter(assaysetupcompound__isnull=True)
