@@ -1,7 +1,7 @@
 // This script was made to prevent redundant code in setup pages
 $(document).ready(function () {
     // var cell_sample_search = $('#id_cell_sample_search');
-    var cell_sample_search = $('.open-cell-sample-dialog');
+    // var cell_sample_search = $('.open-cell-sample-dialog');
     // var cell_sample_id_selector = cell_sample_search.parent().find('input[readonly=readonly]');
     // Defaults for matrix (irrelevant in matrix item)
     var cell_sample_id_selector = $('#id_cell_sample');
@@ -34,7 +34,7 @@ $(document).ready(function () {
     // Move filter to left
     $('.dataTables_filter').css('float', 'left');
 
-    cell_sample_search.click(function() {
+    $(document).on('click', '.open-cell-sample-dialog', function() {
         dialog.dialog('open');
         // Get the proper selectors
         cell_sample_id_selector = $(this).parent().find('input[readonly=readonly]');
@@ -43,7 +43,7 @@ $(document).ready(function () {
         // $('.ui-dialog :button').blur();
     });
 
-    $('.cellsample-selector').click(function() {
+    $(document).on('click', '.cellsample-selector', function() {
         var cell_sample_id = $(this).attr('data-cell-sample-id');
         cell_sample_id_selector.prop('value', cell_sample_id);
         var cell_sample_name = this.attributes["name"].value;

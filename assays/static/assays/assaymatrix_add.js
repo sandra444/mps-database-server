@@ -306,15 +306,18 @@ $(document).ready(function () {
     var build_initial_matrix = function(number_of_rows, number_of_columns) {
         matrix_body_selector.empty();
 
+        // ONLY DISPLAY APPLY ROW/COLUMN BUTTONS IF THIS IS ADD/UPDATE
+        var starting_index_for_matrix = $('#floating-submit-row')[0] ? -1 : 0;
+
         // Check to see if new forms will be generated
-        for (var row_index=-1; row_index < number_of_rows; row_index++) {
+        for (var row_index=starting_index_for_matrix; row_index < number_of_rows; row_index++) {
             var row_id = 'row_' + row_index;
             var current_row = $('<tr>')
                 .attr('id', row_id);
 
             var all_matching_for_row_value = $('.' + item_prefix).has('input[name$="-row_index"][value="' + row_index + '"]');
 
-            for (var column_index=-1; column_index < number_of_columns; column_index++) {
+            for (var column_index=starting_index_for_matrix; column_index < number_of_columns; column_index++) {
                 var item_id = item_prefix + '_' + row_index + '_' + column_index;
                 var new_cell = null;
 
@@ -578,10 +581,14 @@ $(document).ready(function () {
         var original_name = $('#id_item_name').val();
         var split_name = original_name.split(/(\d+)/).filter(Boolean);
 
-        var numeric_index = 0;
+        var numeric_index = original_name.length - 1;
         // Increment the first number encountered
-        while (!$.isNumeric(split_name[numeric_index]) && numeric_index < original_name.length) {
-            numeric_index += 1;
+        while (!$.isNumeric(split_name[numeric_index]) && numeric_index >= 0) {
+            numeric_index -= 1;
+        }
+
+        if (numeric_index === -1) {
+            numeric_index = original_name.length;
         }
 
         var first_half = split_name.slice(0, numeric_index).join('');
@@ -603,7 +610,7 @@ $(document).ready(function () {
                 incremented_value = '0' + incremented_value;
             }
 
-            value = first_half + incremented_value + second_half;
+            var value = first_half + incremented_value + second_half;
 
             // Set display
             $(this).find('.item-name').html(value);
@@ -1029,6 +1036,14 @@ $(document).ready(function () {
 
     window.display_protocol(window.organ_model_protocol.val());
 
+    // Hide all
+    function hide_all_sections() {
+        $('.visibility-checkbox').each(function() {
+            var class_to_hide = $(this).attr('value');
+                $(class_to_hide).hide();
+        });
+    }
+
     // Triggers for hiding elements
     function change_matrix_visibility() {
         $('.visibility-checkbox').each(function() {
@@ -1044,6 +1059,19 @@ $(document).ready(function () {
 
     $('.visibility-checkbox').change(change_matrix_visibility);
     change_matrix_visibility();
+
+    // On shift press hide all for dragging
+    $(document).keydown(function (e) {
+        if (e.keyCode === 16) {
+            hide_all_sections();
+        }
+    });
+
+    $(document).keyup(function (e) {
+        if (e.keyCode === 16) {
+            change_matrix_visibility();
+        }
+    });
 
     // Special operations for pre-submission
     $('form').submit(function() {

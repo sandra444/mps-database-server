@@ -15,6 +15,7 @@ $(document).ready(function () {
     var brightness = 100;
 
     var downloadFilename = '';
+    var image_types = ['jpg','jpeg','png','gif','tif','tiff']
 
     // Perform on image expansion
     var popupDialogData = {};
@@ -119,7 +120,7 @@ $(document).ready(function () {
             // Check filetype
             var type = '';
             var detailDisplay = '';
-            if (popupDialogData["file_name"].match(/.(jpg|jpeg|png|gif|tif|tiff)$/i)){
+            if (image_types.indexOf($.trim(popupDialogData["file_name"].split('.').pop().toLowerCase())) >= 0){
                 type = "Image";
                 detailDisplay = '<a href="/media/assay_images/'+study_pk+'/'+popupDialogData["file_name"]+'"><div class="thumbnail col-md-12 col-lg-4"><img alt="'+popupDialogData["file_name"]+'" style="filter: contrast('+contrast+'%)  brightness('+brightness+'%);" src="/media/assay_thumbs/'+study_pk+'/thumbnail_'+popupDialogData["file_name"].split(".").slice(0, -1).join('.') +'_600_600.jpg"/></div></a>'
             } else {
@@ -204,7 +205,7 @@ $(document).ready(function () {
         $('.row-header').css('width', '.1%').css('white-space', 'nowrap');
 
         // Activates Bootstrap tooltips
-        $('[data-toggle="tooltip"]').tooltip({container:"body"});
+        $('[data-toggle="tooltip"]').tooltip({container:"body", html: true});
     });
 
     for (j=0; j<tableCols.length; j++){

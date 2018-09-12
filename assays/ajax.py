@@ -754,6 +754,7 @@ def get_item_groups(study, criteria, matrix_items=None):
         'organ_model',
         'assaysetupsetting_set__setting',
         'assaysetupsetting_set__addition_location',
+        'assaysetupsetting_set__unit',
         'assaysetupcell_set__cell_sample__cell_subtype',
         'assaysetupcell_set__cell_sample__cell_type__organ',
         'assaysetupcell_set__density_unit',
@@ -996,6 +997,24 @@ def get_data_points_for_charting(
     #     if key == 'device':
     #         raw_data = raw_data.exclude(matrix_item__matrix_id__in=heatmap_matrices)
 
+    assays_of_interest = AssayStudyAssay.objects.filter(study_id__in=study)
+
+    target_method_pairs = {}
+
+    if group_method:
+        group_method = False
+
+        for assay in assays_of_interest:
+            if target_method_pairs.get(assay.target_id, assay.method_id) != assay.method_id:
+                group_method = True
+                break
+
+            target_method_pairs.update({assay.target_id: assay.method_id})
+
+    post_filter_compounds = post_filter.get(
+        'matrix_item', {}
+    ).get('assaysetupcompound__compound_instance__compound_id__in', {})
+
     for raw in raw_data:
         # Now uses full name
         # assay = raw.assay_id.assay_id.assay_short_name
@@ -1012,6 +1031,9 @@ def get_data_points_for_charting(
 
         # Not currently used
         method = study_assay.method.name
+
+        if group_method:
+            target = u'{} [{}]'.format(target, method)
 
         sample_location = raw.sample_location.name
 
@@ -1041,17 +1063,38 @@ def get_data_points_for_charting(
                 tag = []
                 concentration = 0
 
+                is_control = True
+
                 for compound in raw.matrix_item.assaysetupcompound_set.all():
-                    if compound.addition_time <= raw_time and compound.addition_time + compound.duration >= raw_time:
+                    if ((post_filter is None or unicode(compound.compound_instance.compound_id) in post_filter_compounds) and
+                        compound.addition_time <= raw_time and
+                        compound.addition_time + compound.duration >= raw_time
+                    ):
                         concentration += compound.concentration * compound.concentration_unit.scale_factor
-                        tag.append(compound.compound_instance.compound.name)
+                        tag.append(
+                            # May need this to have float minutes, unsure
+                            '{} at D{}H{}M{}'.format(
+                                compound.compound_instance.compound.name,
+                                int(raw_time / 24 / 60),
+                                int(raw_time / 60 % 24),
+                                int(raw_time % 60)
+                            )
+                        )
+
+                    is_control = False
 
                 # CONTRIVED: Set time to concentration
                 time = concentration
                 if tag:
                     tag = ' & '.join(tag)
+                elif is_control and (post_filter is None or u'0' in post_filter_compounds):
+                    tag = '-No Compound- at D{}H{}M{}'.format(
+                        int(raw_time / 24 / 60),
+                        int(raw_time / 60 % 24),
+                        int(raw_time % 60)
+                    )
                 else:
-                    tag = '-No Compound-'
+                    continue
             # If by device
             else:
                 tag = (matrix_item_id, matrix_item_name)
@@ -1061,7 +1104,7 @@ def get_data_points_for_charting(
 
             # Set data in nested monstrosity that is initial_data
             initial_data.setdefault(
-                (target, method), {}
+                target, {}
             ).setdefault(
                 unit, {}
             ).setdefault(
@@ -1074,21 +1117,6 @@ def get_data_points_for_charting(
 
             # Update all_sample_locations
             all_sample_locations.update({sample_location: True})
-
-    targets = [target_method[0] for target_method in initial_data.keys()]
-
-    for target_method, units in initial_data.items():
-        target = target_method[0]
-        method = target_method[1]
-
-        if group_method and targets.count(target) > 1:
-            target = u'{} [{}]'.format(target, method)
-
-        initial_data.update({
-            target: units
-        })
-
-        del initial_data[target_method]
 
     # Nesting like this is a little sloppy, flat > nested
     for target, units in initial_data.items():
@@ -1344,10 +1372,11 @@ def fetch_data_points(request):
         request.POST.get('include_all', ''),
         request.POST.get('truncate_negative', ''),
         json.loads(request.POST.get('dynamic_excluded', '{}')),
-        study=study,
+        study=studies,
         matrix_item=matrix_item,
         matrix_items=matrix_items,
-        criteria=json.loads(request.POST.get('criteria', '{}'))
+        criteria=json.loads(request.POST.get('criteria', '{}')),
+        post_filter=post_filter
     )
 
     data.update({
@@ -1397,6 +1426,9 @@ def validate_data_file(request):
 
     this_study = AssayStudy.objects.get(pk=int(study))
 
+    # Very odd, but expedient
+    studies = AssayStudy.objects.filter(id=this_study.id)
+
     form = AssayStudyDataUploadForm(request.POST, request.FILES, request=request, instance=this_study)
 
     if form.is_valid():
@@ -1415,7 +1447,7 @@ def validate_data_file(request):
             include_all,
             truncate_negative,
             dynamic_quality,
-            study=this_study,
+            study=studies,
             new_data=True,
             criteria=json.loads(request.POST.get('criteria', '{}'))
         )
@@ -1837,6 +1869,12 @@ def acquire_post_filter(studies, assays, matrix_items, data_points):
 
         for cell in matrix_item.assaysetupcell_set.all():
             current.setdefault(
+                'assaysetupcell__cell_sample_id__in', {}
+            ).update({
+                cell.cell_sample_id: unicode(cell.cell_sample)
+            })
+
+            current.setdefault(
                 'assaysetupcell__cell_sample__cell_type_id__in', {}
             ).update({
                 cell.cell_sample.cell_type_id: cell.cell_sample.cell_type.cell_type
@@ -1975,7 +2013,7 @@ def apply_post_filter(post_filter, studies, assays, matrix_items, data_points):
         ] for current_filter in post_filter.get('matrix_item') if current_filter.startswith('assaysetupsetting__')
     }
 
-    matrix_items.filter(study_id__in=studies)
+    matrix_items = matrix_items.filter(study__in=studies)
 
     matrix_items = matrix_items.filter(
         **matrix_item_post_filters
@@ -2168,7 +2206,8 @@ def fetch_data_points_from_filters(request):
                 study=studies,
                 matrix_item=matrix_item,
                 matrix_items=matrix_items,
-                criteria=json.loads(request.POST.get('criteria', '{}'))
+                criteria=json.loads(request.POST.get('criteria', '{}')),
+                post_filter=post_filter
             )
 
             data.update({'post_filter': post_filter})
