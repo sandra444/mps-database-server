@@ -66,9 +66,14 @@
                                 Models &amp; Devices <span class="caret"></span>
                             </button>
                             <ul class="dropdown-menu" role="menu">
+                                <li class="dropdown-header">Model Data</li>
                                 <li title="View MPS models"><a href="/microdevices/model">View MPS Models</a></li>
                                 <li title="View microdevices"><a href="/microdevices/device">View Microdevices</a></li>
-                                <li title="View diseases"><a href="/diseases">View Diseases</a></li>
+                                <li title="View disease models"><a href="/diseases/">View Diseases</a></li>
+                                <li class="divider"></li>
+                                <li class="dropdown-header">Requires Permission</li>
+                                <li><a href="/microdevices/model/add/">Add MPS Model</a></li>
+                                <li><a href="/microdevices/device/add/">Add Microdevice</a></li>
                             </ul>
                         </div>
                     </div>
@@ -86,13 +91,20 @@
                                 Compounds <span class="caret"></span>
                             </button>
                             <ul class="dropdown-menu" role="menu">
+                                <li class="dropdown-header">Compound Data</li>
                                 <li><a href="/compounds/">View Chemical Data</a></li>
+                                {# TODO NOTE THAT THIS IS A REPEAT LINK! #}
                                 <li><a href="/bioactivities/table/#filter">View Bioactivities</a></li>
                                 <li><a href="/drugtrials/">View Drug Trials</a></li>
+                                <li><a href="/autodrugtrialsform/">Search Disease Related Drug Trials</a></li>
                                 <li><a href="/adverse_events/">View Adverse Events</a></li>
                                 <li class="divider"></li>
+                                <li class="dropdown-header">Reports</li>
                                 <li><a href="/compare_adverse_events/">Compare Adverse Events</a></li>
                                 <li><a href="/compounds/report/#filter">Compound Report</a></li>
+                                <li class="divider"></li>
+                                <li class="dropdown-header">Requires Permission</li>
+                                <li><a href="/compounds/add/">Add Compound</a></li>
                             </ul>
                           </div>
                     </div>
@@ -110,9 +122,15 @@
                             Cell Samples <span class="caret"></span>
                         </button>
                           <ul class="dropdown-menu" role="menu">
-                            <li><a href="/cellsamples/celltype/">View Cell Types</a></li>
-                            <li><a href="/cellsamples/cellsubtype/">View Cell Origins</a></li>
-                            <li><a href="/cellsamples/cellsample/">View Cell Samples</a></li>
+                              <li class="dropdown-header">Cell Data</li>
+                              <li><a href="/cellsamples/celltype/">View Cell Types</a></li>
+                              <li><a href="/cellsamples/cellsubtype/">View Cell Origins</a></li>
+                              <li><a href="/cellsamples/cellsample/">View Cell Samples</a></li>
+                              <li class="divider"></li>
+                              <li class="dropdown-header">Requires Permission</li>
+                              <li><a href="/cellsamples/celltype/add/">Add Cell Type</a></li>
+                              <li><a href="/cellsamples/cellsubtype/add/">Add Cell Origin</a></li>
+                              <li><a href="/cellsamples/cellsample/add/">Add Cell Sample</a></li>
                           </ul>
                         </div>
                     </div>
@@ -134,18 +152,27 @@
 {#                           class="btn btn-primary btn-large">#}
 {#                            Add/Edit Studies#}
 {#                        </a>#}
-                        <div class="btn-group">
+                        <div class="btn-group dropup">
                             <button id="studies_button" type="button" class="btn btn-primary btn-large dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
                                 Studies <span class="caret"></span>
                             </button>
                             <ul class="dropdown-menu" role="menu">
-                                <li title="Index of all the studies created by groups you are a member of">
-                                    <a href="/assays/assaystudy/editable_studies/">View Editable Studies</a>
-                                </li>
+                                <li class="dropdown-header">Study Data</li>
+                                <li title="Index of all the studies created by groups you are a member of"><a href="/assays/assaystudy/editable_studies/">View Editable Studies</a></li>
                                 <li><a href="/assays/assaystudy/">View All Studies</a></li>
+                                <li><a href="/assays/studyconfiguration/">View Integrated Study Configurations</a></li>
+                                <li class="divider"></li>
+                                <li class="dropdown-header">Study Components</li>
+                                <li><a href="/assays/targets/">View All Target/Analytes</a></li>
+                                <li><a href="/assays/methods/">View All Method/Kits</a></li>
+                      {#          <li class="divider"></li>#}
+                      {#          <li><a href="/assays/assaychipsetup/">View Setups</a></li>#}
+                      {#          <li><a href="/assays/assaychipreadout/">View Readouts</a></li>#}
+                      {#          <li><a href="/assays/assaychiptestresult/">View Results</a></li>#}
                                 <li class="divider"></li>
                                 <li class="dropdown-header">Requires Permission</li>
                                 <li><a href="/assays/assaystudy/add/">Add Study</a></li>
+                                <li><a href="/assays/studyconfiguration/add/">Add Integrated Study Configuration</a></li>
                             </ul>
                         </div>
                     </div>
@@ -158,24 +185,23 @@
                              style="height: 70px;">
                     </a>
                     <div class="caption">
-                        <div class="btn-group">
+                        <div class="btn-group dropup">
                             <button id="visualization_button" type="button" class="btn btn-primary btn-large dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
                                 Data Analysis <span class="caret"></span>
                             </button>
                             <ul class="dropdown-menu" role="menu">
-                                <li>
-                                    <a href="/bioactivities/heatmap/#filter">
-                                        Create Heatmap
-                                    </a>
-                                </li>
-                                <li>
-                                    <a href="/bioactivities/cluster/#filter">
-                                        Cluster Compounds
-                                    </a>
-                                </li>
+                                <li class="dropdown-header">Study Data Analysis</li>
                                 <li title="View plots and reproducibility"><a href="/assays/graphing_reproducibility/">
-                                  Graphing/Reproducibility
+                                    Graphing/Reproducibility
                                 </a></li>
+                                <li class="divider"></li>
+                                <li class="dropdown-header">Compound Activities</li>
+                                <li title="Generate a heatmap for selected bioactivity data">
+                                    <a href="/bioactivities/heatmap/#filter">Heatmap</a>
+                                </li>
+                                <li title="Generate a dendrogram for selected compound/bioactivity data">
+                                    <a href="/bioactivities/cluster/#filter">Cluster</a>
+                                </li>
                             </ul>
                         </div>
                     </div>
@@ -188,23 +214,20 @@
                              style="height: 70px;">
                     </a>
                     <div class="caption">
-                        <div class="btn-group">
+                        <div class="btn-group dropup">
                             <button id="modeling_button" type="button" class="btn btn-primary btn-large dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
                                 Computational Modeling <span class="caret"></span>
                             </button>
                             <ul class="dropdown-menu" role="menu">
-                                <li title="This feature is still in development">
-                                    <a href="/under_construction/">
-                                        <span class="glyphicon glyphicon-wrench" aria-hidden="true"></span>
-                                        PBPK
-                                    </a>
-                                </li>
-                                <li title="This feature is still in development">
-                                    <a href="/bioactivities/model/">
-                                        <span class="glyphicon glyphicon-wrench" aria-hidden="true"></span>
-                                        Predictive Modeling
-                                    </a>
-                                </li>
+                                <li class="dropdown-header">Computational Modeling</li>
+                                <li title="This feature is still in development"><a href="/under_construction/">
+                                    <span class="glyphicon glyphicon-wrench" aria-hidden="true"></span>
+                                    PBPK
+                                </a></li>
+                                <li title="This feature is still in development"><a href="/bioactivities/model/">
+                                    <span class="glyphicon glyphicon-wrench" aria-hidden="true"></span>
+                                    Predictive Modeling
+                                </a></li>
 {#                                <li title="This feature is still in development">#}
 {#                                    <a href="/under_construction/">#}
 {#                                        <span id="generic_alert_symbol" class="glyphicon glyphicon-wrench" aria-hidden="true"></span>#}
