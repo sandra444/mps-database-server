@@ -1725,6 +1725,16 @@ class AssayMethodDetail(DetailView):
         return context
 
 
+class AssayPhysicalUnitsList(ListView):
+    model = PhysicalUnits
+    template_name = 'assays/assayunit_list.html'
+
+
+class AssaySampleLocationList(ListView):
+    model = AssaySampleLocation
+    template_name = 'assays/assaylocation_list.html'
+
+
 # Inappropriate use of CBV
 class AssayDataFromFilters(LoginRequiredMixin, TemplateView):
     """Returns a combined file for all data for given filters"""

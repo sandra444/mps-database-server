@@ -37,7 +37,7 @@
     <div class="text-center">
         <div class="row" id="title">
             <span class="col-sm-2">
-              <img src="/static/img/test_dots.png" style="width:100px;height:100px;">
+              <img alt="UPDDI Logo" src="/static/img/test_dots.png" style="width:100px;height:100px;">
             </span>
             <div class="col-sm-8">
                 <h1>Microphysiology Systems Database</h1>
@@ -46,7 +46,7 @@
               </div>
             </div>
             <span class="col-sm-2">
-                <img src="/static/img/Pitt_Logo.png" style="width:100px;height:100px;">
+                <img alt="Pitt Logo" src="/static/img/Pitt_Logo.png" style="width:100px;height:100px;">
             </span>
         </div>
         <div class="row">
@@ -57,7 +57,7 @@
                 <div title="View MPS models and microdevices" class="well">
                     {# Note that this doesn't work unless stopPropagation is used #}
                     <a onclick="event.stopPropagation(); $('#models_button').click();">
-                        <img src="/static/img/liver_model.png"
+                        <img alt="MPS Models Icon" src="/static/img/liver_model.png"
                              style="height: 70px;">
                     </a>
                     <div class="caption">
@@ -71,6 +71,9 @@
                                 <li title="View microdevices"><a href="/microdevices/device">View Microdevices</a></li>
                                 <li title="View disease models"><a href="/diseases/">View Diseases</a></li>
                                 <li class="divider"></li>
+                                <li class="dropdown-header">Model Components</li>
+                                <li title="View microdevice locations"><a href="/assays/locations/">View Microdevice Locations</a></li>
+                                <li class="divider"></li>
                                 <li class="dropdown-header">Requires Permission</li>
                                 <li><a href="/microdevices/model/add/">Add MPS Model</a></li>
                                 <li><a href="/microdevices/device/add/">Add Microdevice</a></li>
@@ -82,7 +85,7 @@
             <div class="col-sm-6 col-md-4">
                 <div title="View curated drug trials and chemical data" class="well">
                     <a onclick="event.stopPropagation(); $('#compounds_button').click();">
-                        <img src="/static/img/button_browse.png"
+                        <img alt="Compounds Icon" src="/static/img/button_browse.png"
                              style="height: 70px;">
                     </a>
                     <div class="caption">
@@ -113,7 +116,7 @@
             <div class="col-sm-12 col-md-4">
                 <div title="View cell samples and cell types" class="well">
                     <a onclick="event.stopPropagation(); $('#cellsamples_button').click();">
-                        <img src="/static/img/button_cell.png"
+                        <img alt="Cells Icon" src="/static/img/button_cell.png"
                              style="height: 70px;">
                     </a>
                     <div class="caption">
@@ -144,7 +147,7 @@
             <div class="col-sm-6 col-md-4">
                 <div title="Add/edit studies, setups, readouts, and results" class="well">
                     <a onclick="event.stopPropagation(); $('#studies_button').click();">
-                        <img src="/static/img/button_study.png"
+                        <img alt="Studies Icon" src="/static/img/button_study.png"
                              style="height: 70px;">
                     </a>
                     <div class="caption">
@@ -163,8 +166,9 @@
                                 <li><a href="/assays/studyconfiguration/">View Integrated Study Configurations</a></li>
                                 <li class="divider"></li>
                                 <li class="dropdown-header">Study Components</li>
-                                <li><a href="/assays/targets/">View All Target/Analytes</a></li>
-                                <li><a href="/assays/methods/">View All Method/Kits</a></li>
+                                <li><a href="/assays/targets/">View Target/Analytes</a></li>
+                                <li><a href="/assays/methods/">View Method/Kits</a></li>
+                                <li><a href="/assays/units/">View Measurement Units</a></li>
                       {#          <li class="divider"></li>#}
                       {#          <li><a href="/assays/assaychipsetup/">View Setups</a></li>#}
                       {#          <li><a href="/assays/assaychipreadout/">View Readouts</a></li>#}
@@ -181,7 +185,7 @@
             <div class="col-sm-6 col-md-4">
                 <div title="Generate heatmaps and clusters for selected bioactivity data" class="well">
                     <a onclick="event.stopPropagation(); $('#visualization_button').click();">
-                        <img src="/static/img/button_heatmap.png"
+                        <img alt="Data Analysis Icon" src="/static/img/button_heatmap.png"
                              style="height: 70px;">
                     </a>
                     <div class="caption">
@@ -210,7 +214,7 @@
             <div class="col-sm-12 col-md-4">
                 <div title="View reproducibility and predictive modeling" class="well">
                     <a onclick="event.stopPropagation(); $('#modeling_button').click();">
-                        <img src="/static/img/button_predictive.png"
+                        <img alt="Modelling Icon" src="/static/img/button_predictive.png"
                              style="height: 70px;">
                     </a>
                     <div class="caption">

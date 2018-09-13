@@ -90,12 +90,18 @@ urlpatterns = [
 
     # Images
     url(r'^assays/assaystudy/(?P<pk>[0-9]+)/images/$', AssayStudyImages.as_view(), name='study-images'),
-  
+
     # Targets and Methods
     url(r'^assays/targets/$', AssayTargetList.as_view(), name='assay-targets-list'),
     url(r'^assays/targets/(?P<pk>[0-9]+)/$', AssayTargetDetail.as_view(), name='assay-targets-detail'),
     url(r'^assays/methods/$', AssayMethodList.as_view(), name='assay-methods-list'),
     url(r'^assays/methods/(?P<pk>[0-9]+)/$', AssayMethodDetail.as_view(), name='assay-methods-detail'),
+
+    # Units
+    url(r'^assays/units/$', AssayPhysicalUnitsList.as_view(), name='assay-units-list'),
+
+    # Sample Locations
+    url(r'^assays/locations/$', AssaySampleLocationList.as_view(), name='assay-locations-list'),
 
     # Location for test filter, for now
     url(r'^assays/graphing_reproducibility/$', GraphingReproducibilityFilterView.as_view(), name='graphing-reproducibility'),

@@ -637,23 +637,35 @@ $(document).ready(function() {
                 { "responsivePriority": 5, "targets": 11 },
                 { "responsivePriority": 6, "targets": 13 },
                 { "responsivePriority": 7, "targets": 6 },
-                { "responsivePriority": 8, "targets": 4 }
+                { "responsivePriority": 8, "targets": 4 },
+                { "aTargets": [14], "fnCreatedCell": function (nTd, sData, oData, iRow, iCol) {
+                    if (sData[0] === "E") {
+                        $(nTd).css('background-color', '#74ff5b').css('font-weight', 'bold');
+                    } else if (sData[0] === "A") {
+                        $(nTd).css('background-color', '#fcfa8d').css('font-weight', 'bold');
+                    } else if (sData[0] === "P") {
+                        $(nTd).css('background-color', '#ff7863').css('font-weight', 'bold');
+                    } else {
+                        $(nTd).css('background-color', 'Grey').css('font-weight', 'bold');
+                    }
+                }}
             ],
             "order": [[status_column_index, 'desc'], [ 1, "asc" ]],
-            "createdRow": function(row, data, dataIndex) {
-                if (data[8][0] === "E") {
-                    $(row).find('td:eq(' + status_column_index + ')').css("background-color", "#74ff5b").css("font-weight", "bold");
-                }
-                else if (data[8][0] === "A") {
-                    $(row).find('td:eq(' + status_column_index + ')').css("background-color", "#fcfa8d").css("font-weight", "bold");
-                }
-                else if (data[8][0] === "P") {
-                    $(row).find('td:eq(' + status_column_index + ')').css("background-color", "#ff7863").css("font-weight", "bold");
-                }
-                else {
-                    $(row).find('td:eq(' + status_column_index + ')').css("background-color", "Grey").css("font-weight", "bold");
-                }
-            },
+            // Column visibility toggle would displace, hence new means of coloring.
+            // "createdRow": function(row, data, dataIndex) {
+            //     if (data[8][0] === "E") {
+            //         $(row).find('td:eq(' + status_column_index + ')').css("background-color", "#74ff5b").css("font-weight", "bold");
+            //     }
+            //     else if (data[8][0] === "A") {
+            //         $(row).find('td:eq(' + status_column_index + ')').css("background-color", "#fcfa8d").css("font-weight", "bold");
+            //     }
+            //     else if (data[8][0] === "P") {
+            //         $(row).find('td:eq(' + status_column_index + ')').css("background-color", "#ff7863").css("font-weight", "bold");
+            //     }
+            //     else {
+            //         $(row).find('td:eq(' + status_column_index + ')').css("background-color", "Grey").css("font-weight", "bold");
+            //     }
+            // },
             "responsive": true,
             dom: 'B<"row">lfrtip',
             fixedHeader: {headerOffset: 50},

@@ -151,6 +151,7 @@ $(document).ready(function () {
             }}
         ],
         "order": [[11, 'desc'], [ 1, "asc" ]],
+        // Column visibility toggle would displace, hence new means of coloring.
         // "createdRow": function( row, data, dataIndex ) {
         //     if ( data[10][0] === "E" ) {
         //         $( row ).find('td:eq(11)').css( "background-color", "#74ff5b" ).css( "font-weight", "bold"  );
