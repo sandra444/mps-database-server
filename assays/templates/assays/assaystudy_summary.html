@@ -81,8 +81,9 @@
     </div>
 
     {% if object.assaystudyassay_set.count %}
+    <div class="padded-bottom">
     <legend>Assays</legend>
-    <table class="table table-striped table-bordered">
+    <table id="assay_table" class="table table-striped table-bordered">
         <thead>
             <tr>
                 <th>Target/Analyte</th>
@@ -100,6 +101,7 @@
             {% endfor %}
         </tbody>
     </table>
+    </div>
     {% endif %}
 
     {% include 'assays/grouping_filtering.html' %}

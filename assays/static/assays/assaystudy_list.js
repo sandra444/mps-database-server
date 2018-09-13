@@ -4,11 +4,17 @@ $(document).ready(function() {
     // Set the callback
     google.charts.setOnLoadCallback(reproPie);
 
+    var studies_table = $('#studies');
+    // Hide initially
+    studies_table.hide();
+
     function reproPie() {
+        studies_table.show();
+
         var number_of_rows = $('tbody tr').length;
-        for (x=0;x<number_of_rows;x++){
-            if ($( "#piechart"+x )[0]) {
-                var pie = $("#piechart"+x).data('nums').split("|");
+        for (x = 0; x < number_of_rows; x++) {
+            if ($("#piechart" + x)[0]) {
+                var pie = $("#piechart" + x).data('nums').split("|");
                 var pieData = google.visualization.arrayToDataTable([
                     ['Status', 'Count'],
                     ['Excellent', parseInt(pie[0])],
@@ -20,9 +26,9 @@ $(document).ready(function() {
                     // titleFontSize:16,
                     legend: 'none',
                     slices: {
-                        0: { color: '#74ff5b' },
-                        1: { color: '#fcfa8d' },
-                        2: { color: '#ff7863' }
+                        0: {color: '#74ff5b'},
+                        1: {color: '#fcfa8d'},
+                        2: {color: '#ff7863'}
                     },
                     pieSliceText: 'none',
                     pieSliceTextStyle: {
@@ -31,7 +37,7 @@ $(document).ready(function() {
                         fontSize: 12
                     },
                     'chartArea': {'width': '90%', 'height': '90%'},
-                    backgroundColor: { fill:'transparent' },
+                    backgroundColor: {fill: 'transparent'},
                     // is3D: true,
                     pieSliceBorderColor: "black",
                     tooltip: {
@@ -41,11 +47,16 @@ $(document).ready(function() {
                     }
                     // enableInteractivity: false
                 };
-                var pieChart = new google.visualization.PieChart(document.getElementById('piechart'+x));
+                var pieChart = new google.visualization.PieChart(document.getElementById('piechart' + x));
                 pieChart.draw(pieData, pieOptions);
             }
         }
-        var data_table = $('#studies').DataTable( {
+
+        // Hide again
+        studies_table.hide();
+
+
+        studies_table.DataTable({
             dom: 'B<"row">lfrtip',
             fixedHeader: {headerOffset: 50},
             responsive: true,
@@ -63,17 +74,25 @@ $(document).ready(function() {
                 },
                 {
                     "type": "numeric-comma",
-                    "targets": [5, 6]
+                    "targets": [5, 6, 7, 8]
+                },
+                {
+                    'visible': false,
+                    'targets': [7, 8, 12]
                 },
                 {
                     'className': 'none',
-                    'targets': [7, 10]
+                    'targets': [9]
                 },
                 {
                     'sortable': false,
-                    'targets': [8]
+                    'targets': [10]
                 }
-            ]
+            ],
+            drawCallback: function () {
+                // Show when done
+                studies_table.show();
+            }
         });
     }
 });

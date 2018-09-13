@@ -17,7 +17,7 @@
                         <b>Center</b>
                     </td>
                     <td>
-                        <a href="/microdevices/center/{{ object.center.id }}" target='_blank'>{{ object.center }}</a>
+                        <a href="/microdevices/center/{{ object.center.id }}" target='_blank'>{{ object.center.name }} ({{ object.center.center_id }})</a>
                     </td>
                 </tr>
                 <tr>
@@ -30,19 +30,30 @@
                 </tr>
                 <tr>
                     <td>
-                        <b></b>
+                        <b>Base Model</b>
                     </td>
                     <td>
-
+                        {{ object.base_model }}
                     </td>
                 </tr>
-                {% if object.description %}
                 <tr>
                     <td>
-                        <b>Description</b>
+                        <b>Organ</b>
                     </td>
                     <td>
-                        {{ object.description|linebreaksbr }}
+                        {{ object.organ }}
+                    </td>
+                </tr>
+                {% if object.disease %}
+                <tr>
+                    <td>
+                        <b>Disease</b>
+                    </td>
+                    <td>
+                        {{ object.disease }}
+                        {% if object.disease_trigger %}
+                            ({{ object.get_disease_trigger_display }})
+                        {% endif %}
                     </td>
                 </tr>
                 {% endif %}
@@ -89,6 +100,16 @@
                         {% endif %}
                     </td>
                 </tr>
+                {% if object.description %}
+                <tr>
+                    <td>
+                        <b>Description</b>
+                    </td>
+                    <td>
+                        {{ object.description|linebreaksbr }}
+                    </td>
+                </tr>
+                {% endif %}
                 <tr>
                     <td>
                         <b>References</b>
