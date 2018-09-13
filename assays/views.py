@@ -1159,13 +1159,13 @@ class AssayMatrixAdd(StudyGroupMixin, CreateView):
         if self.request.POST:
             context['item_formset'] = AssayMatrixItemFormSetFactory(
                 self.request.POST,
-                prefix='item',
+                prefix='matrix_item',
                 study=study,
                 user=self.request.user
             )
         else:
             context['item_formset'] = AssayMatrixItemFormSetFactory(
-                prefix='item',
+                prefix='matrix_item',
                 study=study,
                 user=self.request.user
             )
@@ -1182,7 +1182,7 @@ class AssayMatrixAdd(StudyGroupMixin, CreateView):
         formset = AssayMatrixItemFormSetFactory(
             self.request.POST,
             instance=form.instance,
-            prefix='item',
+            prefix='matrix_item',
             study=study,
             user=self.request.user
         )
@@ -1274,7 +1274,7 @@ class AssayMatrixUpdate(StudyGroupMixin, UpdateView):
                 self.request.POST,
                 instance=self.object,
                 queryset=matrix_item_queryset,
-                prefix='item',
+                prefix='matrix_item',
                 user=self.request.user
             )
             context['compound_formset'] = AssaySetupCompoundFormSetFactory(
@@ -1299,7 +1299,7 @@ class AssayMatrixUpdate(StudyGroupMixin, UpdateView):
             context['item_formset'] = AssayMatrixItemFormSetFactory(
                 instance=self.object,
                 queryset=matrix_item_queryset,
-                prefix='item',
+                prefix='matrix_item',
                 user=self.request.user
             )
             context['compound_formset'] = AssaySetupCompoundFormSetFactory(
@@ -1330,7 +1330,7 @@ class AssayMatrixUpdate(StudyGroupMixin, UpdateView):
             self.request.POST,
             instance=self.object,
             queryset=matrix_item_queryset,
-            prefix='item',
+            prefix='matrix_item',
             user=self.request.user
         )
         # Order no longer matters really
@@ -1432,7 +1432,7 @@ class AssayMatrixDetail(StudyGroupMixin, DetailView):
         context['item_formset'] = AssayMatrixItemFormSetFactory(
             instance=self.object,
             queryset=matrix_item_queryset,
-            prefix='item'
+            prefix='matrix_item'
         )
         context['compound_formset'] = AssaySetupCompoundFormSetFactory(
             queryset=compound_queryset,
@@ -1719,6 +1719,16 @@ class AssayMethodDetail(DetailView):
             assayimagesetting__assayimage__method__name=self.object.name
         ).distinct()
         return context
+
+
+class AssayPhysicalUnitsList(ListView):
+    model = PhysicalUnits
+    template_name = 'assays/assayunit_list.html'
+
+
+class AssaySampleLocationList(ListView):
+    model = AssaySampleLocation
+    template_name = 'assays/assaylocation_list.html'
 
 
 # Inappropriate use of CBV
