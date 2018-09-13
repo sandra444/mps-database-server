@@ -10,16 +10,19 @@
     <style>
         .filled-circle {list-style-type: disc;}
         .open-circle {list-style-type: circle; padding-left: 20px;}
+        table, th{background-color: SteelBlue;
+            font-size: 105%;
+        }
         .sub1-bars {font-style: italic; font-size: 180%}
-        .sub2-bars {background-color: DarkGreen; font-weight: bold; color: white; font-size:95%; padding: 10px}
+        .sub2-bars {font-style: italic; font-size: 160%}
         .sub4-bars {background-color: DarkBlue; font-weight: bold; color: white; font-size:95%; padding: 10px}}
 
         .showhidebutton{font-size:105%; border-radius:5%; padding:2px; }
 
         .collapsible {
-            background-color: DarkGray;
+            background-color: SteelBlue;
             font-size: 120%;
-            color: Gray;
+            color: white;
             cursor: pointer;
             padding: 10px;
             width: 100%;
@@ -29,7 +32,7 @@
             margin-bottom: 1%;
             margin-top: 1%;
         }
-        .active, .collapsible:hover {background-color: SteelBlue; color: White;}
+        .active2, .collapsible:hover {background-color: SteelBlue; color: White; font-weight: bold; font-size: 140%}
         .content {
             padding: 0 18px;
             max-height: 0;
@@ -135,8 +138,8 @@
                             <li><a href="#studies">Studies</a></li>
                             <li><a href="#matrices">Matrices</a></li>
                             <li><a href="#matrixitems">Matrix Items</a></li>
-                            <li><a href="#assayimages">Assay Images & Videos</a></li>
                             <li><a href="#assaydata">Assay Data Points</a></li>
+                            <li><a href="#assayimages">Assay Images & Videos</a></li>
                         </ul>
                     </li>
 
@@ -590,6 +593,8 @@
 
         <h1 class="sub1-bars"><b>Study Components</b> Used in MPS Studies</h1>
 
+        <h1 class="sub2-bars">Model Design Components</h1>
+
         <div id="mpsmodels">
             <button class="collapsible">Models in the Database</button>
             <div class="content">
@@ -702,6 +707,8 @@
                 </div>
             </div>
         </div>
+
+        <h1 class="sub2-bars">Experimental Design Components</h1>
 
         <div id="diseaselist">
             <button class="collapsible">Diseases in the MPS Database </button>
@@ -828,6 +835,8 @@
             </div>
         </div>
 
+        <h1 class="sub2-bars">Mesurement Components</h1>
+
         <div id="targets">
             <button class="collapsible">Assay Targets/Analytes</button>
             <div class="content">
@@ -904,9 +913,9 @@
                         </li>
                     </ul>
                 </div>
-                <button class="showhidebutton" onclick="myToggle9()">Show/Hide Information for Editors</button>
+                <button class="showhidebutton" onclick="myToggle8()">Show/Hide Information for Editors</button>
                 <div id="methodsseditor" class="editorsubtainer">
-                <div id="showhide9">
+                <div id="showhide8">
                     <ul class="list-group">
                         <li class="list-group-item">
                             <ul class="list-unstyled">
@@ -976,17 +985,13 @@
 
     <div id="study_section" class="container">
 
-        <h2 class="sub2-bars">Study Design and Data</h2>
+        <h1 class="sub1-bars"><b>Study Data</b> Curated by Data Providers</h1>
 
         <div id="studies">
-        <h2 class="sub2-bars">---</h2>
-        <h4 class="sub4-bars">Study Data Manually Curated into the MPS Database  </h4>
-            <div class="list-group">
-                <div id="studiesviewer">
+            <button class="collapsible">Studies</button>
+            <div class="content">
+                <div id="studiesviewer" class="viewersubtainer">
                     <ul class="list-group">
-                        <li class="list-group-item active">
-                         To view data from an individual study, select the option to view all Studies from the Studies tab or the Studies icon.
-                        </li>
                         <li class="list-group-item">
                             <ul class="list-unstyled">
                                 <li>To view Study details:
@@ -1014,11 +1019,13 @@
                         </li>
                     </ul>
                 </div>
+                <button class="showhidebutton" onclick="myToggle10()">Show/Hide Information for Editors</button>
                 <div id="studieseditor" class="editorsubtainer">
+                <div id="showhide10">
                     <ul class="list-group">
                         <li class="list-group-item">
                             <ul class="list-unstyled">
-                                <li>To add/edit a Study:
+                                <li>Adding Assay Data Step 1: Adding a Study - to add/edit a Study:
                                 <ul class="filled-circle">
                                     <li>Check to make sure that all controlled vocabulary needed is available (<a href="#mpsmodels">Models</a>, <a href="#cellsamples">Cell Samples</a>, <a href="#mpslocations">Locations</a>, <a href="#targets">Target/Analytes</a>, <a href="#methods">Method/Kits</a>, <a href="#physicalunits">Units</a>) </li>
                                     <li>Click on the <b>Add Study</b> button or the <b>View/Edit</b> button next to the study of interest to be routed to the Study Matrices and Matrix Items List page</li>
@@ -1032,10 +1039,10 @@
                                         <ul class="open-circle"><li>Protocol File – a Word or pdf of the study protocol </li></ul>
                                         <ul class="open-circle"><li>Image to Clarify A Study – recommend a picture of the setup or an illustration of the experimental protocol </li></ul>
                                         <ul class="open-circle"><li>For Integrated Chip Studies – select configuration if performing an integrated study  </li></ul>
-                                        <ul class="open-circle"><li>Assay – For information on adding assay, <a href="#targets">click here</a> </li></ul>
+                                        <ul class="open-circle"><li>Assay – For information on adding assay, <a href="#targets">click here</a> (the combinations of Method-Target-Units must be here priore to uploading assay data)</li></ul>
                                         <ul class="open-circle"><li>Supporting Data – Attach files that will assist other database users in understanding the study design and/or assay data  </li></ul>
                                         <ul class="open-circle"><li>click the <b>Submit</b> button to save changes</li></ul>
-                                    <li>For information on continuing to add MPS models and assay data to the Study, <a href="#matrices">click here</a> </li>
+                                    <li>For information on continuing to add MPS models and assay data to the Study (Step 2), <a href="#matrices">click here</a> </li>
                                 </ul>
                                 </li>
                                 <li>Tips:
@@ -1071,18 +1078,15 @@
                         </li>
                     </ul>
                 </div>
+                </div>
             </div>
         </div>
 
         <div id="matrices">
-        <h2 class="sub2-bars">---</h2>
-        <h4 class="sub4-bars">Study Matrices  </h4>
-            <div class="list-group">
-                <div id="matricesviewer">
+            <button class="collapsible">Matrices</button>
+            <div class="content">
+                <div id="matricesviewer" class="viewersubtainer">
                     <ul class="list-group">
-                        <li class="list-group-item active">
-                         Matrices are selected using the <b>View/Edit</b> button next to the Matrix of interest in the Matrices section of the Study Matrices and Matrix Items list page.
-                        </li>
                         <li class="list-group-item">
                             <ul class="list-unstyled">
                                 <li>To view Matrix details, from the Study Matrices and Items list page:
@@ -1107,11 +1111,13 @@
                         </li>
                     </ul>
                 </div>
-                <div id="matriceseditor" class="editorsubtainer">
+                <button class="showhidebutton" onclick="myToggle11()">Show/Hide Information for Editors</button>
+                <div id="matricieseditor" class="editorsubtainer">
+                <div id="showhide11">
                     <ul class="list-group">
                         <li class="list-group-item">
                             <ul class="list-unstyled">
-                                <li>To add a Matrix, click the <b>Add Matrix</b> button; to edit click on the <b>View/Edit</b> button next to the Matrix of interest:
+                                <li>Adding Assay Data Step 2: Adding a Matrix - to add a matrix, click the <b>Add Matrix</b> button; to edit click on the <b>View/Edit</b> button next to the Matrix of interest:
                                     <br><br>
                                     Global Section
                                 <ul class="filled-circle">
@@ -1128,12 +1134,13 @@
                                     <li>Click on one of the "Apply" buttons or click and drag in the matrix </li>
                                     <li>Representation – select from the options in the list</li>
                                     <li>Click the <b>Submit</b> button to save changes</li>
+                                    <li>For information on continuing to add MPS models and assay data to the Study (Step 3), <a href="#matrices">click here</a> </li>
                                 </ul>
                                 </li>
                                 <li>Tips:
                                 <ul class="filled-circle">
                                     <li>For each Matrix Item, the Name/ID, Test Type, Setup Date, and MPS/Organ Model MUST be filled PRIOR to the first Submit  </li>
-                                    <li> Name/IDs must be unique in  Study (cannot not have repeats in a Matrix or in two Matrices)  </li>
+                                    <li>Name/IDs must be unique in  Study (cannot not have repeats in a Matrix or in two Matrices)  </li>
                                     <li>Test Type specifies whether the Matrix Item functions as a control  </li>
                                     <li>Submit (and Overwrite) after every change you do not want to have to make again  </li>
                                     <li>Invest a little time in exploring the different Actions and Apply techniques to find what works best for you  </li>
@@ -1144,21 +1151,18 @@
                         </li>
                     </ul>
                 </div>
+                </div>
             </div>
         </div>
 
         <div id="matrixitems">
-        <h2 class="sub2-bars">---</h2>
-        <h4 class="sub4-bars">Matrix Items (an instance of an MPS Model)  </h4>
-            <div class="list-group">
-                <div id="matrixitemsviewer">
+            <button class="collapsible">Matrix Items</button>
+            <div class="content">
+                <div id="matrixitemsviewer" class="viewersubtainer">
                     <ul class="list-group">
-                        <li class="list-group-item active">
-                         Matrix Items can be selected by clicking on active links in many places in the MPS-GUI. One way to access an individual Matrix Item is to click the <b>View/Edit</b> button next to the Matrix Item in the Items section of  the Study Matrices and Matrix Items list page.
-                        </li>
                         <li class="list-group-item">
                             <ul class="list-unstyled">
-                                <li>To view Matrix Item details, from the Study Matrices and Items list page:
+                                <li>Matrix Items can be selected by clicking on active links in many places in the MPS-GUI. One way to access an individual Matrix Item is to click the <b>View/Edit</b> button next to the Matrix Item in the Items section of  the Study Matrices and Matrix Items list page.
                                 <ul class="filled-circle">
                                     <li>Use the search bar or scroll through the list to find the Item of interest</li>
                                     <li>Click on the <b>View/Edit</b> button next to the Item of interest </li>
@@ -1180,11 +1184,13 @@
                         </li>
                     </ul>
                 </div>
+                <button class="showhidebutton" onclick="myToggle12()">Show/Hide Information for Editors</button>
                 <div id="matrixitemseditor" class="editorsubtainer">
+                <div id="showhide12">
                     <ul class="list-group">
                         <li class="list-group-item">
                             <ul class="list-unstyled">
-                                <li>To edit a Matrix Item, click on the <b>View/Edit</b> button next to the Item of interest:
+                                <li>Adding Assay Data Step 3 (optional): Refining Matrix Item setup - To edit a Matrix Item, click on the <b>View/Edit</b> button next to the Item of interest:
                                 <ul class="filled-circle">
                                     <li>Add/Edit Matrix Item Details</li>
                                         <ul class="open-circle"><li>edit the information as appropriate (add additional details if desired) </li></ul>
@@ -1212,70 +1218,15 @@
                         </li>
                     </ul>
                 </div>
-            </div>
-        </div>
-
-        <div id="assayimages">
-        <h2 class="sub2-bars">---</h2>
-        <h4 class="sub4-bars">Assay Images and Videos  </h4>
-            <div class="list-group">
-                <div id="assayimagesviewer">
-                    <ul class="list-group">
-                        <li class="list-group-item active">
-                         Images and/or Videos can be attached to a specific <b>MPS Model</b> in a <b>Study</b>
-                        </li>
-                        <li class="list-group-item">
-                            <ul class="list-unstyled">
-                                <li>To view Images and/or Videos:
-                                <ul class="filled-circle">
-                                    <li>Select a <b>Study</b></li>
-                                    <li>Click on the <b>View Images</b> button </li>
-                                    <li>Click on the thumbnail of the media file of interest </li>
-                                    <li>Review media file metadata </li>
-                                    <li>If video, click on the play button to view the video </li>
-                                </ul>
-                                </li>
-                                <li>Notes:
-                                <ul class="filled-circle">
-                                    <li>Media files have been altered for appearance in a web browser. To perform comparative analysis between media files, downloading the unaltered media file is recommended </li>
-                                </ul>
-                                </li>
-                            </ul>
-                        </li>
-                    </ul>
-                </div>
-                <div id="assayimageseditor" class="editorsubtainer">
-                    <ul class="list-group">
-                        <li class="list-group-item">
-                            <ul class="list-unstyled">
-                                <li>To add images and/or videos:
-                                <ul class="filled-circle">
-                                    <li>Prepare the image/video file</li>
-                                    <li>Prepare an image/video metadata file (MIF-C-i) </li>
-                                </ul>
-                                </li>
-                                <li>Tips:
-                                <ul class="filled-circle">
-                                    <li>Contact an MPS Database Administrator for guidance on preparing media metadata files.</li>
-                                    <li>To remove media files, contact an MPS Database Administrator for assistance.</li>
-                                </ul>
-                                </li>
-                            </ul>
-                        </li>
-                    </ul>
                 </div>
             </div>
         </div>
 
         <div id="assaydata">
-        <h2 class="sub2-bars">---</h2>
-        <h4 class="sub4-bars">Assay Data  </h4>
-            <div class="list-group">
-                <div id="assaydataviewer">
+            <button class="collapsible">Assay Data</button>
+            <div class="content">
+                <div id="assaydataviewer" class="viewersubtainer">
                     <ul class="list-group">
-                        <li class="list-group-item active">
-                         Assay data can be accessed in several places in the MPS-GUI.
-                        </li>
                         <li class="list-group-item">
                             <ul class="list-unstyled">
                                 <li>To view assay data for a study:
@@ -1308,11 +1259,14 @@
                         </li>
                     </ul>
                 </div>
+
+                <button class="showhidebutton" onclick="myToggle14()">Show/Hide Information for Editors</button>
                 <div id="assaydataeditor" class="editorsubtainer">
+                <div id="showhide14">
                     <ul class="list-group">
                         <li class="list-group-item">
                             <ul class="list-unstyled">
-                                <li>To add/edit assay data:
+                                <li>Adding Assay Data Step 4: Upload Assay Data - To add/edit assay data:
                                 <ul class="filled-circle">
                                     <li>Prepare a data file (MIF-C-a) </li>
                                     <li>Select a <b>Study</b></li>
@@ -1322,7 +1276,8 @@
                                 </li>
                                 <li>Tips:
                                 <ul class="filled-circle">
-                                    <li>The ONLY editable field of the assay data that is editable in the MPS-GUI is the <b>Exclude</b> field</bExclude></li>
+                                    <li>The ONLY editable field of the assay data that is editable in the MPS-GUI is the <b>Exclude</b> field</li>
+                                    <li>All combinations of Method/Kit, Target/Analyte, and Unit must be included in the Assays section of the Study Level Details page PRIOR to uploading assay data points for that combination</li>
                                     <li>Contact an MPS Database Administrator for guidance on preparing data files</li>
                                     <li>For details on the required file format for uploading data, <a href="#uploadingdata">click here</a> </li>
                                 </ul>
@@ -1331,46 +1286,24 @@
                         </li>
                     </ul>
                 </div>
-            </div>
+                </div>
 
-
-            <div id="uploadingdata" class="editorsubtainer">
-                <h2 class="sub2-bars">Uploading Data Points - Text has not been Updated</h2>
-                {#    <h4 class="sub4-bars"></h4>#}
-                <ul class="list-group">
-                  <li class="list-group-item active">
-                    It is possible to upload multiple sets of data points by uploading an Excel file (.xls or .xlsx) or CSV (.csv)
-                  </li>
-                  <li class="list-group-item">
-                    To access this interface, go to the desired study's page and click this button:
-                      <a class="btn btn-warning" role="button">Upload Data</a>
-                  </li>
-                  <li class="list-group-item">
-                    Click the following links to download Excel templates:
-                    <br>
-                    <a href="/media/excel_templates/chip_template-{{ version }}.xlsx">
-                        Click Here For Upload Template
-                    </a>
-                  </li>
-                  <li class="list-group-item">
-                    The templates indicate where to place the Chip/Plate IDs
-                  </li>
-                  <li class="list-group-item">
-                    The Chip/Plate IDs must be for Chips/Plates in the current study
-                  </li>
-                  <li class="list-group-item">
-                    All valid sheets (based on the header) of an Excel file are considered for upload
-                  </li>
-                  <li class="list-group-item">
-                    Before uploading data, please be sure to add every assay performed in the section entitled <b>Assays</b>
-                    <br>
-                    You can change this list by going to the Study's edit page and finding the section <b>Assays</b>
-                    <br>
-                    Please see <a href="#study">Study</a>
-                  </li>
-                  <li class="list-group-item">
-                    <h4 class="sub4-bars">The format for data point uploads is as follows:</h4>
-                      <table class="table table-bordered table-condensed small" style="background-color: #F0FFFF;">
+                <button class="showhidebutton" onclick="myToggle15()">Show/Hide Details of Assay Data File Format (MIF-C-a)</button>
+                <div id="uploadingdata" class="editorsubtainer">
+                <div id="showhide15">
+                    <ul class="list-group">
+                        <li class="list-group-item">
+                            <ul class="list-unstyled">
+                                <li>To get an example template file, <a href="/media/excel_templates/chip_template-{{ version }}.xlsx">click here</a></li>
+                                <ul class="filled-circle">
+                                    <li>Chip ID must be unique within a Study</li>
+                                    <li>File can contain mulitple tabs</li>
+                                    <li>All tabs with correct headers (i.e. column names) will be evaluated for upload, others will be ignored</li>
+                                    <li>The correct headers must be placed in the first three rows to be considered valid</li>
+                                    <li>Details of the Assay Data file format are shown in table below</li>
+                                </ul>
+                            </ul>
+                            <table class="table table-bordered table-condensed small" style="background-color: #F0FFFF;">
                           <thead>
                                 <tr class="active">
                                     <th>Chip ID</th>
@@ -1433,78 +1366,80 @@
                                 </tr>
                             </tbody>
                         </table>
-                    </li>
-                    <li class="list-group-item">
-                        File uploads can use either full names ("Albumin") or abbreviations ("ALB") for Target/Analytes
-                    </li>
-                    <li class="list-group-item">
-                        Some assays involve transferring media from a device into a plate
-                        <br>
-                        For these assays, specify this information with <b>Assay Plate ID</b> and <b>Assay Well ID</b>
-                    </li>
-                    <li class="list-group-item">
-                        Please note that time is split into <b>Day</b>, <b>Hour</b>, and <b>Minute</b>
-                    </li>
-                    <li class="list-group-item">
-                        The <b>Sample Location</b> indicates from where in a device the tested sample was acquired
-                        <br>
-                        For instance, if an Organ Model is split into a top and bottom compartment, one might put terms like "Apical" or "Basal" in the Sample Location column
-                    </li>
-                    <li class="list-group-item">
-                        <b class="text-danger">
-                            <span class="glyphicon glyphicon-exclamation-sign"></span>
-                            The brackets ([] and {}) in the above examples and templates are not meant to be taken literally
-                            <br>
-                            When you are actually entering data, remove them
-                        </b>
-                    </li>
-                    <li class="list-group-item">
-                        <b class="text-danger">
-                            <span class="glyphicon glyphicon-exclamation-sign"></span>
-                            The Chip ID should be nothing more than the Chip ID/Barcode you entered for a Matrix Item
-                        </b>
-                    </li>
-                    <li class="list-group-item">
-                        <b class="text-danger">
-                            <span class="glyphicon glyphicon-exclamation-sign"></span>
-                            The correct header must be in the first three rows for a file to be considered valid
-                        </b>
-                    </li>
-                    <li class="list-group-item">
-                        <b class="text-danger">
-                            <span class="glyphicon glyphicon-exclamation-sign"></span>
-                            Uploading overwrites previous conflicting data (an alert will indicate if data is going to be overwritten)
-                        </b>
-                    </li>
-                    <li class="list-group-item">
-                        <b class="text-danger">
-                            <span class="glyphicon glyphicon-exclamation-sign"></span>
-                            You will have to reselect the desired file after a failed submission
-                        </b>
-                    </li>
-                </ul>
-              </div>
+                        </li>
+                    </ul>
+                </div>
+                </div>
+            </div>
+        </div>
 
-
+        <div id="assayimages">
+            <button class="collapsible">Assay Images and Videos</button>
+            <div class="content">
+                <div id="assayimagesviewer" class="viewersubtainer">
+                    <ul class="list-group">
+                        <li class="list-group-item">
+                            <ul class="list-unstyled">
+                                <li>To view assay Images and Videos attached to a specific MPS Model in a Study:
+                                <ul class="filled-circle">
+                                    <li>Select a <b>Study</b></li>
+                                    <li>Click on the <b>View Images</b> button </li>
+                                    <li>Click on the thumbnail of the media file of interest </li>
+                                    <li>Review media file metadata </li>
+                                    <li>If video, click on the play button to view the video </li>
+                                </ul>
+                                </li>
+                                <li>Notes:
+                                <ul class="filled-circle">
+                                    <li>Media files have been altered for appearance in a web browser. To perform comparative analysis between media files, downloading the unaltered media file is recommended </li>
+                                </ul>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+                <button class="showhidebutton" onclick="myToggle13()">Show/Hide Information for Editors</button>
+                <div id="imageseditor" class="editorsubtainer">
+                <div id="showhide13">
+                    <ul class="list-group">
+                        <li class="list-group-item">
+                            <ul class="list-unstyled">
+                                <li>To add images and/or videos:
+                                <ul class="filled-circle">
+                                    <li>Prepare the image/video file</li>
+                                    <li>Prepare an image/video metadata file (MIF-C-i) </li>
+                                </ul>
+                                </li>
+                                <li>Tips:
+                                <ul class="filled-circle">
+                                    <li>Contact an MPS Database Administrator for guidance on preparing media metadata files.</li>
+                                    <li>To remove media files, contact an MPS Database Administrator for assistance.</li>
+                                </ul>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+                </div>
+            </div>
         </div>
 
     </div>
 
     <div id="feature_section" class="container">
 
-       <h1 class="sub1-bars">Features Based on Study Data Only</h1>
+        <h1 class="sub1-bars"> <b>Features </b> </h1>
 
-       <div id="intrastudy">
-        <h2 class="sub2-bars">---</h2>
-        <h4 class="sub4-bars">Intra-Study Analysis  </h4>
-            <div class="list-group">
-                <div id="intrastudyviewer">
+        <h1 class="sub2-bars">Based on Study Data Only</h1>
+
+        <div id="intrastudy">
+            <button class="collapsible">Intra-Study Analysis</button>
+            <div class="content">
+                <div id="intrastudyviewer" class="viewersubtainer">
                     <ul class="list-group">
-                        <li class="list-group-item active">
-                         Intra-study analysis is performed from within an individual study and is filtered and grouped depending on how data are accessed.
-                        </li>
                         <li class="list-group-item">
                             <ul class="list-unstyled">
+                                <li>Intra-study analysis is performed from within an individual study and is filtered and grouped depending on how data are accessed.</li>
                                 <li>To view study details and assay data for a whole study:
                                 <ul class="filled-circle">
                                     <li>Select a <b>Study</b></li>
@@ -1553,17 +1488,14 @@
         </div>
 
         <div id="interstudy">
-        <h2 class="sub2-bars">---</h2>
-        <h4 class="sub4-bars">Inter-Study Analysis  </h4>
-            <div class="list-group">
-                <div id="interstudyviewer">
+            <button class="collapsible">Inter-Study Analysys</button>
+            <div class="content">
+                <div id="interstudyviewer" class="viewersubtainer">
                     <ul class="list-group">
-                        <li class="list-group-item active">
-                         The inter-study query tool enables data visualization and analysis across studies. To access the inter-study query tool, select Graphing/Reproducibility from the Analysis tab or icon.
-                        </li>
                         <li class="list-group-item">
                             <ul class="list-unstyled">
-                                <li>To perform an inter-study query:
+                                <li>The inter-study query tool enables data visualization and analysis across studies. To access the inter-study query tool, select Graphing/Reproducibility from the Analysis tab or icon.
+                                                 To perform an inter-study query:
                                 <ul class="filled-circle">
                                     <li>Check at least one box in each list  </li>
                                         <ul class="open-circle"><li>notice how checking and unchecking boxes changes the assay data point count </li></ul>
@@ -1592,371 +1524,352 @@
             </div>
         </div>
 
-        <h1 class="sub1-bars">Features Based on Study Data Plus Curated Reference Data</h1>
+        <h1 class="sub2-bars">Based on Study Data Plus Curated Reference Data</h1>
 
         <div id="diseasemodels">
-        <h2 class="sub2-bars">Disease Portal</h2>
-        <h4 class="sub4-bars">Text needs to be added</h4>
-        <ul class="list-group">
-          <li class="list-group-item active">
-            <b>Disease Portal</b> connects clinical trials data to MPS study data.
-          </li>
-          <li class="list-group-item">
-            Links are made based on the disease.
-          </li>
-          <li class="list-group-item">
-            Users can view summary information, then drill down to see additional disease related details.
-          </li>
-        </ul>
+            <button class="collapsible">Disease Portal</button>
+            <div class="content">
+                <div id="diseaseviewer" class="viewersubtainer">
+                    <ul class="list-group">
+                        <li class="list-group-item">
+                            <ul class="list-unstyled">
+                                <li>The Disease Portal provides access to clinical trials data and curated study data connected via a specific disease.
+                                <ul class="filled-circle">
+                                    <li>Access the Disease Portal from the Models menu </li>
+                                    <li>Scroll through the list of disease or use the search bar to find a disease of interest </li>
+                                    <li>Click on the View button next to disease of interest to see options</li>
+                                        <ul class="open-circle"><li>Disease Overview - disease basics </li></ul>
+                                        <ul class="open-circle"><li>Disease Biology - active links to relevant biology/genomic information </li></ul>
+                                        <ul class="open-circle"><li>Clinical Data - summarized findings from clinicaltrials.gov </li></ul>
+                                        <ul class="open-circle"><li>Disease Models & Studies - list of disease related models in the MPS Database and list of studies related to the disease  </li></ul>
+                                </ul>
+                                </li>
+                                <li>Notes:
+                                <ul class="filled-circle">
+                                    <li>The study list on the Disease Models & Studies page and the summary counts on the main Disease Portal page are permission specific  </li>
+                                </ul>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </div>
         </div>
 
         <div id="compoundreport">
-        <h2 class="sub2-bars">Compound Report</h2>
-        <h4 class="sub4-bars">Compound Report (text has not been updated)</h4>
-        <ul class="list-group">
-          <li class="list-group-item active">
-            <b>Compound Report</b> lets you compare compound summaries
-          </li>
-          <li class="list-group-item">
-            Make selections by clicking the checkboxes in the furthest left column of the table
-          </li>
-          <li class="list-group-item">
-            When you are finished making selections, click "Generate Compound Report"
-          </li>
-          <li class="list-group-item">
-            You can save, load, and clear your selections by using the buttons at the top
-          </li>
-          <li class="list-group-item">
-            The report shows a summary of compound properties and plots of data for available assays
-          </li>
-          <li class="list-group-item">
-            <b>Please note that only normalized data is considered in the plots</b>
-          </li>
-        </ul>
+            <button class="collapsible">Compound Report</button>
+            <div class="content">
+                <div id="compoundviewer" class="viewersubtainer">
+                    <ul class="list-group">
+                        <li class="list-group-item">
+                            <ul class="list-unstyled">
+                                <li><b>Compound Report</b> links compound properties to study data based on a compound
+                                <ul class="filled-circle">
+                                    <li>Access the Compound Report from the Compounds menu </li>
+                                    <li>As a precaution, click the Clear Current Selections button</li>
+                                    <li>Use the search bar to narrow the compound list </li>
+                                    <li>Check the box of the compounds to include</li>
+                                    <li>If desired, use the search bar to get a different compound list</li>
+                                    <li>If desired, check additional compounds to include</li>
+                                    <li>Click on the button to Generate Compound Report </li>
+                                    <li>If a green plus sign is present, click it to see aggregated assay study data</li>
+                                </ul>
+                                </li>
+                                <li>Notes:
+                                <ul class="filled-circle">
+                                    <li>Compound selections are cumulative</li>
+                                    <li>To start with a fresh search, click the Clear Current Selections button</li>
+                                    <li>To save a complicated search, click Save Selections (when returning at a later time, click Load Selections)</li>
+                                    <li>Only normalized data are shown in the aggregated assay study data plots</li>
+                                </ul>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </div>
         </div>
 
-        <h1 class="sub1-bars">Features Based on Curated Reference Data</h1>
+        <h1 class="sub2-bars">Based on Curated Reference Data</h1>
 
         <div id="chemicaldata">
-        <h2 class="sub2-bars">Chemical Data</h2>
-        <h4 class="sub4-bars">Viewing Chemical Data (text has not been updated)</h4>
-          <ul class="list-group">
-            <li class="list-group-item active">
-              The <b>Chemical Data</b> section displays information about pertinent compounds
-            </li>
-            <li class="list-group-item">
-              After choosing a compound to view, you can traverse the list in <em>alphanumeric order</em> with the "Next" and "Previous" buttons
-            </li>
-            <li class="list-group-item">
-              The labels beneath the image of the compound indicate what project or projects the compound is part of
-            </li>
-            <li class="list-group-item">
-              The "Medchem Alerts" field shows whether functional groups that are uncommon in drugs are present in this compound
-              <br>
-              If there are Medchem Alerts for a compound, you can click on the flag to see a list of the functional groups
-            </li>
-          </ul>
+            <button class="collapsible">Chemical Data</button>
+            <div class="content">
+                <div id="chemicaldataviewer" class="viewersubtainer">
+                    <ul class="list-group">
+                        <li class="list-group-item">
+                            <ul class="list-unstyled">
+                                <li>Compounds are accessed from the Compounds menu
+                                <ul class="filled-circle">
+                                    <li>Use the search bar or scroll through the list to find the Compound of interest</li>
+                                    <li>Click on the <b>View</b> button next to the Compound of interest to see compound details</li>
+                                    <li>Click on the Previous or Next button to scroll through the compounds </li>
+                                </ul>
+                                </li>
+                                <li>Notes:
+                                <ul class="filled-circle">
+                                    <li>If a Compound is missing from the list, contact an MPS Database Administrator </li>
+                                    <li>The "Medchem Alerts" field (in the compound deatils page) shows whether functional groups that are uncommon in drugs are present in this compound </li>
+                                    <ul class="open-circle"><li>If there are Medchem Alerts for a compound, click on the flag to see a list of the functional group </li></ul>
+                                </ul>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+                <button class="showhidebutton" onclick="myToggle16()">Show/Hide Information for Editors</button>
+                <div id="chemicaldataeditor" class="editorsubtainer">
+                <div id="showhide16">
+                    <ul class="list-group">
+                        <li class="list-group-item">
+                            <ul class="list-unstyled">
+                                <li>Currently online MPS Database Adminstrators can add compounds to the MPS Database</li>
+                                <li>Tips for MPS Datbase Administrators:
+                                <ul class="filled-circle">
+                                    <li>Always search ChEMBL before adding a compound (a link is provided on the Add page)  </li>
+                                    <ul class="open-circle"><li>If found, put the <em>entire ChEMBL ID</em> (including "CHEMBL") into the ChEBML ID field and hit the Retrieve" button/li></ul>
 
-
-               <div id="addchemicals" class="editorsubtainer">
-                <h2 class="sub2-bars">need to update text</h2>
-                {#    <h4 class="sub4-bars"></h4>#}
-                <ul class="list-group">
-                  <h4 class="sub4-bars">Adding Chemical Data</h4>
-                  <ul class="list-group">
-                    <li class="list-group-item">
-                      <b class="text-danger">
-                        <span class="glyphicon glyphicon-exclamation-sign"></span>
-                        Before entering data yourself, please check ChEMBL (follow the link) for the compound you are interested in
-                      </b>
-                    </li>
-                    <li class="list-group-item">
-                      If you found one, put the <em>entire ChEMBL ID</em> (including "CHEMBL") into the ChEBML ID field and hit "Retrieve"
-                    </li>
-                  </ul>
-                </ul>
-              </div>
-
-
+                                </ul>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+                </div>
+            </div>
         </div>
 
         <div id="bioactivities">
-        <h2 class="sub2-bars">Bioactivities</h2>
-        <h4 class="sub4-bars">About Bioactivities (text has not been updated)</h4>
-          <ul class="list-group">
-            <li class="list-group-item active">
-              This <b>Bioactivity</b> data comes from ChEMBL and PubChem
-            </li>
-            <li class="list-group-item">
-              Some data from these sources has been marked <em>questionable</em> for various reasons, you can exclude such entries
-            </li>
-          </ul>
-        <h4 class="sub4-bars">Using the Quick Search</h4>
-        <ul class="list-group">
-          <li class="list-group-item">
-            <b>You do not need to fill out every field in this form</b>
-            <br>
-            It is only neccessary to fill out one of the three fields: "Compound", "Target", or "Name"
-          </li>
-          <li class="list-group-item">
-            Search suggestions will appear for the compounds field
-          </li>
-          <li class="list-group-item">
-            This interface can also be accessed on the home page: click the drop down button reading "Global" and switch to "Bioactivities"
-          </li>
-        </ul>
-        <h4 class="sub4-bars">Using the Advanced Search</h4>
-        <ul class="list-group">
-          <li class="list-group-item">
-            Scroll down to see the Advanced Search options
-          </li>
-          <li class="list-group-item">
-            Check the checkboxes of desired rows from each section and hit "Generate Table" when you are done
-          </li>
-          <li class="list-group-item">
-            Clicking the checkbox at the top of a section will select <em>all currently visible</em> checkboxes in that section
-          </li>
-          <li class="list-group-item">
-            To limit the number of choices to those containing specific characters, type in the <em>Filter</em> located above the respective section
-          </li>
-          <li class="list-group-item">
-            The <em>Minimum Feature Count Per Record</em> field specifies the number of bioactivities that need to be linked to a given option for it to appear
-            <br>
-            e.g. if the min feature count is 10, then the compound "ALDRIN" won't be an option because only 5 bioactivities link to "ALDRIN"
-          </li>
-          <li class="list-group-item">
-            Changes to the min feature count are not automatically applied, be sure to hit the "Apply" button if you want to change the min feature count
-          </li>
-          <li class="list-group-item">
-            The following actions will clear <em>all</em> your selections and cause a refresh:
-            <br>
-            Changing between ChEMBL and PubChem, Changing whether questionable are excluded, Changing the min feature count
-          </li>
-          <li class="list-group-item">
-            Changing the <em>Target Types</em> or <em>Organisms</em> will clear your <em>Target</em> selections and cause a refresh
-          </li>
-          <li class="list-group-item">
-            The data for compounds is simple enough that you can use <em>Filter Compounds</em> without a refresh
-          </li>
-        </ul>
-        <h4 class="sub4-bars">Viewing the Table</h4>
-        <ul class="list-group">
-          <li class="list-group-item">
-            The resulting tables are similar in design to the other tables in the database
-          </li>
-          <li class="list-group-item">
-            The "Data Validity" column shows whether or not and why an entry has been marked questionable
-          </li>
-          <li class="list-group-item">
-            Please note that not every ChEMBL entry has a corresponding PubChem entry and vice versa
-          </li>
-        </ul>
+            <button class="collapsible">Bioactivities</button>
+            <div class="content">
+                <div id="bioactivitiesviewer" class="viewersubtainer">
+                    <ul class="list-group">
+                        <li class="list-group-item">
+                            <ul class="list-unstyled">
+                                <li>Access Bioactivites from the Compound Menu</li>
+                                <li><br>Quick Search
+                                <ul class="filled-circle">
+                                    <li>Enter at least one search string in one of the fields (Compound, Target, and/or Name)  </li>
+                                        <ul class="open-circle"><li>notice that options appear, these can be selected from the dropdown </li></ul>
+                                    <li>Optional - Click on the buttons to Exclude and/or change data as indicated on the button  </li>
+                                    <li>Click on the <span class="glyphicon glyphicon-search" aria-hidden="true"></span> </li>
+                                </ul>
+                                <li>Advanced Search
+                                <ul class="filled-circle">
+                                    <li>Optional - Click on the buttons to Exclude and/or change data as indicated on the button  </li>
+                                        <ul class="open-circle"><li>notice that options appear, these can be selected from the dropdown </li></ul>
+                                    <li>Optional - The <em>Minimum Feature Count Per Record</em> field specifies the number of bioactivities that need to be linked to a given option for it to appear  </li>
+                                        <ul class="open-circle"><li>e.g. if the min feature count is 10, then the compound "ALDRIN" won't be an option because only 5 bioactivities link to "ALDRIN" </li></ul>
+                                        <ul class="open-circle"><li>Click the "Apply" button to confirm the change to the min feature count </li></ul>
+                                    <li>Make sure that the boxes are checkmarked to indicate selections in all tables </li>
+                                    <li>Click the button to Generate a Table </li>
+                                </ul>
+                                </li>
+                                <li>Advanced Search Notes:
+                                <ul class="filled-circle">
+                                    <li>Some data from the reference sources have been marked <em>questionable</em> for various reasons, exclude them if desired  </li>
+                                    <li>Clicking the checkbox at the top of a table will select <em>all currently visible</em> checkboxes in that section</li>
+                                    <li>Use the Filter boxes to limit choices of Bioactivities, Targets, and/or Compounds </li>
+                                    <li>The following will clear <em>all</em> selections </li>
+                                        <ul class="open-circle"><li>Changing between ChEMBL and PubChem, Changing whether questionable are excluded, Changing the min feature count, Changing the <em>Target Types</em> or <em>Organisms</em>  </li></ul>
+                                </ul>
+                                </li>
+                                <li>Reviewing the Results Table:
+                                <ul class="filled-circle">
+                                    <li>The resulting tables are similar in design to the other tables in the databased  </li>
+                                    <li>The "Data Validity" column shows whether or not and why an entry has been marked questionable</li>
+                                    <li>Please note that not every ChEMBL entry has a corresponding PubChem entry and vice versa </li>
+                                </ul>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </div>
         </div>
 
         <div id="drugtrials">
-        <h2 class="sub2-bars">Drug Trials </h2>
-            <h4 class="sub4-bars">Drug Trials (text has not been updated)</h4>
-        <ul class="list-group">
-          <li class="list-group-item active">
-            <b>Drug Trials</b> contain manually curated preclinical, clinical, and post-marketing data for compounds
-          </li>
-          <li class="list-group-item">
-            After choosing a trial to view, you can traverse the list in <em>alphanumeric order</em> with the "Next" and "Previous" buttons
-          </li>
-        </ul>
+            <button class="collapsible">Drug Trials</button>
+            <div class="content">
+                <div id="drugtrialsviewer" class="viewersubtainer">
+                    <ul class="list-group">
+                        <li class="list-group-item">
+                            <ul class="list-unstyled">
+                                <li><b>Drug Trials</b> contain manually curated preclinical, clinical, and post-marketing data for compounds
+                                <ul class="filled-circle">
+                                    <li>After choosing a trial to view, you can traverse the list in <em>alphanumeric order</em> with the "Next" and "Previous" buttons </li>
+                                </ul>
+                                </li>
+                                <li>Notes:
+                                <ul class="filled-circle">
+                                    <li></li>
+                                </ul>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </div>
         </div>
 
         <div id="adverseevents">
-        <h2 class="sub2-bars">Adverse Events</h2>
-        <h4 class="sub4-bars">Viewing Adverse Events (text has not been updated)</h4>
-        <ul class="list-group">
-          <li class="list-group-item active">
-            <b>Adverse Events</b> contain automatically acquired data from OpenFDA
-          </li>
-          <li class="list-group-item">
-            The "Number of Reports" column indicates the number of reports that list both the compound and adverse event in the row
-            <br>
-            Please note that a compound can be listed in a report but not suspected of causing the adverse event
-            <br>
-            Likewise, "Number of Reports" in this interface does not contain any information concerning the dose of the drug
-          </li>
-          <li class="list-group-item">
-            Only top adverse events for compounds are shown in this interface
-          </li>
-          <li class="list-group-item">
-            After choosing a compound to view, you can traverse the list in <em>alphanumeric order</em> with the "Next" and "Previous" buttons
-          </li>
-          <li class="list-group-item">
-            While viewing a compound's adverse events, you can create time plots by selecting the "Toggle Plot" button in each row of the table
-          </li>
-          <li class="list-group-item">
-            It is also possible to generate tables of adverse event frequencies given a specific time frame by using the interface at the bottom of the page
-          </li>
-          <li class="list-group-item">
-            Additional information from OpenFDA such as warnings are sometimes found for a compound, click the "Show" button to view such data
-          </li>
-          <li class="list-group-item">
-            <b class="text-danger">
-              <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
-              OpenFDA is in beta: This data is not intended for clinical use
-            </b>
-          </li>
-        </ul>
+            <button class="collapsible">Adverse Events</button>
+            <div class="content">
+                <div id="adverseeventsviewer" class="viewersubtainer">
+                    <ul class="list-group">
+                        <li class="list-group-item">
+                            <ul class="list-unstyled">
+                                <li><br>Adverse Events are accessed through the Compounds menu </li>
+                                <ul class="filled-circle">
+                                    <li>Scroll through the list or use the Search bar to find a compound and event of interest </li>
+                                        <ul class="open-circle"><li>use a space in the search bar to such multiple terms </li></ul>
+                                        <ul class="open-circle"><li>e.g, "EPINEPHRINE nausea" </li></ul>
+                                    <li>Click on the View button to see details of the compound and event of interest </li>
+                                    <li>Click on the Show buttons for more information regarding Warnings and Nonclinical Toxicology </li>
+                                    <li>Click on the Toggle Plot button next to an event of interest to generate time plots of reported events (scroll down to see the plot) </li>
+                                        <ul class="open-circle"><li>if desired, use the data boxes under the plot to control time frame of plot</li></ul>
+                                    <li>Scroll through the compounds using the Next and Previous buttons </li>
+                                </ul>
+                                </li>
+                                <li>Notes:
+                                <ul class="filled-circle">
+                                    <li>Only top adverse events for compounds are shown in the results of the search</li>
+                                    <li>The "Number of Reports" column indicates the number of reports that list both the compound and adverse event in the row</li>
+                                    <li>Only top adverse events for compounds are shown in the results of the search</li>
+                                    <li>A compound can be listed in a report but not suspected of causing the adverse event</li>
+                                    <li>The "Number of Reports does not contain any information regarding the dose of the drug</li>
+                                    <li>OpenFDA is in beta: data are not intended for clinical use</li>
+                                </ul>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </div>
         </div>
 
         <div id="compareadverseevents">
-        <h4 class="sub4-bars">Compare Adverse Events (text has not been updated)</h4>
-        <ul class="list-group">
-          <li class="list-group-item">
-            Make selections by clicking the checkboxes in the furthest left column of the tables
-          </li>
-          <li class="list-group-item">
-            Bar graphs will not appear until you have selected at least one adverse event and at least one compound
-          </li>
-          <li class="list-group-item">
-            You can save, load, and clear your selections by using the buttons at the top
-          </li>
-          <li class="list-group-item">
-            "Reports Among Top" is the number of reports of the most common adverse events for each compound
-            <br>
-            <b class="text-danger">
-              <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
-              Entries with 0 for "Reports Among Top" may still have data from OpenFDA, these entries have a zero value because they are not top adverse events
-            </b>
-          </li>
-          <li class="list-group-item">
-            "Estimated Usage" are values derived from "Drug Mentions" listed in the CDC NAMCS and NHAMCS surveys of clinics, out-patient, and ER facilities
-          </li>
-          <li class="list-group-item">
-            "Estimated Usage" is used to normalize the number of adverse events reports
-            <br>
-            To show the raw counts of adverse event reports, click the "Show Raw Counts" button
-          </li>
-        </ul>
+            <button class="collapsible">Compare Adverse Events</button>
+            <div class="content">
+                <div id="compareadverseeventsviewer" class="viewersubtainer">
+                    <ul class="list-group">
+                        <li class="list-group-item">
+                            <ul class="list-unstyled">
+                                <li><br>Compare Adverse Events are accessed through the Compounds menu
+                                <ul class="filled-circle">
+                                    <li>As a precaution, click the Clear Current Selections button</li>
+                                    <li>Use the search bars to narrow the events and compounds lists </li>
+                                    <li>Check the boxes of the events and compounds to include</li>
+                                        <ul class="open-circle"><li>at least one event and one compound must be selected before a graph will appear </li></ul>
+                                    <li>If desired, use the search bar to get different lists </li>
+                                    <li>If desired, check additional compounds to include</li>
+                                    <li>Scroll down to see the graph comparing events</li>
+                                    <li>If desired, click on the Show Raw Counts button to toggle from Number of Reports per 10,000 Mentions </li>
+                                </ul>
+                                </li>
+                                <li>Notes:
+                                <ul class="filled-circle">
+                                    <li>Selections from both lists are cumulative</li>
+                                    <li>To start with a fresh search, click the Clear Current Selections button</li>
+                                    <li>To save a complicated search, click Save Selections (when returning at a later time, click Load Selections) </li>
+                                    <li>To save a complicated search, click Save Selections (when returning at a later time, click Load Selections) </li>
+                                    <li>Hover over the circle ? to learn more about data presented </li>
+                                </ul>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </div>
         </div>
 
         <div id="heatmap">
-        <h2 class="sub2-bars">Bioactivities Heatmap</h2>
-        <h4 class="sub4-bars">About Bioactivities (text has not been updated)</h4>
-        <ul class="list-group">
-          <li class="list-group-item active">
-            This <b>Bioactivity</b> data comes from ChEMBL and PubChem
-          </li>
-          <li class="list-group-item">
-            Some data from these sources has been marked <em>questionable</em> for various reasons, you can exclude such entries
-          </li>
-        </ul>
-        <h4 class="sub4-bars">Making Selections</h4>
-        <ul class="list-group">
-          <li class="list-group-item">
-            Check the checkboxes of desired rows from each section and hit "Generate Heatmap" when you are done
-          </li>
-          <li class="list-group-item">
-            Clicking the checkbox at the top of a section will select <em>all currently visible</em> checkboxes in that section
-          </li>
-          <li class="list-group-item">
-            To limit the number of choices to those containing specific characters, type in the <em>Filter</em> located above the respective section
-          </li>
-          <li class="list-group-item">
-            The <em>Minimum Feature Count Per Record</em> field specifies the number of bioactivities that need to be linked to a given option for it to appear
-            <br>
-            e.g. if the min feature count is 10, then the compound "ALDRIN" won't be an option because only 5 bioactivities link to "ALDRIN"
-          </li>
-          <li class="list-group-item">
-            Changes to the min feature count are not automatically applied, be sure to hit the "Apply" button if you want to change the min feature count
-          </li>
-          <li class="list-group-item">
-            The following actions will clear <em>all</em> your selections and cause a refresh:
-            <br>
-            Changing between ChEMBL and PubChem, Changing whether questionable are excluded, Changing the min feature count
-          </li>
-          <li class="list-group-item">
-            Changing the <em>Target Types</em> or <em>Organisms</em> will clear your <em>Target</em> selections and cause a refresh
-          </li>
-          <li class="list-group-item">
-            The data for compounds is simple enough that you can use <em>Filter Compounds</em> without a refresh
-          </li>
-        </ul>
-        <h4 class="sub4-bars">Viewing the Heatmap</h4>
-        <ul class="list-group">
-          <li class="list-group-item">
-            You can download a .csv file containing the information in the heatmap
-          </li>
-          <li class="list-group-item">
-            The legend at the bottom of the page shows the meaning of the colors used
-          </li>
-          <li class="list-group-item">
-            Click on a row or column label to sort the heatmap such that entries in the selection are ordered from highest to lowest
-          </li>
-          <li class="list-group-item">
-            Clicking on a specific square in the heatmap will show that particular value in a pop-up
-          </li>
-        </ul>
+            <button class="collapsible">Heatmap of Bioactivities</button>
+            <div class="content">
+                <div id="heatmapviewer" class="viewersubtainer">
+                    <ul class="list-group">
+                        <li class="list-group-item">
+                            <ul class="list-unstyled">
+                                <li>Access the Heatmap of Bioactivites from the Analysis Menu</li>
+                                <ul class="filled-circle">
+                                    <li>Optional - Click on the buttons to Exclude and/or change data as indicated on the button  </li>
+                                    <li>Optional - The <em>Minimum Feature Count Per Record</em> field specifies the number of bioactivities that need to be linked to a given option for it to appear  </li>
+                                        <ul class="open-circle"><li>e.g. if the min feature count is 10, then the compound "ALDRIN" won't be an option because only 5 bioactivities link to "ALDRIN" </li></ul>
+                                        <ul class="open-circle"><li>Click the "Apply" button to confirm the change to the min feature count </li></ul>
+                                    <li>Make sure that the boxes are checkmarked to indicate selections in all tables </li>
+                                    <li>Click the button to Generate a Heatmap </li>
+                                    <li>If desired, click on a row or column label to sort the heatmap such that entries in the selection are ordered from highest to lowest</li>
+                                    <li>If desired, click the button to Download the Heatmap (downloads data used in heatmap to csv)</li>
+                                </ul>
+                                </li>
+                                <li>Notes:
+                                <ul class="filled-circle">
+                                    <li>Some data from the reference sources have been marked <em>questionable</em> for various reasons, exclude them if desired  </li>
+                                    <li>Clicking the checkbox at the top of a table will select <em>all currently visible</em> checkboxes in that section</li>
+                                    <li>Use the Filter boxes to limit choices of Bioactivities, Targets, and/or Compounds </li>
+                                    <li>The following will clear <em>all</em> selections </li>
+                                        <ul class="open-circle"><li>Changing between ChEMBL and PubChem, Changing whether questionable are excluded, Changing the min feature count, Changing the <em>Target Types</em> or <em>Organisms</em>  </li></ul>
+                                </ul>
+                                </li>
+                                <li>Reviewing the Results Table:
+                                <ul class="filled-circle">
+                                    <li>Scroll to the bottom of the heatmap to see the legend of colors used  </li>
+                                    <li>Clicking on a specific square in the heatmap will show that particular value in a pop-up </li>
+                                </ul>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </div>
         </div>
 
         <div id="cluster">
-        <h2 class="sub2-bars">Compound Clustering</h2>
-        <h4 class="sub4-bars">About Bioactivities (text has not been updated)</h4>
-        <ul class="list-group">
-          <li class="list-group-item active">
-            This <b>Bioactivity</b> data comes from ChEMBL and PubChem
-          </li>
-          <li class="list-group-item">
-            Some data from these sources has been marked <em>questionable</em> for various reasons, you can exclude such entries
-          </li>
-        </ul>
-        <h4 class="sub4-bars">Making Selections</h4>
-        <ul class="list-group">
-          <li class="list-group-item">
-            Check the checkboxes of desired rows from each section and hit "Generate Dendrogram" when you are done
-          </li>
-          <li class="list-group-item">
-            Clicking the checkbox at the top of a section will select <em>all currently visible</em> checkboxes in that section
-          </li>
-          <li class="list-group-item">
-            To limit the number of choices to those containing specific characters, type in the <em>Filter</em> located above the respective section
-          </li>
-          <li class="list-group-item">
-            The <em>Minimum Feature Count Per Record</em> field specifies the number of bioactivities that need to be linked to a given option for it to appear
-            <br>
-            e.g. if the min feature count is 10, then the compound "ALDRIN" won't be an option because only 5 bioactivities link to "ALDRIN"
-          </li>
-          <li class="list-group-item">
-            Changes to the min feature count are not automatically applied, be sure to hit the "Apply" button if you want to change the min feature count
-          </li>
-          <li class="list-group-item">
-            The following actions will clear <em>all</em> your selections and cause a refresh:
-            <br>
-            Changing between ChEMBL and PubChem, Changing whether questionable are excluded, Changing the min feature count
-          </li>
-          <li class="list-group-item">
-            Changing the <em>Target Types</em> or <em>Organisms</em> will clear your <em>Target</em> selections and cause a refresh
-          </li>
-          <li class="list-group-item">
-            The data for compounds is simple enough that you can use <em>Filter Compounds</em> without a refresh
-          </li>
-          <li class="list-group-item">
-            This interface is made to be similar to the selection forms used in the Heatmap and Cluster pages
-          </li>
-        </ul>
-        <h4 class="sub4-bars">Viewing the Cluster</h4>
-        <ul class="list-group">
-          <li class="list-group-item">
-            The table on the left shows the bioactivities and drug trial data taken into account
-          </li>
-          <li class="list-group-item">
-            Clicking on a node will show the corresponding compound or compounds in the box on the right
-            <br>
-            You can dismiss a compound's information by hitting the corresponding red "X" button
-          </li>
-        </ul>
+            <button class="collapsible">Compound Clustering</button>
+            <div class="content">
+                <div id="heatmapviewer" class="viewersubtainer">
+                    <ul class="list-group">
+                        <li class="list-group-item">
+                            <ul class="list-unstyled">
+                                <li>Access the Heatmap of Bioactivites from the Analysis Menu</li>
+                                <ul class="filled-circle">
+                                    <li>Optional - Click on the buttons to Exclude and/or change data as indicated on the button  </li>
+                                    <li>Optional - The <em>Minimum Feature Count Per Record</em> field specifies the number of bioactivities that need to be linked to a given option for it to appear  </li>
+                                        <ul class="open-circle"><li>e.g. if the min feature count is 10, then the compound "ALDRIN" won't be an option because only 5 bioactivities link to "ALDRIN" </li></ul>
+                                        <ul class="open-circle"><li>Click the "Apply" button to confirm the change to the min feature count </li></ul>
+                                    <li>Make sure that the boxes are checkmarked to indicate selections in all tables </li>
+                                    <li>Click the button to Generate Dendrogram  </li>
+                                    <li>If desired, click on a row or column label to sort the heatmap such that entries in the selection are ordered from highest to lowest</li>
+                                    <li>If desired, click the button to Download the Heatmap (downloads data used in heatmap to csv)</li>
+                                </ul>
+                                </li>
+                                <li>Notes:
+                                <ul class="filled-circle">
+                                    <li>Some data from the reference sources have been marked <em>questionable</em> for various reasons, exclude them if desired  </li>
+                                    <li>Clicking the checkbox at the top of a table will select <em>all currently visible</em> checkboxes in that section</li>
+                                    <li>Use the Filter boxes to limit choices of Bioactivities, Targets, and/or Compounds </li>
+                                    <li>The following will clear <em>all</em> selections </li>
+                                        <ul class="open-circle"><li>Changing between ChEMBL and PubChem, Changing whether questionable are excluded, Changing the min feature count, Changing the <em>Target Types</em> or <em>Organisms</em>  </li></ul>
+                                </ul>
+                                </li>
+                                <li>Reviewing the Results Table:
+                                <ul class="filled-circle">
+                                    <li>The table on the left shows the bioactivities and drug trial data taken used in clustering</li>
+                                    <li>A compound's information can be dismissed by hitting the corresponding red "X" button</li>
+                                </ul>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </div>
         </div>
 
     </div>
 
     <div id="glossary" class="container padded-bottom">
 
-      <h1 class="sub1-bars">Glossary</h1>
+        <h1 class="sub1-bars"><b>Glossary</b></h1>
         <table hidden id="glossary_table" class="display" cellspacing="0" width="100%">
         <thead>
           <tr>
@@ -1990,7 +1903,7 @@
 
     for (i = 0; i < coll.length; i++) {
       coll[i].addEventListener("click", function() {
-        this.classList.toggle("active");
+        this.classList.toggle("active2");
         var content = this.nextElementSibling;
         if (content.style.maxHeight){
           content.style.maxHeight = null;
@@ -2066,6 +1979,62 @@
     }
     function myToggle9() {
     var x = document.getElementById("showhide9");
+    if (x.style.display === "none") {
+        x.style.display = "block";
+    } else {
+        x.style.display = "none";
+    }
+    }
+    function myToggle10() {
+    var x = document.getElementById("showhide10");
+    if (x.style.display === "none") {
+        x.style.display = "block";
+    } else {
+        x.style.display = "none";
+    }
+    }
+    function myToggle11() {
+    var x = document.getElementById("showhide11");
+    if (x.style.display === "none") {
+        x.style.display = "block";
+    } else {
+        x.style.display = "none";
+    }
+    }
+    function myToggle12() {
+    var x = document.getElementById("showhide12");
+    if (x.style.display === "none") {
+        x.style.display = "block";
+    } else {
+        x.style.display = "none";
+    }
+    }
+    function myToggle13() {
+    var x = document.getElementById("showhide13");
+    if (x.style.display === "none") {
+        x.style.display = "block";
+    } else {
+        x.style.display = "none";
+    }
+    }
+    function myToggle14() {
+    var x = document.getElementById("showhide14");
+    if (x.style.display === "none") {
+        x.style.display = "block";
+    } else {
+        x.style.display = "none";
+    }
+    }
+    function myToggle15() {
+    var x = document.getElementById("showhide15");
+    if (x.style.display === "none") {
+        x.style.display = "block";
+    } else {
+        x.style.display = "none";
+    }
+    }
+    function myToggle16() {
+    var x = document.getElementById("showhide16");
     if (x.style.display === "none") {
         x.style.display = "block";
     } else {
