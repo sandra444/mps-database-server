@@ -1014,9 +1014,21 @@ def get_data_points_for_charting(
 
             target_method_pairs.update({assay.target_id: assay.method_id})
 
+    # TODO NOTE THAT THIS MAKES ASSUMPTION ABOUT THE STATE OF THE POST FILTER
+    # That is to say, you may want to be positive that the "combined" fields are split out
+    matrix_item_compound_post_filters = {}
+
     post_filter_compounds = post_filter.get(
         'matrix_item', {}
     ).get('assaysetupcompound__compound_instance__compound_id__in', {})
+
+    if post_filter:
+        # WARNING THIS MAKES A NUMBER OF ASSUMPTIONS
+        matrix_item_compound_post_filters = {
+            '__'.join(current_filter.replace('assaysetupcompound__', '').split('__')[:-1]): [
+                x for x in post_filter.get('matrix_item', {}).get(current_filter, [])
+            ] for current_filter in post_filter.get('matrix_item', {}) if current_filter.startswith('assaysetupcompound__')
+        }
 
     for raw in raw_data:
         # Now uses full name
@@ -1069,7 +1081,17 @@ def get_data_points_for_charting(
                 is_control = True
 
                 for compound in raw.matrix_item.assaysetupcompound_set.all():
-                    if ((post_filter is None or unicode(compound.compound_instance.compound_id) in post_filter_compounds) and
+                    # Makes sure the compound doesn't violate filters
+                    # This is because a compound can be excluded even if its parent matrix item isn't!
+                    valid_compound = True
+
+                    for filter, values in matrix_item_compound_post_filters.items():
+                        if unicode(attr_getter(compound, filter.split('__'))) not in values:
+                            valid_compound = False
+                            break
+
+                    # TERRIBLE CONDITIONAL
+                    if (valid_compound and
                         compound.addition_time <= raw_time and
                         compound.addition_time + compound.duration >= raw_time
                     ):
@@ -1832,11 +1854,16 @@ def acquire_post_filter(studies, assays, matrix_items, data_points):
             })
 
             # SPECIAL EXCEPTION, CONCENTRATION AND UNITS ARE COMBINED
-            # current.setdefault(
-            #     'assaysetupcompound__concentration__in', {}
-            # ).update({
-            #     compound.concentration: compound.concentration
-            # })
+            current.setdefault(
+                'assaysetupcompound__concentration__in', {}
+            ).update({
+                compound.concentration: compound.concentration
+            })
+            current.setdefault(
+                'assaysetupcompound__concentration_unit_id__in', {}
+            ).update({
+                compound.concentration_unit_id: compound.concentration_unit_id
+            })
 
             current.setdefault(
                 'assaysetupcompound__concentration__concentration_unit_id__in', {}
@@ -1902,11 +1929,16 @@ def acquire_post_filter(studies, assays, matrix_items, data_points):
             })
 
             # SPECIAL EXCEPTION, DENSITY AND UNITS ARE COMBINED
-            # current.setdefault(
-            #     'assaysetupcell__density__in', {}
-            # ).update({
-            #     cell.density: cell.density
-            # })
+            current.setdefault(
+                'assaysetupcell__density__in', {}
+            ).update({
+                cell.density: cell.density
+            })
+            current.setdefault(
+                'assaysetupcell__density_unit_id__in', {}
+            ).update({
+                cell.density_unit_id: cell.density_unit_id
+            })
 
             # THIS NEEDS TO BE REMOVED BEFORE ACTUAL FILTERS ARE APPLIED
             current.setdefault(
@@ -1937,11 +1969,16 @@ def acquire_post_filter(studies, assays, matrix_items, data_points):
             })
 
             # SPECIAL EXCEPTION, VALUE AND UNITS ARE COMBINED
-            # current.setdefault(
-            #     'assaysetupsetting__value__in', {}
-            # ).update({
-            #     setting.value: setting.value
-            # })
+            current.setdefault(
+                'assaysetupsetting__value__in', {}
+            ).update({
+                setting.value: setting.value
+            })
+            current.setdefault(
+                'assaysetupsetting__unit_id__in', {}
+            ).update({
+                setting.unit_id: setting.unit_id
+            })
 
             current.setdefault(
                 'assaysetupsetting__value__unit_id__in', {}
