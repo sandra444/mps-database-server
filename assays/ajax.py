@@ -675,7 +675,7 @@ def get_control_data(
             # Check if the setup is marked a control chip
             if raw.matrix_item.test_type == 'control':
                 initial_control_data.setdefault(
-                    (target, method), {}
+                    target, {}
                 ).setdefault(
                     unit, {}
                 ).setdefault(
@@ -687,22 +687,6 @@ def get_control_data(
                 ).append(
                     raw
                 )
-
-    targets = [target_method[0] for target_method in initial_control_data.keys()]
-
-    for target_method, units in initial_control_data.items():
-        target = target_method[0]
-        method = target_method[1]
-
-        # JUST IGNORE METHOD FOR NOW
-        # if targets.count(target) > 1:
-        #     target = u'{} [{}]'.format(target, method)
-
-        initial_control_data.update({
-            target: units
-        })
-
-        del initial_control_data[target_method]
 
     for target, units in initial_control_data.items():
         for unit, tags in units.items():
@@ -1108,8 +1092,8 @@ def get_data_points_for_charting(
 
                     is_control = False
 
-                # CONTRIVED: Set time to concentration
-                time = concentration
+                # CONTRIVED: Set time to concentration AND time
+                time = (concentration, time)
                 if tag:
                     tag = ' & '.join(tag)
                 elif is_control and (post_filter is None or u'0' in post_filter_compounds):
@@ -1242,28 +1226,60 @@ def get_data_points_for_charting(
                         if interval != 0:
                             accommodate_intervals = True
 
-                        if not percent_control:
-                            current_data.setdefault(current_key, {}).update({time: value})
-                            current_data.setdefault(current_key+' ~@i1', {}).update({time: value - interval})
-                            current_data.setdefault(current_key+' ~@i2', {}).update({time: value + interval})
-                            y_header.update({time: True})
-                            include_current = True
+                        # UGLY NOT DRY
+                        # Contrived combination of time and concentration only for dose-response
+                        if key == 'dose':
+                            concentration = time[0]
+                            time = time[1]
 
-                        elif controls.get((study_id, target, unit, sample_location, time), False):
-                            control_value = controls.get((study_id, target, unit, sample_location, time))
+                            if not percent_control:
+                                current_data.setdefault(current_key, {}).update({concentration: value})
+                                current_data.setdefault(current_key + ' ~@i1', {}).update({concentration: value - interval})
+                                current_data.setdefault(current_key + ' ~@i2', {}).update({concentration: value + interval})
+                                y_header.update({concentration: True})
+                                include_current = True
 
-                            # We can not divide by zero
-                            if control_value == 0:
-                                return {'errors': 'Could not calculate percent control because some control values are zero (divide by zero error).'}
+                            elif controls.get((study_id, target, unit, sample_location, time), False):
+                                control_value = controls.get((study_id, target, unit, sample_location, time))
 
-                            adjusted_value = (value / control_value) * 100
-                            adjusted_interval = (interval / control_value) * 100
+                                # We can not divide by zero
+                                if control_value == 0:
+                                    return {
+                                        'errors': 'Could not calculate percent control because some control values are zero (divide by zero error).'}
 
-                            current_data.setdefault(current_key, {}).update({time: adjusted_value})
-                            current_data.setdefault(current_key+' ~@i1', {}).update({time: adjusted_value - adjusted_interval})
-                            current_data.setdefault(current_key+' ~@i2', {}).update({time: adjusted_value + adjusted_interval})
-                            y_header.update({time: True})
-                            include_current = True
+                                adjusted_value = (value / control_value) * 100
+                                adjusted_interval = (interval / control_value) * 100
+
+                                current_data.setdefault(current_key, {}).update({concentration: adjusted_value})
+                                current_data.setdefault(current_key + ' ~@i1', {}).update(
+                                    {concentration: adjusted_value - adjusted_interval})
+                                current_data.setdefault(current_key + ' ~@i2', {}).update(
+                                    {concentration: adjusted_value + adjusted_interval})
+                                y_header.update({concentration: True})
+                                include_current = True
+                        else:
+                            if not percent_control:
+                                current_data.setdefault(current_key, {}).update({time: value})
+                                current_data.setdefault(current_key+' ~@i1', {}).update({time: value - interval})
+                                current_data.setdefault(current_key+' ~@i2', {}).update({time: value + interval})
+                                y_header.update({time: True})
+                                include_current = True
+
+                            elif controls.get((study_id, target, unit, sample_location, time), False):
+                                control_value = controls.get((study_id, target, unit, sample_location, time))
+
+                                # We can not divide by zero
+                                if control_value == 0:
+                                    return {'errors': 'Could not calculate percent control because some control values are zero (divide by zero error).'}
+
+                                adjusted_value = (value / control_value) * 100
+                                adjusted_interval = (interval / control_value) * 100
+
+                                current_data.setdefault(current_key, {}).update({time: adjusted_value})
+                                current_data.setdefault(current_key+' ~@i1', {}).update({time: adjusted_value - adjusted_interval})
+                                current_data.setdefault(current_key+' ~@i2', {}).update({time: adjusted_value + adjusted_interval})
+                                y_header.update({time: True})
+                                include_current = True
 
                     key_present = current_key in x_header
 
