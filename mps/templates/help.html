@@ -10,14 +10,12 @@
     <style>
         .filled-circle {list-style-type: disc;}
         .open-circle {list-style-type: circle; padding-left: 20px;}
-        table, th{background-color: SteelBlue;
-            font-size: 105%;
-        }
+
         .sub1-bars {font-style: italic; font-size: 180%}
         .sub2-bars {font-style: italic; font-size: 160%}
         .sub4-bars {background-color: DarkBlue; font-weight: bold; color: white; font-size:95%; padding: 10px}}
 
-        .showhidebutton{font-size:105%; border-radius:5%; padding:2px; }
+        .showhidebutton{font-size:105%; border-radius:5%; padding:2px; display:block;}
 
         .collapsible {
             background-color: SteelBlue;
@@ -32,11 +30,13 @@
             margin-bottom: 1%;
             margin-top: 1%;
         }
-        .active2, .collapsible:hover {background-color: SteelBlue; color: White; font-weight: bold; font-size: 140%}
-        .content {
-            padding: 0 18px;
-            max-height: 0;
-            overflow: hidden;
+
+        .collapsible:hover {
+            font-weight: bold; font-size: 120%
+        }
+
+        .content, .editorsubtainer {
+            display: none;
             transition: max-height 0.1s ease-out;
         }
 
@@ -245,7 +245,7 @@
 
     </div>
 
-    <div id=overview_section" class="container">
+    <div id="overview_section" class="container">
 
         <h1 class="sub1-bars"><b>Overview</b> of the MPS Database</h1>
 
@@ -612,9 +612,8 @@
                         </li>
                     </ul>
                 </div>
-                <button class="showhidebutton" onclick="myToggle('showhide1')">Show/Hide Information for Editors</button>
+                <button class="showhidebutton">Show/Hide Information for Editors</button>
                 <div id="mpsmodelseditor" class="editorsubtainer">
-                <div id="showhide1">
                     <ul class="list-group">
                         <li class="list-group-item">
                             <ul class="list-unstyled">
@@ -629,7 +628,6 @@
                             </ul>
                         </li>
                     </ul>
-                </div>
                 </div>
             </div>
         </div>
@@ -651,9 +649,8 @@
                         </li>
                     </ul>
                 </div>
-                <button class="showhidebutton" onclick="myToggle('showhide2')">Show/Hide Information for Editors</button>
+                <button class="showhidebutton">Show/Hide Information for Editors</button>
                 <div id="deviceseditor" class="editorsubtainer">
-                <div id="showhide2">
                     <ul class="list-group">
                         <li class="list-group-item">
                             <ul class="list-unstyled">
@@ -668,7 +665,6 @@
                             </ul>
                         </li>
                     </ul>
-                </div>
                 </div>
             </div>
         </div>
@@ -689,9 +685,8 @@
                         </li>
                     </ul>
                 </div>
-                <button class="showhidebutton" onclick="myToggle('showhide3')">Show/Hide Information for Editors</button>
+                <button class="showhidebutton">Show/Hide Information for Editors</button>
                 <div id="locationeditor" class="editorsubtainer">
-                <div id="showhide3">
                     <ul class="list-group">
                         <li class="list-group-item">
                             <ul class="list-unstyled">
@@ -703,7 +698,6 @@
                             </ul>
                         </li>
                     </ul>
-                </div>
                 </div>
             </div>
         </div>
@@ -726,9 +720,8 @@
                         </li>
                     </ul>
                 </div>
-                <button class="showhidebutton" onclick="myToggle('showhide4')">Show/Hide Information for Editors</button>
+                <button class="showhidebutton">Show/Hide Information for Editors</button>
                 <div id="diseaselisteditor" class="editorsubtainer">
-                <div id="showhide4">
                     <ul class="list-group">
                         <li class="list-group-item">
                             <ul class="list-unstyled">
@@ -740,7 +733,6 @@
                             </ul>
                         </li>
                     </ul>
-                </div>
                 </div>
             </div>
         </div>
@@ -769,9 +761,8 @@
                         </li>
                     </ul>
                 </div>
-                <button class="showhidebutton" onclick="myToggle('showhide5')">Show/Hide Information for Editors</button>
+                <button class="showhidebutton">Show/Hide Information for Editors</button>
                 <div id="cellsampleseditor" class="editorsubtainer">
-                <div id="showhide5">
                     <ul class="list-group">
                         <li class="list-group-item">
                             <ul class="list-unstyled">
@@ -796,7 +787,6 @@
                         </li>
                     </ul>
                 </div>
-                </div>
             </div>
         </div>
 
@@ -816,9 +806,8 @@
                         </li>
                     </ul>
                 </div>
-                <button class="showhidebutton" onclick="myToggle('showhide6')">Show/Hide Information for Editors</button>
+                <button class="showhidebutton">Show/Hide Information for Editors</button>
                 <div id="settingseditor" class="editorsubtainer">
-                <div id="showhide6">
                     <ul class="list-group">
                         <li class="list-group-item">
                             <ul class="list-unstyled">
@@ -830,7 +819,6 @@
                             </ul>
                         </li>
                     </ul>
-                </div>
                 </div>
             </div>
         </div>
@@ -859,9 +847,8 @@
                         </li>
                     </ul>
                 </div>
-                <button class="showhidebutton" onclick="myToggle('showhide7')">Show/Hide Information for Editors</button>
+                <button class="showhidebutton">Show/Hide Information for Editors</button>
                 <div id="targetsseditor" class="editorsubtainer">
-                <div id="showhide7">
                     <ul class="list-group">
                         <li class="list-group-item">
                             <ul class="list-unstyled">
@@ -886,7 +873,6 @@
                             </ul>
                         </li>
                     </ul>
-                </div>
                 </div>
             </div>
         </div>
@@ -913,9 +899,8 @@
                         </li>
                     </ul>
                 </div>
-                <button class="showhidebutton" onclick="myToggle('showhide8')">Show/Hide Information for Editors</button>
+                <button class="showhidebutton">Show/Hide Information for Editors</button>
                 <div id="methodsseditor" class="editorsubtainer">
-                <div id="showhide8">
                     <ul class="list-group">
                         <li class="list-group-item">
                             <ul class="list-unstyled">
@@ -941,7 +926,6 @@
                         </li>
                     </ul>
                 </div>
-                </div>
             </div>
         </div>
 
@@ -962,9 +946,8 @@
                         </li>
                     </ul>
                 </div>
-                <button class="showhidebutton" onclick="myToggle('showhide9')">Show/Hide Information for Editors</button>
+                <button class="showhidebutton">Show/Hide Information for Editors</button>
                 <div id="settingseditor" class="editorsubtainer">
-                <div id="showhide9">
                     <ul class="list-group">
                         <li class="list-group-item">
                             <ul class="list-unstyled">
@@ -976,7 +959,6 @@
                             </ul>
                         </li>
                     </ul>
-                </div>
                 </div>
             </div>
         </div>
@@ -1019,9 +1001,8 @@
                         </li>
                     </ul>
                 </div>
-                <button class="showhidebutton" onclick="myToggle('showhide10')">Show/Hide Information for Editors</button>
+                <button class="showhidebutton">Show/Hide Information for Editors</button>
                 <div id="studieseditor" class="editorsubtainer">
-                <div id="showhide10">
                     <ul class="list-group">
                         <li class="list-group-item">
                             <ul class="list-unstyled">
@@ -1078,7 +1059,6 @@
                         </li>
                     </ul>
                 </div>
-                </div>
             </div>
         </div>
 
@@ -1111,9 +1091,8 @@
                         </li>
                     </ul>
                 </div>
-                <button class="showhidebutton" onclick="myToggle('showhide11')">Show/Hide Information for Editors</button>
+                <button class="showhidebutton">Show/Hide Information for Editors</button>
                 <div id="matricieseditor" class="editorsubtainer">
-                <div id="showhide11">
                     <ul class="list-group">
                         <li class="list-group-item">
                             <ul class="list-unstyled">
@@ -1151,7 +1130,6 @@
                         </li>
                     </ul>
                 </div>
-                </div>
             </div>
         </div>
 
@@ -1184,9 +1162,8 @@
                         </li>
                     </ul>
                 </div>
-                <button class="showhidebutton" onclick="myToggle('showhide12')">Show/Hide Information for Editors</button>
+                <button class="showhidebutton">Show/Hide Information for Editors</button>
                 <div id="matrixitemseditor" class="editorsubtainer">
-                <div id="showhide12">
                     <ul class="list-group">
                         <li class="list-group-item">
                             <ul class="list-unstyled">
@@ -1217,7 +1194,6 @@
                             </ul>
                         </li>
                     </ul>
-                </div>
                 </div>
             </div>
         </div>
@@ -1259,10 +1235,8 @@
                         </li>
                     </ul>
                 </div>
-
-                <button class="showhidebutton" onclick="myToggle('showhide14')">Show/Hide Information for Editors</button>
+                <button class="showhidebutton">Show/Hide Information for Editors</button>
                 <div id="assaydataeditor" class="editorsubtainer">
-                <div id="showhide14">
                     <ul class="list-group">
                         <li class="list-group-item">
                             <ul class="list-unstyled">
@@ -1286,11 +1260,9 @@
                         </li>
                     </ul>
                 </div>
-                </div>
-
-                <button class="showhidebutton" onclick="myToggle('showhide15')">Show/Hide Details of Assay Data File Format (MIF-C-a)</button>
+                <br><br>
+                <button class="showhidebutton">Show/Hide Details of Assay Data File Format (MIF-C-a)</button>
                 <div id="uploadingdata" class="editorsubtainer">
-                <div id="showhide15">
                     <ul class="list-group">
                         <li class="list-group-item">
                             <ul class="list-unstyled">
@@ -1369,7 +1341,6 @@
                         </li>
                     </ul>
                 </div>
-                </div>
             </div>
         </div>
 
@@ -1398,9 +1369,8 @@
                         </li>
                     </ul>
                 </div>
-                <button class="showhidebutton" onclick="myToggle('showhide13')">Show/Hide Information for Editors</button>
+                <button class="showhidebutton">Show/Hide Information for Editors</button>
                 <div id="imageseditor" class="editorsubtainer">
-                <div id="showhide13">
                     <ul class="list-group">
                         <li class="list-group-item">
                             <ul class="list-unstyled">
@@ -1419,7 +1389,6 @@
                             </ul>
                         </li>
                     </ul>
-                </div>
                 </div>
             </div>
         </div>
@@ -1617,9 +1586,8 @@
                         </li>
                     </ul>
                 </div>
-                <button class="showhidebutton" onclick="myToggle('showhide16')">Show/Hide Information for Editors</button>
+                <button class="showhidebutton">Show/Hide Information for Editors</button>
                 <div id="chemicaldataeditor" class="editorsubtainer">
-                <div id="showhide16">
                     <ul class="list-group">
                         <li class="list-group-item">
                             <ul class="list-unstyled">
@@ -1627,14 +1595,12 @@
                                 <li>Tips for MPS Datbase Administrators:
                                 <ul class="filled-circle">
                                     <li>Always search ChEMBL before adding a compound (a link is provided on the Add page)  </li>
-                                    <ul class="open-circle"><li>If found, put the <em>entire ChEMBL ID</em> (including "CHEMBL") into the ChEBML ID field and hit the Retrieve" button/li></ul>
-
+                                    <ul class="open-circle"><li>If found, put the <em>entire ChEMBL ID</em> (including "CHEMBL") into the ChEBML ID field and hit the Retrieve button"</li></ul>
                                 </ul>
                                 </li>
                             </ul>
                         </li>
                     </ul>
-                </div>
                 </div>
             </div>
         </div>
@@ -1899,28 +1865,26 @@
 
 <script>
   //From w3schools.com https://www.w3schools.com/howto/tryit.asp?filename=tryhow_js_collapsible_animate
-    var coll = document.getElementsByClassName("collapsible");
+    var coll = $(".collapsible, .showhidebutton");
     var i;
 
     for (i = 0; i < coll.length; i++) {
-      coll[i].addEventListener("click", function() {
-        this.classList.toggle("active2");
-        var content = this.nextElementSibling;
-        if (content.style.maxHeight){
-          content.style.maxHeight = null;
-        } else {
-          content.style.maxHeight = content.scrollHeight + "px";
-        }
-      });
-    }
-
-    function myToggle(collapsibleID) {
-        var x = document.getElementById(collapsibleID);
-        if (x.style.display === "none") {
-            x.style.display = "block";
-        } else {
-            x.style.display = "none";
-        }
+        coll[i].addEventListener("click", function() {
+            console.log(this);
+            var content = this.nextElementSibling;
+            console.log(content);
+            if ($(content).css("display") != "none"){
+                console.log(content.style.maxHeight);
+                console.log("Shrinking...");
+                $(content).css("display","none");
+                console.log(content.style.maxHeight);
+            } else {
+                console.log(content.style.maxHeight);
+                console.log("Expanding...");
+                $(content).css("display","block");
+                console.log(content.style.maxHeight);
+            }
+        });
     }
 </script>
 </body>
