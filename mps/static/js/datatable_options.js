@@ -72,8 +72,8 @@ $(document).ready(function () {
     window.onresize = function() {
         setTimeout(function() {
             $($.fn.dataTable.tables(true)).DataTable().columns.adjust();
-            $($.fn.dataTable.tables(true)).DataTable().responsive.recalc();
-            $($.fn.dataTable.tables(true)).DataTable().fixedHeader.adjust();
+            // $($.fn.dataTable.tables(true)).DataTable().responsive.recalc();
+            // $($.fn.dataTable.tables(true)).DataTable().fixedHeader.adjust();
         }, 250);
     }
 });
