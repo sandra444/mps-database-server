@@ -70,7 +70,11 @@ $(document).ready(function () {
 
     // Fix some issues with column width on resize.
     window.onresize = function() {
-        $($.fn.dataTable.tables(true)).DataTable().columns.adjust();
+        setTimeout(function() {
+            $($.fn.dataTable.tables(true)).DataTable().columns.adjust();
+            $($.fn.dataTable.tables(true)).DataTable().responsive.recalc();
+            $($.fn.dataTable.tables(true)).DataTable().fixedHeader.adjust();
+        }, 250);
     }
 });
 // $.fn.dataTable.TableTools.defaults.aButtons = [
