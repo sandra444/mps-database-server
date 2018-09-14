@@ -8,6 +8,7 @@ $(document).ready(function () {
             $('html, body').animate({
                 scrollTop: $($(this).attr('href')).offset().top -offset
             }, 500);
+            $($(this).attr('href')).find('button')[0].click();
         }
     });
 
@@ -16,6 +17,7 @@ $(document).ready(function () {
         $('html, body').animate({
             scrollTop: $(initial_hash).offset().top - offset
         }, 500);
+        $(initial_hash).find('button')[0].click();
     }
 
     var _alphabetSearch = '';
@@ -36,10 +38,7 @@ $(document).ready(function () {
     var glossary_table = $('#glossary_table').DataTable({
         dom: 'B<"row">lfrtip',
         "iDisplayLength": 10,
-        responsive: true,
-        fixedHeader: {
-            headerOffset: 50
-        }
+        responsive: true
     });
 
     var alphabet = $('<div class="alphabet"/>').append('Search: ');
