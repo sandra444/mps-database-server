@@ -107,16 +107,16 @@ $(document).ready(function () {
             { title: "<span style='white-space: nowrap;'>Max CV<br>or CV "+make_escaped_tooltip(cv_tooltip)+"</span>", data: '8' },
             { title: "<span style='white-space: nowrap;'>ICC "+make_escaped_tooltip(icc_tooltip)+"</span>", data: '9' },
             { title: "Reproducibility<br>Status "+make_escaped_tooltip(repro_tooltip), data: '10', render: function(data, type, row, meta) {
-                if (data == "Excellent (ICC)" || data == "Excellent (CV)"){
-                    return '<td><span class="hidden">3</span>'+data+'</td>';
-                } else if (data == "Acceptable (ICC)" || data == "Acceptable (CV)") {
-                    return '<td><span class="hidden">2</span>'+data+'</td>';
-                } else if (data == "Poor (ICC)" || data == "Poor (CV)") {
-                    return '<td><span class="hidden">1</span>'+data+'</td>';
+                if (data[0] === 'E') {
+                    return '<td><span class="hidden">3</span>' + data + '</td>';
+                } else if (data[0] === 'A') {
+                    return '<td><span class="hidden">2</span>' + data + '</td>';
+                } else if (data[0] === 'P') {
+                    return '<td><span class="hidden">1</span>' + data + '</td>';
                 } else {
                     return '<td><span class="hidden">0</span>'+data+'<span data-toggle="tooltip" title="'+row[14]+'" class="glyphicon glyphicon-question-sign" aria-hidden="true"></span></td>';
                 }
-            },
+            }},
             { title: "# of Chips/Wells", data: '12' },
             { title: "# of Time Points", data: '13' },
             { title: "Cells", data: '1', 'className': 'none'},

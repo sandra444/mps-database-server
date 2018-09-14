@@ -15,6 +15,16 @@ import collections
 
 
 # These are here to avoid potentially messy imports, may change later
+def attr_getter(item, attributes):
+    """attribute getter for individual items"""
+    for a in attributes:
+        try:
+            item = getattr(item, a)
+        except AttributeError:
+            return None
+
+    return item
+
 def tuple_attrgetter(*items):
     """Custom attrgetter that ALWAYS returns a tuple"""
     # NOTE WILL NEED TO CHANGE IF MOVED TO PYTHON 3

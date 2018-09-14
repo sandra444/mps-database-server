@@ -58,6 +58,9 @@ logger = logging.getLogger(__name__)
 # Global variable for what to call control values (avoid magic strings)
 CONTROL_LABEL = '-Control-'
 
+# Variable to indicate that these should be split for special filters
+COMBINED_VALUE_DELIMITER = '~@|'
+
 # Note manipulations for sorting
 # Somewhat contrived
 # THESE SHOULD BE DEFINED, NOT LAMBDA FUNCTIONS
@@ -672,7 +675,7 @@ def get_control_data(
             # Check if the setup is marked a control chip
             if raw.matrix_item.test_type == 'control':
                 initial_control_data.setdefault(
-                    (target, method), {}
+                    target, {}
                 ).setdefault(
                     unit, {}
                 ).setdefault(
@@ -684,22 +687,6 @@ def get_control_data(
                 ).append(
                     raw
                 )
-
-    targets = [target_method[0] for target_method in initial_control_data.keys()]
-
-    for target_method, units in initial_control_data.items():
-        target = target_method[0]
-        method = target_method[1]
-
-        # JUST IGNORE METHOD FOR NOW
-        # if targets.count(target) > 1:
-        #     target = u'{} [{}]'.format(target, method)
-
-        initial_control_data.update({
-            target: units
-        })
-
-        del initial_control_data[target_method]
 
     for target, units in initial_control_data.items():
         for unit, tags in units.items():
@@ -1011,9 +998,21 @@ def get_data_points_for_charting(
 
             target_method_pairs.update({assay.target_id: assay.method_id})
 
+    # TODO NOTE THAT THIS MAKES ASSUMPTION ABOUT THE STATE OF THE POST FILTER
+    # That is to say, you may want to be positive that the "combined" fields are split out
+    matrix_item_compound_post_filters = {}
+
     post_filter_compounds = post_filter.get(
         'matrix_item', {}
     ).get('assaysetupcompound__compound_instance__compound_id__in', {})
+
+    if post_filter:
+        # WARNING THIS MAKES A NUMBER OF ASSUMPTIONS
+        matrix_item_compound_post_filters = {
+            '__'.join(current_filter.replace('assaysetupcompound__', '').split('__')[:-1]): [
+                x for x in post_filter.get('matrix_item', {}).get(current_filter, [])
+            ] for current_filter in post_filter.get('matrix_item', {}) if current_filter.startswith('assaysetupcompound__')
+        }
 
     for raw in raw_data:
         # Now uses full name
@@ -1066,7 +1065,17 @@ def get_data_points_for_charting(
                 is_control = True
 
                 for compound in raw.matrix_item.assaysetupcompound_set.all():
-                    if ((post_filter is None or unicode(compound.compound_instance.compound_id) in post_filter_compounds) and
+                    # Makes sure the compound doesn't violate filters
+                    # This is because a compound can be excluded even if its parent matrix item isn't!
+                    valid_compound = True
+
+                    for filter, values in matrix_item_compound_post_filters.items():
+                        if unicode(attr_getter(compound, filter.split('__'))) not in values:
+                            valid_compound = False
+                            break
+
+                    # TERRIBLE CONDITIONAL
+                    if (valid_compound and
                         compound.addition_time <= raw_time and
                         compound.addition_time + compound.duration >= raw_time
                     ):
@@ -1083,8 +1092,8 @@ def get_data_points_for_charting(
 
                     is_control = False
 
-                # CONTRIVED: Set time to concentration
-                time = concentration
+                # CONTRIVED: Set time to concentration AND time
+                time = (concentration, time)
                 if tag:
                     tag = ' & '.join(tag)
                 elif is_control and (post_filter is None or u'0' in post_filter_compounds):
@@ -1217,28 +1226,60 @@ def get_data_points_for_charting(
                         if interval != 0:
                             accommodate_intervals = True
 
-                        if not percent_control:
-                            current_data.setdefault(current_key, {}).update({time: value})
-                            current_data.setdefault(current_key+' ~@i1', {}).update({time: value - interval})
-                            current_data.setdefault(current_key+' ~@i2', {}).update({time: value + interval})
-                            y_header.update({time: True})
-                            include_current = True
+                        # UGLY NOT DRY
+                        # Contrived combination of time and concentration only for dose-response
+                        if key == 'dose':
+                            concentration = time[0]
+                            time = time[1]
 
-                        elif controls.get((study_id, target, unit, sample_location, time), False):
-                            control_value = controls.get((study_id, target, unit, sample_location, time))
+                            if not percent_control:
+                                current_data.setdefault(current_key, {}).update({concentration: value})
+                                current_data.setdefault(current_key + ' ~@i1', {}).update({concentration: value - interval})
+                                current_data.setdefault(current_key + ' ~@i2', {}).update({concentration: value + interval})
+                                y_header.update({concentration: True})
+                                include_current = True
 
-                            # We can not divide by zero
-                            if control_value == 0:
-                                return {'errors': 'Could not calculate percent control because some control values are zero (divide by zero error).'}
+                            elif controls.get((study_id, target, unit, sample_location, time), False):
+                                control_value = controls.get((study_id, target, unit, sample_location, time))
 
-                            adjusted_value = (value / control_value) * 100
-                            adjusted_interval = (interval / control_value) * 100
+                                # We can not divide by zero
+                                if control_value == 0:
+                                    return {
+                                        'errors': 'Could not calculate percent control because some control values are zero (divide by zero error).'}
 
-                            current_data.setdefault(current_key, {}).update({time: adjusted_value})
-                            current_data.setdefault(current_key+' ~@i1', {}).update({time: adjusted_value - adjusted_interval})
-                            current_data.setdefault(current_key+' ~@i2', {}).update({time: adjusted_value + adjusted_interval})
-                            y_header.update({time: True})
-                            include_current = True
+                                adjusted_value = (value / control_value) * 100
+                                adjusted_interval = (interval / control_value) * 100
+
+                                current_data.setdefault(current_key, {}).update({concentration: adjusted_value})
+                                current_data.setdefault(current_key + ' ~@i1', {}).update(
+                                    {concentration: adjusted_value - adjusted_interval})
+                                current_data.setdefault(current_key + ' ~@i2', {}).update(
+                                    {concentration: adjusted_value + adjusted_interval})
+                                y_header.update({concentration: True})
+                                include_current = True
+                        else:
+                            if not percent_control:
+                                current_data.setdefault(current_key, {}).update({time: value})
+                                current_data.setdefault(current_key+' ~@i1', {}).update({time: value - interval})
+                                current_data.setdefault(current_key+' ~@i2', {}).update({time: value + interval})
+                                y_header.update({time: True})
+                                include_current = True
+
+                            elif controls.get((study_id, target, unit, sample_location, time), False):
+                                control_value = controls.get((study_id, target, unit, sample_location, time))
+
+                                # We can not divide by zero
+                                if control_value == 0:
+                                    return {'errors': 'Could not calculate percent control because some control values are zero (divide by zero error).'}
+
+                                adjusted_value = (value / control_value) * 100
+                                adjusted_interval = (interval / control_value) * 100
+
+                                current_data.setdefault(current_key, {}).update({time: adjusted_value})
+                                current_data.setdefault(current_key+' ~@i1', {}).update({time: adjusted_value - adjusted_interval})
+                                current_data.setdefault(current_key+' ~@i2', {}).update({time: adjusted_value + adjusted_interval})
+                                y_header.update({time: True})
+                                include_current = True
 
                     key_present = current_key in x_header
 
@@ -1842,11 +1883,30 @@ def acquire_post_filter(studies, assays, matrix_items, data_points):
                 compound.compound_instance.lot: compound.compound_instance.lot
             })
 
-            # NAIVE AND CAN CAUSE COLLISIONS
+            # SPECIAL EXCEPTION, CONCENTRATION AND UNITS ARE COMBINED
             current.setdefault(
                 'assaysetupcompound__concentration__in', {}
             ).update({
                 compound.concentration: compound.concentration
+            })
+            current.setdefault(
+                'assaysetupcompound__concentration_unit_id__in', {}
+            ).update({
+                compound.concentration_unit_id: compound.concentration_unit_id
+            })
+
+            current.setdefault(
+                'assaysetupcompound__concentration__concentration_unit_id__in', {}
+            ).update({
+                '{}{}{}'.format(
+                    compound.concentration,
+                    COMBINED_VALUE_DELIMITER,
+                    compound.concentration_unit_id
+                ): '{}{}{}'.format(
+                    compound.concentration,
+                    COMBINED_VALUE_DELIMITER,
+                    compound.concentration_unit
+                )
             })
 
             current.setdefault(
@@ -1898,10 +1958,31 @@ def acquire_post_filter(studies, assays, matrix_items, data_points):
                 cell.passage: cell.passage
             })
 
+            # SPECIAL EXCEPTION, DENSITY AND UNITS ARE COMBINED
             current.setdefault(
                 'assaysetupcell__density__in', {}
             ).update({
                 cell.density: cell.density
+            })
+            current.setdefault(
+                'assaysetupcell__density_unit_id__in', {}
+            ).update({
+                cell.density_unit_id: cell.density_unit_id
+            })
+
+            # THIS NEEDS TO BE REMOVED BEFORE ACTUAL FILTERS ARE APPLIED
+            current.setdefault(
+                'assaysetupcell__density__density_unit_id__in', {}
+            ).update({
+                '{}{}{}'.format(
+                    cell.density,
+                    COMBINED_VALUE_DELIMITER,
+                    cell.density_unit_id
+                ): '{}{}{}'.format(
+                    cell.density,
+                    COMBINED_VALUE_DELIMITER,
+                    cell.density_unit
+                )
             })
 
             current.setdefault(
@@ -1917,10 +1998,30 @@ def acquire_post_filter(studies, assays, matrix_items, data_points):
                 setting.setting_id: setting.setting.name
             })
 
+            # SPECIAL EXCEPTION, VALUE AND UNITS ARE COMBINED
             current.setdefault(
                 'assaysetupsetting__value__in', {}
             ).update({
                 setting.value: setting.value
+            })
+            current.setdefault(
+                'assaysetupsetting__unit_id__in', {}
+            ).update({
+                setting.unit_id: setting.unit_id
+            })
+
+            current.setdefault(
+                'assaysetupsetting__value__unit_id__in', {}
+            ).update({
+                '{}{}{}'.format(
+                    setting.value,
+                    COMBINED_VALUE_DELIMITER,
+                    setting.unit_id
+                ): '{}{}{}'.format(
+                    setting.value,
+                    COMBINED_VALUE_DELIMITER,
+                    setting.unit
+                )
             })
 
             current.setdefault(
@@ -1988,6 +2089,82 @@ def apply_post_filter(post_filter, studies, assays, matrix_items, data_points):
         **assay_post_filters
     )
 
+    # Special exceptions for combined filters
+    combined_compounds_data = post_filter.setdefault('matrix_item', {}).setdefault(
+        'assaysetupcompound__concentration__concentration_unit_id__in', {}
+    )
+
+    compound_concentration_filter = {}
+    compound_unit_filter = {}
+
+    for concentration_unit_id in combined_compounds_data.keys():
+        concentration_unit_id = concentration_unit_id.split(COMBINED_VALUE_DELIMITER)
+        concentration = concentration_unit_id[0]
+        unit = concentration_unit_id[1]
+        compound_concentration_filter.update({
+            concentration: True
+        })
+        compound_unit_filter.update({
+            unit: True
+        })
+
+    post_filter.get('matrix_item', {}).update({
+        'assaysetupcompound__concentration__in': compound_concentration_filter,
+        'assaysetupcompound__concentration_unit_id__in': compound_unit_filter
+    })
+
+    del post_filter['matrix_item']['assaysetupcompound__concentration__concentration_unit_id__in']
+
+    combined_cells_data = post_filter.setdefault('matrix_item', {}).setdefault(
+        'assaysetupcell__density__density_unit_id__in', {}
+    )
+
+    cell_density_filter = {}
+    cell_unit_filter = {}
+
+    for density_unit_id in combined_cells_data.keys():
+        density_unit_id = density_unit_id.split(COMBINED_VALUE_DELIMITER)
+        density = density_unit_id[0]
+        unit = density_unit_id[1]
+        cell_density_filter.update({
+            density: True
+        })
+        cell_unit_filter.update({
+            unit: True
+        })
+
+    post_filter.get('matrix_item', {}).update({
+        'assaysetupcell__density__in': cell_density_filter,
+        'assaysetupcell__density_unit_id__in': cell_unit_filter
+    })
+
+    del post_filter['matrix_item']['assaysetupcell__density__density_unit_id__in']
+
+    combined_settings_data = post_filter.setdefault('matrix_item', {}).setdefault(
+        'assaysetupsetting__value__unit_id__in', {}
+    )
+
+    setting_value_filter = {}
+    setting_unit_filter = {}
+
+    for value_unit_id in combined_settings_data.keys():
+        value_unit_id = value_unit_id.split(COMBINED_VALUE_DELIMITER)
+        value = value_unit_id[0]
+        unit = value_unit_id[1]
+        setting_value_filter.update({
+            value: True
+        })
+        setting_unit_filter.update({
+            unit: True
+        })
+
+    post_filter.get('matrix_item', {}).update({
+        'assaysetupsetting__value__in': setting_value_filter,
+        'assaysetupsetting__unit_id__in': setting_unit_filter
+    })
+
+    del post_filter['matrix_item']['assaysetupsetting__value__unit_id__in']
+
     # Matrix Items somewhat contrived to deal with null compounds
     matrix_item_post_filters = {
         current_filter: [
@@ -2020,8 +2197,9 @@ def apply_post_filter(post_filter, studies, assays, matrix_items, data_points):
     )
 
     # Compounds
-    if post_filter.get('matrix_item', {}).get('assaysetupcompound__compound_instance__compound_id__in', {}).get('0',
-                                                                                                                None):
+    if post_filter.get('matrix_item', {}).get('assaysetupcompound__compound_instance__compound_id__in', {}).get(
+            '0', None
+    ):
         matrix_items = matrix_items.filter(
             **matrix_item_compound_post_filters
         ) | matrix_items.filter(assaysetupcompound__isnull=True)

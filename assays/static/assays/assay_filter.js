@@ -559,11 +559,11 @@ $(document).ready(function() {
                 title: "Reproducibility<br>Status " + make_escaped_tooltip(repro_tooltip),
                 data: '8',
                 render: function (data, type, row, meta) {
-                    if (data == "Excellent (ICC)" || data == "Excellent (CV)") {
+                    if (data[0] === 'E') {
                         return '<td><span class="hidden">3</span>' + data + '</td>';
-                    } else if (data == "Acceptable (ICC)" || data == "Acceptable (CV)") {
+                    } else if (data[0] === 'A') {
                         return '<td><span class="hidden">2</span>' + data + '</td>';
-                    } else if (data == "Poor (ICC)" || data == "Poor (CV)") {
+                    } else if (data[0] === 'P') {
                         return '<td><span class="hidden">1</span>' + data + '</td>';
                     } else {
                         return '<td><span class="hidden">0</span>' + data + '<span data-toggle="tooltip" title="' + row[9] + '" class="glyphicon glyphicon-question-sign" aria-hidden="true"></span></td>';
@@ -1137,13 +1137,13 @@ $(document).ready(function() {
             }
         });
 
-        if (!method_to_show) {
+        if (!method_to_show || !current_max) {
             $.each(interpolation_methods, function(index, method) {
                 var current_row = current_full_data[method];
                 var lower_method = method.toLowerCase();
 
-                if (current_row && current_row[5] < current_min) {
-                    current_min = current_row[5];
+                if (current_row && parseFloat(current_row[5]) < current_min) {
+                    current_min = parseFloat(current_row[5]);
                     method_to_show = lower_method;
                 }
             });
