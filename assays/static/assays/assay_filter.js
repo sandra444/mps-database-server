@@ -1109,13 +1109,13 @@ $(document).ready(function() {
             }
         });
 
-        if (!method_to_show) {
+        if (!method_to_show || !current_max) {
             $.each(interpolation_methods, function(index, method) {
                 var current_row = current_full_data[method];
                 var lower_method = method.toLowerCase();
 
-                if (current_row && current_row[5] < current_min) {
-                    current_min = current_row[5];
+                if (current_row && parseFloat(current_row[5]) < current_min) {
+                    current_min = parseFloat(current_row[5]);
                     method_to_show = lower_method;
                 }
             });
