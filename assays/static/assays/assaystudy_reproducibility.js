@@ -116,7 +116,7 @@ $(document).ready(function () {
                 } else {
                     return '<td><span class="hidden">0</span>'+data+'<span data-toggle="tooltip" title="'+row[14]+'" class="glyphicon glyphicon-question-sign" aria-hidden="true"></span></td>';
                 }
-            },
+            }},
             { title: "# of Chips/Wells", data: '12' },
             { title: "# of Time Points", data: '13' },
             { title: "Cells", data: '1', 'className': 'none'},
