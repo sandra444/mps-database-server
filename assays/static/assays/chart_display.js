@@ -394,26 +394,31 @@ $(document).ready(function () {
 
             var y_axis_label_type = '';
 
+            // Go through y values
             $.each(assays[index].slice(1), function(index, current_values) {
                 // Idiomatic way to remove NaNs
                 var trimmed_values = current_values.slice(1).filter(isNumber);
 
-                var current_max = Math.abs(Math.max.apply(null, trimmed_values));
-                var current_min = Math.abs(Math.min.apply(null, trimmed_values));
+                var current_max_y = Math.abs(Math.max.apply(null, trimmed_values));
+                var current_min_y = Math.abs(Math.min.apply(null, trimmed_values));
 
-                if (current_max > 1000 || current_max < 0.001) {
+                if (current_max_y > 1000 || current_max_y < 0.001) {
                     y_axis_label_type = '0.00E0';
                     return false;
                 }
-                else if (Math.abs(current_max - current_min) < 10 && Math.abs(current_max - current_min) > 0.1 && Math.abs(current_max - current_min) !== 0) {
+                else if (Math.abs(current_max_y - current_min_y) < 10 && Math.abs(current_max_y - current_min_y) > 0.1 && Math.abs(current_max_y - current_min_y) !== 0) {
                     y_axis_label_type = '0.00';
                     return false;
                 }
-                else if (Math.abs(current_max - current_min) < 0.1 && Math.abs(current_max - current_min) !== 0) {
+                else if (Math.abs(current_max_y - current_min_y) < 0.1 && Math.abs(current_max_y - current_min_y) !== 0) {
                     y_axis_label_type = '0.00E0';
                     return false;
                 }
             });
+
+            var current_min_x = assays[index][1][0];
+            var current_max_x = assays[index][assays[index].length - 1][0];
+            var current_x_range = current_max_x - current_min_x;
 
             var options = {
                 title: assay,
@@ -446,6 +451,12 @@ $(document).ready(function () {
                         bold: true,
                         italic: false
                     }
+                    // ADD PROGRAMMATICALLY
+                    // viewWindowMode:'explicit',
+                    // viewWindow: {
+                    //     max: current_max_x + 0.05 * current_x_range,
+                    //     min: current_min_x - 0.05 * current_x_range
+                    // }
                     // baselineColor: 'none',
                     // ticks: []
                 },
@@ -514,21 +525,16 @@ $(document).ready(function () {
                 }
             });
 
-            // Line chart if more than one time point and less than 101 colors
-            if (assays[index].length > 2 && num_colors < 101) {
+            // Line chart if more than two time points and less than 101 colors
+            if (assays[index].length > 3 && num_colors < 101) {
                 chart = new google.visualization.LineChart(document.getElementById(charts + '_' + index));
 
-                // If the scale is not already small
-                if (assays[index][assays[index].length-1][0] - assays[index][1][0] > 1) {
-                    // If line chart and small difference between last two numbers, make the max horizontal value one day higher than necessary
-                    if (assays[index][assays[index].length-1][0] - assays[index][assays[index].length-2][0] < 0.5) {
-                        options.hAxis.maxValue = assays[index][assays[index].length - 1][0] + 1;
-                    }
-                    // Do the same for minimum
-                    if (assays[index][2][0] - assays[index][1][0] < 0.5 ) {
-                        options.hAxis.minValue = assays[index][1][0] - 1;
-                    }
-                }
+                // Change the options
+                options.hAxis.viewWindowMode = 'explicit';
+                options.hAxis.viewWindow = {
+                    max: current_max_x + 0.05 * current_x_range,
+                    min: current_min_x - 0.05 * current_x_range
+                };
             }
             // Nothing if more than 100 colors
             else if (num_colors > 100) {
@@ -539,7 +545,7 @@ $(document).ready(function () {
                     '<br>This plot has too many data points, please try filtering.' +
                 '</div>'
             }
-            // Bar chart if only one time point
+            // Bar chart if only one or two time points
             else if (assays[index].length > 1) {
                 // Convert to categories
                 data.insertColumn(0, 'string', data.getColumnLabel(0));
