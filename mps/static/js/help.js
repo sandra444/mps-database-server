@@ -8,7 +8,6 @@ $(document).ready(function () {
             $('html, body').animate({
                 scrollTop: $($(this).attr('href')).offset().top -offset
             }, 500);
-            console.log($($(this).attr('href')));
             $($(this).attr('href')).find('button')[0].click();
         }
     });
@@ -18,6 +17,7 @@ $(document).ready(function () {
         $('html, body').animate({
             scrollTop: $(initial_hash).offset().top - offset
         }, 500);
+        $(initial_hash).find('button')[0].click();
     }
 
     var _alphabetSearch = '';

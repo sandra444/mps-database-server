@@ -1870,19 +1870,11 @@
 
     for (i = 0; i < coll.length; i++) {
         coll[i].addEventListener("click", function() {
-            console.log(this);
             var content = this.nextElementSibling;
-            console.log(content);
             if ($(content).css("display") != "none"){
-                console.log(content.style.maxHeight);
-                console.log("Shrinking...");
                 $(content).css("display","none");
-                console.log(content.style.maxHeight);
             } else {
-                console.log(content.style.maxHeight);
-                console.log("Expanding...");
                 $(content).css("display","block");
-                console.log(content.style.maxHeight);
             }
         });
     }
