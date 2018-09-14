@@ -2437,7 +2437,8 @@ class AssaySetupSetting(models.Model):
     # No longer one-to-one
     # setup = models.ForeignKey('assays.AssaySetup')
     setting = models.ForeignKey('assays.AssaySetting')
-    unit = models.ForeignKey('assays.PhysicalUnits', blank=True, null=True)
+    # DEFAULTS TO NONE, BUT IS REQUIRED
+    unit = models.ForeignKey('assays.PhysicalUnits', blank=True, default=14)
     value = models.CharField(max_length=255)
 
     # Will we include these??
