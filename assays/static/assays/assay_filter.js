@@ -2,6 +2,9 @@ $(document).ready(function() {
     // Load core chart package
     google.charts.load('current', {'packages':['corechart']});
 
+    // Set the callback
+    google.charts.setOnLoadCallback(reproPie1);
+
     var filters = {
         'organ_models': {},
         'groups': {},
@@ -410,6 +413,7 @@ $(document).ready(function() {
     var repro_table_data_best = null;
     // For making the charts
     var chart_data = null;
+    var summary_pie = null;
     // For getting info on treatment groups
     var data_groups = null;
     var header_keys = null;
@@ -445,6 +449,8 @@ $(document).ready(function() {
         inter_level = $('#inter_level_by_center').prop('checked') ? 1 : 0;
         max_interpolation_size = $('#max_interpolation_size').val();
         initial_norm = $('#initial_norm').prop('checked') ? 1 : 0;
+
+        reproPie1();
 
         // Special check to see whether to default to studies (only one center selected)
         if (Object.keys(filters['groups']).length === 1) {
@@ -602,6 +608,7 @@ $(document).ready(function() {
                     repro_table_data_full = json.repro_table_data_full;
                     repro_table_data_best = json.repro_table_data_best;
                     chart_data = json.chart_data;
+                    summary_pie = json.pie;
                     data_groups = json.data_groups;
                     header_keys = json.header_keys;
                     treatment_groups = json.treatment_groups;
@@ -741,6 +748,7 @@ $(document).ready(function() {
             populate_selection_table(group, data_table);
             if (repro_table_data_full[group].best[1]) {
                 populate_icc_table(group, icc_table);
+                reproPie2();
             }
             else {
                 icc_table.hide();
@@ -1305,4 +1313,54 @@ $(document).ready(function() {
     $('#' + charts_name + 'chart_options').find('input').change(function() {
         show_plots();
     });
+
+    // Piecharts
+    function reproPie1() {
+        var data = google.visualization.arrayToDataTable([
+            ['Status', 'Count'],
+            ['Loading...', 1]
+        ]);
+        var options = {
+            legend: 'none',
+            pieSliceText: 'label',
+            'chartArea': {'width': '90%', 'height': '90%'},
+            tooltip: {trigger : 'none'},
+            pieSliceTextStyle: {
+                color: 'white',
+                bold: true,
+                fontSize: 12
+            },
+        };
+        var chart = new google.visualization.PieChart(document.getElementById('piechart'));
+        chart.draw(data, options);
+    }
+
+    function reproPie2() {
+        var data = google.visualization.arrayToDataTable([
+            ['Status', 'Count'],
+            ['Excellent', summary_pie[0]],
+            ['Acceptable', summary_pie[1]],
+            ['Poor', summary_pie[2]]
+        ]);
+        var options = {
+            // title: 'Reproducibility Breakdown\n(Click Slices for Details)',
+            // titleFontSize:16,
+            legend: 'none',
+            slices: {
+                0: { color: '#74ff5b' },
+                1: { color: '#fcfa8d' },
+                2: { color: '#ff7863' }
+            },
+            pieSliceText: 'label',
+            pieSliceTextStyle: {
+                color: 'black',
+                bold: true,
+                fontSize: 12
+            },
+            'chartArea': {'width': '90%', 'height': '90%'},
+            pieSliceBorderColor: "black",
+        };
+        var chart = new google.visualization.PieChart(document.getElementById('piechart'));
+        chart.draw(data, options);
+    }
 });

@@ -1572,17 +1572,17 @@ def fetch_assay_study_reproducibility(request):
     data['comp_list'] = comp_list
 
     # Get pie chart data
-    excellentCounter = acceptableCounter = poorCounter = 0
+    excellent_counter = acceptable_counter = poor_counter = 0
 
     for x in range(0, len(data['gas_list'])):
         if data['gas_list'][x][10][0] == 'E':
-            excellentCounter += 1
+            excellent_counter += 1
         elif data['gas_list'][x][10][0] == 'A':
-            acceptableCounter += 1
+            acceptable_counter += 1
         elif data['gas_list'][x][10][0] == 'P':
-            poorCounter += 1
+            poor_counter += 1
 
-    data['pie'] = [excellentCounter, acceptableCounter, poorCounter]
+    data['pie'] = [excellent_counter, acceptable_counter, poor_counter]
 
     return HttpResponse(json.dumps(data),
                         content_type='application/json')
@@ -2702,6 +2702,7 @@ def get_inter_study_reproducibility(
     # Make into a suitable dictionary
     results_rows_full = {}
     results_rows_best = []
+    excellent_counter = acceptable_counter = poor_counter = 0
     for row in results_rows:
         current_dic = results_rows_full.setdefault(
             row[0], {}
@@ -2738,6 +2739,14 @@ def get_inter_study_reproducibility(
 
     for set, current_dic in results_rows_full.items():
         current_best = current_dic.get('best')
+
+        if current_best[8]:
+            if current_best[8][0] == 'E':
+                excellent_counter += 1
+            elif current_best[8][0] == 'A':
+                acceptable_counter += 1
+            elif current_best[8][0] == 'P':
+                poor_counter += 1
 
         for current_type, row in current_dic.items():
             # Format the ICC
@@ -2879,7 +2888,8 @@ def get_inter_study_reproducibility(
         'data_group_to_studies': final_data_group_to_studies,
         # BAD
         'data_group_to_sample_locations': final_data_group_to_sample_locations,
-        'data_group_to_organ_models': final_data_group_to_organ_models
+        'data_group_to_organ_models': final_data_group_to_organ_models,
+        'pie': [excellent_counter, acceptable_counter, poor_counter]
     }
 
     return data
