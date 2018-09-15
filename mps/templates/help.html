@@ -10,35 +10,25 @@
     <style>
         .filled-circle {list-style-type: disc;}
         .open-circle {list-style-type: circle; padding-left: 20px;}
+        .list-group{margin-bottom: 1px}
 
-        .sub1-bars {font-style: italic; font-size: 180%}
+        .sub1-bars {font-style: italic; font-size: 180%; margin-top: 3%}
         .sub2-bars {font-style: italic; font-size: 160%}
-        .sub4-bars {background-color: DarkBlue; font-weight: bold; color: white; font-size:95%; padding: 10px}}
+        .sub3-bars {font-style: italic; font-size: 140%}
 
-        .showhidebutton{font-size:105%; border-radius:5%; padding:2px; display:block;}
+        .showhidebutton{background-color: azure; font-size:105%; border-radius:5%; padding-left:3px;  padding-right:3px; display:block;
+            border-color:DarkGray; outline: none;width: 80%; margin-bottom: 3px; text-align: left; }
+        .showhide2button{background-color: Gainsboro; font-size:100%; border-radius:5%; padding-left:3px;  padding-right:3px; display:block;
+            border-color:gray; outline: none;width: 60%; margin-bottom: 3px; text-align: left; }
 
-        .collapsible {
-            background-color: SteelBlue;
-            font-size: 120%;
-            color: white;
-            cursor: pointer;
-            padding: 10px;
-            width: 100%;
-            border: none;
-            text-align: left;
-            outline: none;
-            margin-bottom: 1%;
-            margin-top: 1%;
-        }
+        .showhidebutton:hover { font-weight: bold; font-size: 104%; border-color:darkgray; }
+        .showhide2button:hover { font-weight: bold; font-size: 100%; border-color:lightgray; }
 
-        .collapsible:hover {
-            font-weight: bold; font-size: 120%
-        }
+        .collapsible {background-color: SteelBlue; font-size: 120%; color: white; cursor: pointer; padding: 10px;
+            width: 100%; border: none; text-align: left; outline: none; margin-bottom: 1px; margin-top: 2%; }
+        .collapsible:hover {font-weight: bold; font-size: 120%}
 
-        .content, .editorsubtainer {
-            display: none;
-            transition: max-height 0.1s ease-out;
-        }
+        .content, .editorsubtainer, .editor2subtainer {display: none; transition: max-height 0.1s ease-out; }
 
     </style>
     <link rel="icon"
@@ -81,8 +71,10 @@
 <body data-spy="scroll" data-target=".navbar" data-offset="80">
 
 <nav class="navbar navbar-inverse navbar-fixed-top">
+
     {# Open class container - use Ctrl+Shift+M to jump to close#}
     <div class="container">
+
         <div class="navbar-header">
             <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
                 <span class="icon-bar"></span>
@@ -106,7 +98,7 @@
                             <li><a href="#overview2">Study Data</a></li>
                             <li><a href="#overview3">Features</a></li>
                             <li><a href="#overview4">Data Sources</a></li>
-                            <li><a href="#overview5">Permission Structure</a></li>
+                            <li><a href="#overview5">Permission Structure Structure</a></li>
                         </ul>
                     </li>
 
@@ -170,7 +162,7 @@
             </div>
         </div>
     </div>
-  {# Close class container #}
+    {# Close class container #}
 </nav>
 
 <div class="offset-help-navbar">
@@ -182,24 +174,24 @@
         <div id="recentupgrades">
             <button class="collapsible">Summary of Recent Updates</button>
             <div class="content">
-                <div id="mpsmodelsviewer" class="viewersubtainer">
+                <div id="recentupgradesviewer" class="viewersubtainer">
                     <ul class="list-group">
-                        <li class="list-group-item"> <b><em>Integrated Reproducibility Analysis</em></b> An intra- and inter-study reproducibility analysis tool is now available in the MPS database. The inter-study reproducibility analysis tool can be accessed through the Data Analysis icon. This tool offers the user a wide range of options for grouping and filtering data prior to performing analysis. The intra-study tool can be accessed through the Study Summary Page.
-                            For more information on this feature, <a href="#interstudy">click here</a>.
+                        <li class="list-group-item"> <b><em>Integrated Reproducibility Analysis</em></b> - An intra- and inter-study reproducibility analysis tool is now available in the <b>MPS database</b>. The inter-study tool can be accessed through the <b>Data Analysis</b> tab or icon. This tool offers the user a wide range of options for grouping and filtering data prior to performing graphing or reproducibility analysis. The intra-study tool can be accessed through the <b>Study Summary</b> page.
+                            For more information on this feature, <a href="#intrastudy">click here</a>.
                         </li>
-                        <li class="list-group-item"> <b><em>Matrix Items in a Matrix</em></b> Matrix Items can now be assigned to a matrix and data can be summarized by matrix. To learn more about matrix and matrix items, review the descriptions in the glossary section of the help.
+                        <li class="list-group-item"> <b><em>Matrix Items in a Matrix</em></b> - <b>Matrix Items</b> can now be assigned to a <b>Matrix</b> and data can be summarized by <b>Matrix</b>. <b>Matricies</b> can be accessed from the <b>Study Matrices and Items</b> list page of a specific study.
                             For more information on this feature, <a href="#matrices">click here</a>.
                         </li>
-                        <li class="list-group-item"> <b><em>Integration of Images and Videos</em></b> Images and videos can now be associated to a matrix item within a study. Images/videos are provided with metadata explaining what is being displayed. Images/videos are auto-scaled for optimal viewing online, and the unaltered images/videos can be downloaded to perform relative comparisons. Images/videos can be accessed from the main study page (Study Matrices and Items List Page).
+                        <li class="list-group-item"> <b><em>Integration of Images and Videos</em></b> - Images and videos can now be associated to a <b>Matrix Item</b> within a study. Images and videos are auto-scaled for optimal viewing online and the unaltered image/video is available for downloaded to facilitate performing relative comparisons. Images and videos can be accessed from the <b>Study Matrices and Items</b> list page of a specific study.
                             For more information on this feature, <a href="#assayimages">click here</a>.
                         </li>
-                        <li class="list-group-item"> <b><em>Inter-Study Analysis with Grouping and Filtering</em></b> The grouping and filtering feature is a powerful tool that offers the user a wide range of options for grouping and filtering data. The tool can be accessed in several places throughout the database, including: through the Data Analysis icon and the Study Summary Page. The tool can be used to customize what data are used (via the filtering feature) and how data will be grouped (via the grouping feature) graphing and analysis.
+                        <li class="list-group-item"> <b><em>Inter-Study Analysis with Grouping and Filtering</em></b> - The grouping and filtering feature is a powerful tool that offers the user a wide range of options for grouping and filtering data. The tool can be accessed in several places throughout the database, including: through the <b>Data Analysis</b> icon or tab and the <b>Study Summary</b> page. The tool can be used to customize what data are used (via the filtering feature) and how data will be grouped (via the grouping feature) in subsequent graphing and analysis.
                             For more information on this feature, <a href="#interstudy">click here</a>.
                         </li>
-                        <li class="list-group-item"> <b><em>Disease Model Portal</em></b> The disease model portal allows users to quickly determine what information regarding a specific disease is available in the MPS Database, lets the user drill down on data stored in the MPS database (study data and data extracted from the clinicaltrials.gov), and provides users with a links to clinicaltrials.gov where addition drug trial information can be accessed. The disease model portal can be accessed through the Models tab (via the View Diseases option).
+                        <li class="list-group-item"> <b><em>Diseases Portal</em></b> - The <b>Diseases</b> portal allows users to quickly find information regarding a specific disease. The protal lets the user drill down on data stored in the <b>MPS database</b> (study data and data extracted from the clinicaltrials.gov), and provides users with a links to clinicaltrials.gov where additional drug trial information can be obtained. The portal can be accessed through the <b>Models</b> icon or tab.
                             For more information on this feature, <a href="#diseasemodels">click here</a>.
                         </li>
-                        <li class="list-group-item"> <b><em>Non-Compound Treatments and/or Settings</em></b>This feature allows the study data provider the ability to enter treatments and/or experimental parameters that are thought to impact the assay data measurements. These, along with the added compounds, can be used to group and filter data to prepare them for visualization and analysis.
+                        <li class="list-group-item"> <b><em>Non-Compound Treatments and/or Settings</em></b> - This feature allows the <b>Data Provider</b> the ability to enter treatments and/or experimental parameters (such as instrument settings) that impact assay data measurements. These, along with the added compounds, can be used to group and filter data on preparation for visualization and analysis.
                             For more information on this feature, <a href="#matrixitems">click here</a>.
                         </li>
                     </ul>
@@ -220,20 +212,21 @@
                     <ul class="list-group">
                         <li class="list-group-item">
                             <ul class="list-unstyled">
-                                <li>To perform a <b>Global Search</b> from the Home page:
+                                <li>Use a <b>Global Search</b> to search the whole <b>MPS Database</b> from the Home page
                                 <ul class="filled-circle">
-                                    <li>Type text to search in the Global search bar (put a space between terms for multiple term searching)</li>
-                                    <li>Make preliminary selection (hit enter, click the blue <b>Search</b> button, or mouse down and click the left mouse button)</li>
+                                    <li>Go to the <b>MPS Database Home</b> page</li>
+                                    <li>Type search text in the <b>Global</b> search bar</li>
+                                    <li>Make preliminary selection (hit enter, click the blue <b>Search</b> button, or mouse down the options list and click the left mouse button)</li>
                                     <li>Wait for a list of matching information to appear</li>
-                                    <li>Click in boxes in Filter section to further limit matching results (optional)</li>
-                                    <li>Click on link to desired location</li>
+                                    <li>Click to check boxes in the filter section to further limit matching results (optional)</li>
+                                    <li>Click on link to be routed to desired location</li>
                                 </ul>
                                 </li>
-                                <li>Notes:
+                                <li><br>Notes:
                                 <ul class="filled-circle">
-                                    <li>To search on multiple terms, include a space between the terms in the search bar</li>
                                     <li>There are search bars in various locations in the MPS-GUI</li>
-                                    <li>Most search bars limit results on entry (no hitting enter or a search button is required)</li>
+                                    <li>Most search bars limit results on entry (no <b>Enter</b> or <b>Search</b> button required)</li>
+                                     <li>In all search bars, include a space between search terms to conduct a multi-term search</li>
                                 </ul>
                                 </li>
                             </ul>
@@ -247,19 +240,19 @@
 
     <div id="overview_section" class="container">
 
-        <h1 class="sub1-bars"><b>Overview</b> of the MPS Database</h1>
+        <h1 class="sub1-bars"><b>Overview</b> of the <b>MPS Database</b></h1>
 
         <div id="overview0">
-            <button class="collapsible">Background</button>
+            <button class="collapsible">Database Background</button>
             <div class="content">
                 <div id="overview0viewer" class="viewersubtainer">
                     <ul class="list-group">
                         <li class="list-group-item">
-                            The Microphysiology Systems database (MPS-Db) was designed for the management and analysis of MPS data together with curated reference and clinical data. The MPS-Db can store assay data and associated metadata from a wide variety of plate-based and microfluidic organ models. Data from external reference sources are brought into the MPS to facilitate ease of access to those data and to support integration of data across curated data sources and with study data.
+                            The <b>Microphysiology Systems (MPS) Database</b> was designed for the management and analysis of MPS data together with curated reference and clinical data. The <b>MPS Database</b> can store curated assay data and associated metadata from a wide variety of plate-based and microfluidic models. Data from external reference sources are brought into the <b>MPS Database</b> to facilitate ease of access to those data and to support integration of data across curated data sources.
                             <br><br>
-                            All study data and study components (e.g., models, devices, cell samples) are manually curated into the MPS Database. Data from some references data sources are both manually and auto-curated. The MPS Database provides tools to analyze and/or visualize data pulled from external data sources, and also provides tools to analyze curated study data with reference data. Viewing study components, study data, and the features of the database query and visualize study and reference data are describing briefing in the tables below.
+                            All <b>Study Data</b> and <b>Study Components</b> (e.g., <b>Models</b>, <b>Devices</b>, <b>Cell Samples</b>) are manually curated into the <b>MPS Database</b>. Data from some references data sources are both manually and auto-curated. The <b>MPS Database</b> provides tools to analyze and/or visualize data pulled from external data sources, and also provides tools to analyze curated study data combined with reference data. <b>Study Data</b>, <b>Study Components</b>, and the <b>Features</b> of available in the <b>MPS Database</b> are describing briefly in the tables below.
                             <br><br>
-                            Many of the terms used in the MPS-GUI and here in the <b>Help</b> are defined in the <b>Glossary</b>. It is recommened that you rely heavily on the <b>Glossary</b> to assist in understanding how to appropriately review, edit, and/or add data to the MPS-Database.
+                            Many of the terms used in the MPS-GUI and here in the <b>Help</b> are defined in the <b>Glossary</b>. It is recommened that you rely heavily on the <b>Glossary</b> to assist in understanding how to appropriately review, edit, and/or add data to the <b>MPS Database</b>.
                         </li>
                     </ul>
                 </div>
@@ -267,7 +260,7 @@
         </div>
 
         <div id="overview1">
-            <button class="collapsible">Components of a Study</button>
+            <button class="collapsible">Study Components</button>
             <div class="content">
                 <div id="overview1viewer" class="viewersubtainer">
                     <ul class="list-group">
@@ -282,47 +275,47 @@
                             <tbody>
                                 <tr>
                                 <td> Models </td>
-                                <td> A list of Models in the MPS Database with the option to click on the model and view details of the model's design. For more information on this feature, <a href="#mpsmodels">click here</a>.</td>
+                                    <td> A list of <b>Models</b> in the <b>MPS Database</b> with the option to click on the model and view details of the model's design. For more information on this feature, <a href="#mpsmodels">click here</a>.</td>
                                 </tr>
                                 <tr>
                                 <td> Devices </td>
-                                <td> A list of Devices used in Models in the MPS Database with the option to click on the device to view component details. For more information on this feature, <a href="#devices">click here</a>.</td>
+                                    <td> A list of <b>Devices</b> used in <b>Models</b> in the <b>MPS Database</b> with the option to click on the <b>Device</b> to view details of the <b>Device</b>. For more information on this feature, <a href="#devices">click here</a>.</td>
                                 </tr>
                                 <tr>
                                 <td> Locations </td>
-                                <td> A list of Locations within a Device where treatments can be added and/or samples removed. For more information on this feature, <a href="#mpslocations">click here</a>.</td>
+                                    <td> A list of <b>Locations</b> within a <b>Device</b> where treatments can be added and/or samples removed. For more information on this feature, <a href="#mpslocations">click here</a>.</td>
                                 </tr>
                                 <tr>
                                 <td> Diseases </td>
-                                <td> A list of Disease in the MPS Database. For more information on this feature, <a href="#diseasemodels">click here</a>.</td>
+                                    <td> A list of <b>Diseases</b> in the <b>MPS Database</b>. For more information on this feature, <a href="#diseasemodels">click here</a>.</td>
                                 </tr>
                                 <tr>
                                 <td> Cell Samples </td>
-                                <td> A list of Cell Samples used in Models in the MPS Database. The Cell Types and Cell Origins are included as part of the Cell Sample. For more information on this feature, <a href="#cellsamples">click here</a>.</td>
+                                    <td> A list of <b>Cell Samples</b> used in <b>Models</b> in the <b>MPS Database</b>. The <b>Cell Types</b> and <b>Cell Origins</b> are included as part of the <b>Cell Sample</b>. For more information on this feature, <a href="#cellsamples">click here</a>.</td>
                                 </tr>
                                 <tr>
                                 <td> Compounds </td>
-                                <td> A list of chemicals used in MPS Study data. Chemical properties are curated from reference sources. For more information, <a href="#chemicaldata">click here</a>.</td>
+                                    <td> A list of <b>Chemicals</b> used in <b>Studies</b> and/or <b>Features</b> of the <b>MPS Database</b>. <b>Chemical</b> properties are curated from reference sources. For more information, <a href="#chemicaldata">click here</a>.</td>
                                 </tr>
                                 <tr>
                                 <td> Settings </td>
-                                <td> A list of settings used in describing a study. For more information, <a href="#settings">click here</a>.</td>
+                                    <td> A list of <b>Settings</b> used in describing the <b>Study</b> design. For more information, <a href="#settings">click here</a>.</td>
                                 </tr>
                                 <tr>
-                                <td> Assay Target/Analytes </td>
-                                <td> A list of assay Target/Analytes used to assess the response of a Model. Assay Target/Analytes are associated to the Method/Kit used to measure the response. For more information on this feature, <a href="#targets">click here</a>.</td>
+                                <td> Assay Targets/Analytes </td>
+                                    <td> A list of assay <b>Targets/Analytes</b> used to assess the response of a <b>Model</b>. Assay <b>Targets/Analytes</b> are associated to the <b>Method/Kit</b> used to measure response. For more information, <a href="#targets">click here</a>.</td>
                                 </tr>
                                 <tr>
                                 <td> Assay Method/Kits </td>
-                                <td> A list of assay Method/Kits used to measure assay Target/Analytes. For more information on this feature, <a href="#methods">click here</a>.</td>
+                                    <td> A list of assay <b>Method/Kits</b> used to measure assay <b>Targets/Analytes</b>. For more information, <a href="#methods">click here</a>.</td>
                                 </tr>
                                 <tr>
                                 <td> Units of Measure </td>
-                                <td> A list of units available for quantifying compound concentrations and assay target/analytes. For more information on this feature, <a href="#physicalunits">click here</a>.</td>
+                                    <td> A list of <b>Units</b> available for quantifying <b>Compound</b> concentrations and assay <b>Targets/Analytes</b>. For more information, <a href="#physicalunits">click here</a>.</td>
                                 </tr>
                                 <tr>
                                 <td> Other Lists </td>
-                                <td> Currently in develop - option to allow users to see lists of other controlled text strings. For more information, visit the glossary <a href="#glossary">click here</a>.</td>
+                                <td> Options to view lists of other components of a <b>Study</b> are currently in develop. For more information, visit the database <b>Glossary</b>, <a href="#glossary">click here</a>.</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -333,7 +326,7 @@
         </div>
 
         <div id="overview2">
-            <button class="collapsible">Assay Study Data and Metadata</button>
+            <button class="collapsible">Study Data and Metadata</button>
             <div class="content">
                 <div id="overview2viewer" class="viewersubtainer">
                     <ul class="list-group">
@@ -347,24 +340,24 @@
                             </thead>
                             <tbody>
                                 <tr>
-                                <td> Studies List </td>
-                                <td> A list of Studies in the MPS Database with summary information about the models and associated assay results. Selecting a study from the list allows the user to focus in on data from a single study. For more information, <a href="#studies">click here</a>.</td>
+                                <td> Studies </td>
+                                    <td> A list of <b>Studies</b> in the <b>MPS Database</b> with summary information about the <b>Models</b> used in the <b>Study</b> and associated assay results. Selecting a <b>Study</b> from the list allows the user to focus on data from a single <b>Study</b>. For more information, <a href="#studies">click here</a>.</td>
                                 </tr>
                                 <tr>
                                 <td> Matrices </td>
-                                <td> A study Matrix is a method of grouping organ models within a study. Matrices associated with an individual study are shown on the Study Matrices and Matrix Items List page of the MPS-GUI. For more information, see the Glossary or <a href="#matrices">click here</a>.</td>
+                                    <td> A <b>Study Matrix</b> is a method of grouping models within a <b>Study</b>. <b>Matrices</b> associated with an individual <b>Study</b> are shown on the <b>Study Matrices and Items</b> list page of the MPS-GUI. For more information, see the <b>Glossary</b> or <a href="#matrices">click here</a>.</td>
                                 </tr>
                                 <tr>
                                 <td> Matrix Items </td>
-                                <td> In a study, a Matrix Item is the generic term for an individual organ model. Matrix Items are assigned to a Matrix within an individual study. For more information, see the glossary or <a href="#mpslocations">click here</a>.</td>
-                                </tr>
-                                <tr>
-                                <td> Assay Images and Videos </td>
-                                <td> Images and videos can be attached to a Matrix Item and displayed within a Study. For more information on this feature, <a href="#assayimages">click here</a>.</td>
+                                <td> In a <b>Study</b>, a <b>Matrix Item</b> is the generic term for an individual organ model.<b>Matrix Items</b> are assigned to a <b>Matrix</b> within an individual <b>Study</b>. For more information, see the <b>Glossary</b> or <a href="#mpslocations">click here</a>.</td>
                                 </tr>
                                 <tr>
                                 <td> Assay Data Points </td>
-                                <td> Assay Target/Analytes measured values can be uploaded into the MPS Database and assigned to a Matrix Item at a specific time point relative to the start of an experiment. These data can be visualized/analyzed within an individual study (intra-study), across studies (inter-study), and/or with curated reference data. For more information on intra-study assay data, <a href="#assaydata">click here</a>.</td>
+                                    <td> Measured assay <b>Targets/Analytes</b> values, for a specific time point relative to the start of an experiment, can be uploaded into the <b>MPS Database</b> and assigned to an individual <b>Matrix Item</b> within a specific <b>Study</b>. These data can be visualized/analyzed within the individual <b>Study</b> (intra-study), across studies (inter-study), and/or in combination with curated reference data. For more information, <a href="#assaydata">click here</a>. </td>
+                                </tr>
+                                <tr>
+                                <td> Assay Images & Videos </td>
+                                    <td> Images and videos can be attached to a <b>Matrix Item</b> and displayed within a <b>Study</b>. For more information, <a href="#assayimages">click here</a>.</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -391,57 +384,57 @@
                             <tbody>
                                 <tr>
                                 <td> Intra-Study Anaylsis (Graphing/Reproducibility) </td>
-                                <td> This feature of the MPS Database enables intra-study querying and subsequent visualization and analysis. For more information on intra-study assay data analysis, <a href="#intrastudy">click here</a>.</td>
+                                <td> Enables intra-study querying and subsequent visualization and analysis. For more information on intra-study assay data analysis, <a href="#intrastudy">click here</a>.</td>
                                 <td> 1</td>
                                 </tr>
                                 <tr>
                                 <td> Inter-Study Analysis (Graphing/Reproducibility) </td>
-                                <td> This feature of the MPS Database enables inter-study querying and subsequent visualization and analysis. For more information on inter-study assay data analysis, <a href="#interstudy">click here</a>.</td>
+                                <td> Enables inter-study querying and subsequent visualization and analysis. For more information on inter-study assay data analysis, <a href="#interstudy">click here</a>.</td>
                                 <td> 1</td>
                                 </tr>
                                 <tr>
                                 <td> Disease Portal </td>
-                                <td> Provides a portal connecting information from clinical trials to MPS Study data. Links are made based on disease. Users can view summary information, then drill down to see additional disease related details. For more information, <a href="#diseasemodels">click here</a>.</td>
+                                    <td> Provides a portal connecting information from clinical trials to MPS <b>Study Data</b>. Links are made based on <b>Disease</b>. Users can view summary information, then drill down to see additional disease-related details. For more information, <a href="#diseasemodels">click here</a>.</td>
                                 <td> 1, 13, 14 </td>
                                 </tr>
                                 <tr>
                                 <td> Compound Report </td>
-                                <td> Provides a portal for viewing compound data and associated assay study data in the same interface. For more information, <a href="#compoundreport">click here</a>.</td>
+                                    <td> Provides a portal for viewing compound data and associated assay <b>Study Data</b> in the same interface. For more information, <a href="#compoundreport">click here</a>.</td>
                                 <td> 1-5, 12 </td>
                                 </tr>
                                 <tr>
-                                <td> View Chemical Data </td>
-                                <td> Provides a portal for looking at chemical data from a variety of sources. Allows for searching by synonym, molecular weight, and other compound properties. For more information, <a href="#chemicaldata">click here</a>.</td>
+                                <td> Chemical Data </td>
+                                    <td> Provides a portal for looking at <b>Chemical</b> data from a variety of sources. Allows for searching by synonym, molecular weight, and other <b>Compound</b> properties. For more information, <a href="#chemicaldata">click here</a>.</td>
                                 <td>  2-5, 8, 9, 10, 11, 12 </td>
                                 </tr>
                                 <tr>
-                                <td> View Bioactivities </td>
-                                <td> Provides a portal for searching compound bioactivities from a variety of sources. Provides a quick search option to search by compound, biological target, or bioactivity name, and also an advanced search that can be used for selecting multiple compounds, biological targets, and/or bioactivities. For more information, <a href="#bioactivities">click here</a>.</td>
+                                <td> Bioactivities </td>
+                                    <td> Provides a portal for searching <b>Chemcial</b> <b>Bioactivities</b> from a variety of sources. Provides a <b>Quick Search</b> option to search by <b>Compound</b>, biological target, and/or bioactivity name, and an <b>Advanced Search</b> for selecting multiple <b>Compounds</b>, biological targets, and/or bioactivities. For more information, <a href="#bioactivities">click here</a>.</td>
                                 <td> 8, 9, 12, manual </td>
                                 </tr>
                                 <tr>
-                                <td> View Drug Trials </td>
-                                <td> Provides a portal for viewing drug trial data from a variety of sources. Trial type and finding are summarized in list format. Users can search by treatment compound, trial type, species, and other aspects of the trial. For more information, <a href="#drugtrials">click here</a>.</td>
+                                <td> Drug Trials </td>
+                                    <td> Provides a portal for viewing <b>Drug Trial</b> data from a variety of sources. Trial type and trial finding are summarized in list format. Users can search by treatment <b>Compound</b>, trial type, species, and other aspects of the trial. For more information, <a href="#drugtrials">click here</a>.</td>
                                 <td> 2-5</td>
                                 </tr>
                                 <tr>
-                                <td> View Adverse Events </td>
-                                <td> Provides a portal for searching an viewing reported adverse events, including estimated number of reports normalized by estimate drug usage. For more information, <a href="#adverseevents">click here</a>.</td>
+                                <td> Adverse Events </td>
+                                    <td> Provides a portal for searching and viewing reported <b>Adverse Events</b>, including estimated number of reports normalized by estimated drug usage. For more information, <a href="#adverseevents">click here</a>.</td>
                                 <td> 6, 7</td>
                                 </tr>
                                 <tr>
                                 <td> Compare Adverse Events </td>
-                                <td> Enables comparison of multiple compounds and adverse events side-by-side. For more information, <a href="#compareadverseevents">click here</a>.</td>
+                                <td> Enables comparison of multiple <b>Compounds</b> and <b>Adverse Events</b> side-by-side. For more information, <a href="#compareadverseevents">click here</a>.</td>
                                 <td> 6, 7</td>
                                 </tr>
                                 <tr>
-                                <td> Heatmap Analysis </td>
-                                <td> Provides a heatmap visualization of the relative bioactivites (e.g., bioavailability, Cmax, etc.) of one or more compounds and one or more biological targets. For more information, <a href="#heatmap">click here</a>.</td>
+                                <td> Heatmap (Bioactivities) </td>
+                                    <td> Provides a <b>Heatmap</b> visualization of relative <b>Bioactivities</b> (e.g., bioavailability, Cmax, etc.) of one or more <b>Compounds</b> and one or more biological targets. For more information, <a href="#heatmap">click here</a>.</td>
                                 <td> 2-5, 8, 9, 11, 12 </td>
                                 </tr>
                                 <tr>
-                                <td> Cluster Analysis </td>
-                                <td> Provides a dendrogram of compounds clustered by their respective chemical properties and/or bioactivities. For more information, <a href="#cluster">click here</a>.</td>
+                                <td> Cluster Chemicals </td>
+                                <td> Provides a dendrogram of <b>Compounds</b> clustered by their respective properties and/or <b>Bioactivities</b>. For more information, <a href="#cluster">click here</a>.</td>
                                 <td> 2-5, 8, 9, 11, 12 </td>
                                 </tr>
                             </tbody>
@@ -469,7 +462,7 @@
                                 <tbody>
                                     <tr>
                                     <td> 1 </td>
-                                    <td> MPS Database Study Data </td>
+                                        <td> MPS Database Study Data </td>
                                     <td> Manual Curation </td>
                                     </tr>
                                     <tr>
@@ -495,7 +488,7 @@
                                     <tr>
                                     <td> 6 </td>
                                     <td> OpenFDA </td>
-                                    <td> Some data pulled dynamically and not stored in the MPS Database. </td>
+                                    <td> Some data pulled dynamically and not stored. </td>
                                     </tr>
                                     <tr>
                                     <td> 7 </td>
@@ -530,12 +523,12 @@
                                     <tr>
                                     <td> 13 </td>
                                     <td> clinicaltrials.gov </td>
-                                    <td> Some data pulled dynamically and not stored in the MPS Database. </td>
+                                    <td> Some data pulled dynamically and not stored. </td>
                                     </tr>
                                     <tr>
                                     <td> 14 </td>
                                     <td> ctti-clinicaltrials.org </td>
-                                    <td> Some data pulled dynamically and not stored in the MPS Database. </td>
+                                    <td> Some data pulled dynamically and not stored</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -561,23 +554,23 @@
                                 <tbody>
                                     <tr>
                                     <td> Registered MPS Users with No Additional Permissions  </td>
-                                    <td> Can view all reference data and associated features. Can view study component lists (e.g., models, devices, cell samples, etcetera). Can view study data in studies that have been designated as open to all registered MPS users, including: viewing matrix item setup, study protocols, images, videos, and study data. </td>
+                                        <td> Can view all reference data and associated features. Can view <b>Study</b> component lists (e.g., <b>Models</b>, <b>Devices</b>, <b>Cell Samples</b>). Can view <b>Study Data</b> in <b>Studies</b> that have been designated as open to all registered MPS users, including: viewing <b>Matrix Item</b> setup, study protocols, images, videos, and <b>Study Data</b>. </td>
                                     </tr>
                                     <tr>
                                     <td> Data Group Viewers and Users with Additional Permissions  </td>
-                                    <td> Have all the access of registered MPS Users with No Additional Permissions plus access to studies and study data in studies to which they have been granted special access. </td>
+                                        <td> Have all the access of <i>registered MPS Users with No Additional Permissions</i> plus access to <b>Studies</b> to which they have been granted special access. </td>
                                     </tr>
                                     <tr>
                                     <td> Data Group Editors  </td>
-                                    <td> Have all the access of Data Group Viewers and Users with Additional Permissions plus the ability to edit their studies, including: adding/deleting/editing studies and study details; adding/deleting/editing matrices and matrix items; uploading assay data; and validating matrices, matrix items, and studies. </td>
+                                        <td> Have all the access of <i>Data Group Viewers and Users with Additional Permissions</i> plus the ability to edit their <b>Studies</b>, including: adding/deleting/editing <b>Studies</b> and <b>Study</b> details; adding/deleting/editing <b>Matricies</b> and <b>Matrix Items</b>; uploading assay data; and validating <b>Matricies</b>, <b>Matrix Items</b>, and <b>Studies</b>. </td>
                                     </tr>
                                     <tr>
                                     <td> Data Group Admins  </td>
-                                    <td> Have all the access of Data Group Editors plus the ability to sign off a study and monitor the acknowledgment status of a study (e.g., if a model developer has reviewed their study data). </td>
+                                        <td> Have all the access of <i>Data Group Editors</i> plus the ability to sign off a <b>Study</b> and monitor the acknowledgment status of a <b>Study</b> (e.g., indicating a model developer has reviewed their <b>Study</b> data). </td>
                                     </tr>
                                     <tr>
                                     <td> MPS Database Administrators  </td>
-                                    <td> Have all the access of Data Group Admins plus the ability to add/edit/delete new controlled vocabulary to list (e.g., MPS models, Devices, Cell Samples, Locations, excetera). Can change user permissions, including establishing users with acknowledgment access to specific studies. </td>
+                                        <td> Have all the access of <i>Data Group Admins</i> plus the ability to add/edit/delete new controlled vocabulary to lists (e.g., <b>Models</b>, <b>Devices</b>, <b>Cell Samples</b>). Can change user permissions, including establishing users with acknowledgment access to specific studies. </td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -602,27 +595,42 @@
                     <ul class="list-group">
                         <li class="list-group-item">
                             <ul class="list-unstyled">
-                                <li>To view, select MPS Models from the Models tab or from the Models icon:
+                                <li>To view, select <b>View MPS Models</b> from the <b>Models</b> tab or icon:
                                 <ul class="filled-circle">
-                                    <li>Use the search bar or scroll through the list to find the model of interest</li>
-                                    <li>Click on the <b>View</b> to see additional details about the model of interest</li>
+                                    <li>Use the search bar or scroll through the list to find the <b>Model</b> of interest</li>
+                                    <li>Click on the <b>View</b> button to see additional details </li>
+                                </ul>
+                                </li>
+                                <li><br>Notes:
+                                <ul class="filled-circle">
+                                    <li>In the <b>Models</b> list, click on the active links to learn more about the <b>Center</b> or the <b>Devive</b> </li>
+                                    <li>To have a new <b>Model</b> added, contact an <b>MPS Database</b> Administrator </li>
                                 </ul>
                                 </li>
                             </ul>
                         </li>
                     </ul>
                 </div>
-                <button class="showhidebutton">Show/Hide Information for Editors</button>
+                <button class="showhidebutton">Information for Editors</button>
                 <div id="mpsmodelseditor" class="editorsubtainer">
                     <ul class="list-group">
                         <li class="list-group-item">
                             <ul class="list-unstyled">
-                                <li>To edit MPS Model details:
+                                <li>To edit, select <b>View MPS Models</b> from the <b>Models</b> tab or icon:
                                 <ul class="filled-circle">
-                                    <li>Use the search bar or scroll through the list to find the model of interest</li>
-                                    <li>Click on the <b>Edit</b> to see additional details about the model of interest</li>
+                                    <li>Use the search bar or scroll through the list to find the <b>Model</b> of interest</li>
+                                    <li>Click on the <b>Edit</b> button to see additional details </li>
                                     <li>Make the required changes</li>
                                     <li>Click the <b>Submit</b> button to save changes</li>
+                                </ul>
+                                </li>
+                                <li><br>Tips:
+                                <ul class="filled-circle">
+                                    <li>If the <b>Model</b> is a new, enter without a <b>Base Model</b> and <b>Submit</b> to save, then, go back and edit the <b>Model</b> again and assign its <b>Model Name</b> as the <b>Base Model</b> </li>
+                                    <li>In the <b>Locations</b> section of the details page, enter all locations of the <b>Model</b> where actions occur (e.g., adding treatments, collecting samples, imaging a part of the <b>Model</b>) </li>
+                                    <li>Permissions to add and edit <b>Models</b> are user specific </li>
+                                    <li>If you need to add or edit a <b>Model</b>, contact an <b>MPS Database</b> administrator </li>
+                                    <li>For information on assigning a <b>Model</b> to a <b>Matrix Item</b>, <a href="#matrixitemseditor">click here</a> </li>
                                 </ul>
                                 </li>
                             </ul>
@@ -639,27 +647,40 @@
                     <ul class="list-group">
                         <li class="list-group-item">
                             <ul class="list-unstyled">
-                                <li>To view, select Devices/Microdevices from the Models tab or from the Models icon:
+                                <li>To view, select <b>View Devices/Microdevices</b> from the <b>Models</b> tab or icon:
                                 <ul class="filled-circle">
-                                    <li>Use the search bar or scroll through the list to find the device of interest</li>
-                                    <li>Click on the <b>View</b> to see additional details about the device of interest</li>
+                                    <li>Use the search bar or scroll through the list to find the <b>Device</b> of interest</li>
+                                    <li>Click on the <b>View</b> button to see additional details </li>
+                                </ul>
+                                </li>
+                                <li><br>Notes:
+                                <ul class="filled-circle">
+                                    <li>To have a new <b>Device</b> added, contact an <b>MPS Database</b> Administrator </li>
                                 </ul>
                                 </li>
                             </ul>
                         </li>
                     </ul>
                 </div>
-                <button class="showhidebutton">Show/Hide Information for Editors</button>
+                <button class="showhidebutton">Information for Editors</button>
                 <div id="deviceseditor" class="editorsubtainer">
                     <ul class="list-group">
                         <li class="list-group-item">
                             <ul class="list-unstyled">
-                                <li>To edit Device details:
+                                <li>To edit, select <b>View Devices/Microdevices</b> from the <b>Models</b> tab or icon:
                                 <ul class="filled-circle">
-                                    <li>Use the search bar or scroll through the list to find the device of interest</li>
-                                    <li>Click on the <b>Edit</b> to see addition details about the device of interest</li>
+                                    <li>Use the search bar or scroll through the list to find the <b>Device</b> of interest</li>
+                                    <li>Click on the <b>Edit</b> button to see additional details </li>
                                     <li>Make the required changes</li>
                                     <li>Click the <b>Submit</b> button to save changes</li>
+                                </ul>
+                                </li>
+                                <li><br>Tips:
+                                <ul class="filled-circle">
+                                    <li>In the <b>Layout</b> section, the <b>Number of Rows</b> and <b>Number of Columns</b> will be used as the dimensions of the <b>Matrix</b> when using a <b>Model</b> based on this <b>Device</b> and entering as wells in a plate </li>
+                                    <li>Permissions to add and edit <b>Devices</b> are user specific </li>
+                                    <li>If you need to add or edit a <b>Device</b>, contact an <b>MPS Database</b> administrator </li>
+                                    <li>For information on assigning a <b>Device</b> to a <b>Matrix Item</b>, <a href="#matrixitemseditor">click here</a> </li>
                                 </ul>
                                 </li>
                             </ul>
@@ -676,23 +697,30 @@
                     <ul class="list-group">
                         <li class="list-group-item">
                             <ul class="list-unstyled">
-                                <li>To view Location details (not available in the database yet, hopefully before the conference):
+                                <li>To view, select <b>View Devices/Microdevices Locations</b> from the <b>Models</b> tab or icon:
                                 <ul class="filled-circle">
-                                    <li>Currently only available to MPS Database Administrators</li>
+                                    <li>Scroll through the list or search for the <b>Location</b> of interest </li>
+                                </ul>
+                                </li>
+                                <li><br>Notes:
+                                <ul class="filled-circle">
+                                    <li>To have a new <b>Location</b> added, contact an <b>MPS Database</b> Administrator </li>
                                 </ul>
                                 </li>
                             </ul>
                         </li>
                     </ul>
                 </div>
-                <button class="showhidebutton">Show/Hide Information for Editors</button>
+                <button class="showhidebutton">Information for Editors</button>
                 <div id="locationeditor" class="editorsubtainer">
                     <ul class="list-group">
                         <li class="list-group-item">
                             <ul class="list-unstyled">
-                                <li>To edit Location details:
+                                <li>To edit:
                                 <ul class="filled-circle">
-                                    <li>Currently only available to MPS Database Administrators</li>
+                                    <li>Permissions to add and edit <b>Locations</b> are user specific </li>
+                                    <li>If you need to add or edit a <b>Location</b>, contact an <b>MPS Database</b> administrator </li>
+                                    <li>For information on assigning a <b>Location</b> to a <b>Matrix Item</b>, <a href="#matrixitemseditor">click here</a> </li>
                                 </ul>
                                 </li>
                             </ul>
@@ -705,29 +733,31 @@
         <h1 class="sub2-bars">Experimental Design Components</h1>
 
         <div id="diseaselist">
-            <button class="collapsible">Diseases in the MPS Database </button>
+            <button class="collapsible">Diseases in the <b>MPS Database</b> </button>
             <div class="content">
                 <div id="diseaselistviewer" class="viewersubtainer">
                     <ul class="list-group">
                         <li class="list-group-item">
                             <ul class="list-unstyled">
-                                <li>To view Disease details:
+                                <li>To view, select <b>View Disease</b> from the <b>Models</b> tab or icon:
                                 <ul class="filled-circle">
-                                    <li>Currently only available to MPS Database Administrators</li>
+                                    <li>To learn more about <b>Disease Features</b>, <a href="#diseasemodels">click here</a> </li>
                                 </ul>
                                 </li>
                             </ul>
                         </li>
                     </ul>
                 </div>
-                <button class="showhidebutton">Show/Hide Information for Editors</button>
+                <button class="showhidebutton">Information for Editors</button>
                 <div id="diseaselisteditor" class="editorsubtainer">
                     <ul class="list-group">
                         <li class="list-group-item">
                             <ul class="list-unstyled">
-                                <li>To edit Disease details:
+                                <li>To edit:
                                 <ul class="filled-circle">
-                                    <li>Currently only available to MPS Database Administrators</li>
+                                    <li>Permissions to add and edit <b>Diseases</b> are user specific </li>
+                                    <li>If you need to add or edit a <b>Diseases</b>, contact an <b>MPS Database</b> administrator </li>
+                                    <li>For information on assigning a <b>Disease</b> to an organ <b>Model</b>, <a href="#mpsmodelseditor">click here</a> </li>
                                 </ul>
                                 </li>
                             </ul>
@@ -744,43 +774,48 @@
                     <ul class="list-group">
                         <li class="list-group-item">
                             <ul class="list-unstyled">
-                                <li>To view Cell Samples details:
+                                <li>To view, select <b>View Cell Samples</b> from the <b>Cell Samples</b> tab or icon:
                                 <ul class="filled-circle">
                                     <li>Use the search bar or scroll through the list to find the cell sample of interest</li>
+                                    <li>Review the information in the list</li>
                                 </ul>
                                 </li>
-                                <li>Notes:
+                                <li><br>Notes:
                                 <ul class="filled-circle">
-                                    <li><b>Cell Samples</b>, density, and addition location are added to Matrix Items by Data Providers as part of Study setup</li>
+                                    <li><b>Cell Samples</b>, density, and addition location are added to <b>Matrix Items</b> by Data Providers as part of <b>Study</b> setup</li>
                                     <li><b>Cell Types</b> describe a variety of cells, such as <em>astrocyte</em> or <em>hepatocyte</em> )</li>
                                     <li><b>Cell Types</b> should be selected ONLY if the Cell Origin is SPECIFIC to a certain Cell Type (e.g. a cell line) </li>
                                     <li><b>Cell Origins</b> elaborate on the origin of the cells, for instance whether they are fresh, cryopreserved, or from a cell line </li>
+                                    <li>In the <b>Cell Samples</b> list, click on the active links to learn more about the <b>Cell Type</b> or the <b>Cell Origin</b> </li>
+                                    <li>To have a new <b>Cell Sample</b> added, contact an <b>MPS Database</b> Administrator </li>
                                 </ul>
                                 </li>
                             </ul>
                         </li>
                     </ul>
                 </div>
-                <button class="showhidebutton">Show/Hide Information for Editors</button>
+                <button class="showhidebutton">Information for Editors</button>
                 <div id="cellsampleseditor" class="editorsubtainer">
                     <ul class="list-group">
                         <li class="list-group-item">
                             <ul class="list-unstyled">
-                                <li>To edit Cell Sample details:
+                                <li>To edit, select <b>View Cell Samples</b> from the <b>Cell Samples</b> tab or icon:
                                 <ul class="filled-circle">
-                                    <li>Use the search bar or scroll through the list to find the cell sample of interest</li>
-                                    <li>Click on the <b>Edit</b> button to see additional details about the cell sample of interest</li>
+                                    <li>Use the search bar or scroll through the list to find the <b>Cell Sample</b> of interest</li>
+                                    <li>Click on the <b>Edit</b> button to see additional details </li>
                                     <li>Make the required changes</li>
                                     <li>Click the <b>Submit</b> button to save changes</li>
                                 </ul>
                                 </li>
-                                <li>Tips:
+                                <li><br>Tips:
                                 <ul class="filled-circle">
-                                    <li>If a Cell Sample is missing from the list, contact an MPS Database Administrator </li>
-                                    <li>If the <em>Cell Origin</em> of the sample is a cell line, select the <b>Cell Type</b> first </li>
+                                    <li>If the <b>Cell Origin</b> of the sample is a cell line, select the <b>Cell Type</b> first </li>
                                     <li>Differentiating cell lots on date received and other criteria can be helpful in identifying assay data generated using specific lots of cells </li>
-                                    <li>Select a Cell Type ONLY if this Origin is SPECIFIC to a certain Cell Type (e.g., a cell line) </li>
-                                    <li>Be sure to specify the <b>organ</b>, as many Cell Types differ depending on where they are located (e.g., hepatic stellate cells differ from pancreatic stellate cells </li>
+                                    <li>Select a <b>Cell Type</b> ONLY if this Origin is SPECIFIC to a certain <b>Cell Type</b> (e.g., a cell line) </li>
+                                    <li>Be sure to specify the <b>Organ</b>, as many <b>Cell Types</b> differ depending on where they are located (e.g., hepatic stellate cells differ from pancreatic stellate cells </li>
+                                    <li>Permissions to add and edit <b>Cell Samples</b>, <b>Cell Types</b>, and <b>Cell Origins</b> are user specific </li>
+                                    <li>If you need to add or edit a <b>Cell Samples</b>, contact an <b>MPS Database</b> administrator </li>
+                                    <li>For information on assigning a <b>Cell Sample</b> to a <b>Matrix Item</b>, <a href="#matrixitemseditor">click here</a> </li>
                                 </ul>
                                 </li>
                             </ul>
@@ -791,29 +826,31 @@
         </div>
 
         <div id="settings">
-            <button class="collapsible">Settings (non-Compound Treatments, Experimental Parameters, etcetera) </button>
+            <button class="collapsible">Settings (Instrument Settings, Non-Compound Treatments, etcetera) </button>
             <div class="content">
                 <div id="settingsviewer" class="viewersubtainer">
                     <ul class="list-group">
                         <li class="list-group-item">
                             <ul class="list-unstyled">
-                                <li>To view Settings details:
+                                <li>To view, a <b>Study</b> containing Settings:
                                 <ul class="filled-circle">
-                                    <li>Currently only available to MPS Database Administrators</li>
+                                    <li>A way of viewing a list of avaialable settings is in development </li>
                                 </ul>
                                 </li>
                             </ul>
                         </li>
                     </ul>
                 </div>
-                <button class="showhidebutton">Show/Hide Information for Editors</button>
+                <button class="showhidebutton">Information for Editors</button>
                 <div id="settingseditor" class="editorsubtainer">
                     <ul class="list-group">
                         <li class="list-group-item">
                             <ul class="list-unstyled">
-                                <li>To edit Settings details:
+                                <li>To edit:
                                 <ul class="filled-circle">
-                                    <li>Currently only available to MPS Database Administrators</li>
+                                    <li>Permissions to add and edit <b>Settings</b> are user specific </li>
+                                    <li>If you need to add or edit a <b>Settings</b>, contact an <b>MPS Database</b> administrator </li>
+                                    <li>For information on assigning a <b>Setting</b> to a <b>Matrix Item</b>, <a href="#matrixitemseditor">click here</a> </li>
                                 </ul>
                                 </li>
                             </ul>
@@ -823,7 +860,7 @@
             </div>
         </div>
 
-        <h1 class="sub2-bars">Mesurement Components</h1>
+        <h1 class="sub2-bars">Measurement Components</h1>
 
         <div id="targets">
             <button class="collapsible">Assay Targets/Analytes</button>
@@ -832,42 +869,34 @@
                     <ul class="list-group">
                         <li class="list-group-item">
                             <ul class="list-unstyled">
-                                <li>To view assay Target/Analyte details:
+                                <li>To view, select <b>View Targets/Analytes</b> from the <b>Studies</b> tab or icon:
                                 <ul class="filled-circle">
-                                    <li>Use the search bar or scroll through the list to find the assay Target/Analyte of interest</li>
-                                    <li>Click on the <b>View</b> button to see a list of Method/Kits paired with the Target/Analyte and the studies with assay data for the Target/Analyte</li>
+                                    <li>Use the search bar or scroll through the list to find the <b>Targets/Analytes</b> of interest</li>
+                                    <li>Click on the <b>View</b> button to see additional details </li>
+                                    <li>Click on a <b>Method/Kit</b> to see more information about the measurement method (optional)</li>
+                                    <li>Click on a <b>Study</b> in the list of stuides that utilize the <b>Target/Analyte</b> to view study specific results (optional)</li>
                                 </ul>
                                 </li>
-                                <li>Notes:
+                                <li><br>Notes:
                                 <ul class="filled-circle">
-                                    <li>The studies shown in the list are tied to user permission settings. For more information on permissions, <a href="#overview5">click here</a> </li>
+                                    <li>The <b>Studies</b> shown in the list are tied to user permission settings. For more information on permissions, <a href="#overview5">click here</a> </li>
+                                    <li>To have a new <b>Target/Analyte</b> added, contact an <b>MPS Database</b> Administrator </li>
                                 </ul>
                                 </li>
                             </ul>
                         </li>
                     </ul>
                 </div>
-                <button class="showhidebutton">Show/Hide Information for Editors</button>
-                <div id="targetsseditor" class="editorsubtainer">
+                <button class="showhidebutton">Information for Editors</button>
+                <div id="targetseditor" class="editorsubtainer">
                     <ul class="list-group">
                         <li class="list-group-item">
                             <ul class="list-unstyled">
-                                <li>To add assay Target/Analytes to a Study:
+                                <li>To edit:
                                 <ul class="filled-circle">
-                                    <li>Go to the study of interest. For more information on finding a study, <a href="#studies">click here</a> </li>
-                                    <li>Click on the study of interest to be routed to the Study Matrices and Matrix Items List page</li>
-                                    <li>Click on the <b>Edit This Study</b> button </li>
-                                    <li>Scroll to the Assays section</li>
-                                    <li>Click on the <b>Add Assay</b> button </li>
-                                    <li>Select the appropriate combination of Target/Analyte, Method/Kit, and Units </li>
-                                    <li>Click the <b>Submit</b> button to save changes</li>
-                                </ul>
-                                </li>
-                                <li>Tips:
-                                <ul class="filled-circle">
-                                    <li>If the Target/Analyte is not listed, contact an MPS Database administrator </li>
-                                    <li>If the Method/Kit is not listed, contact an MPS Database administrator </li>
-                                    <li>If the Unit is not listed, contact an MPS Database administrator </li>
+                                    <li>Permissions to add and edit <b>Targets/Anayltes</b> are user specific </li>
+                                    <li>If you need to add or edit a <b>Targets/Anayltes</b>, contact an <b>MPS Database</b> administrator </li>
+                                    <li>For information on adding/editing <b>Targets/Anayltes</b> assigned to a <b>Study</b>, <a href="#studieseditor">click here</a> </li>
                                 </ul>
                                 </li>
                             </ul>
@@ -884,42 +913,34 @@
                     <ul class="list-group">
                         <li class="list-group-item">
                             <ul class="list-unstyled">
-                                <li>To view assay Method/Kit details:
+                                <li>To view, select <b>View Methods/Kits</b> from the <b>Studies</b> tab or icon:
                                 <ul class="filled-circle">
-                                     <li>Use the search bar or scroll through the list to find the assay Method/Kit of interest</li>
-                                    <li>Click on the <b>View</b> button to see a list of Target/Analytes paired with the Method/Kit and the studies with assay data for the Method/Kit </li>
+                                    <li>Use the search bar or scroll through the list to find the assay <b>Method/Kit</b> of interest</li>
+                                    <li>Click on the <b>View</b> button to see a list of <b>Targets/Analytes</b> paired with the <b>Method/Kit</b> and the studies with assay data for the <b>Method/Kit</b> </li>
+                                    <li>Click on a <b>Target/Analyte</b> to see more information about what was measured using the <b>Method/Kit</b> (optional)</li>
+                                    <li>Click on a <b>Study</b> in the list of stuides that utilize the <b>Method/Kit</b> to view study specific results (optional)</li>
                                 </ul>
                                 </li>
-                                <li>Notes:
+                                <li><br>Notes:
                                 <ul class="filled-circle">
-                                    <li>The studies shown in the list are tied to user permission settings. For more information on permissions, <a href="#overview5">click here</a> </li>
+                                    <li>The <b>Studies</b> shown in the list are tied to user permission settings. For more information on permissions, <a href="#overview5">click here</a> </li>
+                                    <li>To have a new <b>Target/Analyte</b> added, contact an <b>MPS Database</b> Administrator </li>
                                 </ul>
                                 </li>
                             </ul>
                         </li>
                     </ul>
                 </div>
-                <button class="showhidebutton">Show/Hide Information for Editors</button>
+                <button class="showhidebutton">Information for Editors</button>
                 <div id="methodsseditor" class="editorsubtainer">
                     <ul class="list-group">
                         <li class="list-group-item">
                             <ul class="list-unstyled">
-                                <li>To add assay Method/Kitss to a Study:
+                                <li>To edit:
                                 <ul class="filled-circle">
-                                    <li>Go to the study of interest. For more information on finding a study, <a href="#studies">click here</a> </li>
-                                    <li>Click on the study of interest to be routed to the Study Matrices and Matrix Items List page</li>
-                                    <li>Click on the <b>Edit This Study</b> button </li>
-                                    <li>Scroll to the Assays section</li>
-                                    <li>Click on the <b>Add Assay</b> button </li>
-                                    <li>Select the appropriate combination of Target/Analyte, Method/Kit, and Units </li>
-                                    <li>Click the <b>Submit</b> button to save changes</li>
-                                </ul>
-                                </li>
-                                <li>Tips:
-                                <ul class="filled-circle">
-                                    <li>If the Target/Analyte is not listed, contact an MPS Database administrator </li>
-                                    <li>If the Method/Kit is not listed, contact an MPS Database administrator </li>
-                                    <li>If the Unit is not listed, contact an MPS Database administrator </li>
+                                    <li>Permissions to add and edit <b>Methods/Kits</b> are user specific </li>
+                                    <li>If you need to add or edit a <b>Methods/Kits</b>, contact an <b>MPS Database</b> administrator </li>
+                                    <li>For information on adding/editing <b>Methods/Kits</b> assigned to a <b>Study</b>, <a href="#studieseditor">click here</a> </li>
                                 </ul>
                                 </li>
                             </ul>
@@ -928,7 +949,6 @@
                 </div>
             </div>
         </div>
-
 
         <div id="physicalunits">
             <button class="collapsible">Units Available for Compounds, Cells, Settings, and Assay Targets</button>
@@ -937,23 +957,30 @@
                     <ul class="list-group">
                         <li class="list-group-item">
                             <ul class="list-unstyled">
-                                <li>To view Units details:
+                                <li>To view, select <b>View Measurement Units</b> from the <b>Studies</b> tab or icon:
                                 <ul class="filled-circle">
-                                    <li>Currently only available to MPS Database Administrators</li>
+                                    <li>Scroll through the list or search for the <b>Unit</b> of interest </li>
+                                </ul>
+                                </li>
+                                <li><br>Notes:
+                                <ul class="filled-circle">
+                                    <li>To have a new <b>Unit</b> added, contact an <b>MPS Database</b> Administrator </li>
                                 </ul>
                                 </li>
                             </ul>
                         </li>
                     </ul>
                 </div>
-                <button class="showhidebutton">Show/Hide Information for Editors</button>
-                <div id="settingseditor" class="editorsubtainer">
+                <button class="showhidebutton">Information for Editors</button>
+                <div id="physicalunitseditor" class="editorsubtainer">
                     <ul class="list-group">
                         <li class="list-group-item">
                             <ul class="list-unstyled">
-                                <li>To edit Units details:
+                                <li>To edit:
                                 <ul class="filled-circle">
-                                    <li>Currently only available to MPS Database Administrators</li>
+                                    <li>Permissions to add and edit <b>Units</b> are user specific </li>
+                                    <li>If you need to add or edit a <b>Unit</b>, contact an <b>MPS Database</b> administrator </li>
+                                    <li>For information on adding/editing <b>Units</b> assigned to a measurements in a <b>Study</b>, <a href="#studieseditor">click here</a> </li>
                                 </ul>
                                 </li>
                             </ul>
@@ -962,7 +989,6 @@
                 </div>
             </div>
         </div>
-
     </div>
 
     <div id="study_section" class="container">
@@ -976,24 +1002,24 @@
                     <ul class="list-group">
                         <li class="list-group-item">
                             <ul class="list-unstyled">
-                                <li>To view Study details:
+                                <li>To view, select <b>View All Studies</b> from the <b>Studies</b> tab or icon:
                                 <ul class="filled-circle">
-                                    <li>Use the search bar or scroll through the list to find the Study of interest</li>
-                                    <li>Click on the study of interest to be routed to the Study Matrices and Matrix Items List page</li>
-                                    <li>There are several options for where to go next (<a href="#intrastudy">click here</a> for guidance on what to select)  </li>
-                                        <ul class="open-circle"><li>click on the <b>Study Summary</b> button in the header bar to see study details and review study data </li></ul>
-                                        <ul class="open-circle"><li>click on the <b>View Reproducibility</b> button in the header bar to see reproducibility analysis </li></ul>
-                                        <ul class="open-circle"><li>click on the <b>View Images</b> button in the header bar to see images and/or videos associated to the study </li></ul>
-                                        <ul class="open-circle"><li>click on the <b>View/Edit</b> button next to a Matrix to view matrix details, data, and to review Matrix Item setup as a group (for more information, <a href="#matrices">click here</a>) </li></ul>
-                                        <ul class="open-circle"><li>click on the <b>View/Edit</b> button next to an individual Item to review Matrix Item details, data, and setup of an individual item (for more information, <a href="#matrixitems">click here</a>) </li></ul>
+                                    <li>Use the search bar or scroll through the list to find the <b>Study</b> of interest</li>
+                                    <li>If a green plus sign shows on the list, click it to see more details (optional) </li>
+                                    <li>Click on the <b>View/Edit</b> button to be routed to the <b>Study Matrices and Items</b> list page </li>
+                                    <li>There are several options for where to go next, including:  </li>
+                                        <ul class="open-circle"><li>Clicking on the <b>Study Summary</b> button - see <b>Study</b> details and review <b>Study</b> data (for more information, <a href="#intrastudy">click here</a>)</li></ul>
+                                        <ul class="open-circle"><li>Clicking on the <b>View Reproducibility</b> button - see results of intra-study reproducibility analysis (for more information, <a href="#intrastudy">click here</a>)</li></ul>
+                                        <ul class="open-circle"><li>Clicking on the <b>View Images</b> button - see images and/or videos associated to the <b>Study</b> (for more information, <a href="#assayimages">click here</a>)</li></ul>
+                                        <ul class="open-circle"><li>Clicking on the <b>View/Edit</b> button next to a <b>Matrix</b> - review <b>Matrix</b> details, data, and to review <b>Matrix Item</b> setups as a group (for more information, <a href="#matrices">click here</a>) </li></ul>
+                                    <ul class="open-circle"><li>Clicking on the <b>View/Edit</b> button next to an individual <b>Matrix Item</b> - review <b>Matrix Item</b> details, data, and setup of an individual item (for more information, <a href="#matrixitems">click here</a>) </li></ul>
                                 </ul>
                                 </li>
-                                <li>Notes:
+                                <li><br>Notes:
                                 <ul class="filled-circle">
                                     <li>The studies shown in the list are tied to user permission settings. For more information on permissions, <a href="#overview5">click here</a> </li>
-                                    <li>The assay data visualization section on the Study Summary page, the Matrix Setup and Data page, and the Matrix Item Setup and Data page all work the same way</li>
-                                    <li>If a green plus sign shows on the list, click it to see more details in the list (optional) </li>
-                                    <li>The grouping and filtering features function the same way when accessed from within an individual study or from the inter-study query page of the MPS-GUI.  </li>
+                                    <li>The assay data visualization section on the <b>Study</b> Summary page, the <b>Matrix</b> Setup and Data page, and the <b>Matrix Item</b> Setup and Data page all work the same way</li>
+                                    <li>The grouping and filtering feature functions the same way when accessed from within an individual <b>Study</b> or from the inter-study query page of the MPS-GUI.  </li>
                                     <li>For information on viewing data across studies (inter-study), <a href="#interstudy">click here</a> </li>
                                 </ul>
                                 </li>
@@ -1001,64 +1027,89 @@
                         </li>
                     </ul>
                 </div>
-                <button class="showhidebutton">Show/Hide Information for Editors</button>
+
+                <button class="showhidebutton">Information for Editors</button>
                 <div id="studieseditor" class="editorsubtainer">
+                    <h3 class="sub3-bars"><em><b>Adding Assay Data Step 1:</b></em> Adding/Editting a <b>Study</b> </h3>
                     <ul class="list-group">
                         <li class="list-group-item">
                             <ul class="list-unstyled">
-                                <li>Adding Assay Data Step 1: Adding a Study - to add/edit a Study:
+                                <li>To Add/Edit a <b>Study</b>:
                                 <ul class="filled-circle">
-                                    <li>Check to make sure that all controlled vocabulary needed is available (<a href="#mpsmodels">Models</a>, <a href="#cellsamples">Cell Samples</a>, <a href="#mpslocations">Locations</a>, <a href="#targets">Target/Analytes</a>, <a href="#methods">Method/Kits</a>, <a href="#physicalunits">Units</a>) </li>
-                                    <li>Click on the <b>Add Study</b> button or the <b>View/Edit</b> button next to the study of interest to be routed to the Study Matrices and Matrix Items List page</li>
+                                    <li>Check to make sure that all needed components are available in the database <a href="#component_section">Study Components</a> </li>
+                                    <li>Click on the <b>Add Study</b> button or the <b>View/Edit</b> button next to the <b>Study</b> of interest to be routed to the <b>Study Matrices and Items</b> list page </li>
                                     <li>Click on the <b>Edit This Study</b> button and add/edit the required information</li>
-                                        <ul class="open-circle"><li>Group – Data Group </li></ul>
-                                        <ul class="open-circle"><li>Study Type – the general purpose of the study (one is required; check all that apply) </li></ul>
-                                        <ul class="open-circle"><li>Study Name – Use an informative name (e.g., "Kidney-Liver Vitamin C Metabolism" is more informative than "Study-1") </li></ul>
-                                        <ul class="open-circle"><li>Start Date - Start of experiment </li></ul>
-                                        <ul class="open-circle"><li>Description - Information description </li></ul>
-                                        <ul class="open-circle"><li>Use in Calculations - Checking <b>Use in Calculations</b> tells the database to use this study's data in predictive modeling and other calculations </li></ul>
-                                        <ul class="open-circle"><li>Protocol File – a Word or pdf of the study protocol </li></ul>
-                                        <ul class="open-circle"><li>Image to Clarify A Study – recommend a picture of the setup or an illustration of the experimental protocol </li></ul>
-                                        <ul class="open-circle"><li>For Integrated Chip Studies – select configuration if performing an integrated study  </li></ul>
-                                        <ul class="open-circle"><li>Assay – For information on adding assay, <a href="#targets">click here</a> (the combinations of Method-Target-Units must be here priore to uploading assay data)</li></ul>
-                                        <ul class="open-circle"><li>Supporting Data – Attach files that will assist other database users in understanding the study design and/or assay data  </li></ul>
-                                        <ul class="open-circle"><li>click the <b>Submit</b> button to save changes</li></ul>
-                                    <li>For information on continuing to add MPS models and assay data to the Study (Step 2), <a href="#matrices">click here</a> </li>
+                                        <ul class="open-circle"><li>Group – select a Data Group </li></ul>
+                                        <ul class="open-circle"><li>Study Type – indicate the general purpose of the <b>Study</b> (one is required; check all that apply) </li></ul>
+                                        <ul class="open-circle"><li>Study Name – use an informative name (e.g., "Kidney-Liver Vitamin C Metabolism" is more informative than "Study-1") </li></ul>
+                                        <ul class="open-circle"><li>Start Date - start of experiment (Day 0) </li></ul>
+                                        <ul class="open-circle"><li>Description - informative description </li></ul>
+                                        <ul class="open-circle"><li>Use in Calculations - checking <b>Use in Calculations</b> tells the database to use this study's data in predictive modeling and other calculations </li></ul>
+                                        <ul class="open-circle"><li>Protocol File – a Word or pdf file containing the <b>Study</b> protocol </li></ul>
+                                        <ul class="open-circle"><li>Image to Clarify A <b>Study</b> – recommend a picture of the setup or an illustration of the experimental protocol </li></ul>
+                                        <ul class="open-circle"><li>For Integrated Chip Studies – select configuration if performing an integrated <b>Study</b>  </li></ul>
+                                        <ul class="open-circle"><li>Assays – for each combination of Method-Target-Unit of assay data that will be loaded to the study, add an assay row to the section </li></ul>
+                                        <ul class="open-circle"><li>Supporting Data – attach files that will assist other database users in understanding the <b>Study</b> design and/or assay data  </li></ul>
+                                        <ul class="open-circle"><li>Click the <b>Submit</b> button to save changes</li></ul>
+                                    <li>For information on continuing to add MPS models and assay data to the <b>Study</b> (Step 2), <a href="#matriceseditor">click here</a> </li>
                                 </ul>
                                 </li>
-                                <li>Tips:
+                                <li><br>Tips:
                                 <ul class="filled-circle">
-                                    <li>If new controlled vocabulary is needed, contact an MPS Database administrator </li>
-                                    <li>Everything in the study can be edited at any time until the study Data Group Admin signs off the study (then it is locked) </li>
+                                    <li>If new components are needed, contact an <b>MPS Database</b> administrator </li>
+                                    <li>Everything in the <b>Study</b> can be edited at any time until the <b>Study</b> Data Group Admin signs off the <b>Study</b> (then it is locked) </li>
                                     <li>Data contained in files attached as Supporting Data are NOT available for visualization, analysis, or used in calculations within the MPS-GUI </li>
+                                    <li>All Combinations of Method-Target-Unit must be listed in the Assays Section of the Study Details page prior to uploading assay data</li>
                                 </ul>
                                 </li>
-                                <li><br>A Note about Flags:
-                                <ul class="filled-circle">
-                                    <li>When reviewing a study, the study, each matrix, and/or each matrix item can be flagged and annotated</li>
-                                    <li> Clicking <a role='button' class="btn btn-sm" style="color:#337AB7"> <span class="glyphicon glyphicon-flag" aria-hidden="true"></span> </a> places the flag  </li>
-                                    <li> Clicking <a role='button' class="btn btn-sm btn-warning"> Notes </a> brings up an input dialog where you can explain why these results were flagged </li>
-                                    <li> Flags and notes are fully reversible until a study is signed off </li>
-                                    <li> The annotation process works the same way for a Study, a Matrix, and a Matrix Item </li>
-                                </ul>
-                                </li>
-                                <div id="studyconfigurations">
-                                <li><br>A Note about Integrated Studies:
-                                <ul class="filled-circle">
-                                    <li>When setting up a study, Models can be associated </li>
-                                    <li>Each model has a <b>Label</b>, which can be one or two characters long </li>
-                                    <li><b>Sequence Number</b> shows the order of input for the models </li>
-                                    <li><b>Output</b> lists all of the other models the current model feeds into </li>
-                                    <li>Output should be a list of labels separated by dashes: e.g. "AB-CD" means the model is connected to AB and CD </li>
-                                    <li><b>Coupling</b> indicates whether or not the model is directly hooked up to the other models </li>
-                                    <li>Click <b>Add Model</b> to add another row </li>
-                                </ul>
-                                </li>
-                                </div>
                             </ul>
                         </li>
                     </ul>
                 </div>
+
+                <button class="showhide2button">See a Note About Flags</button>
+                <div id="flagsnotes" class="editor2subtainer">
+                    <ul class="list-group">
+                        <li class="list-group-item">
+                            <ul class="list-unstyled">
+                                <li>A <b>Study</b>, each <b>Matrix</b>, and/or each <b>Matrix Item</b> can be flagged and annotated
+                                <ul class="filled-circle">
+                                    <li> Clicking <a role='button' class="btn btn-sm" style="color:#337AB7"> <span class="glyphicon glyphicon-flag" aria-hidden="true"></span> </a> places the flag  </li>
+                                    <li> Clicking <a role='button' class="btn btn-sm btn-warning"> Notes </a> brings up an input dialog where annotations can be added </li>
+                                </ul>
+                                </li>
+                                <li><br>Tips:
+                                <ul class="filled-circle">
+                                    <li> Flags and notes are fully reversible until a <b>Study</b> is signed off </li>
+                                    <li> The annotation process works the same way for a <b>Study</b>, a <b>Matrix</b>, and a <b>Matrix Item</b> </li>
+                                </ul>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+
+                <button class="showhide2button">See a Note About Integrated Studies</button>
+                <div id="studyconfigurations" class="editor2subtainer">
+                    <ul class="list-group">
+                        <li class="list-group-item">
+                            <ul class="list-unstyled">
+                                <li>When performing <b>Integrated Studies</b>:
+                                <ul class="filled-circle">
+                                    <li>When setting up a <b>Study</b>, <b>Models</b> can be associated </li>
+                                    <li>Each <b>Model</b> is assigned a <b>Label</b>, which can be one or two characters long </li>
+                                    <li><b>Sequence Number</b> shows the order of input for the <b>Models</b> </li>
+                                    <li><b>Output</b> lists all of the other <b>Models</b> the current <b>Models</b> feeds into </li>
+                                    <li><b>Output</b>  should be a list of labels separated by dashes (e.g. "AB-CD" means the model is connected to AB and CD) </li>
+                                    <li><b>Coupling</b> indicates whether or not the model is directly connected to the other models </li>
+                                    <li>Click <b>Add Model</b> to add another row </li>
+                                </ul>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+
             </div>
         </div>
 
@@ -1069,36 +1120,42 @@
                     <ul class="list-group">
                         <li class="list-group-item">
                             <ul class="list-unstyled">
-                                <li>To view Matrix details, from the Study Matrices and Items list page:
+                                <li>To view <b>Matrix</b> details, from the <b>Study Matrices and Items</b> list page:
                                 <ul class="filled-circle">
-                                    <li>Use the search bar or scroll through the list to find the Matrix of interest</li>
-                                    <li>Click on the <b>View/Edit</b> button next to the Matrix of interest </li>
+                                    <li>Use the search bar or scroll through the list to find the <b>Matrix</b> of interest</li>
+                                    <li>Review information provided
+                                    <li>Click on the <b>View/Edit</b> button next to the <b>Matrix</b> of interest </li>
                                     <li>Click on the <b>Show Settings</b> button to see non-compound treatments/conditions/settings </li>
                                     <li>Click on the <b>Show Compounds</b> to see compound treatments  </li>
-                                    <li>Click on the <b>Show Cells</b> button to see cells added to matrix items </li>
-                                    <li>Review the setup of all the Matrix Items as a group </li>
-                                    <li>Grouping/Filtering enables changing what/how data are displayed/analyzed (for more information on how to use this feature, <a href="#interstudy">click here</a>) </li>
-                                    <li>Current Data presents visualizations for assay data associated with the Items in this Matrix (for more information on how to use this feature, <a href="#intrastudy">click here</a>) </li>
+                                    <li>Click on the <b>Show Cells</b> button to see cells added to<b>Matrix Items</b> </li>
+                                    <li>Review the setup of all the<b>Matrix Items</b> as a group </li>
+                                    <li>The <i>Grouping/Filtering</i> section enables changing what/how data are displayed (for more information on how to use this feature, <a href="#intrastudy">click here</a>) </li>
+                                    <li>The <i>Current Data</i> section presents visualizations for assay data associated with the <b>Matrix Items</b> in this <b>Matrix</b> (for more information on how to use this feature, <a href="#intrastudy">click here</a>) </li>
                                 </ul>
                                 </li>
-                                <li>Notes:
+                                <li><br>Notes:
                                 <ul class="filled-circle">
-                                    <li>To review how to navigate to the Study Matrices and Matrix Items list page, <a href="#studies">click here</a> </li>
-                                    <li>The assay data visualization section on the Study Summary page, the Matrix Setup and Data page, and the Matrix Item Setup and Data page all work the same way</li>
+                                    <li>To review how to navigate to the <b>Study Matrices and Items</b> list page, <a href="#studies">click here</a> </li>
+                                    <li>The <i>Current Data</i> sections of the <b>Study Summary</b> page, the <b>Matrix Setup and Data</b> page, and the <b>Matrix Item Setup and Data</b> page all work the same way</li>
                                 </ul>
                                 </li>
                             </ul>
                         </li>
                     </ul>
                 </div>
-                <button class="showhidebutton">Show/Hide Information for Editors</button>
+                <button class="showhidebutton">Information for Editors</button>
                 <div id="matricieseditor" class="editorsubtainer">
+                    <h3 class="sub3-bars"><em><b>Adding Assay Data Step 2:</b></em> Adding/Editting a <b>Matrix</b> </h3>
                     <ul class="list-group">
                         <li class="list-group-item">
                             <ul class="list-unstyled">
-                                <li>Adding Assay Data Step 2: Adding a Matrix - to add a matrix, click the <b>Add Matrix</b> button; to edit click on the <b>View/Edit</b> button next to the Matrix of interest:
-                                    <br><br>
-                                    Global Section
+                                <li>To Add/Edit a <b>Matrix</b>:
+                                <ul class="filled-circle">
+                                    <li>To add - click the <b>Add Matrix</b> button</li>
+                                    <li>To edit - click on the <b>View/Edit</b> button next to the <b>Matrix</b> of interest</li>
+                                </ul>
+                                </li>
+                                <li><br>In the <i>Global Section</i>:
                                 <ul class="filled-circle">
                                     <li>Matrix Name – enter something descriptive</li>
                                     <li>Notes – free text field for describing the matrix</li>
@@ -1106,24 +1163,24 @@
                                     <li>If multiple chips -  select number of Items, Rows, and Columns </li>
                                     <li>If Plate - select the applicable device </li>
                                 </ul>
-
-                                    Individual Section
+                                </li>
+                                <li><br>In the <i>Individual Section</i>:
                                 <ul class="filled-circle">
-                                    <li>Select an Action – enter applicable information in the box below the action </li>
-                                    <li>Click on one of the "Apply" buttons or click and drag in the matrix </li>
-                                    <li>Representation – select from the options in the list</li>
+                                    <li>Select an <i>Action</i> </li>
+                                    <li>Enter applicable information in the box below the <i>Action</i> </li>
+                                    <li>Click on one of the "Apply" buttons or click and drag in the <b>Matrix</b> </li>
                                     <li>Click the <b>Submit</b> button to save changes</li>
-                                    <li>For information on continuing to add MPS models and assay data to the Study (Step 3), <a href="#matrices">click here</a> </li>
                                 </ul>
                                 </li>
-                                <li>Tips:
+                                <li><br>Tips:
                                 <ul class="filled-circle">
-                                    <li>For each Matrix Item, the Name/ID, Test Type, Setup Date, and MPS/Organ Model MUST be filled PRIOR to the first Submit  </li>
-                                    <li>Name/IDs must be unique in  Study (cannot not have repeats in a Matrix or in two Matrices)  </li>
-                                    <li>Test Type specifies whether the Matrix Item functions as a control  </li>
+                                    <li>For each <b>Matrix Item</b>, the Name/ID, Test Type, Setup Date, and MPS/Organ Model MUST be filled PRIOR to the first <b>Submit</b>  </li>
+                                    <li>Name/IDs must be unique in an individual <b>Study</b> (cannot not have repeats in a <b>Matrix</b> or in two <b>Matrices</b> of the same <b>Study</b>)  </li>
+                                    <li>Test Type specifies whether the <b>Matrix Item</b> functions as a control  </li>
                                     <li>Submit (and Overwrite) after every change you do not want to have to make again  </li>
                                     <li>Invest a little time in exploring the different Actions and Apply techniques to find what works best for you  </li>
-                                    <li>After the first Submit, Matrix Items can be setup and/or updated in the Matrix or individually (to learn more about setup up Matrix Items, <a href="#matrixitems">click here</a>   </li>
+                                    <li>After the first Submit, <b>Matrix Items</b> can be setup and/or updated in the <b>Matrix</b> or individually (to learn more about setup up<b>Matrix Items</b>, <a href="#matrixitems">click here</a>   </li>
+                                    <li>For information on continuing to add MPS models and assay data to the <b>Study</b> (Step 3), <a href="#matrixitemseditor">click here</a> </li>
                                 </ul>
                                 </li>
                             </ul>
@@ -1140,55 +1197,62 @@
                     <ul class="list-group">
                         <li class="list-group-item">
                             <ul class="list-unstyled">
-                                <li>Matrix Items can be selected by clicking on active links in many places in the MPS-GUI. One way to access an individual Matrix Item is to click the <b>View/Edit</b> button next to the Matrix Item in the Items section of  the Study Matrices and Matrix Items list page.
+                                <li><b>Matrix Items</b> can be selected by clicking on active links in many places in the MPS-GUI. One way to access an individual <b>Matrix Item</b> is to click the <b>View/Edit</b> button next to the <b>Matrix Item</b> in the <i>Items</i> section of the <b>Study Matrices and Items</b> list page.
                                 <ul class="filled-circle">
-                                    <li>Use the search bar or scroll through the list to find the Item of interest</li>
-                                    <li>Click on the <b>View/Edit</b> button next to the Item of interest </li>
-                                    <li>Review the Compounds  </li>
-                                    <li>Review the Cells Samples  </li>
-                                    <li>Review the Settings  </li>
-                                    <li>Grouping/Filtering enables changing what/how data are displayed (for more information on how to use this feature, <a href="#interstudy">click here</a> </li>
-                                    <li>Current Data presents visualizations and tabular formatted assay data associated with this Item (for more information on how to use this feature, <a href="#intrastudy">click here</a>) </li>
+                                    <li>Use the search bar or scroll through the list to find the <b>Matrix Item</b> of interest</li>
+                                    <li>Click on the <b>View/Edit</b> button next to the <b>Matrix Item</b> of interest </li>
+                                    <li>Review the <b>Compounds</b>  </li>
+                                    <li>Review the <b>Cells Samples</b>  </li>
+                                    <li>Review the <b>Settings</b>  </li>
+                                    <li>The <i>Grouping/Filtering</i> section enables changing what/how data are displayed (for more information on how to use this feature, <a href="#intrastudy">click here</a>) </li>
+                                    <li>The <i>Current Data</i> section presents visualizations for assay data associated with the <b>Matrix Item</b> (for more information on how to use this feature, <a href="#intrastudy">click here</a>) </li>
                                 </ul>
                                 </li>
-                                <li>Notes:
+                                <li><br>Notes:
                                 <ul class="filled-circle">
-                                    <li>The individual Matrix Setu and Data page is the only place Matrix Item data are available in tabular format </li>
-                                    <li>To review how to navigate to the Study Matrices and Matrix Items list page, <a href="#studies">click here</a> </li>
-                                    <li>The assay data visualization section on the Study Summary page, the Matrix Setup and Data page, and the Matrix Item Setup and Data page all work the same way</li>
+                                    <li>The individual <b>Matrix Setup and Data</b> page is the only place <b>Matrix Item</b> data are available in tabular format </li>
+                                    <li>To review how to navigate to the <b>Study Matrices and Items</b> list page, <a href="#studies">click here</a> </li>
+                                    <li>The <i>Current Data</i> sections of the <b>Study Summary</b> page, the <b>Matrix Setup and Data</b> page, and the <b>Matrix Item Setup and Data</b> page all work the same way</li>
                                 </ul>
                                 </li>
                             </ul>
                         </li>
                     </ul>
                 </div>
-                <button class="showhidebutton">Show/Hide Information for Editors</button>
+                <button class="showhidebutton">Information for Editors</button>
                 <div id="matrixitemseditor" class="editorsubtainer">
+                    <h3 class="sub3-bars"><em><b>Adding Assay Data Step 3:</b></em> Editting a <b>Matrix Item</b> (Optional) </h3>
                     <ul class="list-group">
                         <li class="list-group-item">
                             <ul class="list-unstyled">
-                                <li>Adding Assay Data Step 3 (optional): Refining Matrix Item setup - To edit a Matrix Item, click on the <b>View/Edit</b> button next to the Item of interest:
+                                <li>To edit a <b>Matrix Item</b>, click on the <b>View/Edit</b> button next to the <b>Matrix Item</b> of interest:
                                 <ul class="filled-circle">
-                                    <li>Add/Edit Matrix Item Details</li>
-                                        <ul class="open-circle"><li>edit the information as appropriate (add additional details if desired) </li></ul>
-                                        <ul class="open-circle"><li>if possible, add the organ model protocol (if not added in the Matrix) </li></ul>
-                                    <li>Add Compounds </li>
-                                        <ul class="open-circle"><li>edit the information as appropriate (add additional details if desired) </li></ul>
-                                        <ul class="open-circle"><li>the addition time should be since the start (time 0) of the experiment </li></ul>
-                                        <ul class="open-circle"><li>the duration is the of exposure (if a bolus dose, use 1 minute; if the whole experiment, use the length of the experiment) </li></ul>
-                                        <ul class="open-circle"><li>if do not know supplier or lots, enter "unspecified" (suggestions are based on your previous entries) </li></ul>
-                                        <ul class="open-circle"><li>if do not know receipt date, leave it blank </li></ul>
-                                    <li>Add/Edit Cell Samples </li>
-                                        <ul class="open-circle"><li>edit the information as appropriate (add additional details if desired)</li></ul>
-                                        <ul class="open-circle"><li>when adding, click the magnifying glass to see a list of available cell samples</li></ul>
-                                    <li>Add/Edit Settings</li>
-                                        <ul class="open-circle"><li>edit the information as appropriate (add additional details if desired)</li></ul>
+                                    <li>In the <i>Matrix Item Details</i> section</li>
+                                        <ul class="open-circle"><li>Add/Edit the information as appropriate (add additional details if desired) </li></ul>
+                                        <ul class="open-circle"><li>If possible, add the organ model protocol (if not added in the Matrix) </li></ul>
+                                    <li>In the <i>Compounds</i> section </li>
+                                        <ul class="open-circle"><li>Edit the information as appropriate (add additional details if desired) </li></ul>
+                                        <ul class="open-circle"><li>The addition time should be since the start (time 0) of the experiment </li></ul>
+                                        <ul class="open-circle"><li>The duration is the of exposure (if a bolus dose, use 1 minute; if the whole experiment, use the length of the experiment) </li></ul>
+                                        <ul class="open-circle"><li>If you do not know supplier or lot, enter "unspecified" (suggestions are based on your previous entries) </li></ul>
+                                        <ul class="open-circle"><li>If you do not know receipt date, leave it blank </li></ul>
+                                    <li>In the <i>Cell Samples</i> section </li>
+                                        <ul class="open-circle"><li>Edit the information as appropriate (add additional details if desired)</li></ul>
+                                        <ul class="open-circle"><li>When adding, click the magnifying glass to see a list of available cell samples</li></ul>
+                                    <li>In the <i>Settings</i> section </li>
+                                        <ul class="open-circle"><li>Edit the information as appropriate (add additional details if desired)</li></ul>
+                                    <li>After assay data have been added, the Exclude field of of the tabular data can be editted (optional) </li>
+                                        <ul class="open-circle"><li>Review data in graphs and/or table</li></ul>
+                                        <ul class="open-circle"><li>Checkmark/uncheck the box in the Exclude field for the data point of interest</li></ul>
+                                    <li>Click the <b>Submit</b> button to save changes</li>
                                 </ul>
                                 </li>
-                                <li>Tips:
+                                <li><br>Tips:
                                 <ul class="filled-circle">
-                                    <li>Matrix Items, along with the Name/ID, Test Type, Setup Date, and Organ Model MUST be added through the Matrix, but can be changed on the Item Setup and Data page of the MPS-GUI </li>
-                                    <li>When entering in scientific notation to enter values, use this format: 1e+3, 1e+10, 3e+15</li>
+                                    <li><b>Matrix Items</b>, along with the Name/ID, Test Type, Setup Date, and Organ <b>Model</b> MUST be added through the <b>Matrix</b>, but can be changed on the <b>Matrix Item Setup and Data</b> page  </li>
+                                    <li>When using scientific notation to enter values, use this format: 1e+3, 1e+10, 3e+15</li>
+                                    <li>The Exclude field, shown on the <b>Matrix Item Setup and Data</b> page is the only attribute of a data point that can be changed in the MPS-GUI</li>
+                                    <li>For information on continuing to add MPS models and assay data to the <b>Study</b> (Step 4), <a href="#assaydataeditor">click here</a> </li>
                                 </ul>
                                 </li>
                             </ul>
@@ -1204,79 +1268,81 @@
                 <div id="assaydataviewer" class="viewersubtainer">
                     <ul class="list-group">
                         <li class="list-group-item">
-                            <ul class="list-unstyled">
-                                <li>To view assay data for a study:
+                             <ul class="list-unstyled">
+                                <li>To view assay data for a whole study:
                                 <ul class="filled-circle">
                                     <li>Select a <b>Study</b></li>
-                                    <li>Click on the <b>Study Summary </b> button </li>
-                                </ul>
-                                </li>
-                                <li>To view assay data for a matrix within a study:
-                                <ul class="filled-circle">
-                                    <li>Select a <b>Study</b></li>
-                                    <li>Click on the Matrix of interest </li>
+                                    <li>Click on the <b>Study Summary</b> button </li>
                                     <li>Scroll down to the data section of the page </li>
                                 </ul>
                                 </li>
-                                <li>To view assay data for an individual matrix item:
+                                <li><br>To view assay data for a <b>Matrix</b> within a study:
                                 <ul class="filled-circle">
                                     <li>Select a <b>Study</b></li>
-                                    <li>Click on the Matrix Item of interest </li>
+                                    <li>Click on the <b>Matrix</b> of interest </li>
                                     <li>Scroll down to the data section of the page </li>
-                                    <li>Scroll down to the tabular data section of the page (this is the only place Matrix Item data are available in tabular format) </li>
                                 </ul>
                                 </li>
-                                <li>Notes:
+                                <li><br>To view assay data for an individual <b>Matrix Item</b>:
                                 <ul class="filled-circle">
-                                    <li>For details how changing viewing features, <a href="#studysummary">click here</a> </li>
+                                    <li>Select a <b>Study</b></li>
+                                    <li>Click on the <b>Matrix Item</b> of interest </li>
+                                    <li>Scroll down to the data section of the page </li>
+                                    <li>To view tabular data scroll down to the table located at the bottom of the data section of the page </li>
+                                    <ul class="open-circle"><li>This is the only place <b>Matrix Item</b> data are available in tabular format </li></ul>
                                 </ul>
                                 </li>
                             </ul>
                         </li>
                     </ul>
                 </div>
-                <button class="showhidebutton">Show/Hide Information for Editors</button>
+                <button class="showhidebutton">Information for Editors</button>
                 <div id="assaydataeditor" class="editorsubtainer">
+                    <h3 class="sub3-bars"><em><b>Adding Assay Data Step 4:</b></em> Uploading Assay Data </h3>
                     <ul class="list-group">
                         <li class="list-group-item">
                             <ul class="list-unstyled">
-                                <li>Adding Assay Data Step 4: Upload Assay Data - To add/edit assay data:
+                                <li>To add/edit assay data:
                                 <ul class="filled-circle">
                                     <li>Prepare a data file (MIF-C-a) </li>
                                     <li>Select a <b>Study</b></li>
                                     <li>Click on the <b>Upload Data</b> button </li>
-                                    <li>Click on the <b>Submit</b> button to save data to MPS Database </li>
+                                    <li>Click on the <b>Submit</b> button to save data to <b>MPS Database</b> </li>
                                 </ul>
                                 </li>
-                                <li>Tips:
+                                <li><br>Tips:
                                 <ul class="filled-circle">
-                                    <li>The ONLY editable field of the assay data that is editable in the MPS-GUI is the <b>Exclude</b> field</li>
-                                    <li>All combinations of Method/Kit, Target/Analyte, and Unit must be included in the Assays section of the Study Level Details page PRIOR to uploading assay data points for that combination</li>
-                                    <li>Contact an MPS Database Administrator for guidance on preparing data files</li>
+                                    <li>The ONLY assay data that are editable in the MPS-GUI is the <b>Exclude</b> field</li>
+                                    <li>All combinations of Method/Kit, Target/Analyte, and Unit must be included in the <i>Assays</i> section of the <b>Study Level Details</b> page PRIOR to uploading assay data points for that combination</li>
+                                    <li>Contact an <b>MPS Database</b> Administrator for guidance on preparing data files</li>
                                     <li>For details on the required file format for uploading data, <a href="#uploadingdata">click here</a> </li>
+                                    <li>To replace assay data values with new values, correct the values in the MIF-C-a file and reupload
+                                    <ul class="open-circle"><li>Changes made to the Exclude field using the MPS-GUI will be lost when data are reuploaded</li></ul>
+                                    <li>To replace assay data and make changes to key fields (e.g., sample loction, sample time), there are a few options:</li>
+                                    <ul class="open-circle"><li>Delete the Method-Target-Unit combination from the study, submit, then re-add the Method-Target-Unit combination and reupload ALL data for this combination </li></ul>
+                                    <ul class="open-circle"><li>Go to the <b>Upload Data</b> page and scroll down to the <i>Current Data Files</i> section, click in the box(es) next to the Data File(s) to remove, click submit, reupload the corrected data </li></ul>
                                 </ul>
                                 </li>
                             </ul>
                         </li>
                     </ul>
                 </div>
-                <br><br>
-                <button class="showhidebutton">Show/Hide Details of Assay Data File Format (MIF-C-a)</button>
+
+                <button class="showhide2button">Details of Assay Data File Format (MIF-C-a)</button>
                 <div id="uploadingdata" class="editorsubtainer">
                     <ul class="list-group">
                         <li class="list-group-item">
                             <ul class="list-unstyled">
                                 <li>To get an example template file, <a href="/media/excel_templates/chip_template-{{ version }}.xlsx">click here</a></li>
                                 <ul class="filled-circle">
-                                    <li>Chip ID must be unique within a Study</li>
-                                    <li>File can contain mulitple tabs</li>
+                                    <li>Chip ID must be unique within a <b>Study</b></li>
+                                    <li>Files can contain mulitple tabs</li>
                                     <li>All tabs with correct headers (i.e. column names) will be evaluated for upload, others will be ignored</li>
                                     <li>The correct headers must be placed in the first three rows to be considered valid</li>
-                                    <li>Details of the Assay Data file format are shown in table below</li>
                                 </ul>
                             </ul>
                             <table class="table table-bordered table-condensed small" style="background-color: #F0FFFF;">
-                          <thead>
+                            <thead>
                                 <tr class="active">
                                     <th>Chip ID</th>
                                     <th>Cross Reference</th>
@@ -1351,25 +1417,26 @@
                     <ul class="list-group">
                         <li class="list-group-item">
                             <ul class="list-unstyled">
-                                <li>To view assay Images and Videos attached to a specific MPS Model in a Study:
+                                <li>To view images and/or videos attached to a specific <b>Matrix Item</b> in a <b>Study</b>:
                                 <ul class="filled-circle">
                                     <li>Select a <b>Study</b></li>
                                     <li>Click on the <b>View Images</b> button </li>
-                                    <li>Click on the thumbnail of the media file of interest </li>
+                                    <li>Click on the thumbnail of the media file of interest to expand details</li>
                                     <li>Review media file metadata </li>
                                     <li>If video, click on the play button to view the video </li>
                                 </ul>
                                 </li>
-                                <li>Notes:
+                                <li><br>Notes:
                                 <ul class="filled-circle">
-                                    <li>Media files have been altered for appearance in a web browser. To perform comparative analysis between media files, downloading the unaltered media file is recommended </li>
+                                    <li>Media files have been altered for appearance in a web browser</li>
+                                    <li>To perform comparative analysis between media files, downloading the unaltered media file is recommended </li>
                                 </ul>
                                 </li>
                             </ul>
                         </li>
                     </ul>
                 </div>
-                <button class="showhidebutton">Show/Hide Information for Editors</button>
+                <button class="showhidebutton">Information for Editors</button>
                 <div id="imageseditor" class="editorsubtainer">
                     <ul class="list-group">
                         <li class="list-group-item">
@@ -1378,12 +1445,13 @@
                                 <ul class="filled-circle">
                                     <li>Prepare the image/video file</li>
                                     <li>Prepare an image/video metadata file (MIF-C-i) </li>
+                                    <li>Contact an <b>MPS Database</b> Administrator to make arranges for submitting the files</li>
                                 </ul>
                                 </li>
-                                <li>Tips:
+                                <li><br>Tips:
                                 <ul class="filled-circle">
-                                    <li>Contact an MPS Database Administrator for guidance on preparing media metadata files.</li>
-                                    <li>To remove media files, contact an MPS Database Administrator for assistance.</li>
+                                    <li>Contact an <b>MPS Database</b> Administrator for guidance on preparing media metadata files.</li>
+                                    <li>To remove media files, contact an <b>MPS Database</b> Administrator for assistance.</li>
                                 </ul>
                                 </li>
                             </ul>
@@ -1397,7 +1465,7 @@
 
     <div id="feature_section" class="container">
 
-        <h1 class="sub1-bars"> <b>Features </b> </h1>
+        <h1 class="sub1-bars"> <b>Features</b> </h1>
 
         <h1 class="sub2-bars">Based on Study Data Only</h1>
 
@@ -1408,44 +1476,32 @@
                     <ul class="list-group">
                         <li class="list-group-item">
                             <ul class="list-unstyled">
-                                <li>Intra-study analysis is performed from within an individual study and is filtered and grouped depending on how data are accessed.</li>
-                                <li>To view study details and assay data for a whole study:
+                                <li><b>Intra-Study Anaylsis</b> currently includes the <b>Grouping/Filtering</b> of data and the quantification of resproducibility within an individual <b>Study</b>
                                 <ul class="filled-circle">
-                                    <li>Select a <b>Study</b></li>
-                                    <li>Click on the <b>Study Summary </b> button to see visualizations of the assay data for the study </li>
-                                    <li>Review the study details provided on the page (Study Description, Protocol file and Image to clarify a study (if provided), Assays, Data, Group table, Current Data Files, Supporting Data) </li>
-                                    <li>Scroll to the grouping, filtering, and data section of the page </li>
-                                        <ul class="open-circle"><li>click on the filter symbol next to a metadata/data tag to limit selected data based on data associated with the tag </li></ul>
-                                        <ul class="open-circle"><li>click on the group box next to a metadata/data tag to include (checked) or exclude (unchecked) data associated with the tag in determine how data are grouped </li></ul>
-                                        <ul class="open-circle"><li>click on the <b>Refresh</b> button to apply changes </li></ul>
-                                    <li>Click on the <b>View Reproducibility </b> button to see the results of reproducibility analysis </li>
-                                        <ul class="open-circle"><li>click to put a check in the <b>Show Details</b> box to see details and visualizations </li></ul>
-                                    <li>Click on the <b>View Images </b> button to see media files (images and/or videos) associated to this study </li>
-                                        <ul class="open-circle"><li>click on the thumbnail to see media file metadata </li></ul>
+                                    <li>Data are grouped and filtered using built-in defaults depending on how data are accessed:</li>
+                                        <ul class="open-circle"><li>Filtered to an individual study when viewed on the <b>Study Summary</b> page </li></ul>
+                                        <ul class="open-circle"><li>Filtered to an individual <b>Matrix</b> when viewed on the <b>Matrix Setup and Data</b> page </li></ul>
+                                        <ul class="open-circle"><li>Filtered to an individual <b>Matrix Item</b> when viewed on the <b>Item Setup and Data </b> page </li></ul>
                                 </ul>
                                 </li>
-                                <li>To view assay data for a matrix within a study:
+                                <li><br>To change <b>Grouping/Filtering</b>, whereever the <b>Grouping/Filtering</b> section is displayed:
                                 <ul class="filled-circle">
-                                    <li>Select a <b>Study</b></li>
-                                    <li>Click on the Matrix of interest </li>
-                                    <li>Scroll down to the grouping, filtering, and data section of the page </li>
-                                        <ul class="open-circle"><li>click on the filter symbol next to a metadata/data tag to limit selected data based on data associated with the tag </li></ul>
-                                        <ul class="open-circle"><li>click on the <b>Refresh</b> button to apply changes </li></ul>
+                                    <li>Click on the filter symbol next to a metadata/data tag to limit selected data based on data associated with the tag </li>
+                                    <li>Click on the group box next to a metadata/data tag to include (checked) or exclude (unchecked) data associated with the tag in determining how data are grouped </li>
+                                    <li>Click on the <b>Refresh</b> button to apply changes </li>
                                 </ul>
                                 </li>
-                                <li>To view assay data for an individual matrix item:
+                                <li><br>To perform reprodicubility analysis, after getting the desired <b>Grouping/Filtering</b>, click on the <b>View Reproducibility</b> button:
                                 <ul class="filled-circle">
-                                    <li>Select a <b>Study</b></li>
-                                    <li>Click on the Matrix Item of interest </li>
-                                    <li>Scroll down to the grouping, filtering, and data section of the page </li>
-                                        <ul class="open-circle"><li>click on the filter symbol next to a metadata/data tag to limit selected data based on data associated with the tag </li></ul>
-                                        <ul class="open-circle"><li>click on the <b>Refresh</b> button to apply changes </li></ul>
-                                    <li>Scroll down to the tabular data section of the page (this is the only place Matrix Item data are available in tabular format) </li>
+                                    <li>Click to put a check in the <b>Show Details</b> box to see details and visualizations </li>
+                                    <li>Scroll down to see the visualizations </li>
                                 </ul>
-                                <li>Notes:
+                                </li>
+                                <li><br>Notes:
                                 <ul class="filled-circle">
+                                    <li>The <b>Grouping/Filtering</b> box and the <b>View Reproducibility</b> button are also available in the <b>Inter-Study Analysis</b> feature </li>
                                     <li>The <b>Current Data</b> box provides a variety of options for viewing data </li>
-                                    <li>These options are available every place in the MPS-GUI where assay data points are plotted </li>
+                                    <li>The options in the <b>Current Data</b> box are available every place in the MPS-GUI where assay data points are plotted </li>
                                     <li>For more information on changing the visualizations, see the user paced training on reviewing a study is available as the Protocol file attached to <a href=https://mps.csb.pitt.edu/assays/assaystudy/128/summary/>this study</a>  </li>
                                 </ul>
                                 </li>
@@ -1457,33 +1513,34 @@
         </div>
 
         <div id="interstudy">
-            <button class="collapsible">Inter-Study Analysys</button>
+            <button class="collapsible">Inter-Study Analysis</button>
             <div class="content">
                 <div id="interstudyviewer" class="viewersubtainer">
                     <ul class="list-group">
                         <li class="list-group-item">
                             <ul class="list-unstyled">
-                                <li>The inter-study query tool enables data visualization and analysis across studies. To access the inter-study query tool, select Graphing/Reproducibility from the Analysis tab or icon.
-                                                 To perform an inter-study query:
+                                <li>The tool provides a two-step option for filtering study data:
                                 <ul class="filled-circle">
-                                    <li>Check at least one box in each list  </li>
-                                        <ul class="open-circle"><li>notice how checking and unchecking boxes changes the assay data point count </li></ul>
+                                    <li>Filter by <b>Model</b>, <b>MPS User Group</b>, <b>Target Analyte</b>, and <b>Compound</b> </li>
+                                    <li>Refining filtering using the <b>Grouping/Filtering</b> feature (described in <a href="#intrastudy">Intra-Study Analysis</a>)</li>
+                                </ul>
+                                <li><br>To access the <b>Inter-Study Analysis</b>, select <b>Graphing/Reproducibility</b> on the <b>Data Analysis</b> tab or icon
+                                <ul class="filled-circle">
+                                    <li>Check <b>at least</b> one box in each list </li>
+                                        <ul class="open-circle"><li>Notice how checking and unchecking boxes changes the assay data point count </li></ul>
                                     <li>There are options for what to do next </li>
-                                        <ul class="open-circle"><li>click on the <b>Show Plots</b> button to visualize assay data </li></ul>
-                                        <ul class="open-circle"><li>click on the <b>Show Reproducibility</b> button to review analysis of selected data </li></ul>
-                                        <ul class="open-circle"><li>click on the <b>Download</b> button to download selected data </li></ul>
-                                    <li>For visualization or analysis, refine grouping and filtering (optional) </li>
-                                        <ul class="open-circle"><li>click on the filter symbol next to a metadata/data tag to limit selected data based on data associated with the tag </li></ul>
-                                        <ul class="open-circle"><li>click on the group box next to a metadata/data tag to include (checked) or exclude (unchecked) data associated with the tag in determine how data are grouped </li></ul>
-                                        <ul class="open-circle"><li>click on the <b>Refresh</b> button to apply </li></ul>
+                                        <ul class="open-circle"><li>Click on the <b>Show Plots</b> button to visualize assay data </li></ul>
+                                        <ul class="open-circle"><li>Click on the <b>Show Reproducibility</b> button to review analysis of selected data </li></ul>
+                                        <ul class="open-circle"><li>Click on the <b>Download</b> button to download selected data </li></ul>
+                                    <li>When <b>Show Plots</b> or <b>Show Reproducibility</b> is selected, the <b>Grouping/Filtering</b> feature appears (for more information, <a href="#intrastudy">click here</a>) </li>
                                 </ul>
                                 </li>
-                                <li>Notes:
+                                <li><br>Notes:
                                 <ul class="filled-circle">
-                                    <li>At least one box from each of the lists on the Inter-Study Query Page must be check to select assay data.  </li>
-                                    <li>The grouping and filtering features function the same way when accessed from within an individual study or from the Inter-Study Query page of the MPS-GUI.  </li>
-                                    <li>The assay data visualization section on the Study Summary page, the Matrix Setup and Data page, the Matrix Item Setup and Data page, and the Inter-Study Visualization page all work the same way</li>
-                                    <li>For more information on changing the visualizations, <a href="#intrastudy">click here</a>  </li>
+                                    <li>The <b>Grouping/Filtering</b> feature functions the same way everywhere it is located.  </li>
+                                    <li>The <b>Current Data</b> box provides a variety of options for viewing data </li>
+                                    <li>The options in the <b>Current Data</b> box are available every place in the MPS-GUI where assay data points are plotted </li>
+                                    <li>For more information on changing the visualizations, see the user paced training on reviewing a study is available as the Protocol file attached to <a href=https://mps.csb.pitt.edu/assays/assaystudy/128/summary/>this study</a>  </li>
                                 </ul>
                                 </li>
                             </ul>
@@ -1502,20 +1559,20 @@
                     <ul class="list-group">
                         <li class="list-group-item">
                             <ul class="list-unstyled">
-                                <li>The Disease Portal provides access to clinical trials data and curated study data connected via a specific disease.
+                                <li>The <b>Disease Portal</b> provides access to clinical trials data and curated study data connected via a specific disease
                                 <ul class="filled-circle">
-                                    <li>Access the Disease Portal from the Models menu </li>
-                                    <li>Scroll through the list of disease or use the search bar to find a disease of interest </li>
-                                    <li>Click on the View button next to disease of interest to see options</li>
+                                    <li>Access the <b>Disease Portal</b> from the <b>Models</b> tab or icon </li>
+                                    <li>Scroll through the list of diseases or use the search bar to find a disease of interest </li>
+                                    <li>Click on the <b>View</b> button next to disease of interest to see options</li>
                                         <ul class="open-circle"><li>Disease Overview - disease basics </li></ul>
                                         <ul class="open-circle"><li>Disease Biology - active links to relevant biology/genomic information </li></ul>
                                         <ul class="open-circle"><li>Clinical Data - summarized findings from clinicaltrials.gov </li></ul>
-                                        <ul class="open-circle"><li>Disease Models &amp; Studies - list of disease related models in the MPS Database and list of studies related to the disease  </li></ul>
+                                    <ul class="open-circle"><li>Disease Models &amp; Studies - list of disease related <b>Models</b> in the <b>MPS Database</b> and list of studies related to the disease  </li></ul>
                                 </ul>
                                 </li>
-                                <li>Notes:
+                                <li><br>Notes:
                                 <ul class="filled-circle">
-                                    <li>The study list on the Disease Models &amp; Studies page and the summary counts on the main Disease Portal page are permission specific  </li>
+                                    <li>The study list on the <b>Disease Models & Studies</b> page and on the summary counts on the main <b>Disease Portal</b> page are permission specific  </li>
                                 </ul>
                                 </li>
                             </ul>
@@ -1544,7 +1601,7 @@
                                     <li>If a green plus sign is present, click it to see aggregated assay study data</li>
                                 </ul>
                                 </li>
-                                <li>Notes:
+                                <li><br>Notes:
                                 <ul class="filled-circle">
                                     <li>Compound selections are cumulative</li>
                                     <li>To start with a fresh search, click the Clear Current Selections button</li>
@@ -1575,10 +1632,10 @@
                                     <li>Click on the Previous or Next button to scroll through the compounds </li>
                                 </ul>
                                 </li>
-                                <li>Notes:
+                                <li><br>Notes:
                                 <ul class="filled-circle">
-                                    <li>If a Compound is missing from the list, contact an MPS Database Administrator </li>
-                                    <li>The "Medchem Alerts" field (in the compound deatils page) shows whether functional groups that are uncommon in drugs are present in this compound </li>
+                                    <li>If a Compound is missing from the list, contact an <b>MPS Database</b> Administrator </li>
+                                    <li>The "Medchem Alerts" field (in the compound details page) shows whether functional groups that are uncommon in drugs are present in this compound </li>
                                     <ul class="open-circle"><li>If there are Medchem Alerts for a compound, click on the flag to see a list of the functional group </li></ul>
                                 </ul>
                                 </li>
@@ -1586,12 +1643,12 @@
                         </li>
                     </ul>
                 </div>
-                <button class="showhidebutton">Show/Hide Information for Editors</button>
+                <button class="showhidebutton">Information for Editors</button>
                 <div id="chemicaldataeditor" class="editorsubtainer">
                     <ul class="list-group">
                         <li class="list-group-item">
                             <ul class="list-unstyled">
-                                <li>Currently online MPS Database Adminstrators can add compounds to the MPS Database</li>
+                                <li>Currently online <b>MPS Database</b> Adminstrators can add compounds to the MPS Database</li>
                                 <li>Tips for MPS Datbase Administrators:
                                 <ul class="filled-circle">
                                     <li>Always search ChEMBL before adding a compound (a link is provided on the Add page)  </li>
@@ -1612,7 +1669,7 @@
                     <ul class="list-group">
                         <li class="list-group-item">
                             <ul class="list-unstyled">
-                                <li>Access Bioactivites from the Compound Menu</li>
+                                <li>Bioactivites are accessed from the Compound Menu</li>
                                 <li><br>Quick Search
                                 <ul class="filled-circle">
                                     <li>Enter at least one search string in one of the fields (Compound, Target, and/or Name)  </li>
@@ -1620,7 +1677,7 @@
                                     <li>Optional - Click on the buttons to Exclude and/or change data as indicated on the button  </li>
                                     <li>Click on the <span class="glyphicon glyphicon-search" aria-hidden="true"></span> </li>
                                 </ul>
-                                <li>Advanced Search
+                                <li><br>Advanced Search
                                 <ul class="filled-circle">
                                     <li>Optional - Click on the buttons to Exclude and/or change data as indicated on the button  </li>
                                         <ul class="open-circle"><li>notice that options appear, these can be selected from the dropdown </li></ul>
@@ -1631,7 +1688,7 @@
                                     <li>Click the button to Generate a Table </li>
                                 </ul>
                                 </li>
-                                <li>Advanced Search Notes:
+                                <li><br>Notes:
                                 <ul class="filled-circle">
                                     <li>Some data from the reference sources have been marked <em>questionable</em> for various reasons, exclude them if desired  </li>
                                     <li>Clicking the checkbox at the top of a table will select <em>all currently visible</em> checkboxes in that section</li>
@@ -1640,7 +1697,7 @@
                                         <ul class="open-circle"><li>Changing between ChEMBL and PubChem, Changing whether questionable are excluded, Changing the min feature count, Changing the <em>Target Types</em> or <em>Organisms</em>  </li></ul>
                                 </ul>
                                 </li>
-                                <li>Reviewing the Results Table:
+                                <li><br>Reviewing the Results Table:
                                 <ul class="filled-circle">
                                     <li>The resulting tables are similar in design to the other tables in the databased  </li>
                                     <li>The "Data Validity" column shows whether or not and why an entry has been marked questionable</li>
@@ -1661,14 +1718,14 @@
                     <ul class="list-group">
                         <li class="list-group-item">
                             <ul class="list-unstyled">
-                                <li><b>Drug Trials</b> contain manually curated preclinical, clinical, and post-marketing data for compounds
+                                <li>The <b>Drug Trials</b> feature is accessed from the <b>Compounds</b> tab or icon
                                 <ul class="filled-circle">
                                     <li>After choosing a trial to view, you can traverse the list in <em>alphanumeric order</em> with the "Next" and "Previous" buttons </li>
                                 </ul>
                                 </li>
-                                <li>Notes:
+                                <li><br>Notes:
                                 <ul class="filled-circle">
-                                    <li></li>
+                                    <li><b>Drug Trials</b> contain manually curated preclinical, clinical, and post-marketing data for compounds</li>
                                 </ul>
                                 </li>
                             </ul>
@@ -1685,7 +1742,7 @@
                     <ul class="list-group">
                         <li class="list-group-item">
                             <ul class="list-unstyled">
-                                <li><br>Adverse Events are accessed through the Compounds menu </li>
+                                <li>Adverse Events are accessed through the Compounds menu </li>
                                 <ul class="filled-circle">
                                     <li>Scroll through the list or use the Search bar to find a compound and event of interest </li>
                                         <ul class="open-circle"><li>use a space in the search bar to such multiple terms </li></ul>
@@ -1697,7 +1754,7 @@
                                     <li>Scroll through the compounds using the Next and Previous buttons </li>
                                 </ul>
                                 </li>
-                                <li>Notes:
+                                <li><br>Notes:
                                 <ul class="filled-circle">
                                     <li>Only top adverse events for compounds are shown in the results of the search</li>
                                     <li>The "Number of Reports" column indicates the number of reports that list both the compound and adverse event in the row</li>
@@ -1721,7 +1778,7 @@
                     <ul class="list-group">
                         <li class="list-group-item">
                             <ul class="list-unstyled">
-                                <li><br>Compare Adverse Events are accessed through the Compounds menu
+                                <li>Compare Adverse Events are accessed through the Compounds menu
                                 <ul class="filled-circle">
                                     <li>As a precaution, click the Clear Current Selections button</li>
                                     <li>Use the search bars to narrow the events and compounds lists </li>
@@ -1733,7 +1790,7 @@
                                     <li>If desired, click on the Show Raw Counts button to toggle from Number of Reports per 10,000 Mentions </li>
                                 </ul>
                                 </li>
-                                <li>Notes:
+                                <li><br>Notes:
                                 <ul class="filled-circle">
                                     <li>Selections from both lists are cumulative</li>
                                     <li>To start with a fresh search, click the Clear Current Selections button</li>
@@ -1768,7 +1825,7 @@
                                     <li>If desired, click the button to Download the Heatmap (downloads data used in heatmap to csv)</li>
                                 </ul>
                                 </li>
-                                <li>Notes:
+                                <li><br>Notes:
                                 <ul class="filled-circle">
                                     <li>Some data from the reference sources have been marked <em>questionable</em> for various reasons, exclude them if desired  </li>
                                     <li>Clicking the checkbox at the top of a table will select <em>all currently visible</em> checkboxes in that section</li>
@@ -1777,7 +1834,7 @@
                                         <ul class="open-circle"><li>Changing between ChEMBL and PubChem, Changing whether questionable are excluded, Changing the min feature count, Changing the <em>Target Types</em> or <em>Organisms</em>  </li></ul>
                                 </ul>
                                 </li>
-                                <li>Reviewing the Results Table:
+                                <li><br>Reviewing the Results Table:
                                 <ul class="filled-circle">
                                     <li>Scroll to the bottom of the heatmap to see the legend of colors used  </li>
                                     <li>Clicking on a specific square in the heatmap will show that particular value in a pop-up </li>
@@ -1793,7 +1850,7 @@
         <div id="cluster">
             <button class="collapsible">Compound Clustering</button>
             <div class="content">
-                <div id="heatmapviewer" class="viewersubtainer">
+                <div id="clusterviewer" class="viewersubtainer">
                     <ul class="list-group">
                         <li class="list-group-item">
                             <ul class="list-unstyled">
@@ -1809,7 +1866,7 @@
                                     <li>If desired, click the button to Download the Heatmap (downloads data used in heatmap to csv)</li>
                                 </ul>
                                 </li>
-                                <li>Notes:
+                                <li><br>Notes:
                                 <ul class="filled-circle">
                                     <li>Some data from the reference sources have been marked <em>questionable</em> for various reasons, exclude them if desired  </li>
                                     <li>Clicking the checkbox at the top of a table will select <em>all currently visible</em> checkboxes in that section</li>
@@ -1818,7 +1875,7 @@
                                         <ul class="open-circle"><li>Changing between ChEMBL and PubChem, Changing whether questionable are excluded, Changing the min feature count, Changing the <em>Target Types</em> or <em>Organisms</em>  </li></ul>
                                 </ul>
                                 </li>
-                                <li>Reviewing the Results Table:
+                                <li><br>Reviewing the Results Table:
                                 <ul class="filled-circle">
                                     <li>The table on the left shows the bioactivities and drug trial data taken used in clustering</li>
                                     <li>A compound's information can be dismissed by hitting the corresponding red "X" button</li>
@@ -1865,7 +1922,7 @@
 
 <script>
   //From w3schools.com https://www.w3schools.com/howto/tryit.asp?filename=tryhow_js_collapsible_animate
-    var coll = $(".collapsible, .showhidebutton");
+    var coll = $(".collapsible, .showhidebutton, .showhide2button");
     var i;
 
     for (i = 0; i < coll.length; i++) {
@@ -1879,5 +1936,6 @@
         });
     }
 </script>
+
 </body>
 </html>
