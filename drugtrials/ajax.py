@@ -181,8 +181,7 @@ def fetch_aggregate_ae_by_event(request):
 switch = {
     'fetch_adverse_events_data': fetch_adverse_events_data,
     'fetch_aggregate_ae_by_event': fetch_aggregate_ae_by_event,
-    'fetch_aggregate_ae_by_compound': fetch_aggregate_ae_by_compound,
-    'fetch_auto_drug_trial_data': fetch_auto_drug_trial_data
+    'fetch_aggregate_ae_by_compound': fetch_aggregate_ae_by_compound
 }
 
 
