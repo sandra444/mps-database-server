@@ -205,7 +205,7 @@ $(document).ready(function () {
         $('.row-header').css('width', '.1%').css('white-space', 'nowrap');
 
         // Activates Bootstrap tooltips
-        $('[data-toggle="tooltip"]').tooltip({container:"body"});
+        $('[data-toggle="tooltip"]').tooltip({container:"body", html: true});
     });
 
     for (j=0; j<tableCols.length; j++){

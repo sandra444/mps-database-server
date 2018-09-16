@@ -108,9 +108,13 @@ def fetch_aggregate_ae_by_compound(request):
     )
 
     compound_frequency = {}
+    ae_to_compound = {}
 
-    for adverse_event in CompoundAdverseEvent.objects.all():
+    for adverse_event in CompoundAdverseEvent.objects.all().prefetch_related('event', 'compound__compound'):
         compound_frequency.setdefault(adverse_event.compound_id, []).append(adverse_event.frequency)
+        ae_to_compound.setdefault(adverse_event.event.event, {}).update({
+            adverse_event.compound.compound.name: True
+        })
 
     data = []
 
@@ -124,11 +128,12 @@ def fetch_aggregate_ae_by_compound(request):
             'checkbox': cgi.escape(compound.compound.name),
             'compound': compound.compound.name,
             'estimated_usage': estimated_usage,
-            'frequency':  u'{:,}'.format(sum(compound_frequency.get(compound.id, [0])))
+            'frequency': u'{:,}'.format(sum(compound_frequency.get(compound.id, [0])))
         })
 
     all_data = {
-        'data': data
+        'data': data,
+        'ae_to_compound': ae_to_compound
     }
 
     return HttpResponse(
@@ -150,17 +155,19 @@ def fetch_aggregate_ae_by_event(request):
     data = []
 
     for adverse_event in adverse_events:
+        frequency = sum(adverse_event_frequency.get(adverse_event.id, [0]))
         organ_name = u''
 
         if adverse_event.organ:
             organ_name = adverse_event.organ.organ_name
 
-        data.append({
-            'checkbox': cgi.escape(adverse_event.event),
-            'event': adverse_event.event,
-            'organ': organ_name,
-            'frequency': u'{:,}'.format(sum(adverse_event_frequency.get(adverse_event.id, [0])))
-        })
+        if frequency:
+            data.append({
+                'checkbox': cgi.escape(adverse_event.event),
+                'event': adverse_event.event,
+                'organ': organ_name,
+                'frequency': u'{:,}'.format(frequency)
+            })
 
     all_data = {
         'data': data
@@ -174,7 +181,8 @@ def fetch_aggregate_ae_by_event(request):
 switch = {
     'fetch_adverse_events_data': fetch_adverse_events_data,
     'fetch_aggregate_ae_by_event': fetch_aggregate_ae_by_event,
-    'fetch_aggregate_ae_by_compound': fetch_aggregate_ae_by_compound
+    'fetch_aggregate_ae_by_compound': fetch_aggregate_ae_by_compound,
+    'fetch_auto_drug_trial_data': fetch_auto_drug_trial_data
 }
 
 

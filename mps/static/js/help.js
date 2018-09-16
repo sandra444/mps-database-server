@@ -2,12 +2,13 @@ $(document).ready(function () {
     // Resolve anchors going to the incorrect location
     var offset = 60;
 
-    $('.navbar li a').click(function(event) {
+    $('a').not("[href*='/']").click(function(event) {
         event.preventDefault();
         if ($($(this).attr('href'))[0]) {
             $('html, body').animate({
                 scrollTop: $($(this).attr('href')).offset().top -offset
             }, 500);
+            $($(this).attr('href')).find('button')[0].click();
         }
     });
 
@@ -16,15 +17,58 @@ $(document).ready(function () {
         $('html, body').animate({
             scrollTop: $(initial_hash).offset().top - offset
         }, 500);
+        $(initial_hash).find('button')[0].click();
     }
 
+    var _alphabetSearch = '';
+
+    $.fn.dataTable.ext.search.push(function(settings, searchData ) {
+        if (!_alphabetSearch) {
+            return true;
+        }
+
+        else if (searchData[0].charAt(0) === _alphabetSearch) {
+            return true;
+        }
+
+        return false;
+    });
+
     // Call datatables for glossary
-    $('#glossary_table').DataTable({
+    var glossary_table = $('#glossary_table').DataTable({
         dom: 'B<"row">lfrtip',
         "iDisplayLength": 10,
-        responsive: true,
-        fixedHeader: {
-            headerOffset: 50
-        }
+        responsive: true
+    });
+
+    var alphabet = $('<div class="alphabet"/>').append('Search: ');
+
+    // Add none
+    $('<a/>')
+        .attr('data-letter', '')
+        .attr('role', 'button')
+        .html('None')
+        .addClass('btn btn-sm')
+        .appendTo(alphabet);
+
+    for(var i=0 ; i<26 ; i++) {
+        var letter = String.fromCharCode(65 + i);
+
+        $('<a/>')
+            .attr('data-letter', letter)
+            .attr('role', 'button')
+            .html(letter)
+            .addClass('btn btn-sm')
+            .appendTo(alphabet);
+    }
+
+    alphabet.insertBefore(glossary_table.table().container());
+
+    alphabet.on('click', 'a', function() {
+        alphabet.find('.active').removeClass('active');
+        $(this).addClass('active');
+
+        _alphabetSearch = $(this).attr('data-letter');
+        glossary_table.draw();
     });
 });

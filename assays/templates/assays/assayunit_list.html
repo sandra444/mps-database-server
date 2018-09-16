@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block load %}
+    <script src="{% static "assays/assayunit_list.js" %}"></script>
+{% endblock %}
+
+{% block breadcrumbs %}
+    <li class="active">Units</li>
+{% endblock %}
+
+{% block content %}
+    <div class="padded-bottom">
+        <legend>
+            <h2 class="text-center">
+                Units List
+            </h2>
+        </legend>
+        <div id="units" style="display: none;">
+            <table id="units-table" class="display" cellspacing="0" width="100%">
+                <thead>
+                    <tr>
+                        <th>Unit</th>
+                        <th>Unit Type</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                {% for unit in object_list %}
+                     <tr>
+                        {# Luke doesn't like 'unit.unit', but I think it's just peachy.#}
+                        <td>{{ unit.unit }}</td>
+                        <td>{{ unit.unit_type }}</td>
+                        <td>{{ unit.description }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="{% static "js/display_datatable.js" %}"></script>
+{% endblock %}

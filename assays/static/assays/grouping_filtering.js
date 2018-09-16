@@ -17,12 +17,12 @@ $(document).ready(function () {
     // Current filter
     var current_filter = null;
     var full_post_filter_data = [];
+
     var current_post_filter_data = [];
 
     // Probably doesn't need to be global
     window.GROUPING.group_criteria = {};
     var grouping_checkbox_selector = $('.grouping-checkbox');
-
 
     // Semi-arbitrary at the moment
     window.GROUPING.get_grouping_filtering = function() {
@@ -48,6 +48,9 @@ $(document).ready(function () {
     var filter_table = filter_popup.find('table');
     var filter_data_table = null;
     var filter_body = filter_table.find('tbody');
+
+    var filter_buffer = {};
+
     // var filter_popup_header = filter_popup.find('h5');
 
     if (filter_popup) {
@@ -56,11 +59,28 @@ $(document).ready(function () {
             closeOnEscape: true,
             autoOpen: false,
             close: function () {
+                // Purge the buffer
+                filter_buffer = {};
                 $('body').removeClass('stop-scrolling');
             },
             open: function () {
                 $('body').addClass('stop-scrolling');
-            }
+            },
+            buttons: [
+            {
+                text: 'Apply',
+                click: function() {
+                    window.GROUPING.current_post_filter[current_parent_model][current_filter] = $.extend({}, filter_buffer);
+                    filter_buffer = {};
+                    $(this).dialog("close");
+                }
+            },
+            {
+                text: 'Cancel',
+                click: function() {
+                   $(this).dialog("close");
+                }
+            }]
         });
         filter_popup.removeProp('hidden');
     }
@@ -86,6 +106,9 @@ $(document).ready(function () {
             full_post_filter_data = window.GROUPING.full_post_filter[current_parent_model][current_filter];
             current_post_filter_data = window.GROUPING.current_post_filter[current_parent_model][current_filter];
 
+            // Initially set buffer to current
+            filter_buffer = $.extend({}, current_post_filter_data);
+
             // Clear current contents
             if (filter_data_table) {
                 filter_table.DataTable().clear();
@@ -108,7 +131,8 @@ $(document).ready(function () {
                         row += '<td width="10%" class="text-center"><input data-obj-name="' + obj_name + '" class="big-checkbox post-filter-checkbox" type="checkbox" value="' + obj_val + '"></td>';
                     }
 
-                    row += '<td>' + obj_name + '</td>';
+                    // WARNING: NAIVE REPLACE
+                    row += '<td>' + obj_name.replace('~@|', ' ') + '</td>';
 
                     row += '</tr>';
 
@@ -138,14 +162,44 @@ $(document).ready(function () {
         }
     });
 
+    // Triggers for select all
+    $('#filter_section_select_all').click(function() {
+        filter_data_table.page.len(-1).draw();
+
+        filter_table.find('.post-filter-checkbox').each(function() {
+            $(this)
+                .prop('checked', false)
+                .attr('checked', false)
+                .trigger('click');
+        });
+
+        filter_data_table.order([[1, 'asc']]);
+        filter_data_table.page.len(10).draw();
+    });
+
+    // Triggers for deselect all
+    $('#filter_section_deselect_all').click(function() {
+        filter_data_table.page.len(-1).draw();
+
+        filter_table.find('.post-filter-checkbox').each(function() {
+            $(this)
+                .prop('checked', true)
+                .attr('checked', true)
+                .trigger('click');
+        });
+
+        filter_data_table.order([[1, 'asc']]);
+        filter_data_table.page.len(10).draw();
+    });
+
     // TODO CHECKBOX TRIGGER
     $(document).on('click', '.post-filter-checkbox', function() {
         if (current_parent_model && current_filter) {
             if ($(this).prop('checked')) {
-                current_post_filter_data[$(this).val()] = $(this).attr('data-obj-name');
+                filter_buffer[$(this).val()] = $(this).attr('data-obj-name');
             }
             else {
-                delete current_post_filter_data[$(this).val()];
+                delete filter_buffer[$(this).val()];
             }
         }
     });

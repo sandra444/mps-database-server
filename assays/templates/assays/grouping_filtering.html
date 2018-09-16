@@ -229,6 +229,20 @@
                 <tbody>
                     <tr>
                         <td>
+                            <a data-parent-model='matrix_item' data-filter-relation='assaysetupcell__cell_sample_id__in'  role='button' class="btn btn-sm post-filter-spawn">
+                                <span class="glyphicon glyphicon-filter"></span>
+                            </a>
+                        </td>
+                        <td>
+                            <input data-group='cell_sample_id' data-group-relation='cell' type="checkbox" class="grouping-checkbox">
+                            <span data-group-type="treatment"></span>
+                        </td>
+                        <td>
+                            Cell Sample
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
                             <a data-parent-model='matrix_item' data-filter-relation='assaysetupcell__cell_sample__cell_type_id__in' role='button' class="btn btn-sm post-filter-spawn">
                                 <span class="glyphicon glyphicon-filter"></span>
                             </a>
@@ -257,22 +271,6 @@
                             Cell Origin
                         </td>
                     </tr>
-                    {# Maybe hide this for now... #}
-{#                    <tr>#}
-{#                        <td>#}
-{#                            <a data-filter-relation='cell_sample' role='button' class="btn btn-sm post-filter-spawn">#}
-{#                                <span class="glyphicon glyphicon-filter"></span>#}
-{#                            </a>#}
-{#                        </td>#}
-{#                        <td>#}
-{#                            <input data-group='cell_sample_id' data-group-relation='cell' type="checkbox" class="grouping-checkbox">#}
-{#                            <span data-group-type="treatment"></span>#}
-{#                        </td>#}
-{#                        <td>#}
-{#                            <span data-group-type="treatment"></span>#}
-{#                            Cell Sample (Includes Type and Origin)#}
-{#                        </td>#}
-{#                    </tr>#}
                     <tr>
                         <td>
                             <a data-parent-model='matrix_item' data-filter-relation='assaysetupcell__biosensor_id__in' role='button' class="btn btn-sm post-filter-spawn">
@@ -305,7 +303,7 @@
                     </tr>
                     <tr>
                         <td>
-                            <a data-parent-model='matrix_item' data-filter-relation='assaysetupcell__density__in' role='button' class="btn btn-sm post-filter-spawn">
+                            <a data-parent-model='matrix_item' data-filter-relation='assaysetupcell__density__density_unit_id__in' role='button' class="btn btn-sm post-filter-spawn">
                                 <span class="glyphicon glyphicon-filter"></span>
                             </a>
                         </td>
@@ -433,7 +431,7 @@
 {#                    </tr>#}
                     <tr>
                         <td>
-                            <a data-parent-model='matrix_item' data-filter-relation='assaysetupcompound__concentration__in' role='button' class="btn btn-sm post-filter-spawn">
+                            <a data-parent-model='matrix_item' data-filter-relation='assaysetupcompound__concentration__concentration_unit_id__in' role='button' class="btn btn-sm post-filter-spawn">
                                 <span class="glyphicon glyphicon-filter"></span>
                             </a>
                         </td>
@@ -556,7 +554,7 @@
 {#                    </tr>#}
                     <tr>
                         <td>
-                            <a data-parent-model='matrix_item' data-filter-relation='assaysetupsetting__value__in' role='button' class="btn btn-sm post-filter-spawn">
+                            <a data-parent-model='matrix_item' data-filter-relation='assaysetupsetting__value__unit_id__in' role='button' class="btn btn-sm post-filter-spawn">
                                 <span class="glyphicon glyphicon-filter"></span>
                             </a>
                         </td>
@@ -625,7 +623,10 @@
 </div>
 
 <div hidden id="filter_popup" title="X">
-{#    <h5></h5>#}
+    <div class="padded-bottom">
+        <a id="filter_section_select_all" class="btn btn-primary">Select All</a>
+        <a id="filter_section_deselect_all" class="btn btn-danger">Deselect All</a>
+    </div>
     <table class="display table" cellspacing="0" width="100%">
         <thead>
             <tr>

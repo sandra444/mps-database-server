@@ -168,6 +168,36 @@ class OrganModel(LockableModel):
 
     model_image = models.ImageField(upload_to='models', null=True, blank=True)
 
+    # "Base Model" represents the "parent" of the model in question
+    # While the default is not listed here, please note that it is in fact the instance in question
+    # ie unspecified base_models point back to the same entry
+    base_model = models.ForeignKey('microdevices.OrganModel', null=True, blank=True)
+    # Alternative name, especially for filters
+    alt_name = models.CharField(max_length=1000, blank=True, default='')
+
+    # May or may not need to be converted to FK fields
+    model_type = models.CharField(
+        max_length=2,
+        choices=(
+            ('F2', 'Fluidic-2D'),
+            ('F3', 'Fluidic-3D'),
+            ('S2', 'Static-2D'),
+            ('S3', 'Static-3D'),
+        )
+    )
+    # Obviously only really relevant for disease models
+    disease_trigger = models.CharField(
+        max_length=10,
+        choices=(
+            ('', ''),
+            ('Compound', 'Induced by Compound'),
+            ('Cells', 'Addition of Diseased Cells'),
+        ),
+        blank=True,
+        default=''
+    )
+
+    # NAIVE
     epa = models.BooleanField(
         default=False,
         help_text='Whether this compound is part of the EPA project'

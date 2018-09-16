@@ -1,0 +1,6 @@
+{{ study.items }}
+{{ study.organ_models }}
+{{ study.devices }}
+{{ study.cells }}
+{{ study.compounds }}
+{{ study.settings }}

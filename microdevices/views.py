@@ -125,6 +125,12 @@ class OrganModelAdd(SpecificGroupRequiredMixin, CreateView):
         )
         if form.is_valid() and protocol_formset.is_valid() and location_formset.is_valid():
             save_forms_with_tracking(self, form, formset=[protocol_formset, location_formset], update=False)
+
+            # Update the base model to be self-referential if it is missing
+            if not form.instance.base_model_id:
+                form.instance.base_model_id = form.instance.id
+                form.instance.save()
+
             return redirect(self.object.get_post_submission_url())
         else:
             return self.render_to_response(self.get_context_data(
@@ -165,7 +171,7 @@ class OrganModelUpdate(UpdateView):
                     self.request.FILES,
                     instance=self.object
                 )
-                context['location_formset'] =OrganModelLocationFormsetFactory(
+                context['location_formset'] = OrganModelLocationFormsetFactory(
                     self.request.POST,
                     instance=self.object
                 )
@@ -189,6 +195,12 @@ class OrganModelUpdate(UpdateView):
         )
         if form.is_valid() and protocol_formset.is_valid() and location_formset.is_valid():
             save_forms_with_tracking(self, form, formset=[protocol_formset, location_formset], update=True)
+
+            # Update the base model to be self-referential if it is missing
+            if not form.instance.base_model_id:
+                form.instance.base_model_id = form.instance.id
+                form.instance.save()
+
             return redirect(self.object.get_post_submission_url())
         else:
             return self.render_to_response(self.get_context_data(
@@ -206,4 +218,7 @@ class MicrophysiologyCenterDetail(DetailView):
     def get_context_data(self, **kwargs):
         context = super(MicrophysiologyCenterDetail, self).get_context_data(**kwargs)
         context['models'] = OrganModel.objects.filter(center=self.object).values_list('name', flat=True)
+        context['pi_email_parts'] = self.object.pi_email.split("@")
+        context['contact_email_parts'] = self.object.contact_email.split("@")
+
         return context
