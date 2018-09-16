@@ -2,7 +2,7 @@ $(document).ready(function () {
     // Resolve anchors going to the incorrect location
     var offset = 60;
 
-    $('.navbar li a').click(function(event) {
+    $('a').not("[href*='/']").click(function(event) {
         event.preventDefault();
         if ($($(this).attr('href'))[0]) {
             $('html, body').animate({
