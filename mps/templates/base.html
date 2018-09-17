@@ -123,17 +123,21 @@
         else if (url.indexOf('/upload/') > -1) {
           anchor = '#uploadingdata'
         }
-        else if (url.indexOf('/studyconfiguration/') > -1) {
+{#        else if (url.indexOf('/assaylayout/') > -1) {#}
+{#          anchor = '#assaylayouts'#}
+{#        }#}
+        else if (url.indexOf('/assaystudyconfiguration/') > -1) {
           anchor = '#studyconfigurations'
         }
         else if (url.indexOf('/model/') > -1) {
-          anchor = '#mpsmodels'
+          anchor = '#organmodels'
         }
-        else if (url.indexOf('/diseases/') > -1) {
-          anchor = '#diseasemodels'
-        }
-        else if (url.indexOf('/device/') > -1) {
-          anchor = '#devices'
+        // TODO
+        // else if (url.indexOf('/diseasemodel_list/') > -1) {
+        //   anchor = '#diseasemodels'
+        // }
+        else if (url.indexOf('/microdevices/') > -1) {
+          anchor = '#microdevices'
         }
         else if (url.indexOf('/table/') > -1) {
           anchor = '#bioactivities'
@@ -143,9 +147,6 @@
         }
         else if (url.indexOf('adverse_events/') > -1) {
           anchor = '#adverseevents'
-        }
-        else if (url.indexOf('compare_adverse_events/') > -1) {
-          anchor = '#compareadverseevents'
         }
         else if (url.indexOf('/report/') > -1) {
           anchor = '#compoundreport'
@@ -160,37 +161,13 @@
           anchor = '#cluster'
         }
         else if (url.indexOf('/celltype/') > -1) {
-          anchor = '#cellsamples'
+          anchor = '#celltypes'
         }
         else if (url.indexOf('/cellsubtype/') > -1) {
-          anchor = '#cellsamples'
+          anchor = '#cellsubtypes'
         }
         else if (url.indexOf('/cellsample/') > -1) {
           anchor = '#cellsamples'
-        }
-        else if (url.indexOf('/targets/') > -1) {
-          anchor = '#targets'
-        }
-        else if (url.indexOf('/methods/') > -1) {
-          anchor = '#methods'
-        }
-        else if (url.indexOf('/assaymatrixitem/') > -1) {
-          anchor = '#matrixitem'
-        }
-        else if (url.indexOf('/assaymatrix/') > -1) {
-          anchor = '#matrices'
-        }
-        else if (url.indexOf('/images/') > -1) {
-          anchor = '#assayimages'
-        }
-        else if (url.indexOf('/assaystudy/') > -1) {
-          anchor = '#assaydata'
-        }
-        else if (url.indexOf('/summary/') > -1) {
-          anchor = '#intrastudy'
-        }
-        else if (url.indexOf('/graphing_reproducibility/') > -1) {
-          anchor = '#interstudy'
         }
 
         $('#view_help').attr('onclick',"window.open('/help/" + anchor + "','win','toolbars=0,width=1000,height=760,left=200,top=200,scrollbars=1,resizable=1')");
