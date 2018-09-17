@@ -23,6 +23,8 @@
             </h1>
         </div>
         <div class="row text-center">
+            <a href="{{ object.get_reproducibility_url }}" class="btn btn-primary" role="button">View Reproducibility</a>
+            <a href="{{ object.get_images_url }}" class="btn btn-primary" role="button">View Images</a>
             <a id="export_button" href="/assays/assaystudy/{{ object.id }}/data/" class="btn btn-info" role="button">Download Data</a>
             <label class="radio-inline">
                 <input type="checkbox" name="exportinclude_all" id="exportinclude_all" onclick="$('#chartsinclude_all').prop('checked', $(this).prop('checked'));"/>
@@ -79,8 +81,9 @@
     </div>
 
     {% if object.assaystudyassay_set.count %}
+    <div class="padded-bottom">
     <legend>Assays</legend>
-    <table class="table table-striped table-bordered">
+    <table id="assay_table" class="table table-striped table-bordered">
         <thead>
             <tr>
                 <th>Target/Analyte</th>
@@ -91,13 +94,14 @@
         <tbody>
             {% for assay in object.assaystudyassay_set.all %}
                 <tr class="inline" id="assay-{{ forloop.counter0 }}">
-                    <td>{{ assay.target }}</td>
-                    <td>{{ assay.method }}</td>
+                    <td><a href="/assays/targets/{{ assay.target.id }}" target="_blank">{{ assay.target }}</a></td>
+                    <td><a href="/assays/methods/{{ assay.method.id }}" target="_blank">{{ assay.method }}</a></td>
                     <td>{{ assay.unit }}</td>
                 </tr>
             {% endfor %}
         </tbody>
     </table>
+    </div>
     {% endif %}
 
     {% include 'assays/grouping_filtering.html' %}
@@ -146,20 +150,7 @@
 {#    </div>#}
 {#    </div>#}
 
-    <table id="treatment_group_table" class="table table-striped table-bordered">
-        <thead id="treatment_group_head">
-        </thead>
-        <tbody id="treatment_group_display">
-        </tbody>
-    </table>
-
-    <div id="group_display" class="container hidden-print">
-        <table class="table table-bordered">
-            <tbody id="group_display_body">
-
-            </tbody>
-        </table>
-    </div>
+    {% include 'assays/group_table.html' %}
 
     {% if object.assaystudysupportingdata_set.count %}
         <legend>Supporting Data</legend>

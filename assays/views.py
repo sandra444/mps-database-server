@@ -32,7 +32,8 @@ from assays.forms import (
     AssayStudyStakeholderFormSetFactory,
     AssayStudyDataUploadForm,
     AssayImage,
-    AssayImageSetting
+    AssayImageSetting,
+    AssayStudyAssay
 )
 from django import forms
 
@@ -352,21 +353,58 @@ def get_queryset_with_number_of_data_points(queryset):
     ).prefetch_related(
         'matrix_item',
         'setting'
-    ).only('id', 'matrix_item', 'setting')
+    ).only('id', 'matrix_item', 'setting', 'file_name')
+
+    video_formats = {x: True for x in [
+        'webm',
+        'avi',
+        'ogv',
+        'mov',
+        'wmv',
+        'mp4',
+        '3gp',
+    ]}
 
     images_map = {}
+    videos_map = {}
 
     for image in images:
-        current_value = images_map.setdefault(
-            image.matrix_item.study_id, 0
+        is_video = image.file_name.split('.')[-1].lower() in video_formats
+
+        if is_video:
+            current_value = videos_map.setdefault(
+                image.matrix_item.study_id, 0
+            )
+            videos_map.update({
+                image.matrix_item.study_id: current_value + 1
+            })
+        else:
+            current_value = images_map.setdefault(
+                image.matrix_item.study_id, 0
+            )
+            images_map.update({
+                image.matrix_item.study_id: current_value + 1
+            })
+
+    supporting_data = AssayStudySupportingData.objects.filter(
+        study_id__in=study_ids
+    ).only('id', 'study_id')
+
+    supporting_data_map = {}
+
+    for supporting in supporting_data:
+        current_value = supporting_data_map.setdefault(
+            supporting.study_id, 0
         )
-        images_map.update({
-            image.matrix_item.study_id: current_value + 1
+        supporting_data_map.update({
+            supporting.study_id: current_value + 1
         })
 
     for study in queryset:
         study.data_points = data_points_map.get(study.id, 0)
         study.images = images_map.get(study.id, 0)
+        study.videos = videos_map.get(study.id, 0)
+        study.supporting_data = supporting_data_map.get(study.id, 0)
 
 
 # TODO GET NUMBER OF DATA POINTS
@@ -976,10 +1014,24 @@ class AssayStudyDataUpload(ObjectGroupRequiredMixin, UpdateView):
 
         context['data_file_uploads'] = get_data_file_uploads(study=self.object)
 
+        if self.request.POST:
+            if 'supporting_data_formset' not in context:
+                context['supporting_data_formset'] = AssayStudySupportingDataFormSetFactory(self.request.POST, self.request.FILES, instance=self.object)
+        else:
+            context['supporting_data_formset'] = AssayStudySupportingDataFormSetFactory(instance=self.object)
+
+        context['update'] = True
+
         return context
 
     def form_valid(self, form):
-        if form.is_valid():
+        supporting_data_formset = AssayStudySupportingDataFormSetFactory(
+            self.request.POST,
+            self.request.FILES,
+            instance=self.object
+        )
+
+        if form.is_valid() and supporting_data_formset.is_valid():
             data = form.cleaned_data
             overwrite_option = data.get('overwrite_option')
 
@@ -987,18 +1039,28 @@ class AssayStudyDataUpload(ObjectGroupRequiredMixin, UpdateView):
 
             # Add user to Study's modified by
             # TODO
-            if self.request and self.request.FILES:
-                self.object.bulk_file = data.get('bulk_file')
-                self.object.modified_by = self.request.user
-                self.object.save()
+            if self.request and self.request.FILES and data.get('bulk_file', ''):
+                # Be positive it is not just processing the same file again
+                if not self.object.bulk_file or self.object.bulk_file != data.get('bulk_file'):
+                    self.object.bulk_file = data.get('bulk_file')
+                    self.object.modified_by = self.request.user
+                    self.object.save()
 
-                file_processor = AssayFileProcessor(self.object.bulk_file, self.object, self.request.user, save=True)
-                # Process the file
-                file_processor.process_file()
-                # parse_file_and_save(self.object.bulk_file, self.object.modified_by, study_id, overwrite_option, 'Bulk', form=None)
+                    file_processor = AssayFileProcessor(self.object.bulk_file, self.object, self.request.user, save=True)
+                    # Process the file
+                    file_processor.process_file()
+                    # parse_file_and_save(self.object.bulk_file, self.object.modified_by, study_id, overwrite_option, 'Bulk', form=None)
 
             # Only check if user is qualified editor
             if is_group_editor(self.request.user, self.object.group.name):
+                # Contrived save for supporting data
+                save_forms_with_tracking(
+                    self,
+                    None,
+                    formset=[supporting_data_formset],
+                    update=True
+                )
+
                 # Contrived method for marking data
                 for key, value in form.data.iteritems():
                     if key.startswith('data_upload_'):
@@ -1541,17 +1603,6 @@ class AssayStudyReproducibility(StudyViewerMixin, DetailView):
     template_name = 'assays/assaystudy_reproducibility.html'
 
 
-# TODO Class-based view for direct reproducibility access.
-# class AssayStudyReproducibilityList(AssayStudyList):
-#     """Displays all of the studies linked to groups that the user is part of"""
-#     def get_context_data(self, **kwargs):
-#         context = super(AssayStudyReproducibilityList, self).get_context_data()
-#
-#         context['reproducibility'] = True
-#
-#         return context
-
-
 class AssayStudyImages(StudyViewerMixin, DetailView):
     """Displays all of the images linked to the current study"""
     model = AssayStudy
@@ -1614,6 +1665,74 @@ class AssayStudyImages(StudyViewerMixin, DetailView):
 
 class GraphingReproducibilityFilterView(LoginRequiredMixin, TemplateView):
     template_name = 'assays/assay_filter.html'
+
+
+class AssayTargetList(ListView):
+    model = AssayTarget
+    template_name = 'assays/assaytarget_list.html'
+
+
+class AssayTargetDetail(DetailView):
+    model = AssayTarget
+    template_name = 'assays/assaytarget_detail.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(AssayTargetDetail, self).get_context_data(**kwargs)
+        context['assays'] = AssayStudyAssay.objects.filter(
+            target__name__icontains=self.object.name
+        ).values_list("method__name", "method_id", "method__description").distinct()
+        context['images'] = AssayImage.objects.filter(
+            target__name__icontains=self.object.name
+        ).values_list("method__name", "method_id", "method__description").distinct()
+        context['studies'] = get_user_accessible_studies(
+            self.request.user
+        ).filter(
+            assaystudyassay__target__name=self.object.name
+        ).distinct() | get_user_accessible_studies(
+            self.request.user
+        ).filter(
+            assayimagesetting__assayimage__target__name=self.object.name
+        ).distinct()
+        return context
+
+
+class AssayMethodList(ListView):
+    model = AssayMethod
+    template_name = 'assays/assaymethod_list.html'
+
+
+class AssayMethodDetail(DetailView):
+    model = AssayMethod
+    template_name = 'assays/assaymethod_detail.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(AssayMethodDetail, self).get_context_data(**kwargs)
+        context['assays'] = AssayStudyAssay.objects.filter(
+            method__name__icontains=self.object.name
+        ).values_list("target__name", "target_id", "target__description", "target__short_name").distinct()
+        context['images'] = AssayImage.objects.filter(
+            method__name__icontains=self.object.name
+        ).values_list("target__name", "target_id", "target__description", "target__short_name").distinct()
+        context['studies'] = get_user_accessible_studies(
+            self.request.user
+        ).filter(
+            assaystudyassay__method__name=self.object.name
+        ).distinct() | get_user_accessible_studies(
+            self.request.user
+        ).filter(
+            assayimagesetting__assayimage__method__name=self.object.name
+        ).distinct()
+        return context
+
+
+class AssayPhysicalUnitsList(ListView):
+    model = PhysicalUnits
+    template_name = 'assays/assayunit_list.html'
+
+
+class AssaySampleLocationList(ListView):
+    model = AssaySampleLocation
+    template_name = 'assays/assaylocation_list.html'
 
 
 # Inappropriate use of CBV

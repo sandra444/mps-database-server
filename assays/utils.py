@@ -173,6 +173,11 @@ MATRIX_PREFETCH = (
     'device',
 )
 
+# STRINGS FOR WHEN NONE OF THE ENTITY IN QUESTION
+NO_COMPOUNDS_STRING = '-No Compounds-'
+NO_CELLS_STRING = '-No Cells-'
+NO_SETTINGS_STRING = '-No Extra Settings-'
+
 
 def charset_detect(in_file, chunk_size=4096):
     """Use chardet library to detect what encoding is being used"""
@@ -1726,6 +1731,7 @@ def Inter_reproducibility(group_count, inter_data_df, inter_level=1, max_interpo
 
                 group_rep_mtarix = pd.DataFrame(index=[0], columns=header_list)
                 group_rep_mtarix.iloc[0, group_rep_mtarix.columns.get_loc('Treatment Group')] = group_id
+                # group_rep_mtarix.iloc[0, 3] = np.nan
                 group_rep_mtarix.iloc[0, 3] = pivot_group_matrix.shape[1]
                 group_rep_mtarix.iloc[
                     0, group_rep_mtarix.columns.get_loc('Reproducibility Note')] = 'Fewer than two centers/studies'
@@ -1759,8 +1765,7 @@ def Inter_reproducibility(group_count, inter_data_df, inter_level=1, max_interpo
                     group_rep_mtarix = pd.DataFrame(index=[0], columns=header_list)
                     group_rep_mtarix.iloc[0, group_rep_mtarix.columns.get_loc('Treatment Group')] = group_id
                     group_rep_mtarix.iloc[0, 3] = no_nan_matrix.shape[1]
-                    group_rep_mtarix.iloc[
-                        0, group_rep_mtarix.columns.get_loc('Reproducibility Note')] = 'Fewer than two centers/studies'
+                    group_rep_mtarix.iloc[0, group_rep_mtarix.columns.get_loc('Reproducibility Note')] = 'Fewer than two centers/studies'
                     reproducibility_results_table = reproducibility_results_table.append(group_rep_mtarix,
                                                                                          ignore_index=True)
                 elif no_nan_matrix.shape[0] < 1:

@@ -15,6 +15,16 @@ import collections
 
 
 # These are here to avoid potentially messy imports, may change later
+def attr_getter(item, attributes):
+    """attribute getter for individual items"""
+    for a in attributes:
+        try:
+            item = getattr(item, a)
+        except AttributeError:
+            return None
+
+    return item
+
 def tuple_attrgetter(*items):
     """Custom attrgetter that ALWAYS returns a tuple"""
     # NOTE WILL NEED TO CHANGE IF MOVED TO PYTHON 3
@@ -1005,7 +1015,7 @@ class AssayChipCells(models.Model):
                                     blank=True, default='')
 
     def __unicode__(self):
-        return u'{0}\n-{1:.0e} {2}'.format(
+        return u'{0}\n~{1:.0e} {2}'.format(
             self.cell_sample,
             self.cellsample_density,
             cell_choice_dict.get(self.cellsample_density_unit, 'Unknown Unit')
@@ -1566,6 +1576,9 @@ class AssayStudy(FlaggableModel):
     # Special addition, would put in base model, but don't want excess...
     signed_off_notes = models.CharField(max_length=255, blank=True, default='')
 
+    # Delimited string of reproducibility (Excellent|Acceptable|Poor)
+    repro_nums = models.CharField(max_length=40, blank=True, default='', help_text='Excellent|Acceptable|Poor')
+
     # TODO SOMEWHAT CONTRIVED
     bulk_file = models.FileField(
         upload_to=upload_file_location,
@@ -1579,6 +1592,59 @@ class AssayStudy(FlaggableModel):
     #         sorted([study_type.code for study_type in self.study_types.all()])
     #     )
     #     return study_types
+
+    # TODO VERY INEFFICIENT, BUT SHOULD WORK
+    def get_indexing_information(self):
+        """Exceedingly inefficient way to add some data for indexing studies"""
+        matrix_items = AssayMatrixItem.objects.filter(matrix__study_id=self.id).prefetch_related(
+            'matrix',
+            'assaysetupsetting_set__setting',
+            'assaysetupsetting_set__addition_location',
+            'assaysetupsetting_set__unit',
+            'assaysetupcell_set__cell_sample__cell_subtype',
+            'assaysetupcell_set__cell_sample__cell_type__organ',
+            'assaysetupcell_set__cell_sample__supplier',
+            'assaysetupcell_set__density_unit',
+            'assaysetupcell_set__addition_location',
+            'assaysetupcompound_set__compound_instance__compound',
+            'assaysetupcompound_set__concentration_unit',
+            'assaysetupcompound_set__addition_location',
+        )
+
+        current_study = {}
+
+        for matrix_item in matrix_items:
+            organ_model_name = u''
+
+            if matrix_item.organ_model:
+                organ_model_name = matrix_item.organ_model.name
+
+            current_study.setdefault('items', {}).update({
+                matrix_item.name: True
+            })
+            current_study.setdefault('organ_models', {}).update({
+                organ_model_name: True
+            })
+            current_study.setdefault('devices', {}).update({
+                matrix_item.device.name: True
+            })
+
+            for compound in matrix_item.assaysetupcompound_set.all():
+                current_study.setdefault('compounds', {}).update({
+                    unicode(compound): True
+                })
+
+            for cell in matrix_item.assaysetupcell_set.all():
+                current_study.setdefault('cells', {}).update({
+                    unicode(cell): True
+                })
+
+            for setting in matrix_item.assaysetupsetting_set.all():
+                current_study.setdefault('settings', {}).update({
+                    unicode(setting): True
+                })
+
+        return u'\n'.join([u' '.join(x) for x in current_study.values()])
 
     def get_study_types_string(self):
         current_types = []
@@ -1863,7 +1929,10 @@ class AssayMatrixItem(FlaggableModel):
             'Compounds': self.stringify_compounds(criteria.get('compound', None)),
             'Cells': self.stringify_cells(criteria.get('cell', None)),
             'Settings': self.stringify_settings(criteria.get('setting', None)),
-            'Trimmed Compounds': self.stringify_compounds({'compound_instance.compound_id': True}),
+            'Trimmed Compounds': self.stringify_compounds({
+                'compound_instance.compound_id': True,
+                'concentration': True
+            }),
             'Items with Same Treatment': []
         }
         return dic
@@ -2000,18 +2069,23 @@ class AssaySetupCell(models.Model):
             return unicode(self)
 
     def __unicode__(self):
+        passage = ''
+
+        if self.passage:
+            passage = 'p{}'.format(self.passage)
+
         if self.addition_location:
-            return u'{0} [{1}]\n-{2:.0e} {3}\nAdded to: {4}'.format(
+            return u'{0} {1}\n~{2:.2e} {3}\nAdded to: {4}'.format(
                 self.cell_sample,
-                self.passage,
+                passage,
                 self.density,
                 self.density_unit.unit,
                 self.addition_location
             )
         else:
-            return u'{0} [{1}]\n-{2:.0e} {3}'.format(
+            return u'{0} {1}\n~{2:.2e} {3}'.format(
                 self.cell_sample,
-                self.passage,
+                passage,
                 self.density,
                 self.density_unit.unit,
             )
@@ -2227,7 +2301,7 @@ class AssaySetupCompound(models.Model):
 
     def __unicode__(self):
         if self.addition_location:
-            return u'{0} ({1} {2})\n-Added on: {3}; Duration of: {4}; Added to: {5}'.format(
+            return u'{0} ({1} {2})\nAdded on: {3}; Duration of: {4}; Added to: {5}'.format(
                 self.compound_instance.compound.name,
                 self.concentration,
                 self.concentration_unit.unit,
@@ -2236,7 +2310,7 @@ class AssaySetupCompound(models.Model):
                 self.addition_location
             )
         else:
-            return u'{0} ({1} {2})\n-Added on: {3}; Duration of: {4}'.format(
+            return u'{0} ({1} {2})\nAdded on: {3}; Duration of: {4}'.format(
                 self.compound_instance.compound.name,
                 self.concentration,
                 self.concentration_unit.unit,
@@ -2363,8 +2437,9 @@ class AssaySetupSetting(models.Model):
     # No longer one-to-one
     # setup = models.ForeignKey('assays.AssaySetup')
     setting = models.ForeignKey('assays.AssaySetting')
-    unit = models.ForeignKey('assays.PhysicalUnits')
-    value = models.FloatField()
+    # DEFAULTS TO NONE, BUT IS REQUIRED
+    unit = models.ForeignKey('assays.PhysicalUnits', blank=True, default=14)
+    value = models.CharField(max_length=255)
 
     # Will we include these??
     # PLEASE NOTE THAT THIS IS IN MINUTES, CONVERTED FROM D:H:M
@@ -2400,8 +2475,9 @@ class AssaySetupSetting(models.Model):
             if 'setting_id' in criteria:
                 full_string.append(unicode(self.setting))
             if 'value' in criteria:
-                full_string.append('{:g}'.format(self.value))
-                full_string.append(self.unit.unit)
+                full_string.append(self.value)
+                if self.unit:
+                    full_string.append(self.unit.unit)
             if 'addition_time' in criteria:
                 full_string.append('Added on: ' + self.get_addition_time_string())
             if 'duration' in criteria:

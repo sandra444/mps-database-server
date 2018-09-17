@@ -45,6 +45,14 @@
 
     {% include 'generic_field.html' with field=form.name label="Model Name*" %}
 
+    {% include 'generic_field.html' with field=form.alt_name label="Alternative Name" %}
+
+    {% include 'generic_field.html' with field=form.center label="Center*" %}
+
+    {% include 'generic_field.html' with field=form.base_model label="Base Model" %}
+
+    {% include 'generic_field.html' with field=form.organ label="Organ*" %}
+
     {% if form.device.errors %}
         {% for error in form.device.errors %}
             <div class="alert alert-danger" role="alert">
@@ -68,24 +76,12 @@
         </div>
     </div>
 
-    {% include 'generic_field.html' with field=form.organ label="Organ*" %}
-
-    {% include 'generic_field.html' with field=form.center label="Center*" %}
+    {% include 'generic_field.html' with field=form.model_type label="Model Type*" %}
 
     {% include 'generic_field.html' with field=form.disease label="Disease" %}
+
+    {% include 'generic_field.html' with field=form.disease_trigger label="Disease Trigger" %}
     {# <h6 class="text-center">Note: Leave "Disease" blank for models that are healthy at the start of a study.</h6>#}
-
-    {% include 'generic_field.html' with field=form.description label="Description" %}
-
-    {% include 'generic_field.html' with field=form.model_image label="Image" %}
-
-    <div id="image_display">
-        <div id="current_display">
-            {% if object.model_image %}
-                <img class="img-responsive center-block padded-bottom" src="/media/{{ object.model_image }}">
-            {% endif %}
-        </div>
-    </div>
 
     {# TODO REVISE #}
     <div class="form-group">
@@ -101,6 +97,18 @@
         <label for="tctc" class="col-sm-1 control-label">TCTC</label>
         <div class="col-sm-1">
           {{ form.tctc }}
+        </div>
+    </div>
+
+    {% include 'generic_field.html' with field=form.description label="Description" %}
+
+    {% include 'generic_field.html' with field=form.model_image label="Image" %}
+
+    <div id="image_display">
+        <div id="current_display">
+            {% if object.model_image %}
+                <img class="img-responsive center-block padded-bottom" src="/media/{{ object.model_image }}">
+            {% endif %}
         </div>
     </div>
 

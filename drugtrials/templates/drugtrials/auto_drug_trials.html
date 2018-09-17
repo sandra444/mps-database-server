@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% load static %}
+{% load humanize %}
+
+{% block load %}
+    <script src="{% static "js/cookies.js" %}"></script>
+    <script src="{% static "drugtrials/auto_drug_trials_list.js" %}"></script>
+{% endblock %}
+
+{% block breadcrumbs %}
+    <li class="active">Auto Drug Trials</li>
+{% endblock %}
+
+{% block content %}
+    <div class="padded-bottom">
+        <legend>
+            <h2 class="text-center">
+                Human Clinical Drug Trials
+            </h2>
+        </legend>
+
+        <table id="auto_drug_trial_data" class="display" cellspacing="0" width="100%">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Primary Outcome</th>
+                    <th>Condition</th>
+                    <th>Treatment</th>
+                    <th>Dose</th>
+                    <th>Enrollment</th>
+                    <th>Measurement</th>
+                    <!-- <th>Value Unit</th> -->
+                    <th>p-Value</th>
+                </tr>
+            </thead>
+        </table>
+    </div>
+
+    <script src="{% static "js/display_datatable.js" %}"></script>
+{% endblock %}

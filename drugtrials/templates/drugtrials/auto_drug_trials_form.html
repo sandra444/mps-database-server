@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% load static %}
+{% load humanize %}
+
+{% block load %}
+    <script src="{% static "js/cookies.js" %}"></script>
+    <!-- <script src="{% static "drugtrials/auto_drug_trials_list.js" %}"></script> -->
+{% endblock %}
+
+{% block breadcrumbs %}
+    <li class="active">Drug Trials Input Form</li>
+{% endblock %}
+
+{% block content %}
+
+<form action="../autodrugtrials/?" + disease method="GET">
+    Enter Disease:
+    <input type="text" name="disease" />
+    <input type="submit" value="Submit" />
+</form>
+{% endblock %}

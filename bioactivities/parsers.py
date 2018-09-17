@@ -266,8 +266,17 @@ def generate_list_of_all_drugtrials(desired_organisms):
     desired_organisms = [organisms.get(organism, '') for organism in desired_organisms]
 
     result = FindingResult.objects.filter(
-        value__isnull=False, drug_trial__species__species_name__in=desired_organisms
-    ).prefetch_related('drug_trial__species', 'finding_name').values_list('finding_name__finding_name', flat=True)
+        value__isnull=False,
+        drug_trial__species__species_name__in=desired_organisms
+    ).exclude(
+        drug_trial__compound__isnull=True
+    ).prefetch_related(
+        'drug_trial__species',
+        'finding_name'
+    ).values_list(
+        'finding_name__finding_name',
+        flat=True
+    )
 
     result = generate_record_frequency_data(result)
 
@@ -634,6 +643,8 @@ def fetch_all_standard_drugtrials_data(
             value__isnull=False,
             drug_trial__compound__name__in=desired_compounds,
             drug_trial__species__species_name__in=desired_organisms
+        ).exclude(
+            drug_trial__compound__isnull=True
         )
         #average = 0
         current_min = 999999999

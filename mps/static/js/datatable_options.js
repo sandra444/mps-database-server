@@ -7,14 +7,6 @@ $(document).ready(function () {
     //     });
     // };
 
-    // Add method to sort by checkbox
-    // (I reversed it so that ascending will place checked first)
-    $.fn.dataTable.ext.order['dom-checkbox-defer'] = function(settings, col) {
-        return settings.aoData.map(function(data, index) {
-            return data._aData.checkbox.indexOf(' checked>') > -1 ? 0 : 1;
-        });
-    };
-
     $.fn.dataTable.ext.order['dom-checkbox'] = function(settings, col) {
         return settings.aoData.map(function(data, index) {
             return data._aData[0].indexOf(' checked>') > -1 ? 0 : 1;
@@ -62,7 +54,7 @@ $(document).ready(function () {
     // Defines the options for the print, copy, and save as buttons
     $.extend(true, $.fn.dataTable.defaults, {
         buttons: [
-            'copy', 'csv', 'print'
+            'copy', 'csv', 'print', 'colvis'
         ]
         // swfPath: '/static/swf/flashExport.swf'
     });
@@ -78,7 +70,11 @@ $(document).ready(function () {
 
     // Fix some issues with column width on resize.
     window.onresize = function() {
-        $($.fn.dataTable.tables(true)).DataTable().columns.adjust();
+        setTimeout(function() {
+            $($.fn.dataTable.tables(true)).DataTable().columns.adjust();
+            // $($.fn.dataTable.tables(true)).DataTable().responsive.recalc();
+            // $($.fn.dataTable.tables(true)).DataTable().fixedHeader.adjust();
+        }, 250);
     }
 });
 // $.fn.dataTable.TableTools.defaults.aButtons = [

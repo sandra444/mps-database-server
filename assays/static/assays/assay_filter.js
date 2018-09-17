@@ -2,6 +2,9 @@ $(document).ready(function() {
     // Load core chart package
     google.charts.load('current', {'packages':['corechart']});
 
+    // Set the callback
+    google.charts.setOnLoadCallback(reproPie1);
+
     var filters = {
         'organ_models': {},
         'groups': {},
@@ -370,10 +373,10 @@ $(document).ready(function() {
 
     // TODO TODO TODO REPRO STUFF
     // TODO: UGLY
-    var cv_tooltip = '<span data-toggle="tooltip" title="The CV is calculated for each time point and the value reported is the max CV across time points, or the CV if a single time point is present.  The reproducibility status is excellent if Max CV/CV < 5% (Excellent (CV)), acceptable if Max CV/CV < 15% (Acceptable (CV)), and poor if CV > 15% for a single time point (Poor (CV))" class="glyphicon glyphicon-question-sign" aria-hidden="true" data-placement="bottom"></span>';
-    var icc_tooltip = '<span data-toggle="tooltip" title="The ICC Absolute Agreement of the measurements across multiple time points is a correlation coefficient that ranges from -1 to 1 with values closer to 1 being more correlated.  When the Max CV > 15%, the reproducibility status is reported to be excellent if > 0.8 (Excellent (ICC), acceptable if > 0.2 (Acceptable (ICC)), and poor if < 0.2 (Poor (ICC))" class="glyphicon glyphicon-question-sign" aria-hidden="true" data-placement="bottom"></span>';
-    var repro_tooltip = '<span data-toggle="tooltip" title="Our classification of this grouping\'s reproducibility (Excellent > Acceptable > Poor/NA). If Max CV < 15% then the status is based on the  Max CV criteria, otherwise the status is based on the ICC criteria when the number of overlapping time points is more than one. For single time point data, if CV <15% then the status is based on the CV criteria, otherwise the status is based on the ANOVA P-Value" class="glyphicon glyphicon-question-sign" aria-hidden="true" data-placement="bottom"></span>';
-    var anova_tooltip = '<span data-toggle="tooltip" title="The ANOVA p-value is calculated for the single overlapping time point data across MPS centers or studies. The reproducibility status is Acceptable (P-Value) if ANOVA p-value >= 0.05, and Poor (P-Value) if ANOVA p-value <0.05." class="glyphicon glyphicon-question-sign" aria-hidden="true" data-placement="bottom"></span>';
+    var cv_tooltip = "The CV is calculated for each time point and the value reported is the max CV across time points, or the CV if a single time point is present.  The reproducibility status is excellent if Max CV/CV < 5% (Excellent (CV)), acceptable if Max CV/CV < 15% (Acceptable (CV)), and poor if CV > 15% for a single time point (Poor (CV))";
+    var icc_tooltip = "The ICC Absolute Agreement of the measurements across multiple time points is a correlation coefficient that ranges from -1 to 1 with values closer to 1 being more correlated.  When the Max CV > 15%, the reproducibility status is reported to be excellent if > 0.8 (Excellent (ICC), acceptable if > 0.2 (Acceptable (ICC)), and poor if < 0.2 (Poor (ICC))";
+    var repro_tooltip = "Our classification of this grouping\'s reproducibility (Excellent > Acceptable > Poor/NA). If Max CV < 15% then the status is based on the  Max CV criteria, otherwise the status is based on the ICC criteria when the number of overlapping time points is more than one. For single time point data, if CV <15% then the status is based on the CV criteria, otherwise the status is based on the ANOVA P-Value";
+    var anova_tooltip = "The ANOVA p-value is calculated for the single overlapping time point data across MPS centers or studies. The reproducibility status is Acceptable (P-Value) if ANOVA p-value >= 0.05, and Poor (P-Value) if ANOVA p-value <0.05.";
     // Bad
     var chart_tooltips = {
         'item': '“Item” graph displays selected Target/Analyte’s measurements on each item (chip or well) against time cross centers or studies.',
@@ -381,6 +384,21 @@ $(document).ready(function() {
         'trimmed': '“Trimmed” graph displays the average of selected Target/Analyte’s measurements aggregated by centers or studies against time by dropping the data points which timely consistent measurement is missing from one or more center/study. It means the time observations are excluded from the analysis when any observations by center/study  are missing at that time.',
         'interpolated': '“Interpolated” graph displays the average of selected Target/Analyte’s measurements aggregated by centers or studies against time by interpolating the data points which timely consistent measurement(s) is(are) missing from a center/study. Four interpolation methods are applied for filling missing points, which are “nearest”, “linear spline”,” quadratic spline” and “cubic spline”. The overlapped data against time from one of four interpolation methods which has highest ICC value is depicted as a graph . The inter reproducibility results from all four interpolation methods are displayed in the table above the graphs.'
     };
+
+    // BAD NOT DRY
+    function escapeHtml(html) {
+        return $('<div>').text(html).html();
+    }
+
+    function make_escaped_tooltip(title_text) {
+        var new_span = $('<div>').append($('<span>')
+            .attr('data-toggle', "tooltip")
+            .attr('data-title', escapeHtml(title_text))
+            .addClass("glyphicon glyphicon-question-sign")
+            .attr('aria-hidden', "true")
+            .attr('data-placement', "bottom"));
+        return new_span.html();
+    }
 
     var interpolation_tooltips = {
         'Trimmed': 'These values use no interpolation method, they are based only on overlapping data.',
@@ -395,6 +413,7 @@ $(document).ready(function() {
     var repro_table_data_best = null;
     // For making the charts
     var chart_data = null;
+    var summary_pie = null;
     // For getting info on treatment groups
     var data_groups = null;
     var header_keys = null;
@@ -431,11 +450,20 @@ $(document).ready(function() {
         max_interpolation_size = $('#max_interpolation_size').val();
         initial_norm = $('#initial_norm').prop('checked') ? 1 : 0;
 
+        reproPie1();
+
+        // Special check to see whether to default to studies (only one center selected)
+        if (Object.keys(filters['groups']).length === 1) {
+            $('#inter_level_by_center').prop('checked', false);
+            $('#inter_level_by_study').prop('checked', true);
+            inter_level = 0;
+        }
+
         // Define what the legend is
         // TODO TODO TODO CONTRIVED FOR NOW
-        var legend_key = 'Centers';
+        var legend_key = 'Center Count';
         if (!inter_level) {
-            legend_key = 'Studies';
+            legend_key = 'Study Count';
         }
 
         if (repro_table) {
@@ -479,7 +507,7 @@ $(document).ready(function() {
                 }
             },
             {
-                title: "Target",
+                title: "Target/Analyte",
                 "render": function (data, type, row) {
                     return data_groups[row[0]][0];
                 },
@@ -530,18 +558,18 @@ $(document).ready(function() {
             // {title: "Max Interpolated", data: '2'},
             {title: legend_key, data: '3'},
             {title: "Time Point Overlap", data: '4', width: '5%'},
-            {title: "<span style='white-space: nowrap;'>Max CV<br>or CV " + cv_tooltip + "</span>", data: '5'},
-            {title: "<span style='white-space: nowrap;'>ICC " + icc_tooltip + "</span>", data: '6'},
-            {title: "<span>ANOVA<br>P-Value " + anova_tooltip + "</span>", data: '7', width: '10%'},
+            {title: "<span style='white-space: nowrap;'>Max CV<br>or CV " + make_escaped_tooltip(cv_tooltip) + "</span>", data: '5'},
+            {title: "<span style='white-space: nowrap;'>ICC " + make_escaped_tooltip(icc_tooltip) + "</span>", data: '6'},
+            {title: "<span>ANOVA<br>P-Value " + make_escaped_tooltip(anova_tooltip) + "</span>", data: '7', width: '10%'},
             {
-                title: "Reproducibility<br>Status " + repro_tooltip,
+                title: "Reproducibility<br>Status " + make_escaped_tooltip(repro_tooltip),
                 data: '8',
                 render: function (data, type, row, meta) {
-                    if (data == "Excellent (ICC)" || data == "Excellent (CV)") {
+                    if (data[0] === 'E') {
                         return '<td><span class="hidden">3</span>' + data + '</td>';
-                    } else if (data == "Acceptable (ICC)" || data == "Acceptable (CV)") {
+                    } else if (data[0] === 'A') {
                         return '<td><span class="hidden">2</span>' + data + '</td>';
-                    } else if (data == "Poor (ICC)" || data == "Poor (CV)") {
+                    } else if (data[0] === 'P') {
                         return '<td><span class="hidden">1</span>' + data + '</td>';
                     } else {
                         return '<td><span class="hidden">0</span>' + data + '<span data-toggle="tooltip" title="' + row[9] + '" class="glyphicon glyphicon-question-sign" aria-hidden="true"></span></td>';
@@ -580,6 +608,7 @@ $(document).ready(function() {
                     repro_table_data_full = json.repro_table_data_full;
                     repro_table_data_best = json.repro_table_data_best;
                     chart_data = json.chart_data;
+                    summary_pie = json.pie;
                     data_groups = json.data_groups;
                     header_keys = json.header_keys;
                     treatment_groups = json.treatment_groups;
@@ -607,21 +636,43 @@ $(document).ready(function() {
                 }
             },
             columns: columns,
+            columnDefs: [
+                { "responsivePriority": 1, "targets": 14 },
+                { "responsivePriority": 2, "targets": [0,1,2,3] },
+                { "responsivePriority": 3, "targets": 5 },
+                { "responsivePriority": 4, "targets": 12 },
+                { "responsivePriority": 5, "targets": 11 },
+                { "responsivePriority": 6, "targets": 13 },
+                { "responsivePriority": 7, "targets": 6 },
+                { "responsivePriority": 8, "targets": 4 },
+                { "aTargets": [14], "fnCreatedCell": function (nTd, sData, oData, iRow, iCol) {
+                    if (sData[0] === "E") {
+                        $(nTd).css('background-color', '#74ff5b').css('font-weight', 'bold');
+                    } else if (sData[0] === "A") {
+                        $(nTd).css('background-color', '#fcfa8d').css('font-weight', 'bold');
+                    } else if (sData[0] === "P") {
+                        $(nTd).css('background-color', '#ff7863').css('font-weight', 'bold');
+                    } else {
+                        $(nTd).css('background-color', 'Grey').css('font-weight', 'bold');
+                    }
+                }}
+            ],
             "order": [[status_column_index, 'desc'], [ 1, "asc" ]],
-            "createdRow": function(row, data, dataIndex) {
-                if (data[8][0] === "E") {
-                    $(row).find('td:eq(' + status_column_index + ')').css("background-color", "#74ff5b").css("font-weight", "bold");
-                }
-                else if (data[8][0] === "A") {
-                    $(row).find('td:eq(' + status_column_index + ')').css("background-color", "#fcfa8d").css("font-weight", "bold");
-                }
-                else if (data[8][0] === "P") {
-                    $(row).find('td:eq(' + status_column_index + ')').css("background-color", "#ff7863").css("font-weight", "bold");
-                }
-                else {
-                    $(row).find('td:eq(' + status_column_index + ')').css("background-color", "Grey").css("font-weight", "bold");
-                }
-            },
+            // Column visibility toggle would displace, hence new means of coloring.
+            // "createdRow": function(row, data, dataIndex) {
+            //     if (data[8][0] === "E") {
+            //         $(row).find('td:eq(' + status_column_index + ')').css("background-color", "#74ff5b").css("font-weight", "bold");
+            //     }
+            //     else if (data[8][0] === "A") {
+            //         $(row).find('td:eq(' + status_column_index + ')').css("background-color", "#fcfa8d").css("font-weight", "bold");
+            //     }
+            //     else if (data[8][0] === "P") {
+            //         $(row).find('td:eq(' + status_column_index + ')').css("background-color", "#ff7863").css("font-weight", "bold");
+            //     }
+            //     else {
+            //         $(row).find('td:eq(' + status_column_index + ')').css("background-color", "Grey").css("font-weight", "bold");
+            //     }
+            // },
             "responsive": true,
             dom: 'B<"row">lfrtip',
             fixedHeader: {headerOffset: 50},
@@ -640,7 +691,7 @@ $(document).ready(function() {
             drawCallback: function () {
                 // Make sure tooltips displayed properly
                 // TODO TODO TODO
-                $('[data-toggle="tooltip"]').tooltip({container: "body"});
+                $('[data-toggle="tooltip"]').tooltip({container: "body", html: true});
             }
         });
 
@@ -653,6 +704,27 @@ $(document).ready(function() {
             order_info(set_order);
         });
     }
+
+    // This function filters the dataTable rows
+    $.fn.dataTableExt.afnFiltering.push(function(oSettings, aData, iDataIndex) {
+        // This is a special exception to make sure that other tables are not filtered on the page
+        if (oSettings.nTable.getAttribute('id') !== 'repro_table') {
+            return true;
+        }
+
+        // If show all is not toggled on, then exclude those without overlap
+        // BEWARE MAGIC NUMBERS
+        if ($('#show_all_repro').prop('checked') || aData[11] || aData[12] || aData[13]) {
+            return true;
+        }
+    });
+
+    // When a filter is clicked, set the filter values and redraw the table
+    $('#show_all_repro_wrapper').click(function() {
+        $('#show_all_repro').prop('checked', !$('#show_all_repro').prop('checked'));
+        // Redraw the table
+        repro_table.draw();
+    });
 
     function draw_subsections() {
         var item_to_copy = $("#clone_container").find('[data-id="repro-data"]');
@@ -676,6 +748,7 @@ $(document).ready(function() {
             populate_selection_table(group, data_table);
             if (repro_table_data_full[group].best[1]) {
                 populate_icc_table(group, icc_table);
+                reproPie2();
             }
             else {
                 icc_table.hide();
@@ -690,7 +763,7 @@ $(document).ready(function() {
             area_to_copy_to.append(current_clone);
 
             // Activates Bootstrap tooltips
-            $('[data-toggle="tooltip"]').tooltip({container:"body"});
+            $('[data-toggle="tooltip"]').tooltip({container:"body", html: true});
         });
     }
 
@@ -712,9 +785,15 @@ $(document).ready(function() {
         var rows = [];
 
         $.each(header_keys['data'], function(index, key) {
-            rows.push(
-                '<tr><th>' + key + '</th><td>' + data_groups[set][index] + '</td></tr>'
-            );
+            if (key === 'Target') {
+                rows.push(
+                    '<tr><th><h4><strong>Target/Analyte</strong></h4></th><td><h4><strong>' + data_groups[set][index] + '</strong></h4></td></tr>'
+                );
+            } else {
+                rows.push(
+                    '<tr><th>' + key + '</th><td>' + data_groups[set][index] + '</td></tr>'
+                );
+            }
         });
 
         var current_treatment_group = data_groups[set][data_groups[set].length - 1];
@@ -929,7 +1008,7 @@ $(document).ready(function() {
                 // tooltip: {isHtml: true},
                 intervals: {
                     // style: 'bars'
-                    'lineWidth':2, 'barWidth': 1
+                    'lineWidth': 0.75
                 }
             };
 
@@ -1066,13 +1145,13 @@ $(document).ready(function() {
             }
         });
 
-        if (!method_to_show) {
+        if (!method_to_show || !current_max) {
             $.each(interpolation_methods, function(index, method) {
                 var current_row = current_full_data[method];
                 var lower_method = method.toLowerCase();
 
-                if (current_row && current_row[5] < current_min) {
-                    current_min = current_row[5];
+                if (current_row && parseFloat(current_row[5]) < current_min) {
+                    current_min = parseFloat(current_row[5]);
                     method_to_show = lower_method;
                 }
             });
@@ -1120,7 +1199,7 @@ $(document).ready(function() {
             current_repro.addClass('hidden')
         }
         // Activates Bootstrap tooltips
-        $('[data-toggle="tooltip"]').tooltip({container:"body"});
+        $('[data-toggle="tooltip"]').tooltip({container:"body", html: true});
     });
 
     $(document).on('mouseover', '.repro-set-info', function() {
@@ -1234,4 +1313,54 @@ $(document).ready(function() {
     $('#' + charts_name + 'chart_options').find('input').change(function() {
         show_plots();
     });
+
+    // Piecharts
+    function reproPie1() {
+        var data = google.visualization.arrayToDataTable([
+            ['Status', 'Count'],
+            ['Loading...', 1]
+        ]);
+        var options = {
+            legend: 'none',
+            pieSliceText: 'label',
+            'chartArea': {'width': '90%', 'height': '90%'},
+            tooltip: {trigger : 'none'},
+            pieSliceTextStyle: {
+                color: 'white',
+                bold: true,
+                fontSize: 12
+            },
+        };
+        var chart = new google.visualization.PieChart(document.getElementById('piechart'));
+        chart.draw(data, options);
+    }
+
+    function reproPie2() {
+        var data = google.visualization.arrayToDataTable([
+            ['Status', 'Count'],
+            ['Excellent', summary_pie[0]],
+            ['Acceptable', summary_pie[1]],
+            ['Poor', summary_pie[2]]
+        ]);
+        var options = {
+            // title: 'Reproducibility Breakdown\n(Click Slices for Details)',
+            // titleFontSize:16,
+            legend: 'none',
+            slices: {
+                0: { color: '#74ff5b' },
+                1: { color: '#fcfa8d' },
+                2: { color: '#ff7863' }
+            },
+            pieSliceText: 'label',
+            pieSliceTextStyle: {
+                color: 'black',
+                bold: true,
+                fontSize: 12
+            },
+            'chartArea': {'width': '90%', 'height': '90%'},
+            pieSliceBorderColor: "black",
+        };
+        var chart = new google.visualization.PieChart(document.getElementById('piechart'));
+        chart.draw(data, options);
+    }
 });
