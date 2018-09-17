@@ -998,6 +998,10 @@ def get_data_points_for_charting(
 
             target_method_pairs.update({assay.target_id: assay.method_id})
 
+    # Make sure the post_filter is at least a dic
+    if post_filter is None:
+        post_filter = {}
+
     # TODO NOTE THAT THIS MAKES ASSUMPTION ABOUT THE STATE OF THE POST FILTER
     # That is to say, you may want to be positive that the "combined" fields are split out
     matrix_item_compound_post_filters = {}
