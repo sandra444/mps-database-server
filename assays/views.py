@@ -200,22 +200,18 @@ def get_user_status_context(self, context):
 
 def get_queryset_with_group_center_dictionary(queryset):
     """Takes the queryset, adds a dictionary 'group_center_map' mapping each group to its center"""
-
-    # INSTEAD OF GRABBING THE GROUPS FIRST, GET ALL CENTERS AND THEIR GROUPS, AND FOR EACH STUDY APPLY CORRECT CENTER
-    # THEN DO COMPOUND STUFF ELSEWHERE
-
-    groups = queryset.values_list('group__name', flat=True)
     group_center_map = {}
 
     centers = MicrophysiologyCenter.objects.all().prefetch_related(
         'groups'
     )
 
-    for group in groups:
-        group_center_map[group] = centers.filter(groups__name__contains=group).first()
+    for center in centers:
+        for group in center.groups.all():
+            group_center_map[group.id] = center
 
     for study in queryset:
-        study.center = group_center_map[study.group.name]
+        study.center = group_center_map[study.group_id]
 
 
 # Class-based views for study configuration
@@ -351,9 +347,8 @@ def get_queryset_with_number_of_data_points(queryset):
     images = AssayImage.objects.filter(
         setting__study_id__in=study_ids
     ).prefetch_related(
-        'matrix_item',
         'setting'
-    ).only('id', 'matrix_item', 'setting', 'file_name')
+    ).only('id', 'setting__study_id', 'setting', 'file_name')
 
     video_formats = {x: True for x in [
         'webm',
@@ -373,17 +368,17 @@ def get_queryset_with_number_of_data_points(queryset):
 
         if is_video:
             current_value = videos_map.setdefault(
-                image.matrix_item.study_id, 0
+                image.setting.study_id, 0
             )
             videos_map.update({
-                image.matrix_item.study_id: current_value + 1
+                image.setting.study_id: current_value + 1
             })
         else:
             current_value = images_map.setdefault(
-                image.matrix_item.study_id, 0
+                image.setting.study_id, 0
             )
             images_map.update({
-                image.matrix_item.study_id: current_value + 1
+                image.setting.study_id: current_value + 1
             })
 
     supporting_data = AssayStudySupportingData.objects.filter(
