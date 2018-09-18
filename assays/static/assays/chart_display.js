@@ -386,6 +386,11 @@ $(document).ready(function () {
         var assays = json.assays;
 
         for (index in sorted_assays) {
+            // Don't bother if empty
+            if (assays[index][1] === undefined) {
+                continue;
+            }
+
             var assay_unit = sorted_assays[index];
             var assay = assay_unit.split('\n')[0];
             var unit = assay_unit.split('\n')[1];
