@@ -1916,13 +1916,13 @@ def acquire_post_filter(studies, assays, matrix_items, data_points):
             current.setdefault(
                 'assaysetupcompound__addition_time__in', {}
             ).update({
-                compound.addition_time: compound.addition_time
+                compound.addition_time: compound.get_addition_time_string()
             })
 
             current.setdefault(
                 'assaysetupcompound__duration__in', {}
             ).update({
-                compound.duration: compound.duration
+                compound.duration: compound.get_duration_string()
             })
 
             current.setdefault(
@@ -1995,6 +1995,8 @@ def acquire_post_filter(studies, assays, matrix_items, data_points):
                 cell.addition_location_id: cell.addition_location.name
             })
 
+            # NOTE NO ADDITION TIME FOR CELLS AT THE MOMENT
+
         for setting in matrix_item.assaysetupsetting_set.all():
             current.setdefault(
                 'assaysetupsetting__setting_id__in', {}
@@ -2031,13 +2033,13 @@ def acquire_post_filter(studies, assays, matrix_items, data_points):
             current.setdefault(
                 'assaysetupsetting__addition_time__in', {}
             ).update({
-                setting.addition_time: setting.addition_time
+                setting.addition_time: setting.get_addition_time_string()
             })
 
             current.setdefault(
                 'assaysetupsetting__duration__in', {}
             ).update({
-                setting.duration: setting.duration
+                setting.duration: setting.get_duration_string()
             })
 
             current.setdefault(

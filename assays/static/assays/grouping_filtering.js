@@ -131,8 +131,13 @@ $(document).ready(function () {
                         row += '<td width="10%" class="text-center"><input data-obj-name="' + obj_name + '" class="big-checkbox post-filter-checkbox" type="checkbox" value="' + obj_val + '"></td>';
                     }
 
+                    if (obj_name) {
+                        obj_name += '';
+                        obj_name = obj_name.replace('~@|', ' ')
+                    }
+
                     // WARNING: NAIVE REPLACE
-                    row += '<td>' + obj_name.replace('~@|', ' ') + '</td>';
+                    row += '<td>' + obj_name + '</td>';
 
                     row += '</tr>';
 

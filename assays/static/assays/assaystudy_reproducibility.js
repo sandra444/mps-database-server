@@ -101,7 +101,7 @@ $(document).ready(function () {
                 }
             },
             { title: "Target/Analyte", data: '3', width: '8%' },
-            { title: "Method/Kit", data: '4', width: '8%' },
+            { title: "Method/Kit", data: '4', width: '8%', 'className': 'none' },
             { title: "Sample Location", data: '5', width: '8%' },
             { title: "Value Unit", data: '6' },
             { title: "<span style='white-space: nowrap;'>Max CV<br>or CV "+make_escaped_tooltip(cv_tooltip)+"</span>", data: '8' },
