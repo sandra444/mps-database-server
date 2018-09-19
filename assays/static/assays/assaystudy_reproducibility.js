@@ -2,7 +2,7 @@ $(document).ready(function () {
     // Load core chart package
     google.charts.load('current', {'packages':['corechart']});
     // Set the callback
-    google.charts.setOnLoadCallback(reproPie1);
+    google.charts.setOnLoadCallback(loadingPie);
 
     // FILE-SCOPE VARIABLES
     var study_id = Math.floor(window.location.href.split('/')[5]);
@@ -57,7 +57,56 @@ $(document).ready(function () {
                 lists.cv_list = json.cv_list;
                 lists.chip_list = json.chip_list;
                 pie = json.pie;
-                reproPie2();
+
+                if (pie == '0,0,0'){
+                    var na_data = google.visualization.arrayToDataTable([
+                        ['Status', 'Count'],
+                        ['NA', 1]
+                    ]);
+                    var na_options = {
+                        legend: 'none',
+                        pieSliceText: 'label',
+                        'chartArea': {'width': '90%', 'height': '90%'},
+                        slices: {
+                            0: { color: 'Grey' }
+                        },
+                        tooltip: {trigger : 'none'},
+                        pieSliceTextStyle: {
+                            color: 'white',
+                            bold: true,
+                            fontSize: 12
+                        },
+                    };
+                    var chart = new google.visualization.PieChart(document.getElementById('piechart'));
+                    chart.draw(na_data, na_options);
+                } else {
+                    var pie_data = google.visualization.arrayToDataTable([
+                        ['Status', 'Count'],
+                        ['Excellent', pie[0]],
+                        ['Acceptable', pie[1]],
+                        ['Poor', pie[2]]
+                    ]);
+                    var pie_options = {
+                        // title: 'Reproducibility Breakdown\n(Click Slices for Details)',
+                        // titleFontSize:16,
+                        legend: 'none',
+                        slices: {
+                            0: { color: '#74ff5b' },
+                            1: { color: '#fcfa8d' },
+                            2: { color: '#ff7863' }
+                        },
+                        pieSliceText: 'label',
+                        pieSliceTextStyle: {
+                            color: 'black',
+                            bold: true,
+                            fontSize: 12
+                        },
+                        'chartArea': {'width': '90%', 'height': '90%'},
+                        pieSliceBorderColor: "black",
+                    };
+                    var chart = new google.visualization.PieChart(document.getElementById('piechart'));
+                    chart.draw(pie_data, pie_options);
+                }
 
                 return gas_list;
             }
@@ -417,12 +466,13 @@ $(document).ready(function () {
         }
     }
 
-    function reproPie1() {
-        var data = google.visualization.arrayToDataTable([
+    // Piecharts
+    function loadingPie(){
+        var loading_data = google.visualization.arrayToDataTable([
             ['Status', 'Count'],
             ['Loading...', 1]
         ]);
-        var options = {
+        var loading_options = {
             legend: 'none',
             pieSliceText: 'label',
             'chartArea': {'width': '90%', 'height': '90%'},
@@ -434,35 +484,6 @@ $(document).ready(function () {
             },
         };
         var chart = new google.visualization.PieChart(document.getElementById('piechart'));
-        chart.draw(data, options);
-    }
-
-    function reproPie2() {
-        var data = google.visualization.arrayToDataTable([
-            ['Status', 'Count'],
-            ['Excellent', pie[0]],
-            ['Acceptable', pie[1]],
-            ['Poor', pie[2]]
-        ]);
-        var options = {
-            // title: 'Reproducibility Breakdown\n(Click Slices for Details)',
-            // titleFontSize:16,
-            legend: 'none',
-            slices: {
-                0: { color: '#74ff5b' },
-                1: { color: '#fcfa8d' },
-                2: { color: '#ff7863' }
-            },
-            pieSliceText: 'label',
-            pieSliceTextStyle: {
-                color: 'black',
-                bold: true,
-                fontSize: 12
-            },
-            'chartArea': {'width': '90%', 'height': '90%'},
-            pieSliceBorderColor: "black",
-        };
-        var chart = new google.visualization.PieChart(document.getElementById('piechart'));
-        chart.draw(data, options);
+        chart.draw(loading_data, loading_options);
     }
 });
