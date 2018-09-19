@@ -2,9 +2,6 @@ $(document).ready(function() {
     // Load core chart package
     google.charts.load('current', {'packages':['corechart']});
 
-    // Set the callback
-    google.charts.setOnLoadCallback(reproPie1);
-
     var filters = {
         'organ_models': {},
         'groups': {},
@@ -450,7 +447,8 @@ $(document).ready(function() {
         max_interpolation_size = $('#max_interpolation_size').val();
         initial_norm = $('#initial_norm').prop('checked') ? 1 : 0;
 
-        reproPie1();
+        // Loading Piechart
+        loadingPie();
 
         // Special check to see whether to default to studies (only one center selected)
         if (Object.keys(filters['groups']).length === 1) {
@@ -619,6 +617,55 @@ $(document).ready(function() {
 
                     value_unit_index = json.header_keys.data.indexOf('Value Unit');
 
+                    // Piechart info
+                    if (summary_pie == '0,0,0'){
+                        var na_data = google.visualization.arrayToDataTable([
+                            ['Status', 'Count'],
+                            ['No Matching Records Found', 1]
+                        ]);
+                        var na_options = {
+                            legend: 'none',
+                            pieSliceText: 'label',
+                            'chartArea': {'width': '90%', 'height': '90%'},
+                            slices: {
+                                0: { color: 'Grey' }
+                            },
+                            tooltip: {trigger : 'none'},
+                            pieSliceTextStyle: {
+                                color: 'white',
+                                bold: true,
+                                fontSize: 12
+                            },
+                        };
+                        var chart = new google.visualization.PieChart(document.getElementById('piechart'));
+                        chart.draw(na_data, na_options);
+                    } else {
+                        var pie_data = google.visualization.arrayToDataTable([
+                            ['Status', 'Count'],
+                            ['Excellent', summary_pie[0]],
+                            ['Acceptable', summary_pie[1]],
+                            ['Poor', summary_pie[2]]
+                        ]);
+                        var pie_options = {
+                            legend: 'none',
+                            slices: {
+                                0: { color: '#74ff5b' },
+                                1: { color: '#fcfa8d' },
+                                2: { color: '#ff7863' }
+                            },
+                            pieSliceText: 'label',
+                            pieSliceTextStyle: {
+                                color: 'black',
+                                bold: true,
+                                fontSize: 12
+                            },
+                            'chartArea': {'width': '90%', 'height': '90%'},
+                            pieSliceBorderColor: "black",
+                        };
+                        var chart = new google.visualization.PieChart(document.getElementById('piechart'));
+                        chart.draw(pie_data, pie_options);
+                    }
+
                     if (window.GROUPING.full_post_filter === null) {
                         window.GROUPING.full_post_filter = json.post_filter;
                         window.GROUPING.current_post_filter = JSON.parse(JSON.stringify(json.post_filter));
@@ -748,7 +795,6 @@ $(document).ready(function() {
             populate_selection_table(group, data_table);
             if (repro_table_data_full[group].best[1]) {
                 populate_icc_table(group, icc_table);
-                reproPie2();
             }
             else {
                 icc_table.hide();
@@ -1315,12 +1361,12 @@ $(document).ready(function() {
     });
 
     // Piecharts
-    function reproPie1() {
-        var data = google.visualization.arrayToDataTable([
+    function loadingPie(){
+        var loading_data = google.visualization.arrayToDataTable([
             ['Status', 'Count'],
             ['Loading...', 1]
         ]);
-        var options = {
+        var loading_options = {
             legend: 'none',
             pieSliceText: 'label',
             'chartArea': {'width': '90%', 'height': '90%'},
@@ -1332,35 +1378,6 @@ $(document).ready(function() {
             },
         };
         var chart = new google.visualization.PieChart(document.getElementById('piechart'));
-        chart.draw(data, options);
-    }
-
-    function reproPie2() {
-        var data = google.visualization.arrayToDataTable([
-            ['Status', 'Count'],
-            ['Excellent', summary_pie[0]],
-            ['Acceptable', summary_pie[1]],
-            ['Poor', summary_pie[2]]
-        ]);
-        var options = {
-            // title: 'Reproducibility Breakdown\n(Click Slices for Details)',
-            // titleFontSize:16,
-            legend: 'none',
-            slices: {
-                0: { color: '#74ff5b' },
-                1: { color: '#fcfa8d' },
-                2: { color: '#ff7863' }
-            },
-            pieSliceText: 'label',
-            pieSliceTextStyle: {
-                color: 'black',
-                bold: true,
-                fontSize: 12
-            },
-            'chartArea': {'width': '90%', 'height': '90%'},
-            pieSliceBorderColor: "black",
-        };
-        var chart = new google.visualization.PieChart(document.getElementById('piechart'));
-        chart.draw(data, options);
+        chart.draw(loading_data, loading_options);
     }
 });
