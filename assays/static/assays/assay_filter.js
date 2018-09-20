@@ -432,7 +432,50 @@ $(document).ready(function() {
 
     var status_column_index = 14;
 
+    //  Pie chart options etc.
+    var na_options = {
+        legend: 'none',
+        pieSliceText: 'label',
+        'chartArea': {'width': '90%', 'height': '90%'},
+        slices: {
+            0: { color: 'Grey' }
+        },
+        tooltip: {trigger : 'none'},
+        pieSliceTextStyle: {
+            color: 'white',
+            bold: true,
+            fontSize: 12
+        }
+    };
+
+    var pie_options = {
+        legend: 'none',
+        slices: {
+            0: { color: '#74ff5b' },
+            1: { color: '#fcfa8d' },
+            2: { color: '#ff7863' }
+        },
+        pieSliceText: 'label',
+        pieSliceTextStyle: {
+            color: 'black',
+            bold: true,
+            fontSize: 12
+        },
+        'chartArea': {'width': '90%', 'height': '90%'},
+        pieSliceBorderColor: "black"
+    };
+
+    var na_data = null;
+
+    var pie_chart = null;
+
     function show_repro() {
+        // Set na_data
+        na_data = google.visualization.arrayToDataTable([
+            ['Status', 'Count'],
+            ['No Matching Records Found', 1]
+        ]);
+
         // Hide fixed headers
         $.each(filters, function (filter, contents) {
             var current_filter = $('#filter_' + filter);
@@ -597,8 +640,12 @@ $(document).ready(function() {
                     window.spinner.stop();
 
                     // A little unpleasant
+                    // Accommodate errors and die early
                     if (json.errors) {
                         alert(json.errors);
+
+                        pie_chart = new google.visualization.PieChart(document.getElementById('piechart'));
+                        pie_chart.draw(na_data, na_options);
 
                         return [];
                     }
@@ -618,27 +665,9 @@ $(document).ready(function() {
                     value_unit_index = json.header_keys.data.indexOf('Value Unit');
 
                     // Piechart info
-                    if (summary_pie == '0,0,0'){
-                        var na_data = google.visualization.arrayToDataTable([
-                            ['Status', 'Count'],
-                            ['No Matching Records Found', 1]
-                        ]);
-                        var na_options = {
-                            legend: 'none',
-                            pieSliceText: 'label',
-                            'chartArea': {'width': '90%', 'height': '90%'},
-                            slices: {
-                                0: { color: 'Grey' }
-                            },
-                            tooltip: {trigger : 'none'},
-                            pieSliceTextStyle: {
-                                color: 'white',
-                                bold: true,
-                                fontSize: 12
-                            },
-                        };
-                        var chart = new google.visualization.PieChart(document.getElementById('piechart'));
-                        chart.draw(na_data, na_options);
+                    if (summary_pie === '0,0,0'){
+                        pie_chart = new google.visualization.PieChart(document.getElementById('piechart'));
+                        pie_chart.draw(na_data, na_options);
                     } else {
                         var pie_data = google.visualization.arrayToDataTable([
                             ['Status', 'Count'],
@@ -646,24 +675,8 @@ $(document).ready(function() {
                             ['Acceptable', summary_pie[1]],
                             ['Poor', summary_pie[2]]
                         ]);
-                        var pie_options = {
-                            legend: 'none',
-                            slices: {
-                                0: { color: '#74ff5b' },
-                                1: { color: '#fcfa8d' },
-                                2: { color: '#ff7863' }
-                            },
-                            pieSliceText: 'label',
-                            pieSliceTextStyle: {
-                                color: 'black',
-                                bold: true,
-                                fontSize: 12
-                            },
-                            'chartArea': {'width': '90%', 'height': '90%'},
-                            pieSliceBorderColor: "black",
-                        };
-                        var chart = new google.visualization.PieChart(document.getElementById('piechart'));
-                        chart.draw(pie_data, pie_options);
+                        pie_chart= new google.visualization.PieChart(document.getElementById('piechart'));
+                        pie_chart.draw(pie_data, pie_options);
                     }
 
                     if (window.GROUPING.full_post_filter === null) {

@@ -11,12 +11,13 @@ $(document).ready(function() {
     function reproPie() {
         studies_table.show();
 
-        var number_of_rows = $('tbody tr').length;
+        var number_of_rows = $('.study').length;
         var pie, pieData, pieOptions, pieChart;
         for (x = 0; x < number_of_rows; x++) {
             if ($("#piechart" + x)[0]) {
-                pie = $("#piechart" + x).data('nums').split("|");
-                if (pie != ['0','0','0'] && pie != ''){
+                pie = $("#piechart" + x).data('nums');
+                if (pie !== '0|0|0' && pie) {
+                    pie = pie.split("|");
                     pieData = google.visualization.arrayToDataTable([
                         ['Status', 'Count'],
                         ['Excellent', parseInt(pie[0])],
@@ -49,7 +50,7 @@ $(document).ready(function() {
                 } else {
                     pieData = google.visualization.arrayToDataTable([
                         ['Status', 'Count'],
-                        ['No Matching Records Found', 1]
+                        ['NA', 1]
                     ]);
                     pieOptions = {
                         legend: 'none',
@@ -59,11 +60,12 @@ $(document).ready(function() {
                             0: { color: 'Grey' }
                         },
                         tooltip: {trigger : 'none'},
+                        backgroundColor: {fill: 'transparent'},
                         pieSliceTextStyle: {
                             color: 'white',
                             bold: true,
                             fontSize: 12
-                        },
+                        }
                     };
                 }
 
