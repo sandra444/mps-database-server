@@ -2,6 +2,7 @@ from django import forms
 from django.forms.models import BaseInlineFormSet
 from .models import *
 from assays.models import AssayMatrixItem, AssaySampleLocation
+from diseases.models import Disease
 from mps.forms import SignOffMixin
 from django.forms.models import inlineformset_factory
 
@@ -34,6 +35,15 @@ class OrganModelForm(SignOffMixin, forms.ModelForm):
             'references': forms.Textarea(attrs={'rows': 3}),
             'description': forms.Textarea(attrs={'rows': 3}),
         }
+
+    def __init__(self, *args, **kwargs):
+        super(OrganModelForm, self).__init__(*args, **kwargs)
+
+        disease_queryset = Disease.objects.all().order_by(
+            'name'
+        )
+
+        self.fields['disease'].queryset = disease_queryset
 
 
 class OrganModelLocationInlineFormset(BaseInlineFormSet):
