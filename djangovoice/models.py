@@ -2,15 +2,24 @@ from django.db import models
 from django.utils.translation import pgettext
 from django.utils.translation import ugettext_lazy as _
 
-from django.conf import settings
-try:
-    from django.contrib.auth import get_user_model
-    User = settings.AUTH_USER_MODEL
-except ImportError:
-    from django.contrib.auth.models import User
+from django.dispatch import receiver
+
+from django.template.loader import render_to_string
+
+# from django.conf import settings
+# try:
+#     from django.contrib.auth import get_user_model
+#     User = settings.AUTH_USER_MODEL
+# except ImportError:
+#     from django.contrib.auth.models import User
+
+# I am just using the default User anyway
+from django.contrib.auth.models import User
 
 from qhonuskan_votes.models import VotesField
 from qhonuskan_votes.models import ObjectsWithScoresManager
+
+from mps.settings import DEFAULT_FROM_EMAIL
 
 STATUS_CHOICES = (
     ('open', pgettext('status', "Open")),
@@ -117,3 +126,22 @@ class Feedback(models.Model):
         verbose_name_plural = _("feedback")
         ordering = ('-created',)
         get_latest_by = 'created'
+
+
+@receiver(models.signals.post_save, sender=Feedback)
+def admin_email_alert_for_new_feedback(sender, **kwargs):
+    current_instance = kwargs.get('instance', None)
+    created = kwargs.get('created', False)
+    if current_instance and created:
+        superusers_to_be_alerted = User.objects.filter(is_superuser=True, is_active=True)
+        # Magic strings are in poor taste, should use a template instead
+        superuser_subject = 'New Feedback: {0}'.format(current_instance.title)
+        superuser_message = render_to_string(
+            'djangovoice/email/superuser_new_feedback_alert.txt',
+            {
+                'feedback': current_instance
+            }
+        )
+
+        for user_to_be_alerted in superusers_to_be_alerted:
+            user_to_be_alerted.email_user(superuser_subject, superuser_message, DEFAULT_FROM_EMAIL)
