@@ -11,43 +11,65 @@ $(document).ready(function() {
     function reproPie() {
         studies_table.show();
 
-        var number_of_rows = $('tbody tr').length;
+        var number_of_rows = $('.study').length;
+        var pie, pieData, pieOptions, pieChart;
         for (x = 0; x < number_of_rows; x++) {
             if ($("#piechart" + x)[0]) {
-                var pie = $("#piechart" + x).data('nums').split("|");
-                var pieData = google.visualization.arrayToDataTable([
-                    ['Status', 'Count'],
-                    ['Excellent', parseInt(pie[0])],
-                    ['Acceptable', parseInt(pie[1])],
-                    ['Poor', parseInt(pie[2])]
-                ]);
-                var pieOptions = {
-                    // title: 'Reproducibility Breakdown\n(Click Slices for Details)',
-                    // titleFontSize:16,
-                    legend: 'none',
-                    slices: {
-                        0: {color: '#74ff5b'},
-                        1: {color: '#fcfa8d'},
-                        2: {color: '#ff7863'}
-                    },
-                    pieSliceText: 'none',
-                    pieSliceTextStyle: {
-                        color: 'black',
-                        bold: true,
-                        fontSize: 12
-                    },
-                    'chartArea': {'width': '90%', 'height': '90%'},
-                    backgroundColor: {fill: 'transparent'},
-                    // is3D: true,
-                    pieSliceBorderColor: "black",
-                    tooltip: {
-                        textStyle: {
-                            fontName: 'verdana', fontSize: 10
+                pie = $("#piechart" + x).data('nums');
+                if (pie !== '0|0|0' && pie) {
+                    pie = pie.split("|");
+                    pieData = google.visualization.arrayToDataTable([
+                        ['Status', 'Count'],
+                        ['Excellent', parseInt(pie[0])],
+                        ['Acceptable', parseInt(pie[1])],
+                        ['Poor', parseInt(pie[2])]
+                    ]);
+                    pieOptions = {
+                        legend: 'none',
+                        slices: {
+                            0: {color: '#74ff5b'},
+                            1: {color: '#fcfa8d'},
+                            2: {color: '#ff7863'}
+                        },
+                        pieSliceText: 'none',
+                        pieSliceTextStyle: {
+                            color: 'black',
+                            bold: true,
+                            fontSize: 12
+                        },
+                        'chartArea': {'width': '90%', 'height': '90%'},
+                        backgroundColor: {fill: 'transparent'},
+                        pieSliceBorderColor: "black",
+                        tooltip: {
+                            textStyle: {
+                                fontName: 'verdana', fontSize: 10
+                            }
                         }
-                    }
-                    // enableInteractivity: false
-                };
-                var pieChart = new google.visualization.PieChart(document.getElementById('piechart' + x));
+                        // enableInteractivity: false
+                    };
+                } else {
+                    pieData = google.visualization.arrayToDataTable([
+                        ['Status', 'Count'],
+                        ['NA', 1]
+                    ]);
+                    pieOptions = {
+                        legend: 'none',
+                        pieSliceText: 'label',
+                        'chartArea': {'width': '90%', 'height': '90%'},
+                        slices: {
+                            0: { color: 'Grey' }
+                        },
+                        tooltip: {trigger : 'none'},
+                        backgroundColor: {fill: 'transparent'},
+                        pieSliceTextStyle: {
+                            color: 'white',
+                            bold: true,
+                            fontSize: 12
+                        }
+                    };
+                }
+
+                pieChart = new google.visualization.PieChart(document.getElementById('piechart' + x));
                 pieChart.draw(pieData, pieOptions);
             }
         }

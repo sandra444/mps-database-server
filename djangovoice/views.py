@@ -120,7 +120,7 @@ class FeedbackListView(VoiceMixin, ListView):
 
         if f_list == 'mine' and not request.user.is_authenticated():
             to_url = (
-                reverse('django.contrib.auth.views.login') +
+                reverse('auth_login') +
                 '?next=%s' % request.path)
 
             return redirect(to_url)
@@ -170,7 +170,7 @@ class FeedbackSubmitView(VoiceMixin, FormView):
         # authentication:
         if (not ALLOW_ANONYMOUS_USER_SUBMIT
                 and not request.user.is_authenticated()):
-            login_url = reverse('django.contrib.auth.views.login')
+            login_url = reverse('auth_login')
             return redirect(login_url + '?next=%s' % request.path)
 
         return super(FeedbackSubmitView, self).dispatch(

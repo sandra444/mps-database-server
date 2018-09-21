@@ -98,9 +98,7 @@
                     {% endif %}
                     <td>{{ study.description }}</td>
                     <td>
-                        {% if study.repro_nums %}
-                            <div id="piechart{{ forloop.counter }}" data-nums="{{study.repro_nums}}" class="text-center" style="width: 70px; height: 70px; margin: auto; display: block;">Loading...</div>
-                        {% endif %}
+                        <div id="piechart{{ forloop.counter0 }}" data-nums="{{study.repro_nums}}" class="text-center" style="width: 70px; height: 70px; margin: auto; display: block;">Loading...</div>
                     </td>
                     <td><a href='/microdevices/center/{{ study.center.id }}/' target='_blank' title="{{ study.center.name }}">{{ study.center.center_id }}</a></td>
                     <td>

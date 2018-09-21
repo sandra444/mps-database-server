@@ -81,7 +81,8 @@
     {# Selectize #}
     {# <script type="text/javascript" src="{% static "js/selectize.js" %}"></script>#}
     {# <link rel="stylesheet" type="text/css" href="{% static "css/selectize.bootstrap3.css" %}" />#}
-    <script src="{% static "js/inline_add.js" %}"></script>
+    {# Do not double include #}
+{#    <script src="{% static "js/inline_add.js" %}"></script>#}
     {# <script src="{% static "js/selectize_script.js" %}"></script>#}
 
     {# Yes, I know this violates SOC #}

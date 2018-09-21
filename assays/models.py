@@ -1593,6 +1593,14 @@ class AssayStudy(FlaggableModel):
     #     )
     #     return study_types
 
+    # TODO INEFFICIENT BUT SHOULD WORK
+    def stakeholder_approval_needed(self):
+        return AssayStudyStakeholder.objects.filter(
+            study_id=self.id,
+            sign_off_required=True,
+            signed_off_by=None
+        ).count()
+
     # TODO VERY INEFFICIENT, BUT SHOULD WORK
     def get_indexing_information(self):
         """Exceedingly inefficient way to add some data for indexing studies"""
