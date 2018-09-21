@@ -59,8 +59,14 @@ $(document).ready(function () {
         // swfPath: '/static/swf/flashExport.swf'
         // Default draw callback
         drawCallback: function () {
-            // Show when done
-            $(this).table().container().show('slow');
+            if ($(this).table) {
+                // Show when done
+                $(this).table().container().show('slow');
+            }
+            // For defer render
+            else {
+                $(this).show('slow');
+            }
             // Swap positions of filter and length selection; clarify filter
             $('.dataTables_filter').css('float', 'left').prop('title', 'Separate terms with a space to search multiple fields');
             $('.dataTables_length').css('float', 'right');
