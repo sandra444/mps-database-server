@@ -1,6 +1,10 @@
-
 from haystack.backends.whoosh_backend import WhooshSearchBackend, WhooshEngine
 from whoosh.fields import NGRAM, Schema
+
+import django.core.mail.backends.console
+import logging
+
+logger = logging.getLogger('mps')
 
 
 class ConfigurableWhooshBackend(WhooshSearchBackend):
@@ -39,3 +43,15 @@ class ConfigurableWhooshBackend(WhooshSearchBackend):
 
 class ConfigurableWhooshEngine(WhooshEngine):
     backend = ConfigurableWhooshBackend
+
+
+class LoggingBackend(django.core.mail.backends.console.EmailBackend):
+
+    def send_messages(self, email_messages):
+        try:
+            for msg in email_messages:
+                logger.info(u"Sending message '%s' to recipients: %s", msg.subject, msg.to)
+        except:
+            logger.exception("Problem logging recipients, ignoring")
+
+        return super(LoggingBackend, self).send_messages(email_messages)

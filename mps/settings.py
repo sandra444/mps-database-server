@@ -290,7 +290,7 @@ LOGGING = {
         'file_critical': {
             'level': 'CRITICAL',
             'class': 'logging.FileHandler',
-            'filename': 'logs/django.debug.log',
+            'filename': 'logs/django.error.log',
             'formatter': 'verbose'
         },
         'file_error': {
@@ -323,9 +323,15 @@ LOGGING = {
     'loggers': {
 
         'django': {
-            'handlers': ['file_error'],
+            'handlers': ['file_critical', 'file_error'],
             'propagate': True,
             'level': 'ERROR',
+        },
+
+        'mps': {
+            'handlers': ['file_critical', 'file_error', 'file_info'],
+            'propagate': True,
+            'level': 'INFO',
         },
 
         'assays': {
@@ -415,6 +421,7 @@ ACCOUNT_ACTIVATION_DAYS = 7
 LOGIN_REDIRECT_URL = '/accounts/loggedin/'
 
 # The console EmailBackend will post emails in the console
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+# EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+EMAIL_BACKEND = 'mps.backends.LoggingBackend'
 
 DEFAULT_FROM_EMAIL = 'webmaster@localhost'
