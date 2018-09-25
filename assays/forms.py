@@ -472,14 +472,14 @@ class AssayMatrixForm(SignOffMixin, forms.ModelForm):
 
         # Set CSS class to receipt date to use date picker
         self.fields['compound_receipt_date'].widget.attrs['class'] = 'datepicker-input'
-        self.fields['item_setup_date'].widget.attrs['class'] = 'datepicker-input'
+        self.fields['matrix_item_setup_date'].widget.attrs['class'] = 'datepicker-input'
 
         # Set the widgets for some additional fields
-        self.fields['item_name'].widget = forms.Textarea(attrs={'rows': 1})
-        self.fields['item_scientist'].widget = forms.Textarea(attrs={'rows': 1})
-        self.fields['item_notes'].widget = forms.Textarea(attrs={'rows': 3})
-        self.fields['item_variance_from_organ_model_protocol'].widget = forms.Textarea(attrs={'rows': 3})
-        self.fields['item_notebook_page'].widget.attrs['style'] = 'width:50px;'
+        self.fields['matrix_item_name'].widget = forms.Textarea(attrs={'rows': 1})
+        self.fields['matrix_item_scientist'].widget = forms.Textarea(attrs={'rows': 1})
+        self.fields['matrix_item_notes'].widget = forms.Textarea(attrs={'rows': 3})
+        self.fields['matrix_item_variance_from_organ_model_protocol'].widget = forms.Textarea(attrs={'rows': 3})
+        self.fields['matrix_item_notebook_page'].widget.attrs['style'] = 'width:50px;'
         self.fields['cell_cell_sample'].widget.attrs['style'] = 'width:50px;'
         self.fields['cell_passage'].widget.attrs['style'] = 'width:50px;'
 
@@ -504,24 +504,24 @@ class AssayMatrixForm(SignOffMixin, forms.ModelForm):
         ('delete', 'Delete Selected'),
     ), required=False)
 
-    # The item_ isn't just to be annoying, I want to avoid conflicts with other fields
+    # The matrix_item isn't just to be annoying, I want to avoid conflicts with other fields
     ### ADDING ITEM FIELDS
-    item_name = forms.CharField(required=False)
+    matrix_item_name = forms.CharField(required=False)
 
-    item_setup_date = forms.DateField(required=False)
+    matrix_item_setup_date = forms.DateField(required=False)
 
-    item_test_type = forms.ChoiceField(required=False, choices=TEST_TYPE_CHOICES)
+    matrix_item_test_type = forms.ChoiceField(required=False, choices=TEST_TYPE_CHOICES)
 
-    item_scientist = forms.CharField(required=False)
-    item_notebook = forms.CharField(required=False)
-    item_notebook_page = forms.CharField(required=False)
-    item_notes = forms.CharField(required=False)
+    matrix_item_scientist = forms.CharField(required=False)
+    matrix_item_notebook = forms.CharField(required=False)
+    matrix_item_notebook_page = forms.CharField(required=False)
+    matrix_item_notes = forms.CharField(required=False)
 
     ### ADDING SETUP FIELDS
-    item_device = forms.ModelChoiceField(queryset=Microdevice.objects.all().order_by('name'), required=False)
-    item_organ_model = forms.ModelChoiceField(queryset=OrganModel.objects.all().order_by('name'), required=False)
-    item_organ_model_protocol = forms.ModelChoiceField(queryset=OrganModelProtocol.objects.all().order_by('version'), required=False)
-    item_variance_from_organ_model_protocol = forms.CharField(required=False)
+    matrix_item_device = forms.ModelChoiceField(queryset=Microdevice.objects.all().order_by('name'), required=False)
+    matrix_item_organ_model = forms.ModelChoiceField(queryset=OrganModel.objects.all().order_by('name'), required=False)
+    matrix_item_organ_model_protocol = forms.ModelChoiceField(queryset=OrganModelProtocol.objects.all().order_by('version'), required=False)
+    matrix_item_variance_from_organ_model_protocol = forms.CharField(required=False)
 
     ### ADDING SETUP CELLS
     cell_cell_sample = forms.IntegerField(required=False)

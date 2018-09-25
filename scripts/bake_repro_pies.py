@@ -15,7 +15,7 @@ def run():
     )
     data = {}
 
-    print(study_list)
+    # print(study_list)
 
     # If chip data
     for study in study_list:
