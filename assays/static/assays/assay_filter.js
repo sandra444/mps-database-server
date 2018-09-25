@@ -43,29 +43,6 @@ $(document).ready(function() {
 
     var current_context = '';
 
-    // Iterate over matching placeholders and add correct icons
-    var treatment_icon = $('<span>')
-        .addClass('glyphicon glyphicon-folder-open')
-        .attr('title', 'This parameter contributes to the definition of a Treatment Group.');
-
-    var color_icon = $('<span>')
-        .addClass('glyphicon glyphicon-tint')
-        .attr('title', 'This parameter contributes to chart Colors.');
-
-    var trellis_icon = $('<span>')
-        .addClass('glyphicon glyphicon-th-large')
-        .attr('title', 'This parameter contributes to Trellising.');
-
-    $('[data-group-type="treatment"]').each(function() {
-        $(this).append(treatment_icon.clone());
-    });
-    $('[data-group-type="color"]').each(function() {
-        $(this).append(color_icon.clone());
-    });
-    $('[data-group-type="trellis"]').each(function() {
-        $(this).append(trellis_icon.clone());
-    });
-
     function show_plots() {
         current_context = 'plots';
 
