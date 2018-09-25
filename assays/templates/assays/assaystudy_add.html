@@ -2,11 +2,11 @@
 {% load static %}
 
 {% block load %}
-    <script src="{% static "js/inline_add.js" %}"></script>
     <script src="{% static "js/image_display.js" %}"></script>
     <script src="{% static "js/enter_override.js" %}"></script>
     <script src="{% static "js/calendar.js" %}"></script>
     <script src="{% static "js/flag.js" %}"></script>
+    {# <script src="{% static "js/inline_add.js" %}"></script>#}
     <script src="{% static "assays/assaystudy_add.js" %}"></script>
 {% endblock %}
 
@@ -85,7 +85,7 @@
               {{ form.toxicity }}
             <label for="efficacy" style="padding-left: 20px;padding-right: 10px;">Efficacy</label>
               {{ form.efficacy }}
-            <label for="disease" style="padding-left: 20px;padding-right: 10px;">Disease</label>
+            <label for="disease" style="padding-left: 20px;padding-right: 10px;">Disease Model</label>
               {{ form.disease }}
             {# Please note superficial edit from Cell Characterization to Chip Characterization #}
             {# This is subject to change #}

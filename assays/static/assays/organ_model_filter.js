@@ -9,6 +9,96 @@ $(document).ready(function() {
     var protocol_div = $('#protocol_div');
     var variance_div = $('#variance_div');
 
+    // NON-SELECTIZE
+    // window.get_organ_models = function(device) {
+    //     if (device) {
+    //         $.ajax({
+    //             url: "/assays_ajax/",
+    //             type: "POST",
+    //             dataType: "json",
+    //             data: {
+    //                 call: 'fetch_organ_models',
+    //                 device: device,
+    //                 csrfmiddlewaretoken: window.COOKIES.csrfmiddlewaretoken
+    //             },
+    //             success: function (json) {
+    //                 var options = json.dropdown;
+    //                 var current_value = window.organ_model.val();
+    //                 window.organ_model.html(options);
+    //                 if (current_value) {
+    //                     window.organ_model.val(current_value);
+    //                 }
+    //                 else {
+    //                     window.organ_model.val('');
+    //                 }
+    //
+    //                 organ_model_div.show('fast');
+    //                 window.get_protocols(window.organ_model.val());
+    //             },
+    //             error: function (xhr, errmsg, err) {
+    //                 console.log(xhr.status + ": " + xhr.responseText);
+    //             }
+    //         });
+    //     }
+    //     else {
+    //         // Clear selections
+    //         window.organ_model.html('');
+    //         window.organ_model.val('');
+    //         window.organ_model_protocol.html('');
+    //         window.organ_model_protocol.val('');
+    //
+    //         // Hide
+    //         organ_model_div.hide('fast');
+    //         protocol_div.hide('fast');
+    //         variance_div.hide('fast');
+    //     }
+    // };
+    //
+    // window.get_protocols = function(organ_model) {
+    //     if (organ_model) {
+    //         $.ajax({
+    //             url: "/assays_ajax/",
+    //             type: "POST",
+    //             dataType: "json",
+    //             data: {
+    //                 call: 'fetch_protocols',
+    //                 organ_model: organ_model,
+    //                 csrfmiddlewaretoken: window.COOKIES.csrfmiddlewaretoken
+    //             },
+    //             success: function (json) {
+    //                 var options = json.dropdown;
+    //                 var current_value = window.organ_model_protocol.val();
+    //                 window.organ_model_protocol.html(options);
+    //                 if (current_value) {
+    //                     window.organ_model_protocol.setval(current_value);
+    //                 }
+    //
+    //                 if (window.organ_model_protocol.val()) {
+    //                     variance_div.show('fast');
+    //                 }
+    //                 else {
+    //                     variance_div.hide('fast');
+    //                 }
+    //
+    //                 protocol_div.show('fast');
+    //                 window.display_protocol(window.organ_model_protocol.val());
+    //             },
+    //             error: function (xhr, errmsg, err) {
+    //                 console.log(xhr.status + ": " + xhr.responseText);
+    //             }
+    //         });
+    //     }
+    //     else {
+    //         window.organ_model_protocol.html('');
+    //         window.organ_model_protocol.val('');
+    //
+    //         // Hide
+    //         protocol_div.hide('fast');
+    //         variance_div.hide('fast');
+    //     }
+    // };
+
+    // SELECTIZE
     window.get_organ_models = function(device) {
         if (device) {
             $.ajax({
@@ -23,13 +113,15 @@ $(document).ready(function() {
                 success: function (json) {
                     var options = json.dropdown;
                     var current_value = window.organ_model.val();
-                    window.organ_model.html(options);
+                    window.organ_model[0].selectize.clear();
+                    window.organ_model[0].selectize.clearOptions();
+                    window.organ_model[0].selectize.addOption(options);
                     if (current_value) {
-                        window.organ_model.val(current_value);
+                        window.organ_model[0].selectize.setValue(current_value);
                     }
-                    else {
-                        window.organ_model.val('');
-                    }
+                    // else {
+                    //     window.organ_model.val('');
+                    // }
 
                     organ_model_div.show('fast');
                     window.get_protocols(window.organ_model.val());
@@ -41,10 +133,10 @@ $(document).ready(function() {
         }
         else {
             // Clear selections
-            window.organ_model.html('');
-            window.organ_model.val('');
-            window.organ_model_protocol.html('');
-            window.organ_model_protocol.val('');
+            window.organ_model[0].selectize.clear();
+            window.organ_model[0].selectize.clearOptions();
+            window.organ_model_protocol[0].selectize.clear();
+            window.organ_model_protocol[0].selectize.clearOptions();
 
             // Hide
             organ_model_div.hide('fast');
@@ -67,9 +159,11 @@ $(document).ready(function() {
                 success: function (json) {
                     var options = json.dropdown;
                     var current_value = window.organ_model_protocol.val();
-                    window.organ_model_protocol.html(options);
+                    window.organ_model_protocol[0].selectize.clear();
+                    window.organ_model_protocol[0].selectize.clearOptions();
+                    window.organ_model_protocol[0].selectize.addOption(options);
                     if (current_value) {
-                        window.organ_model_protocol.val(current_value);
+                        window.organ_model_protocol[0].selectize.setValue(current_value);
                     }
 
                     if (window.organ_model_protocol.val()) {
@@ -88,8 +182,8 @@ $(document).ready(function() {
             });
         }
         else {
-            window.organ_model_protocol.html('');
-            window.organ_model_protocol.val('');
+            window.organ_model_protocol[0].selectize.clear();
+            window.organ_model_protocol[0].selectize.clearOptions();
 
             // Hide
             protocol_div.hide('fast');

@@ -123,8 +123,8 @@
     <div class="well">
     {% include 'generic_field.html' with field=form.action label="Action" %}
 
-    <div hidden class="item-section add_name_section">
-    {% include 'generic_field.html' with field=form.item_name label="Name*" %}
+    <div hidden class="matrix_item-section add_name_section">
+    {% include 'generic_field.html' with field=form.matrix_item_name label="Name*" %}
 
 {#    <div class="form-group">#}
 {#        <label for="increment_name_by_one" class="col-sm-2 control-label">Increment Name by 1 Each Cell</label>#}
@@ -134,35 +134,35 @@
 {#    </div>#}
     </div>
 
-    <div hidden class="item-section add_date_section">
-    {% include 'generic_field.html' with field=form.item_setup_date label="Setup Date*" %}
+    <div hidden class="matrix_item-section add_date_section">
+    {% include 'generic_field.html' with field=form.matrix_item_setup_date label="Setup Date*" %}
     </div>
 
-    <div hidden class="item-section add_test_type_section">
-    {% include 'generic_field.html' with field=form.item_test_type label="Test Type*" %}
+    <div hidden class="matrix_item-section add_test_type_section">
+    {% include 'generic_field.html' with field=form.matrix_item_test_type label="Test Type*" %}
     </div>
 
-    <div hidden class="item-section add_notes_section">
-    {% include 'generic_field.html' with field=form.item_scientist label="Scientist" %}
-    {% include 'generic_field.html' with field=form.item_notebook label="Notebook" %}
-    {% include 'generic_field.html' with field=form.item_notebook_page label="Notebook Page" %}
-    {% include 'generic_field.html' with field=form.item_notes label="Notes" %}
+    <div hidden class="matrix_item-section add_notes_section">
+    {% include 'generic_field.html' with field=form.matrix_item_scientist label="Scientist" %}
+    {% include 'generic_field.html' with field=form.matrix_item_notebook label="Notebook" %}
+    {% include 'generic_field.html' with field=form.matrix_item_notebook_page label="Notebook Page" %}
+    {% include 'generic_field.html' with field=form.matrix_item_notes label="Notes" %}
     </div>
 
-    <div hidden class="item-section add_device_section">
+    <div hidden class="matrix_item-section add_device_section">
 
     <div id="device_div">
-    {% include 'generic_field.html' with field=form.item_device label="Device*" %}
+    {% include 'generic_field.html' with field=form.matrix_item_device label="Device*" %}
     </div>
 
     <div id="organ_model_div">
-    {% include 'generic_field.html' with field=form.item_organ_model label="Organ Model" %}
+    {% include 'generic_field.html' with field=form.matrix_item_organ_model label="Organ Model" %}
     </div>
 
     <div hidden id="protocol_div" class="form-group">
-        <label for="item_organ_model_protocol" class="col-sm-2 control-label">Organ Model Protocol</label>
+        <label for="matrix_item_organ_model_protocol" class="col-sm-2 control-label">Organ Model Protocol</label>
         <div class="col-sm-10">
-          {{ form.item_organ_model_protocol }}
+          {{ form.matrix_item_organ_model_protocol }}
           <span>
             <a target="_blank" href="" id="protocol_display"></a>
           </span>
@@ -170,16 +170,16 @@
     </div>
 
     <div id="variance_div">
-    {% include 'generic_field.html' with field=form.item_variance_from_organ_model_protocol label="Variance from Protocol" %}
+    {% include 'generic_field.html' with field=form.matrix_item_variance_from_organ_model_protocol label="Variance from Protocol" %}
     </div>
 
     </div>
 
-    <div hidden class="item-section add_failure_section">
+    <div hidden class="matrix_item-section add_failure_section">
     {# TODO TODO TODO #}
     </div>
 
-    <div hidden class="item-section add_compounds_section">
+    <div hidden class="matrix_item-section add_compounds_section">
     {% if update or detail %}
     <div class="row thumbnail">
     <div class="col-sm-1"></div>
@@ -257,7 +257,7 @@
 
     </div>
 
-    <div hidden class="item-section add_cells_section">
+    <div hidden class="matrix_item-section add_cells_section">
     {% if update or detail %}
 {#    {% include 'generic_field.html' with field=form.cell_sample label="Cell Sample" %}#}
 {#    <div class="form-group">#}
@@ -340,7 +340,7 @@
 
     </div>
 
-    <div hidden class="item-section add_settings_section">
+    <div hidden class="matrix_item-section add_settings_section">
     {% if update or detail %}
     <div class="row thumbnail">
     <div class="col-sm-1"></div>
@@ -396,8 +396,8 @@
 
     <div align="center">
         <a hidden role="button" id="apply_action_to_all" class="btn btn-primary">Apply Action to All</a>
-        <a hidden role="button" id="apply_plate_names_zero" class="btn btn-primary item-section add_name_section">Apply Default Plate Names (Append Zero)</a>
-        <a hidden role="button" id="apply_plate_names_no_zero" class="btn btn-primary item-section add_name_section">Apply Default Plate Names (Don't Append Zero)</a>
+        <a hidden role="button" id="apply_plate_names_zero" class="btn btn-primary matrix_item-section add_name_section">Apply Default Plate Names (Append Zero)</a>
+        <a hidden role="button" id="apply_plate_names_no_zero" class="btn btn-primary matrix_item-section add_name_section">Apply Default Plate Names (Don't Append Zero)</a>
     </div>
 
     </div>
@@ -468,7 +468,7 @@
         <div class="alert alert-danger" role="alert">
             <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
             <span class="sr-only">Error:</span>
-            {{ item_formset.non_form_errors }}
+            {{ matrix_item_formset.non_form_errors }}
         </div>
     {% endif %}
 {##}
@@ -543,13 +543,13 @@
     <div class="row no-padding large-padding-top">
         <div class="col-md-4 col-lg-2">
             <div class="fancy-checkbox table-filter padded-bottom" align="left">
-                <input class="visibility-checkbox" type="checkbox" name="show_items" id="show_items" value=".item-display" checked/>
+                <input class="visibility-checkbox" type="checkbox" name="show_matrix_items" id="show_matrix_items" value=".matrix_item-display" checked/>
                 <div class="btn-group">
-                    <label for="show_items" class="btn btn-default">
+                    <label for="show_matrix_items" class="btn btn-default">
                         <span class="glyphicon glyphicon-ok"></span>
                         <span> </span>
                     </label>
-                    <label for="show_items" class="btn btn-default active">
+                    <label for="show_matrix_items" class="btn btn-default active">
                         Show Item Contents
                     </label>
                 </div>
@@ -618,7 +618,7 @@
     </div>
 
     {#        <label>#}
-{#        <input type="checkbox" id="id_visibility_item_display" name="visibility_item_display" value=".item-display">#}
+{#        <input type="checkbox" id="id_visibility_item_display" name="visibility_item_display" value=".matrix_item-display">#}
 {#        Show Item Information#}
 {#        </label>#}
 {#        <label>#}
@@ -654,7 +654,7 @@
     <div id="{{ item_formset.prefix }}">
 {#    {{ item_formset.non_form_errors }}#}
     {% for form in item_formset %}
-        <div id="{{ form.prefix }}" class="{{ item_formset.prefix }}">
+        <div id="{{ form.prefix }}" class="{{ item_formset.prefix }} no-selectize">
             {{ form }}
         </div>
     {% endfor %}
@@ -664,7 +664,7 @@
     <div id="{{ compound_formset.prefix }}">
 {#    {{ compound_formset.non_form_errors }}#}
     {% for form in compound_formset %}
-        <div id="{{ form.prefix }}" class="{{ compound_formset.prefix }}">
+        <div id="{{ form.prefix }}" class="{{ compound_formset.prefix }} no-selectize">
             {{ form }}
         </div>
     {% endfor %}
@@ -674,7 +674,7 @@
     <div id="{{ cell_formset.prefix }}">
 {#    {{ cell_formset.non_form_errors }}#}
     {% for form in cell_formset %}
-        <div id="{{ form.prefix }}" class="{{ cell_formset.prefix }}">
+        <div id="{{ form.prefix }}" class="{{ cell_formset.prefix }} no-selectize">
             {{ form }}
         </div>
     {% endfor %}
@@ -684,7 +684,7 @@
     <div id="{{ setting_formset.prefix }}">
 {#    {{ setting_formset.non_form_errors }}#}
     {% for form in setting_formset %}
-        <div id="{{ form.prefix }}" class="{{ setting_formset.prefix }}">
+        <div id="{{ form.prefix }}" class="{{ setting_formset.prefix }} no-selectize">
             {{ form }}
         </div>
     {% endfor %}
@@ -740,24 +740,24 @@
     <div style="display: none;">
 
     <table>
-    <tr id="empty_item_html">
-    <td data-prefix="{{ item_formset.prefix }}" class="item-td">
-        <div class="error-message-section error-display item-setup_set_section">
+    <tr id="empty_matrix_item_html">
+    <td data-prefix="{{ item_formset.prefix }}" class="matrix_item-td">
+        <div class="error-message-section error-display matrix_item-setup_set_section">
         </div>
         <div align="center">
-            <span><a disabled href="#" class="item-name lead item-setup_set_section"></a></span>
-{#            <span class="item-current_setup"></span>#}
+            <span><a disabled href="#" class="matrix_item-name lead matrix_item-setup_set_section"></a></span>
+{#            <span class="matrix_item-current_setup"></span>#}
 {#            <a class="pull-right btn btn-xs">#}
 {#                <span class="glyphicon glyphicon-pencil"></span>#}
 {#            </a>#}
         </div>
         {% if detail %}
-        <div class="well item-display no-margins">
+        <div class="well matrix_item-display no-margins">
         {% else %}
-        <div class="well item-display">
+        <div class="well matrix_item-display">
         {% endif %}
             <div>
-                <span class="item-setup_date item-setup_set_section"></span>
+                <span class="matrix_item-setup_date matrix_item-setup_set_section"></span>
                 {% if not detail %}
                 <a class="pull-right btn btn-xs form-delete">
                     <span class="glyphicon glyphicon-remove text-danger"></span>
@@ -768,32 +768,32 @@
 {#                </a>#}
             </div>
             <div>
-                <span class="item-test_type item-setup_set_section"></span>
+                <span class="matrix_item-test_type matrix_item-setup_set_section"></span>
             </div>
-            <div class="item-failure">
-                <span class="item-failure_time item-setup_set_section"></span>
-                <span class="item-failure_reason item-setup_set_section"></span>
+            <div class="matrix_item-failure">
+                <span class="matrix_item-failure_time matrix_item-setup_set_section"></span>
+                <span class="matrix_item-failure_reason matrix_item-setup_set_section"></span>
             </div>
-            <div class="item-setup_section">
+            <div class="matrix_item-setup_section">
                 <div>
-                    <span class="item-organ_model item-setup_set_section"></span>
-                    <span class="item-organ_model_protocol item-setup_set_section"></span>
+                    <span class="matrix_item-organ_model matrix_item-setup_set_section"></span>
+                    <span class="matrix_item-organ_model_protocol matrix_item-setup_set_section"></span>
                 </div>
-                <div class="item-device item-setup_set_section"></div>
+                <div class="matrix_item-device matrix_item-setup_set_section"></div>
                 <div>
-                    <span class="item-variance_from_organ_model_protocol item-setup_set_section"></span>
+                    <span class="matrix_item-variance_from_organ_model_protocol matrix_item-setup_set_section"></span>
                 </div>
             </div>
-            <div class="item-notes_section">
-                <span class="item-scientist item-setup_set_section"></span>
-                <span class="item-notebook item-setup_set_section"></span>
-                <span class="item-notebook_page item-setup_set_section"></span>
-                <span class="item-notes item-setup_set_section"></span>
+            <div class="matrix_item-notes_section">
+                <span class="matrix_item-scientist matrix_item-setup_set_section"></span>
+                <span class="matrix_item-notebook matrix_item-setup_set_section"></span>
+                <span class="matrix_item-notebook_page matrix_item-setup_set_section"></span>
+                <span class="matrix_item-notes matrix_item-setup_set_section"></span>
             </div>
         </div>
-        <div class="item-cell item-setup_set_section"></div>
-        <div class="item-compound item-setup_set_section"></div>
-        <div class="item-setting item-setup_set_section"></div>
+        <div class="matrix_item-cell matrix_item-setup_set_section"></div>
+        <div class="matrix_item-compound matrix_item-setup_set_section"></div>
+        <div class="matrix_item-setting matrix_item-setup_set_section"></div>
     </td>
     </tr>
     </table>
@@ -932,7 +932,7 @@
     </div>
 
     <div id="empty_error_html">
-        <div class="alert alert-danger force-off-black-text item-error-message-box">
+        <div class="alert alert-danger force-off-black-text matrix_item-error-message-box">
         </div>
     </div>
 
