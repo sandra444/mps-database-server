@@ -187,13 +187,17 @@
     <div class="col-sm-11">
     <table class="table table-condensed table-bordered table-nonfluid no-margin-bottom">
     <tr>
-        <th>Compound*</th>
+        <th colspan="3">Compound*</th>
+    </tr>
+    <tr>
+        <td colspan="3">{{ form.compound_compound }}</td>
+    </tr>
+    <tr>
         <th>Supplier*</th>
         <th>Lot*</th>
         <th>Receipt Date</th>
     </tr>
     <tr>
-        <td>{{ form.compound_compound }}</td>
         <td>{{ form.compound_supplier_text }}</td>
         <td>{{ form.compound_lot_text }}</td>
         <td>{{ form.compound_receipt_date }}</td>

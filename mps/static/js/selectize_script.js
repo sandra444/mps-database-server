@@ -2,7 +2,9 @@
 $(document).ready(function () {
     $("select").each(function(i, obj){
         if(!$(obj).parent().hasClass("no-selectize")) {
-            $(obj).not().selectize('');
+            $(obj).not().selectize({
+                diacritics: true
+            });
         }
     });
 });
