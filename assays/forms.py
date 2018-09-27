@@ -589,6 +589,14 @@ class AssayMatrixForm(SignOffMixin, forms.ModelForm):
     # Receipt date
     compound_receipt_date = forms.DateField(required=False)
 
+    # Options for deletion
+    delete_option = forms.ChoiceField(required=False, choices=(
+        ('all', 'Everything'),
+        ('cell', 'Cells'),
+        ('compound', 'Compounds'),
+        ('setting', 'Settings'),
+    ))
+
     # FORCE UNIQUENESS CHECK
     def clean(self):
         super(AssayMatrixForm, self).clean()

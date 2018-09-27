@@ -802,9 +802,20 @@ $(document).ready(function () {
         current_parent.find('.subform-delete').attr('disabled', checked_value);
     }
 
-    // At the moment, this just triggers the item deletes of all selections
     function delete_items() {
-        $('.ui-selected').not('.strikethrough').find('.form-delete').trigger('click');
+        var delete_option = $('#id_delete_option').val();
+
+        // If delete all
+        if (delete_option === 'all') {
+            $('.ui-selected').not('.strikethrough').find('.form-delete').trigger('click');
+        }
+        // Otherwise find the matching subforms and delete them
+        else {
+            $('.ui-selected').not('.strikethrough')
+                .find('.matrix_item-' + delete_option)
+                .find('.subform-delete')
+                .trigger('click');
+        }
     }
 
     // TODO TODO TODO TENTATIVE
