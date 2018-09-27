@@ -483,6 +483,11 @@ class AssayMatrixForm(SignOffMixin, forms.ModelForm):
         self.fields['cell_cell_sample'].widget.attrs['style'] = 'width:50px;'
         self.fields['cell_passage'].widget.attrs['style'] = 'width:50px;'
 
+        # Make sure no selectize
+        # CONTRIVED
+        self.fields['matrix_item_full_organ_model'].widget.attrs['class'] = 'no-selectize'
+        self.fields['matrix_item_full_organ_model_protocol'].widget.attrs['class'] = 'no-selectize'
+
     ### ADDITIONAL MATRIX FIELDS (unsaved)
     number_of_items = forms.IntegerField(required=False)
 
@@ -522,6 +527,9 @@ class AssayMatrixForm(SignOffMixin, forms.ModelForm):
     matrix_item_organ_model = forms.ModelChoiceField(queryset=OrganModel.objects.all().order_by('name'), required=False)
     matrix_item_organ_model_protocol = forms.ModelChoiceField(queryset=OrganModelProtocol.objects.all().order_by('version'), required=False)
     matrix_item_variance_from_organ_model_protocol = forms.CharField(required=False)
+
+    matrix_item_full_organ_model = forms.ModelChoiceField(queryset=OrganModel.objects.all().order_by('name'), required=False)
+    matrix_item_full_organ_model_protocol = forms.ModelChoiceField(queryset=OrganModelProtocol.objects.all(), required=False)
 
     ### ADDING SETUP CELLS
     cell_cell_sample = forms.IntegerField(required=False)

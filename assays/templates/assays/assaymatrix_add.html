@@ -151,6 +151,12 @@
 
     <div hidden class="matrix_item-section add_device_section">
 
+    {# contrived for full dropdowns #}
+    <div hidden>
+        {% include 'generic_field.html' with field=form.matrix_item_full_organ_model label="Full Organ Model" %}
+        {% include 'generic_field.html' with field=form.matrix_item_full_organ_model_protocol label="Full Organ Model Protocol" %}
+    </div>
+
     <div id="device_div">
     {% include 'generic_field.html' with field=form.matrix_item_device label="Device*" %}
     </div>

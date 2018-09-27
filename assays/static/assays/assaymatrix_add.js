@@ -16,19 +16,8 @@ $(document).ready(function () {
 
     // Contrived, but useful:
     // Will make a clone of the organ_model and organ_model_protocol dropdowns for display
-    // Somewhat crude to add straight to body, I suppose
-    var full_organ_model = window.organ_model
-        .clone()
-        .attr('id', 'id_matrix_item-full_organ_model')
-        .attr('name', 'matrix_item-full_organ_model')
-        .css('display', 'none')
-        .appendTo('body');
-    var full_organ_model_protocol = window.organ_model_protocol
-        .clone()
-        .attr('id', 'id_matrix_item-full_organ_model_protocol')
-        .attr('name', 'matrix_item-full_organ_model_protocol')
-        .css('display', 'none')
-        .appendTo('body');
+    var full_organ_model = $('#id_matrix_item_full_organ_model');
+    var full_organ_model_protocol = $('#id_matrix_item_full_organ_model_protocol');
 
     var item_display_class = '.matrix_item-td';
 
