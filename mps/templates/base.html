@@ -1,4 +1,5 @@
 {% load static %}
+{% load compress %}
 <!DOCTYPE html>
 <html lang="en">
 
@@ -15,42 +16,38 @@
 
 {# <link rel="stylesheet" type="text/css" href="{% get_static_prefix %}css/default.css" > #}
 
-  {% block extrahead %}
+  {% compress css %}
+      <link rel="stylesheet" href="{% static "css/jquery-ui-1.11.2.min.css" %}">
+      <!-- Latest compiled and minified CSS -->
+      <link rel="stylesheet" href="{% static "css/bootstrap.min.css" %}">
+      <link rel="stylesheet" href="{% static "css/bootstrap-theme.min.css" %}">
+      <!-- Load c3.css -->
+      <link href="{% static "css/c3.min.css" %}" rel="stylesheet" type="text/css">
+      <!-- DataTables CSS -->
+      <link rel="stylesheet" type="text/css" href="{% static "css/jquery.dataTables.min.css" %}">
+      <link rel="stylesheet" type="text/css" href="{% static "css/fixedHeader.dataTables.min.css" %}">
+      <link rel="stylesheet" type="text/css" href="{% static "css/responsive.dataTables.min.css" %}">
+      <link rel="stylesheet" type="text/css" href="{% static "css/buttons.dataTables.min.css" %}">
+      <link rel="stylesheet" type="text/css" href="{% static "css/selectize.bootstrap3.css" %}" />
+
+      <!-- Custom CSS Rules -->
+      <link rel="stylesheet" href="{% static "css/bootstrap-overrides.css" %}">
+  {% endcompress %}
+
+  {% compress js %}
     <!-- Load JQuery -->
     <script src="{% static "js/jquery-1.11.2.min.js" %}"></script>
-
     <!-- Load JQuery UI-->
     <script src="{% static "js/jquery-ui-1.11.2.min.js" %}"></script>
-    <link rel="stylesheet" href="{% static "css/jquery-ui-1.11.2.min.css" %}">
-
-    <!-- Load JQuery UI Touch Punch for touch support -->
-    <script src="{% static "js/jquery.ui.touch-punch.min.js" %}"></script>
-
-    <!-- Latest compiled and minified CSS -->
-    <link rel="stylesheet" href="{% static "css/bootstrap.min.css" %}">
 
     <!-- Incorporate the Bootstrap JavaScript plugins -->
     <script src="{% static "js/bootstrap.min.js" %}"></script>
-    <link rel="stylesheet" href="{% static "css/bootstrap-theme.min.css" %}">
-
     <!-- Underscore.js Library -->
     <script src="{% static "js/underscore.js" %}"></script>
-
     <!-- d3.js Library -->
     <script src="{% static "js/d3.min.js" %}"></script>
-
-    <!-- Load c3.css -->
-    <link href="{% static "css/c3.min.css" %}" rel="stylesheet" type="text/css">
-
     <!-- Load d3.js and c3.js -->
     <script src="{% static "js/c3.min.js" %}"></script>
-
-    <!-- DataTables CSS -->
-    <link rel="stylesheet" type="text/css" href="{% static "css/jquery.dataTables.min.css" %}">
-    <link rel="stylesheet" type="text/css" href="{% static "css/fixedHeader.dataTables.min.css" %}">
-    <link rel="stylesheet" type="text/css" href="{% static "css/responsive.dataTables.min.css" %}">
-    <link rel="stylesheet" type="text/css" href="{% static "css/buttons.dataTables.min.css" %}">
-
     <!-- DataTables -->
     <script type="text/javascript" charset="utf-8" src="{% static "js/jquery.dataTables.min.js" %}"></script>
     <script type="text/javascript" charset="utf-8" src="{% static "js/dataTables.fixedHeader.min.js" %}"></script>
@@ -62,8 +59,7 @@
     {# <script type="text/javascript" charset="utf-8" src="{% static "js/buttons.flash.min.js" %}"></script>#}
     <script type="text/javascript" charset="utf-8" src="{% static "js/buttons.html5.min.js" %}"></script>
     <script type="text/javascript" charset="utf-8" src="{% static "js/buttons.print.min.js" %}"></script>
-
-{#    This script sets defaults for Buttons #}
+    {#    This script sets defaults for Buttons #}
 {#    Currently I exclude Excel (as it is confusingly given a csv extension) and PDF (requires heavier SWF)#}
 {#    I may add these later, however, but I will have to remember to use the PDF enabled SWF if PDFs are desired#}
     <script type="text/javascript" charset="utf-8" src="{% static "js/datatable_options.js" %}"></script>
@@ -80,10 +76,13 @@
 
     {# Selectize #}
     <script type="text/javascript" src="{% static "js/selectize.js" %}" charset='UTF-8'></script>
-    <link rel="stylesheet" type="text/css" href="{% static "css/selectize.bootstrap3.css" %}" />
+
     {# Do not double include #}
     <script src="{% static "js/inline_add.js" %}"></script>
     <script src="{% static "js/selectize_script.js" %}"></script>
+
+    <!-- Load JQuery UI Touch Punch for touch support -->
+    <script src="{% static "js/jquery.ui.touch-punch.min.js" %}"></script>
 
     {# Yes, I know this violates SOC #}
     <script>
@@ -210,12 +209,20 @@
         $(window).on('resize', autocollapse);
       });
     </script>
+  {% endcompress %}
 
-    <!-- Custom CSS Rules -->
-    <link rel="stylesheet" href="{% static "css/bootstrap-overrides.css" %}">
+  {% block extra_head %}
   {% endblock %}
 
-  {% block load %}{% endblock %}
+  {% compress js %}
+  {% block load_js %}
+  {% endblock %}
+  {% endcompress %}
+
+  {% compress css %}
+  {% block load_css %}
+  {% endblock %}
+  {% endcompress %}
 </head>
 
 <body>

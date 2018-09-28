@@ -2,10 +2,13 @@
 {% load static %}
 {% load humanize %}
 
-{% block load %}
-    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+{% block load_js %}
     <script src="{% static "assays/assaystudy_summary.js" %}"></script>
     <script src="{% static "assays/chart_display.js" %}"></script>
+{% endblock %}
+
+{% block extra_head %}
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 {% endblock %}
 
 {% block breadcrumbs %}

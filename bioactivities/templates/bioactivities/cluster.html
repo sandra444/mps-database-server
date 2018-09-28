@@ -1,10 +1,14 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block load %}
-    <link href="{% static "bioactivities/cluster_style.css" %}" rel="stylesheet" type="text/css">
+{% block load_js %}
     <script src="{% static "bioactivities/filter.js" %}"></script>
     <script src="{% static "bioactivities/cluster.js" %}"></script>
+{% endblock %}
+
+{% block load_css %}
+    {# TODO REVISE #}
+    <link href="{% static "bioactivities/cluster_style.css" %}" rel="stylesheet" type="text/css">
 {% endblock %}
 
 {% block breadcrumbs %}

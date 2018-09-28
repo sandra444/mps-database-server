@@ -233,8 +233,29 @@ INSTALLED_APPS = (
     'bioactivities',
     'drugtrials',
     'resources',
-    'diseases'
+    'diseases',
+    'compressor',
 )
+
+# COMPRESSION
+STATICFILES_FINDERS += (
+    'compressor.finders.CompressorFinder',
+)
+
+COMPRESS_CSS_FILTERS = [
+    'compressor.filters.css_default.CssAbsoluteFilter',
+    'compressor.filters.cssmin.CSSMinFilter',
+    'compressor.filters.template.TemplateFilter'
+]
+
+COMPRESS_JS_FILTERS = [
+    'compressor.filters.jsmin.JSMinFilter',
+]
+
+# Whether or not to compress
+COMPRESS_ENABLED = True
+# Whether or not to use offline cache
+COMPRESS_OFFLINE = True
 
 # This should set all indices to use real time processing
 # Users will have to pay the toll when adding or deleting indexed objects...
@@ -401,6 +422,8 @@ REST_FRAMEWORK = {
 def show_toolbar(request):
     return True
 
+# I will need to tune this value
+DATA_UPLOAD_MAX_NUMBER_FIELDS = 40000
 
 DEBUG_TOOLBAR_CONFIG = {
     'SHOW_TOOLBAR_CALLBACK': 'mps.settings.show_toolbar'

@@ -1,8 +1,11 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block load %}
+{% block extra_head %}
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+{% endblock %}
+
+{% block load_js %}
     <script src="{% static "assays/chart_display.js" %}"></script>
     <script src="{% static "assays/assaystudy_data_plots.js" %}"></script>
 {% endblock %}

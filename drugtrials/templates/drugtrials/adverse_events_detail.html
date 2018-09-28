@@ -2,10 +2,14 @@
 {% load static %}
 {% load humanize %}
 
-{% block load %}
+{% block load_js %}
     <script src="{% static "drugtrials/get_adverse_events.js" %}"></script>
-    <link href="{% static "css/c3.min.css" %}" rel="stylesheet" type="text/css">
     <script src="{% static "js/c3.min.js" %}"></script>
+{% endblock %}
+
+{% block load_css %}
+    {# TODO REVISE #}
+    <link href="{% static "css/c3.min.css" %}" rel="stylesheet" type="text/css">
 {% endblock %}
 
 {% block breadcrumbs %}

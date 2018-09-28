@@ -4,10 +4,9 @@
 {#{% load url from future %}#}
 {% load humanize %}
 
-{% block load %}
+{% block extra_head %}
+    EXTRA HEAD
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-    <script src="{% static "assays/chart_display.js" %}"></script>
-    <script src="{% static "assays/assaystudy_list.js" %}"></script>
     <style>
         svg > g:last-child > g:last-child {
             pointer-events: none;
@@ -16,6 +15,11 @@
             pointer-events: none;
         }
     </style>
+{% endblock %}
+
+{% block load_js %}
+    <script src="{% static "assays/chart_display.js" %}"></script>
+    <script src="{% static "assays/assaystudy_list.js" %}"></script>
 {% endblock %}
 
 {% block breadcrumbs %}
