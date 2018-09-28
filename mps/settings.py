@@ -253,7 +253,7 @@ COMPRESS_JS_FILTERS = [
 ]
 
 # Whether or not to compress
-COMPRESS_ENABLED = True
+COMPRESS_ENABLED = False
 # Whether or not to use offline cache
 COMPRESS_OFFLINE = True
 
