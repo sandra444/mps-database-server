@@ -4,14 +4,14 @@ $(document).ready(function () {
 // CRUDE
 $.fn.button.noConflict();
 
-// Discern what anchor to add to the help URL by looking at current url
-var url = window.location.href;
-var anchor = '';
+    // Discern what anchor to add to the help URL by looking at current url
+    var url = window.location.href;
+    var anchor = '';
 
-var view_help = $('#view_help');
+    var view_help = $('#view_help');
 
-// TODO GET ANCHOR
-view_help.attr(
+    // TODO GET ANCHOR
+    view_help.attr(
         'onclick',
         "window.open('/help/"
         + anchor +

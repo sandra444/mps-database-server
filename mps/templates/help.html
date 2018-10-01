@@ -166,6 +166,7 @@
                         </ul>
                     </li>
 
+                    {% if user.is_superuser %}
                     <li class="dropdown">
                         <a class="dropdown-toggle" data-toggle="dropdown" href="#">MPS Admins<span class="caret"></span></a>
                         <ul class="dropdown-menu">
@@ -187,6 +188,7 @@
                             <li><a href="#user_groups_admin">Adding Users to Groups</a></li>
                         </ul>
                     </li>
+                    {% endif %}
 
                     <li><a href="#glossary">Glossary</a></li>
 
@@ -2023,6 +2025,7 @@
 
     </div>
 
+    {% if user.is_superuser %}
     <div id="component_admin_section" class="container">
 
         <h1 class="sub1-bars"> MPS Database Admins </h1>
@@ -2356,6 +2359,7 @@
         </div>
 
     </div>
+    {% endif %}
 
     <div id="glossary" class="container padded-bottom">
 
