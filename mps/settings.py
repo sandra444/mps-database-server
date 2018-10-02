@@ -236,6 +236,9 @@ INSTALLED_APPS = (
     'diseases'
 )
 
+# Backend for username case insensitivity
+AUTHENTICATION_BACKENDS = ('mps.backends.CaseInsensitiveModelBackend', )
+
 # This should set all indices to use real time processing
 # Users will have to pay the toll when adding or deleting indexed objects...
 # This is disabled for the moment and a CRON job will be used for now
