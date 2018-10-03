@@ -6,9 +6,9 @@ $(document).ready(function () {
         event.preventDefault();
         if ($($(this).attr('href'))[0]) {
             $('html, body').animate({
-                scrollTop: $($(this).attr('href')).offset().top - offset
+                scrollTop: $($(this).attr('href')).offset().top -offset
             }, 500);
-            // $($(this).attr('href')).find('button')[0].click();
+            $($(this).attr('href')).find('button').next().first().css("display", "block");
         }
     });
 
@@ -17,7 +17,7 @@ $(document).ready(function () {
         $('html, body').animate({
             scrollTop: $(initial_hash).offset().top - offset
         }, 500);
-        // $(initial_hash).find('button')[0].click();
+        $(initial_hash).next().css("display", "block");
     }
 
     var _alphabetSearch = '';

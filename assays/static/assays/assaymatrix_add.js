@@ -16,19 +16,8 @@ $(document).ready(function () {
 
     // Contrived, but useful:
     // Will make a clone of the organ_model and organ_model_protocol dropdowns for display
-    // Somewhat crude to add straight to body, I suppose
-    var full_organ_model = window.organ_model
-        .clone()
-        .attr('id', 'id_matrix_item-full_organ_model')
-        .attr('name', 'matrix_item-full_organ_model')
-        .css('display', 'none')
-        .appendTo('body');
-    var full_organ_model_protocol = window.organ_model_protocol
-        .clone()
-        .attr('id', 'id_matrix_item-full_organ_model_protocol')
-        .attr('name', 'matrix_item-full_organ_model_protocol')
-        .css('display', 'none')
-        .appendTo('body');
+    var full_organ_model = $('#id_matrix_item_full_organ_model');
+    var full_organ_model_protocol = $('#id_matrix_item_full_organ_model_protocol');
 
     var item_display_class = '.matrix_item-td';
 
@@ -802,9 +791,20 @@ $(document).ready(function () {
         current_parent.find('.subform-delete').attr('disabled', checked_value);
     }
 
-    // At the moment, this just triggers the item deletes of all selections
     function delete_items() {
-        $('.ui-selected').not('.strikethrough').find('.form-delete').trigger('click');
+        var delete_option = $('#id_delete_option').val();
+
+        // If delete all
+        if (delete_option === 'all') {
+            $('.ui-selected').not('.strikethrough').find('.form-delete').trigger('click');
+        }
+        // Otherwise find the matching subforms and delete them
+        else {
+            $('.ui-selected').not('.strikethrough')
+                .find('.matrix_item-' + delete_option)
+                .find('.subform-delete')
+                .trigger('click');
+        }
     }
 
     // TODO TODO TODO TENTATIVE

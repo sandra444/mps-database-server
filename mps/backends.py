@@ -1,7 +1,15 @@
+<<<<<<< HEAD
 from django.contrib.auth import get_user_model
 from django.contrib.auth.backends import ModelBackend
+=======
+>>>>>>> e7b64abc0de56b144dd539ff910ae95e7b944291
 from haystack.backends.whoosh_backend import WhooshSearchBackend, WhooshEngine
 from whoosh.fields import NGRAM, Schema
+
+import django.core.mail.backends.console
+import logging
+
+logger = logging.getLogger('mps')
 
 
 class ConfigurableWhooshBackend(WhooshSearchBackend):
@@ -57,3 +65,15 @@ class CaseInsensitiveModelBackend(ModelBackend):
         else:
             if user.check_password(password) and self.user_can_authenticate(user):
                 return user
+
+
+class LoggingBackend(django.core.mail.backends.console.EmailBackend):
+
+    def send_messages(self, email_messages):
+        try:
+            for msg in email_messages:
+                logger.info(u"Sending message '%s' to recipients: %s", msg.subject, msg.to)
+        except:
+            logger.exception("Problem logging recipients, ignoring")
+
+        return super(LoggingBackend, self).send_messages(email_messages)

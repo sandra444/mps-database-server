@@ -92,10 +92,10 @@ class ModelFormSplitTime(forms.ModelForm):
                 # Create fields for Days, Hours, Minutes
                 self.fields['addition_time_' + time_unit] = forms.FloatField(initial=0)
                 # Change style
-                self.fields['addition_time_' + time_unit].widget.attrs['style'] = 'width:50px;'
+                self.fields['addition_time_' + time_unit].widget.attrs['style'] = 'width:75px;'
             if self.fields.get('duration', None):
                 self.fields['duration_' + time_unit] = forms.FloatField(initial=0)
-                self.fields['duration_' + time_unit].widget.attrs['style'] = 'width:50px;'
+                self.fields['duration_' + time_unit].widget.attrs['style'] = 'width:75px;'
 
         # Fill additional time
         if self.fields.get('addition_time', None):
@@ -465,10 +465,10 @@ class AssayMatrixForm(SignOffMixin, forms.ModelForm):
                 # self.fields['addition_time_' + time_unit + '_increment'] = forms.FloatField(initial=0, required=False)
                 # self.fields['duration_' + time_unit + '_increment'] = forms.FloatField(initial=0, required=False)
                 # Change style
-                self.fields[current_section + '_addition_time_' + time_unit].widget.attrs['style'] = 'width:50px;'
-                self.fields[current_section + '_duration_' + time_unit].widget.attrs['style'] = 'width:50px;'
-                # self.fields['addition_time_' + time_unit + '_increment'].widget.attrs['style'] = 'width:50px;'
-                # self.fields['duration_' + time_unit + '_increment'].widget.attrs['style'] = 'width:50px;'
+                self.fields[current_section + '_addition_time_' + time_unit].widget.attrs['style'] = 'width:75px;'
+                self.fields[current_section + '_duration_' + time_unit].widget.attrs['style'] = 'width:75px;'
+                # self.fields['addition_time_' + time_unit + '_increment'].widget.attrs['style'] = 'width:75px;'
+                # self.fields['duration_' + time_unit + '_increment'].widget.attrs['style'] = 'width:75px;'
 
         # Set CSS class to receipt date to use date picker
         self.fields['compound_receipt_date'].widget.attrs['class'] = 'datepicker-input'
@@ -479,9 +479,14 @@ class AssayMatrixForm(SignOffMixin, forms.ModelForm):
         self.fields['matrix_item_scientist'].widget = forms.Textarea(attrs={'rows': 1})
         self.fields['matrix_item_notes'].widget = forms.Textarea(attrs={'rows': 3})
         self.fields['matrix_item_variance_from_organ_model_protocol'].widget = forms.Textarea(attrs={'rows': 3})
-        self.fields['matrix_item_notebook_page'].widget.attrs['style'] = 'width:50px;'
-        self.fields['cell_cell_sample'].widget.attrs['style'] = 'width:50px;'
-        self.fields['cell_passage'].widget.attrs['style'] = 'width:50px;'
+        self.fields['matrix_item_notebook_page'].widget.attrs['style'] = 'width:75px;'
+        self.fields['cell_cell_sample'].widget.attrs['style'] = 'width:75px;'
+        self.fields['cell_passage'].widget.attrs['style'] = 'width:75px;'
+
+        # Make sure no selectize
+        # CONTRIVED
+        self.fields['matrix_item_full_organ_model'].widget.attrs['class'] = 'no-selectize'
+        self.fields['matrix_item_full_organ_model_protocol'].widget.attrs['class'] = 'no-selectize'
 
     ### ADDITIONAL MATRIX FIELDS (unsaved)
     number_of_items = forms.IntegerField(required=False)
@@ -522,6 +527,9 @@ class AssayMatrixForm(SignOffMixin, forms.ModelForm):
     matrix_item_organ_model = forms.ModelChoiceField(queryset=OrganModel.objects.all().order_by('name'), required=False)
     matrix_item_organ_model_protocol = forms.ModelChoiceField(queryset=OrganModelProtocol.objects.all().order_by('version'), required=False)
     matrix_item_variance_from_organ_model_protocol = forms.CharField(required=False)
+
+    matrix_item_full_organ_model = forms.ModelChoiceField(queryset=OrganModel.objects.all().order_by('name'), required=False)
+    matrix_item_full_organ_model_protocol = forms.ModelChoiceField(queryset=OrganModelProtocol.objects.all(), required=False)
 
     ### ADDING SETUP CELLS
     cell_cell_sample = forms.IntegerField(required=False)
@@ -588,6 +596,14 @@ class AssayMatrixForm(SignOffMixin, forms.ModelForm):
     compound_lot_text = forms.CharField(required=False, initial='')
     # Receipt date
     compound_receipt_date = forms.DateField(required=False)
+
+    # Options for deletion
+    delete_option = forms.ChoiceField(required=False, choices=(
+        ('all', 'Everything'),
+        ('cell', 'Cells'),
+        ('compound', 'Compounds'),
+        ('setting', 'Settings'),
+    ))
 
     # FORCE UNIQUENESS CHECK
     def clean(self):
@@ -1029,8 +1045,8 @@ class AssaySetupCellForm(ModelFormSplitTime):
         super(AssaySetupCellForm, self).__init__(*args, **kwargs)
 
         # Change widget size
-        self.fields['cell_sample'].widget.attrs['style'] = 'width:50px;'
-        self.fields['passage'].widget.attrs['style'] = 'width:50px;'
+        self.fields['cell_sample'].widget.attrs['style'] = 'width:75px;'
+        self.fields['passage'].widget.attrs['style'] = 'width:75px;'
 
         self.fields['density_unit'].queryset = PhysicalUnits.objects.filter(availability__contains='cell')
 
@@ -1096,8 +1112,8 @@ class AssaySetupSettingFormSet(BaseModelFormSetForcedUniqueness):
             form.fields['addition_time_' + time_unit] = forms.FloatField(initial=0)
             form.fields['duration_' + time_unit] = forms.FloatField(initial=0)
             # Change style
-            form.fields['addition_time_' + time_unit].widget.attrs['style'] = 'width:50px;'
-            form.fields['duration_' + time_unit].widget.attrs['style'] = 'width:50px;'
+            form.fields['addition_time_' + time_unit].widget.attrs['style'] = 'width:75px;'
+            form.fields['duration_' + time_unit].widget.attrs['style'] = 'width:75px;'
 
         if form.instance.addition_time:
             # Fill additional time
@@ -1184,8 +1200,8 @@ class AssayMatrixItemFullForm(SignOffMixin, forms.ModelForm):
     class Meta(object):
         model = AssayMatrixItem
         widgets = {
-            'concentration': forms.NumberInput(attrs={'style': 'width:50px;'}),
-            'notebook_page': forms.NumberInput(attrs={'style': 'width:50px;'}),
+            'concentration': forms.NumberInput(attrs={'style': 'width:75px;'}),
+            'notebook_page': forms.NumberInput(attrs={'style': 'width:75px;'}),
             'notes': forms.Textarea(attrs={'cols': 50, 'rows': 3}),
             'variance_from_organ_model_protocol': forms.Textarea(attrs={'cols': 50, 'rows': 2}),
         }

@@ -1,13 +1,16 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block load %}
-    {# TODO REVISE #}
-    <link href="{% static "assays/customize_admin.css" %}" rel="stylesheet" type="text/css">
+{% block load_js %}
     <script src="{% static "js/image_display.js" %}"></script>
     <script src="{% static "js/enter_override.js" %}"></script>
     <script src="{% static "microdevices/layout.js" %}"></script>
     <script src="{% static "microdevices/microdevice_add.js" %}"></script>
+{% endblock %}
+
+{% block load_css %}
+    {# TODO REVISE #}
+    <link href="{% static "assays/customize_admin.css" %}" rel="stylesheet" type="text/css">
 {% endblock %}
 
 {% block breadcrumbs %}

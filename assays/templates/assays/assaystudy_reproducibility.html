@@ -1,11 +1,13 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block load %}
-    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+{% block load_js %}
     <script src="{% static "assays/assaystudy_reproducibility.js" %}"></script>
     <script src="{% static "assays/chart_display.js" %}"></script>
-    <script src="{% static "js/display_datatable.js" %}"></script>
+{% endblock %}
+
+{% block extra_head %}
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 {% endblock %}
 
 {% block breadcrumbs %}

@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block load %}
+{% block load_js %}
     <script src="{% static "assays/assaytarget_list.js" %}"></script>
 {% endblock %}
 
@@ -40,5 +40,4 @@
             </table>
         </div>
     </div>
-    <script src="{% static "js/display_datatable.js" %}"></script>
 {% endblock %}
