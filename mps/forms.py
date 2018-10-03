@@ -1,7 +1,7 @@
 from django import forms
 from captcha.fields import CaptchaField
 from registration.forms import RegistrationFormUniqueEmail
-from django.contrib.auth.forms import PasswordResetForm, UserChangeForm
+from django.contrib.auth.forms import PasswordResetForm, UserChangeForm, UserCreationForm
 from django.contrib.auth.models import User
 from mps.settings import DEFAULT_FROM_EMAIL
 
@@ -69,6 +69,13 @@ class CaptchaRegistrationForm(RegistrationFormUniqueEmail):
 
         return last_name
 
+    def clean(self):
+        cleaned_data = super(CaptchaRegistrationForm, self).clean()
+        username = cleaned_data.get('username')
+        if username and User.objects.filter(username__iexact=username).exists():
+            self.add_error('username', 'A user with that username already exists.')
+        return cleaned_data
+
     def save(self, commit=True):
         new_user = super(CaptchaRegistrationForm, self).save()
         new_user.first_name = self.cleaned_data.get('first_name')
@@ -118,3 +125,10 @@ class MyUserChangeForm(UserChangeForm):
                         '***NOTE THAT EDITORS ARE ALSO VIEWERS AND ADMINS ARE EDITORS AND VIEWERS***<br><br>',
             'user_permissions': '***THIS IS FOR THE ADMIN INTERFACE ONLY***<br>',
         }
+
+    def clean(self):
+        cleaned_data = super(MyUserChangeForm, self).clean()
+        username = cleaned_data.get('username')
+        if username and User.objects.filter(username__iexact=username).exclude(id=self.instance.id).exists():
+            self.add_error('username', 'A user with that username already exists.')
+        return cleaned_data

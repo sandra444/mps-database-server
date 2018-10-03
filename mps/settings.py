@@ -237,6 +237,9 @@ INSTALLED_APPS = (
     'compressor',
 )
 
+# Backend for username case insensitivity
+AUTHENTICATION_BACKENDS = ('mps.backends.CaseInsensitiveModelBackend', )
+
 # COMPRESSION
 STATICFILES_FINDERS += (
     'compressor.finders.CompressorFinder',
