@@ -1,8 +1,5 @@
-<<<<<<< HEAD
 from django.contrib.auth import get_user_model
 from django.contrib.auth.backends import ModelBackend
-=======
->>>>>>> e7b64abc0de56b144dd539ff910ae95e7b944291
 from haystack.backends.whoosh_backend import WhooshSearchBackend, WhooshEngine
 from whoosh.fields import NGRAM, Schema
 
