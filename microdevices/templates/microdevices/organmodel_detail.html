@@ -6,7 +6,10 @@
 {% endblock %}
 
 {% block content %}
-    <legend><h1>{{ object.name }}</h1></legend>
+    <legend>
+        <h1>{{ object.name }}</h1>
+        <h2>{{ object.alt_name }}</h2>
+    </legend>
 
     <div>
         <div class="col-xs-12">
@@ -28,14 +31,16 @@
                         {{ object.center.institution|default:'Unspecified' }}
                     </td>
                 </tr>
+                {% if object.base_model and object.base_model_id != object.id %}
                 <tr>
                     <td>
                         <b>Base Model</b>
                     </td>
                     <td>
-                        {{ object.base_model }}
+                        <a href="{{ object.base_model.get_absolute_url }}">{{ object.base_model.alt_name }}</a>
                     </td>
                 </tr>
+                {% endif %}
                 <tr>
                     <td>
                         <b>Organ</b>
