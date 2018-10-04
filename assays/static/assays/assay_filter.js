@@ -8,7 +8,7 @@ $(document).ready(function() {
 
     // see if there are filters from GET parameters
     var get_filters = decodeURIComponent(window.location.search.split('?filters=')[1]);
-    if (get_filters) {
+    if (get_filters && get_filters !== 'undefined') {
         filters = JSON.parse(get_filters);
     }
 
