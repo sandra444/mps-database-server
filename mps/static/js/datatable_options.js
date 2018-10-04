@@ -72,6 +72,9 @@ $(document).ready(function () {
             $('.dataTables_length').css('float', 'right');
             // Reposition download/print/copy
             $('.DTTT_container').css('float', 'none');
+
+            // Activates Bootstrap tooltips
+            $('[data-toggle="tooltip"]').tooltip({container:"body", html: true});
         }
     });
 
