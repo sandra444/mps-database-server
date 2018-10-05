@@ -67,7 +67,7 @@ COMBINED_VALUE_DELIMITER = '~@|'
 convert = lambda text: int(text) if text.isdigit() else text.lower()
 alphanum_key = lambda key: [
     convert(
-        c.replace(' ~@I1', '!').replace(' ~@I2', '"').replace(' ~@S', '"')
+        c.replace('     ~@I1', '!').replace('     ~@I2', '"').replace('     ~@S', '"')
     ) for c in re.split('([0-9]+)', key)
 ]
 
@@ -1238,8 +1238,8 @@ def get_data_points_for_charting(
 
                             if not percent_control:
                                 current_data.setdefault(current_key, {}).update({concentration: value})
-                                current_data.setdefault(current_key + ' ~@i1', {}).update({concentration: value - interval})
-                                current_data.setdefault(current_key + ' ~@i2', {}).update({concentration: value + interval})
+                                current_data.setdefault(current_key + '     ~@i1', {}).update({concentration: value - interval})
+                                current_data.setdefault(current_key + '     ~@i2', {}).update({concentration: value + interval})
                                 y_header.update({concentration: True})
                                 include_current = True
 
@@ -1255,17 +1255,17 @@ def get_data_points_for_charting(
                                 adjusted_interval = (interval / control_value) * 100
 
                                 current_data.setdefault(current_key, {}).update({concentration: adjusted_value})
-                                current_data.setdefault(current_key + ' ~@i1', {}).update(
+                                current_data.setdefault(current_key + '     ~@i1', {}).update(
                                     {concentration: adjusted_value - adjusted_interval})
-                                current_data.setdefault(current_key + ' ~@i2', {}).update(
+                                current_data.setdefault(current_key + '     ~@i2', {}).update(
                                     {concentration: adjusted_value + adjusted_interval})
                                 y_header.update({concentration: True})
                                 include_current = True
                         else:
                             if not percent_control:
                                 current_data.setdefault(current_key, {}).update({time: value})
-                                current_data.setdefault(current_key+' ~@i1', {}).update({time: value - interval})
-                                current_data.setdefault(current_key+' ~@i2', {}).update({time: value + interval})
+                                current_data.setdefault(current_key+'     ~@i1', {}).update({time: value - interval})
+                                current_data.setdefault(current_key+'     ~@i2', {}).update({time: value + interval})
                                 y_header.update({time: True})
                                 include_current = True
 
@@ -1280,8 +1280,8 @@ def get_data_points_for_charting(
                                 adjusted_interval = (interval / control_value) * 100
 
                                 current_data.setdefault(current_key, {}).update({time: adjusted_value})
-                                current_data.setdefault(current_key+' ~@i1', {}).update({time: adjusted_value - adjusted_interval})
-                                current_data.setdefault(current_key+' ~@i2', {}).update({time: adjusted_value + adjusted_interval})
+                                current_data.setdefault(current_key+'     ~@i1', {}).update({time: adjusted_value - adjusted_interval})
+                                current_data.setdefault(current_key+'     ~@i2', {}).update({time: adjusted_value + adjusted_interval})
                                 y_header.update({time: True})
                                 include_current = True
 
@@ -1292,27 +1292,27 @@ def get_data_points_for_charting(
                     # To include all
                     # x_header.append(current_key)
                     # x_header.extend([
-                    #     current_key + ' ~@i1',
-                    #     current_key + ' ~@i2'
+                    #     current_key + '     ~@i1',
+                    #     current_key + '     ~@i2'
                     # ])
 
                     # Only include intervals if necessary
                     if accommodate_intervals and include_current and not key_present:
                         x_header.extend([
-                            current_key + ' ~@i1',
-                            current_key + ' ~@i2'
+                            current_key + '     ~@i1',
+                            current_key + '     ~@i2'
                         ])
                     else:
-                        if current_key+' ~@i1' in current_data:
-                            del current_data[current_key+' ~@i1']
-                            del current_data[current_key + ' ~@i2']
+                        if current_key+'     ~@i1' in current_data:
+                            del current_data[current_key+'     ~@i1']
+                            del current_data[current_key + '     ~@i2']
 
             # for current_key in all_keys:
             #     if current_key not in x_header:
             #         x_header.extend([
             #             current_key,
-            #             current_key + ' ~@i1',
-            #             current_key + ' ~@i2'
+            #             current_key + '     ~@i1',
+            #             current_key + '     ~@i2'
             #         ])
 
             x_header.sort(key=alphanum_key)
@@ -2625,14 +2625,14 @@ def get_inter_study_reproducibility(
                     x_header.update({
                         legend: True,
                         # This is to deal with intervals
-                        legend + ' ~@i1': True,
-                        legend + ' ~@i2': True,
+                        legend + '     ~@i1': True,
+                        legend + '     ~@i2': True,
                     })
                 else:
                     x_header.update({
                         legend: True,
                         # This is to deal with custom tooltips
-                        legend + ' ~@t': True,
+                        legend + '     ~@t': True,
                     })
 
                 for time, values in times.items():
@@ -2641,16 +2641,16 @@ def get_inter_study_reproducibility(
                             value = value_pair[0]
                             matrix_item_id = value_pair[1]
                             current_data.setdefault(legend, {}).update({u'{}~{}'.format(time, index): value})
-                            current_data.setdefault(legend + ' ~@t', {}).update(
+                            current_data.setdefault(legend + '     ~@t', {}).update(
                                 {
                                     u'{}~{}'.format(time, index): [time, legend, value, matrix_item_id]
                                 }
                             )
                             y_header.update({u'{}~{}'.format(time, index): True})
                             # x_header.update({
-                            #     '{}~@x{}'.format(legend, index): True
+                            #     '{}    ~@x{}'.format(legend, index): True
                             # })
-                            # current_data.setdefault('{}~@x{}'.format(legend, index), {}).update({time: value})
+                            # current_data.setdefault('{}    ~@x{}'.format(legend, index), {}).update({time: value})
                             # y_header.update({time: True})
                     else:
                         if len(values) > 1:
@@ -2658,8 +2658,8 @@ def get_inter_study_reproducibility(
                             value = np.mean(values)
                             std = np.std(values)
                             current_data.setdefault(legend, {}).update({time: value})
-                            current_data.setdefault(legend + ' ~@i1', {}).update({time: value - std})
-                            current_data.setdefault(legend + ' ~@i2', {}).update({time: value + std})
+                            current_data.setdefault(legend + '     ~@i1', {}).update({time: value - std})
+                            current_data.setdefault(legend + '     ~@i2', {}).update({time: value + std})
                         else:
                             current_data.setdefault(legend, {}).update({time: values[0]})
                         y_header.update({time: True})
@@ -2671,7 +2671,7 @@ def get_inter_study_reproducibility(
             # if chart_group == 'average':
             #     current_table[0].extend(x_header_keys)
             # else:
-            #     current_table[0].extend([x.split('~@x')[0] for x in x_header_keys])
+            #     current_table[0].extend([x.split('    ~@x')[0] for x in x_header_keys])
 
             x_header = {x_header_keys[index]: index + 1 for index in range(len(x_header_keys))}
 
@@ -2817,16 +2817,16 @@ def get_inter_study_reproducibility(
                 x_header.update({
                     legend: True,
                     # This is to deal with the style
-                    legend + ' ~@s': True,
+                    legend + '     ~@s': True,
                     # This is to deal with intervals
-                    legend + ' ~@i1': True,
-                    legend + ' ~@i2': True,
+                    legend + '     ~@i1': True,
+                    legend + '     ~@i2': True,
                 })
                 for time, value_shape in times.items():
                     value, shape = value_shape[0], value_shape[1]
                     if shape:
                         current_data.setdefault(legend, {}).update({time: value})
-                        current_data.setdefault(legend + ' ~@s', {}).update({time: shape})
+                        current_data.setdefault(legend + '     ~@s', {}).update({time: shape})
                         y_header.update({time: True})
                     else:
                         values = initial_chart_data.get(
@@ -2847,9 +2847,9 @@ def get_inter_study_reproducibility(
                             value = np.mean(values)
                             std = np.std(values)
                             current_data.setdefault(legend, {}).update({time: value})
-                            current_data.setdefault(legend + ' ~@i1', {}).update({time: value - std})
-                            current_data.setdefault(legend + ' ~@i2', {}).update({time: value + std})
-                            current_data.setdefault(legend + ' ~@s', {}).update({time: shape})
+                            current_data.setdefault(legend + '     ~@i1', {}).update({time: value - std})
+                            current_data.setdefault(legend + '     ~@i2', {}).update({time: value + std})
+                            current_data.setdefault(legend + '     ~@s', {}).update({time: shape})
                         else:
                             current_data.setdefault(legend, {}).update({time: values[0]})
 
