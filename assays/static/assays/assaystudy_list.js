@@ -14,6 +14,8 @@ $(document).ready(function() {
         var number_of_rows = $('.study').length;
         var pie, pieData, pieOptions, pieChart;
         for (x = 0; x < number_of_rows; x++) {
+            pieData = null;
+
             if ($("#piechart" + x)[0]) {
                 pie = $("#piechart" + x).data('nums');
                 if (pie !== '0|0|0' && pie) {
@@ -47,30 +49,33 @@ $(document).ready(function() {
                         }
                         // enableInteractivity: false
                     };
-                } else {
-                    pieData = google.visualization.arrayToDataTable([
-                        ['Status', 'Count'],
-                        ['NA', 1]
-                    ]);
-                    pieOptions = {
-                        legend: 'none',
-                        pieSliceText: 'label',
-                        'chartArea': {'width': '90%', 'height': '90%'},
-                        slices: {
-                            0: { color: 'Grey' }
-                        },
-                        tooltip: {trigger : 'none'},
-                        backgroundColor: {fill: 'transparent'},
-                        pieSliceTextStyle: {
-                            color: 'white',
-                            bold: true,
-                            fontSize: 12
-                        }
-                    };
                 }
+                // else {
+                //     pieData = google.visualization.arrayToDataTable([
+                //         ['Status', 'Count'],
+                //         ['NA', 1]
+                //     ]);
+                //     pieOptions = {
+                //         legend: 'none',
+                //         pieSliceText: 'label',
+                //         'chartArea': {'width': '90%', 'height': '90%'},
+                //         slices: {
+                //             0: { color: 'Grey' }
+                //         },
+                //         tooltip: {trigger : 'none'},
+                //         backgroundColor: {fill: 'transparent'},
+                //         pieSliceTextStyle: {
+                //             color: 'white',
+                //             bold: true,
+                //             fontSize: 12
+                //         }
+                //     };
+                // }
 
-                pieChart = new google.visualization.PieChart(document.getElementById('piechart' + x));
-                pieChart.draw(pieData, pieOptions);
+                if (pieData) {
+                    pieChart = new google.visualization.PieChart(document.getElementById('piechart' + x));
+                    pieChart.draw(pieData, pieOptions);
+                }
             }
         }
 
@@ -113,7 +118,7 @@ $(document).ready(function() {
             ],
             drawCallback: function () {
                 // Show when done
-                studies_table.show();
+                studies_table.show('slow');
                 // Swap positions of filter and length selection; clarify filter
                 $('.dataTables_filter').css('float', 'left').prop('title', 'Separate terms with a space to search multiple fields');
                 $('.dataTables_length').css('float', 'right');
