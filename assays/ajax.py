@@ -761,7 +761,10 @@ def get_item_groups(study, criteria, matrix_items=None):
 
     # TODO TODO TODO REVISE THESE MAGIC KEYS
     if criteria.get('setup', ''):
-        header_keys.append('MPS Model')
+        if 'organ_model_id' in criteria.get('setup'):
+            header_keys.append('MPS Model')
+        if 'study_id' in criteria.get('setup'):
+            header_keys.append('Study')
     if criteria.get('cell', ''):
         header_keys.append('Cells')
     if criteria.get('compound', ''):
@@ -799,6 +802,7 @@ def get_item_groups(study, criteria, matrix_items=None):
         setup_to_treatment_group.update({setup.id: current_representative})
 
     # Attempt to sort reasonably
+    # TODO SHOULD STUDY BE PLACED HERE?
     sorted_treatment_groups = sorted(
         treatment_groups.values(), key=lambda x: (
             x.get('Compounds'),
