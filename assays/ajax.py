@@ -1708,8 +1708,13 @@ def fetch_pre_submission_filters(request):
             accessible_compounds
         ])), key=lambda x: x[1])
 
+        # Check to see whether to include no compounds
+        include_no_compounds = accessible_matrix_items.filter(
+            assaysetupcompound__isnull=True
+        ).count()
+
         # Prepend contrived no compound
-        if compounds:
+        if include_no_compounds:
             compounds.insert(0, (0, NO_COMPOUNDS_STRING))
 
         compound_ids = {compound[0]: True for compound in compounds}
@@ -1730,7 +1735,6 @@ def fetch_pre_submission_filters(request):
             # Default to none
             compound_ids = []
             include_no_compounds = False
-            # include_no_compounds = True
 
         # Compensate for no compounds
         if include_no_compounds:
