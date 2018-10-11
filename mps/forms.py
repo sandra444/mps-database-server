@@ -8,7 +8,35 @@ from mps.settings import DEFAULT_FROM_EMAIL
 from django.template.loader import render_to_string
 
 
-class SignOffMixin(forms.ModelForm):
+WIDGETS_TO_ADD_FORM_CONTROL_TO = {
+    "<class 'django.forms.widgets.TextInput'>": True,
+    "<class 'django.forms.widgets.Textarea'>": True,
+    "<class 'django.forms.widgets.DateInput'>": True,
+    "<class 'django.forms.widgets.Select'>": True,
+    "<class 'django.forms.widgets.NumberInput'>": True
+}
+
+DATE_INPUT_WIDGET = "<class 'django.forms.widgets.DateInput'>"
+
+WIDGETS_WITH_AUTOCOMPLETE_OFF  = {
+    "<class 'django.forms.widgets.DateInput'>": True,
+}
+
+class BootstrapForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(BootstrapForm, self).__init__(*args, **kwargs)
+
+        for field in self.fields:
+            widget_type = unicode(type(self.fields[field].widget))
+            if widget_type in WIDGETS_TO_ADD_FORM_CONTROL_TO:
+                self.fields[field].widget.attrs['class'] = 'form-control'
+            if widget_type in WIDGETS_WITH_AUTOCOMPLETE_OFF:
+                self.fields[field].widget.attrs['autocomplete'] = 'off'
+            if widget_type == DATE_INPUT_WIDGET:
+                self.fields[field].widget.attrs['class'] += ' datepicker-input'
+
+
+class SignOffMixin(BootstrapForm):
     def __init__(self, *args, **kwargs):
         super(SignOffMixin, self).__init__(*args, **kwargs)
 

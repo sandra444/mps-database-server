@@ -10,7 +10,7 @@ from cellsamples.models import Biosensor
 from assays.models import *
 from compounds.models import Compound, CompoundInstance, CompoundSupplier
 from microdevices.models import MicrophysiologyCenter
-from mps.forms import SignOffMixin
+from mps.forms import SignOffMixin, BootstrapForm
 import string
 from captcha.fields import CaptchaField
 
@@ -69,7 +69,7 @@ def get_dic_for_custom_choice_field(form, filters=None):
 
 
 # DEPRECATED NO LONGER NEEDED AS CHARFIELDS NOW STRIP AUTOMATICALLY
-class ModelFormStripWhiteSpace(forms.ModelForm):
+class ModelFormStripWhiteSpace(BootstrapForm):
     """Strips the whitespace from char and text fields"""
     def clean(self):
         cd = self.cleaned_data
@@ -83,19 +83,28 @@ class ModelFormStripWhiteSpace(forms.ModelForm):
         return super(ModelFormStripWhiteSpace, self).clean()
 
 
-class ModelFormSplitTime(forms.ModelForm):
+class ModelFormSplitTime(BootstrapForm):
     def __init__(self, *args, **kwargs):
         super(ModelFormSplitTime, self).__init__(*args, **kwargs)
 
         for time_unit in TIME_CONVERSIONS.keys():
             if self.fields.get('addition_time', None):
                 # Create fields for Days, Hours, Minutes
-                self.fields['addition_time_' + time_unit] = forms.FloatField(initial=0)
-                # Change style
-                self.fields['addition_time_' + time_unit].widget.attrs['style'] = 'width:75px;'
+                self.fields['addition_time_' + time_unit] = forms.FloatField(
+                    initial=0,
+                    widget=forms.NumberInput(attrs={
+                        'class': 'form-control',
+                        'style': 'width:75px;'
+                    })
+                )
             if self.fields.get('duration', None):
-                self.fields['duration_' + time_unit] = forms.FloatField(initial=0)
-                self.fields['duration_' + time_unit].widget.attrs['style'] = 'width:75px;'
+                self.fields['duration_' + time_unit] = forms.FloatField(
+                    initial=0,
+                    widget=forms.NumberInput(attrs={
+                        'class': 'form-control',
+                        'style': 'width:75px;'
+                    })
+                )
 
         # Fill additional time
         if self.fields.get('addition_time', None):
@@ -269,7 +278,7 @@ class DicModelChoiceField(forms.Field):
         return False
 
 
-class AssayStudyConfigurationForm(SignOffMixin, forms.ModelForm):
+class AssayStudyConfigurationForm(SignOffMixin, BootstrapForm):
     """Frontend Form for Study Configurations"""
     class Meta(object):
         model = AssayStudyConfiguration
@@ -279,6 +288,40 @@ class AssayStudyConfigurationForm(SignOffMixin, forms.ModelForm):
             'hardware_description': forms.Textarea(attrs={'cols': 50, 'rows': 3}),
         }
         exclude = tracking
+
+
+class AssayStudyModelForm(BootstrapForm):
+    class Meta(object):
+        model = AssayStudyModel
+        exclude = ('' ,)
+
+    def __init__(self, *args, **kwargs):
+        super(AssayStudyModelForm, self).__init__(*args, **kwargs)
+        self.fields['label'].widget.attrs.update({
+            'size': '4',
+            'max_length': '2'
+        })
+        self.fields['sequence_number'].widget.attrs.update({
+            'size': '4',
+            'max_length': '2'
+        })
+        self.fields['output'].widget.attrs.update({
+            'size': '20',
+            'max_length': '20'
+        })
+
+
+# FormSet for Study Models
+AssayStudyModelFormSet = inlineformset_factory(
+    AssayStudyConfiguration,
+    AssayStudyModel,
+    extra=1,
+    form=AssayStudyModelForm,
+    widgets={
+        'label': forms.TextInput(attrs={'size': 2}),
+        'sequence_number': forms.TextInput(attrs={'size': 2})
+    }
+)
 
 
 def label_to_number(label):
@@ -338,7 +381,7 @@ class ReadyForSignOffForm(forms.Form):
 
 
 # TODO PLEASE REVIEW
-class AssayStudyForm(SignOffMixin, forms.ModelForm):
+class AssayStudyForm(SignOffMixin, BootstrapForm):
     def __init__(self, *args, **kwargs):
         """Init the Study Form
 
@@ -367,7 +410,7 @@ class AssayStudyForm(SignOffMixin, forms.ModelForm):
             raise forms.ValidationError('Please select at least one study type')
 
 
-class AssayStudyFormAdmin(forms.ModelForm):
+class AssayStudyFormAdmin(BootstrapForm):
     """Admin Form for Assay Runs (now referred to as Studies)"""
     class Meta(object):
         model = AssayStudy
@@ -406,6 +449,18 @@ class AssayStudyFormAdmin(forms.ModelForm):
             raise forms.ValidationError('Please select at least one study type')
 
 
+class AssayStudySupportingDataForm(BootstrapForm):
+    class Meta(object):
+        model = AssayStudySupportingData
+        exclude = ('',)
+
+
+class AssayStudyAssayForm(BootstrapForm):
+    class Meta(object):
+        model = AssayStudyAssay
+        exclude = ('',)
+
+
 class AssayStudySupportingDataInlineFormSet(BaseInlineFormSet):
     """Form for Study Supporting Data (as part of an inline)"""
     class Meta(object):
@@ -415,6 +470,7 @@ class AssayStudySupportingDataInlineFormSet(BaseInlineFormSet):
 AssayStudySupportingDataFormSetFactory = inlineformset_factory(
     AssayStudy,
     AssayStudySupportingData,
+    form=AssayStudySupportingDataForm,
     formset=AssayStudySupportingDataInlineFormSet,
     extra=1,
     exclude=[],
@@ -426,6 +482,7 @@ AssayStudySupportingDataFormSetFactory = inlineformset_factory(
 AssayStudyAssayFormSetFactory = inlineformset_factory(
     AssayStudy,
     AssayStudyAssay,
+    form=AssayStudyAssayForm,
     formset=AssayStudyAssayInlineFormSet,
     extra=1,
     exclude=[]
@@ -433,7 +490,7 @@ AssayStudyAssayFormSetFactory = inlineformset_factory(
 
 
 # TODO ADD STUDY
-class AssayMatrixForm(SignOffMixin, forms.ModelForm):
+class AssayMatrixForm(SignOffMixin, BootstrapForm):
     class Meta(object):
         model = AssayMatrix
         exclude = ('study',) + tracking
@@ -460,25 +517,23 @@ class AssayMatrixForm(SignOffMixin, forms.ModelForm):
         for time_unit in TIME_CONVERSIONS.keys():
             for current_section in sections_with_times:
                 # Create fields for Days, Hours, Minutes
-                self.fields[current_section + '_addition_time_' + time_unit] = forms.FloatField(initial=0, required=False)
-                self.fields[current_section + '_duration_' + time_unit] = forms.FloatField(initial=0, required=False)
-                # self.fields['addition_time_' + time_unit + '_increment'] = forms.FloatField(initial=0, required=False)
-                # self.fields['duration_' + time_unit + '_increment'] = forms.FloatField(initial=0, required=False)
-                # Change style
-                self.fields[current_section + '_addition_time_' + time_unit].widget.attrs['style'] = 'width:75px;'
-                self.fields[current_section + '_duration_' + time_unit].widget.attrs['style'] = 'width:75px;'
-                # self.fields['addition_time_' + time_unit + '_increment'].widget.attrs['style'] = 'width:75px;'
-                # self.fields['duration_' + time_unit + '_increment'].widget.attrs['style'] = 'width:75px;'
+                self.fields[current_section + '_addition_time_' + time_unit] = forms.FloatField(
+                    initial=0,
+                    required=False,
+                    widget=forms.NumberInput(attrs={
+                        'class': 'form-control',
+                        'style': 'width:75px;'
+                    })
+                )
+                self.fields[current_section + '_duration_' + time_unit] = forms.FloatField(
+                    initial=0,
+                    required=False,
+                    widget=forms.NumberInput(attrs={
+                        'class': 'form-control',
+                        'style': 'width:75px;'
+                    })
+                )
 
-        # Set CSS class to receipt date to use date picker
-        self.fields['compound_receipt_date'].widget.attrs['class'] = 'datepicker-input'
-        self.fields['matrix_item_setup_date'].widget.attrs['class'] = 'datepicker-input'
-
-        # Set the widgets for some additional fields
-        self.fields['matrix_item_name'].widget = forms.Textarea(attrs={'rows': 1})
-        self.fields['matrix_item_scientist'].widget = forms.Textarea(attrs={'rows': 1})
-        self.fields['matrix_item_notes'].widget = forms.Textarea(attrs={'rows': 3})
-        self.fields['matrix_item_variance_from_organ_model_protocol'].widget = forms.Textarea(attrs={'rows': 3})
         self.fields['matrix_item_notebook_page'].widget.attrs['style'] = 'width:75px;'
         self.fields['cell_cell_sample'].widget.attrs['style'] = 'width:75px;'
         self.fields['cell_passage'].widget.attrs['style'] = 'width:75px;'
@@ -511,22 +566,34 @@ class AssayMatrixForm(SignOffMixin, forms.ModelForm):
 
     # The matrix_item isn't just to be annoying, I want to avoid conflicts with other fields
     ### ADDING ITEM FIELDS
-    matrix_item_name = forms.CharField(required=False)
+    matrix_item_name = forms.CharField(
+        required=False,
+        widget=forms.Textarea(attrs={'rows': 1})
+    )
 
     matrix_item_setup_date = forms.DateField(required=False)
 
     matrix_item_test_type = forms.ChoiceField(required=False, choices=TEST_TYPE_CHOICES)
 
-    matrix_item_scientist = forms.CharField(required=False)
+    matrix_item_scientist = forms.CharField(
+        required=False,
+        widget=forms.Textarea(attrs={'rows': 1})
+    )
     matrix_item_notebook = forms.CharField(required=False)
     matrix_item_notebook_page = forms.CharField(required=False)
-    matrix_item_notes = forms.CharField(required=False)
+    matrix_item_notes = forms.CharField(
+        required=False,
+        widget=forms.Textarea(attrs={'rows': 3})
+    )
 
     ### ADDING SETUP FIELDS
     matrix_item_device = forms.ModelChoiceField(queryset=Microdevice.objects.all().order_by('name'), required=False)
     matrix_item_organ_model = forms.ModelChoiceField(queryset=OrganModel.objects.all().order_by('name'), required=False)
     matrix_item_organ_model_protocol = forms.ModelChoiceField(queryset=OrganModelProtocol.objects.all().order_by('version'), required=False)
-    matrix_item_variance_from_organ_model_protocol = forms.CharField(required=False)
+    matrix_item_variance_from_organ_model_protocol = forms.CharField(
+        required=False,
+        widget=forms.Textarea(attrs={'rows': 3})
+    )
 
     matrix_item_full_organ_model = forms.ModelChoiceField(queryset=OrganModel.objects.all().order_by('name'), required=False)
     matrix_item_full_organ_model_protocol = forms.ModelChoiceField(queryset=OrganModelProtocol.objects.all(), required=False)
@@ -591,9 +658,15 @@ class AssayMatrixForm(SignOffMixin, forms.ModelForm):
     ), required=False)
 
     # Text field (un-saved) for supplier
-    compound_supplier_text = forms.CharField(required=False, initial='')
+    compound_supplier_text = forms.CharField(
+        required=False,
+        initial=''
+    )
     # Text field (un-saved) for lot
-    compound_lot_text = forms.CharField(required=False, initial='')
+    compound_lot_text = forms.CharField(
+        required=False,
+        initial=''
+    )
     # Receipt date
     compound_receipt_date = forms.DateField(required=False)
 
@@ -691,6 +764,10 @@ class AssaySetupCompoundFormSet(BaseModelFormSetForcedUniqueness):
             for field in self.custom_fields:
                 form.fields[field] = DicModelChoiceField(field, self.model, self.dic)
 
+            # Purge all classes
+            for field in form.fields:
+                form.fields[field].widget.attrs['class'] = ''
+
     def _construct_form(self, i, **kwargs):
         form = super(AssaySetupCompoundFormSet, self)._construct_form(i, **kwargs)
 
@@ -731,7 +808,7 @@ class AssaySetupCompoundFormSet(BaseModelFormSetForcedUniqueness):
         # Forms to be deleted
         for form in forms_to_delete:
             try:
-                instance = forms.ModelForm.save(form, commit=False)
+                instance = BootstrapForm.save(form, commit=False)
 
                 if instance and instance.id and commit:
                     instance.delete()
@@ -741,7 +818,7 @@ class AssaySetupCompoundFormSet(BaseModelFormSetForcedUniqueness):
 
         # Forms to save
         for form in forms_data:
-            instance = forms.ModelForm.save(form, commit=False)
+            instance = BootstrapForm.save(form, commit=False)
 
             matrix_item = instance.matrix_item
 
@@ -874,14 +951,28 @@ class AssaySetupCompoundInlineFormSet(BaseInlineFormSet):
             form.fields['compound_instance'].queryset = compound_instances
 
             # All available compounds
-            form.fields['compound'] = forms.ModelChoiceField(queryset=Compound.objects.all())
+            form.fields['compound'] = forms.ModelChoiceField(
+                queryset=Compound.objects.all(),
+                widget=forms.Select(attrs={'class': 'form-control'})
+            )
             # Text field (un-saved) for supplier
-            form.fields['supplier_text'] = forms.CharField()
+            form.fields['supplier_text'] = forms.CharField(
+                initial='',
+                widget=forms.TextInput(attrs={'class': 'form-control'})
+            )
             # Text field (un-saved) for lot
-            form.fields['lot_text'] = forms.CharField()
+            form.fields['lot_text'] = forms.CharField(
+                initial='',
+                widget=forms.TextInput(attrs={'class': 'form-control'})
+            )
             # Receipt date
-            form.fields['receipt_date'] = forms.DateField(required=False)
-
+            form.fields['receipt_date'] = forms.DateField(
+                required=False,
+                widget=forms.DateInput(attrs={
+                    'class': 'form-control datepicker-input',
+                    'autocomplete': 'off'
+                })
+            )
             # If instance, apply initial values
             if form.instance.compound_instance_id:
                 current_compound_instance = compound_instances_dic.get(form.instance.compound_instance_id)
@@ -891,9 +982,6 @@ class AssaySetupCompoundInlineFormSet(BaseInlineFormSet):
                 form.fields['lot_text'].initial = current_compound_instance.lot
                 form.fields['receipt_date'].initial = current_compound_instance.receipt_date
 
-            # Set CSS class to receipt date to use date picker
-            form.fields['receipt_date'].widget.attrs['class'] = 'datepicker-input'
-
     # TODO THIS IS NOT DRY
     def save(self, commit=True):
         # Get forms_data (excluding those with delete or no data)
@@ -902,7 +990,7 @@ class AssaySetupCompoundInlineFormSet(BaseInlineFormSet):
 
         # Forms to be deleted
         for form in forms_to_delete:
-            instance = super(forms.ModelForm, form).save(commit=False)
+            instance = super(BootstrapForm, form).save(commit=False)
 
             if instance and instance.id and commit:
                 instance.delete()
@@ -946,7 +1034,7 @@ class AssaySetupCompoundInlineFormSet(BaseInlineFormSet):
 
         # Forms to save
         for form in forms_data:
-            instance = super(forms.ModelForm, form).save(commit=False)
+            instance = super(BootstrapForm, form).save(commit=False)
 
             current_data = form.cleaned_data
 
@@ -1072,18 +1160,15 @@ class AssaySetupCellFormSet(BaseModelFormSetForcedUniqueness):
             for field in self.custom_fields:
                 form.fields[field] = DicModelChoiceField(field, self.model, self.dic)
 
+            # Purge all classes
+            for field in form.fields:
+                form.fields[field].widget.attrs['class'] = ''
+
 
 class AssaySetupSettingForm(ModelFormSplitTime):
     class Meta(object):
         model = AssaySetupCell
         exclude = tracking
-
-        # widgets = {
-        #     'matrix_item': forms.TextInput(),
-        #     'setting': forms.TextInput(),
-        #     'unit': forms.TextInput(),
-        #     'addition_location': forms.TextInput(),
-        # }
 
 
 class AssaySetupSettingFormSet(BaseModelFormSetForcedUniqueness):
@@ -1105,6 +1190,10 @@ class AssaySetupSettingFormSet(BaseModelFormSetForcedUniqueness):
             for field in self.custom_fields:
                 form.fields[field] = DicModelChoiceField(field, self.model, self.dic)
 
+            # Purge all classes
+            for field in form.fields:
+                form.fields[field].widget.attrs['class'] = ''
+
     def _construct_form(self, i, **kwargs):
         form = super(AssaySetupSettingFormSet, self)._construct_form(i, **kwargs)
         for time_unit in TIME_CONVERSIONS.keys():
@@ -1112,8 +1201,8 @@ class AssaySetupSettingFormSet(BaseModelFormSetForcedUniqueness):
             form.fields['addition_time_' + time_unit] = forms.FloatField(initial=0)
             form.fields['duration_' + time_unit] = forms.FloatField(initial=0)
             # Change style
-            form.fields['addition_time_' + time_unit].widget.attrs['style'] = 'width:75px;'
-            form.fields['duration_' + time_unit].widget.attrs['style'] = 'width:75px;'
+            # form.fields['addition_time_' + time_unit].widget.attrs['style'] = 'width:75px;'
+            # form.fields['duration_' + time_unit].widget.attrs['style'] = 'width:75px;'
 
         if form.instance.addition_time:
             # Fill additional time
@@ -1195,7 +1284,7 @@ AssaySetupSettingInlineFormSetFactory = inlineformset_factory(
 )
 
 
-class AssayMatrixItemFullForm(SignOffMixin, forms.ModelForm):
+class AssayMatrixItemFullForm(SignOffMixin, BootstrapForm):
     """Frontend form for Items"""
     class Meta(object):
         model = AssayMatrixItem
@@ -1312,7 +1401,7 @@ AssayMatrixItemFormSetFactory = inlineformset_factory(
 )
 
 
-class AssayStudySignOffForm(SignOffMixin, forms.ModelForm):
+class AssayStudySignOffForm(SignOffMixin, BootstrapForm):
     class Meta(object):
         model = AssayStudy
         fields = ['signed_off', 'signed_off_notes']
@@ -1321,7 +1410,7 @@ class AssayStudySignOffForm(SignOffMixin, forms.ModelForm):
         }
 
 
-class AssayStudyStakeholderSignOffForm(SignOffMixin, forms.ModelForm):
+class AssayStudyStakeholderSignOffForm(SignOffMixin, BootstrapForm):
     class Meta(object):
         model = AssayStudyStakeholder
         fields = ['signed_off', 'signed_off_notes']
@@ -1371,7 +1460,7 @@ AssayStudyStakeholderFormSetFactory = inlineformset_factory(
 )
 
 
-class AssayStudyDataUploadForm(forms.ModelForm):
+class AssayStudyDataUploadForm(BootstrapForm):
     """Form for Bulk Uploads"""
     # Excluded for now
     # overwrite_option = OVERWRITE_OPTIONS_BULK

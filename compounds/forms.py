@@ -1,9 +1,11 @@
 from django import forms
 from .models import *
 from django.forms.models import BaseInlineFormSet
+from mps.forms import BootstrapForm
+from django.forms.models import inlineformset_factory
 
 
-class CompoundForm(forms.ModelForm):
+class CompoundForm(BootstrapForm):
     """Form for Compounds"""
     class Meta(object):
         model = Compound
@@ -76,8 +78,31 @@ class CompoundPropertyInlineFormset(BaseInlineFormSet):
         exclude = ('',)
 
 
-class CompoundTargetInlineFormset(BaseInlineFormSet):
+class CompoundTargetForm(BootstrapForm):
     """Form for Target inlines"""
     class Meta(object):
         model = CompoundTarget
         exclude = ('',)
+
+
+class CompoundTargetInlineFormset(BaseInlineFormSet):
+    """Formset for Target inlines"""
+    class Meta(object):
+        model = CompoundTarget
+        exclude = ('',)
+
+CompoundTargetFormset = inlineformset_factory(
+    Compound,
+    CompoundTarget,
+    form=CompoundTargetForm,
+    formset=CompoundTargetInlineFormset,
+    extra=1,
+    exclude=[],
+    widgets={
+        'name': forms.Textarea(attrs={'size': 25, 'rows': 1}),
+        'uniprot_id': forms.TextInput(attrs={'size': 10}),
+        'pharmacological_action': forms.TextInput(attrs={'size': 7}),
+        'organism': forms.TextInput(attrs={'size': 7}),
+        'type': forms.TextInput(attrs={'size': 11}),
+    }
+)

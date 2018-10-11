@@ -3,14 +3,14 @@ from django.forms.models import BaseInlineFormSet
 from .models import *
 from assays.models import AssayMatrixItem, AssaySampleLocation
 from diseases.models import Disease
-from mps.forms import SignOffMixin
+from mps.forms import SignOffMixin, BootstrapForm
 from django.forms.models import inlineformset_factory
 
 # These are all of the tracking fields
 tracking = ('created_by', 'created_on', 'modified_on', 'modified_by', 'signed_off_by', 'signed_off_date')
 
 
-class MicrodeviceForm(SignOffMixin, forms.ModelForm):
+class MicrodeviceForm(SignOffMixin, BootstrapForm):
     """Form for Microdevices"""
     class Meta(object):
         model = Microdevice
@@ -23,7 +23,7 @@ class MicrodeviceForm(SignOffMixin, forms.ModelForm):
         }
 
 
-class OrganModelForm(SignOffMixin, forms.ModelForm):
+class OrganModelForm(SignOffMixin, BootstrapForm):
     """Form for Organ Models"""
     class Meta(object):
         model = OrganModel
@@ -46,6 +46,12 @@ class OrganModelForm(SignOffMixin, forms.ModelForm):
         self.fields['disease'].queryset = disease_queryset
 
 
+class OrganModelLocationForm(BootstrapForm):
+    class Meta(object):
+        model = OrganModelLocation
+        exclude = ('',)
+
+
 class OrganModelLocationInlineFormset(BaseInlineFormSet):
     """Form for Organ Model Locations"""
     class Meta(object):
@@ -66,6 +72,7 @@ class OrganModelLocationInlineFormset(BaseInlineFormSet):
 OrganModelLocationFormsetFactory = inlineformset_factory(
     OrganModel,
     OrganModelLocation,
+    form=OrganModelLocationForm,
     formset=OrganModelLocationInlineFormset,
     extra=1,
     exclude=[],
@@ -75,8 +82,15 @@ OrganModelLocationFormsetFactory = inlineformset_factory(
 )
 
 
-class OrganModelProtocolInlineFormset(BaseInlineFormSet):
+class OrganModelProtocolForm(BootstrapForm):
     """Form for Organ Model Protocols (as part of an inline)"""
+    class Meta(object):
+        model = OrganModelProtocol
+        exclude = ('',)
+
+
+class OrganModelProtocolInlineFormset(BaseInlineFormSet):
+    """Formset of organ model protocols"""
     class Meta(object):
         model = OrganModelProtocol
         exclude = ('',)
@@ -98,6 +112,7 @@ class OrganModelProtocolInlineFormset(BaseInlineFormSet):
 OrganModelProtocolFormsetFactory = inlineformset_factory(
     OrganModel,
     OrganModelProtocol,
+    form=OrganModelProtocolForm,
     formset=OrganModelProtocolInlineFormset,
     extra=1,
     exclude=[],
@@ -107,7 +122,7 @@ OrganModelProtocolFormsetFactory = inlineformset_factory(
 )
 
 
-class MicrophysiologyCenterForm(forms.ModelForm):
+class MicrophysiologyCenterForm(BootstrapForm):
     class Meta(object):
         model = MicrophysiologyCenter
         exclude = []
@@ -117,7 +132,7 @@ class MicrophysiologyCenterForm(forms.ModelForm):
         }
 
 
-class GroupDeferralForm(forms.ModelForm):
+class GroupDeferralForm(BootstrapForm):
     class Meta(object):
         model = GroupDeferral
         exclude = []

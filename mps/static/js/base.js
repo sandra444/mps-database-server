@@ -116,10 +116,4 @@ $.fn.button.noConflict();
 
     $(document).on('ready', autocollapse);
     $(window).on('resize', autocollapse);
-
-    // TODO TODO TODO CRUDE
-    //Bootstrapify inputs (obviously this would *should* be in the html...
-    $('textarea').addClass('form-control');
-    $('input[type="text"]').addClass('form-control');
-    $('input[type="number"]').addClass('form-control');
 });
