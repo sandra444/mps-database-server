@@ -10,9 +10,27 @@ from django.views.generic import (
 )
 from django.http import HttpResponse
 from cellsamples.models import CellSample
-# TODO TRIM THIS IMPORT
-# Temporary wildcard
-from assays.models import *
+from assays.models import (
+    AssayStudyConfiguration,
+    AssayStudyModel,
+    AssayStudy,
+    AssayMatrix,
+    AssayMatrixItem,
+    AssayTarget,
+    AssayMethod,
+    PhysicalUnits,
+    AssaySampleLocation,
+    AssayImage,
+    AssayImageSetting,
+    AssayStudyAssay,
+    AssaySetupCompound,
+    AssaySetupCell,
+    AssaySetupSetting,
+    AssayStudyStakeholder,
+    AssayDataFileUpload,
+    AssayDataPoint,
+    AssayStudySupportingData
+)
 from assays.forms import (
     AssayStudyConfigurationForm,
     ReadyForSignOffForm,
@@ -30,11 +48,9 @@ from assays.forms import (
     AssaySetupSettingInlineFormSetFactory,
     AssayStudySignOffForm,
     AssayStudyStakeholderFormSetFactory,
-    AssayStudyDataUploadForm,
-    AssayImage,
-    AssayImageSetting,
-    AssayStudyAssay
+    AssayStudyDataUploadForm
 )
+from microdevices.models import MicrophysiologyCenter
 from django import forms
 
 # TODO REVISE SPAGHETTI CODE

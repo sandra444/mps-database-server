@@ -1,5 +1,5 @@
 from haystack import indexes
-from .models import *
+from .models import CellSample, CellType
 
 
 class CellSampleIndex(indexes.SearchIndex, indexes.Indexable):

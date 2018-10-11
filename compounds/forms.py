@@ -1,5 +1,10 @@
 from django import forms
-from .models import *
+from .models import (
+    Compound,
+    CompoundSummary,
+    CompoundProperty,
+    CompoundTarget
+)
 from django.forms.models import BaseInlineFormSet
 
 

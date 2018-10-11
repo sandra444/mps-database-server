@@ -1,6 +1,15 @@
 from django.conf.urls import url
-# Wildcards are evil
-from .views import *
+from .views import (
+    CellSampleAdd,
+    CellSampleList,
+    CellSampleUpdate,
+    CellTypeAdd,
+    CellTypeList,
+    CellTypeUpdate,
+    CellSubtypeAdd,
+    CellSubtypeList,
+    CellSubtypeUpdate
+)
 import cellsamples.ajax
 
 urlpatterns = [
@@ -15,5 +24,5 @@ urlpatterns = [
     url(r'^cellsamples/cellsubtype/add/$', CellSubtypeAdd.as_view(), name='cellsubtype_add'),
     url(r'^cellsamples/cellsubtype/$', CellSubtypeList.as_view(), name='cellsubtype_list'),
     url(r'^cellsamples/cellsubtype/(?P<pk>[0-9]+)/$', CellSubtypeUpdate.as_view(), name='cellsubtype_update'),
-url(r'^cellsamples_ajax/$', cellsamples.ajax.ajax),
+    url(r'^cellsamples_ajax/$', cellsamples.ajax.ajax),
 ]

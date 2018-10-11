@@ -1,8 +1,8 @@
 # coding=utf-8
 
-from django.http import *
+from django.http import HttpResponse, HttpResponseServerError
 import ujson as json
-from .models import *
+from .models import Compound, CompoundInstance, CompoundSupplier
 # from assays.utils import CHIP_DATA_PREFETCH
 # from assays.models import AssayChipRawData, AssayCompoundInstance, AssayChipSetup
 from assays.models import AssayDataPoint, AssaySetupCompound, AssayMatrixItem

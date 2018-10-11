@@ -1,6 +1,6 @@
 # NOTE: Decided it was best to keep AJAX calls app-separated
 import ujson as json
-from django.http import *
+from django.http import HttpResponse, HttpResponseServerError
 import re
 
 # from django.contrib.auth.models import Group

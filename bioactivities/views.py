@@ -9,8 +9,20 @@ from rest_framework.renderers import JSONRenderer
 
 #import ujson as json
 
-#from bioactivities.models import *
-from bioactivities.parsers import *
+from bioactivities.models import PubChemBioactivity, Bioactivity
+# from bioactivities.parsers import *
+import ujson as json
+
+from .models import Bioactivity, PubChemBioactivity
+from bioactivities.parsers import (
+    generate_list_of_all_data_in_bioactivities,
+    generate_list_of_all_bioactivities_in_bioactivities,
+    generate_list_of_all_targets_in_bioactivities,
+    generate_list_of_all_compounds_in_bioactivities,
+    table,
+    cluster,
+    heatmap
+)
 # from bioactivities.serializers import BioactivitiesSerializer
 
 from mps.views import SearchForm, search

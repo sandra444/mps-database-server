@@ -1,6 +1,14 @@
 from django import forms
 from django.forms.models import BaseInlineFormSet
-from .models import *
+from django.contrib.auth.models import Group
+from .models import (
+    Microdevice,
+    OrganModel,
+    OrganModelLocation,
+    OrganModelProtocol,
+    MicrophysiologyCenter,
+    GroupDeferral
+)
 from assays.models import AssayMatrixItem, AssaySampleLocation
 from diseases.models import Disease
 from mps.forms import SignOffMixin

@@ -1,6 +1,5 @@
 from django.shortcuts import render
 from django.http import HttpResponseRedirect
-from django.template import RequestContext
 from .forms import SearchForm
 
 from haystack.query import SearchQuerySet
