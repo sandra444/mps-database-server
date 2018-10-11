@@ -14,7 +14,7 @@ class OrganModelList(ListView):
     template_name = 'microdevices/organmodel_list.html'
 
     def get_queryset(self):
-        return OrganModel.objects.prefetch_related('organ', 'center', 'device').all()
+        return OrganModel.objects.prefetch_related('organ', 'center', 'device', 'base_model').all()
 
 
 class MicrodeviceList(ListView):

@@ -47,7 +47,11 @@
                     <td><a class="btn btn-primary" href="{{ model.id }}/update/">Edit</a></td>
                     <td>{{ model.name }}</td>
                     <td><a href="/microdevices/center/{{ model.center.id }}" target='_blank'>{{ model.center|default_if_none:"" }}</a></td>
-                    <td>{{ model.base_model }}</td>
+                    <td>
+                        {% if model.base_model %}
+                            <a href="{{ model.base_model.get_absolute_url }}">{{ model.base_model.alt_name }}</a>
+                        {% endif %}
+                    </td>
                     <td>{{ model.organ|default_if_none:"" }}</td>
                     <td><a href="/microdevices/device/{{ model.device.id }}">{{ model.device|default_if_none:"" }}</a></td>
                     <td>{{ model.disease }}</td>
