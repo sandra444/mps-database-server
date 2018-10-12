@@ -1,11 +1,12 @@
-# from .models import Compound
+from django import forms
+from .models import Compound, CompoundTarget
 from django.views.generic import ListView, DetailView, CreateView, UpdateView
 # from django.utils.decorators import method_decorator
 # from django.contrib.auth.decorators import login_required
 from mps.mixins import SpecificGroupRequiredMixin
 # from django.shortcuts import render_to_response
 # from django.template import RequestContext
-from .forms import *
+from .forms import CompoundTargetInlineFormset, CompoundForm
 from django.shortcuts import redirect
 from mps.base.models import save_forms_with_tracking
 

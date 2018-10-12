@@ -1,6 +1,38 @@
 from django.conf.urls import url
-# TODO NO WILDCARDS PLEASE
-from assays.views import *
+from assays.views import (
+    AssayStudyEditableList,
+    AssayStudyIndex,
+    AssayStudyUpdate,
+    AssayStudyDelete,
+    AssayStudySummary,
+    AssayStudyData,
+    AssayStudyDataUpload,
+    AssayStudyList,
+    AssayStudyAdd,
+    AssayMatrixItemDetail,
+    AssayMatrixItemUpdate,
+    AssayMatrixItemDelete,
+    AssayStudyConfigurationList,
+    AssayStudyConfigurationAdd,
+    AssayStudyConfigurationUpdate,
+    AssayMatrixAdd,
+    AssayMatrixDetail,
+    AssayMatrixUpdate,
+    AssayMatrixDelete,
+    AssayStudySignOff,
+    AssayStudyReproducibility,
+    AssayStudyImages,
+    AssayTargetList,
+    AssayTargetDetail,
+    AssayMethodList,
+    AssayMethodDetail,
+    AssayPhysicalUnitsList,
+    AssaySampleLocationList,
+    GraphingReproducibilityFilterView,
+    AssayInterStudyReproducibility,
+    AssayStudyDataPlots,
+    AssayDataFromFilters
+)
 import assays.ajax
 
 urlpatterns = [

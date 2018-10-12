@@ -1,5 +1,5 @@
 from haystack import indexes
-from .models import *
+from .models import OrganModel, Microdevice
 
 
 class OrganModelIndex(indexes.SearchIndex, indexes.Indexable):

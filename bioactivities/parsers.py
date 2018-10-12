@@ -5,7 +5,7 @@ import os
 import hashlib
 import csv
 
-from pandas import *
+from pandas import DataFrame, pivot_table
 from django.db import connection
 
 from mps.settings import MEDIA_ROOT
@@ -15,7 +15,7 @@ import scipy.cluster
 import numpy as np
 
 from compounds.models import Compound
-from .models import Bioactivity, PubChemBioactivity, Assay
+from .models import Bioactivity, PubChemBioactivity #, Assay
 from drugtrials.models import FindingResult
 
 # POTENTIALLY TOO MEMORY CONSUMING; BE CAUTIOUS
@@ -789,12 +789,12 @@ def heatmap(request):
         return {'error': 'no standard bioactivities or drugtrial data'}
 
     if all_std_bioactivities:
-        bioactivities_data = pandas.DataFrame(
+        bioactivities_data = DataFrame(
             all_std_bioactivities,
             columns=['compound', 'target', 'bioactivity', 'value']
         ).fillna(0)
 
-        pivoted_data = pandas.pivot_table(
+        pivoted_data = pivot_table(
             bioactivities_data,
             values='value',
             columns=['target', 'bioactivity'],
@@ -813,10 +813,10 @@ def heatmap(request):
         rearranged_data = unwound_data[data_order]
 
     else:
-        rearranged_data = pandas.DataFrame()
+        rearranged_data = DataFrame()
 
     if all_std_drugtrial:
-        drugtrial_df = pandas.DataFrame(all_std_drugtrial, columns=['compound', 'target_bioactivity_pair', 'value'])
+        drugtrial_df = DataFrame(all_std_drugtrial, columns=['compound', 'target_bioactivity_pair', 'value'])
 
         rearranged_data = rearranged_data.append(drugtrial_df)
 
@@ -913,7 +913,7 @@ def heatmap(request):
             values = [value if value is not None else median for value in values]
             data.update({bioactivity: values})
 
-    df = pandas.DataFrame(data)
+    df = DataFrame(data)
 
     # For *Rows*
 
@@ -1021,12 +1021,12 @@ def cluster(request):
     if all_std_bioactivities or all_std_drugtrial:
 
         if all_std_bioactivities:
-            bioactivities_data = pandas.DataFrame(
+            bioactivities_data = DataFrame(
                 all_std_bioactivities,
                 columns=['compound', 'target', 'bioactivity', 'value']
             ).fillna(0)
 
-            pivoted_data = pandas.pivot_table(
+            pivoted_data = pivot_table(
                 bioactivities_data,
                 values='value',
                 columns=['target', 'bioactivity'],
@@ -1045,10 +1045,10 @@ def cluster(request):
             rearranged_data = unwound_data[data_order]
 
         else:
-            rearranged_data = pandas.DataFrame()
+            rearranged_data = DataFrame()
 
         if all_std_drugtrial:
-            drugtrial_df = pandas.DataFrame(
+            drugtrial_df = DataFrame(
                 all_std_drugtrial,
                 columns=['compound', 'target_bioactivity_pair', 'value']
             )
@@ -1138,7 +1138,7 @@ def cluster(request):
             values = [value if value is not None else median for value in values]
             data.update({prop: values})
 
-    df = pandas.DataFrame(data)
+    df = DataFrame(data)
 
     # Determine distances (default is Euclidean)
     # The data frame should encompass all of the bioactivities

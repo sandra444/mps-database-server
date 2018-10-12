@@ -1,4 +1,5 @@
 from django import forms
+from django.contrib.auth.models import Group
 from django.forms.models import (
     BaseInlineFormSet,
     inlineformset_factory,
@@ -6,10 +7,31 @@ from django.forms.models import (
     modelformset_factory,
 )
 from cellsamples.models import Biosensor
-# STOP USING WILDCARD IMPORTS
-from assays.models import *
+from assays.models import (
+    AssayStudyConfiguration,
+    AssayStudy,
+    AssayStudySupportingData,
+    AssayStudyAssay,
+    AssayMatrix,
+    TEST_TYPE_CHOICES,
+    PhysicalUnits,
+    AssaySampleLocation,
+    AssaySetting,
+    AssaySetupCompound,
+    AssaySetupCell,
+    AssaySetupSetting,
+    AssayMatrixItem,
+    AssayStudyStakeholder,
+    AssayTarget,
+    AssayMethod
+)
 from compounds.models import Compound, CompoundInstance, CompoundSupplier
-from microdevices.models import MicrophysiologyCenter
+from microdevices.models import (
+    MicrophysiologyCenter,
+    Microdevice,
+    OrganModel,
+    OrganModelProtocol
+)
 from mps.forms import SignOffMixin, BootstrapForm
 import string
 from captcha.fields import CaptchaField

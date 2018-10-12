@@ -1,5 +1,5 @@
 from haystack import indexes
-from .models import *
+from .models import OpenFDACompound, DrugTrial
 
 
 class OpenFDACompoundIndex(indexes.SearchIndex, indexes.Indexable):

@@ -1,11 +1,37 @@
 # coding=utf-8
 import ujson as json
-from collections import defaultdict
-# TODO STOP USING WILDCARD IMPORTS
-from django.http import *
-# STOP USING WILDCARD IMPORTS
-from .models import *
-from microdevices.models import MicrophysiologyCenter, Microdevice
+# from collections import defaultdict
+from django.http import (
+    HttpResponse,
+    HttpResponseForbidden,
+    HttpResponseServerError
+)
+from .models import (
+    AssayStudy,
+    AssayMatrixItem,
+    AssayMatrix,
+    AssayStudyAssay,
+    AssayDataPoint,
+    AssayChipReadout,
+    AssayChipSetup,
+    AssayRun,
+    AssayChipReadoutAssay,
+    AssayPlateReadoutAssay,
+    AssaySetupCompound,
+    DEFAULT_SETUP_CRITERIA,
+    DEFAULT_SETTING_CRITERIA,
+    DEFAULT_COMPOUND_CRITERIA,
+    DEFAULT_CELL_CRITERIA,
+    attr_getter,
+    tuple_attrgetter,
+    get_split_times,
+)
+from microdevices.models import (
+    MicrophysiologyCenter,
+    Microdevice,
+    OrganModel,
+    OrganModelProtocol
+)
 
 # from mps.settings import TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX
 from .forms import (
@@ -23,8 +49,8 @@ from .utils import (
     get_inter_study_reproducibility_report,
     # GLOBAL STRINGS
     NO_COMPOUNDS_STRING,
-    NO_CELLS_STRING,
-    NO_SETTINGS_STRING,
+    # NO_CELLS_STRING,
+    # NO_SETTINGS_STRING,
 )
 
 from StringIO import StringIO

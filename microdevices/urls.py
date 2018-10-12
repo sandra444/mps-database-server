@@ -1,6 +1,15 @@
 from django.conf.urls import url
-# Wildcard imports are EVIL
-from microdevices.views import *
+from microdevices.views import (
+    MicrodeviceList,
+    MicrodeviceDetail,
+    OrganModelList,
+    OrganModelDetail,
+    MicrodeviceAdd,
+    OrganModelAdd,
+    MicrodeviceUpdate,
+    OrganModelUpdate,
+    MicrophysiologyCenterDetail
+)
 
 urlpatterns = [
     # User can view their studies

@@ -1,14 +1,21 @@
 from django.contrib import admin
-from django.contrib import messages
+# from django.contrib import messages
 from django import forms
-from django.shortcuts import render_to_response
-from django.template import RequestContext
-from django.http import HttpResponseRedirect
+# from django.shortcuts import render_to_response
+# from django.template import RequestContext
+# from django.http import HttpResponseRedirect
 from django.forms import Textarea
+from django.db import models
 
 from bioactivities.resource import BioactivityTypeResource
 from mps.base.admin import LockableAdmin
-from .models import *
+from .models import (
+    Target,
+    Assay,
+    Bioactivity,
+    BioactivityType,
+    PubChemBioactivity
+)
 from bioactivities.forms import AssayForm
 from bioactivities.forms import TargetsForm
 
