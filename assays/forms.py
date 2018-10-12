@@ -23,7 +23,8 @@ from assays.models import (
     AssayMatrixItem,
     AssayStudyStakeholder,
     AssayTarget,
-    AssayMethod
+    AssayMethod,
+    AssayStudyModel
 )
 from compounds.models import Compound, CompoundInstance, CompoundSupplier
 from microdevices.models import (

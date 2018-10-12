@@ -48,7 +48,7 @@ from assays.forms import (
     AssaySetupSettingInlineFormSetFactory,
     AssayStudySignOffForm,
     AssayStudyStakeholderFormSetFactory,
-    AssayStudyDataUploadForm
+    AssayStudyDataUploadForm,
     AssayStudyModelFormSet
 )
 from microdevices.models import MicrophysiologyCenter
