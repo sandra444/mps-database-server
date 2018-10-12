@@ -110,7 +110,14 @@ $(document).ready(function() {
 
     // Filters acquired naively from GET
     var filters = decodeURIComponent(window.location.search.split('?filters=')[1]);
-    $('#back_button').attr('href', $('#back_button').attr('href') + filters);
+    // Change the hrefs to include the filters
+    var submit_buttons_selector = $('.submit-button');
+    submit_buttons_selector.each(function() {
+        var current_download_href = $(this).attr('href');
+        var initial_href = current_download_href.split('?')[0];
+        var get_for_href = 'filters=' + filters;
+        $(this).attr('href', initial_href + '?' + get_for_href);
+    });
 
     function show_repro() {
         // Set na_data
