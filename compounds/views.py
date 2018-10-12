@@ -8,7 +8,6 @@ from mps.mixins import SpecificGroupRequiredMixin
 # from django.template import RequestContext
 from .forms import CompoundTargetInlineFormset, CompoundForm
 from django.shortcuts import redirect
-from django.forms.models import inlineformset_factory
 from mps.base.models import save_forms_with_tracking
 
 
@@ -68,21 +67,6 @@ class CompoundsDetail(DetailView):
         context.update({'previous': previous_compound, 'next': next_compound})
         return context
 
-CompoundTargetFormset = inlineformset_factory(
-    Compound,
-    CompoundTarget,
-    formset=CompoundTargetInlineFormset,
-    extra=1,
-    exclude=[],
-    widgets={
-        'name': forms.Textarea(attrs={'size': 25, 'rows': 1}),
-        'uniprot_id': forms.TextInput(attrs={'size': 10}),
-        'pharmacological_action': forms.TextInput(attrs={'size': 7}),
-        'organism': forms.TextInput(attrs={'size': 7}),
-        'type': forms.TextInput(attrs={'size': 11}),
-    }
-)
-
 
 class CompoundsAdd(SpecificGroupRequiredMixin, CreateView):
     """Add a compound"""
@@ -139,60 +123,6 @@ class CompoundsUpdate(SpecificGroupRequiredMixin, UpdateView):
             return redirect(self.object.get_post_submission_url())
         else:
             return self.render_to_response(self.get_context_data(form=form, formset=formset))
-
-
-# TODO OLD COMPOUNDS UPDATE
-# CompoundSummaryFormset = inlineformset_factory(
-#     Compound,
-#     CompoundSummary,
-#     formset=CompoundSummaryInlineFormset,
-#     extra=1,
-#     exclude=[],
-#     widgets={
-#         'summary': forms.Textarea(attrs={'size': 500})
-#     }
-# )
-#
-# CompoundPropertyFormset = inlineformset_factory(
-#     Compound,
-#     CompoundProperty,
-#     formset=CompoundPropertyInlineFormset,
-#     exclude=[],
-#     extra=1
-# )
-#
-#
-# class CompoundsUpdate(SpecificGroupRequiredMixin, UpdateView):
-#     model = Compound
-#     template_name = 'compounds/compounds_update.html'
-#
-#     required_group_name = 'Change Compounds Front'
-#
-#     def get(self, request, *args, **kwargs):
-#         self.object = self.get_object()
-#         formset_summary = CompoundSummaryFormset(instance=self.object)
-#         formset_property = CompoundPropertyFormset(instance=self.object)
-#         return self.render_to_response(
-#             self.get_context_data(formset_summary=formset_summary,
-#                                   formset_property=formset_property))
-#
-#     def post(self, request, *args, **kwargs):
-#         self.object = self.get_object()
-#
-#         formset_summary = CompoundSummaryFormset(self.request.POST, instance=self.object)
-#         formset_property = CompoundPropertyFormset(self.request.POST, instance=self.object)
-#
-#         if formset_summary.is_valid() and formset_property.is_valid():
-#             formset_summary.save()
-#             formset_property.save()
-#             self.object.modified_by = self.request.user
-#             # Save the Compound to keep tracking data
-#             self.object.save()
-#             return redirect(self.object.get_post_submission_url())
-#         else:
-#             return self.render_to_response(
-#             self.get_context_data(formset_summary=formset_summary,
-#                                   formset_property=formset_property))
 
 
 # Currently, compounds report basically begins as just a compounds list

@@ -1,12 +1,12 @@
 from django import forms
 from .models import CellSample, CellType, CellSubtype
-from mps.forms import SignOffMixin
+from mps.forms import SignOffMixin, BootstrapForm
 
 # These are all of the tracking fields
 tracking = ('created_by', 'created_on', 'modified_on', 'modified_by', 'signed_off_by', 'signed_off_date')
 
 
-class CellSampleForm(SignOffMixin, forms.ModelForm):
+class CellSampleForm(SignOffMixin, BootstrapForm):
     """Form for Cell Samples"""
     def __init__(self, groups, *args, **kwargs):
         """Init the CellSample Form
@@ -29,7 +29,7 @@ class CellSampleForm(SignOffMixin, forms.ModelForm):
         }
 
 
-class CellTypeForm(SignOffMixin, forms.ModelForm):
+class CellTypeForm(SignOffMixin, BootstrapForm):
     """Form for Cell Types"""
     class Meta(object):
         model = CellType
@@ -39,7 +39,7 @@ class CellTypeForm(SignOffMixin, forms.ModelForm):
         }
 
 
-class CellSubtypeForm(SignOffMixin, forms.ModelForm):
+class CellSubtypeForm(SignOffMixin, BootstrapForm):
     """Form for Cell Subtypes"""
     def __init__(self, *args, **kwargs):
         super(CellSubtypeForm, self).__init__(*args, **kwargs)

@@ -49,6 +49,7 @@ from assays.forms import (
     AssayStudySignOffForm,
     AssayStudyStakeholderFormSetFactory,
     AssayStudyDataUploadForm
+    AssayStudyModelFormSet
 )
 from microdevices.models import MicrophysiologyCenter
 from django import forms
@@ -235,19 +236,6 @@ class AssayStudyConfigurationList(LoginRequiredMixin, ListView):
     """Display a list of Study Configurations"""
     model = AssayStudyConfiguration
     template_name = 'assays/studyconfiguration_list.html'
-
-
-# FormSet for Study Models
-AssayStudyModelFormSet = inlineformset_factory(
-    AssayStudyConfiguration,
-    AssayStudyModel,
-    extra=1,
-    exclude=[],
-    widgets={
-        'label': forms.TextInput(attrs={'size': 2}),
-        'sequence_number': forms.TextInput(attrs={'size': 2})
-    }
-)
 
 
 class AssayStudyConfigurationAdd(OneGroupRequiredMixin, CreateView):
