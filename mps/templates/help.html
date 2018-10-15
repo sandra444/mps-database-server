@@ -411,7 +411,7 @@
                                 <tr>
                                 <td> Disease Portal </td>
                                 <td> Provides a portal connecting information from clinical trials to MPS <b>Study Data</b>. Links are made based on <b>Disease</b>. Users can view summary information, then drill down to see additional disease-related details. For more information, <a href="#diseasemodels">click here</a>.</td>
-                                <td> 1, 13, 14 </td>
+                                <td> 1, 13, 14, 15 </td>
                                 </tr>
                                 <tr>
                                 <td> Compound Report </td>
@@ -539,12 +539,17 @@
                                     <tr>
                                     <td> 13 </td>
                                     <td> clinicaltrials.gov </td>
-                                    <td> Some data pulled dynamically and not stored. </td>
+                                    <td> Some data pulled dynamically and not stored </td>
                                     </tr>
                                     <tr>
                                     <td> 14 </td>
                                     <td> ctti-clinicaltrials.org </td>
                                     <td> Some data pulled dynamically and not stored</td>
+                                    </tr>
+                                    <tr>
+                                    <td> 15 </td>
+                                    <td> Expert elicitation from open source and publications</td>
+                                    <td> Manual Curation </td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -1514,7 +1519,7 @@
                         <div class="content2">
                             <div id="studiesviewer" class="viewersubtainer">
                                 <ul class="list-group">
-                                    <li class="list-group-item">
+                                    <li class="list-group-item background2">
                                         <ul class="list-unstyled">
                                             <li>Select <b>View All Studies</b> from the <b>Studies</b> icon or tab
                                                 <ul class="filled-circle">
@@ -1567,7 +1572,7 @@
                         <div class="content2">
                             <div id="matricesviewer" class="viewersubtainer">
                                 <ul class="list-group">
-                                    <li class="list-group-item">
+                                    <li class="list-group-item background2">
                                         <ul class="list-unstyled">
                                             <li>Select <b>View All Studies</b> from the <b>Studies</b> icon or tab
                                                 <ul class="filled-circle">
@@ -1603,7 +1608,7 @@
                         <div class="content2">
                             <div id="matrixitemsviewer" class="viewersubtainer">
                                 <ul class="list-group">
-                                    <li class="list-group-item">
+                                    <li class="list-group-item background2">
                                         <ul class="list-unstyled">
                                             <li>Select <b>View All Studies</b> from the <b>Studies</b> icon or tab
                                                 <ul class="filled-circle">
@@ -1677,11 +1682,11 @@
         </div>
 
         <div id="groupingfiltering">
-            <button class="collapsible1">Overriding the Built-in Default Grouping/Filtering of Assay Data</button>
-            <div class="content1">
+            <button class="collapsible3">Overriding the Built-in Default Grouping/Filtering of Assay Data</button>
+            <div class="content3">
                 <div id="groupingfilteringviewer" class="viewersubtainer">
                     <ul class="list-group">
-                        <li class="list-group-item">
+                        <li class="list-group-item background3">
                             <ul class="list-unstyled">
                                 <li>To override the built-in default <b>Grouping/Filtering</b>, wherever the <b>Grouping/Filtering</b> section is displayed
                                     <ul class="filled-circle">
@@ -1704,11 +1709,11 @@
         </div>
 
         <div id="plottingoptions">
-            <button class="collapsible1">Exploring Plotting/Graphing Options </button>
-            <div class="content1">
+            <button class="collapsible3">Exploring Plotting/Graphing Options </button>
+            <div class="content3">
                 <div id="plottingoptionsviewer" class="viewersubtainer">
                     <ul class="list-group">
-                        <li class="list-group-item">
+                        <li class="list-group-item background3">
                             <ul class="list-unstyled">
                                 <li>To change the <b>Plotting/Graphing</b>, wherever the <b>Data</b> section is displayed, select from the options provided
                                     <ul class="filled-circle">
@@ -3395,6 +3400,7 @@ Results: add a summary of the study results. </td>
     {% endif %}
 
     <div id="glossary" class="container padded-bottom">
+
         <h1 class="sub1-bars"> Glossary </h1>
         <table hidden id="glossary_table" class="display" cellspacing="0" width="100%">
 
