@@ -17,7 +17,8 @@ $(document).ready(function () {
         $('html, body').animate({
             scrollTop: $(initial_hash).offset().top - offset
         }, 500);
-        $(initial_hash).next().css("display", "block");
+        $(initial_hash).find('button').next().first().css("display", "block");
+
     }
 
     var _alphabetSearch = '';
