@@ -1,8 +1,8 @@
 #import datetime
 from haystack import indexes
-from .models import *
-import os.path
-from mps.settings import WHOOSH_INDEX
+from .models import AssayStudy
+# import os.path
+# from mps.settings import WHOOSH_INDEX
 
 
 class AssayStudyIndex(indexes.SearchIndex, indexes.Indexable):

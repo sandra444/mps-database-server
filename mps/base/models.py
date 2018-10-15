@@ -147,24 +147,31 @@ def save_forms_with_tracking(self, form, formset=None, update=False):
             form.instance.signed_off_by = None
             form.instance.signed_off_date = None
 
-        self.object = form.save()
+        self.object = form.save(commit=False)
 
         # Else if Add
         if not update:
             self.object.modified_by = self.object.created_by = self.request.user
         else:
             self.object.modified_by = self.request.user
+
         self.object.save()
 
     if formset:
+        formset_has_changed = False
+
         # If a list of formsets, save each
         if type(formset) == list:
             for current_formset in formset:
-                current_formset.save()
-        # Otherwise, just save the one
-        else:
-            formset.save()
+                if current_formset.has_changed():
+                    current_formset.save()
+                    formset_has_changed = True
 
-        if update:
+        # Otherwise, just save the one
+        elif formset.has_changed():
+            formset.save()
+            formset_has_changed = True
+
+        if update and formset_has_changed:
             self.object.modified_by = self.request.user
             self.object.save()

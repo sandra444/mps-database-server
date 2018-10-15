@@ -4,8 +4,18 @@ from django.contrib import admin
 # from django.utils.safestring import mark_safe
 
 from mps.base.admin import LockableAdmin
-from resources.models import *
-from resources.forms import *
+from resources.models import (
+    Resource,
+    ResourceType,
+    ResourceSubtype,
+    Definition
+)
+from resources.forms import (
+    ResourceForm,
+    ResourceTypeForm,
+    ResourceSubtypeForm,
+    DefinitionForm
+)
 
 
 class ResourceAdmin(LockableAdmin):

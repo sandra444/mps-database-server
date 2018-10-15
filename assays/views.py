@@ -10,9 +10,27 @@ from django.views.generic import (
 )
 from django.http import HttpResponse
 from cellsamples.models import CellSample
-# TODO TRIM THIS IMPORT
-# Temporary wildcard
-from assays.models import *
+from assays.models import (
+    AssayStudyConfiguration,
+    AssayStudyModel,
+    AssayStudy,
+    AssayMatrix,
+    AssayMatrixItem,
+    AssayTarget,
+    AssayMethod,
+    PhysicalUnits,
+    AssaySampleLocation,
+    AssayImage,
+    AssayImageSetting,
+    AssayStudyAssay,
+    AssaySetupCompound,
+    AssaySetupCell,
+    AssaySetupSetting,
+    AssayStudyStakeholder,
+    AssayDataFileUpload,
+    AssayDataPoint,
+    AssayStudySupportingData
+)
 from assays.forms import (
     AssayStudyConfigurationForm,
     ReadyForSignOffForm,
@@ -31,10 +49,9 @@ from assays.forms import (
     AssayStudySignOffForm,
     AssayStudyStakeholderFormSetFactory,
     AssayStudyDataUploadForm,
-    AssayImage,
-    AssayImageSetting,
-    AssayStudyAssay
+    AssayStudyModelFormSet
 )
+from microdevices.models import MicrophysiologyCenter
 from django import forms
 
 # TODO REVISE SPAGHETTI CODE
@@ -219,19 +236,6 @@ class AssayStudyConfigurationList(LoginRequiredMixin, ListView):
     """Display a list of Study Configurations"""
     model = AssayStudyConfiguration
     template_name = 'assays/studyconfiguration_list.html'
-
-
-# FormSet for Study Models
-AssayStudyModelFormSet = inlineformset_factory(
-    AssayStudyConfiguration,
-    AssayStudyModel,
-    extra=1,
-    exclude=[],
-    widgets={
-        'label': forms.TextInput(attrs={'size': 2}),
-        'sequence_number': forms.TextInput(attrs={'size': 2})
-    }
-)
 
 
 class AssayStudyConfigurationAdd(OneGroupRequiredMixin, CreateView):

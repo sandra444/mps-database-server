@@ -1,15 +1,28 @@
 from django.contrib import admin
-from django.contrib import messages
-# from django import forms
-from django.shortcuts import render_to_response
-from django.template import RequestContext
-from django.http import HttpResponseRedirect
-from bioservices import ChEMBL as ChEMBLdb
+# from django.contrib import messages
+from django import forms
+# from django.shortcuts import render_to_response
+# from django.template import RequestContext
+# from django.http import HttpResponseRedirect
+# from bioservices import ChEMBL as ChEMBLdb
 
 from compounds.resource import CompoundResource
 from mps.base.admin import LockableAdmin
-# from compounds.models import *
-from compounds.forms import *
+from compounds.models import (
+    Compound,
+    CompoundSummary,
+    CompoundProperty,
+    CompoundTarget,
+    CompoundInstance,
+    SummaryType,
+    PropertyType,
+    CompoundSupplier
+)
+from compounds.forms import (
+    CompoundTargetInlineFormset,
+    CompoundSummaryInlineFormset,
+    CompoundPropertyInlineFormset
+)
 
 
 class CompoundTargetInline(admin.TabularInline):

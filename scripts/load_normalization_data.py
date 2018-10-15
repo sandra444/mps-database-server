@@ -1,4 +1,4 @@
-from drugtrials.models import *
+from drugtrials.models import OpenFDACompound
 import ujson as json
 from mps.settings import PROJECT_ROOT
 

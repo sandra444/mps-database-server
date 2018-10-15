@@ -2,8 +2,6 @@ from django.contrib import admin
 from django.conf.urls import url, include
 import debug_toolbar
 
-import django.contrib.auth.views
-
 from mps import settings
 
 # from .views import CustomSearch

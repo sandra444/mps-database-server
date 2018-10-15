@@ -110,7 +110,14 @@ $(document).ready(function() {
 
     // Filters acquired naively from GET
     var filters = decodeURIComponent(window.location.search.split('?filters=')[1]);
-    $('#back_button').attr('href', $('#back_button').attr('href') + filters);
+    // Change the hrefs to include the filters
+    var submit_buttons_selector = $('.submit-button');
+    submit_buttons_selector.each(function() {
+        var current_download_href = $(this).attr('href');
+        var initial_href = current_download_href.split('?')[0];
+        var get_for_href = 'filters=' + filters;
+        $(this).attr('href', initial_href + '?' + get_for_href);
+    });
 
     function show_repro() {
         // Set na_data
@@ -744,11 +751,11 @@ $(document).ready(function() {
                 i = 1;
                 while (i < values[0].length) {
                     interval_setter.push(i);
-                    if (i + 2 < values[0].length && values[0][i + 1].indexOf(' ~@i1') > -1) {
+                    if (i + 2 < values[0].length && values[0][i + 1].indexOf('     ~@i1') > -1) {
                         interval_setter.push({sourceColumn: i + 1, role: 'interval'});
                         interval_setter.push({sourceColumn: i + 2, role: 'interval'});
 
-                        if (i + 3 < values[0].length && values[0][i + 3].indexOf(' ~@s') > -1) {
+                        if (i + 3 < values[0].length && values[0][i + 3].indexOf('     ~@s') > -1) {
                             interval_setter.push({sourceColumn: i + 3, type: 'string', role: 'style'});
                             i += 1;
                         }
@@ -756,7 +763,7 @@ $(document).ready(function() {
                         i += 2;
                     }
                     // Item only
-                    if (i + 1 < values[0].length && values[0][i + 1].indexOf(' ~@t') > -1) {
+                    if (i + 1 < values[0].length && values[0][i + 1].indexOf('     ~@t') > -1) {
                         for (var row_index = 1; row_index < values.length; row_index++) {
                             var current_contents = values[row_index][i + 1];
                             if (current_contents) {

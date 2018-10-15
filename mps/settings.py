@@ -175,6 +175,7 @@ TEMPLATES = [
                 'django.template.context_processors.static',
                 'django.template.context_processors.tz',
                 'django.contrib.messages.context_processors.messages',
+                'mps.context_processors.google_analytics',
             ],
             'loaders': [
                 # insert your TEMPLATE_LOADERS here
@@ -236,6 +237,12 @@ INSTALLED_APPS = (
     'diseases',
     'compressor',
 )
+
+# Google Analytics ID
+GOOGLE_ANALYTICS = ''
+
+# Backend for username case insensitivity
+AUTHENTICATION_BACKENDS = ('mps.backends.CaseInsensitiveModelBackend', )
 
 # COMPRESSION
 STATICFILES_FINDERS += (
