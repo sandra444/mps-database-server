@@ -1,6 +1,6 @@
 Hello admins,
 
-New feedback from {{ feedback.email }} has been received:
+New feedback from {{ feedback.user.email }} has been received:
 
 "
 {{ feedback.title }}
