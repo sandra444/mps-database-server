@@ -32,8 +32,7 @@ from assays.forms import (
     AssayStudyStakeholderFormSetFactory,
     AssayStudyDataUploadForm,
     AssayImage,
-    AssayImageSetting,
-    AssayStudyAssay
+    AssayImageSetting
 )
 from django import forms
 
@@ -200,18 +199,22 @@ def get_user_status_context(self, context):
 
 def get_queryset_with_group_center_dictionary(queryset):
     """Takes the queryset, adds a dictionary 'group_center_map' mapping each group to its center"""
+
+    # INSTEAD OF GRABBING THE GROUPS FIRST, GET ALL CENTERS AND THEIR GROUPS, AND FOR EACH STUDY APPLY CORRECT CENTER
+    # THEN DO COMPOUND STUFF ELSEWHERE
+
+    groups = queryset.values_list('group__name', flat=True)
     group_center_map = {}
 
     centers = MicrophysiologyCenter.objects.all().prefetch_related(
         'groups'
     )
 
-    for center in centers:
-        for group in center.groups.all():
-            group_center_map[group.id] = center
+    for group in groups:
+        group_center_map[group] = centers.filter(groups__name__contains=group).first()
 
     for study in queryset:
-        study.center = group_center_map[study.group_id]
+        study.center = group_center_map[study.group.name]
 
 
 # Class-based views for study configuration
@@ -347,8 +350,9 @@ def get_queryset_with_number_of_data_points(queryset):
     images = AssayImage.objects.filter(
         setting__study_id__in=study_ids
     ).prefetch_related(
+        'matrix_item',
         'setting'
-    ).only('id', 'setting__study_id', 'setting', 'file_name')
+    ).only('id', 'matrix_item', 'setting', 'file_name')
 
     video_formats = {x: True for x in [
         'webm',
@@ -368,17 +372,17 @@ def get_queryset_with_number_of_data_points(queryset):
 
         if is_video:
             current_value = videos_map.setdefault(
-                image.setting.study_id, 0
+                image.matrix_item.study_id, 0
             )
             videos_map.update({
-                image.setting.study_id: current_value + 1
+                image.matrix_item.study_id: current_value + 1
             })
         else:
             current_value = images_map.setdefault(
-                image.setting.study_id, 0
+                image.matrix_item.study_id, 0
             )
             images_map.update({
-                image.setting.study_id: current_value + 1
+                image.matrix_item.study_id: current_value + 1
             })
 
     supporting_data = AssayStudySupportingData.objects.filter(
@@ -1169,13 +1173,13 @@ class AssayMatrixAdd(StudyGroupMixin, CreateView):
         if self.request.POST:
             context['item_formset'] = AssayMatrixItemFormSetFactory(
                 self.request.POST,
-                prefix='matrix_item',
+                prefix='item',
                 study=study,
                 user=self.request.user
             )
         else:
             context['item_formset'] = AssayMatrixItemFormSetFactory(
-                prefix='matrix_item',
+                prefix='item',
                 study=study,
                 user=self.request.user
             )
@@ -1192,7 +1196,7 @@ class AssayMatrixAdd(StudyGroupMixin, CreateView):
         formset = AssayMatrixItemFormSetFactory(
             self.request.POST,
             instance=form.instance,
-            prefix='matrix_item',
+            prefix='item',
             study=study,
             user=self.request.user
         )
@@ -1284,7 +1288,7 @@ class AssayMatrixUpdate(StudyGroupMixin, UpdateView):
                 self.request.POST,
                 instance=self.object,
                 queryset=matrix_item_queryset,
-                prefix='matrix_item',
+                prefix='item',
                 user=self.request.user
             )
             context['compound_formset'] = AssaySetupCompoundFormSetFactory(
@@ -1309,7 +1313,7 @@ class AssayMatrixUpdate(StudyGroupMixin, UpdateView):
             context['item_formset'] = AssayMatrixItemFormSetFactory(
                 instance=self.object,
                 queryset=matrix_item_queryset,
-                prefix='matrix_item',
+                prefix='item',
                 user=self.request.user
             )
             context['compound_formset'] = AssaySetupCompoundFormSetFactory(
@@ -1340,7 +1344,7 @@ class AssayMatrixUpdate(StudyGroupMixin, UpdateView):
             self.request.POST,
             instance=self.object,
             queryset=matrix_item_queryset,
-            prefix='matrix_item',
+            prefix='item',
             user=self.request.user
         )
         # Order no longer matters really
@@ -1442,7 +1446,7 @@ class AssayMatrixDetail(StudyGroupMixin, DetailView):
         context['item_formset'] = AssayMatrixItemFormSetFactory(
             instance=self.object,
             queryset=matrix_item_queryset,
-            prefix='matrix_item'
+            prefix='item'
         )
         context['compound_formset'] = AssaySetupCompoundFormSetFactory(
             queryset=compound_queryset,
@@ -1598,6 +1602,17 @@ class AssayStudyReproducibility(StudyViewerMixin, DetailView):
     template_name = 'assays/assaystudy_reproducibility.html'
 
 
+# TODO Class-based view for direct reproducibility access.
+# class AssayStudyReproducibilityList(AssayStudyList):
+#     """Displays all of the studies linked to groups that the user is part of"""
+#     def get_context_data(self, **kwargs):
+#         context = super(AssayStudyReproducibilityList, self).get_context_data()
+#
+#         context['reproducibility'] = True
+#
+#         return context
+
+
 class AssayStudyImages(StudyViewerMixin, DetailView):
     """Displays all of the images linked to the current study"""
     model = AssayStudy
@@ -1660,82 +1675,6 @@ class AssayStudyImages(StudyViewerMixin, DetailView):
 
 class GraphingReproducibilityFilterView(LoginRequiredMixin, TemplateView):
     template_name = 'assays/assay_filter.html'
-
-
-class AssayTargetList(ListView):
-    model = AssayTarget
-    template_name = 'assays/assaytarget_list.html'
-
-
-class AssayTargetDetail(DetailView):
-    model = AssayTarget
-    template_name = 'assays/assaytarget_detail.html'
-
-    def get_context_data(self, **kwargs):
-        context = super(AssayTargetDetail, self).get_context_data(**kwargs)
-        context['assays'] = AssayStudyAssay.objects.filter(
-            target__name__icontains=self.object.name
-        ).values_list("method__name", "method_id", "method__description").distinct()
-        context['images'] = AssayImage.objects.filter(
-            target__name__icontains=self.object.name
-        ).values_list("method__name", "method_id", "method__description").distinct()
-        context['studies'] = get_user_accessible_studies(
-            self.request.user
-        ).filter(
-            assaystudyassay__target__name=self.object.name
-        ).distinct() | get_user_accessible_studies(
-            self.request.user
-        ).filter(
-            assayimagesetting__assayimage__target__name=self.object.name
-        ).distinct()
-        return context
-
-
-class AssayMethodList(ListView):
-    model = AssayMethod
-    template_name = 'assays/assaymethod_list.html'
-
-
-class AssayMethodDetail(DetailView):
-    model = AssayMethod
-    template_name = 'assays/assaymethod_detail.html'
-
-    def get_context_data(self, **kwargs):
-        context = super(AssayMethodDetail, self).get_context_data(**kwargs)
-        context['assays'] = AssayStudyAssay.objects.filter(
-            method__name__icontains=self.object.name
-        ).values_list("target__name", "target_id", "target__description", "target__short_name").distinct()
-        context['images'] = AssayImage.objects.filter(
-            method__name__icontains=self.object.name
-        ).values_list("target__name", "target_id", "target__description", "target__short_name").distinct()
-        context['studies'] = get_user_accessible_studies(
-            self.request.user
-        ).filter(
-            assaystudyassay__method__name=self.object.name
-        ).distinct() | get_user_accessible_studies(
-            self.request.user
-        ).filter(
-            assayimagesetting__assayimage__method__name=self.object.name
-        ).distinct()
-        return context
-
-
-class AssayPhysicalUnitsList(ListView):
-    model = PhysicalUnits
-    template_name = 'assays/assayunit_list.html'
-
-
-class AssaySampleLocationList(ListView):
-    model = AssaySampleLocation
-    template_name = 'assays/assaylocation_list.html'
-
-
-class AssayInterStudyReproducibility(LoginRequiredMixin, TemplateView):
-    template_name = 'assays/assay_interstudy_reproducibility.html'
-
-
-class AssayStudyDataPlots(LoginRequiredMixin, TemplateView):
-    template_name = 'assays/assaystudy_data_plots.html'
 
 
 # Inappropriate use of CBV

@@ -1,8 +1,5 @@
 $(document).ready(function () {
-    // Load core chart package
     google.charts.load('current', {'packages':['corechart']});
-    // Set the callback
-    google.charts.setOnLoadCallback(loadRepro);
 
     // FILE-SCOPE VARIABLES
     var study_id = Math.floor(window.location.href.split('/')[5]);
@@ -14,7 +11,6 @@ $(document).ready(function () {
         chip_list: null,
         cv_list: null
     };
-    var pie = null;
 
     // CRUDE NOT DRY
     var cv_tooltip = "The CV is calculated for each time point and the value reported is the max CV across time points, or the CV if a single time point is present.  The reproducibility status is excellent if Max CV/CV < 5% (Excellent (CV)), acceptable if Max CV/CV < 15% (Acceptable (CV)), and poor if CV > 15% for a single time point (Poor (CV))";
@@ -23,8 +19,6 @@ $(document).ready(function () {
     var missing_tooltip = "Quantity of data values whose values were missing from the data provided and were interpolated by the average of the data values at the same time point";
     var mad_tooltip = "Median Absolute Deviation (MAD) scores of all chip measurement population at every time point. A score > 3.5 or < -3.5 indicates that the chip is an outlier relative to the median of chip measurement population at a that time point";
     var comp_tooltip = "The ICC is calculated for each chip relative to the median of all of the chips.";
-
-    var gasTable = null;
 
     function escapeHtml(html) {
         return $('<div>').text(html).html();
@@ -39,6 +33,118 @@ $(document).ready(function () {
             .attr('data-placement', "bottom"));
         return new_span.html();
     }
+
+    var studyID = $( "#selection-parameters" ).find(".studyId").text();
+
+    var gasTable = $('#gas-table').DataTable({
+        ajax: {
+            url: '/assays_ajax/',
+            data: {
+                // TODO TODO TODO THIS DEPENDS ON THE INTERFACE
+                call: 'fetch_assay_study_reproducibility',
+                csrfmiddlewaretoken: window.COOKIES.csrfmiddlewaretoken,
+                study: study_id
+            },
+            type: 'POST',
+            dataSrc: function(json) {
+                gas_list = json.gas_list;
+                mad_list = json.mad_list;
+                comp_list = json.comp_list;
+                lists.cv_list = json.cv_list;
+                lists.chip_list = json.chip_list;
+
+                return gas_list;
+            }
+        },
+        columns: [
+            { title: "Show Details",
+             "render": function(data, type, row) {
+                if (type === 'display') {
+                    var groupNum = row[11];
+                    return '<input type="checkbox" class="big-checkbox gas-checkbox-'+groupNum+'">';
+                }
+                return data;
+            },
+            "className": "dt-body-center",
+            "createdCell": function (td, cellData, rowData, row, col) {
+                if ( cellData ) {
+                    $(td).css('vertical-align', 'middle')
+                }
+            },
+            "sortable": false
+            },
+            { title: "Set", data: '11', type: "num" },
+            { title: "Organ Model", data: '0' },
+            { title: "<span style='white-space: nowrap;'>Full Compound<br>Treatment(s)</span>", data: '2', className: 'none',
+                render:function (data, type, row, meta) {
+                    return '<br>' + data.replace(/\n/g, '<br>');
+                }
+            },
+            { title: "<span style='white-space: nowrap;'>Compound<br>Treatment(s)</span>", data: '2',
+                // CRUDE, WORTH REFACTOR
+                render:function (data, type, row, meta) {
+                    var split_data = data.split('\n');
+                    var new_data = [];
+                    $.each(split_data, function(index, value) {
+                        if (index % 2 === 0) {
+                            new_data.push(value);
+                        }
+                    });
+                    new_data = new_data.join('<br>');
+                    return new_data;
+                }
+            },
+            { title: "Target/Analyte", data: '3', width: '8%' },
+            { title: "Method/Kit", data: '4', width: '8%' },
+            { title: "Sample Location", data: '5', width: '8%' },
+            { title: "Value Unit", data: '6' },
+            { title: "<span style='white-space: nowrap;'>Max CV<br>or CV "+make_escaped_tooltip(cv_tooltip)+"</span>", data: '8' },
+            { title: "<span style='white-space: nowrap;'>ICC "+make_escaped_tooltip(icc_tooltip)+"</span>", data: '9' },
+            { title: "Reproducibility<br>Status "+make_escaped_tooltip(repro_tooltip), data: '10', render: function(data, type, row, meta) {
+                if (data == "Excellent (ICC)" || data == "Excellent (CV)"){
+                    return '<td><span class="hidden">3</span>'+data+'</td>';
+                } else if (data == "Acceptable (ICC)" || data == "Acceptable (CV)") {
+                    return '<td><span class="hidden">2</span>'+data+'</td>';
+                } else if (data == "Poor (ICC)" || data == "Poor (CV)") {
+                    return '<td><span class="hidden">1</span>'+data+'</td>';
+                } else {
+                    return '<td><span class="hidden">0</span>'+data+'<span data-toggle="tooltip" title="'+row[14]+'" class="glyphicon glyphicon-question-sign" aria-hidden="true"></span></td>';
+                }
+            }},
+            { title: "# of Chips/Wells", data: '12' },
+            { title: "# of Time Points", data: '13' },
+            { title: "Cells", data: '1', 'className': 'none'},
+            { title: "Settings", data: '7', 'className': 'none'},
+            { title: "NA Explanation", data: '14', visible: false, 'name': 'naText' }
+        ],
+        "order": [[11, 'desc'], [ 1, "asc" ]],
+        "createdRow": function( row, data, dataIndex ) {
+            if ( data[10][0] === "E" ) {
+                $( row ).find('td:eq(11)').css( "background-color", "#74ff5b" ).css( "font-weight", "bold"  );
+            }
+            else if ( data[10][0] === "A" ) {
+                $( row ).find('td:eq(11)').css( "background-color", "#fcfa8d" ).css( "font-weight", "bold"  );
+            }
+            else if ( data[10][0] === "P" ) {
+                $( row ).find('td:eq(11)').css( "background-color", "#ff7863" ).css( "font-weight", "bold" );
+            }
+            else {
+                $( row ).find('td:eq(11)').css( "background-color", "Grey" ).css( "font-weight", "bold" );
+            }
+        },
+        "responsive": true,
+        dom: 'B<"row">lfrtip',
+        fixedHeader: {headerOffset: 50},
+        deferRender: true,
+        initComplete: function () {
+            // Attempt to draw the tables
+            drawTables();
+        },
+        drawCallback: function() {
+            // Make sure tooltips displayed properly
+            $('[data-toggle="tooltip"]').tooltip({container:"body", html: true});
+        }
+    });
 
     function drawTables(){
         //Clone reproducibility section per row
@@ -98,8 +204,6 @@ $(document).ready(function () {
             counter++;
         });
     }
-
-    var studyID = $( "#selection-parameters" ).find(".studyId").text();
 
     // Activates Bootstrap tooltips
     $('[data-toggle="tooltip"]').tooltip({container:"body", html: true});
@@ -219,14 +323,7 @@ $(document).ready(function () {
     }
 
     function buildSelectionParameters(studyId, organModel, targetAnalyte, methodKit, sampleLocation, compoundTreatments, valueUnit){
-        content =
-        '<tr><th><h4><strong>Target/Analyte</strong></h4></th><td id="target-analyte-value"><h4><strong>'+targetAnalyte+'</strong></h4></td></tr>'+
-        '<tr><th>Study ID</th><td>'+studyId+'</td></tr>'+
-        '<tr><th>Organ Model</th><td>'+organModel+'</td></tr>'+
-        '<tr><th>Method/Kit</th><td>'+methodKit+'</td></tr>'+
-        '<tr><th>Sample Location</th><td>'+sampleLocation+'</td></tr>'+
-        '<tr><th>Compound Treatment(s)</th><td>'+compoundTreatments+'</td></tr>'+
-        '<tr><th>Value Unit</th><td id="value-unit">'+valueUnit+'</td></tr>'
+        content = '<tr><th>Study ID</th><td>'+studyId+'</td></tr><tr><th>Organ Model</th><td>'+organModel+'</td></tr><tr><th>Target/Analyte</th><td id="target-analyte-value">'+targetAnalyte+'</td></tr><tr><th>Method/Kit</th><td>'+methodKit+'</td></tr><tr><th>Sample Location</th><td>'+sampleLocation+'</td></tr><tr><th>Compound Treatment(s)</th><td>'+compoundTreatments+'</td></tr><tr><th>Value Unit</th><td id="value-unit">'+valueUnit+'</td></tr>'
         return content;
     }
 
@@ -264,229 +361,18 @@ $(document).ready(function () {
         $('[data-toggle="tooltip"]').tooltip({container:"body", html: true});
     });
 
+    // On reorder
+    gasTable.on( 'order.dt', function () {
+        var setOrder = [];
+        gasTable.column(1, { search:'applied' } ).data().each(function(value, index) {
+            setOrder.push(value);
+        });
+        orderInfo(setOrder);
+    } );
+
     function orderInfo(orderList){
-        for (var i=0; i < orderList.length; i++) {
+        for (var i=0; i < orderList.length; i++){
             $('#clone-container .repro-'+orderList[i]).appendTo('#clone-container');
         }
-    }
-
-    // Piecharts
-    function loadRepro() {
-        var loading_data = google.visualization.arrayToDataTable([
-            ['Status', 'Count'],
-            ['Loading...', 1]
-        ]);
-
-        var loading_options = {
-            legend: 'none',
-            pieSliceText: 'label',
-            'chartArea': {'width': '90%', 'height': '90%'},
-            tooltip: {trigger : 'none'},
-            pieSliceTextStyle: {
-                color: 'white',
-                bold: true,
-                fontSize: 12
-            }
-        };
-        var chart = new google.visualization.PieChart(document.getElementById('piechart'));
-        chart.draw(loading_data, loading_options);
-
-        gasTable = $('#gas-table').DataTable({
-            ajax: {
-                url: '/assays_ajax/',
-                data: {
-                    // TODO TODO TODO THIS DEPENDS ON THE INTERFACE
-                    call: 'fetch_assay_study_reproducibility',
-                    csrfmiddlewaretoken: window.COOKIES.csrfmiddlewaretoken,
-                    study: study_id
-                },
-                type: 'POST',
-                dataSrc: function(json) {
-                    gas_list = json.gas_list;
-                    mad_list = json.mad_list;
-                    comp_list = json.comp_list;
-                    lists.cv_list = json.cv_list;
-                    lists.chip_list = json.chip_list;
-                    pie = json.pie;
-
-                    if (pie === '0,0,0'){
-                        var na_data = google.visualization.arrayToDataTable([
-                            ['Status', 'Count'],
-                            ['NA', 1]
-                        ]);
-                        var na_options = {
-                            legend: 'none',
-                            pieSliceText: 'label',
-                            'chartArea': {'width': '90%', 'height': '90%'},
-                            slices: {
-                                0: { color: 'Grey' }
-                            },
-                            tooltip: {trigger : 'none'},
-                            pieSliceTextStyle: {
-                                color: 'white',
-                                bold: true,
-                                fontSize: 12
-                            }
-                        };
-                        chart = new google.visualization.PieChart(document.getElementById('piechart'));
-                        chart.draw(na_data, na_options);
-                    } else {
-                        var pie_data = google.visualization.arrayToDataTable([
-                            ['Status', 'Count'],
-                            ['Excellent', pie[0]],
-                            ['Acceptable', pie[1]],
-                            ['Poor', pie[2]]
-                        ]);
-                        var pie_options = {
-                            // title: 'Reproducibility Breakdown\n(Click Slices for Details)',
-                            // titleFontSize:16,
-                            legend: 'none',
-                            slices: {
-                                0: { color: '#74ff5b' },
-                                1: { color: '#fcfa8d' },
-                                2: { color: '#ff7863' }
-                            },
-                            pieSliceText: 'label',
-                            pieSliceTextStyle: {
-                                color: 'black',
-                                bold: true,
-                                fontSize: 12
-                            },
-                            'chartArea': {'width': '90%', 'height': '90%'},
-                            pieSliceBorderColor: "black"
-                        };
-                        chart = new google.visualization.PieChart(document.getElementById('piechart'));
-                        chart.draw(pie_data, pie_options);
-                    }
-
-                    return gas_list;
-                }
-            },
-            columns: [
-                { title: "Show Details",
-                 "render": function(data, type, row) {
-                    if (type === 'display') {
-                        var groupNum = row[11];
-                        return '<input type="checkbox" class="big-checkbox gas-checkbox-'+groupNum+'">';
-                    }
-                    return data;
-                },
-                "className": "dt-body-center",
-                "createdCell": function (td, cellData, rowData, row, col) {
-                    if ( cellData ) {
-                        $(td).css('vertical-align', 'middle')
-                    }
-                },
-                "sortable": false
-                },
-                { title: "Set", data: '11', type: "num" },
-                { title: "Organ Model", data: '0' },
-                { title: "<span style='white-space: nowrap;'>Full Compound<br>Treatment(s)</span>", data: '2', className: 'none',
-                    render:function (data, type, row, meta) {
-                        return '<br>' + data.replace(/\n/g, '<br>');
-                    }
-                },
-                { title: "<span style='white-space: nowrap;'>Compound<br>Treatment(s)</span>", data: '2',
-                    // CRUDE, WORTH REFACTOR
-                    render:function (data, type, row, meta) {
-                        var split_data = data.split('\n');
-                        var new_data = [];
-                        $.each(split_data, function(index, value) {
-                            if (index % 2 === 0) {
-                                new_data.push(value);
-                            }
-                        });
-                        new_data = new_data.join('<br>');
-                        return new_data;
-                    }
-                },
-                { title: "Target/Analyte", data: '3', width: '8%' },
-                { title: "Method/Kit", data: '4', width: '8%', 'className': 'none' },
-                { title: "Sample Location", data: '5', width: '8%' },
-                { title: "Value Unit", data: '6' },
-                { title: "<span style='white-space: nowrap;'>Max CV<br>or CV "+make_escaped_tooltip(cv_tooltip)+"</span>", data: '8' },
-                { title: "<span style='white-space: nowrap;'>ICC "+make_escaped_tooltip(icc_tooltip)+"</span>", data: '9' },
-                { title: "Reproducibility<br>Status "+make_escaped_tooltip(repro_tooltip), data: '10', render: function(data, type, row, meta) {
-                    if (data[0] === 'E') {
-                        return '<td><span class="hidden">3</span>' + data + '</td>';
-                    } else if (data[0] === 'A') {
-                        return '<td><span class="hidden">2</span>' + data + '</td>';
-                    } else if (data[0] === 'P') {
-                        return '<td><span class="hidden">1</span>' + data + '</td>';
-                    } else {
-                        return '<td><span class="hidden">0</span>'+data+'<span data-toggle="tooltip" title="'+row[14]+'" class="glyphicon glyphicon-question-sign" aria-hidden="true"></span></td>';
-                    }
-                }},
-                { title: "# of Chips/Wells", data: '12' },
-                { title: "# of Time Points", data: '13' },
-                { title: "Cells", data: '1', 'className': 'none'},
-                { title: "Settings", data: '7', 'className': 'none'},
-                { title: "NA Explanation", data: '14', visible: false, 'name': 'naText' }
-            ],
-            columnDefs: [
-                { responsivePriority: 1, targets: 11 },
-                { responsivePriority: 2, targets: [0,1,5,8] },
-                { responsivePriority: 3, targets: 4 },
-                { responsivePriority: 4, targets: 10 },
-                { responsivePriority: 5, targets: 9 },
-                { responsivePriority: 6, targets: 2 },
-                { responsivePriority: 7, targets: 6 },
-                { responsivePriority: 8, targets: 7 },
-                { responsivePriority: 9, targets: 15 },
-                { responsivePriority: 10, targets: 12 },
-                { responsivePriority: 11, targets: 14 },
-                { responsivePriority: 12, targets: 13 },
-                { responsivePriority: 13, targets: 3 },
-                { responsivePriority: 14, targets: 16 },
-                { "aTargets": [11], "fnCreatedCell": function (nTd, sData, oData, iRow, iCol) {
-                    if (sData[0] === "E") {
-                        $(nTd).css('background-color', '#74ff5b').css('font-weight', 'bold');
-                    } else if (sData[0] === "A") {
-                        $(nTd).css('background-color', '#fcfa8d').css('font-weight', 'bold');
-                    } else if (sData[0] === "P") {
-                        $(nTd).css('background-color', '#ff7863').css('font-weight', 'bold');
-                    } else {
-                        $(nTd).css('background-color', 'Grey').css('font-weight', 'bold');
-                    }
-                }}
-            ],
-            "order": [[11, 'desc'], [ 1, "asc" ]],
-            // Column visibility toggle would displace, hence new means of coloring.
-            // "createdRow": function( row, data, dataIndex ) {
-            //     if ( data[10][0] === "E" ) {
-            //         $( row ).find('td:eq(11)').css( "background-color", "#74ff5b" ).css( "font-weight", "bold"  );
-            //     }
-            //     else if ( data[10][0] === "A" ) {
-            //         $( row ).find('td:eq(11)').css( "background-color", "#fcfa8d" ).css( "font-weight", "bold"  );
-            //     }
-            //     else if ( data[10][0] === "P" ) {
-            //         $( row ).find('td:eq(11)').css( "background-color", "#ff7863" ).css( "font-weight", "bold" );
-            //     }
-            //     else {
-            //         $( row ).find('td:eq(11)').css( "background-color", "Grey" ).css( "font-weight", "bold" );
-            //     }
-            // },
-            "responsive": true,
-            dom: 'B<"row">lfrtip',
-            fixedHeader: {headerOffset: 50},
-            deferRender: true,
-            initComplete: function () {
-                // Attempt to draw the tables
-                drawTables();
-            },
-            drawCallback: function() {
-                // Make sure tooltips displayed properly
-                $('[data-toggle="tooltip"]').tooltip({container:"body", html: true});
-            }
-        });
-
-        // On reorder
-        gasTable.on( 'order.dt', function () {
-            var setOrder = [];
-            gasTable.column(1, { search:'applied' } ).data().each(function(value, index) {
-                setOrder.push(value);
-            });
-            orderInfo(setOrder);
-        });
     }
 });

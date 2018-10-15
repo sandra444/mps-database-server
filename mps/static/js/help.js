@@ -8,7 +8,7 @@ $(document).ready(function () {
             $('html, body').animate({
                 scrollTop: $($(this).attr('href')).offset().top -offset
             }, 500);
-            $($(this).attr('href')).find('button').next().first().css("display", "block");
+            $($(this).attr('href')).find('button')[0].click();
         }
     });
 
@@ -17,7 +17,7 @@ $(document).ready(function () {
         $('html, body').animate({
             scrollTop: $(initial_hash).offset().top - offset
         }, 500);
-        $(initial_hash).next().css("display", "block");
+        $(initial_hash).find('button')[0].click();
     }
 
     var _alphabetSearch = '';

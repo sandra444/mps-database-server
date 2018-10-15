@@ -17,7 +17,7 @@
                         <b>Center</b>
                     </td>
                     <td>
-                        <a href="/microdevices/center/{{ object.center.id }}" target='_blank'>{{ object.center.name }} ({{ object.center.center_id }})</a>
+                        {{ object.center.name }} ({{ object.center.center_id }})
                     </td>
                 </tr>
                 <tr>
@@ -25,7 +25,7 @@
                         <b>Institution</b>
                     </td>
                     <td>
-                        {{ object.center.institution|default:'Unspecified' }}
+                        {{ object.institution|default:'Unspecified' }}
                     </td>
                 </tr>
                 <tr>

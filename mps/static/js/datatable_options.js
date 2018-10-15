@@ -55,24 +55,8 @@ $(document).ready(function () {
     $.extend(true, $.fn.dataTable.defaults, {
         buttons: [
             'copy', 'csv', 'print', 'colvis'
-        ],
+        ]
         // swfPath: '/static/swf/flashExport.swf'
-        // Default draw callback
-        drawCallback: function () {
-            if ($(this).table) {
-                // Show when done
-                $(this).table().container().show('slow');
-            }
-            // For defer render
-            else {
-                $(this).show('slow');
-            }
-            // Swap positions of filter and length selection; clarify filter
-            $('.dataTables_filter').css('float', 'left').prop('title', 'Separate terms with a space to search multiple fields');
-            $('.dataTables_length').css('float', 'right');
-            // Reposition download/print/copy
-            $('.DTTT_container').css('float', 'none');
-        }
     });
 
     // Indicates that floating headers need to be refreshed when a toggle-hide-button is clicked
@@ -86,11 +70,7 @@ $(document).ready(function () {
 
     // Fix some issues with column width on resize.
     window.onresize = function() {
-        setTimeout(function() {
-            $($.fn.dataTable.tables(true)).DataTable().columns.adjust();
-            // $($.fn.dataTable.tables(true)).DataTable().responsive.recalc();
-            // $($.fn.dataTable.tables(true)).DataTable().fixedHeader.adjust();
-        }, 250);
+        $($.fn.dataTable.tables(true)).DataTable().columns.adjust();
     }
 });
 // $.fn.dataTable.TableTools.defaults.aButtons = [
