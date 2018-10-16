@@ -527,7 +527,7 @@ $(document).ready(function () {
                 var errors_display = null;
                 var errors_list = null;
 
-                if (errors.length > 0) {
+                if (errors.length > 0 && !$(this).find('input[name$="DELETE"]').prop('checked')) {
                     errors_display = $('#empty_error_html').children().clone();
                     errors_list = $('<ul>');
                     $.each(errors, function(index, error_message) {
@@ -1110,6 +1110,10 @@ $(document).ready(function () {
             // Mark for deletion if empty
             if (empty) {
                 $(this).find('input[name$="DELETE"]').prop('checked', true);
+            }
+            // Otherwise make sure has device
+            if (device_selector.val()) {
+                $(this).find('input[name$="device"]').val(device_selector.val());
             }
         });
     });
