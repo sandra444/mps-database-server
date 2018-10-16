@@ -25,6 +25,8 @@ class MicrodeviceForm(SignOffMixin, BootstrapForm):
         exclude = tracking + ('center', 'organ')
 
         widgets = {
+            'number_of_columns': forms.NumberInput(attrs={'style': 'width: 100px;'}),
+            'number_of_rows': forms.NumberInput(attrs={'style': 'width: 100px;'}),
             'name': forms.Textarea(attrs={'rows': 1}),
             'references': forms.Textarea(attrs={'rows': 3}),
             'description': forms.Textarea(attrs={'rows': 3}),

@@ -518,6 +518,8 @@ class AssayMatrixForm(SignOffMixin, BootstrapForm):
         model = AssayMatrix
         exclude = ('study',) + tracking
         widgets = {
+            'number_of_columns': forms.NumberInput(attrs={'style': 'width: 100px;'}),
+            'number_of_rows': forms.NumberInput(attrs={'style': 'width: 100px;'}),
             'name': forms.Textarea(attrs={'rows': 1}),
             'notes': forms.Textarea(attrs={'rows': 3}),
             'variance_from_organ_model_protocol': forms.Textarea(attrs={'rows': 3}),
