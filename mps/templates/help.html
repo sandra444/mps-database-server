@@ -108,47 +108,35 @@
                         </ul>
                     </li>
 
-                    <li class="dropdown">
-                        <a class="dropdown-toggle" data-toggle="dropdown" href="#">I Want To...<span class="caret"></span></a>
+                   <li class="dropdown">
+                        <a class="dropdown-toggle" data-toggle="dropdown" href="#">Features<span class="caret"></span></a>
                         <ul class="dropdown-menu">
+                            <li class="dropdown-header"><b>Study Data Only</b></li>
+                            <li><a href="#intrastudy">Intra-Study Analysis</a></li>
+                            <li><a href="#interstudy">Inter-Study Analysis</a></li>
                             <li class="divider"></li>
-                            <li class="dropdown-header"><b>Search the Database</b></li>
-                            <li><a href="#search">Global Search</a></li>
-                            <li><a href="#searchbars">Search and Sort Lists</a></li>
+                            <li class="dropdown-header"><b>Combining Study and Reference Data</b></li>
+                            <li><a href="#diseasemodels">Disease Portal</a></li>
+                            <li><a href="#compoundreport">Compound Report</a></li>
                             <li class="divider"></li>
-                            <li class="dropdown-header"><b>Design an MPS Model</b></li>
-                            <li><a href="#mpsmodels">Review MPS Models</a></li>
-                            <li><a href="#cellsamples">Review Cells Samples</a></li>
-                            <li><a href="#studies">Review Media</a></li>
-                            <li><a href="#targets">Review Assay Targets</a></li>
-                            <li class="divider"></li>
-                            <li class="dropdown-header"><b>Find Compounds to Test</b></li>
-                            <li><a href="#chemicaldata">Review Chemical Data</a></li>
-                            <li><a href="#adverseevents">Review Adverse Events</a></li>
+                            <li class="dropdown-header"><b>Reference Data Only</b></li>
+                            <li><a href="#chemicaldata">Chemical Data</a></li>
+                            <li><a href="#bioactivities">Bioactivities</a></li>
+                            <li><a href="#drugtrials">Drug Trials</a></li>
+                            <li><a href="#adverseevents">Adverse Events</a></li>
                             <li><a href="#compareadverseevents">Compare Adverse Events</a></li>
-                            <li><a href="#bioactivities">Review Compound Bioactivities</a></li>
                             <li><a href="#heatmap">Heatmap (Bioactivities)</a></li>
                             <li><a href="#cluster">Cluster Chemicals</a></li>
-                            <li class="divider"></li>
-                            <li class="dropdown-header"><b>Compare Study Data to Clinic</b></li>
-                            <li><a href="#drugtrials">Review Drug Trials</a></li>
-                            <li><a href="#diseasemodels">Review Diseases</a></li>
-                            <li><a href="#compoundreport">Review Study Data in Compound Report</a></li>
-                            <li class="divider"></li>
-                            <li class="dropdown-header"><b>Review Study Data</b></li>
-                            <li><a href="#intrastudy">Single Study (Design &amp; Data)</a></li>
-                            <li><a href="#interstudy">Multiple Studies (Data)</a></li>
                         </ul>
                     </li>
 
                     <li class="dropdown">
-                        <a class="dropdown-toggle" data-toggle="dropdown" href="#">Data Providers<span class="caret"></span></a>
+                        <a class="dropdown-toggle" data-toggle="dropdown" href="#">Providing Data<span class="caret"></span></a>
                         <ul class="dropdown-menu">
                             <li class="divider"></li>
-                            <li class="dropdown-header"><b>Review Pick Lists</b></li>
-                            <li><a href="#methods">Assay Methods</a></li>
-                            <li><a href="#targets">Assay Targets</a></li>
-                            <li><a href="#cellsamples">Cells Samples</a></li>
+                            <li class="dropdown-header"><b>Review Component Lists</b></li>
+                            <li><a href="#assaymts">Assays (Methods and Targets) </a></li>
+                            <li><a href="#cellsamples">Cell Samples</a></li>
                             <li><a href="#chemicallist">Compounds</a></li>
                             <li><a href="#devices">Devices</a></li>
                             <li><a href="#diseaselist">Diseases</a></li>
@@ -174,7 +162,7 @@
                             <li class="dropdown-header"><b>Add/Edit Controlled Vocabulary</b></li>
                             <li><a href="#methods_admin">Assay Methods</a></li>
                             <li><a href="#targets_admin">Assay Targets</a></li>
-                            <li><a href="#cellsamples_admin">Cells Samples</a></li>
+                            <li><a href="#cellsamples_admin">Cell Samples</a></li>
                             <li><a href="#chemicaldata_admin">Compounds</a></li>
                             <li><a href="#devices_admin">Devices</a></li>
                             <li><a href="#diseaselist_admin">Diseases</a></li>
@@ -191,6 +179,36 @@
                     {% endif %}
 
                     <li><a href="#glossary">Glossary</a></li>
+
+
+                    <li class="dropdown">
+                        <a class="dropdown-toggle" data-toggle="dropdown" href="#">I Want To...<span class="caret"></span></a>
+                        <ul class="dropdown-menu">
+                            <li class="divider"></li>
+                            <li class="dropdown-header"><b>Search the Database</b></li>
+                            <li><a href="#search">Global Search</a></li>
+                            <li><a href="#searchbars">Search and Sort Lists</a></li>
+                            <li class="divider"></li>
+                            <li class="dropdown-header"><b>Design an MPS Model</b></li>
+                            <li><a href="#mpsmodels">Review MPS Models</a></li>
+                            <li><a href="#cellsamples">Review Cell Samples</a></li>
+                            <li><a href="#assaymts">Review Assays</a></li>
+                            <li class="divider"></li>
+                            <li class="dropdown-header"><b>Find Compounds to Test</b></li>
+                            <li><a href="#chemicaldata">Review Chemical Data</a></li>
+                            <li><a href="#adverseevents">Review Adverse Events</a></li>
+                            <li><a href="#compareadverseevents">Compare Adverse Events</a></li>
+                            <li class="divider"></li>
+                            <li class="dropdown-header"><b>Compare Study Data to Clinic</b></li>
+                            <li><a href="#drugtrials">Review Drug Trials</a></li>
+                            <li><a href="#diseasemodels">Review Diseases</a></li>
+                            <li><a href="#compoundreport">Review Study Data in Compound Report</a></li>
+                            <li class="divider"></li>
+                            <li class="dropdown-header"><b>Review Study Data</b></li>
+                            <li><a href="#intrastudy">Single Study (Design &amp; Data)</a></li>
+                            <li><a href="#interstudy">Multiple Studies (Data)</a></li>
+                        </ul>
+                    </li>
 
                 </ul>
             </div>
@@ -258,7 +276,7 @@
         </div>
 
         <div id="overview1">
-            <button class="collapsible1">Study Components List (Controlled Vocabulary)</button>
+            <button class="collapsible1">Study Components Lists </button>
             <div class="content1">
                 <div id="overview1viewer" class="viewersubtainer">
                     <ul class="list-group">
@@ -273,11 +291,11 @@
                             <tbody>
                                 <tr>
                                 <td> Assay Method/Kits </td>
-                                    <td> A list of assay <b>Method/Kits</b> used to measure assay <b>Targets/Analytes</b>. For more information, <a href="#methods">click here</a>.</td>
+                                    <td> A list of assay <b>Method/Kits</b> used to measure assay <b>Targets/Analytes</b>. For more information, <a href="#assaymts">click here</a>.</td>
                                 </tr>
                                 <tr>
                                 <td> Assay Targets/Analytes </td>
-                                    <td> A list of assay <b>Targets/Analytes</b> used to assess the response of a <b>Model</b>. Assay <b>Targets/Analytes</b> are associated to the <b>Method/Kit</b> used to measure response. For more information, <a href="#targets">click here</a>.</td>
+                                    <td> A list of assay <b>Targets/Analytes</b> used to assess the response of a <b>Model</b>. Assay <b>Targets/Analytes</b> are associated to the <b>Method/Kit</b> used to measure response. For more information, <a href="#assaymts">click here</a>.</td>
                                 </tr>
                                 <tr>
                                 <td> Cell Samples </td>
@@ -340,15 +358,15 @@
                             <tbody>
                                 <tr>
                                 <td> Study </td>
-                                    <td> A <b>Study</b> is a container for all data and metadata assocated to an experiment assessing <b>Model</b> response. A list of <b>Studies</b> in the <b>MPS Database</b>, with summary information about the <b>Models</b> used in the <b>Study</b> and associated assay results, is provided on the <b>Studies</b> list page of the MPS-GUI. Selecting a <b>Study</b> from the list allows the user to focus on data from a single <b>Study</b>. For more information, <a href="#studies">click here</a>.</td>
+                                    <td> A <b>Study</b> is a container for all data and metadata associated to an experiment assessing <b>Model</b> response. A list of <b>Studies</b> in the <b>MPS Database</b>, with summary information about the <b>Models</b> used in the <b>Study</b> and associated assay results, is provided on the <b>Studies</b> list page of the MPS-GUI. Selecting a <b>Study</b> from the list allows the user to focus on data from a single <b>Study</b>. For more information, <a href="#intrastudy">click here</a>.</td>
                                 </tr>
                                 <tr>
                                 <td> Matrices </td>
-                                    <td> A <b>Study Matrix</b> is a method of grouping models within a <b>Study</b>. <b>Matrices</b> associated with an individual <b>Study</b> are shown on the <b>Study Matrices and Items</b> list page of the MPS-GUI. For more information, <a href="#matrices">click here</a>.</td>
+                                    <td> A <b>Study Matrix</b> is a method of grouping models within a <b>Study</b>. <b>Matrices</b> associated with an individual <b>Study</b> are shown on the <b>Study Matrices and Items</b> list page of the MPS-GUI. For more information, <a href="#intrastudy">click here</a>.</td>
                                 </tr>
                                 <tr>
                                 <td> Matrix Items </td>
-                                <td> In a <b>Study</b>, a <b>Matrix Item</b> is the generic term for an individual organ model.<b>Matrix Items</b> are assigned to a <b>Matrix</b> within an individual <b>Study</b>. For more information, <a href="#matrixitems">click here</a>.</td>
+                                <td> In a <b>Study</b>, a <b>Matrix Item</b> is the generic term for an individual organ model.<b>Matrix Items</b> are assigned to a <b>Matrix</b> within an individual <b>Study</b>. For more information, <a href="#intrastudy">click here</a>.</td>
                                 </tr>
                                 <tr>
                                 <td> Assay Data Points </td>
@@ -356,7 +374,7 @@
                                 </tr>
                                 <tr>
                                 <td> Assay Images & Videos </td>
-                                    <td> Images and videos can be attached to a <b>Matrix Item</b> and displayed within a <b>Study</b>. For more information, <a href="#studies">click here</a>.</td>
+                                    <td> Images and videos can be attached to a <b>Matrix Item</b> and displayed within a <b>Study</b>. For more information, <a href="#intrastudy">click here</a>.</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -394,7 +412,7 @@
                                 <tr>
                                 <td> Disease Portal </td>
                                 <td> Provides a portal connecting information from clinical trials to MPS <b>Study Data</b>. Links are made based on <b>Disease</b>. Users can view summary information, then drill down to see additional disease-related details. For more information, <a href="#diseasemodels">click here</a>.</td>
-                                <td> 1, 13, 14 </td>
+                                <td> 1, 13, 14, 15 </td>
                                 </tr>
                                 <tr>
                                 <td> Compound Report </td>
@@ -522,12 +540,17 @@
                                     <tr>
                                     <td> 13 </td>
                                     <td> clinicaltrials.gov </td>
-                                    <td> Some data pulled dynamically and not stored. </td>
+                                    <td> Some data pulled dynamically and not stored </td>
                                     </tr>
                                     <tr>
                                     <td> 14 </td>
                                     <td> ctti-clinicaltrials.org </td>
                                     <td> Some data pulled dynamically and not stored</td>
+                                    </tr>
+                                    <tr>
+                                    <td> 15 </td>
+                                    <td> Expert elicitation from open source and publications</td>
+                                    <td> Manual Curation </td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -573,6 +596,7 @@
                                     </tr>
                                 </tbody>
                             </table>
+                            Note: Additional permissions can be granted in a multitude of configurations to match individual user needs. For example, any registered user could be granted permission to add/edit <b>Cell Samples</b>, <b>Compounds</b>, <b>MPS Models</b>, etc.
                         </li>
                     </ul>
                 </div>
@@ -644,14 +668,16 @@
 
         <h1 class="sub1-bars"> Components Used in MPS Studies (Pick List Options) </h1>
 
-        <div id="methods">
-            <button class="collapsible1">Assay Methods/Kits</button>
+        {# The tables in the next set of divs, the html, is generated using python script and SCD3 workbook#}
+
+        <div id="assaymts">
+            <button class="collapsible1">Assays Used in Studies</button>
             <div class="content1">
-                <div id="methodsviewer" class="viewersubtainer">
+                <div id="assaymtsviewer" class="viewersubtainer">
                     <ul class="list-group">
                         <li class="list-group-item">
                             <ul class="list-unstyled">
-                                <li>Select <b>View Methods/Kits</b> from the <b>Studies</b> icon or tab
+                                <li>To review list of <b>Methods/Kits</b>,select <b>View Methods/Kits</b> from the <b>Studies</b> icon or tab
                                     <ul class="filled-circle">
                                         <li>Use the <b>Search</b> bar or scroll through the list to find the assay <b>Method/Kit</b> of interest</li>
                                         <li>Click on the <b>View</b> button to see a list of <b>Targets/Analytes</b> paired with the <b>Method/Kit</b> and/or the studies with assay data for the <b>Method/Kit</b> </li>
@@ -659,27 +685,7 @@
                                         <li>Click on a <b>Study</b> to view assay data measured using this <b>Method/Kit</b> (optional)</li>
                                     </ul>
                                 </li>
-                                <li><br>Notes
-                                    <ul class="filled-circle">
-                                        <li>The <b>Studies</b> shown in the list are tied to user permission settings. For more information on permissions, <a href="#overview5">click here</a> </li>
-                                        <li>To have a new <b>Method/Kit</b> added, contact an <b>MPS Database</b> Administrator </li>
-                                    </ul>
-                                </li>
-                            </ul>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-
-        <div id="targets">
-            <button class="collapsible1">Assay Targets/Analytes</button>
-            <div class="content1">
-                <div id="targetsviewer" class="viewersubtainer">
-                    <ul class="list-group">
-                        <li class="list-group-item">
-                            <ul class="list-unstyled">
-                                <li>Select <b>View Targets/Analytes</b> from the <b>Studies</b> icon or tab
+                                <li><br>To review list of <b>Targets/Analytes</b>, select <b>View Targets/Analytes</b> from the <b>Studies</b> icon or tab
                                     <ul class="filled-circle">
                                         <li>Use the <b>Search</b> bar or scroll through the list to find the <b>Target/Analyte</b> of interest</li>
                                         <li>Click on the <b>View</b> button to see additional details </li>
@@ -690,13 +696,116 @@
                                 <li><br>Notes
                                     <ul class="filled-circle">
                                         <li>The <b>Studies</b> shown in the list are tied to user permission settings. For more information on permissions, <a href="#overview5">click here</a> </li>
-                                        <li>To have a new <b>Target/Analyte</b> added, contact an <b>MPS Database</b> Administrator </li>
                                     </ul>
                                 </li>
                             </ul>
                         </li>
                     </ul>
                 </div>
+
+                <div id="assaymts_editor">
+                    <button class="collapsible3">Details and Examples of Metadata Needed to Add New Assays to the MPS Database </button>
+                    <div class="content3">
+                        <div id="assaymtseditor" class="editorsubtainer">
+                            <ul class="list-group">
+                                <li class="list-group-item background3">
+                                    To have a new assay added to the MPS Database, provide the information shown in the table.
+                                    <table class="table table-bordered table-condensed small" style="background-color: #F0FFFF;">
+                                    <thead>
+                                        <tr class="active">
+                                            <th> Description </th>
+                                            <th> Required </th>
+                                            <th> Assay 1 </th>
+                                            <th> Assay 2 </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td> Assay Name </td>
+                                            <td> yes if using plate map generator </td>
+                                            <td> Membrane Permeability </td>
+                                            <td> Cytokines quantification </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Method/Kit Name </td>
+                                            <td> yes </td>
+                                            <td> Fluorescence (490/525) (Sigma-Aldrich: FD10S) </td>
+                                            <td> V-PLEX Cytokine Panel 1 Human Kit (MSD: K15050D) </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Target/Analyte Name </td>
+                                            <td> yes </td>
+                                            <td> Dextran-FITC (10kDa) </td>
+                                            <td> GM-CSF, IL-12/IL-23p40, IL-15, IL-16, IL-17A, IL-1α, IL-5, IL-7, TNFB, VEGF </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Unit of Measure </td>
+                                            <td> yes </td>
+                                            <td> mg/mL </td>
+                                            <td> pg/mL </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Unit of Measure </td>
+                                            <td> yes </td>
+                                            <td> ng/day/10^6 cells </td>
+                                            <td> ng/day/10^6 cells </td>
+                                        </tr>
+                                        <tr>
+                                            <td> (add more as needed) </td>
+                                            <td> yes, if more needed </td>
+                                            <td> as needed </td>
+                                            <td> as needed </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Reader (Instrument Model) </td>
+                                            <td> If applicable and known, yes </td>
+                                            <td> Tecan M1000 </td>
+                                            <td> MESO QUICKPLEX SQ 120 instrument </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Reader (Instrument Manufacturer) </td>
+                                            <td> If applicable and known, yes </td>
+                                            <td> Tecan </td>
+                                            <td> MSD  </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Kit Manufacturer (Assay Supplier) </td>
+                                            <td> If applicable, yes </td>
+                                            <td> Sigma-Aldrich </td>
+                                            <td> MSD (V-Plex) / R&D Systems (Quantikine) </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Kit Catalog # </td>
+                                            <td> If applicable, yes </td>
+                                            <td> FD10S </td>
+                                            <td> nan </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Measurement Type </td>
+                                            <td> yes </td>
+                                            <td> fluorescent </td>
+                                            <td> Immunoassay, electrochemiluminescence </td>
+                                        </tr>
+                                        <tr>
+                                            <td> SOP (provide file and/or hyperlink) </td>
+                                            <td> yes </td>
+                                            <td> https://www.sigmaaldrich.com/catalog/product/sigma/fd10s?lang=en&region=US </td>
+                                            <td> https://www.mesoscale.com/en/products/v-plex-cytokine-panel-1-human-kit-k15050d/ </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Assay Notes </td>
+                                            <td> no </td>
+                                            <td>   </td>
+                                            <td>   </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
 
@@ -717,13 +826,222 @@
                                     <ul class="filled-circle">
                                         <li><b>Cell Sample</b>, density, and addition location are added to <b>Matrix Items</b> by Data Providers as part of <b>Study</b> setup</li>
                                         <li>In the <b>Cell Samples</b> list, click on the active links to learn more about the <b>Cell Type</b> or the <b>Cell Origin</b> </li>
-                                        <li>To have a new <b>Cell Sample</b> added, contact an <b>MPS Database</b> Administrator </li>
                                     </ul>
                                 </li>
                             </ul>
                         </li>
                     </ul>
                 </div>
+
+                <div id="cellsamples_editor">
+                    <button class="collapsible3">Details and Example of Metadata Needed to Add New Cell Samples to the MPS Database </button>
+                    <div class="content3">
+                        <div id="cellsampleseditor" class="editorsubtainer">
+                            <ul class="list-group">
+                                <li class="list-group-item background3">
+                                To have a new <b>Cell Sample</b> added to the MPS Database, provide the information shown in the table.
+                                    <table class="table table-bordered table-condensed small" style="background-color: #F0FFFF;">
+                                    <thead>
+                                        <tr class="active">
+                                        <th> Description </th>
+                                        <th> Required </th>
+                                        <th> Cell 1 </th>
+                                        <th> Cell 2 </th>
+                                        <th> Cell 3 </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td> Cell Sample Reference </td>
+                                            <td> yes </td>
+                                            <td> HBVP pericyte (Human Vasculature) (ScienCell Research Laboratories) </td>
+                                            <td> SVG p12 astrocyte (Human Brain) (ATCC) </td>
+                                            <td> primary-cryopreserved endothelial (Human Vasculature) (CellSystems-376.01.04.01.03) </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Organism (species) </td>
+                                            <td> yes </td>
+                                            <td> Human </td>
+                                            <td> Human </td>
+                                            <td> Human </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Organ Modeled </td>
+                                            <td> yes </td>
+                                            <td> Brain </td>
+                                            <td> Brain </td>
+                                            <td> Brain </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Cell Type </td>
+                                            <td> yes </td>
+                                            <td> Vascular Pericyte </td>
+                                            <td> Astroglia </td>
+                                            <td> Microvascular Endothelial Cells </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Cell Subtype
+{Cell Origin (e.g., primary-fresh isolation or primary-cryopreserved) or Cell Line (e.g., RPTEC)} </td>
+                                            <td> yes </td>
+                                            <td> primary </td>
+                                            <td> SVG p12 </td>
+                                            <td> primary </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Receipt Date </td>
+                                            <td> yes </td>
+                                            <td> 2017-08-01 00:00:00 </td>
+                                            <td> 2017-08-01 00:00:00 </td>
+                                            <td> 2017-08-01 00:00:00 </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Cell Supplier/Source </td>
+                                            <td> yes </td>
+                                            <td> ScienCell Research Laboratories </td>
+                                            <td> ATCC </td>
+                                            <td> CellSystems </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Cell Product ID/Catalog # </td>
+                                            <td> no </td>
+                                            <td> Cat. No. 1200 </td>
+                                            <td> CRL-8621 </td>
+                                            <td> Cat. No. ACBRI 376 </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Cell Barcode/Lot/donor # </td>
+                                            <td> no </td>
+                                            <td> 19244 </td>
+                                            <td> 62959317 </td>
+                                            <td> 376.01.04.01.03 </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Supplier Notes </td>
+                                            <td> no </td>
+                                            <td>   </td>
+                                            <td>   </td>
+                                            <td>   </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Isolation Date </td>
+                                            <td> no </td>
+                                            <td> 2016-06-05 00:00:00 </td>
+                                            <td>   </td>
+                                            <td>   </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Isolation Method </td>
+                                            <td> no </td>
+                                            <td>   </td>
+                                            <td>   </td>
+                                            <td>   </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Isolation Notes </td>
+                                            <td> no </td>
+                                            <td>   </td>
+                                            <td>   </td>
+                                            <td>   </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Cell Viable Count </td>
+                                            <td> no </td>
+                                            <td>   </td>
+                                            <td>   </td>
+                                            <td>   </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Cell Percent Viability </td>
+                                            <td> no </td>
+                                            <td>   </td>
+                                            <td>   </td>
+                                            <td>   </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Patient Age </td>
+                                            <td> no </td>
+                                            <td>   </td>
+                                            <td>   </td>
+                                            <td>   </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Patient Gender </td>
+                                            <td> no </td>
+                                            <td>   </td>
+                                            <td>   </td>
+                                            <td>   </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Patient Condition </td>
+                                            <td> no </td>
+                                            <td>   </td>
+                                            <td>   </td>
+                                            <td>   </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Cell Notes </td>
+                                            <td> no </td>
+                                            <td> Isolated from human brain. HBVP are cryopreserved at passage one after purification and delivered frozen. Each vial contains >5 x 10^5 cells in 1 ml volume. </td>
+                                            <td> The SVG p12 cell line was established by transfecting cultured human fetal glial cells from brain material dissected from 8 to 12-week old embryos with DNA from an ori - mutant of SV40. </td>
+                                            <td> Primary Human Brain Microvascular Endothelial Cells were initiated by elutriation of dispase dissociated normal human brain cortex tissue. </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Cell Image </td>
+                                            <td> no </td>
+                                            <td> provide image </td>
+                                            <td> provide image </td>
+                                            <td> provide image </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Biosensor Name </td>
+                                            <td> yes, if used </td>
+                                            <td>   </td>
+                                            <td>   </td>
+                                            <td>   </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Biosensor supplier </td>
+                                            <td> yes, if used </td>
+                                            <td>   </td>
+                                            <td>   </td>
+                                            <td>   </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Biosensor product ID (supplier's ID) </td>
+                                            <td> yes, if used </td>
+                                            <td>   </td>
+                                            <td>   </td>
+                                            <td>   </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Biosensor Lot/Batch </td>
+                                            <td> no </td>
+                                            <td>   </td>
+                                            <td>   </td>
+                                            <td>   </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Biosensor Description </td>
+                                            <td> no </td>
+                                            <td>   </td>
+                                            <td>   </td>
+                                            <td>   </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Biosensor Notes </td>
+                                            <td> no </td>
+                                            <td>   </td>
+                                            <td>   </td>
+                                            <td>   </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
 
@@ -743,7 +1061,7 @@
                                 </li>
                                 <li><br>Notes
                                     <ul class="filled-circle">
-                                        <li>If a Compound is missing from the list, contact an <b>MPS Database</b> Administrator </li>
+                                        <li>If a Compound is missing from the list, provide the compound name and the ChEMBL ID to an <b>MPS Database</b> Administrator </li>
                                     </ul>
                                 </li>
                             </ul>
@@ -768,13 +1086,158 @@
                                 </li>
                                 <li><br>Notes
                                     <ul class="filled-circle">
-                                        <li>To have a new <b>Device</b> added, contact an <b>MPS Database</b> Administrator </li>
+                                        <li>A <b>Device</b> becomes part of an <b>MPS Model</b> </li>
                                     </ul>
                                 </li>
                             </ul>
                         </li>
                     </ul>
                 </div>
+
+                <div id="devices_editor">
+                    <button class="collapsible3">Details and Example of Metadata Needed to Add New Devices to the MPS Database </button>
+                    <div class="content3">
+                        <div id="deviceseditor" class="editorsubtainer">
+                            <ul class="list-group">
+                                <li class="list-group-item background3">
+                                To have a new <b>Device</b> added to the MPS Database, provide the information shown in the table.
+                                   <table class="table table-bordered table-condensed small" style="background-color: #F0FFFF;">
+                                    <thead>
+                                        <tr class="active">
+                                        <th> Description </th>
+                                        <th> Required </th>
+                                        <th> Device 1 </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td> Device Name </td>
+                                            <td> yes </td>
+                                            <td> Neurovascular Unit </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Device type (plate, microchip) </td>
+                                            <td> yes </td>
+                                            <td> microchip </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Device manufacturer </td>
+                                            <td> yes </td>
+                                            <td> Vanderbilt </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Device catalogue number </td>
+                                            <td> no </td>
+                                            <td> 353VIIBRE Neurovascular Unit and Bubble Trap 072 </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Device barcode </td>
+                                            <td> no </td>
+                                            <td> none </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Device Chamber 1 (Location) </td>
+                                            <td> yes </td>
+                                            <td> Vascular </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Device Chamber 1 Volume (µL) </td>
+                                            <td> yes </td>
+                                            <td> 2.91 </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Device Chamber 2 (Location) </td>
+                                            <td> yes, if 2 chambers </td>
+                                            <td> Brain </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Device Chamber 2 Volume (µL) </td>
+                                            <td> yes, if 2 chambers </td>
+                                            <td> 17.5 </td>
+                                        </tr>
+                                        <tr>
+                                            <td> (add more chambers as needed) </td>
+                                            <td> yes, if more chambers </td>
+                                            <td> add when needed </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Total Volume Device (µL) </td>
+                                            <td> no </td>
+                                            <td> 20.41 </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Device width (millimeters) </td>
+                                            <td> no </td>
+                                            <td> 50 </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Device length (millimeters) </td>
+                                            <td> no </td>
+                                            <td> 75 </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Device thickness (millimeters) </td>
+                                            <td> no </td>
+                                            <td> 4.5-5.5 </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Substrate material </td>
+                                            <td> no </td>
+                                            <td> PDMS </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Substrate thickness  (millimeters) </td>
+                                            <td> no </td>
+                                            <td> 3.5-4.5 </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Device Description </td>
+                                            <td> no </td>
+                                            <td> Dual chamber system separated by porous 0.2µm pore polycarbonate membrane. Flow through each chamber. </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Layout # Rows </td>
+                                            <td> no </td>
+                                            <td>   </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Layout # Columns </td>
+                                            <td> no </td>
+                                            <td>   </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Row Labels (e.g., A B C D...) </td>
+                                            <td> no </td>
+                                            <td>   </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Column Labels (e.g., 1 2 3 4…) </td>
+                                            <td> no </td>
+                                            <td>   </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Device Notes </td>
+                                            <td> no </td>
+                                            <td> QR Symbol -> NVU Chip, SOP: Whatman Nuclepore 0.2um PC Tygon 1/16" CMB002-CMB004 2016_20_10-07 Clayton Britt </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Device Image </td>
+                                            <td> no </td>
+                                            <td> provide image </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Device Cross Section  </td>
+                                            <td> no </td>
+                                            <td> provide image </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
 
@@ -827,7 +1290,7 @@
         </div>
 
         <div id="mpsmodels">
-            <button class="collapsible1">Models in the Database</button>
+            <button class="collapsible1">MPS Models in the Database</button>
             <div class="content1">
                 <div id="mpsmodelsviewer" class="viewersubtainer">
                     <ul class="list-group">
@@ -849,6 +1312,121 @@
                         </li>
                     </ul>
                 </div>
+
+                <div id="mpsmodels_editor">
+                    <button class="collapsible3">Details and Example of Metadata Needed to Add New MPS Models to the MPS Database </button>
+                    <div class="content3">
+                        <div id="mpsmodelseditor" class="editorsubtainer">
+                            <ul class="list-group">
+                                <li class="list-group-item background3">
+                                To have a new <b>MPS Model</b> added to the MPS Database, provide the information shown in the table.
+                                    <table class="table table-bordered table-condensed small" style="background-color: #F0FFFF;">
+                                    <thead>
+                                        <tr class="active">
+                                        <th> Description </th>
+                                        <th> Required </th>
+                                        <th> Model 1 </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td> MPS Model Name </td>
+                                            <td> yes </td>
+                                            <td> Blood-Brain Barrier (NVU) </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Center (MPS Model Developer) </td>
+                                            <td> yes </td>
+                                            <td> Vanderbilt Institute for Integrative Biosystems Research and Education </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Base Model Name </td>
+                                            <td> yes (use "one-off" if applicable) </td>
+                                            <td> Blood-Brain Barrier (NVU) </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Organ Modeling </td>
+                                            <td> yes </td>
+                                            <td> Brain </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Device Name </td>
+                                            <td> yes </td>
+                                            <td> Neurovascular Unit </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Model Type {pick one: Static-2D, Static-3D, Fluidic-2D, Fluidic-3D} </td>
+                                            <td> yes </td>
+                                            <td> Fluidic-3D </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Disease {pick one: healthy, NAFLD, Ewing sarcoma} </td>
+                                            <td> if applicable, yes </td>
+                                            <td> healthy </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Disease Trigger {pick one: healthy, induced by compound, added diseased cells} </td>
+                                            <td> if applicable, yes </td>
+                                            <td> healthy </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Project Assignment {list all that apply: MPS, EPA, TCTC} </td>
+                                            <td> yes </td>
+                                            <td> TCTC </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Model Description </td>
+                                            <td> yes </td>
+                                            <td> Two chambered model of the blood-brain barrier. </td>
+                                        </tr>
+                                        <tr>
+                                            <td> References Relating to MPS Model </td>
+                                            <td> no </td>
+                                            <td> Brown JA, et al. Biomicrofluidics. 2015;9(5):054124. Epub 2015/11/18. doi: 10.1063/1.4934713. PubMed PMID: 26576206 </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Location </td>
+                                            <td> yes </td>
+                                            <td> Effluent-Brain </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Location </td>
+                                            <td> yes </td>
+                                            <td> Effluent-Vascular </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Location </td>
+                                            <td> yes </td>
+                                            <td> Influent-Vascular </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Location </td>
+                                            <td> yes </td>
+                                            <td> Brain </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Location </td>
+                                            <td> yes </td>
+                                            <td> Vascular </td>
+                                        </tr>
+                                        <tr>
+                                            <td> (add more as needed) </td>
+                                            <td> yes, if more </td>
+                                            <td> add when needed </td>
+                                        </tr>
+                                        <tr>
+                                            <td> MPS Model Image </td>
+                                            <td> no </td>
+                                            <td> provide image </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
 
@@ -863,8 +1441,8 @@
                                     <ul class="filled-circle">
                                         <li>Click all the <b>Select All</b> buttons </li>
                                         <li>Click the <b>Show Plots</b> button and wait patiently</li>
-                                        <li>Click all the <span class="glyphicon glyphicon-filter" aria-hidden="true"></span> button for the <b>Setting</b><li>
-                                        <li>Click all the <span class="glyphicon glyphicon-filter" aria-hidden="true"></span> button for the <b>Setting Value</b><li>
+                                        <li>Click all the <span class="glyphicon glyphicon-filter" aria-hidden="true"></span> button for the <b>Setting</b></li>
+                                        <li>Click all the <span class="glyphicon glyphicon-filter" aria-hidden="true"></span> button for the <b>Setting Value</b></li>
                                     </ul>
                                 </li>
                                 <li><br>Notes
@@ -943,7 +1521,7 @@
                         <div class="content2">
                             <div id="studiesviewer" class="viewersubtainer">
                                 <ul class="list-group">
-                                    <li class="list-group-item">
+                                    <li class="list-group-item background2">
                                         <ul class="list-unstyled">
                                             <li>Select <b>View All Studies</b> from the <b>Studies</b> icon or tab
                                                 <ul class="filled-circle">
@@ -996,7 +1574,7 @@
                         <div class="content2">
                             <div id="matricesviewer" class="viewersubtainer">
                                 <ul class="list-group">
-                                    <li class="list-group-item">
+                                    <li class="list-group-item background2">
                                         <ul class="list-unstyled">
                                             <li>Select <b>View All Studies</b> from the <b>Studies</b> icon or tab
                                                 <ul class="filled-circle">
@@ -1032,7 +1610,7 @@
                         <div class="content2">
                             <div id="matrixitemsviewer" class="viewersubtainer">
                                 <ul class="list-group">
-                                    <li class="list-group-item">
+                                    <li class="list-group-item background2">
                                         <ul class="list-unstyled">
                                             <li>Select <b>View All Studies</b> from the <b>Studies</b> icon or tab
                                                 <ul class="filled-circle">
@@ -1106,11 +1684,11 @@
         </div>
 
         <div id="groupingfiltering">
-            <button class="collapsible1">Overriding the Built-in Default Grouping/Filtering of Assay Data</button>
-            <div class="content1">
+            <button class="collapsible3">Overriding the Built-in Default Grouping/Filtering of Assay Data</button>
+            <div class="content3">
                 <div id="groupingfilteringviewer" class="viewersubtainer">
                     <ul class="list-group">
-                        <li class="list-group-item">
+                        <li class="list-group-item background3">
                             <ul class="list-unstyled">
                                 <li>To override the built-in default <b>Grouping/Filtering</b>, wherever the <b>Grouping/Filtering</b> section is displayed
                                     <ul class="filled-circle">
@@ -1133,11 +1711,11 @@
         </div>
 
         <div id="plottingoptions">
-            <button class="collapsible1">Exploring Plotting/Graphing Options </button>
-            <div class="content1">
+            <button class="collapsible3">Exploring Plotting/Graphing Options </button>
+            <div class="content3">
                 <div id="plottingoptionsviewer" class="viewersubtainer">
                     <ul class="list-group">
-                        <li class="list-group-item">
+                        <li class="list-group-item background3">
                             <ul class="list-unstyled">
                                 <li>To change the <b>Plotting/Graphing</b>, wherever the <b>Data</b> section is displayed, select from the options provided
                                     <ul class="filled-circle">
@@ -1675,10 +2253,10 @@
                                             </ul>
                                         </li>
                                         <li>Click the <b>Submit</b> button to save changes</li>
-                                        <li>For information on continuing to add MPS models and assay data to the <b>Study</b> (Step 2), <a href="#matriceseditor">click here</a> </li>
+                                        <li>For information on continuing to add MPS models and assay data to the <b>Study</b> (Step 2), <a href="#matrices_editor">click here</a> </li>
                                     </ul>
                                 </li>
-                                <li><br>Tips
+                                <li><br>Notes
                                     <ul class="filled-circle">
                                         <li>Everything in the <b>Study</b> can be edited at any time until the <b>Study</b> Data Group Admin signs off the <b>Study</b> (then it is locked) </li>
                                         <li>Data contained in files attached as <b>Supporting Data</b> are NOT available for visualization, analysis, or used in calculations within the MPS-GUI </li>
@@ -1702,7 +2280,7 @@
                                             <li> Clicking <a role='button' class="btn btn-sm btn-warning"> Notes </a> brings up an input dialog where annotations can be added </li>
                                         </ul>
                                     </li>
-                                    <li><br>Tips
+                                    <li><br>Notes
                                         <ul class="filled-circle">
                                             <li> Flags and notes are fully reversible until a <b>Study</b> is signed off </li>
                                             <li> The annotation process works the same way for a <b>Study</b>, a <b>Matrix</b>, and a <b>Matrix Item</b> </li>
@@ -1717,7 +2295,7 @@
                     </div>
                 </div>
 
-                <button class="collapsible3">See a Sign Off and Validation</button>
+                <button class="collapsible3">See a Note about Sign Off and Validation</button>
                 <div class="content3">
                     <div id="validation" class="editorsubtainer">
                         <ul class="list-group">
@@ -1759,6 +2337,87 @@
                     </div>
                 </div>
 
+                <div id="studyleveldetails_editor">
+                    <button class="collapsible3">Getting Help With Study Level Details (Example Provided) </button>
+                    <div class="content3">
+                        <div id="studyleveldetailseditor" class="editorsubtainer">
+                            <ul class="list-group">
+                                <li class="list-group-item background3">
+                                To have an <b>MPS Database Admin</b> assist you, prepare the information shown in the table.
+                                    <table class="table table-bordered table-condensed small" style="background-color: #F0FFFF;">
+                                    <thead>
+                                        <tr class="active">
+                                        <th> Description </th>
+                                        <th> Required </th>
+                                        <th> Study 1 </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td> MPS Model Name </td>
+                                            <td> yes </td>
+                                            <td> Blood-Brain Barrier (NVU) </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Study Type(s)  (list all that apply: Toxicity, Efficacy, Disease, Chip Characterization) </td>
+                                            <td> yes </td>
+                                            <td> Toxicity, Chip Characterization </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Project(s) (list all that apply: TCTC, DMET, TCD) </td>
+                                            <td> yes </td>
+                                            <td> TCTC </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Study Name </td>
+                                            <td> yes </td>
+                                            <td> NVU_20160223 </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Study Start Date </td>
+                                            <td> yes </td>
+                                            <td> 2016-02-23 00:00:00 </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Study Description </td>
+                                            <td> yes </td>
+                                            <td> Purpose: add the purpose of the study (study hypothesis and/or background).
+Methods: add the methods used in the study.
+Results: add a summary of the study results. </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Is it okay to use data in Calculations (Database Features)? (yes or no) </td>
+                                            <td> yes </td>
+                                            <td> no </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Do you consider this a "Valid" study? (yes or no) </td>
+                                            <td> yes </td>
+                                            <td> yes </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Study SOPs </td>
+                                            <td> no </td>
+                                            <td> provide the study "Protocol File" </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Study Image </td>
+                                            <td> no </td>
+                                            <td> provide an image to "clarify this study" </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Supporting Data </td>
+                                            <td> no </td>
+                                            <td> provide files that will assist users in understanding and interpreting study data </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
 
@@ -1789,25 +2448,766 @@
                                         <li>Select an <i>Action</i> </li>
                                         <li>Enter applicable information in the box below the <i>Action</i> </li>
                                         <li>Click on one of the <b>Apply</b> buttons or click and drag in the <b>Matrix</b> </li>
-                                        <li>For more details on how to setup MPS Models, <a href="#matrixitemseditor">click here</a> </li>
+                                        <li>For more details on how to setup MPS Models, <a href="#matrixitems_editor">click here</a> </li>
                                         <li>Click the <b>Submit</b> button to save changes</li>
                                     </ul>
                                 </li>
-                                <li><br>Tips
+                                <li><br>Notes
                                     <ul class="filled-circle">
                                         <li>For each <b>Matrix Item</b>, the Name/ID, Test Type, Setup Date, and MPS/Organ Model MUST be filled PRIOR to the first <b>Submit</b>  </li>
                                         <li>Name/IDs must be unique in an individual <b>Study</b> (cannot not have repeats in a <b>Matrix</b> or in two <b>Matrices</b> of the same <b>Study</b>)  </li>
                                         <li>Test Type specifies whether the <b>Matrix Item</b> functions as a control  </li>
                                         <li>Submit (and Overwrite) after every change you do not want to have to make again  </li>
                                         <li>Invest a little time in exploring the different Actions and Apply techniques to find what works best for you  </li>
-                                        <li>After the first Submit, <b>Matrix Items</b> can be setup and/or updated in the <b>Matrix</b> or individually (to learn more about setup up<b>Matrix Items</b>, <a href="#matrixitemseditor">click here</a>   </li>
-                                        <li>For information on continuing to add MPS models and assay data to the <b>Study</b> (Step 3), <a href="#matrixitemseditor">click here</a> </li>
+                                        <li>After the first Submit, <b>Matrix Items</b> can be setup and/or updated in the <b>Matrix</b> or individually (to learn more about setup <b>Matrix Items</b>, <a href="#matrixitems_editor">click here</a>   </li>
+                                        <li>For information on continuing to add MPS models and assay data to the <b>Study</b> (Step 3), <a href="#matrixitems_editor">click here</a> </li>
                                     </ul>
                                 </li>
                             </ul>
                         </li>
                     </ul>
                 </div>
+
+
+                <div id="matricessetupdetails_editor">
+                    <button class="collapsible3">Getting Help With Matrix and Matrix Item Setup (Example Provided) </button>
+                    <div class="content3">
+                        <div id="studyleveldetailseditor" class="editorsubtainer">
+                            <ul class="list-group">
+                                <li class="list-group-item background3">
+                                    To have an <b>MPS Database Admin</b> assist you with setting up <b>Matrix Items</b>, prepare the information shown in the tables.
+                                    <br><br><b><em>Media Setup Data and Metadata</em></b>
+
+                                    <table class="table table-bordered table-condensed small" style="background-color: #F0FFFF;">
+                                    <thead>
+                                        <tr class="active">
+                                        <th> Description </th>
+                                        <th> Required </th>
+                                        <th> Model Media Setup 1 </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td> MPS Model Name </td>
+                                            <td> yes </td>
+                                            <td> Blood-Brain Barrier (NVU) </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Media Setup Name </td>
+                                            <td> yes </td>
+                                            <td> Media 5% </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Media Name </td>
+                                            <td> yes </td>
+                                            <td> DMSO </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Media Value </td>
+                                            <td> yes </td>
+                                            <td> 5 </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Media Value Unit </td>
+                                            <td> yes </td>
+                                            <td> % </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Media Location </td>
+                                            <td> yes </td>
+                                            <td> Influent-Vascular </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Addition Day </td>
+                                            <td> yes </td>
+                                            <td> 0 </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Addition Hour </td>
+                                            <td> yes </td>
+                                            <td> 0 </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Addition Minute </td>
+                                            <td> yes </td>
+                                            <td> 0 </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Duration Day </td>
+                                            <td> yes </td>
+                                            <td> 24 </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Duration Hour </td>
+                                            <td> yes </td>
+                                            <td> 0 </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Duration Minute </td>
+                                            <td> yes </td>
+                                            <td> 0 </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Media Name </td>
+                                            <td> yes </td>
+                                            <td> DMSO </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Media Value </td>
+                                            <td> yes </td>
+                                            <td> 5 </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Media Value Unit </td>
+                                            <td> yes </td>
+                                            <td> % </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Media Location </td>
+                                            <td> yes </td>
+                                            <td> Influent-Brain </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Addition Day </td>
+                                            <td> yes </td>
+                                            <td> 0 </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Addition Hour </td>
+                                            <td> yes </td>
+                                            <td> 0 </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Addition Minute </td>
+                                            <td> yes </td>
+                                            <td> 0 </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Duration Day </td>
+                                            <td> yes </td>
+                                            <td> 24 </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Duration Hour </td>
+                                            <td> yes </td>
+                                            <td> 0 </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Duration Minute </td>
+                                            <td> yes </td>
+                                            <td> 0 </td>
+                                        </tr>
+                                        <tr>
+                                            <td> (add more as needed) </td>
+                                            <td>   </td>
+                                            <td>   </td>
+                                        </tr>
+                                    </tbody>
+                                    </table>
+
+                                    <br><b><em>Setting Setup Data and Metadata</em></b>
+
+                                    <table class="table table-bordered table-condensed small" style="background-color: #F0FFFF;">
+                                    <thead>
+                                        <tr class="active">
+                                        <th> Description </th>
+                                        <th> Required </th>
+                                        <th> Model Setting Setup 1 </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td> MPS Model Name </td>
+                                            <td> yes </td>
+                                            <td> Blood-Brain Barrier (NVU) </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Setting Setup Name </td>
+                                            <td> yes </td>
+                                            <td> Setting Flowrate = 5 </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Settings Name </td>
+                                            <td> yes </td>
+                                            <td> Pump Type </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Settings Category or Value </td>
+                                            <td> yes </td>
+                                            <td> Syringe </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Settings Value Unit (use "category" for categories) </td>
+                                            <td> yes </td>
+                                            <td> category </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Setting Location </td>
+                                            <td> yes </td>
+                                            <td> Influent-Vascular </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Addition Day </td>
+                                            <td> yes </td>
+                                            <td> 0 </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Addition Hour </td>
+                                            <td> yes </td>
+                                            <td> 0 </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Addition Minute </td>
+                                            <td> yes </td>
+                                            <td> 0 </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Duration Day </td>
+                                            <td> yes </td>
+                                            <td> 24 </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Duration Hour </td>
+                                            <td> yes </td>
+                                            <td> 0 </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Duration Minute </td>
+                                            <td> yes </td>
+                                            <td> 0 </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Settings Name </td>
+                                            <td> yes </td>
+                                            <td> Flowrate </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Settings Category or Value </td>
+                                            <td> yes </td>
+                                            <td> 5 </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Settings Value Unit (use "category" for categories) </td>
+                                            <td> yes </td>
+                                            <td> μL/minute </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Setting Location </td>
+                                            <td> yes </td>
+                                            <td> Influent-Vascular </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Addition Day </td>
+                                            <td> yes </td>
+                                            <td> 0 </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Addition Hour </td>
+                                            <td> yes </td>
+                                            <td> 0 </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Addition Minute </td>
+                                            <td> yes </td>
+                                            <td> 0 </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Duration Day </td>
+                                            <td> yes </td>
+                                            <td> 24 </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Duration Hour </td>
+                                            <td> yes </td>
+                                            <td> 0 </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Duration Minute </td>
+                                            <td> yes </td>
+                                            <td> 0 </td>
+                                        </tr>
+                                        <tr>
+                                            <td> (add more as needed) </td>
+                                            <td> no </td>
+                                            <td> add when needed </td>
+                                        </tr>
+                                    </tbody>
+                                    </table>
+
+                                    <br><b><em>Cell Setup Data and Metadata</em></b>
+
+                                    <table class="table table-bordered table-condensed small" style="background-color: #F0FFFF;">
+                                    <thead>
+                                        <tr class="active">
+                                        <th> Description </th>
+                                        <th> Required </th>
+                                        <th> Model Cell Setup 1 </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td> MPS Model Name </td>
+                                            <td> yes </td>
+                                            <td> Blood-Brain Barrier (NVU) </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Cell Setup Name </td>
+                                            <td> yes </td>
+                                            <td> 3 Cell Combo </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Cell Sample ID# or Reference </td>
+                                            <td> yes </td>
+                                            <td> 43 - HBVP pericyte (Human Vasculature) (ScienCell Research Laboratories) </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Cell Biosensor Name </td>
+                                            <td> yes </td>
+                                            <td> none </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Cell Seeding Density </td>
+                                            <td> yes </td>
+                                            <td> 1000 </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Cell Seeding Density Unit </td>
+                                            <td> yes </td>
+                                            <td> cells/µL </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Cell Estimated # that Stick </td>
+                                            <td> yes </td>
+                                            <td> 5000 </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Cell Addition Location </td>
+                                            <td> yes </td>
+                                            <td> Vascular </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Addition Day </td>
+                                            <td> yes </td>
+                                            <td> 0 </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Addition Hour </td>
+                                            <td> yes </td>
+                                            <td> 0 </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Addition Minute </td>
+                                            <td> yes </td>
+                                            <td> 0 </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Duration Day </td>
+                                            <td> yes </td>
+                                            <td> 0 </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Duration Hour </td>
+                                            <td> yes </td>
+                                            <td> 0 </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Duration Minute </td>
+                                            <td> yes </td>
+                                            <td> 1 </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Cell Sample ID# or Reference </td>
+                                            <td> yes </td>
+                                            <td> 42 - SVG p12 astrocyte (Human Brain) (ATCC) </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Cell Biosensor Name </td>
+                                            <td> yes </td>
+                                            <td> none </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Cell Seeding Density </td>
+                                            <td> yes </td>
+                                            <td> 1000 </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Cell Seeding Density Unit </td>
+                                            <td> yes </td>
+                                            <td> cells/µL </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Cell Estimated # that Stick </td>
+                                            <td> yes </td>
+                                            <td> 5000 </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Cell Addition Location </td>
+                                            <td> yes </td>
+                                            <td> Brain </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Addition Day </td>
+                                            <td> yes </td>
+                                            <td> 0 </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Addition Hour </td>
+                                            <td> yes </td>
+                                            <td> 0 </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Addition Minute </td>
+                                            <td> yes </td>
+                                            <td> 0 </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Duration Day </td>
+                                            <td> yes </td>
+                                            <td> 0 </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Duration Hour </td>
+                                            <td> yes </td>
+                                            <td> 0 </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Duration Minute </td>
+                                            <td> yes </td>
+                                            <td> 1 </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Cell Sample ID# or Reference </td>
+                                            <td> yes </td>
+                                            <td> 44 - primary-cryopreserved endothelial (Human Vasculature) (CellSystems-376.01.04.01.03) </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Cell Biosensor Name </td>
+                                            <td> yes </td>
+                                            <td> none </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Cell Seeding Density </td>
+                                            <td> yes </td>
+                                            <td> 1000 </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Cell Seeding Density Unit </td>
+                                            <td> yes </td>
+                                            <td> cells/µL </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Cell Estimated # that Stick </td>
+                                            <td> yes </td>
+                                            <td> 5000 </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Cell Addition Location </td>
+                                            <td> yes </td>
+                                            <td> Vascular </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Addition Day </td>
+                                            <td> yes </td>
+                                            <td> 0 </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Addition Hour </td>
+                                            <td> yes </td>
+                                            <td> 0 </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Addition Minute </td>
+                                            <td> yes </td>
+                                            <td> 0 </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Duration Day </td>
+                                            <td> yes </td>
+                                            <td> 0 </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Duration Hour </td>
+                                            <td> yes </td>
+                                            <td> 0 </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Duration Minute </td>
+                                            <td> yes </td>
+                                            <td> 1 </td>
+                                        </tr>
+                                        <tr>
+                                            <td> (add more as needed) </td>
+                                            <td> no </td>
+                                            <td> add when needed </td>
+                                        </tr>
+                                    </tbody>
+                                    </table>
+
+                                    <br><b><em>Compound Setup Data and Metadata</em></b>
+
+                                    <table class="table table-bordered table-condensed small" style="background-color: #F0FFFF;">
+                                    <thead>
+                                        <tr class="active">
+                                        <th> Description </th>
+                                        <th> Required </th>
+                                        <th> Model Compound Setup 1 </th>
+                                        <th> Model Compound Setup 2 </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td> MPS Model Name </td>
+                                            <td> yes </td>
+                                            <td> Blood-Brain Barrier (NVU) </td>
+                                            <td> Blood-Brain Barrier (NVU) </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Compound Setup Name </td>
+                                            <td> yes </td>
+                                            <td> Terfenadine </td>
+                                            <td> Fexofenadine </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Compound Name </td>
+                                            <td> yes </td>
+                                            <td> TERFENADINE </td>
+                                            <td> FEXOFENADINE </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Compound Manufacturer </td>
+                                            <td> yes </td>
+                                            <td> Sigma-Aldrich  </td>
+                                            <td> Sigma-Aldrich </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Compound Catalog # </td>
+                                            <td> no </td>
+                                            <td> T9652 </td>
+                                            <td> F9427 </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Compound Lot/Batch </td>
+                                            <td> no </td>
+                                            <td> MKBX6318V </td>
+                                            <td> 035M4734 </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Compound Notes </td>
+                                            <td> no </td>
+                                            <td>   </td>
+                                            <td>   </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Treatment Dose </td>
+                                            <td> yes </td>
+                                            <td> 10 </td>
+                                            <td> 10 </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Treatment Dose Unit </td>
+                                            <td> yes </td>
+                                            <td> μM </td>
+                                            <td> μM </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Compound Addition Location </td>
+                                            <td> yes </td>
+                                            <td> Influent-Vascular </td>
+                                            <td> Influent-Vascular </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Addition Day </td>
+                                            <td> yes </td>
+                                            <td> 24 </td>
+                                            <td> 24 </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Addition Hour </td>
+                                            <td> yes </td>
+                                            <td> 0 </td>
+                                            <td> 0 </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Addition Minute </td>
+                                            <td> yes </td>
+                                            <td> 0 </td>
+                                            <td> 0 </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Duration Day </td>
+                                            <td> yes </td>
+                                            <td> 0 </td>
+                                            <td> 0 </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Duration Hour </td>
+                                            <td> yes </td>
+                                            <td> 2 </td>
+                                            <td> 2 </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Duration Minute </td>
+                                            <td> yes </td>
+                                            <td> 30 </td>
+                                            <td> 30 </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Treatment Volume Total (provide if relevant) </td>
+                                            <td> no </td>
+                                            <td>   </td>
+                                            <td>   </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Treatment Volume Total Unit (provide if relevant) </td>
+                                            <td> no </td>
+                                            <td>   </td>
+                                            <td>   </td>
+                                        </tr>
+                                        <tr>
+                                            <td> (add more as needed) </td>
+                                            <td> no </td>
+                                            <td> add when needed </td>
+                                            <td> add when needed </td>
+                                        </tr>
+                                    </tbody>
+                                    </table>
+
+                                    <br><b><em>Matrix Item Setup (Combining the Media, Setting, Cell, and Compound Setup)</em></b>
+
+                                    <table class="table table-bordered table-condensed small" style="background-color: #F0FFFF;">
+                                    <thead>
+                                        <tr class="active">
+                                        <th> Matrix Item Name </th>
+                                        <th> Matrix Name </th>
+                                        <th> Type (Media Control, Vehicle Control, or Compound) </th>
+                                        <th> Model Setup Version Name </th>
+                                        <th> Media Setup Name </th>
+                                        <th> Setting Setup Name </th>
+                                        <th> Cell Setup Name </th>
+                                        <th> Compound Setup Name </th>
+                                        <th> Total Life (days) </th>
+                                        <th> Chip Notes (if a chip "failed" indicate why) </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td> chip1 </td>
+                                            <td> 3D TERFENADINE treated </td>
+                                            <td> Compound </td>
+                                            <td> Blood-Brain Barrier (NVU) </td>
+                                            <td> Media 5% </td>
+                                            <td> Setting Flowrate = 5 </td>
+                                            <td> 3 cell combo </td>
+                                            <td> Terfenadine </td>
+                                            <td> 16.0 </td>
+                                            <td> contamination </td>
+                                        </tr>
+                                        <tr>
+                                            <td> chip2 </td>
+                                            <td> 3D TERFENADINE treated </td>
+                                            <td> Compound </td>
+                                            <td> Blood-Brain Barrier (NVU) </td>
+                                            <td> Media 5% </td>
+                                            <td> Setting Flowrate = 5 </td>
+                                            <td> 3 cell combo </td>
+                                            <td> Terfenadine </td>
+                                            <td> 16.0 </td>
+                                            <td> contamination </td>
+                                        </tr>
+                                        <tr>
+                                            <td> chip3 </td>
+                                            <td> 3D TERFENADINE treated </td>
+                                            <td> Compound </td>
+                                            <td> Blood-Brain Barrier (NVU) </td>
+                                            <td> Media 5% </td>
+                                            <td> Setting Flowrate = 5 </td>
+                                            <td> 3 cell combo </td>
+                                            <td> Terfenadine </td>
+                                            <td> 16.0 </td>
+                                            <td> back pressure </td>
+                                        </tr>
+                                        <tr>
+                                            <td> chip4 </td>
+                                            <td> 3D TERFENADINE treated </td>
+                                            <td> Compound </td>
+                                            <td> Blood-Brain Barrier (NVU) </td>
+                                            <td> Media 5% </td>
+                                            <td> Setting Flowrate = 5 </td>
+                                            <td> 3 cell combo </td>
+                                            <td> Fexofenadine </td>
+                                            <td> 24.0 </td>
+                                            <td> none </td>
+                                        </tr>
+                                        <tr>
+                                            <td> chip5 </td>
+                                            <td> 3D TERFENADINE treated </td>
+                                            <td> Compound </td>
+                                            <td> Blood-Brain Barrier (NVU) </td>
+                                            <td> Media 5% </td>
+                                            <td> Setting Flowrate = 5 </td>
+                                            <td> 3 cell combo </td>
+                                            <td> Fexofenadine </td>
+                                            <td> 24.0 </td>
+                                            <td> none </td>
+                                        </tr>
+                                        <tr>
+                                            <td> chip6 </td>
+                                            <td> 3D TERFENADINE treated </td>
+                                            <td> Compound </td>
+                                            <td> Blood-Brain Barrier (NVU) </td>
+                                            <td> Media 5% </td>
+                                            <td> Setting Flowrate = 5 </td>
+                                            <td> 3 cell combo </td>
+                                            <td> Fexofenadine </td>
+                                            <td> 24.0 </td>
+                                            <td> none </td>
+                                        </tr>
+                                        <tr>
+                                            <td> chip7 </td>
+                                            <td> 3D TERFENADINE treated </td>
+                                            <td> Media Control </td>
+                                            <td> Blood-Brain Barrier (NVU) </td>
+                                            <td> Media 5% </td>
+                                            <td> Setting Flowrate = 5 </td>
+                                            <td> 3 cell combo </td>
+                                            <td> none </td>
+                                            <td> 16.0 </td>
+                                            <td> contamination </td>
+                                        </tr>
+                                        <tr>
+                                            <td> chip8 </td>
+                                            <td> 3D TERFENADINE treated </td>
+                                            <td> Media Control </td>
+                                            <td> Blood-Brain Barrier (NVU) </td>
+                                            <td> Media 5% </td>
+                                            <td> Setting Flowrate = 5 </td>
+                                            <td> 3 cell combo </td>
+                                            <td> none </td>
+                                            <td> 16.0 </td>
+                                            <td> back  pressure </td>
+                                        </tr>
+                                        <tr>
+                                            <td> chip9 </td>
+                                            <td> 3D TERFENADINE treated </td>
+                                            <td> Media Control </td>
+                                            <td> Blood-Brain Barrier (NVU) </td>
+                                            <td> Media 5% </td>
+                                            <td> Setting Flowrate = 5 </td>
+                                            <td> 3 cell combo </td>
+                                            <td> none </td>
+                                            <td> 24.0 </td>
+                                            <td> none </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+
             </div>
         </div>
 
@@ -1856,12 +3256,12 @@
                                         <li>Click the <b>Submit</b> button to save changes</li>
                                     </ul>
                                 </li>
-                                <li><br>Tips
+                                <li><br>Notes
                                     <ul class="filled-circle">
                                         <li><b>Matrix Items</b>, along with the Name/ID, Test Type, Setup Date, and Organ <b>Model</b> MUST be added through the <b>Matrix</b>, but can be changed on the <b>Matrix Item Setup and Data</b> page  </li>
                                         <li>When using scientific notation to enter values, use this format: 1e+3, 1e+10, 3e+15</li>
                                         <li>The Exclude field, shown on the <b>Matrix Item Setup and Data</b> page is the only attribute of a data point that can be changed in the MPS-GUI</li>
-                                        <li>For information on continuing to add MPS models and assay data to the <b>Study</b> (Step 4), <a href="#assaydataeditor">click here</a> </li>
+                                        <li>For information on continuing to add MPS models and assay data to the <b>Study</b> (Step 4), <a href="#assaydata_editor">click here</a> </li>
                                     </ul>
                                 </li>
                             </ul>
@@ -1886,12 +3286,11 @@
                                         <li>Click on the <b>Submit</b> button to save data to <b>MPS Database</b> </li>
                                     </ul>
                                 </li>
-                                <li><br>Tips
+                                <li><br>Notes
                                     <ul class="filled-circle">
                                         <li>The ONLY assay data that are editable in the MPS-GUI is the <b>Exclude</b> field</li>
                                         <li>All combinations of Method/Kit, Target/Analyte, and Unit must be included in the <i>Assays</i> section of the <b>Study Level Details</b> page PRIOR to uploading assay data points for that combination</li>
                                         <li>Contact an <b>MPS Database</b> Administrator for guidance on preparing data files</li>
-                                        <li>For details on the required file format for uploading data, <a href="#uploadingdata">click here</a> </li>
                                         <li>To replace assay data values with new values, correct the values in the MIF-C-a file and re-upload
                                         <ul class="open-circle">
                                             <li>Changes made to the <b>Exclude</b> field using the MPS-GUI will be lost when data are re-uploaded</li>
@@ -1910,7 +3309,7 @@
                     </ul>
                 </div>
 
-                <button class="collapsible3">Details of Assay Data File Format (MIF-C-a)</button>
+                <button class="collapsible3">Assay Data File Format (MIF-C-a)</button>
                 <div class="content3">
                     <div id="uploadingdata" class="editorsubtainer">
                         <ul class="list-group">
@@ -1918,10 +3317,9 @@
                                 <ul class="list-unstyled">
                                     <li>To get an example template file, <a href="/media/excel_templates/chip_template-{{ version }}.xlsx">click here</a>
                                         <ul class="filled-circle">
-                                            <li>Chip ID must be unique within a <b>Study</b></li>
-                                            <li>Files can contain multiple tabs</li>
-                                            <li>All tabs with correct headers (i.e. column names) will be evaluated for upload, others will be ignored</li>
-                                            <li>The correct headers must be placed in the first three rows to be considered valid</li>
+                                            <li>If uploading an Excel workbook, workbook can contain multiple tabs</li>
+                                            <li>All files (or tabs) with correct headers (i.e. column names) will be evaluated for upload, others will be ignored</li>
+                                            <li>Correct headers must be placed in the first three rows to be considered valid</li>
                                         </ul>
                                     </li>
                                 </ul>
@@ -1993,6 +3391,348 @@
                     </div>
                 </div>
 
+                <div id="filespecifications_editor">
+                    <button class="collapsible3">Detailed Specifications for MIF-C-a and MIF-C-i Files (with Examples) </button>
+                    <div class="content3">
+                        <div id="filespecifications" class="editorsubtainer">
+                            <ul class="list-group">
+                                <li class="list-group-item background3">
+                                <ul class="list-unstyled">
+                                    <li>Specifications for generating valid MPS Import Friendly-Columnar (MIF-C-a and MIF-C-i) files
+                                        <ul class="filled-circle">
+                                            <li>Chip ID must be unique within a <b>Study</b></li>
+                                            <li>Each file (and each workbook if using Excel) should contain data for only one <b>Study</b> </li>
+                                            <li>Data for one study may be submitted in multiple files (and/or multiple tabs of an Excel workbook) </li>
+                                        </ul>
+                                    </li>
+                                </ul>
+                                    <table class="table table-bordered table-condensed small" style="background-color: #F0FFFF;">
+                                    <thead>
+                                        <tr class="active">
+                                            <th> Column Header </th>
+                                            <th> Appies to File </th>
+                                            <th> Column Heading Required </th>
+                                            <th> Content Required </th>
+                                            <th> Description </th>
+                                            <th> Example (Assays) </th>
+                                            <th> Example (Images) </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td> Chip ID </td>
+                                            <td> MIF-C-a and MIF-C-i </td>
+                                            <td> yes </td>
+                                            <td> required </td>
+                                            <td> Primarily identifier used to refer to a specific instance of an organ model. In cases where wells are being used as a static comparison to a chip, for purposes of entry into the MPS-Db, each of those wells will need to be assigned a Chip ID, which could be “PlateID-WellID” (e.g. P1234-B05). </td>
+                                            <td> c00001 </td>
+                                            <td> c00001 </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Assay Plate ID </td>
+                                            <td> MIF-C-a and MIF-C-i </td>
+                                            <td> yes </td>
+                                            <td> no </td>
+                                            <td>  A unique ID assigned to a well plate (the enter plate). Recommended naming convention is as follows: “P” & “yyyy” & “-“ & “dddd” & ”a string of the user’s choice” (e.g., P2017-0223A). </td>
+                                            <td> PT_HIM31_02022017 </td>
+                                            <td> PT_HIM31_02022017 </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Assay Well ID </td>
+                                            <td> MIF-C-a and MIF-C-i </td>
+                                            <td> yes </td>
+                                            <td> no </td>
+                                            <td> When used in the context of an Assay (Assay Well ID), specifies the location in a well plate where media and/or standard was placed and observed via a plate reader (e.g., A01, A15, B13).  </td>
+                                            <td> A04 </td>
+                                            <td> none </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Method/Kit </td>
+                                            <td> MIF-C-a and MIF-C-i </td>
+                                            <td> yes </td>
+                                            <td> yes </td>
+                                            <td> Indicates the method (e.g., SW-846 for a group of metals) or kit (e.g., Ammoniagenesis (Abcam: ab83360) used to measure a Target/Analyte. Must be in MPS Database list. In the case of a kit, the kit, and, if the kit can be used with different options, the option used should be specified. </td>
+                                            <td> Ammonia Assay Kit (abcam: ab83360) </td>
+                                            <td> LIVE/DEAD Viability/Cytotoxicity Kit for mammalian cells (Molecular Probes: 03224 - Calcein AM/EthD-1), Hoechst, Phase Contrast </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Target/Analyte </td>
+                                            <td> MIF-C-a and MIF-C-i </td>
+                                            <td> yes </td>
+                                            <td> yes </td>
+                                            <td> The focus of an assay, as in, what is being measured. Examples include: Albumin, Lactate Dehydrogenase, TNF-Alpha. Must be in MPS Database list. </td>
+                                            <td> Ammonium </td>
+                                            <td> Nucleus | Live Cells | Dead Cells | Tissue Structure </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Subtarget </td>
+                                            <td> MIF-C-a and MIF-C-i </td>
+                                            <td> no </td>
+                                            <td> no </td>
+                                            <td> When needed (if data are more appropriately displayed on a heatmap), else will be populated with "none" in the MPS. </td>
+                                            <td> none (in TempO-Seq, would be the gene) </td>
+                                            <td> none </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Sample Location </td>
+                                            <td> MIF-C-a and MIF-C-i </td>
+                                            <td> yes </td>
+                                            <td> yes </td>
+                                            <td> Specifies a compartment in the Organ Model such as: brain, vascular, neural, apical, basal. Must be in MPS Database llist. When  a sample is collected from the Organ Model, the compartment should be combined with a prefix indicating where the sample was collected, such as “effluent-brain” or “stock-brain”. Note that, when a chamber is image, no prefix would be used. </td>
+                                            <td> effluent-apical </td>
+                                            <td> Apical </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Day </td>
+                                            <td> MIF-C-a and MIF-C-i </td>
+                                            <td> yes </td>
+                                            <td> no </td>
+                                            <td> The time, from the start of the experiment, when a Sample was collected and/or when a Measurement was made (e.g, an image taken). The sample time is imported into the MPS-Db in Day, Hour, and Minute. Nulls (blanks) will default to 0 on upload. You may use decimal places..for example, D 0 H 48.5 M 0 = D 2 H 0.5 M 0 = D 2 H 0 M 30 </td>
+                                            <td> 24 </td>
+                                            <td> 24 </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Hour </td>
+                                            <td> MIF-C-a and MIF-C-i </td>
+                                            <td> yes </td>
+                                            <td> no </td>
+                                            <td> nan </td>
+                                            <td> 2 </td>
+                                            <td> 2 </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Minute </td>
+                                            <td> MIF-C-a and MIF-C-i </td>
+                                            <td> yes </td>
+                                            <td> yes </td>
+                                            <td> nan </td>
+                                            <td> 0 </td>
+                                            <td> 0 </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Value </td>
+                                            <td> MIF-C-a and MIF-C-i </td>
+                                            <td> yes </td>
+                                            <td> no </td>
+                                            <td> In the context of Processed Data, indicates the amount observed. </td>
+                                            <td> 0.13036162084885994 </td>
+                                            <td> na </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Value Unit </td>
+                                            <td> MIF-C-a and MIF-C-i </td>
+                                            <td> yes </td>
+                                            <td> yes </td>
+                                            <td> In the context of the Processed Data, indicates the unit of the amount observed. </td>
+                                            <td> mmol/L </td>
+                                            <td> image' for images, 'video' for videos </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Caution Flag </td>
+                                            <td> MIF-C-a </td>
+                                            <td> no </td>
+                                            <td> no </td>
+                                            <td>  A flag indicating the status of a reported result. See the online glossary for list of valid caution flags. </td>
+                                            <td> W </td>
+                                            <td> na </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Exclude </td>
+                                            <td> MIF-C-a </td>
+                                            <td> no </td>
+                                            <td> no </td>
+                                            <td> When the Exclude field of the database is populated (X), that data point will not shown, by default, in graphs or be provided in exports from the database.  </td>
+                                            <td> X </td>
+                                            <td> na </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Duration Sample Collection (days) </td>
+                                            <td> MIF-C-a </td>
+                                            <td> no </td>
+                                            <td> no </td>
+                                            <td> The amount of time sample effluent was collected (days). </td>
+                                            <td> 1 </td>
+                                            <td> na </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Duration Sample Collection (hours) </td>
+                                            <td> MIF-C-a </td>
+                                            <td> no </td>
+                                            <td> no </td>
+                                            <td> The amount of time sample effluent was collected (hours). </td>
+                                            <td> 0 </td>
+                                            <td> na </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Duration Sample Collection (minutes) </td>
+                                            <td> MIF-C-a </td>
+                                            <td> no </td>
+                                            <td> no </td>
+                                            <td> The amount of time sample effluent was collected (minutes). </td>
+                                            <td> 0 </td>
+                                            <td> na </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Sample Volume </td>
+                                            <td> MIF-C-a </td>
+                                            <td> no </td>
+                                            <td> no </td>
+                                            <td> The volume of sample collected. </td>
+                                            <td> 240 </td>
+                                            <td> na </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Sample Volume Unit </td>
+                                            <td> MIF-C-a </td>
+                                            <td> no </td>
+                                            <td> no </td>
+                                            <td> The unit of the volume of the sample collected. </td>
+                                            <td> µL </td>
+                                            <td> na </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Notes </td>
+                                            <td> MIF-C-a and MIF-C-i </td>
+                                            <td> no </td>
+                                            <td> no, but highly recommended, especially for images </td>
+                                            <td> In the context of Processed Data, indicates something of interest with regard to the value being reported. For images, indicates what the colors in the images indicate. </td>
+                                            <td> Well was empty.  </td>
+                                            <td> The image shows cell nucleus. ChipA is on the left and ChipB is on the right. </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Replicate </td>
+                                            <td> MIF-C-a and MIF-C-i </td>
+                                            <td> no </td>
+                                            <td> no </td>
+                                            <td> At the assay level, multiple measurements of the same endpoint (i.e., LDH) observed on the same media sampled and observed at the same time. </td>
+                                            <td> 1 </td>
+                                            <td> 1 </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Cross Reference </td>
+                                            <td> MIF-C-a and MIF-C-i </td>
+                                            <td> no </td>
+                                            <td> no </td>
+                                            <td> In the context of the processed data (the MIF-C file), the cross reference is a string of text that is used to cross reference data points in the MPS-Db to other database systems (i.e. LabKey). </td>
+                                            <td> 12345678-03 </td>
+                                            <td> nan </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Results Group </td>
+                                            <td> MIF-C-a and MIF-C-i </td>
+                                            <td> no </td>
+                                            <td> no </td>
+                                            <td> This is an optional link to results information.  </td>
+                                            <td> 105 </td>
+                                            <td> nan </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Image File Name </td>
+                                            <td> MIF-C-i </td>
+                                            <td> yes </td>
+                                            <td> yes </td>
+                                            <td> The file name of the image that will be provided to UPDDI via a drop box or exteral storage device. The naming of the file is up to the data provider, but a descriptive naming protocol is highly recommended. </td>
+                                            <td> na </td>
+                                            <td> Tamu_PT_UW_d24h0m0_C00039_S01_W5.tif </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Image Field </td>
+                                            <td> MIF-C-i </td>
+                                            <td> yes </td>
+                                            <td> yes </td>
+                                            <td> An indication of where in the chamber of the device the image was taken. Use integers and increment for each additional location. </td>
+                                            <td> na </td>
+                                            <td> 1 </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Image Field Description </td>
+                                            <td> MIF-C-i </td>
+                                            <td> no </td>
+                                            <td> no </td>
+                                            <td> Provide a description of what is captured in the image field. If multiple images were taken at various locations, indicate something about where/how the location was selected (e.g., top left corner, center of channel, etc…) </td>
+                                            <td> na </td>
+                                            <td> Image field manually selected. </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Image Magnification </td>
+                                            <td> MIF-C-i </td>
+                                            <td> yes </td>
+                                            <td> yes </td>
+                                            <td> The image magnification as an integer. </td>
+                                            <td> na </td>
+                                            <td> 20 </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Image Resolution </td>
+                                            <td> MIF-C-i </td>
+                                            <td> yes </td>
+                                            <td> yes </td>
+                                            <td> The resolution of one pixel of the image. </td>
+                                            <td> na </td>
+                                            <td> 0.077 </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Image Resolution Unit </td>
+                                            <td> MIF-C-i </td>
+                                            <td> yes </td>
+                                            <td> yes </td>
+                                            <td> The unit of the resolution. </td>
+                                            <td> na </td>
+                                            <td> µm </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Image Sample Label </td>
+                                            <td> MIF-C-i </td>
+                                            <td> yes </td>
+                                            <td> yes </td>
+                                            <td> The dye/stain that will cause the fluorescence observed in the image. Must exist in MPS Database Sample Label list. </td>
+                                            <td> na </td>
+                                            <td> Hoechst | Calcein AM | EthD-1 | Unlabeled </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Image Sample Label Description </td>
+                                            <td> MIF-C-i </td>
+                                            <td> no </td>
+                                            <td> no </td>
+                                            <td> Provide a description of the image source used. </td>
+                                            <td> na </td>
+                                            <td> 0 </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Image Wavelength (ex/em nm) </td>
+                                            <td> MIF-C-i </td>
+                                            <td> no </td>
+                                            <td> no </td>
+                                            <td> Wavelength of the illuminating light.  </td>
+                                            <td> na </td>
+                                            <td> 405/- | 488/- | 633/- | White Light </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Image Color Mapping </td>
+                                            <td> MIF-C-i </td>
+                                            <td> yes </td>
+                                            <td> yes </td>
+                                            <td> The color displayed in the image.  </td>
+                                            <td> na </td>
+                                            <td> blue | green | red | phase contrast </td>
+                                        </tr>
+                                        <tr>
+                                            <td> Image Setting Note </td>
+                                            <td> MIF-C-i </td>
+                                            <td> no </td>
+                                            <td> no </td>
+                                            <td> An optional note regarding the image settings.  </td>
+                                            <td> na </td>
+                                            <td> W5-FITC, DAPI, TRITC, White Light </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
 
@@ -2010,9 +3750,10 @@
                                         <li>Contact an <b>MPS Database</b> Administrator to make arranges for submitting the files</li>
                                     </ul>
                                 </li>
-                                <li><br>Tips
+                                <li><br>Notes
                                     <ul class="filled-circle">
                                         <li>Contact an <b>MPS Database</b> Administrator for guidance on preparing media metadata files</li>
+                                        <li>For details on the required file format of the media metadata file, <a href="#assaydata_editor">click here</a> and click to view the detailed specifications for MIF-C-a and MIF-C-i files </li>
                                         <li>To remove media files, contact an <b>MPS Database</b> Administrator for assistance</li>
                                     </ul>
                                 </li>
@@ -2049,7 +3790,11 @@
                                         <li>Click the <b>Save</b> button to save the changes </li>
                                     </ul>
                                 </li>
-                                <li>Be mindful that changes to controlled vocabulary may impact the ability of other users to upload data!</li>
+                                <li><br>Notes
+                                    <ul class="filled-circle">
+                                        <li>Be mindful that changes to controlled vocabulary may impact the ability of other users to upload data!</li>
+                                    </ul>
+                                </li>
                             </ul>
                         </li>
                     </ul>
@@ -2074,8 +3819,12 @@
                                         <li>Click the <b>Save</b> button to save the changes </li>
                                     </ul>
                                 </li>
-                                <li>Be mindful that changes to controlled vocabulary may impact the ability of other users to upload data!</li>
-                                <li>If the Target/Analyte is a Compound, use a Name that matches the Compound to facilitate joining on Compound and Target/Analyte!</li>
+                                <li><br>Notes
+                                    <ul class="filled-circle">
+                                        <li>Be mindful that changes to controlled vocabulary may impact the ability of other users to upload data!</li>
+                                        <li>If the Target/Analyte is a Compound, use a Name that matches the Compound to facilitate joining on Compound and Target/Analyte!</li>
+                                    </ul>
+                                </li>
                             </ul>
                         </li>
                     </ul>
@@ -2099,7 +3848,7 @@
                                         <li>Click the <b>Submit</b> button to save changes</li>
                                     </ul>
                                 </li>
-                                <li><br>Tips
+                                <li><br>Notes
                                     <ul class="filled-circle">
                                         <li>In the <b>Layout</b> section, the <b>Number of Rows</b> and <b>Number of Columns</b> will be used as the dimensions of the <b>Matrix</b> when using a <b>Model</b> based on this <b>Device</b> and entering as wells in a plate </li>
                                         <li>For information on assigning a <b>Device</b> to a <b>Matrix Item</b>, <a href="#matrixitems_editor">click here</a> </li>
@@ -2127,7 +3876,7 @@
                                         <li>Click Save button to save changes</li>
                                     </ul>
                                 </li>
-                                <li><br>Tips
+                                <li><br>Notes
                                     <ul class="filled-circle">
                                         <li>As of 20180925, there is a lot of manual work that needs done for each new disease</li>
                                     </ul>
@@ -2140,7 +3889,7 @@
         </div>
 
         <div id="cellsamples_admin">
-            <button class="collapsible1">Cell Samples Used in MPS Models...still need to update</button>
+            <button class="collapsible1">Cell Samples Used in MPS Models</button>
             <div class="content1">
                 <div id="cellsamplesadmin" class="adminsubtainer">
                     <ul class="list-group">
@@ -2154,20 +3903,14 @@
                                         <li>Click the <b>Submit</b> button to save changes</li>
                                     </ul>
                                 </li>
-                                <li><br>Tips
+                                <li><br>Notes
                                     <ul class="filled-circle">
+                                        <li><b>Cell Types</b> describe a variety of cells, such as <em>astrocyte</em> or <em>hepatocyte</em> )</li>
+                                        <li><b>Cell Origins</b> elaborate on the origin of the cells, for instance whether they are fresh, cryopreserved, or from a cell line </li>
                                         <li>If the <b>Cell Origin</b> of the sample is a cell line, select the <b>Cell Type</b> first </li>
                                         <li>Differentiating cell lots on date received and other criteria can be helpful in identifying assay data generated using specific lots of cells </li>
                                         <li>Select a <b>Cell Type</b> ONLY if this Origin is SPECIFIC to a certain <b>Cell Type</b> (e.g., a cell line) </li>
                                         <li>Be sure to specify the <b>Organ</b>, as many <b>Cell Types</b> differ depending on where they are located (e.g., hepatic stellate cells differ from pancreatic stellate cells </li>
-                                        <li>Permissions to add and edit <b>Cell Samples</b>, <b>Cell Types</b>, and <b>Cell Origins</b> are user specific </li>
-                                        <li>If you need to add or edit a <b>Cell Samples</b>, contact an <b>MPS Database</b> administrator </li>
-                                        <li>For information on assigning a <b>Cell Sample</b> to a <b>Matrix Item</b>, <a href="#matrixitemseditor">click here</a> </li>
-                                        <li><b>Cell Samples</b>, density, and addition location are added to <b>Matrix Items</b> by Data Providers as part of <b>Study</b> setup</li>
-                                        <li><b>Cell Types</b> describe a variety of cells, such as <em>astrocyte</em> or <em>hepatocyte</em> )</li>
-                                        <li><b>Cell Types</b> should be selected ONLY if the Cell Origin is SPECIFIC to a certain Cell Type (e.g. a cell line) </li>
-                                        <li><b>Cell Origins</b> elaborate on the origin of the cells, for instance whether they are fresh, cryopreserved, or from a cell line </li>
-                                        <li>In the <b>Cell Samples</b> list, click on the active links to learn more about the <b>Cell Type</b> or the <b>Cell Origin</b> </li>
                                     </ul>
                                 </li>
                             </ul>
@@ -2178,32 +3921,28 @@
         </div>
 
         <div id="chemicaldata_admin">
-            <button class="collapsible1">Chemical Data...still need to update</button>
+            <button class="collapsible1">Chemical Data</button>
             <div class="content1">
                 <div id="chemicaldataeditor" class="adminsubtainer">
                     <ul class="list-group">
                         <li class="list-group-item">
                             <ul class="list-unstyled">
-                                <li>Compounds are accessed from the Compounds menu
+                                <li>To Add, go to the MPS Database Admin
                                     <ul class="filled-circle">
-                                        <li>Use the <b>Search</b> bar or scroll through the list to find the Compound of interest</li>
-                                        <li>Click on the <b>View</b> button next to the Compound of interest to see compound details</li>
-                                        <li>Click on the Previous or Next button to scroll through the compounds </li>
+                                        <li>Go to the COMPOUND Section</li>
+                                        <li>Click on Compounds/Drugs </li>
+                                        <li>Search to confirm the Compound needed is not already available in the database </li>
+                                        <li>Click the <b>ADD COMPOUND</b> button to add a new compound </li>
+                                        <li>Enter the ChEMBL ID of the compound to add (e.g., CHEMBL1319459) </li>
+                                        <li>Click the <b>Retrieve</b> button </li>
+                                        <li>Add additional information as available (optional) </li>
+                                        <li>Click the <b>Save</b> button to save the changes </li>
                                     </ul>
                                 </li>
-                                <li><br>Tips
+                                <li><br>Notes
                                     <ul class="filled-circle">
-                                        <li>If a Compound is missing from the list, contact an <b>MPS Database</b> Administrator </li>
-                                        <li>The "Medchem Alerts" field (in the compound details page) shows whether functional groups that are uncommon in drugs are present in this compound
-                                        <ul class="open-circle">
-                                            <li>If there are Medchem Alerts for a compound, click on the flag to see a list of the functional group </li>
-                                        </ul>
-                                        </li>
-                                        <li>Always search ChEMBL before adding a compound (a link is provided on the Add page)
-                                        <ul class="open-circle">
-                                            <li>If found, put the <em>entire ChEMBL ID</em> (including "CHEMBL") into the ChEBML ID field and hit the Retrieve button"</li>
-                                        </ul>
-                                        </li>
+                                        <li>Sometimes it is easier to find the ChEMBL ID on PubChem (<a href='https://www.ncbi.nlm.nih.gov/pccompound'>PubChem Compounds</a> )  </li>
+                                        <li>Or search ChEMBL (<a href='https://www.ebi.ac.uk/chembl/index.php/'>ChEMBL</a> )  </li>
                                     </ul>
                                 </li>
                             </ul>
@@ -2225,7 +3964,7 @@
                                         <li>Go to the MPS ASSAYS Section </li>
                                         <li>Click on Assay Sample Locations </li>
                                         <li>Search for an existing name that is applicable (click Add Assay Sample Location if need new) </li>
-                                        <li>Click Save button to save changes</li>
+                                        <li>Click <b>Save</b> button to save changes</li>
                                     </ul>
                                 </li>
                             </ul>
@@ -2251,10 +3990,10 @@
                                         <li>Click the <b>Submit</b> button to save changes</li>
                                     </ul>
                                 </li>
-                                <li><br>Tips
+                                <li><br>Notes
                                     <ul class="filled-circle">
                                         <li>As of 20180925, models are available for review by all users</li>
-                                        <li>As of 20180925, plans are in the workes to add more attributes to a model (locations, settings, media, etc)</li>
+                                        <li>As of 20180925, the ability to add more attributes to a model (locations, settings, media, etc) are under consideration</li>
                                     </ul>
                                 </li>
                             </ul>
@@ -2276,7 +4015,7 @@
                                         <li>Go to the MPS ASSAYS Section </li>
                                         <li>Click on Assay Settings </li>
                                         <li>Search for an existing name that is applicable (click ADD ASSAY SAMPLE LOCATION if need new) </li>
-                                        <li>Click Save button to save changes</li>
+                                        <li>Click <b>Save</b> button to save changes</li>
                                     </ul>
                                 </li>
                             </ul>
@@ -2298,7 +4037,7 @@
                                         <li>Go to the MPS ASSAYS Section </li>
                                         <li>Click on Physical Units </li>
                                         <li>Search for an existing name that is applicable (click ADD PHYSICAL UNITS if need new) </li>
-                                        <li>Click Save button to save changes</li>
+                                        <li>Click <b>Save</b> button to save changes</li>
                                     </ul>
                                 </li>
                             </ul>
@@ -2317,14 +4056,25 @@
                     <ul class="list-group">
                         <li class="list-group-item">
                             <ul class="list-unstyled">
-                                <li>To do
+                                <li>To assign groups to a <b>Study</b>
                                     <ul class="filled-circle">
-                                        <li> </li>
+                                        <li>Go to the MPS Database admin</li>
+                                        <li>Go to the MPS Assays Section</li>
+                                        <li>Click on Studies</li>
+                                        <li>Scroll through the groups or use the search bar to find the study</li>
+                                        <li>Click to open the study</li>
+                                        <li>Scroll to the Study Data Group and Access Group Info Section (the Data Group should already be selected) </li>
+                                        <li>Select all Access Groups (add the group proper - not admin or viewer) </li>
+                                        <li>Scroll to the Assay Study Stakeholders Section</li>
+                                        <li>Add the stakeholder group(s) (add the group proper - not admin or viewer) </li>
                                     </ul>
                                 </li>
-                                <li><br>Tips
+                                <li><br>Notes
                                     <ul class="filled-circle">
-                                        <li> </li>
+                                        <li>Best practice would be to assign appropriate groups at the time of study creation. </li>
+                                        <li>Data Group Admins and Editors can create a study, but cannot add/edit special permission groups to a study</li>
+                                        <li>Data Providers must work with MPS Database Admins to set up appropriate groups when/if needed. </li>
+                                        <li>Clicking on the button to <b>Change Group Access for this Study</b> from the <b>Study Matrices and Items List</b> page will route the user to the <b>Change Study</b> page of the GUI Admin.
                                     </ul>
                                 </li>
                             </ul>
@@ -2334,21 +4084,50 @@
             </div>
         </div>
 
+
         <div id="user_groups_admin">
-            <button class="collapsible1">Assigning Users To Groups</button>
+            <button class="collapsible1">Assigning Users To Groups (Data Group, Stakeholder Group, Access Group)</button>
             <div class="content1">
                 <div id="usergroupsadmin" class="adminsubtainer">
                     <ul class="list-group">
                         <li class="list-group-item">
                             <ul class="list-unstyled">
-                                <li>To do
+                                <li>To assign users to a <b>Group</b>
                                     <ul class="filled-circle">
-                                        <li> </li>
+                                        <li> Go to the MPS Database admin</li>
+                                        <li> Go to the Authentication and Authorization Section</li>
+                                        <li> Click on Users</li>
+                                        <li> Scroll through the users or use the search bar</li>
+                                        <li> Click to open the user details</li>
+                                        <li> Change group membership as needed</li>
+                                        <li> Save the changes</li>
                                     </ul>
                                 </li>
-                                <li><br>Tips
+                                <li><br>Notes
                                     <ul class="filled-circle">
-                                        <li> </li>
+                                        <li> Users should be assigned to appropriate groups when they register</li>
+                                        <li> Users may have different roles in different groups</li>
+                                    </ul>
+                                </li>
+                                <li> <br> The term <b>Data Group</b> actually refers to three groups, one group for each role. The following is an example for <b>Data Group Rusyn_TAMU</b>
+                                    <ul class="filled-circle">
+                                        <li> <b>Rusyn_TAMU</b> - this is the editor group, sometimes referred to as the group proper </li>
+                                        <li> <b>Rusyn_TAMU Admin</b> - admins can edit and sign off studies</li>
+                                        <li> <b>Rusyn_TAMU Viewer</b> - can view studies prior to sign off</li>
+                                    </ul>
+                                </li>
+                                <li> <br> The term <b>Stakeholder Group</b> also refers to three groups, one group for each role. The following is an example for <b>TCD_BBB_Vandy</b>
+                                    <ul class="filled-circle">
+                                        <li> <b>TCD_BBB_Vandy </b> - this group must be present, but should not have members </li>
+                                        <li> <b>TCD_BBB_Vandy Admin</b> – members are users who can acknowledge a study </li>
+                                        <li> <b>TCD_BBB_Vandy Viewer</b> - members are users who can see a study but cannot acknowledge it </li>
+                                    </ul>
+                                </li>
+                                <li> <br> The term <b>Access Group</b> also refers to three groups, one group for each role. The following is an example for the <b> TCD_BBB_Vandy</b>
+                                    <ul class="filled-circle">
+                                        <li> <b>NCATS </b> - group must be present, but should not have members </li>
+                                        <li> <b>NCATS Admin</b> -  group should not have members </li>
+                                        <li> <b>NCATS Viewer</b> - members are users with special access </li>
                                     </ul>
                                 </li>
                             </ul>
@@ -2357,6 +4136,7 @@
                 </div>
             </div>
         </div>
+
 
     </div>
     {% endif %}

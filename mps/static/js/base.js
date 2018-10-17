@@ -1,8 +1,8 @@
 // TODO NEEDS TO BE REVISED ALONG WITH HELP
 $(document).ready(function () {
-// Prevent CSS conflict with Bootstrap
-// CRUDE
-$.fn.button.noConflict();
+    // Prevent CSS conflict with Bootstrap
+    // CRUDE
+    $.fn.button.noConflict();
 
     // Discern what anchor to add to the help URL by looking at current url
     var url = window.location.href;
@@ -73,10 +73,10 @@ $.fn.button.noConflict();
         anchor = '#cellsamples'
     }
     else if (url.indexOf('/targets/') > -1) {
-        anchor = '#targets'
+        anchor = '#assaymts'
     }
     else if (url.indexOf('/methods/') > -1) {
-        anchor = '#methods'
+        anchor = '#assaymts'
     }
     else if (url.indexOf('/assaymatrixitem/') > -1) {
         anchor = '#matrixitem'
