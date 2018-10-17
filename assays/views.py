@@ -1544,12 +1544,21 @@ class AssayMatrixItemUpdate(StudyGroupMixin, UpdateView):
             instance=self.object,
             # matrix=self.object
         )
-        if form.is_valid() and compound_formset.is_valid() and cell_formset.is_valid() and setting_formset.is_valid():
-            save_forms_with_tracking(self, form, update=True, formset=[
-                compound_formset,
-                cell_formset,
-                setting_formset
-            ])
+
+        all_formsets = [
+            compound_formset,
+            cell_formset,
+            setting_formset,
+        ]
+
+        all_formsets_valid =  True
+
+        for current_formset in all_formsets:
+            if not current_formset.is_valid():
+                all_formsets_valid = False
+
+        if form.is_valid() and all_formsets_valid:
+            save_forms_with_tracking(self, form, update=True, formset=all_formsets)
 
             try:
                 data_point_ids_to_update_raw = json.loads(form.data.get('dynamic_exclusion', '{}'))

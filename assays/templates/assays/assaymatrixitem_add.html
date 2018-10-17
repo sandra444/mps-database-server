@@ -329,7 +329,7 @@
                         <th class="bg-info">Day</th>
                         <th class="bg-info">Hour</th>
                         <th class="bg-info">Minute</th>
-                        <th class="bg-warning">Addition Location</th>
+                        <th class="bg-warning">Addition Location*</th>
                         <th class="bg-danger">Delete</th>
                     </tr>
                     <tr>
@@ -487,7 +487,7 @@
 {#                        <th class="bg-info">Day</th>#}
 {#                        <th class="bg-info">Hour</th>#}
 {#                        <th class="bg-info">Minute</th>#}
-                        <th class="bg-warning">Addition Location</th>
+                        <th class="bg-warning">Addition Location*</th>
                         <th class="bg-danger">Delete</th>
                     </tr>
                     <tr>
@@ -519,6 +519,20 @@
 
     {{ setting_formset.management_form }}
     <legend>Settings</legend>
+
+    {% if setting_formset.errors %}
+        {% for dict in setting_formset.errors %}
+            {% for key,value in dict.items %}
+                {% if key %}
+                    <div class="alert alert-danger" role="alert">
+                        <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                        <span class="sr-only">Error:</span>
+                        {{ forloop.parentloop.counter }}.) {{ key }} : {{ value }}
+                    </div>
+                {% endif %}
+            {% endfor %}
+        {% endfor %}
+    {% endif %}
 
     {% if setting_formset.non_form_errors %}
         <div class="alert alert-danger" role="alert">
@@ -593,7 +607,7 @@
                         <th class="bg-info">Day</th>
                         <th class="bg-info">Hour</th>
                         <th class="bg-info">Minute</th>
-                        <th class="bg-warning">Addition Location</th>
+                        <th class="bg-warning">Addition Location*</th>
                         <th class="bg-danger">Delete</th>
                     </tr>
                     <tr>
