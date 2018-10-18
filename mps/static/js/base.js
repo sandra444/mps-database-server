@@ -79,10 +79,10 @@ $(document).ready(function () {
         anchor = '#assaymts'
     }
     else if (url.indexOf('/assaymatrixitem/') > -1) {
-        anchor = '#matrixitem'
+        anchor = '#intrastudy'
     }
     else if (url.indexOf('/assaymatrix/') > -1) {
-        anchor = '#matrices'
+        anchor = '#intrastudy'
     }
     else if (url.indexOf('/images/') > -1) {
         anchor = '#intrastudy'
