@@ -1708,6 +1708,14 @@ class AssayMethodList(ListView):
     model = AssayMethod
     template_name = 'assays/assaymethod_list.html'
 
+    def get_queryset(self):
+        queryset = AssayMethod.objects.all().prefetch_related(
+            'supplier',
+            'measurement_type'
+        )
+
+        return queryset
+
 
 class AssayMethodDetail(DetailView):
     model = AssayMethod
@@ -1737,7 +1745,15 @@ class AssayPhysicalUnitsList(ListView):
     model = PhysicalUnits
     template_name = 'assays/assayunit_list.html'
 
+    def get_queryset(self):
+        queryset = PhysicalUnits.objects.all().prefetch_related(
+            'unit_type',
+        )
 
+        return queryset
+
+
+# TODO: PERHAPS THIS SHOULD NOT BE HERE
 class AssaySampleLocationList(ListView):
     model = AssaySampleLocation
     template_name = 'assays/assaylocation_list.html'

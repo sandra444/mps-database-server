@@ -39,7 +39,4 @@ $(document).ready(function() {
             }
         ]
     });
-
-    // Prevent "pop in".
-    $("#methods").css("display", "block");
 });

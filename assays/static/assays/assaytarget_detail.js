@@ -25,8 +25,4 @@ $(document).ready(function() {
             },
         ]
     });
-
-    // Prevent "pop in".
-    $("#assays").css("display", "block");
-    $("#studies").css("display", "block");
 });

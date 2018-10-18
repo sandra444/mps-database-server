@@ -19,7 +19,7 @@
         </legend>
         <div class="row">
             <div class="col-xs-12">
-                <table class="table table-striped table-bordered table-nonfluid" style="background-color: #AAB3AB; float:none; margin-bottom:18px;">
+                <table class="table table-striped table-bordered table-nonfluid" style="background-color: #AAB3AB;">
                     <tbody>
                         {% if object.short_name %}
                         <tr>
@@ -47,8 +47,8 @@
         </div>
         <br>
         <legend>Method/Kits with this Target/Analyte</legend>
-        <div id="assays" style="display: none;">
-            <table id="assays-table" class="display" cellspacing="0" width="100%">
+        <div id="assays">
+            <table id="assays-table" class="display" cellspacing="0" width="100%" hidden>
                 <thead>
                     <tr>
                         <th>Method/Kit</th>
@@ -74,8 +74,8 @@
         </div>
         <br>
         <legend>Studies Utilizing this Target/Analyte</legend>
-        <div id="studies" style="display: none;">
-            <table id="studies-table" class="display" cellspacing="0" width="100%">
+        <div id="studies">
+            <table id="studies-table" class="display" cellspacing="0" width="100%" hidden>
                 <thead>
                     <tr>
                         <th>Study</th>
