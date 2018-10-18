@@ -2,6 +2,15 @@ $(document).ready(function () {
     // Resolve anchors going to the incorrect location
     var offset = 60;
 
+    $(".collapsible1, .collapsible2, .collapsible3").click(function() {
+        var content = this.nextElementSibling;
+        if ($(content).css("display") != "none") {
+            $(content).css("display", "none");
+        } else {
+            $(content).css("display", "block");
+        }
+    });
+
     $('a').not("[href*='/']").click(function(event) {
         event.preventDefault();
         if ($($(this).attr('href'))[0]) {
@@ -18,7 +27,6 @@ $(document).ready(function () {
             scrollTop: $(initial_hash).offset().top - offset
         }, 500);
         $(initial_hash).find('button').next().first().css("display", "block");
-
     }
 
     var _alphabetSearch = '';
