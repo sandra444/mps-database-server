@@ -6,120 +6,152 @@
 {% endblock %}
 
 {% block content %}
-    <legend><h1>{{ object.name }}</h1></legend>
+    <legend>
+        <h1>{{ object.name }}</h1>
+        <h2>{{ object.alt_name }}</h2>
+    </legend>
 
-    <div>
-        <div class="col-xs-12">
-        <table class="table table-striped table-bordered table-nonfluid" style="background-color: #AAB3AB;">
-            <tbody>
-                <tr>
-                    <td>
-                        <b>Center</b>
-                    </td>
-                    <td>
-                        <a href="/microdevices/center/{{ object.center.id }}" target='_blank'>{{ object.center.name }} ({{ object.center.center_id }})</a>
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <b>Institution</b>
-                    </td>
-                    <td>
-                        {{ object.center.institution|default:'Unspecified' }}
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <b>Base Model</b>
-                    </td>
-                    <td>
-                        {{ object.base_model }}
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <b>Organ</b>
-                    </td>
-                    <td>
-                        {{ object.organ }}
-                    </td>
-                </tr>
-                {% if object.disease %}
-                <tr>
-                    <td>
-                        <b>Disease</b>
-                    </td>
-                    <td>
-                        {{ object.disease }}
-                        {% if object.disease_trigger %}
-                            ({{ object.get_disease_trigger_display }})
-                        {% endif %}
-                    </td>
-                </tr>
-                {% endif %}
-                <tr>
-                    <td>
-                        <b>Project</b>
-                    </td>
-                    <td>
-                        {% if object.mps %}
-                            <span class="label label-primary">MPS</span>
-                        {% endif %}
-                        {% if object.epa %}
-                            <span class="label label-success">EPA</span>
-                        {% endif %}
-                        {% if object.tctc %}
-                            <span class="label label-info">TCTC</span>
-                        {% endif %}
-                        {% if not object.mps and not object.epa and not object.tctc %}
-                            <span class="label label-default">Unassigned</span>
-                        {% endif %}
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <b>Model Image</b>
-                    </td>
-                    <td>
-                        {% if object.model_image %}
-                            <img class="img-responsive" src="/media/{{ object.model_image }}">
-                        {% else %}
-                            No Image Available
-                        {% endif %}
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <b>Device Image</b>
-                    </td>
-                    <td>
-                        {% if object.device.device_image %}
-                            <img class="img-responsive" src="/media/{{ object.device.device_image }}">
-                        {% else %}
-                            No Image Available
-                        {% endif %}
-                    </td>
-                </tr>
-                {% if object.description %}
-                <tr>
-                    <td>
-                        <b>Description</b>
-                    </td>
-                    <td>
-                        {{ object.description|linebreaksbr }}
-                    </td>
-                </tr>
-                {% endif %}
-                <tr>
-                    <td>
-                        <b>References</b>
-                    </td>
-                    <td>
-                        {{ object.references|linebreaksbr }}
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-        </div>
-    </div>
+    <table class="table table-striped table-bordered table-nonfluid" style="background-color: #AAB3AB;">
+        <tbody>
+            <tr>
+                <td>
+                    <b>Center</b>
+                </td>
+                <td>
+                    <a href="/microdevices/center/{{ object.center.id }}" target='_blank'>{{ object.center.name }} ({{ object.center.center_id }})</a>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <b>Institution</b>
+                </td>
+                <td>
+                    {{ object.center.institution|default:'Unspecified' }}
+                </td>
+            </tr>
+            {% if object.base_model and object.base_model_id != object.id %}
+            <tr>
+                <td>
+                    <b>Base Model</b>
+                </td>
+                <td>
+                    <a href="{{ object.base_model.get_absolute_url }}">{{ object.base_model.alt_name }}</a>
+                </td>
+            </tr>
+            {% endif %}
+            {% if object.device %}
+            <tr>
+                <td>
+                    <b>Device</b>
+                </td>
+                <td>
+                    <a href="{{ object.device.get_absolute_url }}">{{ object.device }}</a>
+                </td>
+            </tr>
+            {% endif %}
+            <tr>
+                <td>
+                    <b>Organ</b>
+                </td>
+                <td>
+                    {{ object.organ }}
+                </td>
+            </tr>
+            {% if object.disease %}
+            <tr>
+                <td>
+                    <b>Disease</b>
+                </td>
+                <td>
+                    {{ object.disease }}
+                    {% if object.disease_trigger %}
+                        ({{ object.get_disease_trigger_display }})
+                    {% endif %}
+                </td>
+            </tr>
+            {% endif %}
+            <tr>
+                <td>
+                    <b>Project</b>
+                </td>
+                <td>
+                    {% if object.mps %}
+                        <span class="label label-primary">MPS</span>
+                    {% endif %}
+                    {% if object.epa %}
+                        <span class="label label-success">EPA</span>
+                    {% endif %}
+                    {% if object.tctc %}
+                        <span class="label label-info">TCTC</span>
+                    {% endif %}
+                    {% if not object.mps and not object.epa and not object.tctc %}
+                        <span class="label label-default">Unassigned</span>
+                    {% endif %}
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <b>Model Image</b>
+                </td>
+                <td>
+                    {% if object.model_image %}
+                        <img class="img-responsive" src="/media/{{ object.model_image }}">
+                    {% else %}
+                        No Image Available
+                    {% endif %}
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <b>Device Image</b>
+                </td>
+                <td>
+                    {% if object.device.device_image %}
+                        <img class="img-responsive" src="/media/{{ object.device.device_image }}">
+                    {% else %}
+                        No Image Available
+                    {% endif %}
+                </td>
+            </tr>
+            {% if object.description %}
+            <tr>
+                <td>
+                    <b>Description</b>
+                </td>
+                <td>
+                    {{ object.description|linebreaksbr }}
+                </td>
+            </tr>
+            {% endif %}
+            <tr>
+                <td>
+                    <b>References</b>
+                </td>
+                <td>
+                    {{ object.references|linebreaksbr }}
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    {% if object.organmodellocation_set.count %}
+    <legend>Sample Locations</legend>
+
+    <table class="table table-striped table-bordered table-nonfluid" style="background-color: #E8CAAF;">
+        <thead>
+            <tr>
+                <th>Sample Location</th>
+                <th>Description</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for sample_location in object.organmodellocation_set.all %}
+            <tr>
+                <td>{{ sample_location.sample_location }}</td>
+                <td>{{ sample_location.notes }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
 {% endblock %}

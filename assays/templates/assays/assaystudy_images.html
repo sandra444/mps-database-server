@@ -1,9 +1,11 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block load %}
+{% block load_js %}
     <script src="{% static "assays/image_interface.js" %}"></script>
-    <script src="{% static "js/display_datatable.js" %}"></script>
+{% endblock %}
+
+{% block extra_head %}
     <script>
         var metadata_list = JSON.parse("{{ metadata|escapejs|safe }}");
         var tableRows = JSON.parse("{{ tableRows|escapejs|safe }}");

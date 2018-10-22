@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block load %}
+{% block load_js %}
     <script src="{% static "compounds/compounds_detail.js" %}"></script>
 {% endblock %}
 
@@ -473,8 +473,6 @@
             {% endfor %}
             </tbody>
         </table>
-
-        <script src="{% static "js/display_datatable.js" %}"></script>
         </div>
     {% endif %}
 {% endblock %}

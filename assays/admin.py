@@ -7,6 +7,7 @@ Note that the code for templates can be found here
 
 from django.contrib import admin
 from django import forms
+from django.contrib.auth.models import Group, User
 # from assays.forms import (
 #     AssayStudyConfigurationForm,
 #     AssayChipReadoutInlineFormset,
@@ -21,7 +22,28 @@ from assays.utils import (
 # TODO SPAGHETTI CODE
 # from django.http import HttpResponseRedirect
 
-from assays.models import *
+from assays.models import (
+    AssayQualityIndicator,
+    UnitType,
+    PhysicalUnits,
+    AssayStudyModel,
+    AssayStudyConfiguration,
+    AssayTarget,
+    AssaySampleLocation,
+    AssayMeasurementType,
+    AssaySupplier,
+    AssayMethod,
+    AssayStudyAssay,
+    AssayStudySupportingData,
+    AssayStudyStakeholder,
+    AssayStudy,
+    AssayMatrixItem,
+    AssayMatrix,
+    AssayImage,
+    AssayImageSetting,
+    AssaySetting,
+    AssaySubtarget
+)
 from microdevices.models import MicrophysiologyCenter
 # from compounds.models import Compound
 from mps.base.admin import LockableAdmin
@@ -36,7 +58,7 @@ from mps.base.admin import LockableAdmin
 # from django.db import connection, transaction
 # from urllib import unquote
 
-from .forms import AssayStudyConfigurationForm, AssayStudyFormAdmin
+from .forms import AssayStudyFormAdmin #, AssayStudyConfigurationForm
 
 from mps.settings import MEDIA_ROOT, TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX
 import os

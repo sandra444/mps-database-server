@@ -1,12 +1,25 @@
-# TODO PLEASE AVOID WILDCARD IMPORTS
-from mps.templatetags.custom_filters import has_group, is_group_viewer, is_group_editor, is_group_admin
+from mps.templatetags.custom_filters import (
+    has_group,
+    is_group_viewer,
+    is_group_editor,
+    is_group_admin
+)
 from django.shortcuts import redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.utils.decorators import method_decorator
 from django.template import loader
 from django.http import HttpResponseForbidden
-from assays.models import AssayRun, AssayRunStakeholder, AssayStudy, AssayStudyStakeholder
-from mps.templatetags.custom_filters import filter_groups, VIEWER_SUFFIX, ADMIN_SUFFIX
+from assays.models import (
+    AssayRun,
+    AssayRunStakeholder,
+    AssayStudy,
+    AssayStudyStakeholder
+)
+from mps.templatetags.custom_filters import (
+    filter_groups,
+    VIEWER_SUFFIX,
+    ADMIN_SUFFIX
+)
 
 
 # Unsemantic! Breaks PEP!
@@ -356,7 +369,7 @@ class StudyGroupRequiredMixin(object):
 # Deprecated
 class ViewershipMixin(object):
     """This mixin checks if the user has the group neccessary to at least view the entry
-    
+
     Attributes:
     study - specifies what study to look to for permissions
     """

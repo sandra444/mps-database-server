@@ -17,7 +17,4 @@ $(document).ready(function() {
         //     }
         // ]
     });
-
-    // Prevent "pop in".
-    $("#locations").css("display", "block");
 });

@@ -10,9 +10,27 @@ from django.views.generic import (
 )
 from django.http import HttpResponse
 from cellsamples.models import CellSample
-# TODO TRIM THIS IMPORT
-# Temporary wildcard
-from assays.models import *
+from assays.models import (
+    AssayStudyConfiguration,
+    AssayStudyModel,
+    AssayStudy,
+    AssayMatrix,
+    AssayMatrixItem,
+    AssayTarget,
+    AssayMethod,
+    PhysicalUnits,
+    AssaySampleLocation,
+    AssayImage,
+    AssayImageSetting,
+    AssayStudyAssay,
+    AssaySetupCompound,
+    AssaySetupCell,
+    AssaySetupSetting,
+    AssayStudyStakeholder,
+    AssayDataFileUpload,
+    AssayDataPoint,
+    AssayStudySupportingData
+)
 from assays.forms import (
     AssayStudyConfigurationForm,
     ReadyForSignOffForm,
@@ -31,10 +49,9 @@ from assays.forms import (
     AssayStudySignOffForm,
     AssayStudyStakeholderFormSetFactory,
     AssayStudyDataUploadForm,
-    AssayImage,
-    AssayImageSetting,
-    AssayStudyAssay
+    AssayStudyModelFormSet
 )
+from microdevices.models import MicrophysiologyCenter
 from django import forms
 
 # TODO REVISE SPAGHETTI CODE
@@ -200,22 +217,18 @@ def get_user_status_context(self, context):
 
 def get_queryset_with_group_center_dictionary(queryset):
     """Takes the queryset, adds a dictionary 'group_center_map' mapping each group to its center"""
-
-    # INSTEAD OF GRABBING THE GROUPS FIRST, GET ALL CENTERS AND THEIR GROUPS, AND FOR EACH STUDY APPLY CORRECT CENTER
-    # THEN DO COMPOUND STUFF ELSEWHERE
-
-    groups = queryset.values_list('group__name', flat=True)
     group_center_map = {}
 
     centers = MicrophysiologyCenter.objects.all().prefetch_related(
         'groups'
     )
 
-    for group in groups:
-        group_center_map[group] = centers.filter(groups__name__contains=group).first()
+    for center in centers:
+        for group in center.groups.all():
+            group_center_map[group.id] = center
 
     for study in queryset:
-        study.center = group_center_map[study.group.name]
+        study.center = group_center_map[study.group_id]
 
 
 # Class-based views for study configuration
@@ -223,19 +236,6 @@ class AssayStudyConfigurationList(LoginRequiredMixin, ListView):
     """Display a list of Study Configurations"""
     model = AssayStudyConfiguration
     template_name = 'assays/studyconfiguration_list.html'
-
-
-# FormSet for Study Models
-AssayStudyModelFormSet = inlineformset_factory(
-    AssayStudyConfiguration,
-    AssayStudyModel,
-    extra=1,
-    exclude=[],
-    widgets={
-        'label': forms.TextInput(attrs={'size': 2}),
-        'sequence_number': forms.TextInput(attrs={'size': 2})
-    }
-)
 
 
 class AssayStudyConfigurationAdd(OneGroupRequiredMixin, CreateView):
@@ -351,9 +351,8 @@ def get_queryset_with_number_of_data_points(queryset):
     images = AssayImage.objects.filter(
         setting__study_id__in=study_ids
     ).prefetch_related(
-        'matrix_item',
         'setting'
-    ).only('id', 'matrix_item', 'setting', 'file_name')
+    ).only('id', 'setting__study_id', 'setting', 'file_name')
 
     video_formats = {x: True for x in [
         'webm',
@@ -373,17 +372,17 @@ def get_queryset_with_number_of_data_points(queryset):
 
         if is_video:
             current_value = videos_map.setdefault(
-                image.matrix_item.study_id, 0
+                image.setting.study_id, 0
             )
             videos_map.update({
-                image.matrix_item.study_id: current_value + 1
+                image.setting.study_id: current_value + 1
             })
         else:
             current_value = images_map.setdefault(
-                image.matrix_item.study_id, 0
+                image.setting.study_id, 0
             )
             images_map.update({
-                image.matrix_item.study_id: current_value + 1
+                image.setting.study_id: current_value + 1
             })
 
     supporting_data = AssayStudySupportingData.objects.filter(
@@ -1174,13 +1173,13 @@ class AssayMatrixAdd(StudyGroupMixin, CreateView):
         if self.request.POST:
             context['item_formset'] = AssayMatrixItemFormSetFactory(
                 self.request.POST,
-                prefix='item',
+                prefix='matrix_item',
                 study=study,
                 user=self.request.user
             )
         else:
             context['item_formset'] = AssayMatrixItemFormSetFactory(
-                prefix='item',
+                prefix='matrix_item',
                 study=study,
                 user=self.request.user
             )
@@ -1197,7 +1196,7 @@ class AssayMatrixAdd(StudyGroupMixin, CreateView):
         formset = AssayMatrixItemFormSetFactory(
             self.request.POST,
             instance=form.instance,
-            prefix='item',
+            prefix='matrix_item',
             study=study,
             user=self.request.user
         )
@@ -1289,7 +1288,7 @@ class AssayMatrixUpdate(StudyGroupMixin, UpdateView):
                 self.request.POST,
                 instance=self.object,
                 queryset=matrix_item_queryset,
-                prefix='item',
+                prefix='matrix_item',
                 user=self.request.user
             )
             context['compound_formset'] = AssaySetupCompoundFormSetFactory(
@@ -1314,7 +1313,7 @@ class AssayMatrixUpdate(StudyGroupMixin, UpdateView):
             context['item_formset'] = AssayMatrixItemFormSetFactory(
                 instance=self.object,
                 queryset=matrix_item_queryset,
-                prefix='item',
+                prefix='matrix_item',
                 user=self.request.user
             )
             context['compound_formset'] = AssaySetupCompoundFormSetFactory(
@@ -1345,7 +1344,7 @@ class AssayMatrixUpdate(StudyGroupMixin, UpdateView):
             self.request.POST,
             instance=self.object,
             queryset=matrix_item_queryset,
-            prefix='item',
+            prefix='matrix_item',
             user=self.request.user
         )
         # Order no longer matters really
@@ -1447,7 +1446,7 @@ class AssayMatrixDetail(StudyGroupMixin, DetailView):
         context['item_formset'] = AssayMatrixItemFormSetFactory(
             instance=self.object,
             queryset=matrix_item_queryset,
-            prefix='item'
+            prefix='matrix_item'
         )
         context['compound_formset'] = AssaySetupCompoundFormSetFactory(
             queryset=compound_queryset,
@@ -1545,12 +1544,21 @@ class AssayMatrixItemUpdate(StudyGroupMixin, UpdateView):
             instance=self.object,
             # matrix=self.object
         )
-        if form.is_valid() and compound_formset.is_valid() and cell_formset.is_valid() and setting_formset.is_valid():
-            save_forms_with_tracking(self, form, update=True, formset=[
-                compound_formset,
-                cell_formset,
-                setting_formset
-            ])
+
+        all_formsets = [
+            compound_formset,
+            cell_formset,
+            setting_formset,
+        ]
+
+        all_formsets_valid =  True
+
+        for current_formset in all_formsets:
+            if not current_formset.is_valid():
+                all_formsets_valid = False
+
+        if form.is_valid() and all_formsets_valid:
+            save_forms_with_tracking(self, form, update=True, formset=all_formsets)
 
             try:
                 data_point_ids_to_update_raw = json.loads(form.data.get('dynamic_exclusion', '{}'))
@@ -1700,6 +1708,14 @@ class AssayMethodList(ListView):
     model = AssayMethod
     template_name = 'assays/assaymethod_list.html'
 
+    def get_queryset(self):
+        queryset = AssayMethod.objects.all().prefetch_related(
+            'supplier',
+            'measurement_type'
+        )
+
+        return queryset
+
 
 class AssayMethodDetail(DetailView):
     model = AssayMethod
@@ -1729,10 +1745,26 @@ class AssayPhysicalUnitsList(ListView):
     model = PhysicalUnits
     template_name = 'assays/assayunit_list.html'
 
+    def get_queryset(self):
+        queryset = PhysicalUnits.objects.all().prefetch_related(
+            'unit_type',
+        )
 
+        return queryset
+
+
+# TODO: PERHAPS THIS SHOULD NOT BE HERE
 class AssaySampleLocationList(ListView):
     model = AssaySampleLocation
     template_name = 'assays/assaylocation_list.html'
+
+
+class AssayInterStudyReproducibility(LoginRequiredMixin, TemplateView):
+    template_name = 'assays/assay_interstudy_reproducibility.html'
+
+
+class AssayStudyDataPlots(LoginRequiredMixin, TemplateView):
+    template_name = 'assays/assaystudy_data_plots.html'
 
 
 # Inappropriate use of CBV

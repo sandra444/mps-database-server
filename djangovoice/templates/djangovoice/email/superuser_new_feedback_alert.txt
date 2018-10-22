@@ -1,0 +1,14 @@
+Hello admins,
+
+New feedback from {{ feedback.user.email }} has been received:
+
+"
+{{ feedback.title }}
+
+{{ feedback.description}}
+"
+
+Please respond to the feedback as soon as possible and mark it "Accepted," "Won't Do," or "Done" as necessary.
+
+Thanks,
+MPS

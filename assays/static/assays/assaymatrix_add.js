@@ -10,27 +10,16 @@ $(document).ready(function () {
     var matrix_table_selector = $('#matrix_table');
     var matrix_body_selector = $('#matrix_body');
 
-    window.device = $('#id_item_device');
-    window.organ_model = $('#id_item_organ_model');
-    window.organ_model_protocol = $('#id_item_organ_model_protocol');
+    window.device = $('#id_matrix_item_device');
+    window.organ_model = $('#id_matrix_item_organ_model');
+    window.organ_model_protocol = $('#id_matrix_item_organ_model_protocol');
 
     // Contrived, but useful:
     // Will make a clone of the organ_model and organ_model_protocol dropdowns for display
-    // Somewhat crude to add straight to body, I suppose
-    var full_organ_model = window.organ_model
-        .clone()
-        .attr('id', 'id_item-full_organ_model')
-        .attr('name', 'item-full_organ_model')
-        .css('display', 'none')
-        .appendTo('body');
-    var full_organ_model_protocol = window.organ_model_protocol
-        .clone()
-        .attr('id', 'id_item-full_organ_model_protocol')
-        .attr('name', 'item-full_organ_model_protocol')
-        .css('display', 'none')
-        .appendTo('body');
+    var full_organ_model = $('#id_matrix_item_full_organ_model');
+    var full_organ_model_protocol = $('#id_matrix_item_full_organ_model_protocol');
 
-    var item_display_class = '.item-td';
+    var item_display_class = '.matrix_item-td';
 
     // Allows the matrix_table to have the draggable JQuery UI element
     matrix_table_selector.selectable({
@@ -64,14 +53,14 @@ $(document).ready(function () {
 
     // CRUDE AND BAD
     // If I am going to use these, they should be ALL CAPS to indicate global status
-    var item_prefix = 'item';
+    var item_prefix = 'matrix_item';
     var cell_prefix = 'cell';
     var setting_prefix = 'setting';
     var compound_prefix = 'compound';
 
     var item_form_index_attribute = 'data-form-index';
     var item_subform_index_attribute = 'data-subform-index';
-    var item_id_attribute = 'data-item-id';
+    var item_id_attribute = 'data-matrix_item-id';
 
     var prefixes = [
         item_prefix,
@@ -80,7 +69,7 @@ $(document).ready(function () {
         compound_prefix
     ];
 
-    var empty_item_html = $('#empty_item_html').children();
+    var empty_item_html = $('#empty_matrix_item_html').children();
     var empty_compound_html = $('#empty_compound_html').children();
     var empty_cell_html = $('#empty_cell_html').children();
     var empty_setting_html = $('#empty_setting_html').children();
@@ -204,7 +193,7 @@ $(document).ready(function () {
     }
 
     function plate_style_name_creation(append_zero) {
-        var current_global_name = $('#id_item_name').val();
+        var current_global_name = $('#id_matrix_item_name').val();
         var current_number_of_rows = number_of_rows_selector.val();
         var current_number_of_columns = number_of_columns_selector.val();
 
@@ -230,7 +219,7 @@ $(document).ready(function () {
                 // TODO TODO TODO PERFORM THE ACTUAL APPLICATION TO THE FORMS
                 // Set display
                 var item_display = $('#'+ current_item_id);
-                item_display.find('.item-name').html(value);
+                item_display.find('.matrix_item-name').html(value);
                 // Set form
                 $('#id_' + item_prefix + '-' + item_display.attr(item_form_index_attribute) + '-name').val(value);
             }
@@ -423,7 +412,19 @@ $(document).ready(function () {
 
             // Get the select display if select
             if (origin.prop('tagName') === 'SELECT') {
-                return origin.find('option[value="' + field.val() + '"]').text()
+                // Convert to integer if possible, thanks
+                var possible_int = Math.floor(field.val());
+                // console.log(possible_int);
+                if (possible_int) {
+                    // console.log(origin[0].selectize.options[possible_int].text);
+                    return origin[0].selectize.options[possible_int].text;
+                }
+                else {
+                    // console.log(origin[0].selectize.options[field.val()].text);
+                    return origin[0].selectize.options[field.val()].text;
+                }
+                // THIS IS BROKEN, FOR PRE-SELECTIZE ERA
+                // return origin.find('option[value="' + field.val() + '"]').text()
             }
             // Just display the thing if there is an origin
             else if (origin[0]) {
@@ -452,7 +453,7 @@ $(document).ready(function () {
     // TODO REVISE
     function refresh_all_contents_from_forms() {
         // I probably can get away with purging the marked entries
-        $('.item-setup_set_section').empty();
+        $('.matrix_item-setup_set_section').empty();
 
         var errors_exist = false;
         // Iterate over all prefixes
@@ -472,12 +473,12 @@ $(document).ready(function () {
                     display.attr(item_id_attribute, current_id);
                     if (current_id) {
                         // BE CAREFUL WITH THIS SORT OF STUFF
-                        display.find('.item-name')
+                        display.find('.matrix_item-name')
                             .removeAttr('disabled')
                             .attr('href', '/assays/assaymatrixitem/' + current_id);
                     }
                     else {
-                        display.find('.item-name').attr('disabled', '');
+                        display.find('.matrix_item-name').attr('disabled', '');
                         display.find('.form-delete').hide();
                     }
                 }
@@ -526,7 +527,7 @@ $(document).ready(function () {
                 var errors_display = null;
                 var errors_list = null;
 
-                if (errors.length > 0) {
+                if (errors.length > 0 && !$(this).find('input[name$="DELETE"]').prop('checked')) {
                     errors_display = $('#empty_error_html').children().clone();
                     errors_list = $('<ul>');
                     $.each(errors, function(index, error_message) {
@@ -549,7 +550,7 @@ $(document).ready(function () {
                         new_subdisplay.removeClass('strikethrough');
                     }
 
-                    display.find('.item-' + prefix).append(new_subdisplay);
+                    display.find('.matrix_item-' + prefix).append(new_subdisplay);
                     if (errors_display) {
                         new_subdisplay.find('.error-message-section').html(errors_display);
                     }
@@ -562,10 +563,10 @@ $(document).ready(function () {
 
         // NOTE: Special operation! Hide device if one is selected
         if (device_selector.val()) {
-            $('.item-device').hide();
+            $('.matrix_item-device').hide();
         }
         else {
-            $('.item-device').show();
+            $('.matrix_item-device').show();
         }
 
         // NOTE: Show all displays if there are errors
@@ -578,7 +579,7 @@ $(document).ready(function () {
     }
 
     function chip_style_name_incrementer() {
-        var original_name = $('#id_item_name').val();
+        var original_name = $('#id_matrix_item_name').val();
         var split_name = original_name.split(/(\d+)/).filter(Boolean);
 
         var numeric_index = original_name.length - 1;
@@ -613,7 +614,7 @@ $(document).ready(function () {
             var value = first_half + incremented_value + second_half;
 
             // Set display
-            $(this).find('.item-name').html(value);
+            $(this).find('.matrix_item-name').html(value);
             // Set form
             $('#id_' + item_prefix + '-' + $(this).attr(item_form_index_attribute) + '-name').val(value);
         });
@@ -684,12 +685,13 @@ $(document).ready(function () {
     }
 
     function get_field_from_control(prefix, control) {
+        // console.log(prefix, control);
         return control.attr('name').replace(prefix + '_', '');
     }
 
     // TODO TODO TODO BE POSITIVE THAT SUBFORMS ARE NOT ADDED TO ITEMS THAT DON'T EXIST YET
     function add_subform(prefix)  {
-        var current_fields = $('.item-section:visible').find('select, input, textarea');
+        var current_fields = $('.matrix_item-section:visible').find('select, input, textarea').not('[id$="-selectized"]');
 
         var number_of_items = $('.ui-selected').length;
 
@@ -720,7 +722,7 @@ $(document).ready(function () {
 
     // SUBJECT TO CHANGE
     function add_to_item() {
-        var current_fields = $('.item-section:visible').find('select, input, textarea');
+        var current_fields = $('.matrix_item-section:visible').find('select, input, textarea').not('[id$="-selectized"]');
 
         var number_of_items = $('.ui-selected').length;
 
@@ -789,9 +791,20 @@ $(document).ready(function () {
         current_parent.find('.subform-delete').attr('disabled', checked_value);
     }
 
-    // At the moment, this just triggers the item deletes of all selections
     function delete_items() {
-        $('.ui-selected').not('.strikethrough').find('.form-delete').trigger('click');
+        var delete_option = $('#id_delete_option').val();
+
+        // If delete all
+        if (delete_option === 'all') {
+            $('.ui-selected').not('.strikethrough').find('.form-delete').trigger('click');
+        }
+        // Otherwise find the matching subforms and delete them
+        else {
+            $('.ui-selected').not('.strikethrough')
+                .find('.matrix_item-' + delete_option)
+                .find('.subform-delete')
+                .trigger('click');
+        }
     }
 
     // TODO TODO TODO TENTATIVE
@@ -888,13 +901,13 @@ $(document).ready(function () {
             }
 
             // SPECIAL OPERATION
-            $('#id_item_device').parent().parent().show();
+            $('#id_matrix_item_device').parent().parent().show();
         }
         else if (current_representation === 'plate') {
             $('#matrix_device_and_model_section').show();
             // TODO FORCE SETUP DEVICE TO MATCH
             // SPECIAL OPERATION
-            $('#id_item_device').parent().parent().hide();
+            $('#id_matrix_item_device').parent().parent().hide();
         }
     }
 
@@ -957,7 +970,7 @@ $(document).ready(function () {
     // }
 
     function check_action() {
-        $('.item-section').hide('fast');
+        $('.matrix_item-section').hide('fast');
         var current_section = action_selector.val();
         $('.' + current_section + '_section').show('fast');
         if (current_section) {
@@ -978,7 +991,7 @@ $(document).ready(function () {
             $('#show_cells').prop('checked', true).trigger('change');
         }
         else if (current_section.indexOf('add_') > -1) {
-            $('#show_items').prop('checked', true).trigger('change');
+            $('#show_matrix_items').prop('checked', true).trigger('change');
         }
     }
     action_selector.change(check_action);
@@ -1097,6 +1110,10 @@ $(document).ready(function () {
             // Mark for deletion if empty
             if (empty) {
                 $(this).find('input[name$="DELETE"]').prop('checked', true);
+            }
+            // Otherwise make sure has device
+            if (device_selector.val()) {
+                $(this).find('input[name$="device"]').val(device_selector.val());
             }
         });
     });

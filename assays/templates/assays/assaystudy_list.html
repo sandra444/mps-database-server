@@ -4,11 +4,9 @@
 {#{% load url from future %}#}
 {% load humanize %}
 
-{% block load %}
+{% block extra_head %}
+    EXTRA HEAD
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-    <script src="{% static "assays/chart_display.js" %}"></script>
-    <script src="{% static "js/display_datatable.js" %}"></script>
-    <script src="{% static "assays/assaystudy_list.js" %}"></script>
     <style>
         svg > g:last-child > g:last-child {
             pointer-events: none;
@@ -17,6 +15,11 @@
             pointer-events: none;
         }
     </style>
+{% endblock %}
+
+{% block load_js %}
+    <script src="{% static "assays/chart_display.js" %}"></script>
+    <script src="{% static "assays/assaystudy_list.js" %}"></script>
 {% endblock %}
 
 {% block breadcrumbs %}
@@ -99,7 +102,7 @@
                     {% endif %}
                     <td>{{ study.description }}</td>
                     <td>
-                        <div id="piechart{{ forloop.counter0 }}" data-nums="{{study.repro_nums}}" class="text-center" style="width: 70px; height: 70px; margin: auto; display: block;">Loading...</div>
+                        <div id="piechart{{ forloop.counter0 }}" data-nums="{{study.repro_nums}}" class="text-center" style="width: 70px; height: 70px; margin: auto; display: block;"></div>
                     </td>
                     <td><a href='/microdevices/center/{{ study.center.id }}/' target='_blank' title="{{ study.center.name }}">{{ study.center.center_id }}</a></td>
                     <td>

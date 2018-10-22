@@ -1,6 +1,38 @@
 from django.conf.urls import url
-# TODO NO WILDCARDS PLEASE
-from assays.views import *
+from assays.views import (
+    AssayStudyEditableList,
+    AssayStudyIndex,
+    AssayStudyUpdate,
+    AssayStudyDelete,
+    AssayStudySummary,
+    AssayStudyData,
+    AssayStudyDataUpload,
+    AssayStudyList,
+    AssayStudyAdd,
+    AssayMatrixItemDetail,
+    AssayMatrixItemUpdate,
+    AssayMatrixItemDelete,
+    AssayStudyConfigurationList,
+    AssayStudyConfigurationAdd,
+    AssayStudyConfigurationUpdate,
+    AssayMatrixAdd,
+    AssayMatrixDetail,
+    AssayMatrixUpdate,
+    AssayMatrixDelete,
+    AssayStudySignOff,
+    AssayStudyReproducibility,
+    AssayStudyImages,
+    AssayTargetList,
+    AssayTargetDetail,
+    AssayMethodList,
+    AssayMethodDetail,
+    AssayPhysicalUnitsList,
+    AssaySampleLocationList,
+    GraphingReproducibilityFilterView,
+    AssayInterStudyReproducibility,
+    AssayStudyDataPlots,
+    AssayDataFromFilters
+)
 import assays.ajax
 
 urlpatterns = [
@@ -105,6 +137,8 @@ urlpatterns = [
 
     # Location for test filter, for now
     url(r'^assays/graphing_reproducibility/$', GraphingReproducibilityFilterView.as_view(), name='graphing-reproducibility'),
+    url(r'^assays/assay_interstudy_reproducibility/$', AssayInterStudyReproducibility.as_view(), name='interstudy-reproducibility'),
+    url(r'^assays/assaystudy_data_plots/$', AssayStudyDataPlots.as_view(), name='assaystudy-data-plots'),
 
     # Data from filters
     url(r'^assays/data_from_filters/$', AssayDataFromFilters.as_view(), name='data-from-filters'),

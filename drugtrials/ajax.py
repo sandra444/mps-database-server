@@ -1,6 +1,6 @@
 # coding=utf-8
 
-from django.http import *
+from django.http import HttpResponse, HttpResponseServerError
 from .models import CompoundAdverseEvent, OpenFDACompound, AdverseEvent
 import ujson as json
 # TODO TODO TODO REVISE IN PYTHON 3

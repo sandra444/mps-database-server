@@ -5,7 +5,14 @@
 from django.contrib import admin
 from cellsamples.resource import CellSampleResource
 from mps.base.admin import LockableAdmin
-from cellsamples.models import *
+from cellsamples.models import (
+    CellType,
+    Organ,
+    CellSubtype,
+    CellSample,
+    Biosensor,
+    Supplier
+)
 
 
 class CellTypeAdmin(LockableAdmin):

@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block load %}
+{% block load_js %}
     <script src="{% static "assays/assaytarget_list.js" %}"></script>
 {% endblock %}
 
@@ -16,8 +16,8 @@
                 Target/Analytes
             </h2>
         </legend>
-        <div id="targets" style="display: none;">
-            <table id="targets-table" class="display" cellspacing="0" width="100%">
+        <div id="targets">
+            <table id="targets-table" class="display" cellspacing="0" width="100%" hidden>
                 <thead>
                     <tr>
                         <th>View Details</th>
@@ -40,5 +40,4 @@
             </table>
         </div>
     </div>
-    <script src="{% static "js/display_datatable.js" %}"></script>
 {% endblock %}

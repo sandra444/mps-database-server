@@ -175,6 +175,7 @@ TEMPLATES = [
                 'django.template.context_processors.static',
                 'django.template.context_processors.tz',
                 'django.contrib.messages.context_processors.messages',
+                'mps.context_processors.google_analytics',
             ],
             'loaders': [
                 # insert your TEMPLATE_LOADERS here
@@ -233,8 +234,35 @@ INSTALLED_APPS = (
     'bioactivities',
     'drugtrials',
     'resources',
-    'diseases'
+    'diseases',
+    'compressor',
 )
+
+# Google Analytics ID
+GOOGLE_ANALYTICS = ''
+
+# Backend for username case insensitivity
+AUTHENTICATION_BACKENDS = ('mps.backends.CaseInsensitiveModelBackend', )
+
+# COMPRESSION
+STATICFILES_FINDERS += (
+    'compressor.finders.CompressorFinder',
+)
+
+COMPRESS_CSS_FILTERS = [
+    'compressor.filters.css_default.CssAbsoluteFilter',
+    'compressor.filters.cssmin.CSSMinFilter',
+    'compressor.filters.template.TemplateFilter'
+]
+
+COMPRESS_JS_FILTERS = [
+    'compressor.filters.jsmin.JSMinFilter',
+]
+
+# Whether or not to compress
+COMPRESS_ENABLED = False
+# Whether or not to use offline cache
+COMPRESS_OFFLINE = True
 
 # This should set all indices to use real time processing
 # Users will have to pay the toll when adding or deleting indexed objects...
@@ -290,7 +318,7 @@ LOGGING = {
         'file_critical': {
             'level': 'CRITICAL',
             'class': 'logging.FileHandler',
-            'filename': 'logs/django.debug.log',
+            'filename': 'logs/django.error.log',
             'formatter': 'verbose'
         },
         'file_error': {
@@ -323,9 +351,15 @@ LOGGING = {
     'loggers': {
 
         'django': {
-            'handlers': ['file_error'],
+            'handlers': ['file_critical', 'file_error'],
             'propagate': True,
             'level': 'ERROR',
+        },
+
+        'mps': {
+            'handlers': ['file_critical', 'file_error', 'file_info'],
+            'propagate': True,
+            'level': 'INFO',
         },
 
         'assays': {
@@ -395,6 +429,8 @@ REST_FRAMEWORK = {
 def show_toolbar(request):
     return True
 
+# I will need to tune this value
+DATA_UPLOAD_MAX_NUMBER_FIELDS = 40000
 
 DEBUG_TOOLBAR_CONFIG = {
     'SHOW_TOOLBAR_CALLBACK': 'mps.settings.show_toolbar'
@@ -415,6 +451,7 @@ ACCOUNT_ACTIVATION_DAYS = 7
 LOGIN_REDIRECT_URL = '/accounts/loggedin/'
 
 # The console EmailBackend will post emails in the console
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+# EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+EMAIL_BACKEND = 'mps.backends.LoggingBackend'
 
 DEFAULT_FROM_EMAIL = 'webmaster@localhost'

@@ -25,6 +25,7 @@ django-filebrowser
 django-filter
 django-grappelli
 django-pipeline
+django-compressor
 djangorestframework
 docutils
 easydev

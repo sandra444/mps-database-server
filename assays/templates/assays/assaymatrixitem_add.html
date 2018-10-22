@@ -2,9 +2,8 @@
 {% load static %}
 {% load custom_filters %}
 
-{% block load %}
-    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-    <script src="{% static "js/inline_add.js" %}"></script>
+{% block load_js %}
+    {# <script src="{% static "js/inline_add.js" %}"></script>#}
     <script src="{% static "js/datepicker.js" %}"></script>
     <script src="{% static "js/enter_override.js" %}"></script>
     <script src="{% static "assays/compound_instances.js" %}"></script>
@@ -13,6 +12,10 @@
     <script src="{% static "assays/organ_model_filter.js" %}"></script>
     <script src="{% static "assays/assaymatrixitem_add.js" %}"></script>
     <script src="{% static "js/flag.js" %}"></script>
+{% endblock %}
+
+{% block extra_head %}
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 {% endblock %}
 
 {% block breadcrumbs %}
@@ -275,11 +278,12 @@
                 <tr class="inline compound-inline" id="compounds-{{ forloop.counter0 }}">
                 <td>
                 <table class="table table-condensed table-bordered table-nonfluid no-margin-bottom">
+
                     <tr>
-                        <th>Compound*</th>
-                        <th>Supplier*</th>
-                        <th>Lot*</th>
-                        <th>Receipt Date</th>
+                        <th colspan="3">Compound*</th>
+                    </tr>
+                    <tr>
+                        <td colspan="3">{{ compound.compound }}</td>
                     </tr>
                     <tr>
                         {# Hidden input for Update (need id to associate) #}
@@ -292,7 +296,12 @@
                             {# Hidden foreign key fields #}
                             {{ compound.compound_instance }}
                         </td>
-                        <td>{{ compound.compound }}</td>
+                    <tr>
+                        <th>Supplier*</th>
+                        <th>Lot*</th>
+                        <th>Receipt Date</th>
+                    </tr>
+                    <tr>
                         <td>{{ compound.supplier_text }}</td>
                         <td>{{ compound.lot_text }}</td>
                         <td>{{ compound.receipt_date }}</td>
@@ -320,7 +329,7 @@
                         <th class="bg-info">Day</th>
                         <th class="bg-info">Hour</th>
                         <th class="bg-info">Minute</th>
-                        <th class="bg-warning">Addition Location</th>
+                        <th class="bg-warning">Addition Location*</th>
                         <th class="bg-danger">Delete</th>
                     </tr>
                     <tr>
@@ -478,7 +487,7 @@
 {#                        <th class="bg-info">Day</th>#}
 {#                        <th class="bg-info">Hour</th>#}
 {#                        <th class="bg-info">Minute</th>#}
-                        <th class="bg-warning">Addition Location</th>
+                        <th class="bg-warning">Addition Location*</th>
                         <th class="bg-danger">Delete</th>
                     </tr>
                     <tr>
@@ -510,6 +519,20 @@
 
     {{ setting_formset.management_form }}
     <legend>Settings</legend>
+
+    {% if setting_formset.errors %}
+        {% for dict in setting_formset.errors %}
+            {% for key,value in dict.items %}
+                {% if key %}
+                    <div class="alert alert-danger" role="alert">
+                        <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                        <span class="sr-only">Error:</span>
+                        {{ forloop.parentloop.counter }}.) {{ key }} : {{ value }}
+                    </div>
+                {% endif %}
+            {% endfor %}
+        {% endfor %}
+    {% endif %}
 
     {% if setting_formset.non_form_errors %}
         <div class="alert alert-danger" role="alert">
@@ -584,7 +607,7 @@
                         <th class="bg-info">Day</th>
                         <th class="bg-info">Hour</th>
                         <th class="bg-info">Minute</th>
-                        <th class="bg-warning">Addition Location</th>
+                        <th class="bg-warning">Addition Location*</th>
                         <th class="bg-danger">Delete</th>
                     </tr>
                     <tr>

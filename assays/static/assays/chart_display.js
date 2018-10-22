@@ -52,6 +52,7 @@ $(document).ready(function () {
     // Conversion dictionary
     var headers = {
         // 'device': 'Device',
+        'Study': 'Study',
         'MPS Model': 'MPS Model',
         'Cells': 'Cells Added',
         'Compounds': 'Compound Treatment',

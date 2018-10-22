@@ -1,11 +1,37 @@
 # coding=utf-8
 import ujson as json
-from collections import defaultdict
-# TODO STOP USING WILDCARD IMPORTS
-from django.http import *
-# STOP USING WILDCARD IMPORTS
-from .models import *
-from microdevices.models import MicrophysiologyCenter, Microdevice
+# from collections import defaultdict
+from django.http import (
+    HttpResponse,
+    HttpResponseForbidden,
+    HttpResponseServerError
+)
+from .models import (
+    AssayStudy,
+    AssayMatrixItem,
+    AssayMatrix,
+    AssayStudyAssay,
+    AssayDataPoint,
+    AssayChipReadout,
+    AssayChipSetup,
+    AssayRun,
+    AssayChipReadoutAssay,
+    AssayPlateReadoutAssay,
+    AssaySetupCompound,
+    DEFAULT_SETUP_CRITERIA,
+    DEFAULT_SETTING_CRITERIA,
+    DEFAULT_COMPOUND_CRITERIA,
+    DEFAULT_CELL_CRITERIA,
+    attr_getter,
+    tuple_attrgetter,
+    get_split_times,
+)
+from microdevices.models import (
+    MicrophysiologyCenter,
+    Microdevice,
+    OrganModel,
+    OrganModelProtocol
+)
 
 # from mps.settings import TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX
 from .forms import (
@@ -23,8 +49,8 @@ from .utils import (
     get_inter_study_reproducibility_report,
     # GLOBAL STRINGS
     NO_COMPOUNDS_STRING,
-    NO_CELLS_STRING,
-    NO_SETTINGS_STRING,
+    # NO_CELLS_STRING,
+    # NO_SETTINGS_STRING,
 )
 
 from StringIO import StringIO
@@ -119,7 +145,7 @@ def fetch_organ_models(request):
     Receives the following from POST:
     device -- the device to acquire organ models from
     """
-    dropdown = u'<option value="">---------</option>'
+    dropdown = [{'value': "", 'text': '---------'}]
 
     device = request.POST.get('device', '')
 
@@ -128,7 +154,7 @@ def fetch_organ_models(request):
     for finding in findings:
         # match value to the desired subject ID
         value = str(finding.id)
-        dropdown += u'<option value="' + value + '">' + unicode(finding) + '</option>'
+        dropdown.append({'value': value, 'text': unicode(finding)})
 
     data = {}
 
@@ -146,7 +172,7 @@ def fetch_protocols(request):
     Receives the following from POST:
     organ_model -- the organ model to acquire protocols from
     """
-    dropdown = u'<option value="">---------</option>'
+    dropdown = [{'value': "", 'text': '---------'}]
 
     organ_model = request.POST.get('organ_model', '')
 
@@ -162,7 +188,7 @@ def fetch_protocols(request):
     for finding in findings:
         # match value to the desired subject ID
         value = str(finding.id)
-        dropdown += u'<option value="' + value + '">' + unicode(finding) + '</option>'
+        dropdown.append({'value': value, 'text': unicode(finding)})
 
     data = {}
 
@@ -761,7 +787,10 @@ def get_item_groups(study, criteria, matrix_items=None):
 
     # TODO TODO TODO REVISE THESE MAGIC KEYS
     if criteria.get('setup', ''):
-        header_keys.append('MPS Model')
+        if 'organ_model_id' in criteria.get('setup'):
+            header_keys.append('MPS Model')
+        if 'study_id' in criteria.get('setup'):
+            header_keys.append('Study')
     if criteria.get('cell', ''):
         header_keys.append('Cells')
     if criteria.get('compound', ''):
@@ -799,6 +828,7 @@ def get_item_groups(study, criteria, matrix_items=None):
         setup_to_treatment_group.update({setup.id: current_representative})
 
     # Attempt to sort reasonably
+    # TODO SHOULD STUDY BE PLACED HERE?
     sorted_treatment_groups = sorted(
         treatment_groups.values(), key=lambda x: (
             x.get('Compounds'),

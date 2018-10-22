@@ -9,12 +9,13 @@ from mps.base.models import save_forms_with_tracking
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.utils.decorators import method_decorator
 
+
 class OrganModelList(ListView):
     """Displays list of Organ Models"""
     template_name = 'microdevices/organmodel_list.html'
 
     def get_queryset(self):
-        return OrganModel.objects.prefetch_related('organ', 'center', 'device').all()
+        return OrganModel.objects.prefetch_related('organ', 'center', 'device', 'base_model').all()
 
 
 class MicrodeviceList(ListView):

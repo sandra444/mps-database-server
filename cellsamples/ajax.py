@@ -1,7 +1,7 @@
 # NOTE: Decided it was best to keep AJAX calls app-separated
 import ujson as json
-from django.http import *
-from .models import *
+from django.http import HttpResponse, HttpResponseServerError
+from .models import CellSubtype
 import logging
 logger = logging.getLogger(__name__)
 

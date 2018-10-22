@@ -1,5 +1,11 @@
 from django.conf.urls import url
-from .views import *
+from .views import (
+    CompoundsList,
+    CompoundsAdd,
+    CompoundsReport,
+    CompoundsDetail,
+    CompoundsUpdate
+)
 import compounds.ajax
 
 urlpatterns = [

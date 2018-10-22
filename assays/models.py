@@ -1933,6 +1933,7 @@ class AssayMatrixItem(FlaggableModel):
             criteria = {}
         dic = {
             # 'device': self.device.name,
+            'Study': self.get_hyperlinked_study(),
             'MPS Model': self.get_hyperlinked_model_or_device(),
             'Compounds': self.stringify_compounds(criteria.get('compound', None)),
             'Cells': self.stringify_cells(criteria.get('cell', None)),
@@ -1953,6 +1954,9 @@ class AssayMatrixItem(FlaggableModel):
             return '<a target="_blank" href="{0}">{1} (No Organ Model)</a>'.format(self.device.get_absolute_url(), self.device.name)
         else:
             return '<a target="_blank" href="{0}">{1}</a>'.format(self.organ_model.get_absolute_url(), self.organ_model.name)
+
+    def get_hyperlinked_study(self):
+        return '<a target="_blank" href="{0}">{1}</a>'.format(self.study.get_absolute_url(), self.study.name)
 
     # TODO TODO TODO CHANGE
     def get_absolute_url(self):

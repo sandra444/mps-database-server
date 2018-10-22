@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block load %}
+{% block load_js %}
     <script src="{% static "assays/assaylocation_list.js" %}"></script>
 {% endblock %}
 
@@ -16,8 +16,8 @@
                 Microdevice Locations List
             </h2>
         </legend>
-        <div id="locations" style="display: none;">
-            <table id="locations-table" class="display" cellspacing="0" width="100%">
+        <div id="locations">
+            <table id="locations-table" class="display" cellspacing="0" width="100%" hidden>
                 <thead>
                     <tr>
                         {# <th>View Details</th>#}
@@ -38,6 +38,4 @@
             </table>
         </div>
     </div>
-
-    <script src="{% static "js/display_datatable.js" %}"></script>
 {% endblock %}

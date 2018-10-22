@@ -8,7 +8,35 @@ from mps.settings import DEFAULT_FROM_EMAIL
 from django.template.loader import render_to_string
 
 
-class SignOffMixin(forms.ModelForm):
+WIDGETS_TO_ADD_FORM_CONTROL_TO = {
+    "<class 'django.forms.widgets.TextInput'>": True,
+    "<class 'django.forms.widgets.Textarea'>": True,
+    "<class 'django.forms.widgets.DateInput'>": True,
+    "<class 'django.forms.widgets.Select'>": True,
+    "<class 'django.forms.widgets.NumberInput'>": True
+}
+
+DATE_INPUT_WIDGET = "<class 'django.forms.widgets.DateInput'>"
+
+WIDGETS_WITH_AUTOCOMPLETE_OFF  = {
+    "<class 'django.forms.widgets.DateInput'>": True,
+}
+
+class BootstrapForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(BootstrapForm, self).__init__(*args, **kwargs)
+
+        for field in self.fields:
+            widget_type = unicode(type(self.fields[field].widget))
+            if widget_type in WIDGETS_TO_ADD_FORM_CONTROL_TO:
+                self.fields[field].widget.attrs['class'] = 'form-control'
+            if widget_type in WIDGETS_WITH_AUTOCOMPLETE_OFF:
+                self.fields[field].widget.attrs['autocomplete'] = 'off'
+            if widget_type == DATE_INPUT_WIDGET:
+                self.fields[field].widget.attrs['class'] += ' datepicker-input'
+
+
+class SignOffMixin(BootstrapForm):
     def __init__(self, *args, **kwargs):
         super(SignOffMixin, self).__init__(*args, **kwargs)
 
@@ -69,6 +97,13 @@ class CaptchaRegistrationForm(RegistrationFormUniqueEmail):
 
         return last_name
 
+    def clean(self):
+        cleaned_data = super(CaptchaRegistrationForm, self).clean()
+        username = cleaned_data.get('username')
+        if username and User.objects.filter(username__iexact=username).exists():
+            self.add_error('username', 'A user with that username already exists.')
+        return cleaned_data
+
     def save(self, commit=True):
         new_user = super(CaptchaRegistrationForm, self).save()
         new_user.first_name = self.cleaned_data.get('first_name')
@@ -118,3 +153,10 @@ class MyUserChangeForm(UserChangeForm):
                         '***NOTE THAT EDITORS ARE ALSO VIEWERS AND ADMINS ARE EDITORS AND VIEWERS***<br><br>',
             'user_permissions': '***THIS IS FOR THE ADMIN INTERFACE ONLY***<br>',
         }
+
+    def clean(self):
+        cleaned_data = super(MyUserChangeForm, self).clean()
+        username = cleaned_data.get('username')
+        if username and User.objects.filter(username__iexact=username).exclude(id=self.instance.id).exists():
+            self.add_error('username', 'A user with that username already exists.')
+        return cleaned_data

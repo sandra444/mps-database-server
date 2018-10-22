@@ -7,9 +7,8 @@
     <li class="active">{{ object }}</li>
 {% endblock %}
 
-{% block load %}
+{% block load_js %}
     <script src="{% static "assays/assaystudy_index.js" %}"></script>
-    <script src="{% static "js/display_datatable.js" %}"></script>
 {% endblock %}
 
 {% block content %}
@@ -78,7 +77,7 @@
 
         {% if matrices %}
         <div>
-        <table id="matrices" class="display table table-striped table-hover" cellspacing="0" width="100%">
+        <table hidden id="matrices" class="display table table-striped table-hover" cellspacing="0" width="100%">
             <thead>
                 <tr>
                     <th>View/Edit</th>
@@ -137,7 +136,7 @@
 
         {% if items %}
         <div class="padded-bottom">
-        <table id="matrix_items" class="display table table-striped table-hover" cellspacing="0" width="100%">
+        <table hidden id="matrix_items" class="display table table-striped table-hover" cellspacing="0" width="100%">
             <thead>
                 <tr>
                     <th>View/Edit</th>

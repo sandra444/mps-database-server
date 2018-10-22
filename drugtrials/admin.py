@@ -5,12 +5,26 @@ from django.utils.translation import ugettext_lazy as _
 from django.utils.text import force_text
 from django.db.models import URLField
 from django.utils.safestring import mark_safe
-from django.forms import Textarea
 
 from mps.base.admin import LockableAdmin
-from drugtrials.models import *
-from drugtrials.resource import *
-from forms import *
+from drugtrials.models import (
+    Species,
+    TrialSource,
+    FindingResult,
+    FindingTreatment,
+    FindingType,
+    ResultDescriptor,
+    Finding,
+    AdverseEvent,
+    OpenFDACompound,
+    DrugTrial
+)
+from drugtrials.resource import DrugTrialResource
+from .forms import (
+    FindingResultForm,
+    DrugTrialForm,
+    FindingForm
+)
 
 from import_export.admin import ImportExportModelAdmin
 
