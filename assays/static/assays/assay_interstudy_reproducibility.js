@@ -120,6 +120,9 @@ $(document).ready(function() {
     });
 
     function show_repro() {
+        // Clear anything in extra_info
+        area_to_copy_to.empty();
+
         // Set na_data
         na_data = google.visualization.arrayToDataTable([
             ['Status', 'Count'],
