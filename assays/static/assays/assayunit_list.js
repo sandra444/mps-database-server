@@ -6,7 +6,4 @@ $(document).ready(function() {
         responsive: true,
         "order": [[0, "asc"]],
     });
-
-    // Prevent "pop in".
-    $("#units").css("display", "block");
 });

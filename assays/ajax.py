@@ -2678,9 +2678,9 @@ def get_inter_study_reproducibility(
                             )
                             y_header.update({u'{}~{}'.format(time, index): True})
                             # x_header.update({
-                            #     '{}~@x{}'.format(legend, index): True
+                            #     '{}    ~@x{}'.format(legend, index): True
                             # })
-                            # current_data.setdefault('{}~@x{}'.format(legend, index), {}).update({time: value})
+                            # current_data.setdefault('{}    ~@x{}'.format(legend, index), {}).update({time: value})
                             # y_header.update({time: True})
                     else:
                         if len(values) > 1:
@@ -2701,7 +2701,7 @@ def get_inter_study_reproducibility(
             # if chart_group == 'average':
             #     current_table[0].extend(x_header_keys)
             # else:
-            #     current_table[0].extend([x.split('~@x')[0] for x in x_header_keys])
+            #     current_table[0].extend([x.split('    ~@x')[0] for x in x_header_keys])
 
             x_header = {x_header_keys[index]: index + 1 for index in range(len(x_header_keys))}
 

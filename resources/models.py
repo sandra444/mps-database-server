@@ -61,7 +61,12 @@ class Definition(LockableModel):
         return self.term
 
     def show_url(self):
-        return format_html("<a target='_blank' href='{url}'>{url}</a>", url=self.reference)
+        if self.reference:
+            return format_html(
+                "<a target='_blank' href='{url}'><span title='{url}' class='glyphicon glyphicon-link'></span></a>", url=self.reference
+            )
+        else:
+            return ""
 
     show_url.short_description = "Ref URL"
     show_url.allow_tags = True

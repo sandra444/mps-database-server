@@ -18,7 +18,4 @@ $(document).ready(function() {
             },
         ]
     });
-
-    // Prevent "pop in".
-    $("#targets").css("display", "block");
 });

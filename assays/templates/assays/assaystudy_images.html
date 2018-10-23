@@ -3,6 +3,9 @@
 
 {% block load_js %}
     <script src="{% static "assays/image_interface.js" %}"></script>
+{% endblock %}
+
+{% block extra_head %}
     <script>
         var metadata_list = JSON.parse("{{ metadata|escapejs|safe }}");
         var tableRows = JSON.parse("{{ tableRows|escapejs|safe }}");

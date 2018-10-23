@@ -6,7 +6,10 @@ from django.views.generic import ListView, DetailView, CreateView, UpdateView
 from mps.mixins import SpecificGroupRequiredMixin
 # from django.shortcuts import render_to_response
 # from django.template import RequestContext
-from .forms import CompoundTargetInlineFormset, CompoundForm
+from .forms import (
+    CompoundTargetFormset,
+    CompoundForm,
+)
 from django.shortcuts import redirect
 from mps.base.models import save_forms_with_tracking
 

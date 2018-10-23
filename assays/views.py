@@ -1544,12 +1544,21 @@ class AssayMatrixItemUpdate(StudyGroupMixin, UpdateView):
             instance=self.object,
             # matrix=self.object
         )
-        if form.is_valid() and compound_formset.is_valid() and cell_formset.is_valid() and setting_formset.is_valid():
-            save_forms_with_tracking(self, form, update=True, formset=[
-                compound_formset,
-                cell_formset,
-                setting_formset
-            ])
+
+        all_formsets = [
+            compound_formset,
+            cell_formset,
+            setting_formset,
+        ]
+
+        all_formsets_valid =  True
+
+        for current_formset in all_formsets:
+            if not current_formset.is_valid():
+                all_formsets_valid = False
+
+        if form.is_valid() and all_formsets_valid:
+            save_forms_with_tracking(self, form, update=True, formset=all_formsets)
 
             try:
                 data_point_ids_to_update_raw = json.loads(form.data.get('dynamic_exclusion', '{}'))
@@ -1699,6 +1708,14 @@ class AssayMethodList(ListView):
     model = AssayMethod
     template_name = 'assays/assaymethod_list.html'
 
+    def get_queryset(self):
+        queryset = AssayMethod.objects.all().prefetch_related(
+            'supplier',
+            'measurement_type'
+        )
+
+        return queryset
+
 
 class AssayMethodDetail(DetailView):
     model = AssayMethod
@@ -1728,7 +1745,15 @@ class AssayPhysicalUnitsList(ListView):
     model = PhysicalUnits
     template_name = 'assays/assayunit_list.html'
 
+    def get_queryset(self):
+        queryset = PhysicalUnits.objects.all().prefetch_related(
+            'unit_type',
+        )
 
+        return queryset
+
+
+# TODO: PERHAPS THIS SHOULD NOT BE HERE
 class AssaySampleLocationList(ListView):
     model = AssaySampleLocation
     template_name = 'assays/assaylocation_list.html'
