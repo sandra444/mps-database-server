@@ -116,7 +116,7 @@
                             <li><a href="#interstudy">Inter-Study Analysis</a></li>
                             <li class="divider"></li>
                             <li class="dropdown-header"><b>Combining Study and Reference Data</b></li>
-                            <li><a href="#diseasemodels">Disease Portal</a></li>
+                            <li><a href="#diseasemodels">Diseases</a></li>
                             <li><a href="#compoundreport">Compound Report</a></li>
                             <li class="divider"></li>
                             <li class="dropdown-header"><b>Reference Data Only</b></li>
@@ -230,22 +230,24 @@
                 <div id="recentupgradesviewer" class="viewersubtainer">
                     <ul class="list-group">
                         <li class="list-group-item"> <b><em>Integrated Reproducibility Analysis</em></b> - An intra- and inter-study reproducibility analysis tool is now available in the <b>MPS database</b>. The inter-study tool can be accessed through the <b>Data Analysis</b> icon or tab. This tool offers the user a wide range of options for grouping and filtering data prior to performing graphing and/or reproducibility analysis. The intra-study tool can be accessed through the <b>Study Summary</b> page of the MPS-GUI.
+                            For more information on the intra-study feature, <a href="#intrastudy">click here</a>.
+                            For more information on the inter-study feature, <a href="#interstudy">click here</a>.
+                        </li>
+                        <li class="list-group-item"> <b><em>MPS Models can be Grouped into a Matrix</em></b> - <b>MPS Models</b> (i.e. <b>Matrix Items</b>), tested as part of a study, can now be assigned to a <b>Matrix</b> and data can be summarized by <b>Matrix</b>. <b>Matrices</b> can be accessed from the <b>Study Matrices and Items</b> list page of a specific study.
+                            For more information on this feature, <a href="#intrastudy">click here</a> and click to see information on the Built-in Default Grouping/Filtering by Matrix.
+                        </li>
+                        <li class="list-group-item"> <b><em>Integration of Images and Videos</em></b> - Images and videos can now be associated to a <b>MPS Model</b> (i.e. <b>Matrix Item</b>) within a study. Images and videos are auto-scaled for optimal viewing online and the unaltered image/video is available for download to facilitate performing relative comparisons. Images and videos can be accessed from the <b>Study Matrices and Items</b> list page of a specific study.
                             For more information on this feature, <a href="#intrastudy">click here</a>.
-                        </li>
-                        <li class="list-group-item"> <b><em>Matrix Items in a Matrix</em></b> - <b>Matrix Items</b> can now be assigned to a <b>Matrix</b> and data can be summarized by <b>Matrix</b>. <b>Matrices</b> can be accessed from the <b>Study Matrices and Items</b> list page of a specific study.
-                            For more information on this feature, <a href="#matrices">click here</a>.
-                        </li>
-                        <li class="list-group-item"> <b><em>Integration of Images and Videos</em></b> - Images and videos can now be associated to a <b>Matrix Item</b> within a study. Images and videos are auto-scaled for optimal viewing online and the unaltered image/video is available for download to facilitate performing relative comparisons. Images and videos can be accessed from the <b>Study Matrices and Items</b> list page of a specific study.
-                            For more information on this feature, <a href="#studies">click here</a>.
                         </li>
                         <li class="list-group-item"> <b><em>Inter-Study Analysis with Grouping and Filtering</em></b> - The grouping and filtering feature is a powerful tool that offers the user a wide range of options for grouping and filtering data. The tool can be accessed in several places throughout the database, including: through the <b>Data Analysis</b> icon or tab and the <b>Study Summary</b> page. The tool can be used to customize what data are used (via the filtering feature) and how data will be grouped (via the grouping feature) in subsequent graphing and analysis.
-                            For more information on this feature, <a href="#intrastudy">click here</a>.
+                            For more information on this feature, <a href="#interstudy">click here</a>.
                         </li>
-                        <li class="list-group-item"> <b><em>Diseases Portal</em></b> - The <b>Diseases</b> portal allows users to quickly find information regarding a specific disease. The portal lets the user drill down on data stored in the <b>MPS database</b> (study data and data extracted from the clinicaltrials.gov website), and provides users with a links to clinicaltrials.gov where additional drug trial information can be obtained. The portal can be accessed through the <b>Models</b> icon or tab.
+                        <li class="list-group-item"> <b><em>View Diseases</em></b> - The <b>View Diseases</b> feature allows users to quickly find information regarding a specific disease. Users can drill down on data stored in the <b>MPS database</b> (study data and data extracted from the clinicaltrials.gov website), and link to clinicaltrials.gov where additional drug trial information can be obtained. The <b>View Diseases</b> feature can be accessed through the <b>Models</b> icon or tab.
                             For more information on this feature, <a href="#diseasemodels">click here</a>.
                         </li>
-                        <li class="list-group-item"> <b><em>Non-Compound Treatments and/or Settings</em></b> - This feature allows the <b>Data Provider</b> the ability to enter treatments and/or experimental parameters (such as instrument settings) that impact assay data measurements. These, along with the added compounds, can be used to group and filter data in preparation for visualization and analysis.
-                            For more information on this feature, <a href="#matrixitems">click here</a>.
+                        <li class="list-group-item"> <b><em>Add Experimental Variables as Settings</em></b> - This feature allows the <b>Data Provider</b> the ability to enter treatments and/or experimental parameters (such as instrument settings) that impact assay data measurements. These, along with the added compounds, can be used to group and filter data in preparation for visualization and analysis.
+                            For more information on adding settings, <a href="#matrixitems_editor">click here</a>.
+                            For more information on using settings in grouping and filtering, <a href="#intrastudy">click here</a>.
                         </li>
                     </ul>
                 </div>
@@ -266,7 +268,7 @@
                         <li class="list-group-item">
                             The <b>Microphysiology Systems (MPS) Database</b> was designed for the management and analysis of MPS data together with curated reference and clinical data. The <b>MPS Database</b> can store curated assay data and associated metadata from a wide variety of plate-based and microfluidic models. Data from external reference sources are brought into the <b>MPS Database</b> to facilitate ease of access to those data and to support integration of data across curated data sources.
                             <br><br>
-                            <b>Study Data</b> and <b>Study Components</b> (e.g., <b>Models</b>, <b>Devices</b>, <b>Cell Samples</b>) are manually curated into the <b>MPS Database</b>. Data from some references data sources are both manually and auto-curated. The <b>MPS Database</b> provides tools to analyze and/or visualize data pulled from external data sources, and also provides tools to analyze curated study data in combination with reference data. <b>Study Data</b>, <b>Study Components</b>, and the <b>Features</b> available in the <b>MPS Database</b> are describing briefly in the tables below.
+                            <b>Study Data</b> and <b>Study Components</b> (e.g., <b>Models</b>, <b>Devices</b>, <b>Cell Samples</b>) are manually curated into the <b>MPS Database</b>. Data from some reference data sources are both manually and auto-curated. The <b>MPS Database</b> provides tools to analyze and/or visualize data pulled from external data sources, and also provides tools to analyze curated study data in combination with reference data. <b>Study Data</b>, <b>Study Components</b>, and the <b>Features</b> available in the <b>MPS Database</b> are described briefly in the tables below.
                             <br><br>
                             Many of the terms used in the MPS-GUI and here in the <b>Help</b> are defined in the <b>Glossary</b>. It is recommended that users rely heavily on the <b>Glossary</b> to assist in understanding how to appropriately review, edit, and/or add data to the <b>MPS Database</b>.
                         </li>
@@ -366,7 +368,7 @@
                                 </tr>
                                 <tr>
                                 <td> Matrix Items </td>
-                                <td> In a <b>Study</b>, a <b>Matrix Item</b> is the generic term for an individual organ model.<b>Matrix Items</b> are assigned to a <b>Matrix</b> within an individual <b>Study</b>. For more information, <a href="#intrastudy">click here</a>.</td>
+                                <td> In a <b>Study</b>, a <b>Matrix Item</b> is the generic term for an individual organ model. <b>Matrix Items</b> are assigned to a <b>Matrix</b> within an individual <b>Study</b>. For more information, <a href="#intrastudy">click here</a>.</td>
                                 </tr>
                                 <tr>
                                 <td> Assay Data Points </td>
@@ -410,7 +412,7 @@
                                 <td> 1</td>
                                 </tr>
                                 <tr>
-                                <td> Disease Portal </td>
+                                <td> Diseases </td>
                                 <td> Provides a portal connecting information from clinical trials to MPS <b>Study Data</b>. Links are made based on <b>Disease</b>. Users can view summary information, then drill down to see additional disease-related details. For more information, <a href="#diseasemodels">click here</a>.</td>
                                 <td> 1, 13, 14, 15 </td>
                                 </tr>
@@ -446,7 +448,7 @@
                                 </tr>
                                 <tr>
                                 <td> Heatmap (Bioactivities) </td>
-                                <td> Provides a <b>Heatmap</b> visualization of relative <b>Bioactivities</b> (e.g., bioavailability, Cmax, etc.) of one or more <b>Compounds</b> and one or more biological targets. For more information, <a href="#heatmap">click here</a>.</td>
+                                <td> Provides a <b>Heatmap</b> visualization of relative <b>Bioactivities</b> (e.g., bioavailability, Cmax, etc.) for one or more <b>Compounds</b> and one or more biological targets. For more information, <a href="#heatmap">click here</a>.</td>
                                 <td> 2-5, 8, 9, 11, 12 </td>
                                 </tr>
                                 <tr>
@@ -549,7 +551,7 @@
                                     </tr>
                                     <tr>
                                     <td> 15 </td>
-                                    <td> Expert elicitation from open source and publications</td>
+                                    <td> Expert elicitation from open sources and publications</td>
                                     <td> Manual Curation </td>
                                     </tr>
                                 </tbody>
@@ -620,7 +622,7 @@
                                     <ul class="filled-circle">
                                         <li>Go to the <b>MPS Database Home</b> page</li>
                                         <li>Type search text in the <b>Global</b> search bar</li>
-                                        <li>Make preliminary selection (hit enter, click the blue <b>Search</b> button, or mouse down the options list and click the left mouse button)</li>
+                                        <li>Make preliminary selection (hit enter, click the blue <b>Search</b> button, or mouse down the options list to item of interest and click the left mouse button)</li>
                                         <li>Wait for a list of matching information to appear</li>
                                         <li>Click to check (or uncheck) boxes in the filter section to further restrict (or unrestrict) matching results (optional)</li>
                                         <li>Click on link to be routed to desired location</li>
@@ -643,8 +645,8 @@
                                 <li>In many places throughout the database, there are lists/tables with search bars located at the top
                                     <ul class="filled-circle">
                                         <li>Type a search term in the search bar</li>
-                                        <li>Type a space and add an additional term(s)(optional)</li>
-                                        <li>From the list, click on button to View/Edit or click an active link to be routed to desired location</li>
+                                        <li>Type a space and add an additional term(s) (optional)</li>
+                                        <li>From the list, click on button to <b>View/Edit</b> or click an active link to be routed to desired location</li>
                                     </ul>
                                 </li>
                                 <li><br>Notes
@@ -824,7 +826,7 @@
                                 </li>
                                 <li><br>Notes
                                     <ul class="filled-circle">
-                                        <li><b>Cell Sample</b>, density, and addition location are added to <b>Matrix Items</b> by Data Providers as part of <b>Study</b> setup</li>
+                                        <li><b>Cell Sample</b>, density, and addition location are added to <b>Matrix Items</b> by <b>Data Providers</b> as part of <b>Study</b> setup</li>
                                         <li>In the <b>Cell Samples</b> list, click on the active links to learn more about the <b>Cell Type</b> or the <b>Cell Origin</b> </li>
                                     </ul>
                                 </li>
@@ -1061,7 +1063,7 @@
                                 </li>
                                 <li><br>Notes
                                     <ul class="filled-circle">
-                                        <li>If a Compound is missing from the list, provide the compound name and the ChEMBL ID to an <b>MPS Database</b> Administrator </li>
+                                        <li>If a <b>Compound</b> is missing from the list, provide the <b>Compound</b> name and the ChEMBL ID to an <b>MPS Database</b> Administrator </li>
                                     </ul>
                                 </li>
                             </ul>
@@ -1248,7 +1250,7 @@
                     <ul class="list-group">
                         <li class="list-group-item">
                             <ul class="list-unstyled">
-                                <li>Select <b>View Disease</b> from the <b>Models</b> icon or tab
+                                <li>Select <b>View Diseases</b> from the <b>Models</b> icon or tab
                                     <ul class="filled-circle">
                                         <li>To learn more about <b>Disease Features</b>, <a href="#diseasemodels">click here</a> </li>
                                     </ul>
@@ -1630,7 +1632,7 @@
                                             </li>
                                             <li><br>Notes
                                                 <ul class="filled-circle">
-                                                    <li>The individual <b>Matrix Setup and Data</b> page is the only place <b>Matrix Item</b> data are available in tabular format </li>
+                                                    <li>The individual <b>Matrix Item Setup and Data</b> page is the only place <b>Matrix Item</b> data are available in tabular format </li>
                                                 </ul>
                                             </li>
                                         </ul>
@@ -1658,7 +1660,7 @@
                                                 <li>Notice how checking and unchecking boxes changes the assay data point count </li>
                                             </ul>
                                         </li>
-                                        <li>Option 1 - Click on the <b>Show Plots</b> button - to see <b>Study</b> details and view plots
+                                        <li>Option 1 - Click on the <b>Show Plots</b> button - to view plots
                                             <ul class="open-circle">
                                                 <li>Scroll down the page to see plots data</li>
                                                 <li>For more information on overriding default grouping and filtering, <a href="#groupingfiltering">click here</a> </li>
@@ -1693,7 +1695,7 @@
                                 <li>To override the built-in default <b>Grouping/Filtering</b>, wherever the <b>Grouping/Filtering</b> section is displayed
                                     <ul class="filled-circle">
                                         <li>Click on the filter symbol next to a metadata/data tag to limit selected data based on data associated with the tag </li>
-                                        <li>Click on the group box next to a metadata/data tag to include (checked) or exclude (unchecked) data associated with the tag in determining how data are grouped </li>
+                                        <li>Click on the group box next to a metadata/data tag to include (checked) or omit (unchecked) data associated with the tag in determining how data are grouped </li>
                                         <li>REPEAT for all attributes to override </li>
                                         <li>Click on the <b>Refresh</b> button to apply changes </li>
                                     </ul>
@@ -1745,7 +1747,7 @@
         <h1 class="sub2-bars"> Features Based on Study Data Plus Curated Reference Data </h1>
 
         <div id="diseasemodels">
-            <button class="collapsible1">Disease Portal (Clinical Trials and Study Data Combined via a Disease)</button>
+            <button class="collapsible1">Diseases (Clinical Trials and Study Data Combined via a Disease)</button>
             <div class="content1">
                 <div id="diseaseviewer" class="viewersubtainer">
                     <ul class="list-group">
@@ -1766,7 +1768,7 @@
                                 </li>
                                 <li><br>Notes
                                     <ul class="filled-circle">
-                                        <li>The study list on the <b>Disease Models & Studies</b> page and on the summary counts on the main <b>Disease Portal</b> page are permission specific  </li>
+                                        <li>The study list on the <b>Disease Models & Studies</b> page and the summary counts on the main <b>Diseases</b> page are permission specific  </li>
                                         <li>For more information on the reference data source(s), <a href="#overview3">click here</a> </li>
                                     </ul>
                                 </li>
@@ -1788,7 +1790,7 @@
                                     <ul class="filled-circle">
                                         <li>As a precaution, click the <b>Clear Current Selections</b> button</li>
                                         <li>Use the <b>Search</b> bar to limit the compound list </li>
-                                        <li>Check the box of the compounds to include</li>
+                                        <li>Check the boxes for the compounds to include</li>
                                         <li>If desired, use the <b>Search</b> bar to get a different compound list</li>
                                         <li>If desired, check additional compounds to include</li>
                                         <li>Click on the button to <b>Generate Compound Report</b> </li>
@@ -1829,7 +1831,7 @@
                                 </li>
                                 <li><br>Notes
                                     <ul class="filled-circle">
-                                        <li>The "Medchem Alerts" field (in the compound details page) shows whether functional groups that are uncommon in drugs are present in this compound
+                                        <li>The "Medchem Alerts" field (in the compound details page) shows whether functional groups that are uncommon in drugs are present in the compound
                                         <ul class="open-circle">
                                             <li>If there are Medchem Alerts for a compound, click on the flag to see a list of the functional groups </li>
                                         </ul>
@@ -1856,7 +1858,7 @@
                                     <ul class="filled-circle">
                                         <li>Enter at least one search string in one of the fields (Compound, Target, and/or Name)
                                             <ul class="open-circle">
-                                                <li>notice that options appear, these can be selected from the dropdown </li>
+                                                <li>Notice that options appear, these can be selected from the dropdown </li>
                                             </ul>
                                             </li>
                                         <li>Optional - Click on the buttons to Exclude and/or change data as indicated on the button  </li>
@@ -1946,7 +1948,7 @@
                                         <li>Not every ChEMBL entry has a corresponding PubChem entry, and vice versa </li>
                                         <li>The following will clear <em>all</em> selections
                                             <ul class="open-circle">
-                                                <li>Changing between ChEMBL and PubChem, Changing whether questionable are excluded, Changing the min feature count, Changing the <em>Target Types</em> or <em>Organisms</em>  </li>
+                                                <li>Changing between ChEMBL and PubChem; Changing whether questionable results are excluded or not; Changing the min feature count; Changing the <em>Target Types</em> or <em>Organisms</em>  </li>
                                             </ul>
                                         </li>
                                         <li>For more information on the reference data source(s), <a href="#overview3">click here</a> </li>
@@ -2128,7 +2130,7 @@
                                         <li>Not every ChEMBL entry has a corresponding PubChem entry, and vice versa </li>
                                         <li>The following will clear <em>all</em> selections
                                             <ul class="open-circle">
-                                                <li>Changing between ChEMBL and PubChem, Changing whether questionable are excluded, Changing the min feature count, Changing the <em>Target Types</em> or <em>Organisms</em>  </li>
+                                                <li>Changing between ChEMBL and PubChem; Changing whether questionable results are excluded or not; Changing the min feature count; Changing the <em>Target Types</em> or <em>Organisms</em>  </li>
                                             </ul>
                                         </li>
                                         <li>For more information on the reference data source(s), <a href="#overview3">click here</a> </li>
@@ -2161,7 +2163,7 @@
                                                 <li>Click the "Apply" button to confirm the change to the min feature count </li>
                                             </ul>
                                         </li>
-                                        <li>Make sure that the boxes are checkmarked to indicate selections in all tables </li>
+                                        <li>Make sure that the boxes are check marked to indicate selections in all tables </li>
                                         <li>Click the button to <b>Generate Dendrogram</b> </li>
                                         <li>The table on the left shows the bioactivities and drug trial data used in clustering</li>
                                         <li>Click on a node to see information about the compound (click the red X button to close)</li>
@@ -2203,7 +2205,7 @@
                                         <li>Not every ChEMBL entry has a corresponding PubChem entry, and vice versa </li>
                                         <li>The following will clear <em>all</em> selections
                                             <ul class="open-circle">
-                                                <li>Changing between ChEMBL and PubChem, Changing whether questionable are excluded, Changing the min feature count, Changing the <em>Target Types</em> or <em>Organisms</em>  </li>
+                                                <li>Changing between ChEMBL and PubChem; Changing whether questionable results are excluded or not; Changing the min feature count; Changing the <em>Target Types</em> or <em>Organisms</em>  </li>
                                             </ul>
                                         </li>
                                         <li>For more information on the reference data source(s), <a href="#overview3">click here</a> </li>
@@ -2233,7 +2235,7 @@
                                     <ul class="filled-circle">
                                         <li>Check to make sure that all needed components are available in the database <a href="#component_section">Study Components</a>
                                         <ul class="open-circle">
-                                            <li>To have a new components added, contact an <b>MPS Database</b> Administrator  </li>
+                                            <li>To have a new component added, contact an <b>MPS Database</b> Administrator  </li>
                                         </ul>
                                         </li>
                                         <li>Click on the <b>Add Study</b> button or the <b>View/Edit</b> button next to the <b>Study</b> of interest to be routed to the <b>Study Matrices and Items</b> list page </li>
@@ -2242,13 +2244,13 @@
                                                 <li>Group – select a Data Group (the team performing the study) </li>
                                                 <li>Study Type – indicate the general purpose of the <b>Study</b> (one is required; check all that apply) </li>
                                                 <li>Study Name – use an informative name (e.g., "Kidney-Liver Vitamin C Metabolism" is more informative than "Study-1") </li>
-                                                <li>Start Date - start of experiment (Day 0) </li>
-                                                <li>Description - informative description </li>
+                                                <li>Start Date - start of experiment (Day 0 is generally considered the day the first cells added to model) </li>
+                                                <li>Description - informative description (purpose, methods, results)</li>
                                                 <li>Use in Calculations - checking <b>Use in Calculations</b> tells the database to use this study's data in predictive modeling and other calculations  </li>
                                                 <li>Protocol File – a Word or pdf file containing the <b>Study</b> protocol </li>
                                                 <li>Image to Clarify A <b>Study</b> – recommend a picture of the setup or an illustration of the experimental protocol </li>
                                                 <li>For Integrated Chip Studies – select configuration if performing an integrated <b>Study</b>  </li>
-                                                <li>Assays – for each combination of assay Method-Target-Unit used, add a row  </li>
+                                                <li>Assays – for each combination of assay Method/Kit, Target/Analyte, and Unit used, add a row  </li>
                                                 <li>Supporting Data – attach files that will assist other database users in understanding the <b>Study</b> design and/or assay data (other than the protocol file, which is added separately)  </li>
                                             </ul>
                                         </li>
@@ -2260,7 +2262,7 @@
                                     <ul class="filled-circle">
                                         <li>Everything in the <b>Study</b> can be edited at any time until the <b>Study</b> Data Group Admin signs off the <b>Study</b> (then it is locked) </li>
                                         <li>Data contained in files attached as <b>Supporting Data</b> are NOT available for visualization, analysis, or used in calculations within the MPS-GUI </li>
-                                        <li>All combinations of Method-Target-Unit must be listed in the <b>Assays</b> Section of the <b>Study Level Details</b> page prior to uploading assay data</li>
+                                        <li>All combinations of Method/Kit, Target/Analyte, and Unit must be listed in the <b>Assays</b> Section of the <b>Study Level Details</b> page prior to uploading assay data</li>
                                     </ul>
                                 </li>
                             </ul>
@@ -2303,7 +2305,7 @@
                                 <ul class="list-unstyled">
                                     <li>A <b>Study</b>, each <b>Matrix</b>, and/or each <b>Matrix Item</b> can be validated
                                         <ul class="filled-circle">
-                                            <li> <b>Study</b> sign off is done by the Data Group Admin by clicking the <b>View/Edit Sigh Off Status of this Study</b> button on the <b>Study Matrices and Items</b> list page </li>
+                                            <li> <b>Study</b> sign off is done by the Data Group Admin by clicking the <b>View/Edit Sign Off Status of this Study</b> button on the <b>Study Matrices and Items</b> list page </li>
                                             <li> A <b>Matrix</b> is validated from the <b>Matrix Setup and Data</b> page </li>
                                             <li> A <b>Matrix Item</b> is validated from the <b>Item Setup and Data</b> page </li>
                                         </ul>
@@ -2320,7 +2322,7 @@
                         <ul class="list-group">
                             <li class="list-group-item background3">
                                 <ul class="list-unstyled">
-                                    <li>When performing <b>Integrated Studies</b>:
+                                    <li>When performing <b>Integrated Studies</b>
                                         <ul class="filled-circle">
                                             <li>When setting up a <b>Study</b>, <b>Models</b> can be associated </li>
                                             <li>Each <b>Model</b> is assigned a <b>Label</b>, which can be one or two characters long </li>
@@ -2455,11 +2457,11 @@ Results: add a summary of the study results. </td>
                                 <li><br>Notes
                                     <ul class="filled-circle">
                                         <li>For each <b>Matrix Item</b>, the Name/ID, Test Type, Setup Date, and MPS/Organ Model MUST be filled PRIOR to the first <b>Submit</b>  </li>
-                                        <li>Name/IDs must be unique in an individual <b>Study</b> (cannot not have repeats in a <b>Matrix</b> or in two <b>Matrices</b> of the same <b>Study</b>)  </li>
+                                        <li>Name/IDs must be unique in an individual <b>Study</b> (cannot have repeats in a <b>Matrix</b> or in two <b>Matrices</b> of the same <b>Study</b>)  </li>
                                         <li>Test Type specifies whether the <b>Matrix Item</b> functions as a control  </li>
                                         <li>Submit (and Overwrite) after every change you do not want to have to make again  </li>
                                         <li>Invest a little time in exploring the different Actions and Apply techniques to find what works best for you  </li>
-                                        <li>After the first Submit, <b>Matrix Items</b> can be setup and/or updated in the <b>Matrix</b> or individually (to learn more about setup <b>Matrix Items</b>, <a href="#matrixitems_editor">click here</a>   </li>
+                                        <li>After the first Submit, <b>Matrix Items</b> can be setup and/or updated in the <b>Matrix</b> or individually (to learn more about editting individual <b>Matrix Items</b>, <a href="#matrixitems_editor">click here</a>)   </li>
                                         <li>For information on continuing to add MPS models and assay data to the <b>Study</b> (Step 3), <a href="#matrixitems_editor">click here</a> </li>
                                     </ul>
                                 </li>
@@ -3224,14 +3226,13 @@ Results: add a summary of the study results. </td>
                                             <ul class="open-circle">
                                                 <li>Add/Edit the information as appropriate (add additional details if desired) </li>
                                                 <li>If possible, add the organ model protocol (if not added in the Matrix) </li>
-                                                <li>The individual <b>Matrix Setup and Data</b> page is the only place <b>Matrix Item</b> data are available in tabular format</li>
                                             </ul>
                                         </li>
                                         <li>In the <i>Compounds</i> section
                                             <ul class="open-circle">
                                                 <li>Edit the information as appropriate (add additional details if desired) </li>
                                                 <li>The addition time should be since the start (time 0) of the experiment </li>
-                                                <li>The duration is the of exposure (if a bolus dose, use 1 minute; if the whole experiment, use the length of the experiment) </li>
+                                                <li>The duration is the length of time of exposure (if a bolus dose, use 1 minute; if the whole experiment, use the length of the experiment) </li>
                                                 <li>If you do not know supplier or lot, enter "unspecified" (suggestions are based on your previous entries) </li>
                                                 <li>If you do not know receipt date, leave it blank </li>
                                             </ul>
@@ -3247,7 +3248,7 @@ Results: add a summary of the study results. </td>
                                                 <li>Edit the information as appropriate (add additional details if desired)</li>
                                             </ul>
                                         </li>
-                                        <li>After assay data have been added, the Exclude field of of the tabular data can be editted (optional)
+                                        <li>After assay data have been added, the Exclude field of the tabular data can be edited (optional)
                                             <ul class="open-circle">
                                                 <li>Review data in graphs and/or table</li>
                                                 <li>In the table, if desired, change the exclusion status of a data point (add an X to the Exclude field to omit by default, remove the X to include) </li>
@@ -3261,6 +3262,7 @@ Results: add a summary of the study results. </td>
                                         <li><b>Matrix Items</b>, along with the Name/ID, Test Type, Setup Date, and Organ <b>Model</b> MUST be added through the <b>Matrix</b>, but can be changed on the <b>Matrix Item Setup and Data</b> page  </li>
                                         <li>When using scientific notation to enter values, use this format: 1e+3, 1e+10, 3e+15</li>
                                         <li>The Exclude field, shown on the <b>Matrix Item Setup and Data</b> page is the only attribute of a data point that can be changed in the MPS-GUI</li>
+                                        <li>The individual <b>Matrix Setup and Data</b> page is the only place <b>Matrix Item</b> data are available in tabular format</li>
                                         <li>For information on continuing to add MPS models and assay data to the <b>Study</b> (Step 4), <a href="#assaydata_editor">click here</a> </li>
                                     </ul>
                                 </li>
@@ -3283,7 +3285,7 @@ Results: add a summary of the study results. </td>
                                         <li>Prepare a data file (MIF-C-a) </li>
                                         <li>Select a <b>Study</b></li>
                                         <li>Click on the <b>Upload Data</b> button </li>
-                                        <li>Click on the <b>Submit</b> button to save data to <b>MPS Database</b> </li>
+                                        <li>Click on the <b>Submit</b> button to save data to the <b>MPS Database</b> </li>
                                     </ul>
                                 </li>
                                 <li><br>Notes
@@ -3298,7 +3300,7 @@ Results: add a summary of the study results. </td>
                                         </li>
                                         <li>To replace assay data and make changes to key fields (e.g., sample location, sample time), there are a few options
                                         <ul class="open-circle">
-                                            <li>Delete the Method-Target-Unit combination from the study, submit, then re-add the Method-Target-Unit combination and re-upload ALL data for this combination </li>
+                                            <li>Delete the Method/Kit, Target/Analyte, and Unit combination from the study, submit, then re-add the Method/Kit, Target/Analyte, and Unit combination to the study and re-upload ALL data for this combination </li>
                                             <li>Go to the <b>Upload Data</b> page and scroll down to the <i>Current Data Files</i> section, click in the box(es) next to the Data File(s) to remove, click submit, re-upload the corrected data </li>
                                         </ul>
                                         </li>
@@ -3747,7 +3749,7 @@ Results: add a summary of the study results. </td>
                                     <ul class="filled-circle">
                                         <li>Prepare the image/video file</li>
                                         <li>Prepare an image/video metadata file (MIF-C-i) </li>
-                                        <li>Contact an <b>MPS Database</b> Administrator to make arranges for submitting the files</li>
+                                        <li>Contact an <b>MPS Database</b> Administrator to make arrangements for submitting the files</li>
                                     </ul>
                                 </li>
                                 <li><br>Notes
@@ -4170,5 +4172,24 @@ Results: add a summary of the study results. </td>
     </div>
 
 </div>
+
+{# TODO MOVE TO HELP.JS #}
+<script>
+  //From w3schools.com https://www.w3schools.com/howto/tryit.asp?filename=tryhow_js_collapsible_animate
+    var coll = $(".collapsible1, .collapsible2, .collapsible3");
+    var i;
+
+    for (i = 0; i < coll.length; i++) {
+        coll[i].addEventListener("click", function() {
+            var content = this.nextElementSibling;
+            if ($(content).css("display") != "none"){
+                $(content).css("display","none");
+            } else {
+                $(content).css("display","block");
+            }
+        });
+    }
+</script>
+
 </body>
 </html>
