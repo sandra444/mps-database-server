@@ -29,7 +29,8 @@ from assays.models import (
     AssayStudyStakeholder,
     AssayDataFileUpload,
     AssayDataPoint,
-    AssayStudySupportingData
+    AssayStudySupportingData,
+    AssayStudySet
 )
 from assays.forms import (
     AssayStudyConfigurationForm,
@@ -83,7 +84,8 @@ from mps.mixins import (
     user_is_active,
     PermissionDenied,
     StudyGroupMixin,
-    StudyViewerMixin
+    StudyViewerMixin,
+    CreatorOrSuperuserRequiredMixin
 )
 
 from mps.base.models import save_forms_with_tracking
@@ -1904,3 +1906,24 @@ class AssayDataFromFilters(TemplateView):
         # Return nothing otherwise
         else:
             return HttpResponse('', content_type='text/plain')
+
+
+class AssayStudySetAdd(CreateView, OneGroupRequiredMixin):
+    model = AssayStudySet
+    template_name = 'assays/assaystudyset_add.html'
+
+
+class AssayStudySetUpdate(CreatorOrSuperuserRequiredMixin, UpdateView):
+    model = AssayStudySet
+    template_name = 'assays/assaystudyset_update.html'
+
+
+class AssayStudySetDetail(DetailView):
+    model = AssayStudySet
+    template_name = 'assays/assaystudyset_detail.html'
+
+
+# The queryset for this will be somewhat complicated...
+#class AssayStudySetList(ListView):
+    #model = AssayStudySet
+    #template_name = 'assays/assaystudyset_list.html'

@@ -250,6 +250,22 @@ class CreatorOrAdminRequiredMixin(object):
         return super(CreatorOrAdminRequiredMixin, self).dispatch(*args, **kwargs)
 
 
+# Require user to be the creator or a group admin
+class CreatorOrSuperuserRequiredMixin(object):
+    """This mixin requires the user to be the creator of the object"""
+    @method_decorator(login_required)
+    @method_decorator(user_passes_test(user_is_active))
+    # Deny access if not the CREATOR
+    # Note the call for request.user.is_authenticated
+    # Interestingly, Django wraps request.user until it is accessed
+    # Thus, to perform this comparison it is necessary to access request.user via authentication
+    def dispatch(self, *args, **kwargs):
+        self.object = self.get_object()
+        if not self.request.user.is_authenticated() or (self.request.user != self.object.created_by and not self.request.user.is_superuser):
+            return PermissionDenied(self.request, 'Only the creator of this entry can view this page.')
+        return super(CreatorOrSuperuserRequiredMixin, self).dispatch(*args, **kwargs)
+
+
 # Require user to be a group admin
 class AdminRequiredMixin(object):
     """This mixin requires the user to be a group admin"""
