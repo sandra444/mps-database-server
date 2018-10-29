@@ -2537,3 +2537,9 @@ class AssayStudySet(FlaggableModel):
 
     studies = models.ManyToManyField(AssayStudy)
     assays = models.ManyToManyField(AssayStudyAssay)
+
+    def get_post_submission_url(self):
+        return self.get_absolute_url()
+
+    def get_absolute_url(self):
+        return '/assays/assaystudyset/{}/'.format(self.id)

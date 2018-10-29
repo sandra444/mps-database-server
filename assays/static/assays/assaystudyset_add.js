@@ -33,8 +33,6 @@ $(document).ready(function () {
         }
     });
 
-    console.log(study_id_to_assays);
-
     // TODO dialog for selecting a study
     var study_id_selector = $('#study_id_selector');
 
@@ -76,14 +74,6 @@ $(document).ready(function () {
         }
     });
     study_dialog.removeProp('hidden');
-
-    $('#study_data_table').DataTable({
-        "iDisplayLength": -1,
-        // Initially sort on receipt date
-        "order": [ 1, "desc" ],
-        // If one wants to display top and bottom
-        "sDom": '<"wrapper"fti>'
-    });
 
     // Datatable for filtering assays
     var assay_filter_data_table = null;
@@ -128,15 +118,16 @@ $(document).ready(function () {
         studies_selector.find('option').each(function() {
             if ($(this).prop('selected')) {
                 current_study_filter[$(this).val()] = true;
+                $('.study-selector[value="' + $(this).val() + '"]').prop('checked', true);
             }
             else {
                 current_study_filter[$(this).val()] = false;
+                $('.study-selector[value="' + $(this).val() + '"]').prop('checked', false);
             }
         });
     }
 
     function apply_study_filter() {
-        console.log(current_study_filter);
         $.each(current_study_filter, function(study_id, add_or_remove) {
             // Add/remove from m2m
             // (Can pass selections as an array, but this works too)
@@ -167,7 +158,7 @@ $(document).ready(function () {
         });
     }
 
-    function add_or_remove_from_study_table(current_study_option, add_or_remove) {
+    function add_or_remove_from_study_table(current_study_option, add_or_remove, initial) {
         var study_id = current_study_option.val();
         var current = selected_studies_table_selector.find('tr[data-study-id="' + current_study_option.val() + '"]');
         // If selected, then add to table
@@ -184,9 +175,11 @@ $(document).ready(function () {
             selected_studies_table_selector.append(new_row);
 
             // Select/de-select all associated assays by default
-            $.each(study_id_to_assays[study_id], function(index, value) {
-                assays_selector.find('option[value="' + value.id + '"]').prop('selected', true);
-            });
+            if (!initial) {
+                $.each(study_id_to_assays[study_id], function(index, value) {
+                    assays_selector.find('option[value="' + value.id + '"]').prop('selected', true);
+                });
+            }
         }
         // If de-selected, then remove from table
         else if (!add_or_remove && current[0]) {
@@ -215,11 +208,19 @@ $(document).ready(function () {
     // Iterate over every intial selection in studies and spawn table
     $('#id_studies > option:selected').each(function() {
         // True indicates always add
-        add_or_remove_from_study_table(current_study_option, true);
+        add_or_remove_from_study_table($(this), true, true);
     });
 
     // Get initial study filter
     reset_study_filter();
+
+    $('#study_data_table').DataTable({
+        "iDisplayLength": -1,
+        // Initially sort on receipt date
+        "order": [ 1, "desc" ],
+        // If one wants to display top and bottom
+        "sDom": '<"wrapper"fti>'
+    });
 
     // TODO dialog for selecting a set of assays (per study)
     $(document).on('click', '.assay-select-button', function() {
@@ -243,9 +244,6 @@ $(document).ready(function () {
             $.each(current_assays, function (index, assay) {
                 var row = '<tr>';
 
-                console.log(assay);
-                console.log(current_assay_filter);
-
                 if (current_assay_filter[assay.id]) {
                     row += '<td width="10%" class="text-center"><input class="big-checkbox assay-selector" type="checkbox" value="' + assay.id + '" checked></td>';
                 }
@@ -268,8 +266,6 @@ $(document).ready(function () {
         }
 
         assay_dialog_body.html(html_to_append.join(''));
-
-        console.log(html_to_append);
 
         // TODO BETTER SELECTOR
         assay_filter_data_table = assay_table.DataTable({
@@ -305,7 +301,7 @@ $(document).ready(function () {
     $('#assay_filter_section_deselect_all').click(function() {
         assay_filter_data_table.page.len(-1).draw();
 
-        assay_table.find('.post-filter-checkbox').each(function() {
+        assay_table.find('.assay-selector').each(function() {
             $(this)
                 .prop('checked', true)
                 .attr('checked', true)

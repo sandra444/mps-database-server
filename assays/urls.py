@@ -34,7 +34,8 @@ from assays.views import (
     AssayDataFromFilters,
     AssayStudySetAdd,
     AssayStudySetUpdate,
-    AssayStudySetDetail,
+    AssayStudySetDataPlots,
+    AssayStudySetReproducibility,
     AssayStudySetList,
 )
 import assays.ajax
@@ -120,8 +121,13 @@ urlpatterns = [
     ),
     url(
         r'^assays/assaystudyset/(?P<pk>[0-9]+)/$',
-        AssayStudySetDetail.as_view(),
-        name='assaystudyset-detail'
+        AssayStudySetDataPlots.as_view(),
+        name='assaystudyset-data-plots'
+    ),
+    url(
+        r'^assays/assaystudyset/(?P<pk>[0-9]+)/reproducibility/$',
+        AssayStudySetReproducibility.as_view(),
+        name='assaystudyset-reproducibility'
     ),
     url(
         r'^assays/assaystudyset/$',
