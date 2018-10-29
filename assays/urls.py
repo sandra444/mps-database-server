@@ -37,31 +37,24 @@ from assays.views import (
     AssayStudySetDataPlots,
     AssayStudySetReproducibility,
     AssayStudySetList,
+    AssayStudySetData
 )
 import assays.ajax
 
 urlpatterns = [
-    # User can view their studies
-    # url(r'^assays/user_index/$', UserIndex.as_view(), name='user_index'),
     # User can view all Editable Studies
-    # url(r'^assays/editable_studies/$', GroupIndex.as_view(), name='editable_studies'),
     url(r'^assays/assaystudy/editable_studies/$', AssayStudyEditableList.as_view(), name='editable_study_list'),
     # The main page for a study
-    # url(r'^assays/(?P<pk>[0-9]+)/$', StudyIndex.as_view(), name='study_index'),
     url(r'^assays/assaystudy/(?P<pk>[0-9]+)/$', AssayStudyIndex.as_view(), name='assay_study_index'),
     # Update page for studies
-    # url(r'^assays/(?P<pk>[0-9]+)/update/$', AssayRunUpdate.as_view(), name='study-update'),
     url(r'^assays/assaystudy/(?P<pk>[0-9]+)/update/$', AssayStudyUpdate.as_view(), name='assay_study_update'),
     # Delete view for studies
     url(r'^assays/assaystudy/(?P<pk>[0-9]+)/delete/$', AssayStudyDelete.as_view(), name='study-delete'),
     # Summary view for studies
-    # url(r'^assays/(?P<pk>[0-9]+)/summary/$', AssayRunSummary.as_view(), name='study-summary'),
     url(r'^assays/assaystudy/(?P<pk>[0-9]+)/summary/$', AssayStudySummary.as_view(), name='assay_study_summary'),
     # # All data for a study
-    # url(r'^assays/(?P<pk>[0-9]+)/data/$', ReturnStudyData.as_view(), name='study-data'),
     url(r'^assays/assaystudy/(?P<pk>[0-9]+)/data/$', AssayStudyData.as_view(), name='assay_study_data'),
     # # Bulk Readout Upload for Studies
-    # url(r'^assays/(?P<pk>[0-9]+)/bulk/$', ReadoutBulkUpload.as_view(), name='readout-bulk-upload'),
     url(r'^assays/assaystudy/(?P<pk>[0-9]+)/upload/$', AssayStudyDataUpload.as_view(), name='assay_study_upload'),
 
     # NEW_TO_BE_REVISED
@@ -133,6 +126,12 @@ urlpatterns = [
         r'^assays/assaystudyset/$',
         AssayStudySetList.as_view(),
         name='assaystudyset-list'
+    ),
+
+    url(
+        r'^assays/assaystudyset/(?P<pk>[0-9]+)/data/$',
+        AssayStudySetData.as_view(),
+        name='assaystudyset-data'
     ),
 
     # Data from filters

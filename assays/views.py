@@ -1944,6 +1944,13 @@ class AssayStudySetUpdate(CreatorOrSuperuserRequiredMixin, UpdateView):
     template_name = 'assays/assaystudyset_add.html'
     form_class = AssayStudySetForm
 
+    def get_context_data(self, **kwargs):
+        context = super(AssayStudySetUpdate, self).get_context_data(**kwargs)
+
+        context['update'] = True
+
+        return context
+
     def get_form(self, form_class=None):
         form_class = self.get_form_class()
 
@@ -1980,12 +1987,14 @@ class AssayStudySetReproducibility(DetailView):
 
 
 # The queryset for this will be somewhat complicated...
+# TODO REVISE THE QUERYSET
 class AssayStudySetList(ListView):
     model = AssayStudySet
     template_name = 'assays/assaystudyset_list.html'
 
 
-class AssayStudyData(StudyViewerMixin, DetailView):
+# TODO CONSIDER DISPATCH
+class AssayStudySetData(DetailView):
     """Returns a combined file for all data in a study set"""
     model = AssayStudySet
 
@@ -1993,7 +2002,15 @@ class AssayStudyData(StudyViewerMixin, DetailView):
         # Make sure that the study exists, then continue
         if self.object:
             # TODO TODO TODO
-            studies = get_user_accessible_studies.filter()
+            studies = get_user_accessible_studies(self.request.user).filter(id__in=self.object.studies.all())
+            assays = self.object.assays.all()
+
+            matrix_items = AssayMatrixItem.objects.filter(study_id__in=studies)
+
+            matrix_items = matrix_items.filter(
+                assaydatapoint__study_assay_id__in=assays
+            ).distinct()
+
             # If chip data
             # Not particularly DRY
             data_points = AssayDataPoint.objects.filter(
@@ -2042,4 +2059,3 @@ class AssayStudyData(StudyViewerMixin, DetailView):
         # Return nothing otherwise
         else:
             return HttpResponse('', content_type='text/plain')
-

@@ -15,11 +15,17 @@
 
 {% block fluid-content %}
 <div class="row padded-row text-center padded-bottom large-padding-top">
+    {% if user.id == object.created_by_id %}
+    <a href="/assays/assaystudyset/{{ object.id}}/update" type="button" class="btn btn-xlarge btn-primary text-center submit-button" id="download_submit">
+        <span class="glyphicon glyphicon glyphicon-pencil" aria-hidden="true"></span>
+        Update
+    </a>
+    {% endif %}
     <a href="/assays/assaystudyset/{{ object.id }}/?" type="button" class="btn btn-xlarge btn-primary text-center submit-button" id="charts_submit">
         <span class="glyphicon glyphicon glyphicon-stats" aria-hidden="true"></span>
         Show Plots
     </a>
-    <a href="/assays/data_from_study_set/?" type="button" class="btn btn-xlarge btn-info text-center submit-button" id="download_submit">
+    <a href="/assays/assaystudyset/{{ object.id }}/data/?" type="button" class="btn btn-xlarge btn-info text-center submit-button" id="download_submit">
         <span class="glyphicon glyphicon glyphicon-download-alt" aria-hidden="true"></span>
         Download
     </a>

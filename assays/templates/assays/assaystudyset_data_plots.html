@@ -16,11 +16,17 @@
 
 {% block content %}
 <div class="row padded-row text-center padded-bottom large-padding-top">
-    <a href="/assays/assaystudyset/{{ object.id}}/reproducibility?" type="button" class="btn btn-xlarge btn-primary text-center submit-button" id="repro_submit">
+    {% if user.id == object.created_by_id %}
+    <a href="/assays/assaystudyset/{{ object.id}}/update" type="button" class="btn btn-xlarge btn-primary text-center submit-button" id="download_submit">
+        <span class="glyphicon glyphicon glyphicon-pencil" aria-hidden="true"></span>
+        Update
+    </a>
+    {% endif %}
+    <a href="/assays/assaystudyset/{{ object.id}}/reproducibility" type="button" class="btn btn-xlarge btn-primary text-center submit-button" id="repro_submit">
         <span class="glyphicon glyphicon glyphicon-random" aria-hidden="true"></span>
         Show Reproducibility
     </a>
-    <a href="/assays/data_from_study_set/?" type="button" class="btn btn-xlarge btn-info text-center submit-button" id="download_submit">
+    <a href="/assays/assaystudyset/{{ object.id}}/data" type="button" class="btn btn-xlarge btn-info text-center submit-button" id="download_submit">
         <span class="glyphicon glyphicon glyphicon-download-alt" aria-hidden="true"></span>
         Download
     </a>
