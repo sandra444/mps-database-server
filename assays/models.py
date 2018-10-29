@@ -2451,7 +2451,7 @@ class AssayStudyAssay(models.Model):
     unit = models.ForeignKey(PhysicalUnits)
 
     def __unicode__(self):
-        return u'{0}|{1}|{2}'.format(self.target, self.method, self.unit)
+        return u'{0}~@|{1}~@|{2}~@|{3}'.format(self.study_id, self.target, self.method, self.unit)
 
 
 class AssayImageSetting(models.Model):
@@ -2530,19 +2530,10 @@ class AssayImage(models.Model):
 
 
 class AssayStudySet(FlaggableModel):
-    # Link to the study
-    study = models.ForeignKey(AssayStudy)
     # Name for the set
     name = models.CharField(max_length=255, unique=True)
     # Description
-    description = models.CharField(max_length=2000)
+    description = models.CharField(max_length=2000, default='', blank=True)
 
-
-class AssayStudySetStudy(models.Model):
-    study_set = models.ForeignKey(AssayStudySet)
-    study = models.ForeignKey(AssayStudy)
-
-
-class AssayStudySetAssay(models.Model):
-    study_set = models.ForeignKey(AssayStudySet)
-    study_assay = models.ForeignKey(AssayStudyAssay)
+    studies = models.ManyToManyField(AssayStudy)
+    assays = models.ManyToManyField(AssayStudyAssay)

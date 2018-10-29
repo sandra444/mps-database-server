@@ -50,7 +50,8 @@ from assays.forms import (
     AssayStudySignOffForm,
     AssayStudyStakeholderFormSetFactory,
     AssayStudyDataUploadForm,
-    AssayStudyModelFormSet
+    AssayStudyModelFormSet,
+    AssayStudySetForm,
 )
 from microdevices.models import MicrophysiologyCenter
 from django import forms
@@ -1911,11 +1912,38 @@ class AssayDataFromFilters(TemplateView):
 class AssayStudySetAdd(CreateView, OneGroupRequiredMixin):
     model = AssayStudySet
     template_name = 'assays/assaystudyset_add.html'
+    form_class = AssayStudySetForm
+
+    def get_form(self, form_class=None):
+        form_class = self.get_form_class()
+        # Get group selection possibilities
+        groups = filter_groups(self.request.user)
+
+        # If POST
+        if self.request.method == 'POST':
+            return form_class(self.request.POST, request=self.request)
+        # If GET
+        else:
+            return form_class(request=self.request)
+
+    def form_valid(self, form):
+        if form.is_valid():
+            save_forms_with_tracking(self, form, update=False)
+            return redirect(
+                self.object.get_absolute_url()
+            )
+        else:
+            return self.render_to_response(
+                self.get_context_data(
+                    form=form
+                )
+            )
 
 
 class AssayStudySetUpdate(CreatorOrSuperuserRequiredMixin, UpdateView):
     model = AssayStudySet
     template_name = 'assays/assaystudyset_update.html'
+    form_class = AssayStudySetForm
 
 
 class AssayStudySetDetail(DetailView):
@@ -1924,6 +1952,6 @@ class AssayStudySetDetail(DetailView):
 
 
 # The queryset for this will be somewhat complicated...
-#class AssayStudySetList(ListView):
-    #model = AssayStudySet
-    #template_name = 'assays/assaystudyset_list.html'
+class AssayStudySetList(ListView):
+    model = AssayStudySet
+    template_name = 'assays/assaystudyset_list.html'

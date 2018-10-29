@@ -31,7 +31,11 @@ from assays.views import (
     GraphingReproducibilityFilterView,
     AssayInterStudyReproducibility,
     AssayStudyDataPlots,
-    AssayDataFromFilters
+    AssayDataFromFilters,
+    AssayStudySetAdd,
+    AssayStudySetUpdate,
+    AssayStudySetDetail,
+    AssayStudySetList,
 )
 import assays.ajax
 
@@ -77,47 +81,10 @@ urlpatterns = [
     url(r'^assays/assaymatrix/(?P<pk>[0-9]+)/update/$', AssayMatrixUpdate.as_view(), name='assay_matrix_update'),
     url(r'^assays/assaymatrix/(?P<pk>[0-9]+)/delete/$', AssayMatrixDelete.as_view(), name='assay_matrix_delete'),
 
-    # Sign off
-    # url(r'^assays/(?P<pk>[0-9]+)/sign_off/$', AssayRunSignOff.as_view(), name='study-sign_off'),
-    url(r'^assays/assaystudy/(?P<pk>[0-9]+)/sign_off/$', AssayStudySignOff.as_view(), name='assay_study_sign_off'),
-    # # Change pages for respective models
-    # url(r'^assays/assaychipsetup/(?P<pk>[0-9]+)/update/$', AssayChipSetupUpdate.as_view(), name='setup_update'),
-    # url(r'^assays/assaychipreadout/(?P<pk>[0-9]+)/update/$', AssayChipReadoutUpdate.as_view(), name='readout_update'),
-    # url(r'^assays/assaychiptestresult/(?P<pk>[0-9]+)/update/$', AssayChipTestResultUpdate.as_view(), name='result_update'),
-
-    # # Add pages for respective models
-    # url(r'^assays/(?P<study_id>[0-9]+)/assaychipsetup/add/$', AssayChipSetupAdd.as_view(), name='setup_add'),
-    # url(r'^assays/(?P<study_id>[0-9]+)/assaychipreadout/add/$', AssayChipReadoutAdd.as_view(), name='readout_add'),
-    # url(r'^assays/(?P<study_id>[0-9]+)/assaychiptestresult/add/$', AssayChipTestResultAdd.as_view(), name='result_add'),
-
-    # # Delete pages for respective models
-    # url(r'^assays/assaychipsetup/(?P<pk>[0-9]+)/delete/$', AssayChipSetupDelete.as_view(), name='setup_delete'),
-    # url(r'^assays/assaychipreadout/(?P<pk>[0-9]+)/delete/$', AssayChipReadoutDelete.as_view(), name='readout_delete'),
-    # url(r'^assays/assaychiptestresult/(?P<pk>[0-9]+)/delete/$', AssayChipTestResultDelete.as_view(), name='result_delete'),
-
     url(r'^assays/studyconfiguration/$', AssayStudyConfigurationList.as_view(), name='studyconfiguration_list'),
     url(r'^assays/studyconfiguration/add/$', AssayStudyConfigurationAdd.as_view(), name='studyconfiguration_add'),
     url(r'^assays/studyconfiguration/(?P<pk>[0-9]+)/$', AssayStudyConfigurationUpdate.as_view(), name='studyconfiguration_update'),
 
-    # url(r'^assays/study/$', AssayRunList.as_view(), name='study_list'),
-    # url(r'^assays/study/add/$', AssayRunAdd.as_view(), name='study_add'),
-
-    # DEPRECATED >>
-    # url(r'^assays/assaychipsetup/$', AssayChipSetupList.as_view(), name='setup_list'),
-    # url(r'^assays/assaychipsetup/(?P<pk>[0-9]+)/$', AssayChipSetupDetail.as_view(), name='setup_detail'),
-    #
-    # url(r'^assays/assaychipreadout/$', AssayChipReadoutList.as_view(), name='readout_list'),
-    # url(r'^assays/assaychipreadout/(?P<pk>[0-9]+)/$', AssayChipReadoutDetail.as_view(), name='readout_detail'),
-    #
-    # url(r'^assays/assaychiptestresult/$', AssayChipTestResultList.as_view(), name='result_list'),
-    # url(r'^assays/assaychiptestresult/(?P<pk>[0-9]+)/$', AssayChipTestResultDetail.as_view(), name='result_detail'),
-    #
-    # # Reproducibility
-    # url(r'^assays/reproducibility/$', AssayRunReproducibilityList.as_view(), name='run_reproducibility_list'),
-    # url(r'^assays/(?P<pk>[0-9]+)/reproducibility/$', AssayRunReproducibility.as_view(), name='run-reproducibility'),
-
-    # Deprecated
-    # url(r'^assays/assaystudy/reproducibility/$', AssayStudyReproducibilityList.as_view(), name='assay_study_reproducibility_list'),
     url(r'^assays/assaystudy/(?P<pk>[0-9]+)/reproducibility/$', AssayStudyReproducibility.as_view(), name='assay_study_reproducibility'),
 
     # Images
@@ -135,10 +102,32 @@ urlpatterns = [
     # Sample Locations
     url(r'^assays/locations/$', AssaySampleLocationList.as_view(), name='assay-locations-list'),
 
-    # Location for test filter, for now
+    # Location for assay filter
     url(r'^assays/graphing_reproducibility/$', GraphingReproducibilityFilterView.as_view(), name='graphing-reproducibility'),
     url(r'^assays/assay_interstudy_reproducibility/$', AssayInterStudyReproducibility.as_view(), name='interstudy-reproducibility'),
     url(r'^assays/assaystudy_data_plots/$', AssayStudyDataPlots.as_view(), name='assaystudy-data-plots'),
+
+    # Study Set urls
+    url(
+        r'^assays/assaystudyset/add/$',
+        AssayStudySetAdd.as_view(),
+        name='assaystudyset-add'
+    ),
+    url(
+        r'^assays/assaystudyset/(?P<pk>[0-9]+)/update/$',
+        AssayStudySetUpdate.as_view(),
+        name='assaystudyset-add'
+    ),
+    url(
+        r'^assays/assaystudyset/(?P<pk>[0-9]+)/$',
+        AssayStudySetDetail.as_view(),
+        name='assaystudyset-detail'
+    ),
+    url(
+        r'^assays/assaystudyset/$',
+        AssayStudySetList.as_view(),
+        name='assaystudyset-list'
+    ),
 
     # Data from filters
     url(r'^assays/data_from_filters/$', AssayDataFromFilters.as_view(), name='data-from-filters'),
