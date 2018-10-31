@@ -444,7 +444,7 @@ class AssayStudyEditableList(OneGroupRequiredMixin, ListView):
         return context
 
 
-class AssayStudyList(LoginRequiredMixin, ListView):
+class AssayStudyList(ListView):
     """A list of all studies"""
     template_name = 'assays/assaystudy_list.html'
     model = AssayStudy
@@ -1671,8 +1671,16 @@ class AssayStudyImages(StudyViewerMixin, DetailView):
         return context
 
 
-class GraphingReproducibilityFilterView(LoginRequiredMixin, TemplateView):
+class GraphingReproducibilityFilterView(TemplateView):
     template_name = 'assays/assay_filter.html'
+
+
+class AssayInterStudyReproducibility(TemplateView):
+    template_name = 'assays/assay_interstudy_reproducibility.html'
+
+
+class AssayStudyDataPlots(TemplateView):
+    template_name = 'assays/assaystudy_data_plots.html'
 
 
 class AssayTargetList(ListView):
@@ -1759,16 +1767,8 @@ class AssaySampleLocationList(ListView):
     template_name = 'assays/assaylocation_list.html'
 
 
-class AssayInterStudyReproducibility(LoginRequiredMixin, TemplateView):
-    template_name = 'assays/assay_interstudy_reproducibility.html'
-
-
-class AssayStudyDataPlots(LoginRequiredMixin, TemplateView):
-    template_name = 'assays/assaystudy_data_plots.html'
-
-
 # Inappropriate use of CBV
-class AssayDataFromFilters(LoginRequiredMixin, TemplateView):
+class AssayDataFromFilters(TemplateView):
     """Returns a combined file for all data for given filters"""
     template_name = 'assays/assay_filter.html'
 

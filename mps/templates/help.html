@@ -4166,30 +4166,7 @@ Results: add a summary of the study results. </td>
           {% endfor %}
         </tbody>
       </table>
-
-      <script src="{% static "js/display_datatable.js" %}"></script>
-
     </div>
-
 </div>
-
-{# TODO MOVE TO HELP.JS #}
-<script>
-  //From w3schools.com https://www.w3schools.com/howto/tryit.asp?filename=tryhow_js_collapsible_animate
-    var coll = $(".collapsible1, .collapsible2, .collapsible3");
-    var i;
-
-    for (i = 0; i < coll.length; i++) {
-        coll[i].addEventListener("click", function() {
-            var content = this.nextElementSibling;
-            if ($(content).css("display") != "none"){
-                $(content).css("display","none");
-            } else {
-                $(content).css("display","block");
-            }
-        });
-    }
-</script>
-
 </body>
 </html>
