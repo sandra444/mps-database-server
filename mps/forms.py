@@ -27,7 +27,7 @@ class BootstrapForm(forms.ModelForm):
         super(BootstrapForm, self).__init__(*args, **kwargs)
 
         for field in self.fields:
-            widget_type = unicode(type(self.fields[field].widget))
+            widget_type = str(type(self.fields[field].widget))
             if widget_type in WIDGETS_TO_ADD_FORM_CONTROL_TO:
                 self.fields[field].widget.attrs['class'] = 'form-control'
             if widget_type in WIDGETS_WITH_AUTOCOMPLETE_OFF:

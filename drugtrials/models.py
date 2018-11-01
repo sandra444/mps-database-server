@@ -132,7 +132,7 @@ class DrugTrial(LockableModel):
                                   verbose_name='Trial ID/Reference')
 
     def __unicode__(self):
-        return u'{} from {}'.format(dict(TRIALTYPES)[self.trial_type],
+        return '{} from {}'.format(dict(TRIALTYPES)[self.trial_type],
                                            self.source.source_name)
 
     def get_absolute_url(self):
@@ -176,7 +176,7 @@ class Test(LockableModel):
     description = models.CharField(max_length=400, blank=True, default='')
 
     def __unicode__(self):
-        return u'{} :: {} :: {}'.format(
+        return '{} :: {} :: {}'.format(
             self.organ,
             self.test_type,
             self.test_name
@@ -211,7 +211,7 @@ class Finding(LockableModel):
     description = models.CharField(max_length=400, blank=True, default='')
 
     def __unicode__(self):
-        return u'{} :: {} :: {}'.format(self.organ, self.finding_type, self.finding_name)
+        return '{} :: {} :: {}'.format(self.organ, self.finding_type, self.finding_name)
 
 
 class ResultDescriptor(LockableModel):
@@ -313,7 +313,7 @@ class TestResult(models.Model):
                 raise ValidationError("You forgot to enter a value!")
 
     def __unicode__(self):
-        return u''
+        return ''
 
 FREQUENCIES = (
     ('>= 10%', '>= 10% : Very Common'), ('1 - < 10%', '1 - < 10% : Common'),
@@ -366,7 +366,7 @@ class FindingResult(models.Model):
     value_units = models.ForeignKey(PhysicalUnits, blank=True, null=True, related_name='finding_value_units')
 
     def __unicode__(self):
-        return u'{} {}'.format(unicode(self.drug_trial), unicode(self.finding_name))
+        return '{} {}'.format(str(self.drug_trial), str(self.finding_name))
 
 
 class FindingTreatment(models.Model):
@@ -388,7 +388,7 @@ class AdverseEvent(models.Model):
     organ = models.ForeignKey(Organ, blank=True, null=True)
 
     def __unicode__(self):
-        return u'{}'.format(self.event)
+        return '{}'.format(self.event)
 
 
 # TODO think of a better name
@@ -416,7 +416,7 @@ class OpenFDACompound(LockableModel):
     estimated_usage = models.IntegerField(blank=True, null=True)
 
     def __unicode__(self):
-        return u'{}'.format(self.compound.name)
+        return '{}'.format(self.compound.name)
 
     def get_absolute_url(self):
         return "/adverse_events/{}/".format(self.id)
@@ -430,4 +430,4 @@ class CompoundAdverseEvent(models.Model):
     frequency = models.IntegerField()
 
     def __unicode__(self):
-        return u'{}:{}'.format(self.compound, self.event)
+        return '{}:{}'.format(self.compound, self.event)

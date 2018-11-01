@@ -16,7 +16,7 @@ class Organ(LockableModel):
         ordering = ('organ_name', )
 
     def __unicode__(self):
-        return u'{}'.format(self.organ_name)
+        return '{}'.format(self.organ_name)
 
 
 class CellType(LockableModel):
@@ -44,7 +44,7 @@ class CellType(LockableModel):
         unique_together = [('cell_type', 'species', 'organ')]
 
     def __unicode__(self):
-        return u'{} ({} {})'.format(
+        return '{} ({} {})'.format(
             self.cell_type,
             self.species,
             self.organ
@@ -71,7 +71,7 @@ class CellSubtype(LockableModel):
     cell_type = models.ForeignKey(CellType, null=True, blank=True)
 
     def __unicode__(self):
-        return u'{}'.format(self.cell_subtype)
+        return '{}'.format(self.cell_subtype)
 
     def get_absolute_url(self):
         return "/cellsamples/cellsubtype/{}".format(self.id)
@@ -86,7 +86,7 @@ class Supplier(LockableModel):
     address = models.CharField(max_length=255, blank=True)
 
     def __unicode__(self):
-        return u'{}'.format(self.name)
+        return '{}'.format(self.name)
 
 
 class Biosensor(LockableModel):
@@ -101,7 +101,7 @@ class Biosensor(LockableModel):
     description = models.CharField(max_length=512, blank=True)
 
     def __unicode__(self):
-        return u'{}'.format(self.name)
+        return '{}'.format(self.name)
 
 
 class CellSample(FlaggableModel):
@@ -182,14 +182,14 @@ class CellSample(FlaggableModel):
 
     def __unicode__(self):
         if self.barcode:
-            return u'{0} {1} ({2}-{3})'.format(
+            return '{0} {1} ({2}-{3})'.format(
                 self.cell_subtype,
                 self.cell_type,
                 self.supplier,
                 self.barcode
             )
         else:
-            return u'{0} {1} ({2})'.format(
+            return '{0} {1} ({2})'.format(
                 self.cell_subtype,
                 self.cell_type,
                 self.supplier

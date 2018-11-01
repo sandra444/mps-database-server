@@ -10,7 +10,7 @@ from microdevices.models import (
 from mps.base.models import LockableModel, FlaggableModel, FlaggableRestrictedModel
 from django.contrib.auth.models import Group, User
 
-import urllib
+import urllib.request, urllib.parse, urllib.error
 import collections
 
 
@@ -28,7 +28,7 @@ def attr_getter(item, attributes):
 def tuple_attrgetter(*items):
     """Custom attrgetter that ALWAYS returns a tuple"""
     # NOTE WILL NEED TO CHANGE IF MOVED TO PYTHON 3
-    if any(not (isinstance(item, str) or isinstance(item, unicode)) for item in items):
+    if any(not (isinstance(item, str) or isinstance(item, str)) for item in items):
         raise TypeError('attribute name must be a string')
 
     def g(obj):
@@ -48,14 +48,14 @@ def resolve_attr(obj, attr):
 
 # TODO DEPRECATED, REMOVE SOON
 PHYSICAL_UNIT_TYPES = (
-    (u'V', u'Volume'),
-    (u'C', u'Concentration'),
-    (u'M', u'Mass'),
-    (u'T', u'Time'),
-    (u'F', u'Frequency'),
-    (u'RA', u'Rate'),
-    (u'RE', u'Relative'),
-    (u'O', u'Other'),
+    ('V', 'Volume'),
+    ('C', 'Concentration'),
+    ('M', 'Mass'),
+    ('T', 'Time'),
+    ('F', 'Frequency'),
+    ('RA', 'Rate'),
+    ('RE', 'Relative'),
+    ('O', 'Other'),
 )
 
 types = (
@@ -121,7 +121,7 @@ def get_split_times(time_in_minutes):
         'minute': 0
     }
     time_in_minutes_remaining = time_in_minutes
-    for time_unit, conversion in TIME_CONVERSIONS.items():
+    for time_unit, conversion in list(TIME_CONVERSIONS.items()):
         initial_time_for_current_field = int(time_in_minutes_remaining / conversion)
         if initial_time_for_current_field:
             times[time_unit] = initial_time_for_current_field
@@ -163,7 +163,7 @@ class UnitType(LockableModel):
                                    blank=True, default='')
 
     def __unicode__(self):
-        return u'{}'.format(self.unit_type)
+        return '{}'.format(self.unit_type)
 
 
 # TODO THIS NEEDS TO BE REVISED (IDEALLY REPLACED WITH PHYSICALUNIT BELOW)
@@ -190,9 +190,9 @@ class PhysicalUnits(LockableModel):
     availability = models.CharField(max_length=255,
                                     blank=True,
                                     default='',
-                                    help_text=(u'Type a series of strings for indicating '
-                                               u'where this unit should be listed:'
-                                               u'\ntest = test results\nreadouts = readouts\ncells = cell samples'))
+                                    help_text=('Type a series of strings for indicating '
+                                               'where this unit should be listed:'
+                                               '\ntest = test results\nreadouts = readouts\ncells = cell samples'))
 
     # verbose_name_plural is used to avoid a double 's' on the model name
     class Meta(object):
@@ -200,7 +200,7 @@ class PhysicalUnits(LockableModel):
         ordering = ['unit_type', 'unit']
 
     def __unicode__(self):
-        return u'{}'.format(self.unit)
+        return '{}'.format(self.unit)
 
 
 # DEPRECATED: SLATED FOR DELETION
@@ -242,7 +242,7 @@ class AssayModel(LockableModel):
                                  verbose_name='Test Type')
 
     def __unicode__(self):
-        return u'{0} ({1})'.format(self.assay_name, self.assay_short_name)
+        return '{0} ({1})'.format(self.assay_name, self.assay_short_name)
 
 
 # DEPRECATED: SLATED FOR DELETION
@@ -396,7 +396,7 @@ class AssayCompoundInstance(models.Model):
         )
 
     def __unicode__(self):
-        return u'{0} ({1} {2})\n-Added on: {3}; Duration of: {4}'.format(
+        return '{0} ({1} {2})\n-Added on: {3}; Duration of: {4}'.format(
             self.compound_instance.compound.name,
             self.concentration,
             self.concentration_unit.unit,
@@ -481,7 +481,7 @@ class AssayPlateSetup(FlaggableRestrictedModel):
     notes = models.CharField(max_length=2048, blank=True, default='')
 
     def __unicode__(self):
-        return u'{}'.format(self.assay_plate_id)
+        return '{}'.format(self.assay_plate_id)
 
     def get_absolute_url(self):
         return '/assays/assayplatesetup/{}/'.format(self.id)
@@ -507,7 +507,7 @@ class AssayReader(LockableModel):
     reader_type = models.CharField(max_length=128)
 
     def __unicode__(self):
-        return u'{0} - {1}'.format(self.reader_name, self.reader_type)
+        return '{0} - {1}'.format(self.reader_name, self.reader_type)
 
 
 # TO BE DEPRECATED To be merged into single "AssayInstance" model
@@ -534,7 +534,7 @@ class AssayPlateReadoutAssay(models.Model):
     feature = models.CharField(max_length=150)
 
     def __unicode__(self):
-        return u'{0}-{1}'.format(self.assay_id.assay_short_name, self.feature)
+        return '{0}-{1}'.format(self.assay_id.assay_short_name, self.feature)
 
 
 # TO BE DEPRECATED To be merged into single "AssayData" model
@@ -619,7 +619,7 @@ class AssayPlateReadout(FlaggableRestrictedModel):
                             blank=True, null=True)
 
     def __unicode__(self):
-        return u'{0}'.format(self.setup)
+        return '{0}'.format(self.setup)
 
     def get_absolute_url(self):
         return '/assays/assayplatereadout/{}/'.format(self.id)
@@ -723,7 +723,7 @@ class AssayPlateTestResult(FlaggableRestrictedModel):
     summary = models.TextField(default='', blank=True)
 
     def __unicode__(self):
-        return u'Results for: {}'.format(self.readout)
+        return 'Results for: {}'.format(self.readout)
 
     def get_absolute_url(self):
         return '/assays/assayplatetestresult/{}/'.format(self.id)
@@ -871,10 +871,10 @@ class AssayRun(FlaggableRestrictedModel):
             current_types += 'DM '
         if self.cell_characterization:
             current_types += 'CC '
-        return u'{0}'.format(current_types)
+        return '{0}'.format(current_types)
 
     def __unicode__(self):
-        return unicode(self.assay_run_id)
+        return str(self.assay_run_id)
 
     def get_absolute_url(self):
         return '/assays/{}/'.format(self.id)
@@ -1015,7 +1015,7 @@ class AssayChipCells(models.Model):
                                     blank=True, default='')
 
     def __unicode__(self):
-        return u'{0}\n~{1:.0e} {2}'.format(
+        return '{0}\n~{1:.0e} {2}'.format(
             self.cell_sample,
             self.cellsample_density,
             cell_choice_dict.get(self.cellsample_density_unit, 'Unknown Unit')
@@ -1064,7 +1064,7 @@ class AssayChipSetup(FlaggableRestrictedModel):
     notes = models.CharField(max_length=2048, blank=True, default='')
 
     def __unicode__(self):
-        return u'{}'.format(self.assay_chip_id)
+        return '{}'.format(self.assay_chip_id)
         # if self.compound:
         #     return u'Chip-{}:{}({}{})'.format(
         #         self.assay_chip_id,
@@ -1094,7 +1094,7 @@ class AssayChipSetup(FlaggableRestrictedModel):
         """Stringified cells for a setup"""
         cells = []
         for cell in self.assaychipcells_set.all():
-            cells.append(unicode(cell))
+            cells.append(str(cell))
 
         if not cells:
             cells = ['-No Cell Samples-']
@@ -1119,7 +1119,7 @@ class AssayChipSetup(FlaggableRestrictedModel):
         """Stringified cells for a setup"""
         compounds = []
         for compound in self.assaycompoundinstance_set.all():
-            compounds.append(unicode(compound))
+            compounds.append(str(compound))
 
         if not compounds:
             compounds = ['-No Compounds-']
@@ -1192,7 +1192,7 @@ class AssayChipReadoutAssay(models.Model):
     # method = models.ForeignKey(AssayMethod)
 
     def __unicode__(self):
-        return u'{}'.format(self.assay_id)
+        return '{}'.format(self.assay_id)
 
 
 # Likely to become deprecated
@@ -1240,10 +1240,10 @@ class AssayChipReadout(FlaggableRestrictedModel):
         for assay in assays:
             list_of_assays.append(str(assay))
         # Convert to unicode for consistency
-        return u'{0}'.format(', '.join(list_of_assays))
+        return '{0}'.format(', '.join(list_of_assays))
 
     def __unicode__(self):
-        return u'{0}'.format(self.chip_setup)
+        return '{0}'.format(self.chip_setup)
 
     def get_absolute_url(self):
         return '/assays/assaychipreadout/{}/'.format(self.id)
@@ -1269,7 +1269,7 @@ class AssayChipTestResult(FlaggableRestrictedModel):
     summary = models.TextField(default='', blank=True)
 
     def __unicode__(self):
-        return u'Results for: {}'.format(self.chip_readout)
+        return 'Results for: {}'.format(self.chip_readout)
 
     def assay(self):
         if self.id and not len(AssayChipResult.objects.filter(assay_result_id=self.id).order_by('id')) == 0:
@@ -1280,9 +1280,9 @@ class AssayChipTestResult(FlaggableRestrictedModel):
         if self.id and not len(AssayChipResult.objects.filter(assay_result_id=self.id).order_by('id')) == 0:
             abbreviation = AssayChipResult.objects.filter(assay_result_id=self.id).order_by('id')[0].result
             if abbreviation == '1':
-                return u'Positive'
+                return 'Positive'
             else:
-                return u'Negative'
+                return 'Negative'
         return ''
 
     def result_function(self):
@@ -1374,7 +1374,7 @@ class AssayDataUpload(FlaggableRestrictedModel):
     study = models.ForeignKey(AssayRun)
 
     def __unicode__(self):
-        return urllib.unquote(self.file_location.split('/')[-1])
+        return urllib.parse.unquote(self.file_location.split('/')[-1])
 
 
 class AssayDataFileUpload(FlaggableModel):
@@ -1396,7 +1396,7 @@ class AssayDataFileUpload(FlaggableModel):
     study = models.ForeignKey('assays.AssayStudy')
 
     def __unicode__(self):
-        return urllib.unquote(self.file_location.split('/')[-1])
+        return urllib.parse.unquote(self.file_location.split('/')[-1])
 
 
 # NEW MODELS, TO BE INTEGRATED FURTHER LATER
@@ -1411,7 +1411,7 @@ class AssayTarget(LockableModel):
     alt_name = models.CharField(max_length=1000, blank=True, default='')
 
     def __unicode__(self):
-        return u'{0} ({1})'.format(self.name, self.short_name)
+        return '{0} ({1})'.format(self.name, self.short_name)
 
 
 class AssaySubtarget(models.Model):
@@ -1482,7 +1482,7 @@ class AssayInstance(models.Model):
     unit = models.ForeignKey(PhysicalUnits)
 
     def __unicode__(self):
-        return u'{0}|{1}|{2}'.format(self.target, self.method, self.unit)
+        return '{0}|{1}|{2}'.format(self.target, self.method, self.unit)
 
 
 # Preliminary schema
@@ -1622,7 +1622,7 @@ class AssayStudy(FlaggableModel):
         current_study = {}
 
         for matrix_item in matrix_items:
-            organ_model_name = u''
+            organ_model_name = ''
 
             if matrix_item.organ_model:
                 organ_model_name = matrix_item.organ_model.name
@@ -1639,20 +1639,20 @@ class AssayStudy(FlaggableModel):
 
             for compound in matrix_item.assaysetupcompound_set.all():
                 current_study.setdefault('compounds', {}).update({
-                    unicode(compound): True
+                    str(compound): True
                 })
 
             for cell in matrix_item.assaysetupcell_set.all():
                 current_study.setdefault('cells', {}).update({
-                    unicode(cell): True
+                    str(cell): True
                 })
 
             for setting in matrix_item.assaysetupsetting_set.all():
                 current_study.setdefault('settings', {}).update({
-                    unicode(setting): True
+                    str(setting): True
                 })
 
-        return u'\n'.join([u' '.join(x) for x in current_study.values()])
+        return '\n'.join([' '.join(x) for x in list(current_study.values())])
 
     def get_study_types_string(self):
         current_types = []
@@ -1664,7 +1664,7 @@ class AssayStudy(FlaggableModel):
             current_types.append('DM')
         if self.cell_characterization:
             current_types.append('CC')
-        return u'-'.join(current_types)
+        return '-'.join(current_types)
 
     # TODO
     def __unicode__(self):
@@ -1673,7 +1673,7 @@ class AssayStudy(FlaggableModel):
         return '-'.join([
             center_id,
             self.get_study_types_string(),
-            unicode(self.start_date),
+            str(self.start_date),
             self.name
         ])
 
@@ -1756,7 +1756,7 @@ class AssayMatrix(FlaggableModel):
     notes = models.CharField(max_length=2048, blank=True, default='')
 
     def __unicode__(self):
-        return u'{0}'.format(self.name)
+        return '{0}'.format(self.name)
 
     # def get_organ_models(self):
     #     organ_models = []
@@ -1860,7 +1860,7 @@ class AssayMatrixItem(FlaggableModel):
     failure_reason = models.ForeignKey(AssayFailureReason, blank=True, null=True)
 
     def __unicode__(self):
-        return unicode(self.name)
+        return str(self.name)
 
     def devolved_settings(self, criteria=DEFAULT_SETTING_CRITERIA):
         """Makes a tuple of cells (for comparison)"""
@@ -2060,11 +2060,11 @@ class AssaySetupCell(models.Model):
         if criteria:
             full_string = []
             if 'cell_sample_id' in criteria:
-                full_string.append(unicode(self.cell_sample))
+                full_string.append(str(self.cell_sample))
             if 'cell_sample_id' not in criteria and 'cell_sample.cell_type_id' in criteria:
-                full_string.append(unicode(self.cell_sample.cell_type))
+                full_string.append(str(self.cell_sample.cell_type))
             if 'cell_sample_id' not in criteria and 'cell_sample.cell_subtype_id' in criteria:
-                full_string.append(unicode(self.cell_sample.cell_subtype))
+                full_string.append(str(self.cell_sample.cell_subtype))
             if 'passage' in criteria:
                 full_string.append(self.passage)
             if 'density' in criteria:
@@ -2075,10 +2075,10 @@ class AssaySetupCell(models.Model):
             # if 'duration' in criteria:
             #     full_string.append('Duration of: ' + self.get_duration_string())
             if 'addition_location_id' in criteria:
-                full_string.append(unicode(self.addition_location))
-            return u'{}; '.format(u' '.join(full_string))
+                full_string.append(str(self.addition_location))
+            return '{}; '.format(' '.join(full_string))
         else:
-            return unicode(self)
+            return str(self)
 
     def __unicode__(self):
         passage = ''
@@ -2087,7 +2087,7 @@ class AssaySetupCell(models.Model):
             passage = 'p{}'.format(self.passage)
 
         if self.addition_location:
-            return u'{0} {1}\n~{2:.2e} {3}\nAdded to: {4}'.format(
+            return '{0} {1}\n~{2:.2e} {3}\nAdded to: {4}'.format(
                 self.cell_sample,
                 passage,
                 self.density,
@@ -2095,7 +2095,7 @@ class AssaySetupCell(models.Model):
                 self.addition_location
             )
         else:
-            return u'{0} {1}\n~{2:.2e} {3}'.format(
+            return '{0} {1}\n~{2:.2e} {3}'.format(
                 self.cell_sample,
                 passage,
                 self.density,
@@ -2306,14 +2306,14 @@ class AssaySetupCompound(models.Model):
             if 'duration' in criteria:
                 full_string.append('Duration of: ' + self.get_duration_string())
             if 'addition_location_id' in criteria:
-                full_string.append(unicode(self.addition_location))
-            return u'{}; '.format(u' '.join(full_string))
+                full_string.append(str(self.addition_location))
+            return '{}; '.format(' '.join(full_string))
         else:
-            return unicode(self)
+            return str(self)
 
     def __unicode__(self):
         if self.addition_location:
-            return u'{0} ({1} {2})\nAdded on: {3}; Duration of: {4}; Added to: {5}'.format(
+            return '{0} ({1} {2})\nAdded on: {3}; Duration of: {4}; Added to: {5}'.format(
                 self.compound_instance.compound.name,
                 self.concentration,
                 self.concentration_unit.unit,
@@ -2322,7 +2322,7 @@ class AssaySetupCompound(models.Model):
                 self.addition_location
             )
         else:
-            return u'{0} ({1} {2})\nAdded on: {3}; Duration of: {4}'.format(
+            return '{0} ({1} {2})\nAdded on: {3}; Duration of: {4}'.format(
                 self.compound_instance.compound.name,
                 self.concentration,
                 self.concentration_unit.unit,
@@ -2485,7 +2485,7 @@ class AssaySetupSetting(models.Model):
         if criteria:
             full_string = []
             if 'setting_id' in criteria:
-                full_string.append(unicode(self.setting))
+                full_string.append(str(self.setting))
             if 'value' in criteria:
                 full_string.append(self.value)
                 if self.unit:
@@ -2495,13 +2495,13 @@ class AssaySetupSetting(models.Model):
             if 'duration' in criteria:
                 full_string.append('Duration of: ' + self.get_duration_string())
             if 'addition_location_id' in criteria:
-                full_string.append(unicode(self.addition_location))
-            return u'{}; '.format(u' '.join(full_string))
+                full_string.append(str(self.addition_location))
+            return '{}; '.format(' '.join(full_string))
         else:
-            return unicode(self)
+            return str(self)
 
     def __unicode__(self):
-        return u'{} {} {}'.format(self.setting.name, self.value, self.unit)
+        return '{} {} {}'.format(self.setting.name, self.value, self.unit)
 
 
 class AssayRunStakeholder(models.Model):
@@ -2561,7 +2561,7 @@ class AssayStudyAssay(models.Model):
     unit = models.ForeignKey(PhysicalUnits)
 
     def __unicode__(self):
-        return u'{0}|{1}|{2}'.format(self.target, self.method, self.unit)
+        return '{0}|{1}|{2}'.format(self.target, self.method, self.unit)
 
 
 class AssayImageSetting(models.Model):
@@ -2581,7 +2581,7 @@ class AssayImageSetting(models.Model):
     color_mapping = models.CharField(max_length=255, default='', blank=True)
 
     def __unicode__(self):
-        return u'{} {}'.format(self.study.name, self.label_name)
+        return '{} {}'.format(self.study.name, self.label_name)
 
 
 class AssayImage(models.Model):
@@ -2636,4 +2636,4 @@ class AssayImage(models.Model):
         }
 
     def __unicode__(self):
-        return u'{}'.format(self.file_name)
+        return '{}'.format(self.file_name)

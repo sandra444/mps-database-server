@@ -29,7 +29,7 @@ def chembl_target(chemblid):
 
     data = CHEMBL.get_target_by_chemblId(str(chemblid))['target']
 
-    return {FIELDS[key]: value for key, value in data.items()
+    return {FIELDS[key]: value for key, value in list(data.items())
             if key in FIELDS}
 
 
@@ -43,7 +43,7 @@ def chembl_assay(chemblid):
 
     data = CHEMBL.get_assays_by_chemblId(str(chemblid))['assay']
 
-    return {FIELDS[key]: value for key, value in data.items()
+    return {FIELDS[key]: value for key, value in list(data.items())
             if key in FIELDS}
 
 
@@ -88,10 +88,10 @@ class Target(LockableModel):
     def chembl_link(self):
 
         if self.chemblid:
-            return (u'<a href="https://www.ebi.ac.uk/chembl/target/inspect/'
+            return ('<a href="https://www.ebi.ac.uk/chembl/target/inspect/'
                     '{0}" target="_blank">{0}</a>').format(self.chemblid)
         else:
-            return u''
+            return ''
 
     chembl_link.allow_tags = True
     chembl_link.short_description = 'ChEMBL ID'
@@ -138,10 +138,10 @@ class Assay(LockableModel):
     def chembl_link(self):
 
         if self.chemblid:
-            return (u'<a href="https://www.ebi.ac.uk/chembl/assay/inspect/'
+            return ('<a href="https://www.ebi.ac.uk/chembl/assay/inspect/'
                     '{0}" target="_blank">{0}</a>').format(self.chemblid)
         else:
-            return u''
+            return ''
 
     chembl_link.allow_tags = True
     chembl_link.short_description = 'ChEMBL ID'
@@ -202,7 +202,7 @@ class Bioactivity(LockableModel):
         return self.target.organism
 
     def __unicode__(self):
-        return u'{}: {} {}'.format(
+        return '{}: {} {}'.format(
             self.compound,
             self.bioactivity_type,
             self.target.name
@@ -225,7 +225,7 @@ class BioactivityType(LockableModel):
     standard_unit = models.TextField(default='', blank=True)
 
     def __unicode__(self):
-        return unicode(self.standard_name)
+        return str(self.standard_name)
 
 
 class PubChemBioactivity(LockableModel):
@@ -292,7 +292,7 @@ class PubChemTarget(LockableModel):
     organism = models.TextField(default='', blank=True)
 
     def __unicode__(self):
-        return unicode(self.name)
+        return str(self.name)
 
 
 # DEPRECATED
@@ -312,4 +312,4 @@ class PubChemAssay(LockableModel):
     description = models.TextField(default='', blank=True)
 
     def __unicode__(self):
-        return unicode(self.aid)
+        return str(self.aid)

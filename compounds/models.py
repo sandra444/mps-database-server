@@ -40,7 +40,7 @@ def chembl_compound(chemblid):
     chembl = get_chembl_handle()
     data = chembl.get_compounds_by_chemblId(str(chemblid))['compound']
     return {
-        FIELDS[key]: value for key, value in data.items()
+        FIELDS[key]: value for key, value in list(data.items())
         if key in FIELDS
     }
 
@@ -221,31 +221,31 @@ class Compound(LockableModel):
         ordering = ('name',)
 
     def __unicode__(self):
-        return u'{0}'.format(self.name)
+        return '{0}'.format(self.name)
 
     def chembl_link(self):
         if self.chemblid:
-            return (u'<a href="https://www.ebi.ac.uk/chembl/compound/inspect/'
+            return ('<a href="https://www.ebi.ac.uk/chembl/compound/inspect/'
                     '{0}" target="_blank">{0}</a>').format(self.chemblid)
         else:
-            return u''
+            return ''
 
     chembl_link.allow_tags = True
     chembl_link.short_description = 'ChEMBL ID'
 
     def thumb_src(self):
         if self.chemblid:
-            return (u'https://www.ebi.ac.uk/chembldb/compound/'
+            return ('https://www.ebi.ac.uk/chembldb/compound/'
                     'displayimage/' + self.chemblid)
         else:
-            return u''
+            return ''
 
     def thumb(self):
         url = self.thumb_src()
         if url:
-            return u'<img src="{}" />'.format(url)
+            return '<img src="{}" />'.format(url)
         else:
-            return u''
+            return ''
 
     thumb.allow_tags = True
     thumb.short_description = 'Thumbnail'
@@ -253,16 +253,16 @@ class Compound(LockableModel):
     def image(self):
         url = self.image_src()
         if url:
-            return u'<img src="{}" />'.format(url)
+            return '<img src="{}" />'.format(url)
         else:
-            return u''
+            return ''
 
     def image_src(self):
         if self.chemblid:
-            return (u'https://www.ebi.ac.uk/chembldb/compound/'
+            return ('https://www.ebi.ac.uk/chembldb/compound/'
                     'displayimage_large/' + self.chemblid)
         else:
-            return u''
+            return ''
 
     image.allow_tags = True
     image.short_description = 'Image'
@@ -284,7 +284,7 @@ class SummaryType(LockableModel):
     description = models.CharField(max_length=500, default='')
 
     def __unicode__(self):
-        return unicode(self.name)
+        return str(self.name)
 
 
 # TODO THIS MODEL IS DEPRECATED
@@ -296,7 +296,7 @@ class PropertyType(LockableModel):
     description = models.CharField(max_length=500, default='')
 
     def __unicode__(self):
-        return unicode(self.name)
+        return str(self.name)
 
 
 # TODO THIS MODEL IS DEPRECATED
@@ -314,7 +314,7 @@ class CompoundSummary(models.Model):
     source = models.CharField(max_length=250)
 
     def __unicode__(self):
-        return unicode(self.summary)
+        return str(self.summary)
 
 
 # TODO THIS MODEL IS DEPRECATED
@@ -333,7 +333,7 @@ class CompoundProperty(models.Model):
     source = models.CharField(max_length=250)
 
     def __unicode__(self):
-        return unicode(self.value)
+        return str(self.value)
 
 
 # Should these be treated separately from bioactivity targets?
@@ -357,7 +357,7 @@ class CompoundSupplier(LockableModel):
     name = models.CharField(max_length=255, unique=True)
 
     def __unicode__(self):
-        return unicode(self.name)
+        return str(self.name)
 
 
 # TODO Add uniqueness contraints
@@ -377,6 +377,6 @@ class CompoundInstance(LockableModel):
 
     def __unicode__(self):
         items = [
-            unicode(self.compound), unicode(self.supplier), unicode(self.lot), unicode(self.receipt_date)
+            str(self.compound), str(self.supplier), str(self.lot), str(self.receipt_date)
         ]
-        return u' '.join(items)
+        return ' '.join(items)

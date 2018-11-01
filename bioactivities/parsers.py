@@ -17,6 +17,7 @@ import numpy as np
 from compounds.models import Compound
 from .models import Bioactivity, PubChemBioactivity #, Assay
 from drugtrials.models import FindingResult
+from functools import reduce
 
 # POTENTIALLY TOO MEMORY CONSUMING; BE CAUTIOUS
 # Only uncomment this if requested
@@ -48,7 +49,7 @@ def generate_record_frequency_data(query):
 
     result_list = []
 
-    for key, value in result.iteritems():
+    for key, value in result.items():
         result_list.append([key, value])
 
     return result_list
@@ -64,7 +65,7 @@ def get_compound_frequency_data(query):
 
     for element in query:
         # TODO CRUDE; REQUIRES REVISION
-        element = '|'.join([unicode(item) for item in element])
+        element = '|'.join([str(item) for item in element])
         if element:
             if element in result:
                 frequency = result.get(element)
@@ -75,7 +76,7 @@ def get_compound_frequency_data(query):
 
     result_list = []
 
-    for key, value in result.iteritems():
+    for key, value in result.items():
         result_list.append([key, value])
 
     return result_list
@@ -1116,7 +1117,7 @@ def cluster(request):
              'ro3_passes']
 
     # list of dics of compounds (creating this prevents excessive calls to the database
-    compound_data = Compound.objects.filter(name__in=valid_compounds).values()
+    compound_data = list(Compound.objects.filter(name__in=valid_compounds).values())
 
     # Update values for chemical properties (if chemical_properties)
     if chemical_properties:
@@ -1157,7 +1158,7 @@ def cluster(request):
 
     # Create dictionary for labeling nodes by their IDs
     labels = list(df['compounds'])
-    id2name = dict(zip(range(len(labels)), labels))
+    id2name = dict(list(zip(list(range(len(labels))), labels)))
 
     # Create a nested dictionary from the ClusterNode's returned by SciPy
     def add_node(node, parent):
@@ -1307,14 +1308,14 @@ def table(request):
                 target = bioactivity.assay.target.name
                 organism = bioactivity.assay.target.organism
             else:
-                target = u''
+                target = ''
                 organism = bioactivity.assay.organism
         else:
             if bioactivity.target:
                 target = bioactivity.target.name
                 organism = bioactivity.target.organism
             else:
-                target = u''
+                target = ''
                 organism = bioactivity.assay.organism
 
         chemblid = bioactivity.assay.chemblid
@@ -1323,8 +1324,8 @@ def table(request):
         if pubchem:
             activity_name = bioactivity.activity_name
             standardized_value = bioactivity.value
-            operator = u''
-            standardized_units = u''
+            operator = ''
+            standardized_units = ''
         else:
             activity_name = bioactivity.standard_name
             standardized_value = bioactivity.standardized_value

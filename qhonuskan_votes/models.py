@@ -83,11 +83,10 @@ class VotesField(object):
 
         rel_nm_user = '%s_votes' % model._meta.object_name.lower()
 
-        class Vote(models.Model):
+        class Vote(models.Model, metaclass=VoteMeta):
             """
             Vote model
             """
-            __metaclass__ = VoteMeta
 
             voter = models.ForeignKey(
                 User,

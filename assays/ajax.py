@@ -53,7 +53,7 @@ from .utils import (
     # NO_SETTINGS_STRING,
 )
 
-from StringIO import StringIO
+from io import StringIO
 from django.shortcuts import get_object_or_404
 from mps.templatetags.custom_filters import ADMIN_SUFFIX, is_group_editor
 
@@ -154,7 +154,7 @@ def fetch_organ_models(request):
     for finding in findings:
         # match value to the desired subject ID
         value = str(finding.id)
-        dropdown.append({'value': value, 'text': unicode(finding)})
+        dropdown.append({'value': value, 'text': str(finding)})
 
     data = {}
 
@@ -188,7 +188,7 @@ def fetch_protocols(request):
     for finding in findings:
         # match value to the desired subject ID
         value = str(finding.id)
-        dropdown.append({'value': value, 'text': unicode(finding)})
+        dropdown.append({'value': value, 'text': str(finding)})
 
     data = {}
 
@@ -327,7 +327,7 @@ def send_ready_for_sign_off_email(request):
             # Magic strings are in poor taste, should use a template instead
             # I would use a template, but it gets picky about newlines (which as often added automatically)
             # I could strip the newlines, but alternatively I might as well just have it here
-            subject = 'Sign Off Requested for {0}'.format(unicode(study))
+            subject = 'Sign Off Requested for {0}'.format(str(study))
 
             for user in users_to_be_alerted:
                 content = render_to_string(
@@ -404,7 +404,7 @@ def get_data_as_list_of_lists(ids, data_points=None, both_assay_names=False, inc
 
     for data_point in data_points:
         # Definitely need to rename these fields/models...
-        study_id = unicode(data_point.study)
+        study_id = str(data_point.study)
 
         item_name = data_point.matrix_item.name
 
@@ -502,7 +502,7 @@ def get_data_as_csv(ids, data_points=None, both_assay_names=False, include_heade
 
     for index in range(len(data)):
         current_list = list(data[index])
-        data[index] = [unicode(item) for item in current_list]
+        data[index] = [str(item) for item in current_list]
 
     string_io = StringIO()
     csv_writer = UnicodeWriter(string_io)
@@ -572,12 +572,12 @@ def get_data_as_json(ids, data_points=None):
         data_file_upload = data_point.data_file_upload
 
         if data_file_upload:
-            data_file_upload_name = unicode(data_file_upload)
+            data_file_upload_name = str(data_file_upload)
             data_file_upload_url = data_file_upload.file_location
 
         else:
-            data_file_upload_name = u''
-            data_file_upload_url = u''
+            data_file_upload_name = ''
+            data_file_upload_url = ''
 
         if sample_location.id not in sample_locations:
             sample_locations.update(
@@ -714,11 +714,11 @@ def get_control_data(
                     raw
                 )
 
-    for target, units in initial_control_data.items():
-        for unit, tags in units.items():
-            for tag, sample_locations in tags.items():
-                for sample_location, time_values in sample_locations.items():
-                    for time, points in time_values.items():
+    for target, units in list(initial_control_data.items()):
+        for unit, tags in list(units.items()):
+            for tag, sample_locations in list(tags.items()):
+                for sample_location, time_values in list(sample_locations.items()):
+                    for time, points in list(time_values.items()):
                         # TODO TODO TODO More than a little crude: PLEASE REVISE THESE NESTED LOOPS SO THAT THEY ARE MORE ROBUST
                         study_values = {}
 
@@ -728,7 +728,7 @@ def get_control_data(
                             else:
                                 study_values.setdefault(point.study_id, []).append(point.value)
 
-                        for study_id, values in study_values.items():
+                        for study_id, values in list(study_values.items()):
                             if len(values) > 1:
                                 # If geometric mean
                                 if mean_type == 'geometric':
@@ -830,7 +830,7 @@ def get_item_groups(study, criteria, matrix_items=None):
     # Attempt to sort reasonably
     # TODO SHOULD STUDY BE PLACED HERE?
     sorted_treatment_groups = sorted(
-        treatment_groups.values(), key=lambda x: (
+        list(treatment_groups.values()), key=lambda x: (
             x.get('Compounds'),
             x.get('MPS Model'),
             x.get('Cells'),
@@ -1066,7 +1066,7 @@ def get_data_points_for_charting(
         method = study_assay.method.name
 
         if group_method:
-            target = u'{} [{}]'.format(target, method)
+            target = '{} [{}]'.format(target, method)
 
         sample_location = raw.sample_location.name
 
@@ -1084,7 +1084,7 @@ def get_data_points_for_charting(
         excluded = raw.excluded
 
         # TODO Should probably just use dynamic_excluded instead of quality for this
-        if value is not None and not replaced and (include_all or not dynamic_excluded.get(unicode(raw.id), excluded)):
+        if value is not None and not replaced and (include_all or not dynamic_excluded.get(str(raw.id), excluded)):
             if truncate_negative and value < 0:
                 value = 0
             # Get tag for data point
@@ -1103,8 +1103,8 @@ def get_data_points_for_charting(
                     # This is because a compound can be excluded even if its parent matrix item isn't!
                     valid_compound = True
 
-                    for filter, values in matrix_item_compound_post_filters.items():
-                        if unicode(attr_getter(compound, filter.split('__'))) not in values:
+                    for filter, values in list(matrix_item_compound_post_filters.items()):
+                        if str(attr_getter(compound, filter.split('__'))) not in values:
                             valid_compound = False
                             break
 
@@ -1130,7 +1130,7 @@ def get_data_points_for_charting(
                 time = (concentration, time)
                 if tag:
                     tag = ' & '.join(tag)
-                elif is_control and (post_filter is None or u'0' in post_filter_compounds):
+                elif is_control and (post_filter is None or '0' in post_filter_compounds):
                     tag = '-No Compound- at D{}H{}M{}'.format(
                         int(raw_time / 24 / 60),
                         int(raw_time / 60 % 24),
@@ -1162,18 +1162,18 @@ def get_data_points_for_charting(
             all_sample_locations.update({sample_location: True})
 
     # Nesting like this is a little sloppy, flat > nested
-    for target, units in initial_data.items():
-        for unit, tags in units.items():
-            for tag, sample_locations in tags.items():
-                for sample_location, time_points in sample_locations.items():
-                    for time, points in time_points.items():
+    for target, units in list(initial_data.items()):
+        for unit, tags in list(units.items()):
+            for tag, sample_locations in list(tags.items()):
+                for sample_location, time_points in list(sample_locations.items()):
+                    for time, points in list(time_points.items()):
                         # TODO TODO TODO More than a little crude: PLEASE REVISE THESE NESTED LOOPS SO THAT THEY ARE MORE ROBUST
                         study_values = {}
 
                         for point in points:
                             study_values.setdefault(point.study_id, []).append(point.value)
 
-                        for study_id, values in study_values.items():
+                        for study_id, values in list(study_values.items()):
                             if len(values) > 1:
                                 # If geometric mean
                                 if mean_type == 'geometric':
@@ -1206,8 +1206,8 @@ def get_data_points_for_charting(
 
     accommodate_sample_location = group_sample_location and len(all_sample_locations) > 1
 
-    for target, units in averaged_data.items():
-        for unit, tags in units.items():
+    for target, units in list(averaged_data.items()):
+        for unit, tags in list(units.items()):
             # row_indices = {}
             accommodate_units = len(units) > 1
 
@@ -1231,17 +1231,17 @@ def get_data_points_for_charting(
             y_header = {}
             final_data.get('sorted_assays').append(assay_label)
 
-            for tag, sample_locations in tags.items():
+            for tag, sample_locations in list(tags.items()):
                 # TODO: A little naive
                 if use_key_discrimination and key_discrimination.get(tag[1], ''):
-                    tag = u'{} || {}'.format(tag[1], tag[0])
+                    tag = '{} || {}'.format(tag[1], tag[0])
                 elif use_key_discrimination:
                     tag = tag[1]
 
                 accommodate_intervals = False
                 include_current = False
 
-                for sample_location, time_values in sample_locations.items():
+                for sample_location, time_values in list(sample_locations.items()):
                     if accommodate_sample_location:
                         current_key = tag + ' || ' + sample_location
                         accommodate_intervals = False
@@ -1252,7 +1252,7 @@ def get_data_points_for_charting(
 
                     # all_keys.update({current_key: True})
 
-                    for time, value_interval_study_id in time_values.items():
+                    for time, value_interval_study_id in list(time_values.items()):
                         value = value_interval_study_id[0]
                         interval = value_interval_study_id[1]
                         study_id = value_interval_study_id[2]
@@ -1350,7 +1350,7 @@ def get_data_points_for_charting(
 
             x_header = {x_header[index]: index + 1 for index in range(len(x_header))}
 
-            y_header = y_header.keys()
+            y_header = list(y_header.keys())
             y_header.sort(key=float)
 
             for y in y_header:
@@ -1358,14 +1358,14 @@ def get_data_points_for_charting(
 
             y_header = {float(y_header[index]): index + 1 for index in range(len(y_header))}
 
-            for x, data_point in current_data.items():
-                for y, value in data_point.items():
+            for x, data_point in list(current_data.items()):
+                for y, value in list(data_point.items()):
                     current_table[y_header.get(y)][x_header.get(x)] = value
 
     final_data.get('sorted_assays').sort(key=lambda s: s.upper())
     final_data['assays'] = [[] for x in range(len(final_data.get('sorted_assays')))]
 
-    for assay, assay_data in intermediate_data.items():
+    for assay, assay_data in list(intermediate_data.items()):
         final_data.get('assays')[final_data.get('sorted_assays').index(assay)] = assay_data
 
     final_data.update({
@@ -1627,7 +1627,7 @@ def fetch_pre_submission_filters(request):
     current_filters = json.loads(request.POST.get('filters', '{}'))
     filters_present = False
 
-    for key, value in current_filters.items():
+    for key, value in list(current_filters.items()):
         if value:
             filters_present = True
             break
@@ -1821,7 +1821,7 @@ def acquire_post_filter(studies, assays, matrix_items, data_points):
         current.setdefault(
             'id__in', {}
         ).update({
-            study.id: u'{} ({})'.format(study.name, study.group.name)
+            study.id: '{} ({})'.format(study.name, study.group.name)
         })
 
     assays = assays.prefetch_related(
@@ -1886,13 +1886,13 @@ def acquire_post_filter(studies, assays, matrix_items, data_points):
         current.setdefault(
             'id__in', {}
         ).update({
-            matrix_item.id: u'{} ({})'.format(matrix_item.name, matrix_item.study.name)
+            matrix_item.id: '{} ({})'.format(matrix_item.name, matrix_item.study.name)
         })
 
         current.setdefault(
             'matrix_id__in', {}
         ).update({
-            matrix_item.matrix_id: u'{} ({})'.format(matrix_item.matrix.name, matrix_item.study.name)
+            matrix_item.matrix_id: '{} ({})'.format(matrix_item.matrix.name, matrix_item.study.name)
         })
 
         if matrix_item.organ_model_id:
@@ -1969,7 +1969,7 @@ def acquire_post_filter(studies, assays, matrix_items, data_points):
             current.setdefault(
                 'assaysetupcell__cell_sample_id__in', {}
             ).update({
-                cell.cell_sample_id: unicode(cell.cell_sample)
+                cell.cell_sample_id: str(cell.cell_sample)
             })
 
             current.setdefault(
@@ -2137,7 +2137,7 @@ def apply_post_filter(post_filter, studies, assays, matrix_items, data_points):
     compound_concentration_filter = {}
     compound_unit_filter = {}
 
-    for concentration_unit_id in combined_compounds_data.keys():
+    for concentration_unit_id in list(combined_compounds_data.keys()):
         concentration_unit_id = concentration_unit_id.split(COMBINED_VALUE_DELIMITER)
         concentration = concentration_unit_id[0]
         unit = concentration_unit_id[1]
@@ -2162,7 +2162,7 @@ def apply_post_filter(post_filter, studies, assays, matrix_items, data_points):
     cell_density_filter = {}
     cell_unit_filter = {}
 
-    for density_unit_id in combined_cells_data.keys():
+    for density_unit_id in list(combined_cells_data.keys()):
         density_unit_id = density_unit_id.split(COMBINED_VALUE_DELIMITER)
         density = density_unit_id[0]
         unit = density_unit_id[1]
@@ -2187,7 +2187,7 @@ def apply_post_filter(post_filter, studies, assays, matrix_items, data_points):
     setting_value_filter = {}
     setting_unit_filter = {}
 
-    for value_unit_id in combined_settings_data.keys():
+    for value_unit_id in list(combined_settings_data.keys()):
         value_unit_id = value_unit_id.split(COMBINED_VALUE_DELIMITER)
         value = value_unit_id[0]
         unit = value_unit_id[1]
@@ -2473,7 +2473,7 @@ def get_inter_study_reproducibility(
     )
 
     matrix_item_id_to_tooltip_string = {
-        matrix_item.id: u'{} ({})'.format(matrix_item.name, matrix_item.matrix.name) for matrix_item in matrix_items
+        matrix_item.id: '{} ({})'.format(matrix_item.name, matrix_item.matrix.name) for matrix_item in matrix_items
     }
 
     inter_data = []
@@ -2551,19 +2551,19 @@ def get_inter_study_reproducibility(
                 setup_to_treatment_group.get(item_id).get('index')
             ),
             # 'Group {}'.format(len(data_point_treatment_groups) + 1)
-            u'{}'.format(len(data_point_treatment_groups) + 1)
+            '{}'.format(len(data_point_treatment_groups) + 1)
         )
         point.data_group = current_group
         if current_group not in treatment_group_table:
             if point.study_assay.unit.base_unit_id:
                 treatment_group_table.update({
-                    current_group: [unicode(x) for x in list(
+                    current_group: [str(x) for x in list(
                         data_point_attribute_getter_base_values(point)
                     ) + [setup_to_treatment_group.get(item_id).get('index')]]
                 })
             else:
                 treatment_group_table.update({
-                    current_group: [unicode(x) for x in list(
+                    current_group: [str(x) for x in list(
                         data_point_attribute_getter_current_values(point)
                     ) + [setup_to_treatment_group.get(item_id).get('index')]]
                 })
@@ -2571,7 +2571,7 @@ def get_inter_study_reproducibility(
         data_group_to_studies.setdefault(
             current_group, {}
         ).update({
-            u'<a href="{}" target="_blank">{} ({})</a>'.format(point.study.get_absolute_url(), point.study.name, point.study.group.name): point.study.name
+            '<a href="{}" target="_blank">{} ({})</a>'.format(point.study.get_absolute_url(), point.study.name, point.study.group.name): point.study.name
         })
 
         data_group_to_sample_locations.setdefault(
@@ -2639,14 +2639,14 @@ def get_inter_study_reproducibility(
             point.time / 1440.0, []
         ).append(point.standard_value)
 
-    for set, chart_groups in initial_chart_data.items():
+    for set, chart_groups in list(initial_chart_data.items()):
         current_set = final_chart_data.setdefault(set, {})
-        for chart_group, legends in chart_groups.items():
+        for chart_group, legends in list(chart_groups.items()):
             current_data = {}
             current_table = current_set.setdefault(chart_group, [['Time']])
             x_header = {}
             y_header = {}
-            for legend, times in legends.items():
+            for legend, times in list(legends.items()):
                 x_header.update({
                     legend: True,
                 })
@@ -2665,18 +2665,18 @@ def get_inter_study_reproducibility(
                         legend + '     ~@t': True,
                     })
 
-                for time, values in times.items():
+                for time, values in list(times.items()):
                     if chart_group == 'item':
                         for index, value_pair in enumerate(values):
                             value = value_pair[0]
                             matrix_item_id = value_pair[1]
-                            current_data.setdefault(legend, {}).update({u'{}~{}'.format(time, index): value})
+                            current_data.setdefault(legend, {}).update({'{}~{}'.format(time, index): value})
                             current_data.setdefault(legend + '     ~@t', {}).update(
                                 {
-                                    u'{}~{}'.format(time, index): [time, legend, value, matrix_item_id]
+                                    '{}~{}'.format(time, index): [time, legend, value, matrix_item_id]
                                 }
                             )
-                            y_header.update({u'{}~{}'.format(time, index): True})
+                            y_header.update({'{}~{}'.format(time, index): True})
                             # x_header.update({
                             #     '{}    ~@x{}'.format(legend, index): True
                             # })
@@ -2694,7 +2694,7 @@ def get_inter_study_reproducibility(
                             current_data.setdefault(legend, {}).update({time: values[0]})
                         y_header.update({time: True})
 
-            x_header_keys = x_header.keys()
+            x_header_keys = list(x_header.keys())
             x_header_keys.sort(key=alphanum_key)
             current_table[0].extend(x_header_keys)
 
@@ -2705,8 +2705,8 @@ def get_inter_study_reproducibility(
 
             x_header = {x_header_keys[index]: index + 1 for index in range(len(x_header_keys))}
 
-            y_header = y_header.keys()
-            y_header.sort(key=lambda x: float(unicode(x).split('~')[0]))
+            y_header = list(y_header.keys())
+            y_header.sort(key=lambda x: float(str(x).split('~')[0]))
             # y_header.sort(key=float)
 
             for y in y_header:
@@ -2715,8 +2715,8 @@ def get_inter_study_reproducibility(
 
             y_header = {y_header[index]: index + 1 for index in range(len(y_header))}
 
-            for x, data_point in current_data.items():
-                for y, value in data_point.items():
+            for x, data_point in list(current_data.items()):
+                for y, value in list(data_point.items()):
                     current_table[y_header.get(y)][x_header.get(x)] = value
 
     # Reset chart data again
@@ -2764,12 +2764,12 @@ def get_inter_study_reproducibility(
                 'best': row
             })
 
-    for set, current_dic in results_rows_full.items():
+    for set, current_dic in list(results_rows_full.items()):
         current_best = current_dic.get('best')
 
         # If the current best has no ICC, try CV
         if not current_best[6]:
-            for current_type, row in current_dic.items():
+            for current_type, row in list(current_dic.items()):
                 current_cv = row[5] if row[5] else 999
 
                 if current_cv < current_dic.get('best')[5]:
@@ -2777,7 +2777,7 @@ def get_inter_study_reproducibility(
                         'best': row
                     })
 
-    for set, current_dic in results_rows_full.items():
+    for set, current_dic in list(results_rows_full.items()):
         current_best = current_dic.get('best')
 
         if current_best[8]:
@@ -2788,7 +2788,7 @@ def get_inter_study_reproducibility(
             elif current_best[8][0] == 'P':
                 poor_counter += 1
 
-        for current_type, row in current_dic.items():
+        for current_type, row in list(current_dic.items()):
             # Format the ICC
             if row[6] and not type(row[6]) == str:
                 row[6] = '{0:.4g}'.format(row[6])
@@ -2825,23 +2825,23 @@ def get_inter_study_reproducibility(
             row[0] / 1440.0, (row[2], shape)
         )
 
-    for set, chart_groups in inter_chart_data.items():
+    for set, chart_groups in list(inter_chart_data.items()):
         current_set = final_chart_data.setdefault(set, {})
-        for chart_group, legends in chart_groups.items():
+        for chart_group, legends in list(chart_groups.items()):
             current_data = {}
             current_table = current_set.setdefault(chart_group, [['Time']])
             x_header = {}
             y_header = {}
-            for legend, times in legends.items():
+            for legend, times in list(legends.items()):
                 # Get the median
                 current_median = np.median([
-                    np.median(x) for x in initial_chart_data.get(
+                    np.median(x) for x in list(initial_chart_data.get(
                         set
                     ).get(
                         'average'
                     ).get(
                         legend
-                    ).values()
+                    ).values())
                 ])
 
                 x_header.update({
@@ -2852,7 +2852,7 @@ def get_inter_study_reproducibility(
                     legend + '     ~@i1': True,
                     legend + '     ~@i2': True,
                 })
-                for time, value_shape in times.items():
+                for time, value_shape in list(times.items()):
                     value, shape = value_shape[0], value_shape[1]
                     if shape:
                         current_data.setdefault(legend, {}).update({time: value})
@@ -2885,13 +2885,13 @@ def get_inter_study_reproducibility(
 
                         y_header.update({time: True})
 
-            x_header_keys = x_header.keys()
+            x_header_keys = list(x_header.keys())
             x_header_keys.sort(key=alphanum_key)
             current_table[0].extend(x_header_keys)
 
             x_header = {x_header_keys[index]: index + 1 for index in range(len(x_header_keys))}
 
-            y_header = y_header.keys()
+            y_header = list(y_header.keys())
             y_header.sort(key=float)
 
             for y in y_header:
@@ -2899,20 +2899,20 @@ def get_inter_study_reproducibility(
 
             y_header = {y_header[index]: index + 1 for index in range(len(y_header))}
 
-            for x, data_point in current_data.items():
-                for y, value in data_point.items():
+            for x, data_point in list(current_data.items()):
+                for y, value in list(data_point.items()):
                     current_table[y_header.get(y)][x_header.get(x)] = value
 
     final_data_group_to_studies = {}
-    for data_group, current_studies in data_group_to_studies.items():
+    for data_group, current_studies in list(data_group_to_studies.items()):
         final_data_group_to_studies[data_group] = sorted(current_studies, key=current_studies.get)
 
     final_data_group_to_sample_locations = {}
-    for data_group, current_sample_location in data_group_to_sample_locations.items():
+    for data_group, current_sample_location in list(data_group_to_sample_locations.items()):
         final_data_group_to_sample_locations[data_group] = sorted(current_sample_location)
 
     final_data_group_to_organ_models = {}
-    for data_group, current_organ_model in data_group_to_organ_models.items():
+    for data_group, current_organ_model in list(data_group_to_organ_models.items()):
         final_data_group_to_organ_models[data_group] = sorted(current_organ_model)
 
     data = {

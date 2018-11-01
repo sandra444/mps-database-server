@@ -30,7 +30,7 @@ class ResourceType(LockableModel):
     resource_subtype = models.ForeignKey(ResourceSubtype, verbose_name="Category")
 
     def __unicode__(self):
-        return u'{} ({})'.format(self.resource_subtype,
+        return '{} ({})'.format(self.resource_subtype,
                                  self.resource_type_name)
 
 

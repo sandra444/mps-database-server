@@ -50,7 +50,7 @@ class Status(models.Model):
         super(Status, self).save(**kwargs)
 
     def __unicode__(self):
-        return unicode(self.title)
+        return str(self.title)
 
     class Meta:
         verbose_name = _("status")
@@ -119,7 +119,7 @@ class Feedback(models.Model):
         return 'djangovoice_item', [self.id]
 
     def __unicode__(self):
-        return unicode(self.title)
+        return str(self.title)
 
     class Meta:
         verbose_name = _("feedback")

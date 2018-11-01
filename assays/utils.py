@@ -23,7 +23,7 @@ import xlrd
 from django.conf import settings
 import string
 import codecs
-import cStringIO
+import io
 
 import pandas as pd
 import numpy as np
@@ -202,7 +202,7 @@ def unicode_csv_reader(in_file, dialect=csv.excel, **kwargs):
     encoding = chardet_results.get('encoding')
     csv_reader = csv.reader(in_file, dialect=dialect, **kwargs)
     for row in csv_reader:
-        yield [unicode(cell.decode(encoding)) for cell in row]
+        yield [str(cell.decode(encoding)) for cell in row]
 
 
 class UnicodeWriter:
@@ -215,7 +215,7 @@ class UnicodeWriter:
         dialect -- the "dialect" of csv to use (default excel)
         encoding -- the text encoding set to use (default utf-8)
         """
-        self.queue = cStringIO.StringIO()
+        self.queue = io.StringIO()
         self.writer = csv.writer(self.queue, dialect=dialect, **kwds)
         self.stream = f
         self.encoder = codecs.getincrementalencoder(encoding)()
@@ -343,17 +343,17 @@ def stringify_excel_value(value):
     This also converts floats to integers when possible
     """
     # If the value is just a string literal, return it
-    if type(value) == str or type(value) == unicode:
-        return unicode(value)
+    if type(value) == str or type(value) == str:
+        return str(value)
     else:
         try:
             # If the value can be an integer, make it into one
             if int(value) == float(value):
-                return unicode(int(value))
+                return str(int(value))
             else:
-                return unicode(float(value))
+                return str(float(value))
         except:
-            return unicode(value)
+            return str(value)
 
 
 def get_csv_media_location(file_name):
@@ -612,18 +612,18 @@ class AssayFileProcessor:
             sample_location_id = None
             if not sample_location:
                 self.errors.append(
-                    unicode(sheet + 'The Sample Location "{0}" was not recognized.').format(sample_location_name)
+                    str(sheet + 'The Sample Location "{0}" was not recognized.').format(sample_location_name)
                 )
             else:
                 sample_location_id = sample_location.id
 
             # TODO THE TRIMS HERE SHOULD BE BASED ON THE MODELS RATHER THAN MAGIC NUMBERS
             # Get notes, if possible
-            notes = u''
+            notes = ''
             if header_indices.get('NOTES', '') and header_indices.get('NOTES') < len(line):
                 notes = line[header_indices.get('NOTES')].strip()[:255]
 
-            cross_reference = u''
+            cross_reference = ''
             if header_indices.get('CROSS REFERENCE', '') and header_indices.get('CROSS REFERENCE') < len(line):
                 cross_reference = line[header_indices.get('CROSS REFERENCE')].strip()[:255]
 
@@ -635,7 +635,7 @@ class AssayFileProcessor:
                 if line[header_indices.get('EXCLUDE')].strip():
                     excluded = True
 
-            caution_flag = u''
+            caution_flag = ''
             if header_indices.get('CAUTION FLAG', '') and header_indices.get('CAUTION FLAG') < len(line):
                 caution_flag = line[header_indices.get('CAUTION FLAG')].strip()[:20]
 
@@ -650,7 +650,7 @@ class AssayFileProcessor:
             matrix_item_id = None
             if not matrix_item:
                 self.errors.append(
-                    unicode(
+                    str(
                         sheet + 'No Matrix Item with the ID "{0}" exists; please change your file or add this chip.'
                     ).format(matrix_item_name)
                 )
@@ -667,7 +667,7 @@ class AssayFileProcessor:
             study_assay_id = None
             if not study_assay:
                 self.errors.append(
-                    unicode(
+                    str(
                         sheet + '{0}: No assay with the target "{1}", the method "{2}", and the unit "{3}" exists. '
                                 'Please review your data and add this assay to your study if necessary.').format(
                         matrix_item_name,
@@ -690,7 +690,7 @@ class AssayFileProcessor:
                 )
 
             # Check to make certain the time is a valid float
-            for time_unit, conversion in TIME_CONVERSIONS.items():
+            for time_unit, conversion in list(TIME_CONVERSIONS.items()):
                 current_time_value = times.get(time_unit, 0)
 
                 if current_time_value == '':
@@ -1026,7 +1026,7 @@ def chip_med_comp_ICC(X):
     col_index=Y.columns
     df_missing=X.isnull().sum(axis=0)
     #define ICC list dataframe
-    icc_comp_value=pd.DataFrame(index=range(Count_Col),columns=['Chip ID','ICC Absolute Agreement','Missing Data Points'])
+    icc_comp_value=pd.DataFrame(index=list(range(Count_Col)),columns=['Chip ID','ICC Absolute Agreement','Missing Data Points'])
     icc_median=Y.median(axis=1)
     for col in range(Count_Col):
         df=pd.DataFrame(Y,columns=[col_index[col]])
@@ -1065,7 +1065,7 @@ def Reproducibility_Index(X):
     Max_CV_value=Max_CV(Y) #Call Max CV function
     ICC_Value=ICC_A(Y) #Call ICC function
     #Create a reproducibility index dataframe
-    rep_index=pd.DataFrame(index=range(1),columns=['Max CV','ICC Absolute Agreement'], dtype='float') #define the empty dataframe
+    rep_index=pd.DataFrame(index=list(range(1)),columns=['Max CV','ICC Absolute Agreement'], dtype='float') #define the empty dataframe
     rep_index.iloc[0][0]=Max_CV_value
     rep_index.iloc[0][1]=ICC_Value
     rep_index=rep_index.round(2)
@@ -1078,7 +1078,7 @@ def Single_Time_Reproducibility_Index(X):
     rep_mean=X.mean(axis=1)
     rep_sd=X.std(axis=1,ddof=1)
     rep_med=X.median(axis=1)
-    rep_index=pd.DataFrame(index=range(1),columns=['CV','Mean','Standard Deviation','Median'], dtype='float')
+    rep_index=pd.DataFrame(index=list(range(1)),columns=['CV','Mean','Standard Deviation','Median'], dtype='float')
     if rep_sd.iloc[0] > 0:
         rep_index.iloc[0][0]=X.std(axis=1,ddof=1)/X.mean(axis=1)*100
 
@@ -1098,7 +1098,7 @@ def Reproducibility_Report(study_data):
 
     study_group=study_data[["Organ Model","Cells","Compound Treatment(s)","Target/Analyte","Method/Kit","Sample Location","Value Unit","Settings"]]
     study_unique_group=study_group.drop_duplicates()
-    study_unique_group.set_index([range(study_unique_group.shape[0])],drop=True, append=False, inplace=True)
+    study_unique_group.set_index([list(range(study_unique_group.shape[0]))],drop=True, append=False, inplace=True)
 
     #create reproducibility report table
     reproducibility_results_table=study_unique_group
@@ -1185,7 +1185,7 @@ def Reproducibility_Report(study_data):
     return reproducibility_results_table
 
 def study_group_setting(study_unique_group,row):
-    group_setting=pd.DataFrame(index=range(study_unique_group.shape[1]),columns=['Replicate Set Parameters','Setting'])
+    group_setting=pd.DataFrame(index=list(range(study_unique_group.shape[1])),columns=['Replicate Set Parameters','Setting'])
     for i in range(study_unique_group.shape[1]):
         group_setting.iloc[i][0]=study_unique_group.columns.tolist()[i]
 
@@ -1202,7 +1202,7 @@ def pivot_data_matrix(study_data,group_index):
     row=group_index
     study_group=study_data[["Organ Model","Cells","Compound Treatment(s)","Target/Analyte","Method/Kit","Sample Location","Value Unit","Settings"]]
     study_unique_group=study_group.drop_duplicates()
-    study_unique_group.set_index([range(study_unique_group.shape[0])],drop=True, append=False, inplace=True)
+    study_unique_group.set_index([list(range(study_unique_group.shape[0]))],drop=True, append=False, inplace=True)
     rep_matrix=study_data[study_data['Organ Model']==study_unique_group['Organ Model'][row]]
     rep_matrix=rep_matrix[rep_matrix['Cells']==study_unique_group['Cells'][row]]
     rep_matrix=rep_matrix[rep_matrix['Compound Treatment(s)']==study_unique_group['Compound Treatment(s)'][row]]
@@ -1224,7 +1224,7 @@ def scatter_plot_matrix(study_data,group_index):
     row=group_index
     study_group=study_data[["Organ Model","Cells","Compound Treatment(s)","Target/Analyte","Method/Kit","Sample Location","Value Unit","Settings"]]
     study_unique_group=study_group.drop_duplicates()
-    study_unique_group.set_index([range(study_unique_group.shape[0])],drop=True, append=False, inplace=True)
+    study_unique_group.set_index([list(range(study_unique_group.shape[0]))],drop=True, append=False, inplace=True)
     rep_matrix=study_data[study_data['Organ Model']==study_unique_group['Organ Model'][row]]
     rep_matrix=rep_matrix[rep_matrix['Cells']==study_unique_group['Cells'][row]]
     rep_matrix=rep_matrix[rep_matrix['Compound Treatment(s)']==study_unique_group['Compound Treatment(s)'][row]]
@@ -1269,7 +1269,7 @@ def get_repro_data(data):
     #Select unique group rows by study, organ model,sample location, assay and unit
     study_group=study_data[["Organ Model","Cells","Compound Treatment(s)","Target/Analyte","Method/Kit","Sample Location","Value Unit","Settings"]]
     study_unique_group=study_group.drop_duplicates()
-    study_unique_group.set_index([range(study_unique_group.shape[0])],drop=True, append=False, inplace=True)
+    study_unique_group.set_index([list(range(study_unique_group.shape[0]))],drop=True, append=False, inplace=True)
 
     #create reproducibility report table
     reproducibility_results_table=Reproducibility_Report(study_data)
@@ -1425,7 +1425,7 @@ def Inter_Reproducibility_Index(X):
     else:
         ICC_Value = np.nan
     # Create a reproducibility index dataframe
-    rep_index = pd.DataFrame(index=range(1), columns=['Max CV', 'ICC Absolute Agreement'],
+    rep_index = pd.DataFrame(index=list(range(1)), columns=['Max CV', 'ICC Absolute Agreement'],
                              dtype='float')  # define the empty dataframe
     rep_index.iloc[0][0] = Max_CV_value
     rep_index.iloc[0][1] = ICC_Value
