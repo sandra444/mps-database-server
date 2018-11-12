@@ -267,13 +267,11 @@
     </div>
   </nav>
 
-  <div id="page" style="margin-top: 70px;">
+  <div id="sidebar_warpper">
+    {% block sidebar %}{% endblock %}
+  </div>
 
-  {# Have yet to use sidebar #}
-{#  <div id="sidebar">#}
-{#    {% block sidebar %}#}
-{#    {% endblock %}#}
-{#  </div>#}
+  <div id="page" style="margin-top: 70px;">
 
   {# For most elements #}
   <div id="content" class="container">

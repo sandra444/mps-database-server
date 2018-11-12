@@ -1,24 +1,98 @@
-{% load static %}
+{% load static compress %}
+{% compress js %}
 <script src="{% static "assays/grouping_filtering.js" %}"></script>
+{% endcompress %}
 
-<div id="filtering" class="well">
+<style>
+    #sidebar {
+        overflow: auto;
+        position: fixed;
+        height: 100vh;
+        min-width: 250px;
+        max-width: 250px;
+        background: #eaeaea;
+        transition: all 0.3s;
+        margin-left: -250px;
+        margin-top: -20px;
+    }
+
+    #sidebar.active {
+        margin-left: 0px;
+    }
+
+    #sidebar ul.components {
+        padding: 20px 0;
+    }
+
+    #sidebar ul li a {
+        padding: 10px;
+        display: block;
+    }
+    #sidebar ul li a:hover {
+        background: #fff;
+    }
+
+    #sidebar ul li.active > a, a[aria-expanded="true"] {
+        background: #f8f8ff;
+    }
+
+    a[data-toggle="collapse"] {
+        position: relative;
+    }
+
+    a[aria-expanded="false"]::before, a[aria-expanded="true"]::before {
+        content: '\e259';
+        display: block;
+        position: absolute;
+        right: 20px;
+        font-family: 'Glyphicons Halflings';
+        font-size: 0.6em;
+    }
+    a[aria-expanded="true"]::before {
+        content: '\e260';
+    }
+
+    #page {
+        min-height: 100vh;
+        transition: all 0.3s;
+    }
+
+    #page.pushed {
+        padding-left: 275px;
+        min-height: 100vh;
+        max-width: 90vw;
+        transition: all 0.3s;
+    }
+
+    @media (max-width: 768px) {
+        #sidebar {
+            margin-left: -250px;
+        }
+        #sidebar.active {
+            margin-left: 0;
+        }
+        #sidebarCollapse span {
+            display: none;
+        }
+    }
+</style>
+
+<nav id="sidebar">
     {# Inline JS is a little risque, but expedient #}
     <h3 class="text-center">
         Grouping/Filtering
     </h3>
 
-    <div class="padded-row padded-bottom">
-        <a role="button" onclick="$('#filtering_tables').toggle('slow');$(this).text($(this).text() === 'Show' ? 'Hide' : 'Show');" class="btn btn-info toggle-hide-button">Hide Grouping/Filtering</a>
+    <div class="row text-center">
+        <a role="button" id="refresh_plots" class="btn btn-primary btn-lg">Refresh</a>
     </div>
 
-    <div class="row" id="filtering_tables">
-    <div class="col-md-3">
-        <p class="text-center">
-            <label>
-                Assay Metadata
-            </label>
-        </p>
-        <div>
+    <ul class="list-unstyled components" id="filtering_tables">
+    <li>
+        <a href="#assay_metatdata" class="text-center" data-toggle="collapse" aria-expanded="false">
+            Assay Metadata
+        </a>
+        <div class="collapse" id="assay_metatdata">
             <table class="table table-bordered table-condensed bg-white">
                 <thead>
                     <tr>
@@ -208,16 +282,14 @@
                 </tbody>
             </table>
         </div>
-    </div>
+    </li>
 
 
-    <div class="col-md-3">
-        <p class="text-center">
-            <label>
-                Cell Metadata
-            </label>
-        </p>
-        <div>
+    <li>
+        <a href="#cell_metatdata" class="text-center" data-toggle="collapse" aria-expanded="false">
+            Cell Metadata
+        </a>
+        <div class="collapse" id="cell_metatdata">
             <table class="table table-bordered table-condensed bg-white">
                 <thead>
                     <tr>
@@ -348,17 +420,15 @@
                 </tbody>
             </table>
         </div>
-    </div>
+    </li>
 
 
 
-    <div class="col-md-3">
-        <p class="text-center">
-            <label>
-                Compound Metadata
-            </label>
-        </p>
-        <div>
+    <li>
+        <a href="#compound_metatdata" class="text-center" data-toggle="collapse" aria-expanded="false">
+            Compound Metadata
+        </a>
+        <div class="collapse" id="compound_metatdata">
             <table class="table table-bordered table-condensed bg-white">
                 <thead>
                     <tr>
@@ -505,16 +575,13 @@
                 </tbody>
             </table>
         </div>
-    </div>
+    </li>
 
-
-    <div class="col-md-3">
-        <p class="text-center">
-            <label>
-                Setting Metadata
-            </label>
-        </p>
-        <div>
+    <li>
+        <a href="#setting_metatdata" class="text-center" data-toggle="collapse" aria-expanded="false">
+            Setting Metadata
+        </a>
+        <div class="collapse" id="setting_metatdata">
             <table class="table table-bordered table-condensed bg-white">
                 <thead>
                     <tr>
@@ -615,12 +682,9 @@
                 </tbody>
             </table>
         </div>
-    </div>
-</div>
-<div class="row text-center">
-    <a role="button" id="refresh_plots" class="btn btn-primary btn-lg">Refresh</a>
-</div>
-</div>
+    </li>
+</ul>
+</nav>
 
 <div hidden id="filter_popup" title="X">
     <div class="padded-bottom">

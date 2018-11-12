@@ -240,4 +240,28 @@ $(document).ready(function () {
             window.GROUPING.refresh_function();
         }
     });
+
+    $('#sidebarCollapse').on('click', function () {
+         $('#sidebar').toggleClass('active');
+         $('#page').toggleClass('pushed');
+    });
+
+    $(window).on('resize', function() {
+       console.log($(window).width());
+       if($(window).width() > 768) {
+           console.log('Pushed');
+            $('#page').addClass('pushed');
+           $('#sidebar').addClass('active');
+       }
+       else {
+           console.log('Un-pushed');
+           $('#page').removeClass('pushed');
+           $('#sidebar').removeClass('active');
+       }
+    });
+
+    if($(window).width() > 768) {
+       $('#page').addClass('pushed');
+       $('#sidebar').addClass('active');
+    }
 });
