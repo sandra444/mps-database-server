@@ -24,6 +24,8 @@ $(document).ready(function () {
     window.GROUPING.group_criteria = {};
     var grouping_checkbox_selector = $('.grouping-checkbox');
 
+    var post_filter_spawn_selector = $('.post-filter-spawn');
+
     // Iterate over matching placeholders and add correct icons
     var treatment_icon = $('<span>')
         .addClass('glyphicon glyphicon-folder-open')
@@ -46,6 +48,30 @@ $(document).ready(function () {
     $('[data-group-type="trellis"]').each(function() {
         $(this).append(trellis_icon.clone());
     });
+
+    // Gray out filters with nothing in them
+    window.GROUPING.set_grouping_filtering = function(new_post_filter) {
+        if (window.GROUPING.full_post_filter === null) {
+            window.GROUPING.full_post_filter = JSON.parse(JSON.stringify(new_post_filter));
+            window.GROUPING.current_post_filter = JSON.parse(JSON.stringify(new_post_filter));
+
+            post_filter_spawn_selector.each(function() {
+                // Current parent model
+                current_parent_model = $(this).attr('data-parent-model');
+                // Current filter
+                current_filter = $(this).attr('data-filter-relation');
+
+                // PLEASE NOTE: TECHNICALLY SHOULD BE PROP
+                if (!new_post_filter || !new_post_filter[current_parent_model] || !new_post_filter[current_parent_model][current_filter]) {
+                    $(this).attr('disabled', 'disabled');
+                    console.log(this);
+                }
+                else {
+                    $(this).removeAttr('disabled');
+                }
+            });
+        }
+    }
 
     // Semi-arbitrary at the moment
     window.GROUPING.get_grouping_filtering = function() {
@@ -112,7 +138,7 @@ $(document).ready(function () {
 
     // Triggers for spawning filters
     // TODO REVISE THIS TERRIBLE SELECTOR
-    $('.post-filter-spawn').click(function() {
+    post_filter_spawn_selector.click(function() {
         // Parent row
         var current_title = $(this).parent().parent().find('td').eq(2).html();
 

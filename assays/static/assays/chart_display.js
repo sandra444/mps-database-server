@@ -345,10 +345,7 @@ $(document).ready(function () {
 
     window.CHARTS.make_charts = function(json, charts, changes_to_options) {
         // post_filter setup
-        if (window.GROUPING.full_post_filter === null) {
-            window.GROUPING.full_post_filter = json.post_filter;
-            window.GROUPING.current_post_filter = JSON.parse(JSON.stringify(json.post_filter));
-        }
+        window.GROUPING.set_grouping_filtering(json.post_filter);
 
         // Remove triggers
         if (all_events[charts]) {
