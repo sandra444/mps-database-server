@@ -62,9 +62,8 @@ $(document).ready(function () {
                 current_filter = $(this).attr('data-filter-relation');
 
                 // PLEASE NOTE: TECHNICALLY SHOULD BE PROP
-                if (!new_post_filter || !new_post_filter[current_parent_model] || !new_post_filter[current_parent_model][current_filter]) {
+                if (!new_post_filter || !new_post_filter[current_parent_model] || !new_post_filter[current_parent_model][current_filter] || new_post_filter[current_parent_model][current_filter].length < 2) {
                     $(this).attr('disabled', 'disabled');
-                    console.log(this);
                 }
                 else {
                     $(this).removeAttr('disabled');
@@ -267,27 +266,34 @@ $(document).ready(function () {
         }
     });
 
-    $('#sidebarCollapse').on('click', function () {
+    $('#sidebarCollapse').click(function () {
          $('#sidebar').toggleClass('active');
          $('#page').toggleClass('pushed');
     });
 
-    $(window).on('resize', function() {
-       console.log($(window).width());
-       if($(window).width() > 768) {
-           console.log('Pushed');
-            $('#page').addClass('pushed');
-           $('#sidebar').addClass('active');
-       }
-       else {
-           console.log('Un-pushed');
-           $('#page').removeClass('pushed');
-           $('#sidebar').removeClass('active');
-       }
+    $(window).resize(function() {
+        if($(window).width() > 768) {
+             $('#page').addClass('pushed');
+             $('#sidebar').addClass('active');
+        }
+        else {
+            $('#page').removeClass('pushed');
+            $('#sidebar').removeClass('active');
+        }
+
+        // Adjust datatables
+        setTimeout(function() {
+            $($.fn.dataTable.tables(true)).DataTable().columns.adjust();
+        }, 250);
     });
 
     if($(window).width() > 768) {
-       $('#page').addClass('pushed');
-       $('#sidebar').addClass('active');
+        $('#page').addClass('pushed');
+        $('#sidebar').addClass('active');
+
+
+        setTimeout(function() {
+            $($.fn.dataTable.tables(true)).DataTable().columns.adjust();
+        }, 250);
     }
 });

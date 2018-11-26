@@ -1,7 +1,10 @@
 // Contains functions for making charts for data
 
 // Global variable for charts
-window.CHARTS = {};
+window.CHARTS = {
+    // Should this be here, or in grouping?
+    // refresh_function: null;
+};
 
 // Load the Visualization API and the corechart package.
 // google.charts.load('current', {'packages':['corechart']});
@@ -219,11 +222,6 @@ $(document).ready(function () {
             columnDefs: [
                 // Treat the group column as if it were just the number
                 { "type": "brute-numeric", "targets": 0, "width": "10%" }
-                // Poses a problem due to variable table
-                // { "width": "10%", "targets": 1 },
-                // { "width": "15%", "targets": 2 },
-                // { "width": "20%", "targets": 3 },
-                // { "width": "15%", "targets": 4 }
             ]
         });
 
@@ -644,4 +642,10 @@ $(document).ready(function () {
             all_events[charts].push(current_event);
         }
     };
+
+    // Setup triggers
+    $('#chart_options').find('input').change(function() {
+        // Odd, perhaps innapropriate!
+        window.GROUPING.refresh_function();
+    });
 });
