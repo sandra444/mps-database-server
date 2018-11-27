@@ -2110,7 +2110,7 @@ def apply_post_filter(post_filter, studies, assays, matrix_items, data_points):
     study_post_filters = {
         current_filter: [
             x for x in post_filter.get('study', {}).get(current_filter, [])
-        ] for current_filter in post_filter.get('study')
+        ] for current_filter in post_filter.get('study', {})
     }
 
     studies = studies.filter(
@@ -2120,7 +2120,7 @@ def apply_post_filter(post_filter, studies, assays, matrix_items, data_points):
     assay_post_filters = {
         current_filter: [
             x for x in post_filter.get('assay', {}).get(current_filter, [])
-        ] for current_filter in post_filter.get('assay')
+        ] for current_filter in post_filter.get('assay', {})
     }
 
     assays = assays.filter(
@@ -2209,25 +2209,25 @@ def apply_post_filter(post_filter, studies, assays, matrix_items, data_points):
     matrix_item_post_filters = {
         current_filter: [
             x for x in post_filter.get('matrix_item', {}).get(current_filter, [])
-        ] for current_filter in post_filter.get('matrix_item') if not current_filter.startswith('assaysetup')
+        ] for current_filter in post_filter.get('matrix_item', {}) if not current_filter.startswith('assaysetup')
     }
 
     matrix_item_compound_post_filters = {
         current_filter: [
             x for x in post_filter.get('matrix_item', {}).get(current_filter, [])
-        ] for current_filter in post_filter.get('matrix_item') if current_filter.startswith('assaysetupcompound__')
+        ] for current_filter in post_filter.get('matrix_item', {}) if current_filter.startswith('assaysetupcompound__')
     }
 
     matrix_item_cell_post_filters = {
         current_filter: [
             x for x in post_filter.get('matrix_item', {}).get(current_filter, [])
-        ] for current_filter in post_filter.get('matrix_item') if current_filter.startswith('assaysetupcell__')
+        ] for current_filter in post_filter.get('matrix_item', {}) if current_filter.startswith('assaysetupcell__')
     }
 
     matrix_item_setting_post_filters = {
         current_filter: [
             x for x in post_filter.get('matrix_item', {}).get(current_filter, [])
-        ] for current_filter in post_filter.get('matrix_item') if current_filter.startswith('assaysetupsetting__')
+        ] for current_filter in post_filter.get('matrix_item', {}) if current_filter.startswith('assaysetupsetting__')
     }
 
     matrix_items = matrix_items.filter(study__in=studies)
@@ -2273,7 +2273,7 @@ def apply_post_filter(post_filter, studies, assays, matrix_items, data_points):
     data_point_post_filters = {
         current_filter: [
             x for x in post_filter.get('data_point', {}).get(current_filter, [])
-        ] for current_filter in post_filter.get('data_point')
+        ] for current_filter in post_filter.get('data_point', {})
     }
 
     data_points = data_points.filter(
