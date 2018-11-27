@@ -2,6 +2,17 @@
 
 // Global variable for grouping
 window.GROUPING = {
+    // Refresh wrapper runs refresh_function under certain criteria
+    refresh_wrapper: function(manual_refresh) {
+        if (!window.GROUPING.refresh_function) {
+            console.log('Error refreshing');
+        }
+        else {
+            if (manual_refresh || !document.getElementById("id_manually_refresh").checked) {
+                window.GROUPING.refresh_function();
+            }
+        }
+    },
     // Starts null
     refresh_function: null,
     // Starts null
@@ -120,6 +131,10 @@ $(document).ready(function () {
                 click: function() {
                     window.GROUPING.current_post_filter[current_parent_model][current_filter] = $.extend({}, filter_buffer);
                     filter_buffer = {};
+
+                    // Refresh on apply
+                    window.GROUPING.refresh_wrapper();
+
                     $(this).dialog("close");
                 }
             },
@@ -258,12 +273,13 @@ $(document).ready(function () {
     });
 
     $('#refresh_plots').click(function() {
-        if (!window.GROUPING.refresh_function) {
-            console.log('Error refreshing');
-        }
-        else {
-            window.GROUPING.refresh_function();
-        }
+        window.GROUPING.refresh_function();
+    });
+
+    // Setup triggers
+    $('#filtering_tables').find('input').change(function() {
+        // Odd, perhaps innapropriate!
+        window.GROUPING.refresh_wrapper();
     });
 
     $('#sidebarCollapse').click(function () {

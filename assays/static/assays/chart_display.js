@@ -66,7 +66,9 @@ $(document).ready(function () {
     window.CHARTS.prepare_chart_options = function(charts) {
         var options = {};
 
-        $.each($('#' + charts + 'chart_options').find('input'), function() {
+        //$.each($('#' + charts + 'chart_options').find('input'), function() {
+        // Object extraneous as there is only one option set now
+        $.each($('#charting_options_tables').find('input'), function() {
             if (this.checked) {
                 options[this.name.replace(charts, '')] = this.value;
             }
@@ -240,6 +242,7 @@ $(document).ready(function () {
         treatment_group_data_table.fixedHeader.enable();
     };
 
+    // UNUSED
     window.CHARTS.get_heatmap_dropdowns = function(starting_index) {
         if (heatmap_data.matrices && _.keys(heatmap_data.matrices).length > 0) {
             heatmap_wrapper_selector.show();
@@ -498,12 +501,15 @@ $(document).ready(function () {
                 options.focusTarget = 'category';
             }
 
+            // Removed for now
+/*
             if (document.getElementById(charts + 'log_x').checked) {
                 options.hAxis.scaleType = 'log';
             }
             if (document.getElementById(charts + 'log_y').checked) {
                 options.vAxis.scaleType = 'log';
             }
+*/
 
             // Merge options with the specified changes
             $.extend(options, changes_to_options);
@@ -644,8 +650,8 @@ $(document).ready(function () {
     };
 
     // Setup triggers
-    $('#chart_options').find('input').change(function() {
+    $('#charting_options_tables').find('input').change(function() {
         // Odd, perhaps innapropriate!
-        window.GROUPING.refresh_function();
+        window.GROUPING.refresh_wrapper();
     });
 });
