@@ -3,12 +3,6 @@
 
 {% block extra_head %}
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-    {% if not detail %}
-    <script src="{% static "js/calendar.js" %}"></script>
-    <script src="{% static "js/enter_override.js" %}"></script>
-    <script src="{% static "assays/compound_instances.js" %}"></script>
-    <script src="{% static "js/flag.js" %}"></script>
-    {% endif %}
 {% endblock %}
 
 {% block load_js %}
@@ -16,6 +10,11 @@
     <script src="{% static "assays/cell_sample_selection.js" %}"></script>
     <script src="{% static "assays/assaymatrix_add.js" %}"></script>
     <script src="{% static "assays/chart_display.js" %}"></script>
+    {# Not used in detail, but shouldn't be problem #}
+    <script src="{% static "js/calendar.js" %}"></script>
+    <script src="{% static "js/enter_override.js" %}"></script>
+    <script src="{% static "assays/compound_instances.js" %}"></script>
+    <script src="{% static "js/flag.js" %}"></script>
 {% endblock %}
 
 {% block breadcrumbs %}
