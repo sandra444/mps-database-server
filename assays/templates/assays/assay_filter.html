@@ -143,10 +143,11 @@
 
     {# TODO TODO TODO NEED GROUPING  AND FILTERING STUFF HERE TOO #}
 
-    <div class="well container">
+    <div class="container">
+    <div class="well">
         {# TODO TODO TODO #}
-        <div class="row">
-        <div class="col-md-4">
+        <div class="row form-group">
+        <div class="col-sm-6 col-md-4">
         <label class="radio-inline">
             <input type="radio" name="inter_level" id="inter_level_by_center" value="1" checked>
             By Center
@@ -156,18 +157,18 @@
             By Study
         </label>
         </div>
-        <div class="col-md-4">
+        <div class="col-sm-6 col-md-4">
         <label>
             <input type="checkbox" name="initial_norm" id="initial_norm">
             Normalize by Median Value
         </label>
         </div>
         <div class="col-md-4">
-        <label>Maximum Interpolation Size
-            <input id="max_interpolation_size" type="number" value="2" style="width: 40px;">
-        </label>
+        <label>Maximum Interpolation Size</label>
+            <input id="max_interpolation_size" class="form-control" type="number" value="2" style="width: 75px; display: inline;">
         </div>
         </div>
+    </div>
     </div>
 
     <div class="row padded-row">
