@@ -1853,7 +1853,7 @@ def acquire_post_filter(studies, assays, matrix_items, data_points):
 
     # Contrived: Add no cells
     post_filter.setdefault('matrix_item', {}).setdefault(
-        'assaysetupcell__cell_sample__cell_type_id__in', {}
+        'assaysetupcell__cell_sample_id__in', {}
     ).update({
         0: '-No Cells-'
     })
@@ -2249,7 +2249,7 @@ def apply_post_filter(post_filter, studies, assays, matrix_items, data_points):
         )
 
     # Cells
-    if post_filter.get('matrix_item', {}).get('assaysetupcell__cell_sample__cell_type_id__in', {}).get('0', None):
+    if post_filter.get('matrix_item', {}).get('assaysetupcell__cell_sample_id__in', {}).get('0', None):
         matrix_items = matrix_items.filter(
             **matrix_item_cell_post_filters
         ) | matrix_items.filter(assaysetupcell__isnull=True)
