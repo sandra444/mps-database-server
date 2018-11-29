@@ -10,21 +10,21 @@
         <div class="collapse well" id="plot_graph_by">
             <div class="radio">
                 <label class="radio-inline">
-                    <input type="radio" name="{{ chart_prefix }}key" id="{{ chart_prefix }}device_select" value="device" checked>
+                    <input type="radio" name="key" id="device_select" value="device" checked>
                     By Chip
                 </label>
             </div>
 
             <div class="radio">
                 <label class="radio-inline">
-                    <input type="radio" name="{{ chart_prefix }}key" id="{{ chart_prefix }}group_select" value="group">
+                    <input type="radio" name="key" id="group_select" value="group">
                     By Group
                 </label>
             </div>
 
             <div class="radio">
                 <label class="radio-inline">
-                    <input type="radio" name="{{ chart_prefix }}key" id="{{ chart_prefix }}dose_select" value="dose">
+                    <input type="radio" name="key" id="dose_select" value="dose">
                     By Dose-Response
                 </label>
             </div>
@@ -36,25 +36,25 @@
         <div class="collapse well" id="data_aggregation">
             <div class="radio">
                 <label class="radio-inline">
-                    <input type="radio" name="{{ chart_prefix }}mean_type" id="{{ chart_prefix }}arithmetic_select" value="arithmetic" checked>
+                    <input type="radio" name="mean_type" id="arithmetic_select" value="arithmetic" checked>
                     Arithmetic Mean
                 </label>
             </div>
             <div class="radio">
                 <label class="radio-inline">
-                    <input type="radio" name="{{ chart_prefix }}mean_type" id="{{ chart_prefix }}geometric_select" value="geometric">
+                    <input type="radio" name="mean_type" id="geometric_select" value="geometric">
                     Geometric Mean
                 </label>
             </div>
             <div class="radio">
                 <label class="radio-inline">
-                    <input type="radio" name="{{ chart_prefix }}mean_type" id="{{ chart_prefix }}median_select" value="median">
+                    <input type="radio" name="mean_type" id="median_select" value="median">
                     Median
                 </label>
             </div>
             <div class="radio">
                 <label class="radio-inline">
-                    <input type="radio" name="{{ chart_prefix }}mean_type" id="{{ chart_prefix }}none_select" value="none">
+                    <input type="radio" name="mean_type" id="none_select" value="none">
                     None
                 </label>
             </div>
@@ -67,19 +67,19 @@
         <div class="collapse well" id="error_bar_by">
             <div class="radio">
                 <label class="radio-inline">
-                    <input type="radio" name="{{ chart_prefix }}interval_type" id="{{ chart_prefix }}ste_select" value="ste" checked>
+                    <input type="radio" name="interval_type" id="ste_select" value="ste" checked>
                     Standard Error
                 </label>
             </div>
             <div class="radio">
                 <label class="radio-inline">
-                    <input type="radio" name="{{ chart_prefix }}interval_type" id="{{ chart_prefix }}std_select" value="std">
+                    <input type="radio" name="interval_type" id="std_select" value="std">
                     Standard Deviation
                 </label>
             </div>
             <div class="radio">
                 <label class="radio-inline">
-                    <input type="radio" name="{{ chart_prefix }}interval_type" id="{{ chart_prefix }}iqr_select" value="iqr">
+                    <input type="radio" name="interval_type" id="iqr_select" value="iqr">
                     Interquartile Range
                 </label>
             </div>
@@ -93,13 +93,13 @@
             {# Subject to removal #}
             <div class="radio">
                 <label class="radio-inline">
-                    <input type="radio" name="{{ chart_prefix }}tooltip_type" id="{{ chart_prefix }}datum_select" value="datum" checked>
+                    <input type="radio" name="tooltip_type" id="datum_select" value="datum" checked>
                     Each Data Point
                 </label>
             </div>
             <div class="radio">
                 <label class="radio-inline">
-                    <input type="radio" name="{{ chart_prefix }}tooltip_type" id="{{ chart_prefix }}category_select" value="category">
+                    <input type="radio" name="tooltip_type" id="category_select" value="category">
                     Entire Time Point
                 </label>
             </div>
@@ -111,15 +111,15 @@
         </a>
         <div class="collapse well" id="data_display">
             <div class="radio">
-                <label for="{{ chart_prefix }}include_all">
-                    <input type="checkbox" name="{{ chart_prefix }}include_all" id="{{ chart_prefix }}include_all" />
+                <label for="include_all">
+                    <input type="checkbox" name="include_all" id="include_all" />
                     {# Beyond crude, don't do things like this #}
                     Include Excluded Data
                 </label>
             </div>
             <div class="radio">
-                <label for="{{ chart_prefix }}truncate_negative">
-                    <input type="checkbox" name="{{ chart_prefix }}truncate_negative" id="{{ chart_prefix }}truncate_negative" />
+                <label for="truncate_negative">
+                    <input type="checkbox" name="truncate_negative" id="truncate_negative" />
                     Negative Values -> 0
                 </label>
             </div>

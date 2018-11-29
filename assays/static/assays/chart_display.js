@@ -52,6 +52,8 @@ $(document).ready(function () {
     var device_to_group = {};
     var all_treatment_groups = [];
 
+    var min_height = 400;
+
     // Conversion dictionary
     var headers = {
         // 'device': 'Device',
@@ -70,7 +72,7 @@ $(document).ready(function () {
         // Object extraneous as there is only one option set now
         $.each($('#charting_options_tables').find('input'), function() {
             if (this.checked) {
-                options[this.name.replace(charts, '')] = this.value;
+                options[this.name] = this.value;
             }
         });
 
@@ -97,7 +99,7 @@ $(document).ready(function () {
                 if (!previous) {
                     previous = $('<div>')
                     //.addClass('padded-row')
-                        .css('min-height', 400);
+                        .css('min-height', min_height);
                     charts_id.append(previous
                         .append($('<div>')
                             .attr('id', charts + '_' + index)
@@ -115,6 +117,36 @@ $(document).ready(function () {
             }
         }
     };
+
+    window.CHARTS.prepare_row_by_row_charts = function(json, charts) {
+        // Clear existing charts
+        var charts_id = $('#' + charts);
+        charts_id.empty();
+
+        // If errors, report them and then terminate
+        if (json.errors) {
+            alert(json.errors);
+            return;
+        }
+
+        var sorted_assays = json.sorted_assays;
+        var assays = json.assays;
+
+        var previous = null;
+        for (var index in sorted_assays) {
+            if (assays[index].length > 1) {
+                new_div = $('<div>')
+                //.addClass('padded-row')
+                    .css('min-height', min_height);
+                charts_id.append(new_div
+                    .append($('<div>')
+                        .attr('id', charts + '_' + index)
+                        .addClass('chart-container')
+                    )
+                );
+            }
+        }
+    }
 
     // No longer in use
     window.CHARTS.prepare_charts_by_table = function(json, charts) {
@@ -369,7 +401,7 @@ $(document).ready(function () {
         // window.CHARTS.get_heatmap_dropdowns(0);
 
         // Naive way to learn whether dose vs. time
-        var is_dose = $('#' + charts + 'dose_select').prop('checked');
+        var is_dose = $('#dose_select').prop('checked');
 
         var x_axis_label = 'Time (Days)';
         if (is_dose) {
@@ -487,7 +519,7 @@ $(document).ready(function () {
                     'width': '75%',
                     'height': '65%'
                 },
-                'height':400,
+                'height':min_height,
                 // Individual point tooltips, not aggregate
                 focusTarget: 'datum',
                 intervals: {
@@ -497,7 +529,7 @@ $(document).ready(function () {
             };
 
             // NAIVE: I shouldn't perform a whole refresh just to change the scale!
-            if (document.getElementById(charts + 'category_select').checked) {
+            if (document.getElementById('category_select').checked) {
                 options.focusTarget = 'category';
             }
 
@@ -607,7 +639,7 @@ $(document).ready(function () {
                     // Need to link EACH CHARTS values to the proper group
                     // EMPHASIS ON EACH CHART
                     // Somewhat naive
-                    if (document.getElementById(charts + 'group_select').checked) {
+                    if (document.getElementById('group_select').checked) {
                         // NOTE -1
                         group_to_data[charts][index][i] = assays[index][0][i].replace(/\D/g, '') - 1;
                     }
