@@ -2,7 +2,7 @@
     <u>General Graph Properties</u>
 </h3>
 
-<ul class="list-unstyled components" id="charting_options_tables">
+<ul class="list-unstyled components padded-bottom" id="charting_options_tables">
     <li>
         <a href="#plot_graph_by" class="text-center collapsed" data-toggle="collapse" aria-expanded="false">
             Plot Graph By
@@ -24,10 +24,17 @@
 
             <div class="radio">
                 <label class="radio-inline">
-                    <input type="radio" name="key" id="dose_select" value="dose">
-                    By Dose-Response
+                    <input type="radio" name="key" id="compound_select" value="compound">
+                    By Compound
                 </label>
             </div>
+
+            {# <div class="radio"> #}
+                {# <label class="radio-inline"> #}
+                    {# <input type="radio" name="key" id="dose_select" value="dose"> #}
+                    {# By Dose-Response #}
+                {# </label> #}
+            {# </div> #}
     </li>
     <li>
         <a href="#data_aggregation" class="text-center collapsed" data-toggle="collapse" aria-expanded="false">
@@ -138,7 +145,7 @@
         </div>
     </li>
 
-    <div class="row text-center">
+    <div class="row text-center padded-bottom">
         <a role="button" id="show_hide_plots" class="btn btn-warning btn-lg">Show/Hide Plots</a>
     </div>
 </ul>
