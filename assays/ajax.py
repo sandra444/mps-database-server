@@ -1106,10 +1106,13 @@ def get_data_points_for_charting(
                         compound.addition_time <= raw_time and
                         compound.addition_time + compound.duration >= raw_time
                     ):
+                        concentration = compound.concentration * compound.concentration_unit.scale_factor
                         tag.append(
                             # May need this to have float minutes, unsure
-                            '{}'.format(
+                            '{} {} {}'.format(
                                 compound.compound_instance.compound.name,
+                                concentration,
+                                compound.concentration_unit.base_unit,
                             )
                         )
 
