@@ -404,6 +404,7 @@ $(document).ready(function () {
         var is_dose = $('#dose_select').prop('checked');
 
         var x_axis_label = 'Time (Days)';
+        // Still need to work in dose-response
         if (is_dose) {
             x_axis_label = 'Dose (μM)';
         }
@@ -415,6 +416,37 @@ $(document).ready(function () {
 
         var sorted_assays = json.sorted_assays;
         var assays = json.assays;
+
+        var time_conversion = null;
+        var time_label = null;
+
+        // CRUDE: Perform time unit conversions
+        if (document.getElementById('id_chart_option_time_unit').value != 'Day') {
+            if (document.getElementById('id_chart_option_time_unit').value == 'Hour') {
+                time_conversion = 24;
+                time_label = 'Time (Hours)';
+            }
+            else {
+                time_conversion = 1440;
+                time_label = 'Time (Minutes)';
+            }
+        }
+
+        if (time_conversion)
+        {
+            x_axis_label = time_label;
+
+            $.each(assays, function(index, assay) {
+                // Don't bother if empty
+                assay[0][0] = time_label;
+                // Crude
+                $.each(assay, function(index, row) {
+                    if (index) {
+                        row[0] *= time_conversion;
+                    }
+                });
+            });
+        }
 
         for (index in sorted_assays) {
             // Don't bother if empty
@@ -682,7 +714,7 @@ $(document).ready(function () {
     };
 
     // Setup triggers
-    $('#charting_options_tables').find('input').change(function() {
+    $('#charting_options_tables').find('input, select').change(function() {
         // Odd, perhaps innapropriate!
         window.GROUPING.refresh_wrapper();
     });
