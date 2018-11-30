@@ -60,6 +60,11 @@ $(document).ready(function () {
         $(this).append(trellis_icon.clone());
     });
 
+    var toggle_sidebar_button = $('#toggle_sidebar_button');
+
+    // Contrived: Show the toggle sidebar button
+    toggle_sidebar_button.removeClass('hidden');
+
     // Gray out filters with nothing in them
     window.GROUPING.set_grouping_filtering = function(new_post_filter) {
         if (window.GROUPING.full_post_filter === null) {
@@ -282,7 +287,7 @@ $(document).ready(function () {
         window.GROUPING.refresh_wrapper();
     });
 
-    $('#sidebarCollapse').click(function () {
+    toggle_sidebar_button.click(function() {
          $('#sidebar').toggleClass('active');
          $('#page').toggleClass('pushed');
     });
