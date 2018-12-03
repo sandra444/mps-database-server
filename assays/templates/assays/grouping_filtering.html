@@ -3,6 +3,7 @@
 <script src="{% static "assays/grouping_filtering.js" %}"></script>
 {% endcompress %}
 
+{# TODO MOVE #}
 <style>
     #sidebar {
         overflow: auto;
@@ -699,7 +700,9 @@
 </ul>
 
 {# TODO REMOVE THE BLASTED PREFIX PLEASE #}
-{% include "assays/chart_options.html" with chart_prefix='charts' %}
+{% if charts == 'true' %}
+    {% include "assays/chart_options.html" with chart_prefix='charts' %}
+{% endif %}
 
 </nav>
 

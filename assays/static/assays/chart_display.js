@@ -65,6 +65,59 @@ $(document).ready(function () {
         'Items with Same Treatment': 'Matrix Items (Chips/Wells) in Group'
     };
 
+    // TODO PLEASE MAKE THIS NOT CONTRIVED SOON
+    var chart_filter_popup = $('#chart_filter_popup');
+    var chart_filter_table = chart_filter_popup.find('table');
+    var chart_filter_data_table = null;
+    var chart_filter_body = chart_filter_table.find('tbody');
+
+    var charts_to_hide = {};
+    var chart_filter_buffer = {};
+
+    // var filter_popup_header = filter_popup.find('h5');
+
+    if (chart_filter_popup) {
+        chart_filter_popup.dialog({
+            width: 825,
+            closeOnEscape: true,
+            autoOpen: false,
+            close: function () {
+                // Purge the buffer
+                chart_filter_buffer = {};
+                $('body').removeClass('stop-scrolling');
+            },
+            open: function () {
+                $('body').addClass('stop-scrolling');
+            },
+            buttons: [
+            {
+                text: 'Apply',
+                click: function() {
+                    // Iterate over the charts to hide
+                    charts_to_hide = $.extend({}, chart_filter_buffer);
+
+                    $.each(function(chart_id, status) {
+                        if (status) {
+                            $(chart_id).hide('slow');
+                        }
+                        else {
+                            $(chart_id).show('slow');
+                        }
+                    });
+
+                    $(this).dialog("close");
+                }
+            },
+            {
+                text: 'Cancel',
+                click: function() {
+                   $(this).dialog("close");
+                }
+            }]
+        });
+        chart_filter_popup.removeProp('hidden');
+    }
+
     window.CHARTS.prepare_chart_options = function(charts) {
         var options = {};
 
@@ -93,27 +146,38 @@ $(document).ready(function () {
         var sorted_assays = json.sorted_assays;
         var assays = json.assays;
 
-        var previous = null;
+        // Old method
+        // var previous = null;
+        // for (var index in sorted_assays) {
+        //     if (assays[index].length > 1) {
+        //         if (!previous) {
+        //             previous = $('<div>')
+        //             //.addClass('padded-row')
+        //                 .css('min-height', min_height);
+        //             charts_id.append(previous
+        //                 .append($('<div>')
+        //                     .attr('id', charts + '_' + index)
+        //                     .addClass('col-sm-12 col-md-6 chart-container')
+        //                 )
+        //             );
+        //         }
+        //         else {
+        //             previous.append($('<div>')
+        //                 .attr('id', charts + '_' + index)
+        //                 .addClass('col-sm-12 col-md-6 chart-container')
+        //             );
+        //             previous = null;
+        //         }
+        //     }
+        // }
+
         for (var index in sorted_assays) {
             if (assays[index].length > 1) {
-                if (!previous) {
-                    previous = $('<div>')
-                    //.addClass('padded-row')
-                        .css('min-height', min_height);
-                    charts_id.append(previous
-                        .append($('<div>')
-                            .attr('id', charts + '_' + index)
-                            .addClass('col-sm-12 col-md-6 chart-container')
-                        )
-                    );
-                }
-                else {
-                    previous.append($('<div>')
+                charts_id.append($('<div>')
                         .attr('id', charts + '_' + index)
                         .addClass('col-sm-12 col-md-6 chart-container')
-                    );
-                    previous = null;
-                }
+                        .css('min-height', min_height)
+                );
             }
         }
     };
@@ -374,6 +438,10 @@ $(document).ready(function () {
     // TODO THIS SHOULDN'T BE REDUNDANT
     function isNumber(obj) {
         return obj !== undefined && typeof(obj) === 'number' && !isNaN(obj);
+    }
+
+    function populate_selection_filter() {
+
     }
 
     window.CHARTS.make_charts = function(json, charts, changes_to_options) {
@@ -717,5 +785,40 @@ $(document).ready(function () {
     $('#charting_options_tables').find('input, select').change(function() {
         // Odd, perhaps innapropriate!
         window.GROUPING.refresh_wrapper();
+    });
+
+    // TODO TODO TODO NOT DRY
+    $(document).on('click', '.chart-filter-checkbox', function() {
+        chart_filter_buffer[$(this).val()] = $(this).prop('checked');
+    });
+
+    // Triggers for select all
+    $('#chart_filter_section_select_all').click(function() {
+        chart_filter_data_table.page.len(-1).draw();
+
+        chart_filter_table.find('.chart-filter-checkbox').each(function() {
+            $(this)
+                .prop('checked', false)
+                .attr('checked', false)
+                .trigger('click');
+        });
+
+        chart_filter_data_table.order([[1, 'asc']]);
+        chart_filter_data_table.page.len(10).draw();
+    });
+
+    // Triggers for deselect all
+    $('#chart_filter_section_deselect_all').click(function() {
+        chart_filter_data_table.page.len(-1).draw();
+
+        chart_filter_table.find('.chart-filter-checkbox').each(function() {
+            $(this)
+                .prop('checked', true)
+                .attr('checked', true)
+                .trigger('click');
+        });
+
+        chart_filter_data_table.order([[1, 'asc']]);
+        chart_filter_data_table.page.len(10).draw();
     });
 });
