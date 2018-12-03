@@ -747,7 +747,11 @@ $(document).ready(function () {
                     form_field_to_add_to = current_form.find('select[name$="' + field_name + '"]');
                 }
 
-                form_field_to_add_to.val(current_value);
+                // DO NOT ADD TO FORMS THAT ARE MISSING THEIR NAME!
+                // ONLY IGNORE IF field_name IS NAME
+                if (field_name == 'name' || current_form.find('input[name$="name"]').val()) {
+                    form_field_to_add_to.val(current_value);
+                }
             });
         });
 
@@ -1093,29 +1097,39 @@ $(document).ready(function () {
         // Iterate over every Matrix Item form
         // EXCEEDINGLY NAIVE, PLEASE REVISE
         $('.' + item_prefix).each(function(form_index) {
-            var empty = true;
-            $(this).find('input:not(:checkbox)').each(function(input_index) {
-                // console.log($(this));
-                if($(this).val()) {
-                    if(
-                        $(this).attr('name').indexOf('_index') === -1 &&
-                        $(this).attr('name').indexOf('-name') === -1 &&
-                        $(this).attr('name').indexOf('-matrix') === -1 &&
-                        $(this).attr('name').indexOf('-test_type') === -1 &&
-                        (!device_selector.val() || $(this).attr('name').indexOf('-device') === -1)
-                    ) {
-                        empty = false;
-                        return false;
-                    }
-                }
-            });
-            // Mark for deletion if empty
-            if (empty) {
-                $(this).find('input[name$="DELETE"]').prop('checked', true);
-            }
+            // Removed the notion of shadow deleting "empty" items
+            // var empty = true;
+            // $(this).find('input:not(:checkbox)').each(function(input_index) {
+            //     // console.log($(this));
+            //     if($(this).val()) {
+            //         if(
+            //             $(this).attr('name').indexOf('_index') === -1 &&
+            //             $(this).attr('name').indexOf('-name') === -1 &&
+            //             $(this).attr('name').indexOf('-matrix') === -1 &&
+            //             $(this).attr('name').indexOf('-test_type') === -1 &&
+            //             (!device_selector.val() || $(this).attr('name').indexOf('-device') === -1)
+            //         ) {
+            //             empty = false;
+            //             return false;
+            //         }
+            //     }
+            // });
+            // // Mark for deletion if empty
+            // if (empty) {
+            //     $(this).find('input[name$="DELETE"]').prop('checked', true);
+            // }
             // Otherwise make sure has device
-            if (device_selector.val()) {
+            // if (device_selector.val()) {
+            //     $(this).find('input[name$="device"]').val(device_selector.val());
+            // }
+
+            // Items with names must have device
+            if ($(this).find('input[name$="-name"]').val()) {
                 $(this).find('input[name$="device"]').val(device_selector.val());
+            }
+            // Items without names must be removed
+            else {
+                $(this).find('input[name$="DELETE"]').prop('checked', true);
             }
         });
     });
