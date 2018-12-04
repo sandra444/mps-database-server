@@ -29,7 +29,10 @@ from assays.models import (
     AssayStudyStakeholder,
     AssayDataFileUpload,
     AssayDataPoint,
-    AssayStudySupportingData
+    AssayStudySupportingData,
+    # Deprecated, just in case
+    AssayRun,
+    AssayDataUpload
 )
 from assays.forms import (
     AssayStudyConfigurationForm,
@@ -87,7 +90,7 @@ from mps.mixins import (
 )
 
 from mps.base.models import save_forms_with_tracking
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Group
 from mps.settings import DEFAULT_FROM_EMAIL
 
 import ujson as json
