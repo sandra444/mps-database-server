@@ -60,7 +60,7 @@ $(document).ready(function () {
         $(this).append(trellis_icon.clone());
     });
 
-    var toggle_sidebar_button = $('#toggle_sidebar_button');
+    var toggle_sidebar_button = $('.toggle_sidebar_button');
 
     // Contrived: Show the toggle sidebar button
     toggle_sidebar_button.removeClass('hidden');
