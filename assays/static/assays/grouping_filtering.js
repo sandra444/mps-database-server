@@ -80,9 +80,11 @@ $(document).ready(function () {
                 // PLEASE NOTE: TECHNICALLY SHOULD BE PROP
                 if (!new_post_filter || !new_post_filter[current_parent_model] || !new_post_filter[current_parent_model][current_filter] || new_post_filter[current_parent_model][current_filter].length < 2) {
                     $(this).attr('disabled', 'disabled');
+                    $(this).removeClass('btn-info');
                 }
                 else {
                     $(this).removeAttr('disabled');
+                    $(this).addClass('btn-info');
                 }
             });
         }
