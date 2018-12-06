@@ -526,6 +526,14 @@ $(document).ready(function () {
                     }
                 });
 
+                // Hide deletes for forms without names
+                if (!$(this).find('input[name$="-name"]').val()) {
+                    display.find('.form-delete').hide();
+                }
+                else {
+                    display.find('.form-delete').show();
+                }
+
                 var errors_display = null;
                 var errors_list = null;
 
@@ -625,6 +633,9 @@ $(document).ready(function () {
             // Set form
             $('#id_' + item_prefix + '-' + $(this).attr(item_form_index_attribute) + '-name').val(value);
         });
+
+        // Semi-superfluous (refreshes things like delete button)
+        refresh_all_contents_from_forms();
     }
 
     function default_incrementer(
@@ -934,7 +945,7 @@ $(document).ready(function () {
                 window.get_organ_models(device_selector.val());
             }
         }
-        else {
+        else if (!window.device.val() || representation_selector.val() === 'plate') {
             window.device.val('');
             window.get_organ_models('');
         }
@@ -1128,13 +1139,15 @@ $(document).ready(function () {
             //     $(this).find('input[name$="device"]').val(device_selector.val());
             // }
 
+            var current_name = $(this).find('input[name$="-name"]').val();
+
             // Items with names must have device
             // Only apply global device when plate representation is selected
-            if ($(this).find('input[name$="-name"]').val() && representation_selector.val() === 'plate') {
+            if (current_name && representation_selector.val() === 'plate') {
                 $(this).find('input[name$="device"]').val(device_selector.val());
             }
             // Items without names must be removed
-            else {
+            if (!current_name) {
                 $(this).find('input[name$="DELETE"]').prop('checked', true);
             }
         });
