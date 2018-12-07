@@ -68,6 +68,7 @@ from mps.mixins import user_is_valid_study_viewer
 
 import numpy as np
 from scipy.stats.mstats import gmean
+from scipy.stats import iqr
 
 import re
 
@@ -1049,13 +1050,6 @@ def get_data_points_for_charting(
         }
 
     for raw in raw_data:
-        # Now uses full name
-        # assay = raw.assay_id.assay_id.assay_short_name
-        # Deprecated
-        # assay = raw.assay_id.assay_id.assay_name
-        # unit = raw.assay_id.readout_unit.unit
-        # Deprecated
-        # field = raw.field_id
         value = raw.value
 
         study_assay = raw.study_assay
@@ -1219,6 +1213,9 @@ def get_data_points_for_charting(
                                     average = gmean(values)
                                     if np.isnan(average):
                                         return {'errors': 'Geometric mean could not be calculated (probably due to negative values), please use an arithmetic mean instead.'}
+                                # Median
+                                elif mean_type == 'median':
+                                    average = np.mean(values)
                                 # If arithmetic mean
                                 else:
                                     average = np.average(values)
@@ -1228,6 +1225,9 @@ def get_data_points_for_charting(
                             # If standard deviation
                             if interval_type == 'std':
                                 interval = np.std(values)
+                            # IQR
+                            elif interval_type == 'iqr':
+                                interval = iqr(values)
                             # Standard error if not std
                             else:
                                 interval = np.std(values) / len(values) ** 0.5

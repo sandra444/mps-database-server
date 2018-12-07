@@ -312,7 +312,7 @@ $(document).ready(function() {
                     value_unit_index = json.header_keys.data.indexOf('Value Unit');
 
                     // Piechart info
-                    if (summary_pie === '0,0,0'){
+                    if (summary_pie === '0,0,0') {
                         pie_chart = new google.visualization.PieChart(document.getElementById('piechart'));
                         pie_chart.draw(na_data, na_options);
                     } else {
@@ -326,10 +326,7 @@ $(document).ready(function() {
                         pie_chart.draw(pie_data, pie_options);
                     }
 
-                    if (window.GROUPING.full_post_filter === null) {
-                        window.GROUPING.full_post_filter = json.post_filter;
-                        window.GROUPING.current_post_filter = JSON.parse(JSON.stringify(json.post_filter));
-                    }
+                    window.GROUPING.set_grouping_filtering(json.post_filter);
 
                     return repro_table_data_best;
                 },
