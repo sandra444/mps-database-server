@@ -1101,8 +1101,7 @@ def Reproducibility_Report(study_data):
     study_unique_group.set_index([range(study_unique_group.shape[0])],drop=True, append=False, inplace=True)
 
     #create reproducibility report table
-    reproducibility_results_table=study_unique_group
-    header_list=study_unique_group.columns.values.tolist()
+    header_list=chip_data.columns.values.tolist()
     header_list.append('Max CV')
     header_list.append('ICC Absolute Agreement')
     header_list.append('Reproducibility Status')
@@ -1111,10 +1110,16 @@ def Reproducibility_Report(study_data):
     header_list.append('# of Time Points')
     header_list.append('Reproducibility Note')
 
-    #Define all columns of reproducibility report table
-    reproducibility_results_table = reproducibility_results_table.reindex(columns = header_list)
-    #Loop every unique replicate group
-    group_count=len(study_unique_group.index)
+    reproducibility_results_table = []
+
+    for x in range(group_count+1):
+        reproducibility_results_table.append(header_list)
+
+    reproducibility_results_table = pd.DataFrame(columns=header_list)
+
+    # Define all columns of reproducibility report table
+    # Loop every unique replicate group
+    # group_count=len(study_unique_group.index)
     for row in range(group_count):
         rep_matrix=study_data[study_data['Organ Model']==study_unique_group['Organ Model'][row]]
         rep_matrix=rep_matrix[rep_matrix['Cells']==study_unique_group['Cells'][row]]
@@ -1128,7 +1133,10 @@ def Reproducibility_Report(study_data):
         icc_pivot = pd.pivot_table(rep_matrix, values='Value', index='Time (day)',columns=['Chip ID'], aggfunc=np.mean)
         group_id = str(row+1) #Define group ID
 
-        reproducibility_results_table.iloc[row, reproducibility_results_table.columns.get_loc('Replica Set')] = group_id
+        group_rep_matrix = pd.DataFrame(index=[0], columns=header_list)
+        reproducibility_results_table = reproducibility_results_table.append(group_rep_matrix, ignore_index=True)
+
+        reproducibility_results_table.iloc[row, reproducibility_results_table.columns.get_loc('Treatment Group')] = group_id
         reproducibility_results_table.iloc[row, reproducibility_results_table.columns.get_loc('# of Chips/Wells')] = icc_pivot.shape[1]
         reproducibility_results_table.iloc[row, reproducibility_results_table.columns.get_loc('# of Time Points')] = icc_pivot.shape[0]
 
