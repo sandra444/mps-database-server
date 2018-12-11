@@ -7,6 +7,24 @@ $(document).ready(function () {
     google.charts.setOnLoadCallback(reproPie);
 
     var studies_table = $('#studies');
+
+    // Cached secletors
+    var studies_selector = $('#id_studies');
+    var assays_selector = $('#id_assays');
+    var selected_studies_table_selector = $('#selected_studies_table');
+
+    // Populate study_id_to_assay
+    var study_id_to_assays = {};
+
+    var initial_load = true;
+
+    // If the studies are not empty, it must be an update
+    if (studies_selector.val()) {
+        $.each(studies_selector.val(), function(index, value) {
+            studies_table.find('.study-selector[value="' + value + '"]').prop('checked', true);
+        });
+    }
+
     // Hide initially
     studies_table.hide();
 
@@ -96,24 +114,27 @@ $(document).ready(function () {
                 }
             ],
             drawCallback: function () {
-                // Show when done
-                studies_table.show('slow');
+                // Show when done (if not update)
+                // Hide table if updating
+                if (!studies_selector.val()) {
+                    studies_table.show('slow');
+                    initial_load = false;
+                }
+                if (initial_load) {
+                    studies_table.show();
+                    $('#list_section').hide();
+                }
+
+                initial_load = false;
+
                 // Swap positions of filter and length selection; clarify filter
                 $('.dataTables_filter').css('float', 'left').prop('title', 'Separate terms with a space to search multiple fields');
                 $('.dataTables_length').css('float', 'right');
                 // Reposition download/print/copy
                 $('.DTTT_container').css('float', 'none');
-            }
+            },
         });
     }
-
-    // Cached secletors
-    var studies_selector = $('#id_studies');
-    var assays_selector = $('#id_assays');
-    var selected_studies_table_selector = $('#selected_studies_table');
-
-    // Populate study_id_to_assay
-    var study_id_to_assays = {};
 
     assays_selector.find('option').each(function() {
         var assay_id = $(this).val();
