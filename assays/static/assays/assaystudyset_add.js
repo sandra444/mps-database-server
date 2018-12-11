@@ -89,12 +89,9 @@ $(document).ready(function () {
             "order": [ 2, "desc" ],
             "aoColumnDefs": [
                 {
-                    "bSortable": false,
-                    "aTargets": [0]
-                },
-                {
-                    "width": "10%",
-                    "targets": [0]
+                    sSortDataType: "dom-checkbox",
+                    targets: 0,
+                    width: "10%"
                 },
                 {
                     "type": "numeric-comma",
@@ -408,9 +405,11 @@ $(document).ready(function () {
     $(document).on('click', '.assay-selector', function() {
         if ($(this).prop('checked')) {
             current_assay_filter[$(this).val()] = true;
+            $(this).attr('checked', true);
         }
         else {
             current_assay_filter[$(this).val()] = false;
+            $(this).attr('checked', false);
         }
     });
 
