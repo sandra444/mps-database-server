@@ -144,14 +144,15 @@ $(document).ready(function () {
 
             if (full_post_filter_data) {
                 // Spawn checkboxes
+                var index = 0;
                 $.each(full_post_filter_data, function (obj_val, obj_name) {
                     var row = '<tr>';
 
                     if (current_post_filter_data[obj_val]) {
-                        row += '<td width="10%" class="text-center"><input data-obj-name="' + obj_name + '" class="big-checkbox post-filter-checkbox" type="checkbox" value="' + obj_val + '" checked></td>';
+                        row += '<td><input data-table-index="' + index + '" data-obj-name="' + obj_name + '" class="big-checkbox post-filter-checkbox" type="checkbox" value="' + obj_val + '" checked="checked"></td>';
                     }
                     else {
-                        row += '<td width="10%" class="text-center"><input data-obj-name="' + obj_name + '" class="big-checkbox post-filter-checkbox" type="checkbox" value="' + obj_val + '"></td>';
+                        row += '<td><input data-table-index="' + index + '" data-obj-name="' + obj_name + '" class="big-checkbox post-filter-checkbox" type="checkbox" value="' + obj_val + '"></td>';
                     }
 
                     if (obj_name) {
@@ -165,6 +166,8 @@ $(document).ready(function () {
                     row += '</tr>';
 
                     html_to_append.push(row);
+
+                    index++;
                 });
             }
             else {
@@ -178,7 +181,12 @@ $(document).ready(function () {
                 dom: '<"wrapper"lfrtip>',
                 deferRender: true,
                 iDisplayLength: 10,
-                order: [1, 'asc']
+                order: [1, 'asc'],
+                columnDefs: [
+                    // Treat the group column as if it were just the number
+                    { "sSortDataType": "dom-checkbox", "targets": 0, "width": "10%" },
+                    { "className": "dt-center", "targets": 0}
+                ]
             });
 
             // Swap positions of filter and length selection; clarify filter
@@ -189,15 +197,46 @@ $(document).ready(function () {
         }
     });
 
+    // Add a check to datatables data to make sorting work properly (and ensure no missing checks)
+    function modify_checkbox(checkbox, add_or_remove) {
+        if (current_parent_model && current_filter) {
+            var checkbox_index = $(checkbox).attr('data-table-index');
+
+            if (add_or_remove) {
+                $(checkbox).attr('checked', 'checked');
+
+                filter_data_table.data()[
+                    checkbox_index
+                ][0] = filter_data_table.data()[
+                    checkbox_index
+                ][0].replace('>', ' checked="checked">');
+
+                filter_buffer[$(checkbox).val()] = $(checkbox).attr('data-obj-name');
+            }
+            else {
+                $(checkbox).removeAttr('checked');
+
+                filter_data_table.data()[
+                    checkbox_index
+                ][0] = filter_data_table.data()[
+                    checkbox_index
+                ][0].replace(' checked="checked">', '>');
+
+                delete filter_buffer[$(checkbox).val()];
+            }
+        }
+    }
+
     // Triggers for select all
     $('#filter_section_select_all').click(function() {
         filter_data_table.page.len(-1).draw();
 
         filter_table.find('.post-filter-checkbox').each(function() {
-            $(this)
-                .prop('checked', false)
-                .attr('checked', false)
-                .trigger('click');
+            // $(this)
+            //     .prop('checked', false)
+            //     .removeAttr('checked')
+            //     .trigger('click');
+            modify_checkbox(this, true);
         });
 
         filter_data_table.order([[1, 'asc']]);
@@ -209,10 +248,11 @@ $(document).ready(function () {
         filter_data_table.page.len(-1).draw();
 
         filter_table.find('.post-filter-checkbox').each(function() {
-            $(this)
-                .prop('checked', true)
-                .attr('checked', true)
-                .trigger('click');
+            // $(this)
+            //     .prop('checked', true)
+            //     .attr('checked', 'checked')
+            //     .trigger('click');
+            modify_checkbox(this, false);
         });
 
         filter_data_table.order([[1, 'asc']]);
@@ -222,12 +262,13 @@ $(document).ready(function () {
     // TODO CHECKBOX TRIGGER
     $(document).on('click', '.post-filter-checkbox', function() {
         if (current_parent_model && current_filter) {
-            if ($(this).prop('checked')) {
-                filter_buffer[$(this).val()] = $(this).attr('data-obj-name');
-            }
-            else {
-                delete filter_buffer[$(this).val()];
-            }
+            // if ($(this).prop('checked')) {
+            //     filter_buffer[$(this).val()] = $(this).attr('data-obj-name');
+            // }
+            // else {
+            //     delete filter_buffer[$(this).val()];
+            // }
+            modify_checkbox(this, $(this).prop('checked'));
         }
     });
 
