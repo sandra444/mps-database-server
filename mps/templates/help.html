@@ -134,7 +134,7 @@
                         <a class="dropdown-toggle" data-toggle="dropdown" href="#">Providing Data<span class="caret"></span></a>
                         <ul class="dropdown-menu">
                             <li class="divider"></li>
-                            <li class="dropdown-header"><b>Review Component Lists</b></li>
+                            <li class="dropdown-header"><b>Review Components (Study Context)</b></li>
                             <li><a href="#assaymts">Assays (Methods and Targets) </a></li>
                             <li><a href="#cellsamples">Cell Samples</a></li>
                             <li><a href="#chemicallist">Compounds</a></li>
@@ -146,11 +146,11 @@
                             <li><a href="#physicalunits">Units</a></li>
                             <li class="divider"></li>
                             <li class="dropdown-header"><b>Enter Study Data</b></li>
-                            <li><a href="#studies_editor">1. Studies</a></li>
-                            <li><a href="#matrices_editor">2. Matrices</a></li>
-                            <li><a href="#matrixitems_editor">3. Matrix Items</a></li>
-                            <li><a href="#assaydata_editor">4. Assay Data Points</a></li>
-                            <li><a href="#assayimages_editor">5. Assay Images &amp; Videos</a></li>
+                            <li><a href="#studies_editor">1. Studies </a></li>
+                            <li><a href="#matrices_editor">2. Matrices  </a></li>
+                            <li><a href="#matrixitems_editor">3. Matrix Items  </a></li>
+                            <li><a href="#assaydata_editor">4. Assay Data  </a></li>
+                            <li><a href="#assayimages_editor">5. Assay Images &amp; Videos </a></li>
                         </ul>
                     </li>
 
@@ -172,6 +172,7 @@
                             <li><a href="#physicalunits_admin">Units</a></li>
                             <li class="divider"></li>
                             <li class="dropdown-header"><b>Controlling Access</b></li>
+                            <li><a href="#add_groups_admin">Adding Groups to Database</a></li>
                             <li><a href="#study_groups_admin">Adding Groups to Studies</a></li>
                             <li><a href="#user_groups_admin">Adding Users to Groups</a></li>
                         </ul>
@@ -207,6 +208,9 @@
                             <li class="dropdown-header"><b>Review Study Data</b></li>
                             <li><a href="#intrastudy">Single Study (Design &amp; Data)</a></li>
                             <li><a href="#interstudy">Multiple Studies (Data)</a></li>
+                            <li class="divider"></li>
+                            <li class="dropdown-header"><b>Contribute Study Data</b></li>
+                            <li><a href="#studies_editor">Provide Data - Getting Started </a></li>
                         </ul>
                     </li>
 
@@ -507,7 +511,7 @@
                                     <tr>
                                     <td> 6 </td>
                                     <td> OpenFDA </td>
-                                    <td> Some data pulled dynamically and not stored. Note: data are not intended for clinical use. </td>
+                                    <td> Some data pulled dynamically and not stored (Adverse events are updated quarterly). Note: data are not intended for clinical use. </td>
                                     </tr>
                                     <tr>
                                     <td> 7 </td>
@@ -517,7 +521,7 @@
                                     <tr>
                                     <td> 8 </td>
                                     <td> PubChem </td>
-                                    <td> Auto Curation </td>
+                                    <td> Auto Curation (Bioactivity data updated quarterly) </td>
                                     </tr>
                                     <tr>
                                     <td> 9 </td>
@@ -532,12 +536,12 @@
                                     <tr>
                                     <td> 11 </td>
                                     <td> DrugBank  </td>
-                                    <td> Auto Curation </td>
+                                    <td> Auto Curation (Compound data updated when compound added to MPS Database) </td>
                                     </tr>
                                     <tr>
                                     <td> 12 </td>
                                     <td> ChEMBL </td>
-                                    <td> Auto Curation </td>
+                                    <td> Auto Curation (Bioactivity data updated quarterly; Compound data updated when compound added to MPS Database) </td>
                                     </tr>
                                     <tr>
                                     <td> 13 </td>
@@ -2227,17 +2231,72 @@
         <div id="studies_editor">
             <button class="collapsible1">Adding Assay Data Step 1 - Add/Edit Study </button>
             <div class="content1">
+
+                <button class="collapsible3">See Helpful Information for New Data Providers (Reviewing/Adding Study Components and the SCD3 Workbook) </button>
+                <div class="content3">
+                    <div id="scd3notes" class="editorsubtainer">
+                        <ul class="list-group">
+                            <li class="list-group-item background3">
+                                <ul class="list-unstyled">
+                                    <li>Data and metadata collected for inclusion in the MPS Database are categorized based on when and how they are incorporated into the database. These categories are: <br>
+                                        <ul class="filled-circle">
+                                            <li> Study Context – information about the MPS Models, assays, compounds, and cells used in the study (these become options in the study component lists) </li>
+                                            <li> Study Description – the study level details (start date, purpose, methods, and description of the results) </li>
+                                            <li> Study Design – the chips level details (when and what cells, treatments, media, and settings were added to each MPS model) </li>
+                                            <li> Study Data – the resulting measured values, images, and videos </li>
+                                        </ul>
+                                    </li>
+                                    <li><br>The Study Description, Study Design, and Study Data can be added directly to the database by a data provider (a registered user who has been granted permission to add study data to the database). Adding new components to the study component lists requires special permission that is not typically granted to data providers. </li>
+                                    <li><br>To learn how to review Study Components and request new components be added, click on the link to the component
+                                        <ul class="filled-circle">
+                                            <li><a href="#assaymts">Assays (Methods and Targets) </a></li>
+                                            <li><a href="#cellsamples">Cell Samples</a></li>
+                                            <li><a href="#chemicallist">Compounds</a></li>
+                                            <li><a href="#devices">Devices</a></li>
+                                            <li><a href="#diseaselist">Diseases</a></li>
+                                            <li><a href="#mpslocations">Locations (Add/Sample)</a></li>
+                                            <li><a href="#mpsmodels">Models</a></li>
+                                            <li><a href="#settings">Settings</a></li>
+                                            <li><a href="#physicalunits">Units</a></li>
+                                        </ul>
+                                    </li>
+                                    <li><br>CLICK HERE To download all component lists, each to a csv file (e.g., MPS Database Methods.csv, MPS Database Targets.csv, etc.) </li>
+                                    <li><br>Notes
+                                        <ul class="filled-circle">
+                                            <li> The MPS Database Center has prepared an Excel file (the SCD3 Workbook) that describes <b>Study</b> data and metadata stored in the MPS Database </li>
+                                            <li> To download the latest version of the SCD3 Workbook, <a href="/media/excel_templates/SCD3Workbook_20190107.xlsx">click here</a></li>
+                                            <li> The optimal data contribution workflow
+                                                <ul class="open-circle">
+                                                    <li>Data Provider registers as database user and notifies MPS Database Center that they wish to contribute data  </li>
+                                                    <li>MPS Database Center makes a Data Group for the Data Provider, adds the Data Provider to the Group, and notifies the Data Provider </li>
+                                                    <li>Data Provider reviews study component lists and identifies if/what new components need added to the database </li>
+                                                    <li>Data Provider downloads SCD3 Workbook and completes the Study Context tabs for needed new components </li>
+                                                    <li>Data Provider submits completed Study Context tabs to the MPS Database Center </li>
+                                                    <li>MPS Database Center adds needed components and notifies Data Provider </li>
+                                                    <li>Data Provider reviews the SCD3 Workbook and gathers/prepares information </li>
+                                                    <li>Data Provider creates a study and enters the Study Description information directly into the MPS Database via the MPS-GUI </li>
+                                                    <li>Data Provider creates a Matrix, adds Items to the Matrix, and adds all appropriate information to each Item directly in the MPS Database via the MPS-GUI </li>
+                                                    <li>Data Provider prepares and uploads MIF-C-assay data directly in the MPS Database via the MPS-GUI </li>
+                                                    <li>If providing videos/images, Data Provider prepares the MIF-C-image file and submits it, along with the media files to the MPS Database Center (via shared box)  </li>
+                                                    <li>Data Provider reviews and signs off a study </li>
+                                                </ul>
+                                            </li>
+                                            <li> Assistance is available – email MPSHELP@pitt.edu with "HELP with Providing Data" in the subject line
+                                        </ul>
+                                    </li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+
                 <div id="studieseditor" class="editorsubtainer">
                     <ul class="list-group">
                         <li class="list-group-item">
                             <ul class="list-unstyled">
                                 <li>To Add/Edit a <b>Study</b>
                                     <ul class="filled-circle">
-                                        <li>Check to make sure that all needed components are available in the database <a href="#component_section">Study Components</a>
-                                        <ul class="open-circle">
-                                            <li>To have a new component added, contact an <b>MPS Database</b> Administrator  </li>
-                                        </ul>
-                                        </li>
                                         <li>Click on the <b>Add Study</b> button or the <b>View/Edit</b> button next to the <b>Study</b> of interest to be routed to the <b>Study Matrices and Items</b> list page </li>
                                         <li>Click on the <b>Edit This Study</b> button and add/edit the required information
                                             <ul class="open-circle">
@@ -3633,7 +3692,7 @@ Results: add a summary of the study results. </td>
                                             <td> MIF-C-i </td>
                                             <td> yes </td>
                                             <td> yes </td>
-                                            <td> The file name of the image that will be provided to UPDDI via a drop box or exteral storage device. The naming of the file is up to the data provider, but a descriptive naming protocol is highly recommended. </td>
+                                            <td> The file name of the image that will be provided to the MPS Database Center via a drop box or exteral storage device. The naming of the file is up to the data provider, but a descriptive naming protocol is highly recommended. </td>
                                             <td> na </td>
                                             <td> Tamu_PT_UW_d24h0m0_C00039_S01_W5.tif </td>
                                         </tr>
@@ -4051,6 +4110,52 @@ Results: add a summary of the study results. </td>
 
         <h1 class="sub2-bars"> Controlling User Access </h1>
 
+        <div id="add_groups_admin">
+            <button class="collapsible1">Adding New Data Groups</button>
+            <div class="content1">
+                <div id="addgroupsadmin" class="adminsubtainer">
+                    <ul class="list-group">
+                        <li class="list-group-item">
+                            <ul class="list-unstyled">
+                                <li> A <b>Group</b> is actually a trio of groups. The following is an example for <b>Data Group Rusyn_TAMU</b>
+                                    <ul class="filled-circle">
+                                        <li> <b>Rusyn_TAMU</b> - this is the editor group, sometimes referred to as the group proper </li>
+                                        <li> <b>Rusyn_TAMU Admin</b> - admins can edit and sign off (or acknowledge for TCD groups) studies</li>
+                                        <li> <b>Rusyn_TAMU Viewer</b> - can view studies prior to sign off (or acknowledgement for TCD groups) </li>
+                                    </ul>
+                                </li>
+                                <li>To create and prepare a new <b>Group</b>
+                                    <ul class="filled-circle">
+                                        <li>Go to the MPS Database admin (https://mps.csb.pitt.edu/admin/) </li>
+                                        <li>Go to the MPS Authentication and Authorization Section</li>
+                                        <li>Click on Groups and scroll down to review how groups are named</li>
+                                        <li>Click on the ADD GROUP button on the top right side</li>
+                                        <li>Give the group a name (for example: my_group) </li>
+                                        <li>Click the Save and add another button </li>
+                                        <li>Give the group a name (for example: my_group Admin) </li>
+                                        <li>Click the Save and add another button </li>
+                                        <li>Give the group a name (for example: my_group Viewer) </li>
+                                        <li>Click the SAVE button </li>
+                                        <li>Return to the admin home page (https://mps.csb.pitt.edu/admin/) </li>
+                                        <li>Go to the MPS CENTERS AND MODELS Section </li>
+                                        <li>Scroll to find the Center with which the new group will be associated </li>
+                                        <li>Click on the center Name to select the center </li>
+                                        <li>Scroll down to the Groups section and add the new group (the group proper) to the center </li>
+                                        <li>Scroll down and click the SAVE button </li>
+                                    </ul>
+                                </li>
+                                <li><br>Notes
+                                    <ul class="filled-circle">
+                                        <li> It is very easy to forget to attach the group proper to a center. If you forget, you will not be able to use the group. </li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
         <div id="study_groups_admin">
             <button class="collapsible1">Assigning Groups to Studies</button>
             <div class="content1">
@@ -4085,7 +4190,6 @@ Results: add a summary of the study results. </td>
                 </div>
             </div>
         </div>
-
 
         <div id="user_groups_admin">
             <button class="collapsible1">Assigning Users To Groups (Data Group, Stakeholder Group, Access Group)</button>
