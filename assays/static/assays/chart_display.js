@@ -156,7 +156,7 @@ $(document).ready(function () {
             open: function () {
                 $('body').addClass('stop-scrolling');
                 individual_plot_popup_options_section.show('slow');
-                individual_plot_popup_plot_container.hide('slow');
+                individual_plot_popup_plot_section.hide('slow');
                 // Plot needs to be visible for you to, you know, see it here
                 plot_is_visible.prop('checked', true);
             },
@@ -177,7 +177,7 @@ $(document).ready(function () {
                     group_to_data['popup'] = [];
 
                     individual_plot_popup_options_section.hide();
-                    individual_plot_popup_plot_container.show();
+                    individual_plot_popup_plot_section.show();
 
                     get_individual_chart('popup', individual_plot_popup_plot_container[0]);
                 }
@@ -293,7 +293,10 @@ $(document).ready(function () {
                 // Only popup for now
                 // NEED TO MODIFY EVENTS FOR INDIVIDUAL LATER
                 if (charts === 'popup') {
-                    create_events(charts, true)
+                    create_events(charts, true);
+
+                    // Show the correct option section
+                    // TODO TODO TODO
                 }
             },
             error: function (xhr, errmsg, err) {
