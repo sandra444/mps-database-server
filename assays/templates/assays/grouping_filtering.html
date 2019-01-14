@@ -858,7 +858,7 @@
         {# PLEASE NOTE CONTRIVANCE #}
         {% comment %} <div class="chart-container" id="individual_plot_popup_plot_container"> {% endcomment %}
         {# Inline style of width prevents glitch where in width changes on hover events #}
-        <div class="chart-container" id="popup_0" style="width: 500px; float: left; padding: 0 10 0 10;">
+        <div class="chart-container" id="popup_0" style="width: 500px; float: left; min-height: 400px;">
         </div>
 
         {# Options section #}
@@ -880,25 +880,15 @@
             {% comment %} <legend>X-Axis</legend> {% endcomment %}
 
             <div>
-                <label>X-Axis Start</label>
-                <input>
-            </div>
-
-            <div>
-                <label>X-Axis End</label>
-                <input>
+                <label>X-Axis Range</label>
+                <input style="width: 50px;"> <span class="glyphicon glyphicon-chevron-right"></span> <input style="width: 50px;">
             </div>
 
             {% comment %} <legend>Y-Axis</legend> {% endcomment %}
 
-            <div>
-                <label>Y-Axis Start</label>
-                <input>
-            </div>
-
-            <div>
-                <label>Y-Axis End</label>
-                <input>
+            <div class="padded-bottom">
+                <label>Y-Axis Range</label>
+                <input style="width: 50px;"> <span class="glyphicon glyphicon-chevron-right"></span> <input style="width: 50px;">
             </div>
 
             {# Deferred #}
@@ -906,9 +896,11 @@
 
             {% comment %} <legend>Markers</legend> {% endcomment %}
 
-            <div>
-                <label>Show Point Marker</label>
-                <input>
+            <div class="padded-bottom">
+                <label>
+                    Show Point Marker
+                    <input class="big-checkbox" type="checkbox" style="margin-left: 30px;">
+                </label>
             </div>
 
             {% comment %} <legend>Error By</legend> {% endcomment %}
