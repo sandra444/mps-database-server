@@ -415,8 +415,6 @@ $(document).ready(function () {
             var current_max_y = Math.abs(Math.max.apply(null, trimmed_values));
             var current_min_y = Math.abs(Math.min.apply(null, trimmed_values));
 
-            console.log(current_min_y, current_max_y);
-
             if (current_max_y > 1000 || current_max_y < 0.001) {
                 options.vAxis.format = '0.00E0';
                 return false;
@@ -478,7 +476,6 @@ $(document).ready(function () {
 
         // Line chart if more than two time points and less than 101 colors
         if (assays[index].length > 3 && num_colors < 101) {
-            console.log('LINE');
             chart = new google.visualization.LineChart(chart_selector);
 
             // Change the options
@@ -499,7 +496,6 @@ $(document).ready(function () {
         }
         // Bar chart if only one time point
         else if (assays[index].length > 1) {
-            console.log('BAR');
             // Crude...
             delete options.hAxis.viewWindow;
             // Convert to categories
@@ -518,8 +514,6 @@ $(document).ready(function () {
 
             chart = new google.visualization.ColumnChart(chart_selector);
         }
-
-        console.log(options);
 
         if (chart) {
             var dataView = new google.visualization.DataView(data);
@@ -851,14 +845,14 @@ $(document).ready(function () {
             }
 
             // Makes use of a somewhat zany closure
-            var current_event = google.visualization.events.addListener(all_charts[charts][index], 'onmouseover', (function (charts, chart_index) {
+            var current_event = google.visualization.events.addListener(all_charts[charts][index], 'onmouseover', (function (charts, chart_index, is_popup) {
                 return function (entry) {
                     // Only attempts to display if there is a valid treatment group
                     if (all_treatment_groups[group_to_data[charts][chart_index][entry.column]]) {
                         var current_pos = $(all_charts[charts][chart_index].container).position();
 
                         var current_top = current_pos.top + 75;
-                        var current_left = $('#breadcrumbs').position.left;
+                        var current_left = $('#breadcrumbs').position().left;
 
                         if (is_popup) {
                             current_pos = $(all_charts[charts][chart_index].container).parent().parent().parent().position();
@@ -877,7 +871,7 @@ $(document).ready(function () {
                         }
                     }
                 }
-            })(charts, index));
+            })(charts, index, is_popup));
             all_events[charts].push(current_event);
 
             current_event = google.visualization.events.addListener(all_charts[charts][index], 'onmouseout', function () {
