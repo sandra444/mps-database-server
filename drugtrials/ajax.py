@@ -26,6 +26,8 @@ def fetch_adverse_events_data(request):
         'compound__estimated_usage',
         # WHY ISN'T THIS JUST NAME??
         'event__organ__organ_name',
+        # Add logp
+        'compound__compound__logp',
         'compound__black_box',
         # SUBJECT TO CHANGE
         'compound__compound__tctc',
@@ -89,6 +91,7 @@ def fetch_adverse_events_data(request):
                 'organ': organ_name,
                 'black_box_warning': black_box_warning,
                 'project': project,
+                'logp': ae.get('compound__compound__logp')
             }
         )
 
