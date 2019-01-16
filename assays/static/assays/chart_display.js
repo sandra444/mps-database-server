@@ -271,17 +271,17 @@ $(document).ready(function () {
                     if (!plot_is_visible.prop('checked')) {
                         // HIDE THE CHART
                         // A LITTLE MESSY TO MAKE SURE THAT THE SHOW/HIDE PLOTS MATCHES
-                        chart_filter_data_table.page.len(-1).draw();
+                        show_hide_plots_data_table.page.len(-1).draw();
 
-                        chart_filter_table.find('.chart-filter-checkbox').each(function() {
+                        $('.chart-filter-checkbox').each(function() {
                             $(this)
                                 .prop('checked', false)
                                 .attr('checked', false)
                                 .trigger('click');
                         });
 
-                        chart_filter_data_table.order([[1, 'asc']]);
-                        chart_filter_data_table.page.len(10).draw();
+                        show_hide_plots_data_table.order([[1, 'asc']]);
+                        show_hide_plots_data_table.page.len(10).draw();
                     }
 
                     $(this).dialog("close");
@@ -985,33 +985,33 @@ $(document).ready(function () {
     });
 
     // Triggers for select all
-    $('#chart_filter_section_select_all').click(function() {
-        chart_filter_data_table.page.len(-1).draw();
+    $('#show_hide_plots_select_all').click(function() {
+        show_hide_plots_data_table.page.len(-1).draw();
 
-        chart_filter_table.find('.chart-filter-checkbox').each(function() {
+        $('.chart-filter-checkbox').each(function() {
             $(this)
                 .prop('checked', false)
                 .attr('checked', false)
                 .trigger('click');
         });
 
-        chart_filter_data_table.order([[1, 'asc']]);
-        chart_filter_data_table.page.len(10).draw();
+        show_hide_plots_data_table.order([[1, 'asc']]);
+        show_hide_plots_data_table.page.len(10).draw();
     });
 
     // Triggers for deselect all
-    $('#chart_filter_section_deselect_all').click(function() {
-        chart_filter_data_table.page.len(-1).draw();
+    $('#show_hide_plots_deselect_all').click(function() {
+        show_hide_plots_data_table.page.len(-1).draw();
 
-        chart_filter_table.find('.chart-filter-checkbox').each(function() {
+        $('.chart-filter-checkbox').each(function() {
             $(this)
                 .prop('checked', true)
                 .attr('checked', true)
                 .trigger('click');
         });
 
-        chart_filter_data_table.order([[1, 'asc']]);
-        chart_filter_data_table.page.len(10).draw();
+        show_hide_plots_data_table.order([[1, 'asc']]);
+        show_hide_plots_data_table.page.len(10).draw();
     });
 
     $('.show_hide_plots').click(function() {
