@@ -55,6 +55,11 @@ $(document).ready(function() {
                 visible: false,
                 searchable: true,
             },
+            {
+                data: 'alogp',
+                visible: false,
+                searchable: true,
+            },
             {data: 'project', visible: false, searchable: true},
         ],
         "order": [[ 1, "asc" ], [ 3, "desc"]]
