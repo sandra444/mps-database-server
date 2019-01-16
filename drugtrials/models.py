@@ -324,6 +324,10 @@ FREQUENCIES = (
 
 class FindingResult(models.Model):
     """A Finding Result describes in detail a single finding from a Drug Trial"""
+
+    class Meta(object):
+        verbose_name = 'Drug Trial Result'
+
     drug_trial = models.ForeignKey(DrugTrial)
 
     finding_name = models.ForeignKey(Finding,
@@ -365,8 +369,20 @@ class FindingResult(models.Model):
 
     value_units = models.ForeignKey(PhysicalUnits, blank=True, null=True, related_name='finding_value_units')
 
+    notes = models.CharField(max_length=2048, blank=True, default='')
+
+    def get_absolute_url(self):
+        return self.drug_trial.get_absolute_url()
+
     def __unicode__(self):
-        return u'{} {}'.format(unicode(self.drug_trial), unicode(self.finding_name))
+        treatments = []
+
+        for treatment in self.findingtreatment_set.all():
+            treatments.append(unicode(treatment))
+
+        treatments = '; '.join(treatments)
+
+        return u'{}: {} for {}'.format(unicode(self.drug_trial), unicode(self.finding_name), treatments)
 
 
 class FindingTreatment(models.Model):
@@ -380,6 +396,12 @@ class FindingTreatment(models.Model):
         null=True,
         verbose_name='Concentration Unit'
     )
+
+    def __unicode__(self):
+        if self.concentration:
+            return u'{} {} {}'.format(self.compound, self.concentration, self.concentration_unit)
+        else:
+            return u'{}'.format(self.compound)
 
 
 class AdverseEvent(models.Model):
