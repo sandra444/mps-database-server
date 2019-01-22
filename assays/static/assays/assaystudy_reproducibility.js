@@ -449,6 +449,11 @@ $(document).ready(function () {
                 { title: "NA Explanation", data: '14', visible: false, 'name': 'naText' }
             ],
             columnDefs: [
+                { "responsivePriority": 1, "targets": 11 },
+                { "responsivePriority": 2, "targets": [0,1,2,3] },
+                { "responsivePriority": 3, "targets": 5 },
+                { "responsivePriority": 4, "targets": 6 },
+                { "responsivePriority": 5, "targets": 4 },
                 { "aTargets": [11], "fnCreatedCell": function (nTd, sData, oData, iRow, iCol) {
                     if (sData[0] === "E") {
                         $(nTd).css('background-color', '#74ff5b').css('font-weight', 'bold');
@@ -461,22 +466,7 @@ $(document).ready(function () {
                     }
                 }}
             ],
-            "order": [[11, 'desc'], [ 1, "asc" ]],
-            // Column visibility toggle would displace, hence new means of coloring.
-            // "createdRow": function( row, data, dataIndex ) {
-            //     if ( data[10][0] === "E" ) {
-            //         $( row ).find('td:eq(11)').css( "background-color", "#74ff5b" ).css( "font-weight", "bold"  );
-            //     }
-            //     else if ( data[10][0] === "A" ) {
-            //         $( row ).find('td:eq(11)').css( "background-color", "#fcfa8d" ).css( "font-weight", "bold"  );
-            //     }
-            //     else if ( data[10][0] === "P" ) {
-            //         $( row ).find('td:eq(11)').css( "background-color", "#ff7863" ).css( "font-weight", "bold" );
-            //     }
-            //     else {
-            //         $( row ).find('td:eq(11)').css( "background-color", "Grey" ).css( "font-weight", "bold" );
-            //     }
-            // },
+            "order": [[11, 'desc'], [ 10, 'desc' ]],
             "responsive": true,
             dom: 'B<"row">lfrtip',
             fixedHeader: {headerOffset: 50},
