@@ -384,6 +384,9 @@ $(document).ready(function () {
                         chart.draw(pie_data, pie_options);
                     }
 
+                    // post_filter setup
+                    window.GROUPING.set_grouping_filtering(json.post_filter);
+
                     return gas_list;
                 }
             },

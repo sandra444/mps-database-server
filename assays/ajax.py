@@ -69,6 +69,7 @@ from mps.mixins import user_is_valid_study_viewer
 
 import numpy as np
 from scipy.stats.mstats import gmean
+from scipy.stats import iqr
 
 import re
 
@@ -896,6 +897,7 @@ def get_item_groups(study, criteria, matrix_items=None):
 
 
 # TODO TODO TODO MAKE SURE STUDY NO LONGER REQUIRED
+# TODO TODO TODO  CLEAN UP
 def get_data_points_for_charting(
         raw_data,
         key,
@@ -943,8 +945,11 @@ def get_data_points_for_charting(
             'matrices': {},
             'values': {}
         },
-        'header_keys': header_keys
+        'header_keys': header_keys,
+        'assay_ids': {}
     }
+
+    assay_ids = final_data.get('assay_ids')
 
     intermediate_data = {}
 
@@ -1050,24 +1055,29 @@ def get_data_points_for_charting(
         }
 
     for raw in raw_data:
-        # Now uses full name
-        # assay = raw.assay_id.assay_id.assay_short_name
-        # Deprecated
-        # assay = raw.assay_id.assay_id.assay_name
-        # unit = raw.assay_id.readout_unit.unit
-        # Deprecated
-        # field = raw.field_id
         value = raw.value
 
         study_assay = raw.study_assay
         target = study_assay.target.name
         unit = study_assay.unit.unit
-
-        # Not currently used
         method = study_assay.method.name
 
         if group_method:
             target = u'{} [{}]'.format(target, method)
+            assay_ids.update({
+                u'{}\n{}'.format(target, unit): {
+                    'target': study_assay.target_id,
+                    'unit': study_assay.unit_id,
+                    'method': study_assay.method_id
+                }
+            })
+        else:
+            assay_ids.update({
+                u'{}\n{}'.format(target, unit): {
+                    'target': study_assay.target_id,
+                    'unit': study_assay.unit_id
+                }
+            })
 
         sample_location = raw.sample_location.name
 
@@ -1220,6 +1230,9 @@ def get_data_points_for_charting(
                                     average = gmean(values)
                                     if np.isnan(average):
                                         return {'errors': 'Geometric mean could not be calculated (probably due to negative values), please use an arithmetic mean instead.'}
+                                # Median
+                                elif mean_type == 'median':
+                                    average = np.mean(values)
                                 # If arithmetic mean
                                 else:
                                     average = np.average(values)
@@ -1229,6 +1242,9 @@ def get_data_points_for_charting(
                             # If standard deviation
                             if interval_type == 'std':
                                 interval = np.std(values)
+                            # IQR
+                            elif interval_type == 'iqr':
+                                interval = iqr(values)
                             # Standard error if not std
                             else:
                                 interval = np.std(values) / len(values) ** 0.5
@@ -1865,7 +1881,8 @@ def acquire_post_filter(studies, assays, matrix_items, data_points):
 
     assays = assays.prefetch_related(
         'target',
-        'method'
+        'method',
+        'unit'
     )
 
     for assay in assays:
@@ -1881,6 +1898,13 @@ def acquire_post_filter(studies, assays, matrix_items, data_points):
             'method_id__in', {}
         ).update({
             assay.method.id: assay.method.name
+        })
+
+        # Tricky! Not actually in filter list...
+        current.setdefault(
+            'unit_id__in', {}
+        ).update({
+            assay.unit.id: assay.unit.unit
         })
 
     # Contrived: Add no compounds
