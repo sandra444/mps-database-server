@@ -90,7 +90,7 @@
                 {% comment %} <label> {% endcomment %}
                     # of Deviations/Errors
                 {% comment %} </label> {% endcomment %}
-                <input class="form-control" style="width: 50px;" name="number_for_interval" id="number_for_interval" value="1">
+                <input type="number" class="form-control" style="width: 50px; display: inline;" name="number_for_interval" id="number_for_interval" value="1">
             </div>
             <div class="radio">
                 <label class="radio-inline">
@@ -168,12 +168,7 @@
     </a>
       <div class="collapse well" id="legend">
           <div>
-              Legend Position
-              <select class="form-control">
-              </select>
-          </div>
-          <div>
-              <label>Legend By</label>
+              <label>Legend Position</label>
               <select class="form-control">
               </select>
           </div>
@@ -188,10 +183,10 @@
     </a>
 
     <div class="collapse well" id="x_axis">
-        <label>X-Axis Range</label>
-        <input class="form-control" style="width: 50px;">
+        <label>Range</label>
+        <input type="number" class="form-control" style="width: 50px; display: inline;">
         <span class="glyphicon glyphicon-chevron-right"></span>
-        <input class="form-control" style="width: 50px;">
+        <input type="number" class="form-control" style="width: 50px; display: inline;">
     </div>
 </li>
 
@@ -203,10 +198,10 @@
     </a>
 
     <div class="collapse well" id="y_axis">
-        <label>Y-Axis Range</label>
-        <input class="form-control" style="width: 50px;">
+        <label>Range</label>
+        <input type="number" class="form-control" style="width: 50px; display: inline;">
         <span class="glyphicon glyphicon-chevron-right"></span>
-        <input class="form-control" style="width: 50px;">
+        <input type="number" class="form-control" style="width: 50px; display: inline;">
     </div>
 </li>
 

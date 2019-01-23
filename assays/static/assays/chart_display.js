@@ -557,7 +557,12 @@ $(document).ready(function () {
         //$.each($('#' + charts + 'chart_options').find('input'), function() {
         // Object extraneous as there is only one option set now
         $.each($('#charting_options_tables').find('input'), function() {
+            // For radio and checkboxes
             if (this.checked) {
+                options[this.name] = this.value;
+            }
+            // For numeric
+            else if (this.type === 'number') {
                 options[this.name] = this.value;
             }
         });
