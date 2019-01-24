@@ -488,8 +488,8 @@ $(document).ready(function () {
             // Change the options
             options.hAxis.viewWindowMode = 'explicit';
             options.hAxis.viewWindow = {
-                max: current_max_x + 0.05 * current_x_range,
-                min: current_min_x - 0.05 * current_x_range
+                max: current_max_x + 0.1 * current_x_range,
+                min: current_min_x - 0.1 * current_x_range
             };
         }
         // Nothing if more than 100 colors
