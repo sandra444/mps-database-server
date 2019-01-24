@@ -251,7 +251,8 @@ $(document).ready(function () {
             },
             buttons: [
             {
-                text: 'Make Popup Plot',
+                // text: 'Make Popup Plot',
+                text: 'View Preview',
                 click: function() {
                     // Kill events
                     destroy_events('popup');

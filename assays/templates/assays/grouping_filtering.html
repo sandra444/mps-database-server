@@ -796,7 +796,7 @@
       <div class="alert alert-info" role="info">
           <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
           <span class="sr-only">Info:</span>
-          Please see the sidebar for more options
+          Please see the sidebar for more options (options in light blue apply to this specific plot)
       </div>
 
     <div class="row padded-bottom well">
@@ -854,7 +854,8 @@
             <select id="id_individual_plot_type" class="form-control no-selectize">
                 <option val="scatter" selected>Scatter/Line Plot</option>
                 <option val="bar">Bar Chart</option>
-                <option val="box">Box Plot</option>
+                {# Removed for now #}
+                {% comment %} <option val="box">Box Plot</option> {% endcomment %}
             </select>
         </div>
     </div>
