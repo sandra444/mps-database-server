@@ -240,6 +240,10 @@ $(document).ready(function () {
             close: function () {
                 $('body').removeClass('stop-scrolling');
                 side_bar_global = true;
+
+                // Remove bg-info from sidebar stuff
+                $('#charting_sidebar_section').removeClass('bg-info');
+                $('#specific_graph_properties_container').hide('slow');
             },
             open: function () {
                 $('body').addClass('stop-scrolling');
@@ -248,6 +252,10 @@ $(document).ready(function () {
                 // Plot needs to be visible for you to, you know, see it here
                 plot_is_visible.prop('checked', true);
                 side_bar_global = false;
+
+                // Add bg-info from sidebar stuff
+                $('#charting_sidebar_section').addClass('bg-info');
+                $('#specific_graph_properties_container').show('slow');
             },
             buttons: [
             {
