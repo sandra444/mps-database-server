@@ -37,6 +37,13 @@ $(document).ready(function () {
         popup: []
     };
 
+    // Contrived
+    var conversion_to_label = {
+        1: 'Time (Days)',
+        24: 'Time (Hours)',
+        1440: 'Time (Minutes)',
+    };
+
     // BOOLEAN INDICATING WHETHER THE SIDEBAR IS FOR GLOBAL OR LOCAL
     var side_bar_global = true;
 
@@ -153,10 +160,20 @@ $(document).ready(function () {
         },
         tracking: {
             is_default: true,
-            is_dose: false,
-            is_percent_control: false,
+            // A little too odd
+            // use_dose_response: false,
+            // use_percent_control: false,
             time_conversion: 1,
-            chart_type: 'scatter'
+            chart_type: 'scatter',
+            tooltip_type: 'datum'
+        },
+        ajax_data: {
+            key: 'device',
+            mean_type: 'arithmetic',
+            interval_type: 'ste',
+            number_for_interval: '1',
+            percent_control: '',
+            truncate_negative: ''
         }
     };
 
@@ -576,8 +593,40 @@ $(document).ready(function () {
             }
         });
 
+        global_options.ajax_data = $.extend(true, {}, options);
+
         return options;
     };
+
+    // TODO I NEED THIS FUNCTION TO MAKE SURE THAT THE SIDEBAR MATCHES THE POPUP/GLOBAL
+    function apply_options_to_sidebar(options, popup) {
+        $.each(options, function(field_name, value) {
+            var current = $('input[name="' + field_name + '"][value="' + value + '"]');
+            if (current[0]]) {
+                // Note that this does not trigger change
+                $('input[name="' + field_name + '"][value="' + value + '"]').prop('checked', true);
+            }
+            else {
+                current = $('input[name="' + field_name + '"]');
+                if (current.attr('type') === 'checkbox') {
+                    current.prop('checked', value);
+                }
+                else {
+                    current.val(value);
+                }
+            }
+        });
+
+        // TODO YOU ALSO NEED TO MAKE SURE THE POPUP IS CHANGED (percent control etc.)
+        if (popup) {
+            if (options.use_percent_control) {
+
+            }
+            if (options.use_dose_response) {
+
+            }
+        }
+    }
 
     window.CHARTS.prepare_side_by_side_charts = function(json, charts) {
         // Store all data
@@ -865,7 +914,7 @@ $(document).ready(function () {
                 }
             }
 
-            // Makes use of a somewhat zany closure
+            // Makes use of a rather zany closure
             var current_event = google.visualization.events.addListener(all_charts[charts][index], 'onmouseover', (function (charts, chart_index, is_popup) {
                 return function (entry) {
                     // Only attempts to display if there is a valid treatment group
@@ -931,13 +980,14 @@ $(document).ready(function () {
         // window.CHARTS.get_heatmap_dropdowns(0);
 
         // Naive way to learn whether dose vs. time
-        global_options.tracking.is_dose = $('#dose_select').prop('checked');
+        // GLOBAL CANNOT CURRENTLY EVEN BE DOSE RESPONSE (SCRUB)
+        // global_options.tracking.is_dose = $('#dose_select').prop('checked');
 
         global_options.hAxis.title = 'Time (Days)';
         // Still need to work in dose-response
-        if (global_options.tracking.is_dose) {
-            global_options.hAxis.title = 'Dose (μM)';
-        }
+        // if (global_options.tracking.is_dose) {
+        //     global_options.hAxis.title = 'Dose (μM)';
+        // }
 
         // If nothing to show
         if (!json.assays) {
@@ -951,18 +1001,22 @@ $(document).ready(function () {
         var time_label = null;
 
         // CRUDE: Perform time unit conversions
+        // GLOBALLY APPLYING THIS WILL CONFILICT WITH THE INDIVIDUAL CHART CHANGES (possibly)
         if (document.getElementById('id_chart_option_time_unit').value != 'Day') {
             if (document.getElementById('id_chart_option_time_unit').value == 'Hour') {
                 time_conversion = 24;
-                time_label = 'Time (Hours)';
+                // time_label = 'Time (Hours)';
             }
             else {
                 time_conversion = 1440;
-                time_label = 'Time (Minutes)';
+                // time_label = 'Time (Minutes)';
             }
         }
 
+        time_label = conversion_to_label[time_conversion];
+
         if (time_conversion) {
+            global_options.tracking.time_conversion = time_conversion;
             global_options.hAxis.title = time_label;
 
             $.each(assays, function(index, assay) {
