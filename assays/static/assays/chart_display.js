@@ -602,7 +602,7 @@ $(document).ready(function () {
     function apply_options_to_sidebar(options, popup) {
         $.each(options, function(field_name, value) {
             var current = $('input[name="' + field_name + '"][value="' + value + '"]');
-            if (current[0]]) {
+            if (current[0]) {
                 // Note that this does not trigger change
                 $('input[name="' + field_name + '"][value="' + value + '"]').prop('checked', true);
             }
