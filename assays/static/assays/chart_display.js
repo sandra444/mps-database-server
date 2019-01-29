@@ -467,17 +467,20 @@ $(document).ready(function () {
 
         var data = google.visualization.arrayToDataTable(assays[index]);
 
-        var options = {};
-        if (!all_options[charts][index] || all_options[charts][index].tracking.is_default) {
+        var options = '';
+        if ((!all_options[charts][index] || all_options[charts][index].tracking.is_default) && !current_ajax_options) {
             options = $.extend(true, {}, window.CHARTS.global_options);
+        }
+        else if (current_ajax_options) {
+            options = all_options[charts][index];
+            options.ajax_data = current_ajax_options;
+            options.tracking.is_default = false;
         }
         else {
             options = all_options[charts][index];
         }
 
-        if (current_ajax_options) {
-            options.ajax_data = current_ajax_options;
-        }
+        all_options[charts][index] = options;
 
         // Go through y values
         $.each(assays[index].slice(1), function(current_index, current_values) {
@@ -614,13 +617,13 @@ $(document).ready(function () {
             if (!all_charts[charts][index]) {
                 all_charts[charts].push(chart);
                 // Add the options
-                all_options[charts].push(options);
+                // all_options[charts].push(options);
             }
             // Modify existing
             else {
                 all_charts[charts][index] = chart;
                 // Add the options
-                all_options[charts][index] = options;
+                // all_options[charts][index] = options;
             }
         }
     }
@@ -1001,6 +1004,7 @@ $(document).ready(function () {
         }
     }
 
+    // PLEASE NOTE THAT THIS WILL WIPE ALL INDIVIDUAL EDITS
     window.CHARTS.make_charts = function(json, charts) {
         // post_filter setup
         window.GROUPING.set_grouping_filtering(json.post_filter);
