@@ -1,10 +1,13 @@
 // Contains functions for making charts for data
+// TODO TODO TODO THE USE OF THE WORD "options" IS CONFUSING
+// DO NOT DESCRIBE AJAX CRITERIA *AND* CHART OPTIONS AS OPTIONS PLEASE
 
 // Global variable for charts
 window.CHARTS = {
     study_id: 0,
     filter: {},
-    call: ''
+    call: '',
+    global_options: {}
 };
 
 // Load the Visualization API and the corechart package.
@@ -85,7 +88,7 @@ $(document).ready(function () {
 
     // Some global options of note
     // TODO MAKE SURE REVISIONS ARE PROPER
-    var global_options = {
+    window.CHARTS.global_options = {
         // TOO SPECIFIC, OBVIOUSLY
         // title: assay,
         interpolateNulls: true,
@@ -236,12 +239,15 @@ $(document).ready(function () {
     var current_chart = null;
     var current_chart_id = null;
     var current_chart_name = null;
+    var current_chart_options = null;
     var individual_plot_type = $('#individual_plot_type');
     var individual_plot_popup = $('#individual_plot_popup');
 
     var popup_chart = null;
 
     var plot_is_visible = $('#plot_is_visible');
+    var use_percent_control = $('#use_percent_control');
+    var use_dose_response = $('#use_dose_response');
 
     var individual_plot_popup_options_section = $('#individual_plot_popup_options_section');
     var individual_plot_popup_plot_section = $('#individual_plot_popup_plot_section');
@@ -261,6 +267,8 @@ $(document).ready(function () {
                 // Remove bg-info from sidebar stuff
                 $('#charting_sidebar_section').removeClass('bg-info');
                 $('#specific_graph_properties_container').hide('slow');
+
+                apply_options_to_sidebar(window.CHARTS.global_options.ajax_data, false);
             },
             open: function () {
                 $('body').addClass('stop-scrolling');
@@ -273,6 +281,9 @@ $(document).ready(function () {
                 // Add bg-info from sidebar stuff
                 $('#charting_sidebar_section').addClass('bg-info');
                 $('#specific_graph_properties_container').show('slow');
+
+                // Apply options to sidebar
+                apply_options_to_sidebar(current_chart_options.ajax_data, true);
             },
             buttons: [
             {
@@ -363,6 +374,16 @@ $(document).ready(function () {
         // ONLY APPLICABLE TO IN PLACE CHANGES
         var options = window.CHARTS.prepare_chart_options('charts');
 
+        // NOTE THAT FALSE IS ACTUALY AN EMPTY STRING
+        options.percent_control = use_percent_control.prop('checked') ? true : '';
+
+        if (use_dose_response.prop('checked')) {
+            options.key = 'dose';
+        }
+        else {
+            options.key = window.CHARTS.global_options.ajax_data.key;
+        }
+
         data = $.extend(data, options);
 
         // Show spinner
@@ -386,14 +407,24 @@ $(document).ready(function () {
                 // Always 0 index methinks for popup
                 if (charts === 'popup') {
                     current_chart_id = 0;
+                    // Store all data if popup
+                    all_data[charts] = $.extend(true, {}, json);
+                }
+                else {
+                    // Store just the numbers if in-place change
+                    all_data[charts].assays[current_chart_id] = json.assays[0];
                 }
 
-                // Store all data
-                // TODO INDEX INDEX INDEX
-                all_data[charts] = $.extend(true, {}, json);
+                // Not a great exception
+                if (options.percent_control) {
+                    var assay_unit = json.sorted_assays[0];
+                    var assay = assay_unit.split('\n')[0];
+                    var unit = assay_unit.split('\n')[1];
+                    options.revised_unit = unit;
+                }
 
                 // Make the plot
-                build_individual_chart(charts, chart_selector, current_chart_id);
+                build_individual_chart(charts, chart_selector, current_chart_id, options);
 
                 // Only popup for now
                 // NEED TO MODIFY EVENTS FOR INDIVIDUAL LATER
@@ -413,7 +444,7 @@ $(document).ready(function () {
         });
     }
 
-    function build_individual_chart(charts, chart_selector, index) {
+    function build_individual_chart(charts, chart_selector, index, current_ajax_options) {
         // Clear old chart (when applicable)
         $(chart_selector).empty();
 
@@ -430,14 +461,22 @@ $(document).ready(function () {
         var assay = assay_unit.split('\n')[0];
         var unit = assay_unit.split('\n')[1];
 
+        if (current_ajax_options && current_ajax_options.revised_unit) {
+            unit = current_ajax_options.revised_unit;
+        }
+
         var data = google.visualization.arrayToDataTable(assays[index]);
 
         var options = {};
         if (!all_options[charts][index] || all_options[charts][index].tracking.is_default) {
-            options = $.extend(true, {}, global_options);
+            options = $.extend(true, {}, window.CHARTS.global_options);
         }
         else {
             options = all_options[charts][index];
+        }
+
+        if (current_ajax_options) {
+            options.ajax_data = current_ajax_options;
         }
 
         // Go through y values
@@ -570,10 +609,19 @@ $(document).ready(function () {
 
             chart.chart_index = index;
 
-            all_charts[charts].push(chart);
-
-            // Add the options
-            all_options[charts].push(options);
+            // SLOPPY
+            // Add new
+            if (!all_charts[charts][index]) {
+                all_charts[charts].push(chart);
+                // Add the options
+                all_options[charts].push(options);
+            }
+            // Modify existing
+            else {
+                all_charts[charts][index] = chart;
+                // Add the options
+                all_options[charts][index] = options;
+            }
         }
     }
 
@@ -592,8 +640,6 @@ $(document).ready(function () {
                 options[this.name] = this.value;
             }
         });
-
-        global_options.ajax_data = $.extend(true, {}, options);
 
         return options;
     };
@@ -619,12 +665,16 @@ $(document).ready(function () {
 
         // TODO YOU ALSO NEED TO MAKE SURE THE POPUP IS CHANGED (percent control etc.)
         if (popup) {
-            if (options.use_percent_control) {
-
+            if (options.key === 'dose') {
+                $('#plot_graph_by').find('input, select').attr('disabled', 'disabled');
             }
-            if (options.use_dose_response) {
-
-            }
+            // PLEASE NOTE THAT IT IS EMPTY STRING, NOT FALSE
+            use_percent_control.prop('checked', options.percent_control ? true : '');
+            // Check if using dose
+            use_dose_response.prop('checked', options.key === 'dose');
+        }
+        else {
+            $('#plot_graph_by').find('input, select').removeAttr('disabled');
         }
     }
 
@@ -981,12 +1031,12 @@ $(document).ready(function () {
 
         // Naive way to learn whether dose vs. time
         // GLOBAL CANNOT CURRENTLY EVEN BE DOSE RESPONSE (SCRUB)
-        // global_options.tracking.is_dose = $('#dose_select').prop('checked');
+        // window.CHARTS.global_options.tracking.is_dose = $('#dose_select').prop('checked');
 
-        global_options.hAxis.title = 'Time (Days)';
+        window.CHARTS.global_options.hAxis.title = 'Time (Days)';
         // Still need to work in dose-response
-        // if (global_options.tracking.is_dose) {
-        //     global_options.hAxis.title = 'Dose (μM)';
+        // if (window.CHARTS.global_options.tracking.is_dose) {
+        //     window.CHARTS.global_options.hAxis.title = 'Dose (μM)';
         // }
 
         // If nothing to show
@@ -1016,8 +1066,8 @@ $(document).ready(function () {
         time_label = conversion_to_label[time_conversion];
 
         if (time_conversion) {
-            global_options.tracking.time_conversion = time_conversion;
-            global_options.hAxis.title = time_label;
+            window.CHARTS.global_options.tracking.time_conversion = time_conversion;
+            window.CHARTS.global_options.hAxis.title = time_label;
 
             $.each(assays, function(index, assay) {
                 // Don't bother if empty
@@ -1107,6 +1157,8 @@ $(document).ready(function () {
         current_chart = this;
         current_chart_name = $(this).attr('data-chart-name');
         current_chart_id = Math.floor($(this).attr('id').split('_')[1]);
+        // Contrived
+        current_chart_options = all_options['charts'][current_chart_id];
         individual_plot_popup.dialog('open');
     });
 
