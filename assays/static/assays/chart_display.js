@@ -2,6 +2,8 @@
 // TODO TODO TODO THE USE OF THE WORD "options" IS CONFUSING
 // DO NOT DESCRIBE AJAX CRITERIA *AND* CHART OPTIONS AS OPTIONS PLEASE
 
+// TODO TODO TODO REFACTOR ALL STUFF REGARDING "OPTIONS"
+
 // Global variable for charts
 window.CHARTS = {
     study_id: 0,
@@ -239,7 +241,7 @@ $(document).ready(function () {
     var current_chart = null;
     var current_chart_id = null;
     var current_chart_name = null;
-    var current_chart_options = null;
+    // var current_chart_options = null;
     var individual_plot_type = $('#individual_plot_type');
     var individual_plot_popup = $('#individual_plot_popup');
 
@@ -253,6 +255,25 @@ $(document).ready(function () {
     var individual_plot_popup_plot_section = $('#individual_plot_popup_plot_section');
     // var individual_plot_popup_plot_container = $('#individual_plot_popup_plot_container');
     var individual_plot_popup_plot_container = $('#popup_0');
+
+    function refresh_preview() {
+        // Kill events
+        destroy_events('popup');
+
+        // Clear all charts
+        // OBJECTIVELY DUMB
+        all_charts['popup'] = [];
+        all_events['popup'] = [];
+
+        all_options['popup'] = [];
+
+        group_to_data['popup'] = [];
+
+        individual_plot_popup_options_section.hide();
+        individual_plot_popup_plot_section.show();
+
+        get_individual_chart('popup', individual_plot_popup_plot_container[0]);
+    }
 
     if (individual_plot_popup[0]) {
         individual_plot_popup.dialog({
@@ -283,34 +304,20 @@ $(document).ready(function () {
                 $('#specific_graph_properties_container').show('slow');
 
                 // Apply options to sidebar
-                apply_options_to_sidebar(current_chart_options.ajax_data, true);
+                apply_options_to_sidebar(all_options['charts'][current_chart_id].ajax_data, true);
             },
             buttons: [
             {
                 // text: 'Make Popup Plot',
                 text: 'View Preview',
-                click: function() {
-                    // Kill events
-                    destroy_events('popup');
-
-                    // Clear all charts
-                    // OBJECTIVELY DUMB
-                    all_charts['popup'] = [];
-                    all_events['popup'] = [];
-
-                    all_options['popup'] = [];
-
-                    group_to_data['popup'] = [];
-
-                    individual_plot_popup_options_section.hide();
-                    individual_plot_popup_plot_section.show();
-
-                    get_individual_chart('popup', individual_plot_popup_plot_container[0]);
-                }
+                click: refresh_preview
             },
             {
                 text: 'Apply to Plot',
                 click: function() {
+                    all_options['charts'][current_chart_id].ajax_data = $.extend(true, {}, window.CHARTS.prepare_chart_options('charts'));
+                    all_options['charts'][current_chart_id].tracking.is_default = false;
+
                     if (!plot_is_visible.prop('checked')) {
                         // HIDE THE CHART
                         // A LITTLE MESSY TO MAKE SURE THAT THE SHOW/HIDE PLOTS MATCHES
@@ -325,7 +332,7 @@ $(document).ready(function () {
                     }
                     else {
                         // Tricky, may create unpleasant scenarios however...
-                        get_individual_chart('charts', current_chart);
+                        get_individual_chart('charts', current_chart, all_options['charts'][current_chart_id].ajax_data);
                     }
 
                     $(this).dialog("close");
@@ -341,7 +348,9 @@ $(document).ready(function () {
         individual_plot_popup.removeProp('hidden');
     }
 
-    function get_individual_chart(charts, chart_selector) {
+    function get_individual_chart(charts, chart_selector, options) {
+        var index_to_use = current_chart_id;
+
         var individual_post_filter = $.extend(true, {}, window.GROUPING.current_post_filter);
 
         // TODO TODO TODO METHODS
@@ -372,16 +381,15 @@ $(document).ready(function () {
         };
 
         // ONLY APPLICABLE TO IN PLACE CHANGES
-        var options = window.CHARTS.prepare_chart_options('charts');
+        if (!options) {
+            options = window.CHARTS.prepare_chart_options('charts');
+        }
 
         // NOTE THAT FALSE IS ACTUALY AN EMPTY STRING
         options.percent_control = use_percent_control.prop('checked') ? true : '';
 
         if (use_dose_response.prop('checked')) {
             options.key = 'dose';
-        }
-        else {
-            options.key = window.CHARTS.global_options.ajax_data.key;
         }
 
         data = $.extend(data, options);
@@ -406,13 +414,13 @@ $(document).ready(function () {
 
                 // Always 0 index methinks for popup
                 if (charts === 'popup') {
-                    current_chart_id = 0;
+                    index_to_use = 0;
                     // Store all data if popup
                     all_data[charts] = $.extend(true, {}, json);
                 }
                 else {
                     // Store just the numbers if in-place change
-                    all_data[charts].assays[current_chart_id] = json.assays[0];
+                    all_data[charts].assays[index_to_use] = json.assays[0];
                 }
 
                 // Not a great exception
@@ -424,7 +432,7 @@ $(document).ready(function () {
                 }
 
                 // Make the plot
-                build_individual_chart(charts, chart_selector, current_chart_id, options);
+                build_individual_chart(charts, chart_selector, index_to_use, options);
 
                 // Only popup for now
                 // NEED TO MODIFY EVENTS FOR INDIVIDUAL LATER
@@ -472,6 +480,10 @@ $(document).ready(function () {
             options = $.extend(true, {}, window.CHARTS.global_options);
         }
         else if (current_ajax_options) {
+            // Odd conditionals
+            if (!all_options[charts][index]) {
+                all_options[charts][index] = $.extend(true, {}, window.CHARTS.global_options);
+            }
             options = all_options[charts][index];
             options.ajax_data = current_ajax_options;
             options.tracking.is_default = false;
@@ -679,6 +691,9 @@ $(document).ready(function () {
         else {
             $('#plot_graph_by').find('input, select').removeAttr('disabled');
         }
+
+        // Make sure proper options are greyed out
+        restrict_error_bar_options(false);
     }
 
     window.CHARTS.prepare_side_by_side_charts = function(json, charts) {
@@ -932,9 +947,13 @@ $(document).ready(function () {
     }
 
     //
-    function revise_event(charts, index) {
+    function revise_event(charts, is_popup, index) {
         // NOT DRY NOT DRY
+        if (all_events[charts][index]) {
+            google.visualization.events.removeListener(all_events[charts][index]);
+        }
 
+        prep_event(charts, is_popup, index)
     }
 
     // DUMB PARAMETERS
@@ -954,53 +973,57 @@ $(document).ready(function () {
         }
     }
 
-    function create_events(charts, is_popup) {
-        // TODO NEEDS TO BE MADE GENERIC
-        for (var index=0; index < all_charts[charts].length; index++) {
-            group_to_data[charts].push({});
+    function prep_event(charts, is_popup, index) {
+        group_to_data[charts].push({});
 
-            var assays = all_data[charts].assays;
+        var assays = all_data[charts].assays;
 
-            for (i=0; i < assays[index][0].length; i++) {
-                if (assays[index][0][i].indexOf('     ~@i1') === -1 && assays[index][0][i].indexOf('     ~@i2') === -1) {
-                    modify_group_to_data(group_to_data, assays, charts, index, i);
-                }
+        for (i=0; i < assays[index][0].length; i++) {
+            if (assays[index][0][i].indexOf('     ~@i1') === -1 && assays[index][0][i].indexOf('     ~@i2') === -1) {
+                modify_group_to_data(group_to_data, assays, charts, index, i);
             }
+        }
 
-            // Makes use of a rather zany closure
-            var current_event = google.visualization.events.addListener(all_charts[charts][index], 'onmouseover', (function (charts, chart_index, is_popup) {
-                return function (entry) {
-                    // Only attempts to display if there is a valid treatment group
-                    if (all_treatment_groups[group_to_data[charts][chart_index][entry.column]]) {
-                        var current_pos = $(all_charts[charts][chart_index].container).position();
+        // Makes use of a rather zany closure
+        var current_event = google.visualization.events.addListener(all_charts[charts][index], 'onmouseover', (function (charts, chart_index, is_popup) {
+            return function (entry) {
+                // Only attempts to display if there is a valid treatment group
+                if (all_treatment_groups[group_to_data[charts][chart_index][entry.column]]) {
+                    var current_pos = $(all_charts[charts][chart_index].container).position();
 
-                        var current_top = current_pos.top + 75;
-                        var current_left = $('#breadcrumbs').position().left;
+                    var current_top = current_pos.top + 75;
+                    var current_left = $('#breadcrumbs').position().left;
 
-                        if (is_popup) {
-                            current_pos = $(all_charts[charts][chart_index].container).parent().parent().parent().position();
-                            current_top = current_pos.top + 200;
-                            current_left = current_pos.left;
-                        }
+                    if (is_popup) {
+                        current_pos = $(all_charts[charts][chart_index].container).parent().parent().parent().position();
+                        current_top = current_pos.top + 200;
+                        current_left = current_pos.left;
+                    }
 
-                        if (entry.row === null && entry.column) {
-                            var row_clone = all_treatment_groups[group_to_data[charts][chart_index][entry.column]].clone().addClass('bg-warning');
-                            if (row_clone) {
-                                group_display_body.empty().append(row_clone);
+                    if (entry.row === null && entry.column) {
+                        var row_clone = all_treatment_groups[group_to_data[charts][chart_index][entry.column]].clone().addClass('bg-warning');
+                        if (row_clone) {
+                            group_display_body.empty().append(row_clone);
 
-                                group_display.show()
-                                    .css({top: current_top, left: current_left, position: 'absolute'});
-                            }
+                            group_display.show()
+                                .css({top: current_top, left: current_left, position: 'absolute'});
                         }
                     }
                 }
-            })(charts, index, is_popup));
-            all_events[charts].push(current_event);
+            }
+        })(charts, index, is_popup));
+        all_events[charts].push(current_event);
 
-            current_event = google.visualization.events.addListener(all_charts[charts][index], 'onmouseout', function () {
-                group_display.hide();
-            });
-            all_events[charts].push(current_event);
+        current_event = google.visualization.events.addListener(all_charts[charts][index], 'onmouseout', function () {
+            group_display.hide();
+        });
+        all_events[charts].push(current_event);
+    }
+
+    function create_events(charts, is_popup) {
+        // TODO NEEDS TO BE MADE GENERIC
+        for (var index=0; index < all_charts[charts].length; index++) {
+            prep_event(charts, is_popup, index);
         }
     }
 
@@ -1162,7 +1185,7 @@ $(document).ready(function () {
         current_chart_name = $(this).attr('data-chart-name');
         current_chart_id = Math.floor($(this).attr('id').split('_')[1]);
         // Contrived
-        current_chart_options = all_options['charts'][current_chart_id];
+        // current_chart_options = all_options['charts'][current_chart_id];
         individual_plot_popup.dialog('open');
     });
 
@@ -1173,43 +1196,73 @@ $(document).ready(function () {
     var std_selector = $('#std_select');
     var ste_selector = $('#ste_select');
 
-    $('#arithmetic_select, #geometric_select').change(function() {
-        // Enable proper options
-        std_selector.removeAttr('disabled');
-        ste_selector.removeAttr('disabled');
+    // TODO TODO TODO IDIOTIC PLEASE FIX ASAP
+    function restrict_error_bar_options(refresh) {
+        if ($('#arithmetic_select').prop('checked') || $('#geometric_select').prop('checked')) {
+            // Enable proper options
+            std_selector.removeAttr('disabled');
+            ste_selector.removeAttr('disabled');
 
-        // At the end, see if iqr is selected, if so then default to ste
-        // (mean and iqr are forbidden together)
-        if (iqr_selector.prop('checked')) {
-            ste_selector.trigger('click');
+            // At the end, see if iqr is selected, if so then default to ste
+            // (mean and iqr are forbidden together)
+            if (iqr_selector.prop('checked')) {
+                ste_selector.trigger('click');
+            }
+            else if(refresh) {
+                trigger_refresh();
+            }
+
+            // Forbid iqr
+            iqr_selector.attr('disabled', 'disabled');
         }
         else {
-            // Odd, perhaps innapropriate!
-            window.GROUPING.refresh_wrapper();
-        }
+            // Enable proper options
+            iqr_selector.removeAttr('disabled');
 
-        // Forbid iqr
-        iqr_selector.attr('disabled', 'disabled');
+            // At the end, see if iqr is selected, if so then default to ste
+            // (mean and iqr are forbidden together)
+            if (std_selector.prop('checked') || ste_selector.prop('checked')) {
+                iqr_selector.trigger('click');
+            }
+            else if(refresh) {
+                // Odd, perhaps innapropriate!
+                trigger_refresh();
+            }
+
+            // Forbid std and ste
+            std_selector.attr('disabled', 'disabled');
+            ste_selector.attr('disabled', 'disabled');
+        }
+    }
+
+    $('#arithmetic_select, #geometric_select, #median_select').change(function() {
+        restrict_error_bar_options(true);
     });
 
-    $('#median_select').change(function() {
-        // Enable proper options
-        iqr_selector.removeAttr('disabled');
-
-        // At the end, see if iqr is selected, if so then default to ste
-        // (mean and iqr are forbidden together)
-        if (std_selector.prop('checked') || ste_selector.prop('checked')) {
-            iqr_selector.trigger('click');
-        }
-        else {
-            // Odd, perhaps innapropriate!
-            window.GROUPING.refresh_wrapper();
-        }
-
-        // Forbid std and ste
-        std_selector.attr('disabled', 'disabled');
-        ste_selector.attr('disabled', 'disabled');
-    });
-
+    // Initially, just block iqr for now
+    // SLOPPY: PLEASE NOTE PLEASE NOTE
     iqr_selector.attr('disabled', 'disabled');
+
+    // Set up triggers all other triggers
+    function trigger_refresh() {
+        // Odd
+        if (side_bar_global) {
+            window.CHARTS.global_options.ajax_data = $.extend(true, {}, window.CHARTS.prepare_chart_options('charts'));
+
+            // Odd, perhaps innapropriate!
+            window.GROUPING.refresh_wrapper();
+        }
+        else {
+            // IF THE PREVIEW IS VISIBLE AND NOT MANUAL REFRESH, APPLY IT NOW
+            if (!document.getElementById("id_manually_refresh").checked) {
+                refresh_preview();
+            }
+        }
+    }
+
+    $('#sidebar')
+        .find('input, select')
+        // Exceptions to refresh (manually done elsewhere)
+        .not('#arithmetic_select, #geometric_select, #median_select')
+        .change(trigger_refresh);
 });

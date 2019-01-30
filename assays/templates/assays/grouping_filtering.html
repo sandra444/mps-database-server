@@ -1,7 +1,8 @@
 {% load static compress %}
-{% compress js %}
+{# Putting this here is going to cause problems (it is a dependency) #}
+{% comment %} {% compress js %}
 <script src="{% static "assays/grouping_filtering.js" %}"></script>
-{% endcompress %}
+{% endcompress %} {% endcomment %}
 
 {# TODO MOVE #}
 <style>
@@ -86,10 +87,6 @@
         <label for="id_manually_refresh" style="margin-left: 10px;">
             <strong>Manually Refresh</strong>
         </label>
-    </div>
-
-    <div hidden id="refresh_section" class="row text-center">
-        <a role="button" id="refresh_plots" class="btn btn-primary btn-lg">Refresh</a>
     </div>
 
     <div hidden id="refresh_section" class="row text-center">
