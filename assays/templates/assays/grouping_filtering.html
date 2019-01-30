@@ -92,10 +92,6 @@
         <a role="button" id="refresh_plots" class="btn btn-primary btn-lg">Refresh</a>
     </div>
 
-    <div hidden id="refresh_section" class="row text-center">
-        <a role="button" id="refresh_plots" class="btn btn-primary btn-lg">Refresh</a>
-    </div>
-
     {# Inline JS is a little risque, but expedient #}
     <h3 class="text-center">
         <u>Grouping/Filtering</u>
@@ -116,6 +112,7 @@
                     </tr>
                 </thead>
                 <tbody>
+                    {% if not intra_flag %}
                     <tr>
                         <td>
                             <button data-parent-model='study' data-filter-relation='id__in' role='button' class="btn btn-sm post-filter-spawn">
@@ -130,6 +127,7 @@
                             Study
                         </td>
                     </tr>
+                    {% endif %}
                     {# Subject to removal? #}
 {#                    <tr>#}
 {#                        <td>#}

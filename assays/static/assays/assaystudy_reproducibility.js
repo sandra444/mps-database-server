@@ -28,6 +28,8 @@ $(document).ready(function () {
 
     var gas_table = null;
 
+    var repro_info_table_display = $('#repro_info_table_display');
+
     function escapeHtml(html) {
         return $('<div>').text(html).html();
     }
@@ -62,24 +64,26 @@ $(document).ready(function () {
                 var $clone = $elem.clone( true ).removeAttr('id').addClass('repro-'+group).appendTo("#clone-container");
                 $clone.removeClass('hidden');
                 mad_list[group]['columns'].unshift("Time");
-                $clone.find('#repro-title').text('Set ' + group);
-                $clone.find('#selection-parameters').html(build_selection_parameters(studyID, organModel, targetAnalyte, methodKit, sampleLocation, compoundTreatments, valueUnit));
-                $clone.find('#selection-parameters').find('td, th').css('padding','8px 10px');
-                $clone.find('#chip-rep-rep-ind').html(buildCV_ICC(data[5],data[6]));
-                $clone.find('#chip-rep-rep-ind').find('td, th').css('padding','8px 10px');
-                $clone.find('#chart1').attr('id', 'chart1-'+group);
-                $clone.find('#chart2').attr('id', 'chart2-'+group);
-                $clone.find('#mad-score-label').html($clone.find('#mad-score-label').html() + make_escaped_tooltip(mad_tooltip));
-                $clone.find('#med-comp-label').html($clone.find('#med-comp-label').html() + make_escaped_tooltip(comp_tooltip));
+                $clone.find('[data-id=repro-title]').text('Set ' + group);
+                $clone.find('[data-id=selection-parameters]').html(build_selection_parameters(studyID, organModel, targetAnalyte, methodKit, sampleLocation, compoundTreatments, valueUnit));
+                $clone.find('[data-id=selection-parameters]').find('td, th').css('padding','8px 10px');
+                $clone.find('[data-id=chip-rep-rep-ind]').html(buildCV_ICC(data[5],data[6]));
+                $clone.find('[data-id=chip-rep-rep-ind]').find('td, th').css('padding','8px 10px');
+                $clone.find('[data-id=chart1]').attr('id', 'chart1-'+group);
+                $clone.find('[data-id=chart2]').attr('id', 'chart2-'+group);
+                $clone.find('[data-id=mad-score-label]').html($clone.find('[data-id=mad-score-label]').html() + make_escaped_tooltip(mad_tooltip));
+                $clone.find('[data-id=med-comp-label]').html($clone.find('[data-id=med-comp-label]').html() + make_escaped_tooltip(comp_tooltip));
+                var color;
                 if (icc_status[0] === 'E'){
-                    $clone.find('#repro-status').html('<em>'+icc_status+'</em>').css("background-color", "#74ff5b");
+                    color = "#74ff5b";
                 } else if (icc_status[0] === 'A'){
-                    $clone.find('#repro-status').html('<em>'+icc_status+'</em>').css("background-color", "#fcfa8d");
+                    color = "#fcfa8d";
                 } else if (icc_status[0] === 'P'){
-                    $clone.find('#repro-status').html('<em>'+icc_status+'</em>').css("background-color", "#ff7863");
+                    color = "#ff7863";
                 } else {
-                    $clone.find('#repro-status').html('<em>'+icc_status+'</em><small style="color: black;"><span data-toggle="tooltip" title="'+data[14]+'" class="glyphicon glyphicon-question-sign" aria-hidden="true"></span></small>').css("background-color", "Grey");
+                    color = "Grey";
                 }
+                $clone.find('[data-id=repro-status]').html('<em style="padding: 2px; background-color:' + color + '">' + icc_status + '</em><small style="color: #333;"><span data-toggle="tooltip" title="'+data[14]+'" class="glyphicon glyphicon-question-sign" aria-hidden="true"></span></small>');
 
                 // More than 6 rows, scrollY 270px, else 100%
                 var mad_scroll_y = "100%";
@@ -95,7 +99,7 @@ $(document).ready(function () {
                     }
                 }
 
-                var mad_score_matrix = $clone.find('#mad-score-matrix').DataTable({
+                var mad_score_matrix = $clone.find('[data-id=mad-score-matrix]').DataTable({
                     columns: mad_columns(group),
                     data: mad_list[group]['data'],
                     searching: false,
@@ -107,7 +111,7 @@ $(document).ready(function () {
                     scrollX: "100%"
                 });
 
-                var median_comparisons_table = $clone.find('#chip-comp-med').DataTable({
+                var median_comparisons_table = $clone.find('[data-id=chip-comp-med]').DataTable({
                     columns: [
                         { title: "Chip ID", data: '0' },
                         { title: "ICC Absolute Agreement", data: '1' },
@@ -126,59 +130,27 @@ $(document).ready(function () {
                 median_comparisons_table.fixedHeader.disable();
                 $clone.addClass('hidden');
             }
-            $clone.find('#mad-score-matrix').DataTable( {
-                columns: mad_columns(group),
-                data: mad_list[group]['data'],
-                searching: false,
-                paging: false,
-                info: false
-                // fixedColumns: {leftColumns: 1},
-                // scrollX: true
-            });
-
-            $clone.find('#chip-comp-med').DataTable( {
-                columns: [
-                    { title: "Chip ID", data: '0' },
-                    { title: "ICC Absolute Agreement", data: '1' },
-                    { title: "Missing Data Points "+make_escaped_tooltip(missing_tooltip), data: '2' }
-                ],
-                data: comp_list[group],
-                searching: false,
-                paging: false,
-                info: false
-            });
-            counter++;
         });
     }
 
-    var studyID = $( "#selection-parameters" ).find(".studyId").text();
+    var studyID = $( "[data-id=selection-parameters]" ).find(".studyId").text();
 
     // Activates Bootstrap tooltips
     $('[data-toggle="tooltip"]').tooltip({container:"body", html: true});
 
-    function buildCV_ICC(cv, icc){
-        content = '<tr><th>CV(%)</th><th>ICC-Absolute Agreement</th></tr><tr><td>'+cv+'</td><td>'+icc+'</td></tr>'
-        return content;
-    }
-
     //Checkbox click event
-    $(document).on("click", ".big-checkbox", function() {
+    $(document).on("click", ".repro-checkbox", function() {
         var checkbox = $(this);
-        var checkbox_id = $(this).attr('class');
-        var cls = checkbox_id.split(' ').pop();
-        var number = cls.substr(cls.lastIndexOf("-") + 1);
-        //var number = checkbox_id;
-        var reproTable = $('.repro-'+number);
+        var number = checkbox.attr('data-repro-set');
+        var current_repro = $('.repro-' + number);
         if (checkbox.is(':checked')) {
             current_repro.removeClass('hidden');
-            current_repro.find('#chip-comp-med, #mad-score-matrix').find('table').DataTable().fixedHeader.enable();
+            current_repro.find('[data-id=chip-comp-med], [data-id=mad-score-matrix]').find('table').DataTable().fixedHeader.enable();
             draw_charts(number);
         } else {
             current_repro.addClass('hidden');
-            current_repro.find('#chip-comp-med, #mad-score-matrix').find('table').DataTable().fixedHeader.disable();
+            current_repro.find('[data-id=chip-comp-med], [data-id=mad-score-matrix]').find('table').DataTable().fixedHeader.disable();
         }
-        // Recalculate responsive and fixed headers
-        // $('.spawned-datatable').DataTable().fixedHeader.adjust();
         // Activates Bootstrap tooltips
         $('[data-toggle="tooltip"]').tooltip({container:"body", html: true});
         // Recalc Fixed Headers
@@ -198,6 +170,15 @@ $(document).ready(function () {
             document.getElementById("spinner")
         );
 
+        // Center spinner
+        // TODO NOT a satisfactory solution.
+        // Displaces on resize, or if page is still "expanding" when center of #piechart check is made.
+        $(".spinner").position({
+            my: "center",
+            at: "center",
+            of: "#piechart"
+        });
+
         if (gas_table) {
             gas_table.clear();
             gas_table.destroy();
@@ -215,7 +196,7 @@ $(document).ready(function () {
             pieSliceText: 'label',
             'chartArea': {'width': '90%', 'height': '90%'},
             tooltip: {trigger : 'none'},
-            pieSliceTextStyle: {
+            pieSlliceTextStyle: {
                 color: 'white',
                 bold: true,
                 fontSize: 12
@@ -307,19 +288,26 @@ $(document).ready(function () {
             ajax: {
                 url: '/assays_ajax/',
                 data: {
-                    // TODO TODO TODO THIS DEPENDS ON THE INTERFACE
                     call: 'fetch_assay_study_reproducibility',
+                    criteria: JSON.stringify(window.GROUPING.get_grouping_filtering()),
+                    post_filter: JSON.stringify(window.GROUPING.current_post_filter),
                     csrfmiddlewaretoken: window.COOKIES.csrfmiddlewaretoken,
                     study: study_id
                 },
                 type: 'POST',
                 dataSrc: function(json) {
+                    $("#clone-container").empty();
+
                     gas_list = json.gas_list;
                     mad_list = json.mad_list;
                     comp_list = json.comp_list;
                     lists.cv_list = json.cv_list;
                     lists.chip_list = json.chip_list;
+                    header_keys = json.header_keys;
+                    data_groups = json.data_groups;
+                    treatment_groups = json.treatment_groups;
                     pie = json.pie;
+
                     data_group_to_sample_locations = json.data_group_to_sample_locations;
                     data_group_to_organ_models = json.data_group_to_organ_models;
                     value_unit_index = header_keys.indexOf('Value Unit');
@@ -363,8 +351,6 @@ $(document).ready(function () {
                             ['Poor', pie[2]]
                         ]);
                         var pie_options = {
-                            // title: 'Reproducibility Breakdown\n(Click Slices for Details)',
-                            // titleFontSize:16,
                             legend: 'none',
                             slices: {
                                 0: { color: '#74ff5b' },
@@ -386,71 +372,23 @@ $(document).ready(function () {
 
                     // post_filter setup
                     window.GROUPING.set_grouping_filtering(json.post_filter);
+                    // Stop spinner
+                    window.spinner.stop();
 
                     return gas_list;
+                },
+                // Error callback
+                error: function (xhr, errmsg, err) {
+                    $("#clone-container").empty();
+
+                    // Stop spinner
+                    window.spinner.stop();
+
+                    alert('An error has occurred, please try different selections.');
+                    console.log(xhr.status + ": " + xhr.responseText);
                 }
             },
-            columns: [
-                { title: "Show Details",
-                 "render": function(data, type, row) {
-                    if (type === 'display') {
-                        var groupNum = row[11];
-                        return '<input type="checkbox" class="big-checkbox gas-checkbox-'+groupNum+'">';
-                    }
-                    return data;
-                },
-                "className": "dt-body-center",
-                "createdCell": function (td, cellData, rowData, row, col) {
-                    if ( cellData ) {
-                        $(td).css('vertical-align', 'middle')
-                    }
-                },
-                "sortable": false
-                },
-                { title: "Set", data: '11', type: "num" },
-                { title: "MPS Model", data: '0' },
-                { title: "<span style='white-space: nowrap;'>Full Compound<br>Treatment(s)</span>", data: '2', className: 'none',
-                    render:function (data, type, row, meta) {
-                        return '<br>' + data.replace(/\n/g, '<br>');
-                    }
-                },
-                { title: "<span style='white-space: nowrap;'>Compound<br>Treatment(s)</span>", data: '2',
-                    // CRUDE, WORTH REFACTOR
-                    render:function (data, type, row, meta) {
-                        var split_data = data.split('\n');
-                        var new_data = [];
-                        $.each(split_data, function(index, value) {
-                            if (index % 2 === 0) {
-                                new_data.push(value);
-                            }
-                        });
-                        new_data = new_data.join('<br>');
-                        return new_data;
-                    }
-                },
-                { title: "Target/Analyte", data: '3', width: '8%' },
-                { title: "Method/Kit", data: '4', width: '8%', 'className': 'none' },
-                { title: "Sample Location", data: '5', width: '8%' },
-                { title: "Value Unit", data: '6' },
-                { title: "<span style='white-space: nowrap;'>Max CV<br>or CV "+make_escaped_tooltip(cv_tooltip)+"</span>", data: '8' },
-                { title: "<span style='white-space: nowrap;'>ICC "+make_escaped_tooltip(icc_tooltip)+"</span>", data: '9' },
-                { title: "Reproducibility<br>Status "+make_escaped_tooltip(repro_tooltip), data: '10', render: function(data, type, row, meta) {
-                    if (data[0] === 'E') {
-                        return '<td><span class="hidden">3</span>' + data + '</td>';
-                    } else if (data[0] === 'A') {
-                        return '<td><span class="hidden">2</span>' + data + '</td>';
-                    } else if (data[0] === 'P') {
-                        return '<td><span class="hidden">1</span>' + data + '</td>';
-                    } else {
-                        return '<td><span class="hidden">0</span>'+data+'<span data-toggle="tooltip" title="'+row[14]+'" class="glyphicon glyphicon-question-sign" aria-hidden="true"></span></td>';
-                    }
-                }},
-                { title: "# of Chips/Wells", data: '12' },
-                { title: "# of Time Points", data: '13' },
-                { title: "Cells", data: '1', 'className': 'none'},
-                { title: "Settings", data: '7', 'className': 'none'},
-                { title: "NA Explanation", data: '14', visible: false, 'name': 'naText' }
-            ],
+            columns: columns,
             columnDefs: [
                 { "responsivePriority": 1, "targets": 11 },
                 { "responsivePriority": 2, "targets": [0,1,2,3] },
@@ -639,7 +577,7 @@ $(document).ready(function () {
     function build_selection_parameters(studyId, organModel, targetAnalyte, methodKit, sampleLocation, compoundTreatments, valueUnit){
         var content = ''
         if (targetAnalyte) {
-            content += '<tr><th><h4><strong>Target/Analyte</strong></h4></th><td id="target-analyte-value"><h4><strong>'+targetAnalyte+'</strong></h4></td></tr>'
+            content += '<tr><th><strong style="font-size: 16px;">Target/Analyte</strong></th><td><strong style="font-size: 16px;">'+targetAnalyte+'</strong></td></tr>'
         }
         if (studyId) {
             content += '<tr><th>Study ID</th><td>'+studyId+'</td></tr>'
@@ -657,7 +595,7 @@ $(document).ready(function () {
             content += '<tr><th>Compound Treatment(s)</th><td>'+compoundTreatments+'</td></tr>'
         }
         if (valueUnit) {
-            content += '<tr><th>Value Unit</th><td id="value-unit">'+valueUnit+'</td></tr>'
+            content += '<tr><th>Value Unit</th><td>'+valueUnit+'</td></tr>'
         }
         return content;
     }
@@ -675,5 +613,25 @@ $(document).ready(function () {
             var obj = { 'title' : value };
             columns.push(obj);
         });
+        return columns
     }
+
+    $(document).on('mouseover', '.repro-set-info', function() {
+        var current_position = $(this).offset();
+
+        var current_top = current_position.top + 20;
+        var current_left = current_position.left - 100;
+
+        var current_group = Math.floor($(this).html());
+        var current_section = $('.repro-' + current_group);
+        var current_table = current_section.find('[data-id=selection-parameters]');
+        var clone_table = current_table.parent().html();
+        repro_info_table_display.html(clone_table)
+            .show()
+            .css({top: current_top, left: current_left, position:'absolute'});
+    });
+
+    $(document).on('mouseout', '.repro-set-info', function() {
+        repro_info_table_display.hide();
+    });
 });
