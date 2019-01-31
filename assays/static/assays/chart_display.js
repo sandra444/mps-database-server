@@ -29,8 +29,16 @@ $(document).ready(function () {
         popup: []
     };
     var all_events = {
-        charts: [],
-        popup: []
+        // charts: [],
+        // popup: []
+        charts: {
+            'in': [],
+            'out': []
+        },
+        popup: {
+            'in': [],
+            'out': []
+        }
     };
     var all_options = {
         charts: [],
@@ -263,7 +271,10 @@ $(document).ready(function () {
         // Clear all charts
         // OBJECTIVELY DUMB
         all_charts['popup'] = [];
-        all_events['popup'] = [];
+        all_events['popup'] = {
+            'in': [],
+            'out': []
+        };
 
         all_options['popup'] = [];
 
@@ -315,6 +326,15 @@ $(document).ready(function () {
             {
                 text: 'Apply to Plot',
                 click: function() {
+                    // Kill events
+                    // $.each(all_events['charts'], function(event_type, current_events) {
+                    //     if (current_events[current_chart_id]) {
+                    //         google.visualization.events.removeListener(current_events[current_chart_id]);
+                    //         current_events[current_chart_id] = null;
+                    //     }
+                    // });
+                    // destroy_events('charts');
+
                     all_options['charts'][current_chart_id].ajax_data = $.extend(true, {}, window.CHARTS.prepare_chart_options('charts'));
                     all_options['charts'][current_chart_id].tracking.is_default = false;
 
@@ -335,6 +355,10 @@ $(document).ready(function () {
                         get_individual_chart('charts', current_chart, all_options['charts'][current_chart_id].ajax_data);
                     }
 
+                    // Apply new events
+                    // prep_event('charts', false, current_chart_id);
+                    // create_events('charts', false);
+
                     $(this).dialog("close");
                 }
             },
@@ -349,6 +373,9 @@ $(document).ready(function () {
     }
 
     function get_individual_chart(charts, chart_selector, options) {
+        // DESTROY EVENTS
+        destroy_events(charts);
+
         var index_to_use = current_chart_id;
 
         var individual_post_filter = $.extend(true, {}, window.GROUPING.current_post_filter);
@@ -434,14 +461,7 @@ $(document).ready(function () {
                 // Make the plot
                 build_individual_chart(charts, chart_selector, index_to_use, options);
 
-                // Only popup for now
-                // NEED TO MODIFY EVENTS FOR INDIVIDUAL LATER
-                if (charts === 'popup') {
-                    create_events(charts, true);
-
-                    // Show the correct option section
-                    // TODO TODO TODO
-                }
+                create_events(charts, charts==='popup');
             },
             error: function (xhr, errmsg, err) {
                 // Stop spinner
@@ -940,47 +960,57 @@ $(document).ready(function () {
 
     function destroy_events(charts) {
         if (all_events[charts]) {
-            $.each(all_events[charts], function(index, event) {
-                google.visualization.events.removeListener(event);
+            $.each(all_events[charts], function(event_type_index, current_events) {
+                $.each(current_events, function(event_index, event) {
+                    google.visualization.events.removeListener(event);
+                    event = null;
+                });
             });
         }
+
+        all_events[charts] = {
+            'in': [],
+            'out': []
+        };
     }
 
+    // function revise_event(charts, is_popup, index) {
+    //     // NOT DRY NOT DRY
+    //     $.each(all_events[charts], function(event_type, current_events) {
+    //         if (current_events[index]) {
+    //             google.visualization.events.removeListener(current_events[index]);
+    //             event = null;
+    //         }
+    //     });
     //
-    function revise_event(charts, is_popup, index) {
-        // NOT DRY NOT DRY
-        if (all_events[charts][index]) {
-            google.visualization.events.removeListener(all_events[charts][index]);
-        }
-
-        prep_event(charts, is_popup, index)
-    }
+    //     prep_event(charts, is_popup, index);
+    // }
 
     // DUMB PARAMETERS
-    function modify_group_to_data(group_to_data, assays, charts, index, i) {
+    function modify_group_to_data(group_to_data, assays, charts, index, i, key) {
         // Need to link EACH CHARTS values to the proper group
         // EMPHASIS ON EACH CHART
         // Somewhat naive
-        if (document.getElementById('group_select').checked) {
+        if (key === 'group') {
             // NOTE -1
             group_to_data[charts][index][i] = assays[index][0][i].split(' || ')[0].replace(/\D/g, '') - 1;
         }
         else {
             var device = assays[index][0][i].split(' || ')[0];
-            // console.log(device);
-            // console.log(device_to_group);
             group_to_data[charts][index][i] = device_to_group[device];
         }
     }
 
     function prep_event(charts, is_popup, index) {
-        group_to_data[charts].push({});
+        if (!group_to_data[charts][index]) {
+            group_to_data[charts].push({});
+        }
 
         var assays = all_data[charts].assays;
 
         for (i=0; i < assays[index][0].length; i++) {
             if (assays[index][0][i].indexOf('     ~@i1') === -1 && assays[index][0][i].indexOf('     ~@i2') === -1) {
-                modify_group_to_data(group_to_data, assays, charts, index, i);
+                modify_group_to_data(group_to_data, assays, charts, index, i, all_options[charts][index].ajax_data.key);
             }
         }
 
@@ -1012,12 +1042,13 @@ $(document).ready(function () {
                 }
             }
         })(charts, index, is_popup));
-        all_events[charts].push(current_event);
+        all_events[charts]['in'][index] = current_event;
 
         current_event = google.visualization.events.addListener(all_charts[charts][index], 'onmouseout', function () {
             group_display.hide();
         });
-        all_events[charts].push(current_event);
+        // TODO NOTE: CONTRIVED
+        all_events[charts]['out'][index] = current_event;
     }
 
     function create_events(charts, is_popup) {
@@ -1033,7 +1064,7 @@ $(document).ready(function () {
         window.GROUPING.set_grouping_filtering(json.post_filter);
 
         // Remove triggers
-        destroy_events(charts)
+        destroy_events(charts);
         // if (all_events[charts]) {
         //     $.each(all_events[charts], function(index, event) {
         //         google.visualization.events.removeListener(event);
@@ -1042,7 +1073,10 @@ $(document).ready(function () {
 
         // Clear all charts
         all_charts[charts] = [];
-        all_events[charts] = [];
+        all_events[charts] = {
+            'in': [],
+            'out': []
+        };
 
         all_options[charts] = [];
 
