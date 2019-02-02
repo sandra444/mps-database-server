@@ -36,9 +36,10 @@ $(document).ready(function() {
             csrfmiddlewaretoken: window.COOKIES.csrfmiddlewaretoken
         };
 
-        var options = window.CHARTS.prepare_chart_options(charts_name);
+        // ODD
+        window.CHARTS.prepare_chart_options(window.CHARTS.global_options);
 
-        data = $.extend(data, options);
+        data = $.extend(data, window.CHARTS.global_options.ajax_data);
 
         // Show spinner
         window.spinner.spin(
