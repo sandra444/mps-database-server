@@ -18,7 +18,10 @@ window.GROUPING = {
     // Starts null
     full_post_filter: null,
     // Starts empty
-    current_post_filter: {}
+    current_post_filter: {},
+    // Starts null
+    set_grouping_filtering: null,
+    get_grouping_filtering: null,
 };
 
 // Naive encapsulation
@@ -317,13 +320,6 @@ $(document).ready(function () {
 
     $('#refresh_plots').click(function() {
         window.GROUPING.refresh_function();
-    });
-
-    // Setup triggers
-    // Sloppy: Checks for all sidebar inputs and selects
-    $('#sidebar').find('input, select').change(function() {
-        // Odd, perhaps innapropriate!
-        window.GROUPING.refresh_wrapper();
     });
 
     toggle_sidebar_button.click(function() {
