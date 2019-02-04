@@ -51,6 +51,7 @@ from .utils import (
     NO_COMPOUNDS_STRING,
     # NO_CELLS_STRING,
     # NO_SETTINGS_STRING,
+    intra_status_for_inter,
 )
 
 from StringIO import StringIO
@@ -68,6 +69,7 @@ from mps.mixins import user_is_valid_study_viewer
 
 import numpy as np
 from scipy.stats.mstats import gmean
+from scipy.stats import iqr
 
 import re
 
@@ -895,6 +897,7 @@ def get_item_groups(study, criteria, matrix_items=None):
 
 
 # TODO TODO TODO MAKE SURE STUDY NO LONGER REQUIRED
+# TODO TODO TODO  CLEAN UP
 def get_data_points_for_charting(
         raw_data,
         key,
@@ -942,8 +945,11 @@ def get_data_points_for_charting(
             'matrices': {},
             'values': {}
         },
-        'header_keys': header_keys
+        'header_keys': header_keys,
+        'assay_ids': {}
     }
+
+    assay_ids = final_data.get('assay_ids')
 
     intermediate_data = {}
 
@@ -1049,24 +1055,29 @@ def get_data_points_for_charting(
         }
 
     for raw in raw_data:
-        # Now uses full name
-        # assay = raw.assay_id.assay_id.assay_short_name
-        # Deprecated
-        # assay = raw.assay_id.assay_id.assay_name
-        # unit = raw.assay_id.readout_unit.unit
-        # Deprecated
-        # field = raw.field_id
         value = raw.value
 
         study_assay = raw.study_assay
         target = study_assay.target.name
         unit = study_assay.unit.unit
-
-        # Not currently used
         method = study_assay.method.name
 
         if group_method:
             target = u'{} [{}]'.format(target, method)
+            assay_ids.update({
+                u'{}\n{}'.format(target, unit): {
+                    'target': study_assay.target_id,
+                    'unit': study_assay.unit_id,
+                    'method': study_assay.method_id
+                }
+            })
+        else:
+            assay_ids.update({
+                u'{}\n{}'.format(target, unit): {
+                    'target': study_assay.target_id,
+                    'unit': study_assay.unit_id
+                }
+            })
 
         sample_location = raw.sample_location.name
 
@@ -1219,6 +1230,9 @@ def get_data_points_for_charting(
                                     average = gmean(values)
                                     if np.isnan(average):
                                         return {'errors': 'Geometric mean could not be calculated (probably due to negative values), please use an arithmetic mean instead.'}
+                                # Median
+                                elif mean_type == 'median':
+                                    average = np.mean(values)
                                 # If arithmetic mean
                                 else:
                                     average = np.average(values)
@@ -1228,6 +1242,9 @@ def get_data_points_for_charting(
                             # If standard deviation
                             if interval_type == 'std':
                                 interval = np.std(values)
+                            # IQR
+                            elif interval_type == 'iqr':
+                                interval = iqr(values)
                             # Standard error if not std
                             else:
                                 interval = np.std(values) / len(values) ** 0.5
@@ -1586,54 +1603,235 @@ def validate_data_file(request):
 
 def fetch_assay_study_reproducibility(request):
     study = get_object_or_404(AssayStudy, pk=int(request.POST.get('study', '')))
+    # Contrived!
+    studies = AssayStudy.objects.filter(id=study.id)
     data = {}
+
+    post_filter = json.loads(request.POST.get('post_filter', '{}'))
+    criteria = json.loads(request.POST.get('criteria', '{}'))
 
     # If chip data
     matrix_items = AssayMatrixItem.objects.filter(
         study_id=study.id
     )
 
+    assays = AssayStudyAssay.objects.filter(study_id=study.id)
+    data_points = AssayDataPoint.objects.filter(
+        study_id=study.id
+    ).prefetch_related(
+    # TODO optimize prefetch!
+        'study__group',
+        'study_assay__target',
+        'study_assay__method',
+        'study_assay__unit__base_unit',
+        'sample_location',
+        'matrix_item__matrix',
+        'matrix_item__organ_model',
+        'subtarget'
+    ).filter(
+        replaced=False,
+        excluded=False,
+        value__isnull=False
+    )
+
+    if not post_filter:
+        assays = assays.prefetch_related(
+            'target',
+            'method'
+        )
+
+        post_filter = acquire_post_filter(studies, assays, matrix_items, data_points)
+    else:
+        studies, assays, matrix_items, data_points = apply_post_filter(
+            post_filter, studies, assays, matrix_items, data_points
+        )
+
     # Boolean
     # include_all = self.request.GET.get('include_all', False)
-    chip_data = get_data_as_list_of_lists(matrix_items, include_header=True, include_all=False)
+    # chip_data = get_data_as_list_of_lists(matrix_items, include_header=True, include_all=False, data_points=data_points)
 
-    repro_data = get_repro_data(chip_data)
+    # OLD
+    # repro_data = get_repro_data(chip_data)
+    # Organization is assay -> unit -> compound/tag -> field -> time -> value
+    treatment_group_representatives, setup_to_treatment_group, treatment_header_keys = get_item_groups(
+        None,
+        criteria,
+        matrix_items
+    )
 
-    gas_list = repro_data['reproducibility_results_table']['data']
+    repro_data = []
+
+    data_point_treatment_groups = {}
+    treatment_group_table = {}
+    data_group_to_studies = {}
+    data_group_to_sample_locations = {}
+    data_group_to_organ_models = {}
+
+    # CONTRIVED FOR NOW
+    data_header_keys = [
+        'Target',
+        # 'Method',
+        'Value Unit',
+        # 'Sample Location'
+    ]
+
+    base_tuple = (
+        'study_assay.target_id',
+        # 'study_assay.method_id',
+        'study_assay.unit.base_unit_id',
+        # 'sample_location_id'
+    )
+
+    current_tuple = (
+        'study_assay.target_id',
+        # 'study_assay.method_id',
+        'study_assay.unit_id',
+        # 'sample_location_id'
+    )
+
+    additional_keys = []
+
+    # CRUDE
+    if criteria:
+        group_sample_location = 'sample_location' in criteria.get('special', [])
+        group_method = 'method' in criteria.get('special', [])
+
+        if group_method:
+            data_header_keys.append('Method')
+            additional_keys.append('study_assay.method_id')
+
+        if group_sample_location:
+            data_header_keys.append('Sample Location')
+            additional_keys.append('sample_location_id')
+
+    if additional_keys:
+        base_tuple += tuple(additional_keys)
+        current_tuple += tuple(additional_keys)
+
+    # ASSUME _id termination
+    base_value_tuple = tuple([x.replace('_id', '') for x in base_tuple])
+    current_value_tuple = tuple([x.replace('_id', '') for x in current_tuple])
+
+    # TODO TODO TODO TODO
+    data_point_attribute_getter_base = tuple_attrgetter(*base_tuple)
+    data_point_attribute_getter_current = tuple_attrgetter(*current_tuple)
+
+    data_point_attribute_getter_base_values = tuple_attrgetter(*base_value_tuple)
+    data_point_attribute_getter_current_values = tuple_attrgetter(*current_value_tuple)
+
+    for point in data_points:
+        point.standard_value = point.value
+        item_id = point.matrix_item_id
+        if point.study_assay.unit.base_unit_id:
+            data_point_tuple = data_point_attribute_getter_base(point)
+            point.standard_value *= point.study_assay.unit.scale_factor
+        else:
+            data_point_tuple = data_point_attribute_getter_current(point)
+        current_group = data_point_treatment_groups.setdefault(
+            (
+                data_point_tuple,
+                # setup_to_treatment_group.get(item_id).get('id')
+                setup_to_treatment_group.get(item_id).get('index')
+            ),
+            # 'Group {}'.format(len(data_point_treatment_groups) + 1)
+            u'{}'.format(len(data_point_treatment_groups) + 1)
+        )
+        point.data_group = current_group
+        if current_group not in treatment_group_table:
+            if point.study_assay.unit.base_unit_id:
+                treatment_group_table.update({
+                    current_group: [unicode(x) for x in list(
+                        data_point_attribute_getter_base_values(point)
+                    ) + [setup_to_treatment_group.get(item_id).get('index')]]
+                })
+            else:
+                treatment_group_table.update({
+                    current_group: [unicode(x) for x in list(
+                        data_point_attribute_getter_current_values(point)
+                    ) + [setup_to_treatment_group.get(item_id).get('index')]]
+                })
+
+        data_group_to_studies.setdefault(
+            current_group, {}
+        ).update({
+            u'<a href="{}" target="_blank">{} ({})</a>'.format(point.study.get_absolute_url(), point.study.name, point.study.group.name): point.study.name
+        })
+
+        data_group_to_sample_locations.setdefault(
+            current_group, {}
+        ).update({
+            point.sample_location.name: True
+        })
+
+        data_group_to_organ_models.setdefault(
+            current_group, {}
+        ).update({
+            point.matrix_item.organ_model.name: True
+        })
+
+    repro_data.append([
+        'Study ID',
+        'Chip ID',
+        'Time',
+        'Value',
+        # NAME THIS SOMETHING ELSE
+        'Treatment Group'
+    ])
+
+    for point in data_points:
+        repro_data.append([
+            point.study.name,
+            point.matrix_item.name,
+            point.time,
+            point.standard_value,
+            point.data_group
+        ])
+
+    # TODO REVISE
+    intra_data_table = get_repro_data(
+        len(treatment_group_table),
+        repro_data
+    )
+
+    # TODO REVISE
+    if intra_data_table.get('errors', ''):
+        return intra_data_table
+
+    gas_list = intra_data_table['reproducibility_results_table']['data']
     data['gas_list'] = gas_list
 
     mad_list = {}
     cv_list = {}
     chip_list = {}
     comp_list = {}
-    for x in range(len(repro_data) - 1):
+    for x in range(len(intra_data_table) - 1):
         # mad_list
-        mad_list[x + 1] = {'columns': repro_data[x]['mad_score_matrix']['columns']}
-        for y in range(len(repro_data[x]['mad_score_matrix']['index'])):
-            repro_data[x]['mad_score_matrix']['data'][y].insert(0, repro_data[x]['mad_score_matrix']['index'][y])
-        mad_list[x + 1]['data'] = repro_data[x]['mad_score_matrix']['data']
+        mad_list[x + 1] = {'columns': intra_data_table[x]['mad_score_matrix']['columns']}
+        for y in range(len(intra_data_table[x]['mad_score_matrix']['index'])):
+            intra_data_table[x]['mad_score_matrix']['data'][y].insert(0, intra_data_table[x]['mad_score_matrix']['index'][y])
+        mad_list[x + 1]['data'] = intra_data_table[x]['mad_score_matrix']['data']
         # cv_list
-        if repro_data[x].get('comp_ICC_Value'):
+        if intra_data_table[x].get('comp_ICC_Value'):
             cv_list[x + 1] = [['Time', 'CV (%)']]
-            for y in range(len(repro_data[x]['CV_array']['index'])):
-                repro_data[x]['CV_array']['data'][y].insert(0, repro_data[x]['CV_array']['index'][y])
-            for entry in repro_data[x]['CV_array']['data']:
+            for y in range(len(intra_data_table[x]['CV_array']['index'])):
+                intra_data_table[x]['CV_array']['data'][y].insert(0, intra_data_table[x]['CV_array']['index'][y])
+            for entry in intra_data_table[x]['CV_array']['data']:
                 cv_list[x + 1].append(entry)
         # chip_list
-        repro_data[x]['cv_chart']['columns'].insert(0, "Time (days)")
-        chip_list[x + 1] = [repro_data[x]['cv_chart']['columns']]
-        for y in range(len(repro_data[x]['cv_chart']['index'])):
-            repro_data[x]['cv_chart']['data'][y].insert(0, repro_data[x]['cv_chart']['index'][y])
-        for z in range(len(repro_data[x]['cv_chart']['data'])):
-            chip_list[x + 1].append(repro_data[x]['cv_chart']['data'][z])
+        intra_data_table[x]['cv_chart']['columns'].insert(0, "Time (days)")
+        chip_list[x + 1] = [intra_data_table[x]['cv_chart']['columns']]
+        for y in range(len(intra_data_table[x]['cv_chart']['index'])):
+            intra_data_table[x]['cv_chart']['data'][y].insert(0, intra_data_table[x]['cv_chart']['index'][y])
+        for z in range(len(intra_data_table[x]['cv_chart']['data'])):
+            chip_list[x + 1].append(intra_data_table[x]['cv_chart']['data'][z])
         # comp_list
-        if repro_data[x].get('comp_ICC_Value'):
+        if intra_data_table[x].get('comp_ICC_Value'):
             comp_list[x + 1] = []
-            for y in range(len(repro_data[x]['comp_ICC_Value']['Chip ID'])):
+            for y in range(len(intra_data_table[x]['comp_ICC_Value']['Chip ID'])):
                 comp_list[x + 1].insert(y, [])
-                comp_list[x + 1][y].append(repro_data[x]['comp_ICC_Value']['Chip ID'][y])
-                comp_list[x + 1][y].append(repro_data[x]['comp_ICC_Value']['ICC Absolute Agreement'][y])
-                comp_list[x + 1][y].append(repro_data[x]['comp_ICC_Value']['Missing Data Points'][y])
+                comp_list[x + 1][y].append(intra_data_table[x]['comp_ICC_Value']['Chip ID'][y])
+                comp_list[x + 1][y].append(intra_data_table[x]['comp_ICC_Value']['ICC Absolute Agreement'][y])
+                comp_list[x + 1][y].append(intra_data_table[x]['comp_ICC_Value']['Missing Data Points'][y])
 
     data['mad_list'] = mad_list
 
@@ -1647,14 +1845,35 @@ def fetch_assay_study_reproducibility(request):
     excellent_counter = acceptable_counter = poor_counter = 0
 
     for x in range(0, len(data['gas_list'])):
-        if data['gas_list'][x][10][0] == 'E':
+        if not data['gas_list'][x][7]:
+            continue
+        if data['gas_list'][x][7][0] == 'E':
             excellent_counter += 1
-        elif data['gas_list'][x][10][0] == 'A':
+        elif data['gas_list'][x][7][0] == 'A':
             acceptable_counter += 1
-        elif data['gas_list'][x][10][0] == 'P':
+        elif data['gas_list'][x][7][0] == 'P':
             poor_counter += 1
 
     data['pie'] = [excellent_counter, acceptable_counter, poor_counter]
+
+    data['data_groups'] = treatment_group_table
+
+    final_data_group_to_sample_locations = {}
+    for data_group, current_sample_location in data_group_to_sample_locations.items():
+        final_data_group_to_sample_locations[data_group] = sorted(current_sample_location)
+
+    final_data_group_to_organ_models = {}
+    for data_group, current_organ_model in data_group_to_organ_models.items():
+        final_data_group_to_organ_models[data_group] = sorted(current_organ_model)
+
+    data['data_group_to_sample_locations'] = final_data_group_to_sample_locations
+    data['data_group_to_organ_models'] = final_data_group_to_organ_models
+
+    data['header_keys'] = data_header_keys
+
+    data['treatment_groups'] = treatment_group_representatives
+
+    data['post_filter'] = post_filter
 
     return HttpResponse(json.dumps(data),
                         content_type='application/json')
@@ -1864,7 +2083,8 @@ def acquire_post_filter(studies, assays, matrix_items, data_points):
 
     assays = assays.prefetch_related(
         'target',
-        'method'
+        'method',
+        'unit'
     )
 
     for assay in assays:
@@ -1880,6 +2100,13 @@ def acquire_post_filter(studies, assays, matrix_items, data_points):
             'method_id__in', {}
         ).update({
             assay.method.id: assay.method.name
+        })
+
+        # Tricky! Not actually in filter list...
+        current.setdefault(
+            'unit_id__in', {}
+        ).update({
+            assay.unit.id: assay.unit.unit
         })
 
     # Contrived: Add no compounds
@@ -2546,6 +2773,8 @@ def get_inter_study_reproducibility(
 
     additional_keys = []
 
+    sets_intra_points = {}
+
     # CRUDE
     if criteria:
         group_sample_location = 'sample_location' in criteria.get('special', [])
@@ -2591,6 +2820,20 @@ def get_inter_study_reproducibility(
             # 'Group {}'.format(len(data_point_treatment_groups) + 1)
             u'{}'.format(len(data_point_treatment_groups) + 1)
         )
+
+        # TODO Intra-in-Inter: Dictionary of format {group_num : {study1 : [point1, point2], study2 : [point1, point2]}}
+        study_name = "{} ({})".format(point.study.name, point.study.group)
+
+        if current_group not in sets_intra_points:
+            sets_intra_points[current_group] = {}
+        if study_name not in sets_intra_points[current_group]:
+            sets_intra_points[current_group][study_name] = []
+        sets_intra_points[current_group][study_name].append([
+            point.time,
+            point.value,
+            point.matrix_item_id
+        ])
+
         point.data_group = current_group
         if current_group not in treatment_group_table:
             if point.study_assay.unit.base_unit_id:
@@ -2967,10 +3210,21 @@ def get_inter_study_reproducibility(
         # BAD
         'data_group_to_sample_locations': final_data_group_to_sample_locations,
         'data_group_to_organ_models': final_data_group_to_organ_models,
-        'pie': [excellent_counter, acceptable_counter, poor_counter]
+        'pie': [excellent_counter, acceptable_counter, poor_counter],
+        'sets_intra_points': sets_intra_points
     }
 
     return data
+
+
+def intra_repro_in_inter(request):
+    datapoints = json.loads(request.POST.get('datapoints', '{}'))
+    statuses = []
+    for x in datapoints:
+        statuses.append(intra_status_for_inter(x))
+
+    return HttpResponse(json.dumps(statuses),
+                        content_type='application/json')
 
 
 def study_viewer_validation(request):
@@ -3040,7 +3294,10 @@ switch = {
     },
     'fetch_data_points_from_filters': {
         'call': fetch_data_points_from_filters
-    }
+    },
+    'intra_repro_in_inter': {
+        'call': intra_repro_in_inter
+    },
 }
 
 

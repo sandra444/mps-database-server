@@ -312,7 +312,13 @@ $(document).ready(function() {
                     value_unit_index = json.header_keys.data.indexOf('Value Unit');
 
                     // Piechart info
-                    if (summary_pie === '0,0,0'){
+                    var pie_all_zero = summary_pie.every(function(x){
+                        if (!x){
+                            return true;
+                        }
+                        return false;
+                    })
+                    if (pie_all_zero){
                         pie_chart = new google.visualization.PieChart(document.getElementById('piechart'));
                         pie_chart.draw(na_data, na_options);
                     } else {
@@ -326,10 +332,7 @@ $(document).ready(function() {
                         pie_chart.draw(pie_data, pie_options);
                     }
 
-                    if (window.GROUPING.full_post_filter === null) {
-                        window.GROUPING.full_post_filter = json.post_filter;
-                        window.GROUPING.current_post_filter = JSON.parse(JSON.stringify(json.post_filter));
-                    }
+                    window.GROUPING.set_grouping_filtering(json.post_filter);
 
                     return repro_table_data_best;
                 },
@@ -386,6 +389,12 @@ $(document).ready(function() {
             deferRender: true,
             destroy: true,
             initComplete: function () {
+                // Stopgap: Remove compound column if no compound criteria selected
+                if (!window.GROUPING.get_grouping_filtering()['compound'] || window.GROUPING.get_grouping_filtering()['compound'].indexOf('compound_instance.compound_id') === -1) {
+                    // Note magic number
+                    repro_table.column(5).visible(false);
+                }
+
                 // TODO TODO TODO
                 // Draw necessary sections below
                 draw_subsections();
@@ -427,8 +436,7 @@ $(document).ready(function() {
     });
 
     // When a filter is clicked, set the filter values and redraw the table
-    $('#show_all_repro_wrapper').click(function() {
-        $('#show_all_repro').prop('checked', !$('#show_all_repro').prop('checked'));
+    $('#show_all_repro').change(function() {
         // Redraw the table
         repro_table.draw();
     });
