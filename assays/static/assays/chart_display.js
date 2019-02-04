@@ -6,8 +6,10 @@
 
 // Global variable for charts
 window.CHARTS = {
-    study_id: 0,
-    filter: {},
+    study_id: '',
+    matrix_id: '',
+    matrix_item_id: '',
+    filter: '{}',
     call: '',
     global_options: {}
 };
@@ -178,7 +180,8 @@ $(document).ready(function () {
             // use_percent_control: false,
             time_conversion: 1,
             chart_type: 'scatter',
-            tooltip_type: 'datum'
+            tooltip_type: 'datum',
+            revised_unit: null
         },
         ajax_data: {
             key: 'device',
@@ -276,14 +279,17 @@ $(document).ready(function () {
             'out': []
         };
 
-        all_options['popup'] = [];
+        all_options['popup'] = [null];
 
         group_to_data['popup'] = [];
 
         individual_plot_popup_options_section.hide();
         individual_plot_popup_plot_section.show();
 
-        get_individual_chart('popup', individual_plot_popup_plot_container[0]);
+        // Goofy
+        all_options['popup'][0] = window.CHARTS.prepare_chart_options();
+
+        get_individual_chart('popup', individual_plot_popup_plot_container[0], all_options['popup'][0]);
     }
 
     if (individual_plot_popup[0]) {
@@ -335,7 +341,8 @@ $(document).ready(function () {
                     // });
                     // destroy_events('charts');
 
-                    window.CHARTS.prepare_chart_options(all_options['charts'][current_chart_id]);
+                    // A little goofy
+                    all_options['charts'][current_chart_id] = window.CHARTS.prepare_chart_options();
                     all_options['charts'][current_chart_id].tracking.is_default = false;
 
                     if (!plot_is_visible.prop('checked')) {
@@ -352,7 +359,7 @@ $(document).ready(function () {
                     }
                     else {
                         // Tricky, may create unpleasant scenarios however...
-                        get_individual_chart('charts', current_chart, all_options['charts'][current_chart_id].ajax_data);
+                        get_individual_chart('charts', current_chart, all_options['charts'][current_chart_id]);
                     }
 
                     // Apply new events
@@ -396,12 +403,17 @@ $(document).ready(function () {
         }
 
         var data = {
+            // Only for when filter is needed, but still (will never have repro intention)
+            intention: 'charting',
             // TODO TODO TODO CHANGE CALL
             call: window.CHARTS.call,
             // TODO TODO TODO NEED TO GET
             study: window.CHARTS.study_id,
             // TODO TODO TODO MIGHT BE USING A FILTER
-            filter: window.CHARTS.filter,
+            filters: window.CHARTS.filters,
+            // TODO MATRIX AND MATRIX ITEM
+            matrix: window.CHARTS.matrix_id,
+            matrix_item: window.CHARTS.matrix_item_id,
             criteria: JSON.stringify(window.GROUPING.get_grouping_filtering()),
             post_filter: JSON.stringify(individual_post_filter),
             csrfmiddlewaretoken: window.COOKIES.csrfmiddlewaretoken
@@ -419,7 +431,7 @@ $(document).ready(function () {
             options.ajax_data.key = 'dose';
         }
 
-        data = $.extend(data, options);
+        data = $.extend(data, options.ajax_data);
 
         // Show spinner
         window.spinner.spin(
@@ -447,15 +459,23 @@ $(document).ready(function () {
                 }
                 else {
                     // Store just the numbers if in-place change
-                    all_data[charts].assays[index_to_use] = json.assays[0];
+                    if (json.assays && json.assays[0]) {
+                        all_data[charts].assays[index_to_use] = json.assays[0];
+                    }
+                    else {
+                        all_data[charts].assays[index_to_use] = [];
+                    }
                 }
 
                 // Not a great exception
-                if (options.percent_control) {
+                if (options.ajax_data.percent_control) {
                     var assay_unit = json.sorted_assays[0];
                     var assay = assay_unit.split('\n')[0];
                     var unit = assay_unit.split('\n')[1];
-                    options.revised_unit = unit;
+                    options.tracking.revised_unit = unit;
+                }
+                else {
+                    delete options.tracking.revised_unit;
                 }
 
                 // Make the plot
@@ -491,9 +511,9 @@ $(document).ready(function () {
         var assay = assay_unit.split('\n')[0];
         var unit = assay_unit.split('\n')[1];
 
-        // if (current_ajax_options && current_ajax_options.revised_unit) {
-        //     unit = current_ajax_options.revised_unit;
-        // }
+        if (options.tracking.revised_unit) {
+            unit = options.tracking.revised_unit;
+        }
 
         if (!options) {
             options = $.extend(true, {}, window.CHARTS.global_options);
@@ -659,10 +679,8 @@ $(document).ready(function () {
         }
     }
 
-    window.CHARTS.prepare_chart_options = function(options) {
-        if (!options) {
-            options = $.extend(true, {}, window.CHARTS.global_options);
-        }
+    window.CHARTS.prepare_chart_options = function() {
+        var options = $.extend(true, {}, window.CHARTS.global_options);
 
         //$.each($('#' + charts + 'chart_options').find('input'), function() {
         // Object extraneous as there is only one option set now
@@ -717,7 +735,7 @@ $(document).ready(function () {
             options.focusTarget = 'datum';
         }
 
-        // return options;
+        return options;
     };
 
     // TODO I NEED THIS FUNCTION TO MAKE SURE THAT THE SIDEBAR MATCHES THE POPUP/GLOBAL
@@ -1150,24 +1168,13 @@ $(document).ready(function () {
         var assays = json.assays;
 
         for (index in sorted_assays) {
-            build_individual_chart('charts', document.getElementById('charts_' + index), index);
+            build_individual_chart('charts', document.getElementById('charts_' + index), index, window.CHARTS.global_options);
         }
 
         window.CHARTS.display_treatment_groups(json.treatment_groups, json.header_keys);
 
         create_events('charts');
     };
-
-    // Setup triggers
-    // EXCLUDES SPECIAL TRIGGERS (SLOPPY)
-    // NOTE: THIS IS DONE IN GROUPING FILTERING NOW (AVOID DOUBLE)
-    // $('#charting_options_tables')
-    //     .find('input, select')
-    //     .not('#arithmetic_select, #geometric_select, #median_select')
-    //     .change(function() {
-    //         // Odd, perhaps innapropriate!
-    //         window.GROUPING.refresh_wrapper();
-    // });
 
     // TODO TODO TODO NOT DRY
     $(document).on('click', '.chart-filter-checkbox', function() {
@@ -1220,14 +1227,30 @@ $(document).ready(function () {
         alert('TODO');
     });
 
-    // CONTEXT MENU
-    $(document).on('contextmenu', '.chart-container', function() {
-        current_chart = this;
-        current_chart_name = $(this).attr('data-chart-name');
-        current_chart_id = Math.floor($(this).attr('id').split('_')[1]);
+    function create_popup_for_individual_plot(chart) {
+        current_chart = chart;
+        current_chart_name = $(chart).attr('data-chart-name');
+        current_chart_id = Math.floor($(chart).attr('id').split('_')[1]);
         // Contrived
         // current_chart_options = all_options['charts'][current_chart_id];
         individual_plot_popup.dialog('open');
+    }
+
+    // CONTEXT MENU
+    $(document).on('contextmenu', '.chart-container', function() {
+        create_popup_for_individual_plot(this);
+    });
+
+    // TRIGGER CONTEXT MENU ON LONG PRESS
+    var long_press_timer;
+    $(document).on('mousedown', '.chart-container', function() {
+        var chart = this;
+        long_press_timer = setTimeout(function() {
+            create_popup_for_individual_plot(chart);
+        }, 1500);
+    });
+    $(document).on('mouseup mouseleave', '.chart-container', function() {
+        clearTimeout(long_press_timer);
     });
 
     // THESE ARE SPECIAL TRIGGERS TO PREVENT SELECTING MEDIAN AND STE/STD
@@ -1288,7 +1311,7 @@ $(document).ready(function () {
     function trigger_refresh() {
         // Odd
         if (side_bar_global) {
-            window.CHARTS.prepare_chart_options(window.CHARTS.global_options);
+            window.CHARTS.global_options = window.CHARTS.prepare_chart_options();
 
             // Odd, perhaps innapropriate!
             window.GROUPING.refresh_wrapper();
