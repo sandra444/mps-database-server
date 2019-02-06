@@ -197,15 +197,10 @@ $(document).ready(function () {
         show_hide_plots_popup.dialog({
             // Causes problems on small devices
             width: 825,
-            closeOnEscape: true,
-            autoOpen: false,
             close: function () {
                 // Purge the buffer
                 chart_filter_buffer = {};
-                $('body').removeClass('stop-scrolling');
-            },
-            open: function () {
-                $('body').addClass('stop-scrolling');
+                $.ui.dialog.prototype.options.close();
             },
             buttons: [
             {
@@ -298,10 +293,9 @@ $(document).ready(function () {
         individual_plot_popup.dialog({
             // Causes problems on small devices
             width: 825,
-            closeOnEscape: true,
-            autoOpen: false,
             close: function () {
-                $('body').removeClass('stop-scrolling');
+                $.ui.dialog.prototype.options.close();
+
                 side_bar_global = true;
 
                 // Remove bg-info from sidebar stuff
@@ -311,7 +305,8 @@ $(document).ready(function () {
                 apply_options_to_sidebar(window.CHARTS.global_options, false);
             },
             open: function () {
-                $('body').addClass('stop-scrolling');
+                $.ui.dialog.prototype.options.open();
+
                 individual_plot_popup_options_section.show('slow');
                 individual_plot_popup_plot_section.hide('slow');
                 // Plot needs to be visible for you to, you know, see it here
