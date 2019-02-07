@@ -1241,14 +1241,15 @@ $(document).ready(function () {
     });
 
     // TRIGGER CONTEXT MENU ON LONG PRESS
+    // ATTEMPT TO TRIGGER ON TOUCH EVENTS AS WELL
     var long_press_timer;
-    $(document).on('mousedown', '.chart-container', function() {
+    $(document).on('mousedown touchstart', '.chart-container', function() {
         var chart = this;
         long_press_timer = setTimeout(function() {
             create_popup_for_individual_plot(chart);
         }, 1500);
     });
-    $(document).on('mouseup mouseleave', '.chart-container', function() {
+    $(document).on('mouseup mouseleave touchend touchcancel', '.chart-container', function() {
         clearTimeout(long_press_timer);
     });
 
