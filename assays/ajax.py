@@ -766,6 +766,7 @@ def get_item_groups(study, criteria, matrix_items=None):
         )
 
     setups = matrix_items.prefetch_related(
+        'matrix',
         'organ_model',
         'assaysetupsetting_set__setting',
         'assaysetupsetting_set__addition_location',
@@ -793,6 +794,8 @@ def get_item_groups(study, criteria, matrix_items=None):
             header_keys.append('MPS Model')
         if 'study_id' in criteria.get('setup'):
             header_keys.append('Study')
+        if 'matrix_id' in criteria.get('setup'):
+            header_keys.append('Matrix')
     if criteria.get('cell', ''):
         header_keys.append('Cells')
     if criteria.get('compound', ''):
@@ -837,6 +840,8 @@ def get_item_groups(study, criteria, matrix_items=None):
             x.get('MPS Model'),
             x.get('Cells'),
             x.get('Settings'),
+            x.get('Matrix'),
+            x.get('Study'),
             x.get('Items with Same Treatment')[0]
         )
     )
