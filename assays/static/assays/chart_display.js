@@ -1333,6 +1333,8 @@ $(document).ready(function () {
     var std_selector = $('#std_select');
     var ste_selector = $('#ste_select');
 
+    var number_for_interval_selector = $('#number_for_interval');
+
     // TODO TODO TODO IDIOTIC PLEASE FIX ASAP
     function restrict_error_bar_options(refresh) {
         if ($('#arithmetic_select').prop('checked') || $('#geometric_select').prop('checked')) {
@@ -1370,15 +1372,26 @@ $(document).ready(function () {
             std_selector.attr('disabled', 'disabled');
             ste_selector.attr('disabled', 'disabled');
         }
+
+        // Disable number for interval if not std
+        if (!std_selector.prop('checked')) {
+            number_for_interval_selector.attr('disabled', 'disabled');
+        }
+        else {
+            number_for_interval_selector.removeAttr('disabled');
+        }
     }
 
-    $('#arithmetic_select, #geometric_select, #median_select').change(function() {
+    $('#arithmetic_select, #geometric_select, #median_select, #std_select, #ste_select').change(function() {
         restrict_error_bar_options(true);
     });
 
     // Initially, just block iqr for now
     // SLOPPY: PLEASE NOTE PLEASE NOTE
     iqr_selector.attr('disabled', 'disabled');
+
+    // SLOPPY: PLEASE NOTE
+    number_for_interval_selector.attr('disabled', 'disabled');
 
     // Set up triggers all other triggers
     function trigger_refresh() {
@@ -1400,6 +1413,6 @@ $(document).ready(function () {
     $('#sidebar')
         .find('input, select')
         // Exceptions to refresh (manually done elsewhere)
-        .not('#arithmetic_select, #geometric_select, #median_select')
+        .not('#arithmetic_select, #geometric_select, #median_select, #std_select, #ste_select')
         .change(trigger_refresh);
 });
