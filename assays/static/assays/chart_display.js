@@ -324,6 +324,12 @@ $(document).ready(function () {
             open: function () {
                 $.ui.dialog.prototype.options.open();
 
+                // Change title
+                var full_name = current_chart_name.split('\n');
+                var new_title = full_name[0] + ' (' + full_name[1] + ')';
+
+                $(this).dialog('option', 'title', new_title);
+
                 individual_plot_popup_options_section.show('slow');
                 individual_plot_popup_plot_section.hide('slow');
                 // Plot needs to be visible for you to, you know, see it here
