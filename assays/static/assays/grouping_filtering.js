@@ -22,6 +22,13 @@ window.GROUPING = {
     // Starts null
     set_grouping_filtering: null,
     get_grouping_filtering: null,
+    // INDICATES THE ORDER OF FILTERS FOR PROCESSING
+    ordered_filters: [
+        'organ_models',
+        'groups',
+        'targets',
+        'compounds'
+    ]
 };
 
 // Naive encapsulation
@@ -110,6 +117,102 @@ $(document).ready(function () {
         });
 
         return window.GROUPING.group_criteria;
+    };
+
+    // CRUDE: INJECT GET PARAM PROCESSOR INTO JQUERY
+    $.urlParam = function(name) {
+        var results = new RegExp('[\?&]' + name + '=([^&#]*)').exec(window.location.href);
+        if (results == null) {
+           return null;
+        }
+        return decodeURI(results[1]) || '';
+    }
+
+    // Process GET params
+    window.GROUPING.process_get_params = function() {
+        // Process filters
+        // Only needs to be returned
+        var raw_filters = $.urlParam('f');
+        // Default all empty
+        var filters = {
+            'organ_models': {},
+            'groups': {},
+            'compounds': {},
+            'targets': {}
+        };
+
+        if (raw_filters) {
+            raw_filters = raw_filters.split(';');
+
+            $.each(window.GROUPING.ordered_filters, function(index, current_filter) {
+                $.each(raw_filters[index].split(','), function(id_index, current_id) {
+                    if (!filters[current_filter]) {
+                        filters[current_filter] = {};
+                    }
+                    filters[current_filter][current_id] = 'true';
+                });
+            });
+        }
+
+
+        // TODO
+        // Process criteria
+        // Must be accessible before AJAX call
+        // TODO
+        // var raw_criteria = $.urlParam('c');
+        // var criteria = {};
+
+        // TODO
+        // Process post_filter
+        // Must be accessible before AJAX call
+        // TODO
+        // var raw_post_filter = $.urlParam('p');
+        // var post_filter = {};
+
+        return filters;
+    };
+
+    // Generate GET params
+    window.GROUPING.generate_get_params = function(filters, criteria, post_filter) {
+        var string_to_append = [];
+
+        if (filters) {
+            var filter_string = [];
+            $.each(window.GROUPING.ordered_filters, function(index, current_filter) {
+                var curent_filter_string = [];
+                $.each(filters[current_filter], function(current_id, present) {
+                    if (present) {
+                        curent_filter_string.push(current_id);
+                    }
+                });
+                filter_string.push(curent_filter_string.join(','));
+            });
+
+            string_to_append.push('f=' + filter_string.join(';'));
+        }
+
+        // TODO
+        // if (criteria) {
+        //     var criteria_string = [];
+        //
+        //     string_to_append.push(criteria_string.join(';'));
+        // }
+
+        // TODO
+        // if (post_filter) {
+        //     var post_filter_string = [];
+        //
+        //     string_to_append.push(post_filter_string.join(';'));
+        // }
+
+        var full_get_parameters = string_to_append.join('+');
+
+        // Change the hrefs to include the filters
+        $('.submit-button').each(function() {
+            var current_download_href = $(this).attr('href');
+            var initial_href = current_download_href.split('?')[0];
+            $(this).attr('href', initial_href + '?' + full_get_parameters);
+        });
     };
 
     // TODO PLEASE MAKE THIS NOT CONTRIVED SOON

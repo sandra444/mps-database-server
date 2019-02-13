@@ -8,15 +8,20 @@ $(document).ready(function() {
     window.GROUPING.refresh_function = show_repro;
 
     // Filters acquired naively from GET
-    var filters = decodeURIComponent(window.location.search.split('?filters=')[1]);
+    // var filters = decodeURIComponent(window.location.search.split('?filters=')[1]);
+
+    var filters = window.GROUPING.process_get_params();
+
     // Change the hrefs to include the filters
-    var submit_buttons_selector = $('.submit-button');
-    submit_buttons_selector.each(function() {
-        var current_download_href = $(this).attr('href');
-        var initial_href = current_download_href.split('?')[0];
-        var get_for_href = 'filters=' + filters;
-        $(this).attr('href', initial_href + '?' + get_for_href);
-    });
+    // var submit_buttons_selector = $('.submit-button');
+    // submit_buttons_selector.each(function() {
+    //     var current_download_href = $(this).attr('href');
+    //     var initial_href = current_download_href.split('?')[0];
+    //     var get_for_href = 'filters=' + filters;
+    //     $(this).attr('href', initial_href + '?' + get_for_href);
+    // });
+
+    window.GROUPING.generate_get_params(filters);
 
     // TODO TODO TODO REPRO STUFF
     // TODO: UGLY
@@ -287,7 +292,7 @@ $(document).ready(function() {
                     // TODO TODO TODO THIS DEPENDS ON THE INTERFACE
                     call: 'fetch_data_points_from_filters',
                     intention: 'inter_repro',
-                    filters: filters,
+                    filters: JSON.stringify(filters),
                     criteria: JSON.stringify(window.GROUPING.get_grouping_filtering()),
                     post_filter: JSON.stringify(window.GROUPING.current_post_filter),
                     inter_level: inter_level,

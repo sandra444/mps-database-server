@@ -1,25 +1,28 @@
 $(document).ready(function() {
-    var filters = {
-        'organ_models': {},
-        'groups': {},
-        'compounds': {},
-        'targets': {}
-    };
+    // var filters = {
+    //     'organ_models': {},
+    //     'groups': {},
+    //     'compounds': {},
+    //     'targets': {}
+    // };
 
     // see if there are filters from GET parameters
-    var get_filters = decodeURIComponent(window.location.search.split('?filters=')[1]);
-    if (get_filters && get_filters !== 'undefined') {
-        filters = JSON.parse(get_filters);
-    }
+    // var get_filters = decodeURIComponent(window.location.search.split('?filters=')[1]);
+    // if (get_filters && get_filters !== 'undefined') {
+    //     filters = JSON.parse(get_filters);
+    // }
+
+    var filters = window.GROUPING.process_get_params();
 
     var first_run = true;
 
-    var ordered_filters = [
-        'organ_models',
-        'groups',
-        'targets',
-        'compounds'
-    ];
+    // NOW window.GROUPING.ordered_filters
+    // var ordered_filters = [
+    //     'organ_models',
+    //     'groups',
+    //     'targets',
+    //     'compounds'
+    // ];
 
     var filter_empty_messages = {
         'organ_models': 'Please Select at Least One MPS Model.',
@@ -46,12 +49,14 @@ $(document).ready(function() {
         $('.filter-table').addClass('gray-out');
 
         // Change the hrefs to include the filters
-        submit_buttons_selector.each(function() {
-            var current_download_href = $(this).attr('href');
-            var initial_href = current_download_href.split('?')[0];
-            var get_for_href = 'filters=' + JSON.stringify(filters);
-            $(this).attr('href', initial_href + '?' + get_for_href);
-        });
+        // submit_buttons_selector.each(function() {
+        //     var current_download_href = $(this).attr('href');
+        //     var initial_href = current_download_href.split('?')[0];
+        //     var get_for_href = 'filters=' + JSON.stringify(filters);
+        //     $(this).attr('href', initial_href + '?' + get_for_href);
+        // });
+
+        window.GROUPING.generate_get_params(filters);
 
         $.ajax({
             url: "/assays_ajax/",
@@ -87,7 +92,7 @@ $(document).ready(function() {
                 // Hide initially
                 make_more_selections_message_selector.hide();
 
-                $.each(ordered_filters, function (index, filter) {
+                $.each(window.GROUPING.ordered_filters, function (index, filter) {
                     if (_.isEmpty(filters[filter])) {
                         make_more_selections_message_selector.html(filter_empty_messages[filter]);
                         make_more_selections_message_selector.show();
