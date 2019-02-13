@@ -665,17 +665,31 @@ $(document).ready(function () {
         var chart = null;
 
         var num_colors = 0;
+        var truncated_at_index = null;
 
         $.each(assay_data[0].slice(1), function(index, value) {
-            if (value.indexOf('     ~@i1') === -1) {
+            if (value.indexOf('     ~@i') === -1) {
                 num_colors++;
+
+                // NOTE TRUNCATE PAST 40 COLORS
+                if (num_colors > 41) {
+                    truncated_at_index = index;
+                    $.each(assay_data, function(row_index, current_row) {
+                        assay_data[row_index] = current_row.slice(0, index);
+                    });
+
+                    // Indicate truncated in title?
+                    options.title = options.title + ' {TRUNCATED}';
+
+                    return false;
+                }
             }
         });
 
         var data = google.visualization.arrayToDataTable(assay_data);
 
         // Line chart if more than two time points and less than 101 colors
-        if (assay_data.length > 3 && num_colors < 101) {
+        if (assay_data.length > 3) {
             chart = new google.visualization.LineChart(chart_selector);
 
             // Change the options
@@ -685,15 +699,15 @@ $(document).ready(function () {
                 min: current_min_x - 0.1 * current_x_range
             };
         }
-        // Nothing if more than 100 colors
-        else if (num_colors > 100) {
-            chart_selector.innerHTML = '<div class="alert alert-danger" role="alert">' +
-                '<span class="glyphicon glyphicon-warning-sign" aria-hidden="true"></span>' +
-                '<span class="sr-only">Danger:</span>' +
-                ' <strong>' + assay + ' ' + unit + '</strong>' +
-                '<br>This plot has too many data points, please try filtering.' +
-            '</div>'
-        }
+        // No longer totally remove, just truncate instead
+        // else if (num_colors > 100) {
+        //     chart_selector.innerHTML = '<div class="alert alert-danger" role="alert">' +
+        //         '<span class="glyphicon glyphicon-warning-sign" aria-hidden="true"></span>' +
+        //         '<span class="sr-only">Danger:</span>' +
+        //         ' <strong>' + assay + ' ' + unit + '</strong>' +
+        //         '<br>This plot has too many data points, please try filtering.' +
+        //     '</div>'
+        // }
         // Bar chart if only one time point
         else if (assay_data.length > 1) {
             // Crude...
