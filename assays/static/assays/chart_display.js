@@ -669,13 +669,16 @@ $(document).ready(function () {
 
         $.each(assay_data[0].slice(1), function(index, value) {
             if (value.indexOf('     ~@i') === -1) {
-                num_colors++;
-
                 // NOTE TRUNCATE PAST 40 COLORS
-                if (num_colors > 41) {
+                if (num_colors >= 40) {
                     truncated_at_index = index;
+
+                    if (assay_data[0][index + 1].indexOf('     ~@i') !== -1) {
+                        truncated_at_index += 2;
+                    }
+
                     $.each(assay_data, function(row_index, current_row) {
-                        assay_data[row_index] = current_row.slice(0, index);
+                        assay_data[row_index] = current_row.slice(0, truncated_at_index + 1);
                     });
 
                     // Indicate truncated in title?
@@ -683,6 +686,8 @@ $(document).ready(function () {
 
                     return false;
                 }
+
+                num_colors++;
             }
         });
 
