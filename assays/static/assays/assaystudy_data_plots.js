@@ -25,7 +25,8 @@ $(document).ready(function() {
     window.GROUPING.generate_get_params(filters);
 
     window.CHARTS.call = 'fetch_data_points_from_filters';
-    window.CHARTS.filters = filters;
+    // THE FILTERS WILL NOT CHANGE
+    window.CHARTS.filters = JSON.stringify(filters);
 
     function show_plots() {
         var data = {
