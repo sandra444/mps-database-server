@@ -9,6 +9,11 @@ window.GROUPING = {
         }
         else {
             if (manual_refresh || !document.getElementById("id_manually_refresh").checked) {
+                // Sloppy, make sure get params are up-to-date
+                // NOT ALWAYS RELEVANT
+                window.GROUPING.generate_get_params();
+
+                // Call the refresh function specified
                 window.GROUPING.refresh_function();
             }
         }
@@ -28,7 +33,12 @@ window.GROUPING = {
         'groups',
         'targets',
         'compounds'
-    ]
+    ],
+    full_get_parameters: '',
+    filters: null,
+    // Probably doesn't need to be global
+    group_criteria: null,
+    post_filter: null
 };
 
 // Naive encapsulation
@@ -41,8 +51,6 @@ $(document).ready(function () {
 
     var current_post_filter_data = [];
 
-    // Probably doesn't need to be global
-    window.GROUPING.group_criteria = {};
     var grouping_checkbox_selector = $('.grouping-checkbox');
 
     var post_filter_spawn_selector = $('.post-filter-spawn');
@@ -133,54 +141,77 @@ $(document).ready(function () {
         // Process filters
         // Only needs to be returned
         var raw_filters = $.urlParam('f');
-        // Default all empty
-        var filters = {
-            'organ_models': {},
-            'groups': {},
-            'compounds': {},
-            'targets': {}
-        };
-
         if (raw_filters) {
+            // Default all empty
+            window.GROUPING.filters = {
+                'organ_models': {},
+                'groups': {},
+                'compounds': {},
+                'targets': {}
+            };
+
             raw_filters = raw_filters.split(';');
 
             $.each(window.GROUPING.ordered_filters, function(index, current_filter) {
                 $.each(raw_filters[index].split(','), function(id_index, current_id) {
-                    if (!filters[current_filter]) {
-                        filters[current_filter] = {};
+                    if (!window.GROUPING.filters[current_filter]) {
+                        window.GROUPING.filters[current_filter] = {};
                     }
-                    filters[current_filter][current_id] = 'true';
+                    window.GROUPING.filters[current_filter][current_id] = 'true';
                 });
             });
         }
 
-
         // TODO
         // Process criteria
         // Must be accessible before AJAX call
-        // TODO
-        // var raw_criteria = $.urlParam('c');
-        // var criteria = {};
+        var raw_criteria = $.urlParam('c');
+        if (raw_criteria) {
+            var current_criteria = raw_criteria.split('');
+
+            // Check all matching criteria
+            window.GROUPING.group_criteria = {};
+
+            grouping_checkbox_selector.each(function(index, current_checkbox) {
+                if (current_criteria[index] && current_criteria[index] === '1') {
+                    if (!window.GROUPING.group_criteria[$(this).attr('data-group-relation')]) {
+                        window.GROUPING.group_criteria[$(this).attr('data-group-relation')] = [];
+                    }
+                    window.GROUPING.group_criteria[$(this).attr('data-group-relation')].push(
+                        $(this).attr('data-group')
+                    );
+                }
+
+                // Check or uncheck as necessary
+                $(this).prop('checked', current_criteria[index] === '1');
+            });
+        }
+        // Sloppy acquisition
+        else if (!window.GROUPING.group_criteria) {
+            window.GROUPING.get_grouping_filtering();
+        }
 
         // TODO
         // Process post_filter
         // Must be accessible before AJAX call
-        // TODO
-        // var raw_post_filter = $.urlParam('p');
-        // var post_filter = {};
+        var raw_post_filter = $.urlParam('p');
+        if (raw_post_filter) {
 
-        return filters;
+        }
+        else if (!window.GROUPING.current_post_filter) {
+
+        }
     };
 
     // Generate GET params
-    window.GROUPING.generate_get_params = function(filters, criteria, post_filter) {
+    window.GROUPING.generate_get_params = function() {
         var string_to_append = [];
 
-        if (filters) {
+        if (window.GROUPING.filters && Object.keys(window.GROUPING.filters).length) {
             var filter_string = [];
             $.each(window.GROUPING.ordered_filters, function(index, current_filter) {
                 var curent_filter_string = [];
-                $.each(filters[current_filter], function(current_id, present) {
+                $.each(window.GROUPING.filters[current_filter], function(current_id, present) {
                     if (present) {
                         curent_filter_string.push(current_id);
                     }
@@ -192,11 +223,23 @@ $(document).ready(function () {
         }
 
         // TODO
-        // if (criteria) {
-        //     var criteria_string = [];
-        //
-        //     string_to_append.push(criteria_string.join(';'));
-        // }
+        if (window.GROUPING.filters && Object.keys(window.GROUPING.group_criteria).length) {
+            var criteria_string = [];
+
+            grouping_checkbox_selector.each(function(index, current_checkbox) {
+                if (this.checked) {
+                    criteria_string.push('1');
+                }
+                else {
+                    criteria_string.push('0');
+                }
+            });
+
+            string_to_append.push('c=' + criteria_string.join(''));
+        }
+        else if ($.urlParam('c')) {
+            string_to_append.push('c=' + $.urlParam('c'));
+        }
 
         // TODO
         // if (post_filter) {
@@ -205,13 +248,13 @@ $(document).ready(function () {
         //     string_to_append.push(post_filter_string.join(';'));
         // }
 
-        var full_get_parameters = string_to_append.join('+');
+        window.GROUPING.full_get_parameters = '?' + string_to_append.join('&');
 
         // Change the hrefs to include the filters
         $('.submit-button').each(function() {
             var current_download_href = $(this).attr('href');
             var initial_href = current_download_href.split('?')[0];
-            $(this).attr('href', initial_href + '?' + full_get_parameters);
+            $(this).attr('href', initial_href + window.GROUPING.full_get_parameters);
         });
     };
 
@@ -465,6 +508,11 @@ $(document).ready(function () {
             $($.fn.dataTable.tables(true)).DataTable().columns.adjust();
         }, 250);
     }
+
+    // ON LOAD, PROCESS THE GET PARAMS AND APPLY TO ALL SUBMIT BUTTONS
+    // TOO DANGEROUS TO PUT HERE, NEED IN RESPECTIVE FUNCTIONS TO AVOID RACE CONDITION
+    // window.GROUPING.process_get_params();
+    // window.GROUPING.generate_get_params();
 
     // EXPERIMENTAL
     // IF THERE IS A SIDEBAR, GET RID OF CONTAINER CLASS IN BREADCRUMBS AND FOOTER

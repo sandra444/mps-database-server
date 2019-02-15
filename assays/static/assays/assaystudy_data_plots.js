@@ -9,32 +9,19 @@ $(document).ready(function() {
     // TODO TODO TODO
     window.GROUPING.refresh_function = show_plots;
 
-    // var filters = decodeURIComponent(window.location.search.split('?filters=')[1]);
-
-    var filters = window.GROUPING.process_get_params();
-
-    // Change the hrefs to include the filters
-    // var submit_buttons_selector = $('.submit-button');
-    // submit_buttons_selector.each(function() {
-    //     var current_download_href = $(this).attr('href');
-    //     var initial_href = current_download_href.split('?')[0];
-    //     var get_for_href = 'filters=' + filters;
-    //     $(this).attr('href', initial_href + '?' + get_for_href);
-    // });
-
-    window.GROUPING.generate_get_params(filters);
-
     window.CHARTS.call = 'fetch_data_points_from_filters';
-    // THE FILTERS WILL NOT CHANGE
-    window.CHARTS.filters = JSON.stringify(filters);
+
+    // PROCESS GET PARAMS INITIALLY
+    window.GROUPING.process_get_params();
+    window.GROUPING.generate_get_params();
 
     function show_plots() {
         var data = {
             // TODO TODO TODO CHANGE CALL
             call: 'fetch_data_points_from_filters',
             intention: 'charting',
-            filters: JSON.stringify(filters),
-            criteria: JSON.stringify(window.GROUPING.get_grouping_filtering()),
+            filters: JSON.stringify(window.GROUPING.filters),
+            criteria: JSON.stringify(window.GROUPING.group_criteria),
             post_filter: JSON.stringify(window.GROUPING.current_post_filter),
             csrfmiddlewaretoken: window.COOKIES.csrfmiddlewaretoken
         };

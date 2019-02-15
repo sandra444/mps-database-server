@@ -467,11 +467,11 @@ $(document).ready(function () {
             // TODO TODO TODO NEED TO GET
             study: window.CHARTS.study_id,
             // TODO TODO TODO MIGHT BE USING A FILTER
-            filters: window.CHARTS.filters,
+            filters: JSON.stringify(window.GROUPING.filters),
             // TODO MATRIX AND MATRIX ITEM
             matrix: window.CHARTS.matrix_id,
             matrix_item: window.CHARTS.matrix_item_id,
-            criteria: JSON.stringify(window.GROUPING.get_grouping_filtering()),
+            criteria: JSON.stringify(window.GROUPING.group_criteria),
             post_filter: JSON.stringify(individual_post_filter),
             csrfmiddlewaretoken: window.COOKIES.csrfmiddlewaretoken
         };
@@ -497,12 +497,12 @@ $(document).ready(function () {
         // Log scale doesn't affect ajax data, but may as well put it here
         options.tracking.use_x_log = use_x_log.prop('checked');
         if (options.tracking.use_x_log) {
-            options.hAxis.scaleType = 'log';
+            options.hAxis.scaleType = 'mirrorLog';
         }
 
         options.tracking.use_y_log = use_y_log.prop('checked');
         if (options.tracking.use_y_log) {
-            options.vAxis.scaleType = 'log';
+            options.vAxis.scaleType = 'mirrorLog';
         }
 
         // Show spinner
