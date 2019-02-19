@@ -1268,7 +1268,7 @@ $(document).ready(function () {
 
         create_events('charts');
 
-        if (hide_sidebar) {
+        if (hide_sidebar && $('#sidebar').hasClass('active')) {
             // GET RID OF SIDEBAR
             $('.toggle_sidebar_button').first().trigger('click');
         }
