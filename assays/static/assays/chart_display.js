@@ -574,14 +574,20 @@ $(document).ready(function () {
         // var assays = JSON.parse(JSON.stringify(all_data[charts].assays));
         var assay_data = JSON.parse(JSON.stringify(all_data[charts].assays[index]));
 
-        // Don't bother if empty
-        if (assay_data[1] === undefined) {
-            return;
-        }
-
         var assay_unit = sorted_assays[index];
         var assay = assay_unit.split('\n')[0];
         var unit = assay_unit.split('\n')[1];
+
+        // Don't bother if empty
+        if (assay_data[1] === undefined) {
+            chart_selector.innerHTML = '<div class="alert alert-danger" role="alert">' +
+                    '<span class="glyphicon glyphicon-warning-sign" aria-hidden="true"></span>' +
+                    '<span class="sr-only">Danger:</span>' +
+                    ' <strong>' + assay + ' ' + unit + '</strong>' +
+                    '<br>This plot doesn\'t have any valid data.' +
+                '</div>'
+            return;
+        }
 
         if (options.tracking.revised_unit) {
             unit = options.tracking.revised_unit;
