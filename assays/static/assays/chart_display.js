@@ -319,10 +319,25 @@ $(document).ready(function () {
                 $('#charting_sidebar_section').removeClass('bg-info');
                 // specific_graph_properties_container.hide('slow');
 
+                // GET RID OF THE OVERLAY
+                $('#full_page_overlay').remove();
+
                 apply_options_to_sidebar(window.CHARTS.global_options, false);
             },
             open: function () {
                 $.ui.dialog.prototype.options.open();
+
+                var overlay_to_inject = $('<div>')
+                    .attr('id', 'full_page_overlay')
+                    .css('width', '100%')
+                    .css('height', '100%')
+                    .css('z-index', '999')
+                    .css('position', 'fixed')
+                    .css('left', '0')
+                    .css('top', '0')
+                    .css('background-color', '#3333');
+
+                $('#page').append(overlay_to_inject);
 
                 // Change title
                 var full_name = current_chart_name.split('\n');
