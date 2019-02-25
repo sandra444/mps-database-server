@@ -83,7 +83,15 @@ $(document).ready(function () {
                 } else {
                     color = "Grey";
                 }
-                $clone.find('[data-id=repro-status]').html('<em style="padding: 2px; background-color:' + color + '">' + icc_status + '</em><small style="color: #333;"><span data-toggle="tooltip" title="'+data[14]+'" class="glyphicon glyphicon-question-sign" aria-hidden="true"></span></small>');
+
+                var repro_status = '<em style="padding: 2px; background-color:' + color + '">' + icc_status + '</em>';
+
+                // Only add a note if necessary
+                if (data[11]) {
+                    repro_status += '<small style="color: #333;"><span data-toggle="tooltip" title="' + data[11] + '" class="glyphicon glyphicon-question-sign" aria-hidden="true"></span></small>';
+                }
+
+                $clone.find('[data-id=repro-status]').html(repro_status);
 
                 // More than 6 rows, scrollY 270px, else 100%
                 var mad_scroll_y = "100%";
