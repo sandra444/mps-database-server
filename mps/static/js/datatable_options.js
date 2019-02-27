@@ -93,7 +93,7 @@ $(document).ready(function () {
     $(document).on('click', '.toggle-hide-button, .toggle_sidebar_button', function() {
         // Recalculate responsive and fixed headers
         setTimeout(function() {
-            $($.fn.dataTable.tables(true)).DataTable().responsive.recalc();
+            // $($.fn.dataTable.tables(true)).DataTable().columns.adjust();
             $($.fn.dataTable.tables(true)).DataTable().fixedHeader.adjust();
         }, 1000);
     });
