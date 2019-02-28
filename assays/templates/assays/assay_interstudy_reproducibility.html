@@ -6,6 +6,8 @@
 {% endblock %}
 
 {% block load_js %}
+    <script src="{% static "assays/grouping_filtering.js" %}"></script>
+    <script src="{% static "assays/repro_triggers.js" %}"></script>
     <script src="{% static "assays/assay_interstudy_reproducibility.js" %}"></script>
 {% endblock %}
 
@@ -13,11 +15,15 @@
     <li class="active">Reproducibility</li>
 {% endblock %}
 
+{% block sidebar %}
+    {% include 'assays/grouping_filtering.html' with repro='true' %}
+{% endblock %}
+
 {% block fluid-content %}
-<div class="row padded-row text-center padded-bottom large-padding-top">
+<div class="row padded-row text-center padded-bottom large-padding-top hidden-print">
     <a href="/assays/graphing_reproducibility/?filters=" type="button" class="btn btn-xlarge btn-primary text-center submit-button" id="back_button">
         <span class="glyphicon glyphicon glyphicon-hand-left" aria-hidden="true"></span>
-        Go Back
+        Selection
     </a>
     <a href="/assays/assaystudy_data_plots/?" type="button" class="btn btn-xlarge btn-primary text-center submit-button" id="charts_submit">
         <span class="glyphicon glyphicon glyphicon-stats" aria-hidden="true"></span>
@@ -29,12 +35,10 @@
     </a>
 </div>
 
-<div class="container" id="grouping_filtering">
-    {% include 'assays/grouping_filtering.html' %}
-</div>
+{% include 'assays/sidebar_extras.html' %}
 
-{# TODO TODO TODO NEED GROUPING  AND FILTERING STUFF HERE TOO #}
-<div class="container">
+{# NEEDS TO BE MOVED #}
+{% comment %} <div class="container">
 <div class="well">
     {# TODO TODO TODO #}
     <div class="row form-group">
@@ -60,7 +64,7 @@
     </div>
     </div>
 </div>
-</div>
+</div> {% endcomment %}
 
 <div class="row padded-row">
     <br><div class="text-center"><strong>Reproducibility Breakdown</strong><br><small>(Hover for Details)</small></div>

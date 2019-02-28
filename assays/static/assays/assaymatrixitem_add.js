@@ -29,6 +29,11 @@ $(document).ready(function() {
     var matrix_item_id = get_matrix_item();
     var study_id = get_study_id();
 
+    var first_run = true;
+
+    window.CHARTS.call = 'fetch_data_points';
+    window.CHARTS.matrix_item_id = matrix_item_id;
+
     // Name for the charts for binding events etc
     var charts_name = 'charts';
 
@@ -82,6 +87,10 @@ $(document).ready(function() {
         return current_id;
     }
 
+    // PROCESS GET PARAMS INITIALLY
+    window.GROUPING.process_get_params();
+    // window.GROUPING.generate_get_params();
+
     function get_readout() {
         if (matrix_item_id) {
             // Get the table
@@ -124,7 +133,7 @@ $(document).ready(function() {
     //         dynamic_excluded_new = {};
     //     }
     //
-    //     var dynamic_excluded = $.extend({}, dynamic_excluded_current, dynamic_excluded_new);
+    //     var dynamic_excluded = $.extend(true, {}, dynamic_excluded_current, dynamic_excluded_new);
     //
     //     var data = {
     //         call: 'validate_individual_chip_file',
@@ -135,7 +144,7 @@ $(document).ready(function() {
     //         include_table: include_table
     //     };
     //
-    //     var options = window.CHARTS.prepare_chart_options(charts_name);
+    //     window.CHARTS.global_options = window.CHARTS.prepare_chart_options();
     //
     //     data = $.extend(data, options);
     //
@@ -419,6 +428,9 @@ $(document).ready(function() {
         // Clear old (if present)
         current_data_table_selector.DataTable().destroy();
 
+        // KILL ALL LINGERING HEADERS
+        $('.fixedHeader-locked').remove();
+
         // Make the datatable
         current_data_table = current_data_table_selector.DataTable({
             dom: 'B<"row">frti',
@@ -456,19 +468,20 @@ $(document).ready(function() {
     };
 
     function plot_existing_data() {
-        var dynamic_excluded = $.extend({}, dynamic_excluded_current, dynamic_excluded_new);
+        var dynamic_excluded = $.extend(true, {}, dynamic_excluded_current, dynamic_excluded_new);
 
         var data = {
             call: 'fetch_data_points',
             study: study_id,
             matrix_item: matrix_item_id,
             csrfmiddlewaretoken: window.COOKIES.csrfmiddlewaretoken,
-            criteria: JSON.stringify(window.GROUPING.get_grouping_filtering()),
+            criteria: JSON.stringify(window.GROUPING.group_criteria),
             post_filter: JSON.stringify(window.GROUPING.current_post_filter),
             dynamic_excluded: JSON.stringify(dynamic_excluded)
         };
 
-        var options = window.CHARTS.prepare_chart_options(charts_name);
+        window.CHARTS.global_options = window.CHARTS.prepare_chart_options();
+        var options = window.CHARTS.global_options.ajax_data;
 
         data = $.extend(data, options);
 
@@ -487,12 +500,18 @@ $(document).ready(function() {
                 window.spinner.stop();
 
                 window.CHARTS.prepare_side_by_side_charts(json, charts_name);
-                window.CHARTS.make_charts(json, charts_name, changes_to_chart_options);
+                // TODO TODO TODO FIX FIX FIX
+                // window.CHARTS.make_charts(json, charts_name, changes_to_chart_options);
+                window.CHARTS.make_charts(json, charts_name, first_run);
                 // Recalculate responsive and fixed headers
                 $($.fn.dataTable.tables(true)).DataTable().responsive.recalc();
                 $($.fn.dataTable.tables(true)).DataTable().fixedHeader.adjust();
+
+                first_run = false;
             },
             error: function (xhr, errmsg, err) {
+                first_run = false;
+
                 // Stop spinner
                 window.spinner.stop();
 
@@ -529,7 +548,7 @@ $(document).ready(function() {
 
     function toggle_excluded() {
         // Stop gap: magic string
-        var include_all = $('#chartsinclude_all').prop('checked');
+        var include_all = $('#include_all').prop('checked');
 
         if (include_all) {
             $('.initially-excluded').show();
@@ -550,11 +569,6 @@ $(document).ready(function() {
     // Refresh on change in overwrite option NEED REPLCATE TO BE ACCURATE
     $('#id_overwrite_option').change(function() {
         refresh_table_and_charts();
-    });
-
-    // Setup triggers
-    $('#' + charts_name + 'chart_options').find('input').change(function() {
-        refresh_chart_only();
     });
 
     // Handling Device flow

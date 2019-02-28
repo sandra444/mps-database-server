@@ -1,14 +1,15 @@
 {% extends "base.html" %}
 {% load static %}
 
+{% block extra_head %}
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+{% endblock %}
+
 {% block load_js %}
+    <script src="{% static "assays/grouping_filtering.js" %}"></script>
     <script src="{% static "js/enter_override.js" %}"></script>
     <script src="{% static "assays/assaystudy_upload.js" %}"></script>
     <script src="{% static "assays/chart_display.js" %}"></script>
-{% endblock %}
-
-{% block extra_head %}
-    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 {% endblock %}
 
 {% block breadcrumbs %}
@@ -17,7 +18,11 @@
     <li class="active">Upload Data File</li>
 {% endblock %}
 
-{% block content %}
+{% block sidebar %}
+    {% include 'assays/grouping_filtering.html' with charts="true" %}
+{% endblock %}
+
+{% block fluid-content %}
     <form enctype="multipart/form-data" class="form-horizontal" method="post" >
 
     <h1>
@@ -122,15 +127,19 @@
 
     {% include 'assays/assaydatafileupload_table.html' with show_delete="true" group=object.group.name %}
 
-    {% include 'assays/grouping_filtering.html' %}
+    {# Temporary #}
+    {# {% include 'assays/chart_options.html' with chart_title="New Data" chart_prefix="charts" %} #}
+    {% include 'assays/sidebar_extras.html' with show_hide="true" %}
 
-    {% include 'assays/chart_options.html' with chart_title="New Data" chart_prefix="new_charts" %}
-    <div id="new_charts" class="padded-bottom">Preview Unavailable</div>
+    <div id="charts" class="padded-bottom">Preview Unavailable</div>
 
-    {% include 'assays/chart_options.html' with chart_title="Current Data" chart_prefix="current_charts" %}
-    <div id="current_charts" class="padded-bottom">No Current Data</div>
+    {# Revised for now #}
+    {# {% include 'assays/chart_options.html' with chart_title="New Data" chart_prefix="new_charts" %} #}
+    {# <div id="new_charts" class="padded-bottom">Preview Unavailable</div> #}
+
+    {# {% include 'assays/chart_options.html' with chart_title="Current Data" chart_prefix="current_charts" %} #}
+    {# <div id="current_charts" class="padded-bottom">No Current Data</div> #}
 
     {% include 'assays/group_table.html' %}
     </form>
-
 {% endblock %}

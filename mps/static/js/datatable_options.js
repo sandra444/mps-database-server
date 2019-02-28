@@ -7,6 +7,16 @@ $(document).ready(function () {
     //     });
     // };
 
+    // CRUDE: INJECT GET PARAM PROCESSOR INTO JQUERY
+    // AN ODD PLACE TO PUT THIS
+    $.urlParam = function(name) {
+        var results = new RegExp('[\?&]' + name + '=([^&#]*)').exec(window.location.href);
+        if (results == null) {
+           return null;
+        }
+        return decodeURI(results[1]) || '';
+    };
+
     $.fn.dataTable.ext.order['dom-checkbox'] = function(settings, col) {
         return settings.aoData.map(function(data, index) {
             return data._aData[0].indexOf(' checked="checked">') > -1 ? 0 : 1;
@@ -80,10 +90,10 @@ $(document).ready(function () {
     });
 
     // Indicates that floating headers need to be refreshed when a toggle-hide-button is clicked
-    $(document).on('click', '.toggle-hide-button', function() {
+    $(document).on('click', '.toggle-hide-button, .toggle_sidebar_button', function() {
         // Recalculate responsive and fixed headers
         setTimeout(function() {
-            $($.fn.dataTable.tables(true)).DataTable().responsive.recalc();
+            // $($.fn.dataTable.tables(true)).DataTable().columns.adjust();
             $($.fn.dataTable.tables(true)).DataTable().fixedHeader.adjust();
         }, 1000);
     });

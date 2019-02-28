@@ -1160,20 +1160,29 @@ $(document).ready(function () {
 
         // Name for the charts for binding events etc
         var charts_name = 'charts';
+        var first_run = true;
 
         window.GROUPING.refresh_function = get_readouts;
+
+        window.CHARTS.call = 'fetch_data_points';
+        window.CHARTS.matrix_id = matrix_id;
+
+        // PROCESS GET PARAMS INITIALLY
+        window.GROUPING.process_get_params();
+        // window.GROUPING.generate_get_params();
 
         function get_readouts() {
             var data = {
                 // TODO TODO TODO CHANGE CALL
                 call: 'fetch_data_points',
                 matrix: matrix_id,
-                criteria: JSON.stringify(window.GROUPING.get_grouping_filtering()),
+                criteria: JSON.stringify(window.GROUPING.group_criteria),
                 post_filter: JSON.stringify(window.GROUPING.current_post_filter),
                 csrfmiddlewaretoken: window.COOKIES.csrfmiddlewaretoken
             };
 
-            var options = window.CHARTS.prepare_chart_options(charts_name);
+            window.CHARTS.global_options = window.CHARTS.prepare_chart_options();
+            var options = window.CHARTS.global_options.ajax_data;
 
             data = $.extend(data, options);
 
@@ -1192,13 +1201,17 @@ $(document).ready(function () {
                     window.spinner.stop();
 
                     window.CHARTS.prepare_side_by_side_charts(json, charts_name);
-                    window.CHARTS.make_charts(json, charts_name);
+                    window.CHARTS.make_charts(json, charts_name, first_run);
 
                     // Recalculate responsive and fixed headers
                     $($.fn.dataTable.tables(true)).DataTable().responsive.recalc();
                     $($.fn.dataTable.tables(true)).DataTable().fixedHeader.adjust();
+
+                    first_run = false;
                 },
                 error: function (xhr, errmsg, err) {
+                    first_run = false;
+
                     // Stop spinner
                     window.spinner.stop();
 
@@ -1206,10 +1219,11 @@ $(document).ready(function () {
                 }
             });
         }
-
-        // Setup triggers
-        $('#' + charts_name + 'chart_options').find('input').change(function() {
-            get_readouts();
-        });
+    }
+    else {
+        // GET RID OF SIDEBAR INITIALLY
+        if ($('#sidebar').hasClass('active')) {
+            $('.toggle_sidebar_button').first().trigger('click');
+        }
     }
 });

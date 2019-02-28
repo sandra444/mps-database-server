@@ -6,6 +6,7 @@
 {% endblock %}
 
 {% block load_js %}
+    <script src="{% static "assays/grouping_filtering.js" %}"></script>
     <script src="{% static "assays/chart_display.js" %}"></script>
     <script src="{% static "assays/assaystudy_data_plots.js" %}"></script>
 {% endblock %}
@@ -14,11 +15,15 @@
     <li class="active">Data Plots</li>
 {% endblock %}
 
-{% block content %}
-<div class="row padded-row text-center padded-bottom large-padding-top">
+{% block sidebar %}
+    {% include 'assays/grouping_filtering.html' with charts='true' %}
+{% endblock %}
+
+{% block fluid-content %}
+<div class="row padded-row text-center padded-bottom large-padding-top hidden-print">
     <a href="/assays/graphing_reproducibility/?filters=" type="button" class="btn btn-xlarge btn-primary text-center submit-button" id="back_button">
         <span class="glyphicon glyphicon glyphicon-hand-left" aria-hidden="true"></span>
-        Go Back
+        Selection
     </a>
     <a href="/assays/assay_interstudy_reproducibility/?" type="button" class="btn btn-xlarge btn-primary text-center submit-button" id="repro_submit">
         <span class="glyphicon glyphicon glyphicon-random" aria-hidden="true"></span>
@@ -30,9 +35,11 @@
     </a>
 </div>
 
-{% include 'assays/grouping_filtering.html' %}
+{# {% include 'assays/grouping_filtering.html' %} #}
 
-{% include 'assays/chart_options.html' with chart_prefix="charts" chart_title="Selected Data" %}
+{# {% include 'assays/chart_options.html' with chart_prefix="charts" chart_title="Selected Data" %} #}
+
+{% include 'assays/sidebar_extras.html' with show_hide="true" %}
 
 {# Note indicating no data to display initially #}
 <div id="charts" class="padded-bottom">

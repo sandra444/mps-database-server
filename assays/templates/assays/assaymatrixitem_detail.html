@@ -2,13 +2,14 @@
 {% load static %}
 {% load humanize %}
 
-{% block load_js %}
-    <script src="{% static "assays/chart_display.js" %}"></script>
-    <script src="{% static "assays/assaymatrixitem_add.js" %}"></script>
-{% endblock %}
-
 {% block extra_head %}
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+{% endblock %}
+
+{% block load_js %}
+    <script src="{% static "assays/grouping_filtering.js" %}"></script>
+    <script src="{% static "assays/chart_display.js" %}"></script>
+    <script src="{% static "assays/assaymatrixitem_add.js" %}"></script>
 {% endblock %}
 
 {% block breadcrumbs %}
@@ -18,6 +19,10 @@
     <li class="active">
         <em>{{ object }}</em>
     </li>
+{% endblock %}
+
+{% block sidebar %}
+    {% include 'assays/grouping_filtering.html' with charts="true" %}
 {% endblock %}
 
 {% block content %}
@@ -184,9 +189,7 @@
     </table>
     {% endif %}
 
-    {% include 'assays/grouping_filtering.html' %}
-
-    {% include 'assays/chart_options.html' with chart_title="Data" chart_prefix="charts"%}
+    {% include 'assays/sidebar_extras.html' with show_hide="true" %}
 
     <div id="charts" class="padded-bottom"></div>
 
