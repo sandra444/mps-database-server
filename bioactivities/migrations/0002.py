@@ -29,9 +29,9 @@ class Migration(migrations.Migration):
                 ('name', models.TextField(default=b'', null=True, verbose_name=b'Assay Name', blank=True)),
                 ('description', models.TextField(null=True, blank=True)),
                 ('created_by', models.ForeignKey(related_name='pubchemassay_created_by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
-                ('modified_by', models.ForeignKey(related_name='pubchemassay_modified_by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
-                ('signed_off_by', models.ForeignKey(related_name='pubchemassay_signed_off_by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
-            ],
+, on_delete=models.CASCADE                ('modified_by', models.ForeignKey(related_name='pubchemassay_modified_by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
+, on_delete=models.CASCADE                ('signed_off_by', models.ForeignKey(related_name='pubchemassay_signed_off_by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
+, on_delete=models.CASCADE            ],
             options={
                 'abstract': False,
             },
@@ -53,6 +53,6 @@ class Migration(migrations.Migration):
             model_name='pubchembioactivity',
             name='assay',
             field=models.ForeignKey(blank=True, to='bioactivities.PubChemAssay', null=True),
-            preserve_default=True,
+, on_delete=models.CASCADE            preserve_default=True,
         ),
     ]

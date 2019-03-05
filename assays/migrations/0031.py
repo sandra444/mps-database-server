@@ -27,22 +27,22 @@ class Migration(migrations.Migration):
             model_name='assaysetupcell',
             name='addition_location',
             field=models.ForeignKey(blank=True, default=1, on_delete=django.db.models.deletion.CASCADE, to='assays.AssaySampleLocation'),
-        ),
+, on_delete=models.CASCADE        ),
         migrations.AlterField(
             model_name='assaysetupcompound',
             name='addition_location',
             field=models.ForeignKey(blank=True, default=1, on_delete=django.db.models.deletion.CASCADE, to='assays.AssaySampleLocation'),
-        ),
+, on_delete=models.CASCADE        ),
         migrations.AlterField(
             model_name='assaysetupsetting',
             name='addition_location',
             field=models.ForeignKey(blank=True, default=1, on_delete=django.db.models.deletion.CASCADE, to='assays.AssaySampleLocation'),
-        ),
+, on_delete=models.CASCADE        ),
         migrations.AlterField(
             model_name='assaysetupsetting',
             name='unit',
             field=models.ForeignKey(blank=True, default=14, on_delete=django.db.models.deletion.CASCADE, to='assays.PhysicalUnits'),
-        ),
+, on_delete=models.CASCADE        ),
         migrations.AlterField(
             model_name='assaysetupsetting',
             name='value',
@@ -52,7 +52,7 @@ class Migration(migrations.Migration):
             model_name='assaystudy',
             name='group',
             field=models.ForeignKey(help_text=b'Select the Data Group. The study will be bound to this group', on_delete=django.db.models.deletion.CASCADE, to='auth.Group', verbose_name=b'Data Group'),
-        ),
+, on_delete=models.CASCADE        ),
         migrations.AlterField(
             model_name='assaystudy',
             name='restricted',

@@ -22,7 +22,7 @@ class Migration(migrations.Migration):
             model_name='organmodel',
             name='base_model',
             field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='microdevices.OrganModel'),
-        ),
+, on_delete=models.CASCADE        ),
         migrations.AddField(
             model_name='organmodel',
             name='disease_trigger',

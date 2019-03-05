@@ -18,7 +18,7 @@ class Migration(migrations.Migration):
                 ('version', models.CharField(max_length=20)),
                 ('file', models.FileField(upload_to=b'protocols', verbose_name=b'Protocol File')),
                 ('organ_model', models.ForeignKey(verbose_name=b'Organ Model', to='microdevices.OrganModel')),
-            ],
+, on_delete=models.CASCADE            ],
             options={
             },
             bases=(models.Model,),
@@ -31,7 +31,7 @@ class Migration(migrations.Migration):
             model_name='organmodel',
             name='device',
             field=models.ForeignKey(to='microdevices.Microdevice'),
-            preserve_default=True,
+, on_delete=models.CASCADE            preserve_default=True,
         ),
         migrations.RemoveField(
             model_name='microdevice',

@@ -15,5 +15,5 @@ class Migration(migrations.Migration):
             model_name='assaychipresult',
             name='assay_name',
             field=models.ForeignKey(verbose_name=b'Assay', to='assays.AssayInstance'),
-        ),
+, on_delete=models.CASCADE        ),
     ]

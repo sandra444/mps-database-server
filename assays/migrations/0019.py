@@ -33,5 +33,5 @@ class Migration(migrations.Migration):
             model_name='studysupportingdata',
             name='study',
             field=models.ForeignKey(to='assays.AssayRun'),
-        ),
+, on_delete=models.CASCADE        ),
     ]

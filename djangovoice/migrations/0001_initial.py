@@ -27,7 +27,7 @@ class Migration(migrations.Migration):
                 ('slug', models.SlugField(blank=True, max_length=10, null=True)),
                 ('created', models.DateTimeField(auto_now_add=True, null=True)),
                 ('duplicate', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='djangovoice.Feedback', verbose_name='Duplicate')),
-            ],
+, on_delete=models.CASCADE            ],
             options={
                 'ordering': ('-created',),
                 'get_latest_by': 'created',
@@ -42,8 +42,8 @@ class Migration(migrations.Migration):
                 ('value', models.IntegerField(default=1, verbose_name='value')),
                 ('date', models.DateTimeField(auto_now_add=True, db_index=True, verbose_name='voted on')),
                 ('object', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='djangovoice.Feedback', verbose_name='object')),
-                ('voter', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL, verbose_name='voter')),
-            ],
+, on_delete=models.CASCADE                ('voter', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL, verbose_name='voter')),
+, on_delete=models.CASCADE            ],
             options={
                 'ordering': ('date',),
                 'verbose_name': 'Vote',
@@ -76,17 +76,17 @@ class Migration(migrations.Migration):
             model_name='feedback',
             name='status',
             field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='djangovoice.Status', verbose_name='Status'),
-        ),
+, on_delete=models.CASCADE        ),
         migrations.AddField(
             model_name='feedback',
             name='type',
             field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='djangovoice.Type', verbose_name='Type'),
-        ),
+, on_delete=models.CASCADE        ),
         migrations.AddField(
             model_name='feedback',
             name='user',
             field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL, verbose_name='User'),
-        ),
+, on_delete=models.CASCADE        ),
         migrations.AlterUniqueTogether(
             name='feedbackvote',
             unique_together=set([('voter', 'object')]),

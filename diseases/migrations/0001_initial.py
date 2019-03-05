@@ -40,9 +40,9 @@ class Migration(migrations.Migration):
                 ('clinicaldata_blurb', models.TextField(blank=True, default=b'', help_text=b'NOTE: Use HTML tags to create lists.')),
                 ('clinicaldata_image', models.ImageField(blank=True, null=True, upload_to=b'disease_images')),
                 ('created_by', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='disease_created_by', to=settings.AUTH_USER_MODEL)),
-                ('modified_by', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='disease_modified_by', to=settings.AUTH_USER_MODEL)),
-                ('signed_off_by', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='disease_signed_off_by', to=settings.AUTH_USER_MODEL)),
-            ],
+, on_delete=models.CASCADE                ('modified_by', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='disease_modified_by', to=settings.AUTH_USER_MODEL)),
+, on_delete=models.CASCADE                ('signed_off_by', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='disease_signed_off_by', to=settings.AUTH_USER_MODEL)),
+, on_delete=models.CASCADE            ],
             options={
                 'abstract': False,
             },

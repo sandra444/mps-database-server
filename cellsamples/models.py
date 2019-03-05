@@ -35,8 +35,8 @@ class CellType(LockableModel):
                                blank=True)
 
     # Deprecated
-    # cell_subtype = models.ForeignKey('CellSubtype', null=True, blank=True)
-    organ = models.ForeignKey('Organ')
+    # cell_subtype = models.ForeignKey('CellSubtype', null=True, blank=True, on_delete=models.CASCADE)
+    organ = models.ForeignKey('Organ', on_delete=models.CASCADE)
 
     class Meta(object):
         verbose_name = 'Cell Type'
@@ -68,7 +68,7 @@ class CellSubtype(LockableModel):
                                               "skeletal (type of muscle), etc.")
 
     # Cell Subtypes with a None value for cell_type are generic
-    cell_type = models.ForeignKey(CellType, null=True, blank=True)
+    cell_type = models.ForeignKey(CellType, null=True, blank=True, on_delete=models.CASCADE)
 
     def __unicode__(self):
         return '{}'.format(self.cell_subtype)
@@ -94,7 +94,7 @@ class Biosensor(LockableModel):
     class Meta(object):
         ordering = ('name', )
     name = models.CharField(max_length=255, unique=True)
-    supplier = models.ForeignKey('Supplier')
+    supplier = models.ForeignKey('Supplier', on_delete=models.CASCADE)
     product_id = models.CharField(max_length=255, blank=True)
     lot_number = models.CharField(max_length=255, blank=True,
                                   verbose_name='Lot#')
@@ -106,11 +106,11 @@ class Biosensor(LockableModel):
 
 class CellSample(FlaggableModel):
     """A Cell Sample describes a particular selection of cells used for experiments"""
-    cell_type = models.ForeignKey('CellType')
-    cell_subtype = models.ForeignKey('CellSubtype')
+    cell_type = models.ForeignKey('CellType', on_delete=models.CASCADE)
+    cell_subtype = models.ForeignKey('CellSubtype', on_delete=models.CASCADE)
 
     # Group may need to be explicitly defined here as opposed to using a mixin
-    # group = models.ForeignKey('auth.Group', help_text='Bind to a group')
+    # group = models.ForeignKey('auth.Group', help_text='Bind to a group', on_delete=models.CASCADE)
 
     # DEPRECATED
     # cell_source CONSIDERED UNINTUITIVE
@@ -129,7 +129,7 @@ class CellSample(FlaggableModel):
     receipt_date = models.DateField()
 
     # SAMPLE
-    supplier = models.ForeignKey('Supplier')
+    supplier = models.ForeignKey('Supplier', on_delete=models.CASCADE)
     barcode = models.CharField(max_length=255, blank=True, verbose_name='Barcode/Lot#')
     product_id = models.CharField(max_length=255, blank=True)
 
@@ -174,7 +174,7 @@ class CellSample(FlaggableModel):
                                    null=True, blank=True)
 
     # THIS IS NOW EXPLICITLY LISTED
-    group = models.ForeignKey(Group, help_text='Bind to a group')
+    group = models.ForeignKey(Group, help_text='Bind to a group', on_delete=models.CASCADE)
 
     class Meta(object):
         verbose_name = 'Cell Sample'

@@ -121,7 +121,7 @@ class Assay(LockableModel):
     source_id = models.TextField(default='', blank=True)
     name = models.TextField(default='', blank=True, verbose_name="Assay Name")
 
-    target = models.ForeignKey('Target', default=None, verbose_name="Target", null=True, blank=True)
+    target = models.ForeignKey('Target', default=None, verbose_name="Target", null=True, blank=True, on_delete=models.CASCADE)
 
     last_update = models.DateField(blank=True, null=True,
                                    help_text="Last time when activities "
@@ -156,14 +156,20 @@ class Bioactivity(LockableModel):
         unique_together = ('assay', 'target', 'compound')
         ordering = ('compound', 'bioactivity_type',)
 
-    assay = models.ForeignKey(Assay)
-    compound = models.ForeignKey('compounds.Compound',
-                                 related_name='bioactivity_compound')
-    parent_compound = models.ForeignKey('compounds.Compound',
-                                        related_name='bioactivity_parent')
+    assay = models.ForeignKey(Assay, on_delete=models.CASCADE)
+    compound = models.ForeignKey(
+        'compounds.Compound',
+        related_name='bioactivity_compound',
+        on_delete=models.CASCADE
+    )
+    parent_compound = models.ForeignKey(
+        'compounds.Compound',
+        related_name='bioactivity_parent',
+        on_delete=models.CASCADE
+    )
 
     # TODO NOTE THAT THIS TARGET IS MORE ACCURATE THAN ASSAY TARGET FOR CHEMBL
-    target = models.ForeignKey(Target)
+    target = models.ForeignKey(Target, on_delete=models.CASCADE)
     target_confidence = models.IntegerField(blank=True, null=True)
 
     bioactivity_type = models.TextField(verbose_name="name", default='', blank=True)
@@ -231,14 +237,14 @@ class BioactivityType(LockableModel):
 class PubChemBioactivity(LockableModel):
     """A Bioactivity from PubChem (Bioactivity is from ChEMBL)"""
     # TextFields and CharFields have no performace benefits over eachother, but may want to use CharFields for clarity
-    assay = models.ForeignKey('Assay', blank=True, null=True)
+    assay = models.ForeignKey('Assay', blank=True, null=True, on_delete=models.CASCADE)
 
     # It makes sense just to add the PubChem CID to the compound then just use a FK
     #compound_id = models.TextField(verbose_name="Compound ID")
-    compound = models.ForeignKey('compounds.Compound')
+    compound = models.ForeignKey('compounds.Compound', on_delete=models.CASCADE)
 
     # TODO SHOULD PULL TARGET FROM ASSAY IF THIS IS NONE (IF TO BE KEPT)
-    target = models.ForeignKey('Target', verbose_name="Target", null=True, blank=True)
+    target = models.ForeignKey('Target', verbose_name="Target", null=True, blank=True, on_delete=models.CASCADE)
 
     # Value is required
     value = models.FloatField(verbose_name="Value (uM)")

@@ -68,8 +68,8 @@ class DrugTrial(LockableModel):
     # title = models.CharField(max_length=2000, unique=True)
     title = models.CharField(max_length=2000)
     condition = models.CharField(max_length=1400, blank=True, default='')
-    source = models.ForeignKey(TrialSource)
-    compound = models.ForeignKey('compounds.Compound', blank=True, null=True)
+    source = models.ForeignKey(TrialSource, on_delete=models.CASCADE)
+    compound = models.ForeignKey('compounds.Compound', blank=True, null=True, on_delete=models.CASCADE)
 
     # Figures
     figure1 = models.ImageField(upload_to='figures', null=True, blank=True)
@@ -77,10 +77,13 @@ class DrugTrial(LockableModel):
 
     # Participant Information
 
-    species = models.ForeignKey(Species,
-                                default='1',
-                                blank=True,
-                                null=True)
+    species = models.ForeignKey(
+        Species,
+        default='1',
+        blank=True,
+        null=True,
+        on_delete=models.CASCADE
+    )
 
     gender = models.CharField(max_length=1,
                               choices=(
@@ -166,13 +169,17 @@ class Test(LockableModel):
         unique_together = [('test_type', 'test_name')]
         ordering = ('test_name', 'organ', 'test_type', )
 
-    organ_model = models.ForeignKey(OrganModel,
-                                    blank=True, null=True)
-    test_type = models.ForeignKey(TestType)
+    organ_model = models.ForeignKey(
+        OrganModel,
+        blank=True,
+        null=True,
+        on_delete=models.CASCADE
+    )
+    test_type = models.ForeignKey(TestType, on_delete=models.CASCADE)
     test_name = models.CharField(max_length=40,
                                  verbose_name='Organ Function Test')
     test_unit = models.CharField(max_length=40, blank=True, default='')
-    organ = models.ForeignKey(Organ, blank=True, null=True)
+    organ = models.ForeignKey(Organ, blank=True, null=True, on_delete=models.CASCADE)
     description = models.CharField(max_length=400, blank=True, default='')
 
     def __unicode__(self):
@@ -201,12 +208,15 @@ class Finding(LockableModel):
         unique_together = [('organ', 'finding_name')]
         ordering = ('organ', 'finding_type', 'finding_name', )
 
-    finding_type = models.ForeignKey(FindingType)
+    finding_type = models.ForeignKey(FindingType, on_delete=models.CASCADE)
     finding_name = models.CharField(max_length=100)
     finding_unit = models.CharField(max_length=40, blank=True, default='')
-    organ = models.ForeignKey(Organ,
-                              blank=True,
-                              null=True)
+    organ = models.ForeignKey(
+        Organ,
+        blank=True,
+        null=True,
+        on_delete=models.CASCADE
+    )
     # Subject to removal?
     description = models.CharField(max_length=400, blank=True, default='')
 
@@ -250,19 +260,25 @@ class TestResult(models.Model):
 
     THIS MODEL IS DEPRECATED
     """
-    drug_trial = models.ForeignKey(DrugTrial)
+    drug_trial = models.ForeignKey(DrugTrial, on_delete=models.CASCADE)
 
-    test_name = models.ForeignKey(Test,
-                                  verbose_name='Test',
-                                  blank=True,
-                                  null=True)
+    test_name = models.ForeignKey(
+        Test,
+        verbose_name='Test',
+        blank=True,
+        null=True,
+        on_delete=models.CASCADE
+    )
 
     test_time = models.FloatField(verbose_name='Time', blank=True, null=True)
 
-    time_units = models.ForeignKey(PhysicalUnits,
-                                   blank=True,
-                                   null=True,
-                                   related_name='test_time_units')
+    time_units = models.ForeignKey(
+        PhysicalUnits,
+        blank=True,
+        null=True,
+        related_name='test_time_units',
+        on_delete=models.CASCADE
+    )
 
     result = models.CharField(default='1',
                               max_length=8,
@@ -284,11 +300,11 @@ class TestResult(models.Model):
                                     null=True,
                                     verbose_name='Max Affected (% Population)')
 
-    descriptor = models.ForeignKey(ResultDescriptor, blank=True, null=True)
+    descriptor = models.ForeignKey(ResultDescriptor, blank=True, null=True, on_delete=models.CASCADE)
 
     value = models.FloatField(blank=True, null=True)
 
-    value_units = models.ForeignKey(PhysicalUnits, blank=True, null=True, related_name='test_value_units')
+    value_units = models.ForeignKey(PhysicalUnits, blank=True, null=True, related_name='test_value_units', on_delete=models.CASCADE)
 
     def clean(self):
         """Require units to be specified if a value is present"""
@@ -324,14 +340,17 @@ FREQUENCIES = (
 
 class FindingResult(models.Model):
     """A Finding Result describes in detail a single finding from a Drug Trial"""
-    drug_trial = models.ForeignKey(DrugTrial)
+    drug_trial = models.ForeignKey(DrugTrial, on_delete=models.CASCADE)
 
-    finding_name = models.ForeignKey(Finding,
-                                     verbose_name='Finding')
+    finding_name = models.ForeignKey(
+        Finding,
+        verbose_name='Finding',
+        on_delete=models.CASCADE
+    )
 
     finding_time = models.FloatField(verbose_name='Time', blank=True, null=True)
 
-    time_units = models.ForeignKey(PhysicalUnits, blank=True, null=True, related_name='finding_time_units')
+    time_units = models.ForeignKey(PhysicalUnits, blank=True, null=True, related_name='finding_time_units', on_delete=models.CASCADE)
 
     result = models.CharField(default='1',
                               max_length=8,
@@ -359,11 +378,11 @@ class FindingResult(models.Model):
                                  blank=True,
                                  default='')
 
-    descriptor = models.ForeignKey(ResultDescriptor, blank=True, null=True)
+    descriptor = models.ForeignKey(ResultDescriptor, blank=True, null=True, on_delete=models.CASCADE)
 
     value = models.FloatField(blank=True, null=True)
 
-    value_units = models.ForeignKey(PhysicalUnits, blank=True, null=True, related_name='finding_value_units')
+    value_units = models.ForeignKey(PhysicalUnits, blank=True, null=True, related_name='finding_value_units', on_delete=models.CASCADE)
 
     def __unicode__(self):
         return '{} {}'.format(str(self.drug_trial), str(self.finding_name))
@@ -371,21 +390,22 @@ class FindingResult(models.Model):
 
 class FindingTreatment(models.Model):
     """Finding Treatments are tied to Findings, and elaborate on the compounds and concentrations involved therein"""
-    compound = models.ForeignKey('compounds.Compound')
-    finding_result = models.ForeignKey(FindingResult)
+    compound = models.ForeignKey('compounds.Compound', on_delete=models.CASCADE)
+    finding_result = models.ForeignKey(FindingResult, on_delete=models.CASCADE)
     concentration = models.FloatField(blank=True, null=True)
     concentration_unit = models.ForeignKey(
         'assays.PhysicalUnits',
         blank=True,
         null=True,
-        verbose_name='Concentration Unit'
+        verbose_name='Concentration Unit',
+        on_delete=models.CASCADE
     )
 
 
 class AdverseEvent(models.Model):
     """An Adverse Event describes an adverse event and what organ it affects"""
     event = models.CharField(max_length=100)
-    organ = models.ForeignKey(Organ, blank=True, null=True)
+    organ = models.ForeignKey(Organ, blank=True, null=True, on_delete=models.CASCADE)
 
     def __unicode__(self):
         return '{}'.format(self.event)
@@ -400,7 +420,7 @@ class OpenFDACompound(LockableModel):
     class Meta(object):
         verbose_name = 'OpenFDA Report'
 
-    compound = models.ForeignKey('compounds.Compound')
+    compound = models.ForeignKey('compounds.Compound', on_delete=models.CASCADE)
     warnings = models.TextField(blank=True, default='')
     black_box = models.BooleanField(default=False)
 
@@ -425,8 +445,8 @@ class OpenFDACompound(LockableModel):
 class CompoundAdverseEvent(models.Model):
     """A Compound Adverse Event describes an adverse event's frequency as brought on by a compound"""
     # CompoundAdverseEvents are inlines in OpenFDACompound (name subject to change)
-    compound = models.ForeignKey('OpenFDACompound')
-    event = models.ForeignKey(AdverseEvent)
+    compound = models.ForeignKey('OpenFDACompound', on_delete=models.CASCADE)
+    event = models.ForeignKey(AdverseEvent, on_delete=models.CASCADE)
     frequency = models.IntegerField()
 
     def __unicode__(self):

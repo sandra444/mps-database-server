@@ -17,7 +17,7 @@ class Migration(migrations.Migration):
             model_name='definition',
             name='created_by',
             field=models.ForeignKey(related_name='definition_created_by', blank=True, to=settings.AUTH_USER_MODEL, null=True),
-        ),
+, on_delete=models.CASCADE        ),
         migrations.AddField(
             model_name='definition',
             name='created_on',
@@ -32,7 +32,7 @@ class Migration(migrations.Migration):
             model_name='definition',
             name='modified_by',
             field=models.ForeignKey(related_name='definition_modified_by', blank=True, to=settings.AUTH_USER_MODEL, null=True),
-        ),
+, on_delete=models.CASCADE        ),
         migrations.AddField(
             model_name='definition',
             name='modified_on',
@@ -42,7 +42,7 @@ class Migration(migrations.Migration):
             model_name='definition',
             name='signed_off_by',
             field=models.ForeignKey(related_name='definition_signed_off_by', blank=True, to=settings.AUTH_USER_MODEL, null=True),
-        ),
+, on_delete=models.CASCADE        ),
         migrations.AddField(
             model_name='definition',
             name='signed_off_date',

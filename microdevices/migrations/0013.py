@@ -44,7 +44,7 @@ class Migration(migrations.Migration):
             model_name='organmodel',
             name='disease',
             field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='diseases.Disease'),
-        ),
+, on_delete=models.CASCADE        ),
         migrations.AlterField(
             model_name='microphysiologycenter',
             name='center_id',

@@ -15,6 +15,6 @@ class Migration(migrations.Migration):
             model_name='organmodel',
             name='center',
             field=models.ForeignKey(default=1, to='microdevices.MicrophysiologyCenter'),
-            preserve_default=False,
+, on_delete=models.CASCADE            preserve_default=False,
         ),
     ]

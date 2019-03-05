@@ -88,9 +88,7 @@ class VotesField(object):
             Vote model
             """
 
-            voter = models.ForeignKey(
-                User,
-                verbose_name=_('voter'))
+            voter = models.ForeignKey(User, verbose_name=_('voter'), on_delete=models.CASCADE)
 
             value = models.IntegerField(
                 default=1,
@@ -101,9 +99,7 @@ class VotesField(object):
                 db_index=True,
                 verbose_name=_('voted on'))
 
-            object = models.ForeignKey(
-                model,
-                verbose_name=_('object'))
+            object = models.ForeignKey(model, verbose_name=_('object'), on_delete=models.CASCADE)
 
             class Meta:
                 ordering = ('date',)

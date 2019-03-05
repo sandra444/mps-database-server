@@ -15,6 +15,6 @@ class Migration(migrations.Migration):
             model_name='physicalunits',
             name='unit_type_fk',
             field=models.ForeignKey(to='assays.UnitType', null=True),
-            preserve_default=True,
+, on_delete=models.CASCADE            preserve_default=True,
         ),
     ]

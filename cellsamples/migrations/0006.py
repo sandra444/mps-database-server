@@ -15,7 +15,7 @@ class Migration(migrations.Migration):
             model_name='cellsample',
             name='group',
             field=models.ForeignKey(help_text=b'Bind to a group (Level 0)', to='auth.Group'),
-        ),
+, on_delete=models.CASCADE        ),
         migrations.AlterField(
             model_name='cellsample',
             name='restricted',

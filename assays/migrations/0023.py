@@ -25,5 +25,5 @@ class Migration(migrations.Migration):
             model_name='assaychiprawdata',
             name='data_upload',
             field=models.ForeignKey(blank=True, to='assays.AssayDataUpload', null=True),
-        ),
+, on_delete=models.CASCADE        ),
     ]
