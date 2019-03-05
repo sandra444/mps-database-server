@@ -1,6 +1,6 @@
 from django import forms
 from captcha.fields import CaptchaField
-from registration.forms import RegistrationFormUniqueEmail
+from django_registration.forms import RegistrationFormUniqueEmail
 from django.contrib.auth.forms import PasswordResetForm, UserChangeForm
 from django.contrib.auth.models import User
 from mps.settings import DEFAULT_FROM_EMAIL

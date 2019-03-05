@@ -236,6 +236,8 @@ INSTALLED_APPS = (
     'resources',
     'diseases',
     'compressor',
+
+    'django_registration'
 )
 
 # Google Analytics ID

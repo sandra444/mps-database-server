@@ -14,7 +14,7 @@ import django.views
 import mps.management
 
 # For registration
-from registration.backends.hmac.views import ActivationView, RegistrationView
+from django_registration.backends.hmac.views import ActivationView, RegistrationView
 from django.contrib.auth import views as auth_views
 
 from django.conf.urls.static import static
