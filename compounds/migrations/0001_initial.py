@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals
+
 
 from django.db import models, migrations
 from django.conf import settings
@@ -41,9 +41,9 @@ class Migration(migrations.Migration):
                 ('species', models.CharField(help_text=b'A description of the predominant species occurring at pH 7.4 and can be acid, base, neutral or zwitterion.', max_length=10, null=True, verbose_name=b'Molecular species', blank=True)),
                 ('last_update', models.DateField(help_text=b'Last time when activities associated with the compound were updated.', null=True, blank=True)),
                 ('created_by', models.ForeignKey(related_name='compound_created_by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
-                ('modified_by', models.ForeignKey(related_name='compound_modified_by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
-                ('signed_off_by', models.ForeignKey(related_name='compound_signed_off_by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
-            ],
+, on_delete=models.CASCADE                ('modified_by', models.ForeignKey(related_name='compound_modified_by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
+, on_delete=models.CASCADE                ('signed_off_by', models.ForeignKey(related_name='compound_signed_off_by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
+, on_delete=models.CASCADE            ],
             options={
                 'ordering': ('name',),
             },

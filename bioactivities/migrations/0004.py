@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals
+
 
 from django.db import migrations, models
 
@@ -185,7 +185,7 @@ class Migration(migrations.Migration):
             model_name='pubchembioactivity',
             name='target',
             field=models.ForeignKey(verbose_name=b'Target', blank=True, to='bioactivities.Target', null=True),
-        ),
+, on_delete=models.CASCADE        ),
         migrations.AlterField(
             model_name='pubchemtarget',
             name='name',

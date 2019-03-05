@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals
+
 
 from django.db import models, migrations
 
@@ -51,7 +51,7 @@ class Migration(migrations.Migration):
             model_name='assay',
             name='target',
             field=models.ForeignKey(default=None, blank=True, to='bioactivities.Target', null=True, verbose_name=b'Target'),
-            preserve_default=True,
+, on_delete=models.CASCADE            preserve_default=True,
         ),
         migrations.AddField(
             model_name='pubchembioactivity',
@@ -141,13 +141,13 @@ class Migration(migrations.Migration):
             model_name='pubchembioactivity',
             name='assay',
             field=models.ForeignKey(blank=True, to='bioactivities.Assay', null=True),
-            preserve_default=True,
+, on_delete=models.CASCADE            preserve_default=True,
         ),
         migrations.AlterField(
             model_name='pubchembioactivity',
             name='target',
             field=models.ForeignKey(default=None, blank=True, to='bioactivities.Target', null=True, verbose_name=b'Target'),
-            preserve_default=True,
+, on_delete=models.CASCADE            preserve_default=True,
         ),
         migrations.AlterField(
             model_name='pubchemtarget',

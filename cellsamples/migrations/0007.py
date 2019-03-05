@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals
+
 
 from django.db import migrations, models
 
@@ -19,5 +19,5 @@ class Migration(migrations.Migration):
             model_name='cellsample',
             name='group',
             field=models.ForeignKey(help_text=b'Bind to a group', to='auth.Group'),
-        ),
+, on_delete=models.CASCADE        ),
     ]

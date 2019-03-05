@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals
+
 
 from django.db import migrations, models
 import assays.models
@@ -33,5 +33,5 @@ class Migration(migrations.Migration):
             model_name='studysupportingdata',
             name='study',
             field=models.ForeignKey(to='assays.AssayRun'),
-        ),
+, on_delete=models.CASCADE        ),
     ]

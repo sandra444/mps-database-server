@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals
+
 
 from django.db import migrations, models
 from django.conf import settings
@@ -22,8 +22,8 @@ class Migration(migrations.Migration):
                 ('signed_off_notes', models.CharField(default=b'', max_length=255, blank=True)),
                 ('sign_off_required', models.BooleanField(default=True)),
                 ('group', models.ForeignKey(to='auth.Group')),
-                ('signed_off_by', models.ForeignKey(blank=True, to=settings.AUTH_USER_MODEL, null=True)),
-            ],
+, on_delete=models.CASCADE                ('signed_off_by', models.ForeignKey(blank=True, to=settings.AUTH_USER_MODEL, null=True)),
+, on_delete=models.CASCADE            ],
         ),
         migrations.AddField(
             model_name='assayrun',
@@ -34,7 +34,7 @@ class Migration(migrations.Migration):
             model_name='assaychipreadout',
             name='group',
             field=models.ForeignKey(help_text=b'Bind to a group (Level 0)', to='auth.Group'),
-        ),
+, on_delete=models.CASCADE        ),
         migrations.AlterField(
             model_name='assaychipreadout',
             name='restricted',
@@ -44,7 +44,7 @@ class Migration(migrations.Migration):
             model_name='assaychipsetup',
             name='group',
             field=models.ForeignKey(help_text=b'Bind to a group (Level 0)', to='auth.Group'),
-        ),
+, on_delete=models.CASCADE        ),
         migrations.AlterField(
             model_name='assaychipsetup',
             name='restricted',
@@ -54,7 +54,7 @@ class Migration(migrations.Migration):
             model_name='assaychiptestresult',
             name='group',
             field=models.ForeignKey(help_text=b'Bind to a group (Level 0)', to='auth.Group'),
-        ),
+, on_delete=models.CASCADE        ),
         migrations.AlterField(
             model_name='assaychiptestresult',
             name='restricted',
@@ -64,7 +64,7 @@ class Migration(migrations.Migration):
             model_name='assaydataupload',
             name='group',
             field=models.ForeignKey(help_text=b'Bind to a group (Level 0)', to='auth.Group'),
-        ),
+, on_delete=models.CASCADE        ),
         migrations.AlterField(
             model_name='assaydataupload',
             name='restricted',
@@ -74,7 +74,7 @@ class Migration(migrations.Migration):
             model_name='assaylayout',
             name='group',
             field=models.ForeignKey(help_text=b'Bind to a group (Level 0)', to='auth.Group'),
-        ),
+, on_delete=models.CASCADE        ),
         migrations.AlterField(
             model_name='assaylayout',
             name='restricted',
@@ -84,7 +84,7 @@ class Migration(migrations.Migration):
             model_name='assayplatereadout',
             name='group',
             field=models.ForeignKey(help_text=b'Bind to a group (Level 0)', to='auth.Group'),
-        ),
+, on_delete=models.CASCADE        ),
         migrations.AlterField(
             model_name='assayplatereadout',
             name='restricted',
@@ -94,7 +94,7 @@ class Migration(migrations.Migration):
             model_name='assayplatesetup',
             name='group',
             field=models.ForeignKey(help_text=b'Bind to a group (Level 0)', to='auth.Group'),
-        ),
+, on_delete=models.CASCADE        ),
         migrations.AlterField(
             model_name='assayplatesetup',
             name='restricted',
@@ -104,7 +104,7 @@ class Migration(migrations.Migration):
             model_name='assayplatetestresult',
             name='group',
             field=models.ForeignKey(help_text=b'Bind to a group (Level 0)', to='auth.Group'),
-        ),
+, on_delete=models.CASCADE        ),
         migrations.AlterField(
             model_name='assayplatetestresult',
             name='restricted',
@@ -119,7 +119,7 @@ class Migration(migrations.Migration):
             model_name='assayrun',
             name='group',
             field=models.ForeignKey(help_text=b'Bind to a group (Level 0)', to='auth.Group'),
-        ),
+, on_delete=models.CASCADE        ),
         migrations.AlterField(
             model_name='assayrun',
             name='restricted',
@@ -134,5 +134,5 @@ class Migration(migrations.Migration):
             model_name='assayrunstakeholder',
             name='study',
             field=models.ForeignKey(to='assays.AssayRun'),
-        ),
+, on_delete=models.CASCADE        ),
     ]

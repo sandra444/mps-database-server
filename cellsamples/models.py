@@ -16,7 +16,7 @@ class Organ(LockableModel):
         ordering = ('organ_name', )
 
     def __unicode__(self):
-        return u'{}'.format(self.organ_name)
+        return '{}'.format(self.organ_name)
 
 
 class CellType(LockableModel):
@@ -35,8 +35,8 @@ class CellType(LockableModel):
                                blank=True)
 
     # Deprecated
-    # cell_subtype = models.ForeignKey('CellSubtype', null=True, blank=True)
-    organ = models.ForeignKey('Organ')
+    # cell_subtype = models.ForeignKey('CellSubtype', null=True, blank=True, on_delete=models.CASCADE)
+    organ = models.ForeignKey('Organ', on_delete=models.CASCADE)
 
     class Meta(object):
         verbose_name = 'Cell Type'
@@ -44,7 +44,7 @@ class CellType(LockableModel):
         unique_together = [('cell_type', 'species', 'organ')]
 
     def __unicode__(self):
-        return u'{} ({} {})'.format(
+        return '{} ({} {})'.format(
             self.cell_type,
             self.species,
             self.organ
@@ -68,10 +68,10 @@ class CellSubtype(LockableModel):
                                               "skeletal (type of muscle), etc.")
 
     # Cell Subtypes with a None value for cell_type are generic
-    cell_type = models.ForeignKey(CellType, null=True, blank=True)
+    cell_type = models.ForeignKey(CellType, null=True, blank=True, on_delete=models.CASCADE)
 
     def __unicode__(self):
-        return u'{}'.format(self.cell_subtype)
+        return '{}'.format(self.cell_subtype)
 
     def get_absolute_url(self):
         return "/cellsamples/cellsubtype/{}".format(self.id)
@@ -86,7 +86,7 @@ class Supplier(LockableModel):
     address = models.CharField(max_length=255, blank=True)
 
     def __unicode__(self):
-        return u'{}'.format(self.name)
+        return '{}'.format(self.name)
 
 
 class Biosensor(LockableModel):
@@ -94,23 +94,23 @@ class Biosensor(LockableModel):
     class Meta(object):
         ordering = ('name', )
     name = models.CharField(max_length=255, unique=True)
-    supplier = models.ForeignKey('Supplier')
+    supplier = models.ForeignKey('Supplier', on_delete=models.CASCADE)
     product_id = models.CharField(max_length=255, blank=True)
     lot_number = models.CharField(max_length=255, blank=True,
                                   verbose_name='Lot#')
     description = models.CharField(max_length=512, blank=True)
 
     def __unicode__(self):
-        return u'{}'.format(self.name)
+        return '{}'.format(self.name)
 
 
 class CellSample(FlaggableModel):
     """A Cell Sample describes a particular selection of cells used for experiments"""
-    cell_type = models.ForeignKey('CellType')
-    cell_subtype = models.ForeignKey('CellSubtype')
+    cell_type = models.ForeignKey('CellType', on_delete=models.CASCADE)
+    cell_subtype = models.ForeignKey('CellSubtype', on_delete=models.CASCADE)
 
     # Group may need to be explicitly defined here as opposed to using a mixin
-    # group = models.ForeignKey('auth.Group', help_text='Bind to a group')
+    # group = models.ForeignKey('auth.Group', help_text='Bind to a group', on_delete=models.CASCADE)
 
     # DEPRECATED
     # cell_source CONSIDERED UNINTUITIVE
@@ -129,7 +129,7 @@ class CellSample(FlaggableModel):
     receipt_date = models.DateField()
 
     # SAMPLE
-    supplier = models.ForeignKey('Supplier')
+    supplier = models.ForeignKey('Supplier', on_delete=models.CASCADE)
     barcode = models.CharField(max_length=255, blank=True, verbose_name='Barcode/Lot#')
     product_id = models.CharField(max_length=255, blank=True)
 
@@ -174,7 +174,7 @@ class CellSample(FlaggableModel):
                                    null=True, blank=True)
 
     # THIS IS NOW EXPLICITLY LISTED
-    group = models.ForeignKey(Group, help_text='Bind to a group')
+    group = models.ForeignKey(Group, help_text='Bind to a group', on_delete=models.CASCADE)
 
     class Meta(object):
         verbose_name = 'Cell Sample'
@@ -182,14 +182,14 @@ class CellSample(FlaggableModel):
 
     def __unicode__(self):
         if self.barcode:
-            return u'{0} {1} ({2}-{3})'.format(
+            return '{0} {1} ({2}-{3})'.format(
                 self.cell_subtype,
                 self.cell_type,
                 self.supplier,
                 self.barcode
             )
         else:
-            return u'{0} {1} ({2})'.format(
+            return '{0} {1} ({2})'.format(
                 self.cell_subtype,
                 self.cell_type,
                 self.supplier

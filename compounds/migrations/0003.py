@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals
+
 
 from django.db import models, migrations
 from django.conf import settings
@@ -20,7 +20,7 @@ class Migration(migrations.Migration):
                 ('value', models.FloatField()),
                 ('source', models.CharField(max_length=250)),
                 ('compound', models.ForeignKey(to='compounds.Compound')),
-            ],
+, on_delete=models.CASCADE            ],
             options={
                 'verbose_name': 'Compound Property',
                 'verbose_name_plural': 'Compound Properties',
@@ -34,7 +34,7 @@ class Migration(migrations.Migration):
                 ('summary', models.CharField(max_length=500)),
                 ('source', models.CharField(max_length=250)),
                 ('compound', models.ForeignKey(to='compounds.Compound')),
-            ],
+, on_delete=models.CASCADE            ],
             options={
                 'verbose_name': 'Compound Summary',
                 'verbose_name_plural': 'Compound Summaries',
@@ -52,9 +52,9 @@ class Migration(migrations.Migration):
                 ('name', models.CharField(max_length=100)),
                 ('description', models.CharField(default=b'', max_length=500)),
                 ('created_by', models.ForeignKey(related_name='propertytype_created_by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
-                ('modified_by', models.ForeignKey(related_name='propertytype_modified_by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
-                ('signed_off_by', models.ForeignKey(related_name='propertytype_signed_off_by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
-            ],
+, on_delete=models.CASCADE                ('modified_by', models.ForeignKey(related_name='propertytype_modified_by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
+, on_delete=models.CASCADE                ('signed_off_by', models.ForeignKey(related_name='propertytype_signed_off_by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
+, on_delete=models.CASCADE            ],
             options={
                 'verbose_name': 'Compound Property Type',
             },
@@ -71,9 +71,9 @@ class Migration(migrations.Migration):
                 ('name', models.CharField(max_length=100)),
                 ('description', models.CharField(default=b'', max_length=500)),
                 ('created_by', models.ForeignKey(related_name='summarytype_created_by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
-                ('modified_by', models.ForeignKey(related_name='summarytype_modified_by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
-                ('signed_off_by', models.ForeignKey(related_name='summarytype_signed_off_by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
-            ],
+, on_delete=models.CASCADE                ('modified_by', models.ForeignKey(related_name='summarytype_modified_by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
+, on_delete=models.CASCADE                ('signed_off_by', models.ForeignKey(related_name='summarytype_signed_off_by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
+, on_delete=models.CASCADE            ],
             options={
                 'verbose_name': 'Summary Type',
                 'verbose_name_plural': 'Summary Types',
@@ -84,7 +84,7 @@ class Migration(migrations.Migration):
             model_name='compoundsummary',
             name='summary_type',
             field=models.ForeignKey(to='compounds.SummaryType'),
-            preserve_default=True,
+, on_delete=models.CASCADE            preserve_default=True,
         ),
         migrations.AlterUniqueTogether(
             name='compoundsummary',
@@ -94,7 +94,7 @@ class Migration(migrations.Migration):
             model_name='compoundproperty',
             name='property_type',
             field=models.ForeignKey(to='compounds.PropertyType'),
-            preserve_default=True,
+, on_delete=models.CASCADE            preserve_default=True,
         ),
         migrations.AlterUniqueTogether(
             name='compoundproperty',

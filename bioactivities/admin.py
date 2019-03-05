@@ -294,12 +294,12 @@ class BioactivityAdmin(LockableAdmin):
     def bioactivity_display(self, obj):
 
         if obj.compound.chemblid:
-            url = (u'https://www.ebi.ac.uk/chembldb/compound/'
+            url = ('https://www.ebi.ac.uk/chembldb/compound/'
                    'displayimage/' + obj.compound.chemblid)
             return '<img src="%s">' % \
                 url
         else:
-            return u''
+            return ''
 
     bioactivity_display.allow_tags = True
     bioactivity_display.short_description = 'Structure'
