@@ -308,8 +308,8 @@ class CompoundSummary(models.Model):
         verbose_name = 'Compound Summary'
         verbose_name_plural = 'Compound Summaries'
 
-    compound = models.ForeignKey(Compound)
-    summary_type = models.ForeignKey(SummaryType)
+    compound = models.ForeignKey(Compound, on_delete=models.CASCADE)
+    summary_type = models.ForeignKey(SummaryType, on_delete=models.CASCADE)
     summary = models.CharField(max_length=500)
     source = models.CharField(max_length=250)
 
@@ -326,8 +326,8 @@ class CompoundProperty(models.Model):
         verbose_name = 'Compound Property'
         verbose_name_plural = 'Compound Properties'
 
-    compound = models.ForeignKey(Compound)
-    property_type = models.ForeignKey(PropertyType)
+    compound = models.ForeignKey(Compound, on_delete=models.CASCADE)
+    property_type = models.ForeignKey(PropertyType, on_delete=models.CASCADE)
     # After some amount of debate, it was decided a float field should be sufficient for out purposes
     value = models.FloatField()
     source = models.CharField(max_length=250)
@@ -340,7 +340,7 @@ class CompoundProperty(models.Model):
 # Whatever the case, the following information was requested:
 class CompoundTarget(models.Model):
     # Must link back to a compound
-    compound = models.ForeignKey(Compound)
+    compound = models.ForeignKey(Compound, on_delete=models.CASCADE)
 
     name = models.CharField(max_length=150)
     # May not be present
@@ -366,9 +366,9 @@ class CompoundInstance(LockableModel):
     class Meta(object):
         unique_together = [('compound', 'supplier', 'lot', 'receipt_date')]
 
-    compound = models.ForeignKey(Compound)
+    compound = models.ForeignKey(Compound, on_delete=models.CASCADE)
     # Required, though N/A should be an option
-    supplier = models.ForeignKey(CompoundSupplier, blank=True)
+    supplier = models.ForeignKey(CompoundSupplier, blank=True, on_delete=models.CASCADE)
     # Required, though N/A should be an option
     # It is possible that the lot_number will not be solely numeric
     lot = models.CharField(max_length=255)
