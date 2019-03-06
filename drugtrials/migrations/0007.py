@@ -22,9 +22,9 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('concentration', models.FloatField(blank=True, null=True)),
                 ('compound', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='compounds.Compound')),
-, on_delete=models.CASCADE                ('concentration_unit', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='assays.PhysicalUnits', verbose_name=b'Concentration Unit')),
-, on_delete=models.CASCADE                ('finding_result', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='drugtrials.FindingResult')),
-, on_delete=models.CASCADE            ],
+                ('concentration_unit', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='assays.PhysicalUnits', verbose_name=b'Concentration Unit')),
+                ('finding_result', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='drugtrials.FindingResult')),
+            ],
         ),
         migrations.RenameField(
             model_name='drugtrial',
@@ -50,7 +50,7 @@ class Migration(migrations.Migration):
             model_name='drugtrial',
             name='compound',
             field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='compounds.Compound'),
-, on_delete=models.CASCADE        ),
+        ),
         migrations.AlterField(
             model_name='drugtrial',
             name='title',

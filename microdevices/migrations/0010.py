@@ -14,7 +14,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='organmodel',
             name='center',
-            field=models.ForeignKey(default=1, to='microdevices.MicrophysiologyCenter'),
-, on_delete=models.CASCADE            preserve_default=False,
+            field=models.ForeignKey(default=1, to='microdevices.MicrophysiologyCenter', on_delete=models.CASCADE),
+            preserve_default=False,
         ),
     ]

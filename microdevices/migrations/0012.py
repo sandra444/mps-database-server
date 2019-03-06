@@ -68,11 +68,11 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='organmodellocation',
             name='organ_model',
-            field=models.ForeignKey(to='microdevices.OrganModel'),
-, on_delete=models.CASCADE        ),
+            field=models.ForeignKey(to='microdevices.OrganModel', on_delete=models.CASCADE),
+        ),
         migrations.AddField(
             model_name='organmodellocation',
             name='sample_location',
-            field=models.ForeignKey(to='assays.AssaySampleLocation'),
-, on_delete=models.CASCADE        ),
+            field=models.ForeignKey(to='assays.AssaySampleLocation', on_delete=models.CASCADE),
+        ),
     ]

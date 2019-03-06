@@ -18,6 +18,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='cellsample',
             name='group',
-            field=models.ForeignKey(help_text=b'Bind to a group', to='auth.Group'),
-, on_delete=models.CASCADE        ),
+            field=models.ForeignKey(help_text=b'Bind to a group', to='auth.Group', on_delete=models.CASCADE),
+        ),
     ]

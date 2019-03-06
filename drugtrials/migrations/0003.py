@@ -22,25 +22,25 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='findingresult',
             name='time_units',
-            field=models.ForeignKey(related_name='finding_time_units', blank=True, to='assays.PhysicalUnits', null=True),
-, on_delete=models.CASCADE            preserve_default=True,
+            field=models.ForeignKey(related_name='finding_time_units', blank=True, to='assays.PhysicalUnits', null=True, on_delete=models.CASCADE),
+            preserve_default=True,
         ),
         migrations.AlterField(
             model_name='findingresult',
             name='value_units',
-            field=models.ForeignKey(related_name='finding_value_units', blank=True, to='assays.PhysicalUnits', null=True),
-, on_delete=models.CASCADE            preserve_default=True,
+            field=models.ForeignKey(related_name='finding_value_units', blank=True, to='assays.PhysicalUnits', null=True, on_delete=models.CASCADE),
+            preserve_default=True,
         ),
         migrations.AlterField(
             model_name='testresult',
             name='time_units',
-            field=models.ForeignKey(related_name='test_time_units', blank=True, to='assays.PhysicalUnits', null=True),
-, on_delete=models.CASCADE            preserve_default=True,
+            field=models.ForeignKey(related_name='test_time_units', blank=True, to='assays.PhysicalUnits', null=True, on_delete=models.CASCADE),
+            preserve_default=True,
         ),
         migrations.AlterField(
             model_name='testresult',
             name='value_units',
-            field=models.ForeignKey(related_name='test_value_units', blank=True, to='assays.PhysicalUnits', null=True),
-, on_delete=models.CASCADE            preserve_default=True,
+            field=models.ForeignKey(related_name='test_value_units', blank=True, to='assays.PhysicalUnits', null=True, on_delete=models.CASCADE),
+            preserve_default=True,
         ),
     ]

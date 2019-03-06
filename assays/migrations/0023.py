@@ -24,6 +24,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='assaychiprawdata',
             name='data_upload',
-            field=models.ForeignKey(blank=True, to='assays.AssayDataUpload', null=True),
-, on_delete=models.CASCADE        ),
+            field=models.ForeignKey(blank=True, to='assays.AssayDataUpload', null=True, on_delete=models.CASCADE),
+        ),
     ]

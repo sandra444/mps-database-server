@@ -14,7 +14,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='physicalunits',
             name='unit_type',
-            field=models.ForeignKey(default=8, to='assays.UnitType'),
-, on_delete=models.CASCADE            preserve_default=False,
+            field=models.ForeignKey(default=8, to='assays.UnitType', on_delete=models.CASCADE),
+            preserve_default=False,
         ),
     ]

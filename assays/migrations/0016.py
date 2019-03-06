@@ -14,7 +14,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='assaychipreadout',
             name='chip_setup',
-            field=models.ForeignKey(default=15, to='assays.AssayChipSetup'),
-, on_delete=models.CASCADE            preserve_default=False,
+            field=models.ForeignKey(default=15, to='assays.AssayChipSetup', on_delete=models.CASCADE),
+            preserve_default=False,
         ),
     ]

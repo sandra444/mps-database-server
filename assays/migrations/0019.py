@@ -32,6 +32,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='studysupportingdata',
             name='study',
-            field=models.ForeignKey(to='assays.AssayRun'),
-, on_delete=models.CASCADE        ),
+            field=models.ForeignKey(to='assays.AssayRun', on_delete=models.CASCADE),
+        ),
     ]

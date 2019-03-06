@@ -15,8 +15,8 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='assaychipsetup',
             name='device',
-            field=models.ForeignKey(verbose_name=b'Organ Model Name', blank=True, to='microdevices.OrganModel', null=True),
-, on_delete=models.CASCADE            preserve_default=True,
+            field=models.ForeignKey(verbose_name=b'Organ Model Name', blank=True, to='microdevices.OrganModel', null=True, on_delete=models.CASCADE),
+            preserve_default=True,
         ),
         migrations.RenameField(
             model_name='assaychipsetup',
@@ -26,14 +26,14 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='assaychipsetup',
             name='organ_model_protocol',
-            field=models.ForeignKey(verbose_name=b'Organ Model Protocol', blank=True, to='microdevices.OrganModelProtocol', null=True),
-, on_delete=models.CASCADE            preserve_default=True,
+            field=models.ForeignKey(verbose_name=b'Organ Model Protocol', blank=True, to='microdevices.OrganModelProtocol', null=True, on_delete=models.CASCADE),
+            preserve_default=True,
         ),
         migrations.AddField(
             model_name='assaychipsetup',
             name='device',
-            field=models.ForeignKey(verbose_name=b'Device', to='microdevices.Microdevice', null=True),
-, on_delete=models.CASCADE            preserve_default=True,
+            field=models.ForeignKey(verbose_name=b'Device', to='microdevices.Microdevice', null=True, on_delete=models.CASCADE),
+            preserve_default=True,
         ),
         migrations.AlterField(
             model_name='assayrun',

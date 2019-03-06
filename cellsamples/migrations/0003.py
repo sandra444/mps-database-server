@@ -18,8 +18,8 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='cellsample',
             name='cell_subtype',
-            field=models.ForeignKey(default=1, to='cellsamples.CellSubtype'),
-, on_delete=models.CASCADE            preserve_default=False,
+            field=models.ForeignKey(default=1, to='cellsamples.CellSubtype', on_delete=models.CASCADE),
+            preserve_default=False,
         ),
         migrations.AddField(
             model_name='cellsample',
@@ -36,14 +36,14 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='cellsubtype',
             name='cell_type',
-            field=models.ForeignKey(blank=True, to='cellsamples.CellType', null=True),
-, on_delete=models.CASCADE            preserve_default=True,
+            field=models.ForeignKey(blank=True, to='cellsamples.CellType', null=True, on_delete=models.CASCADE),
+            preserve_default=True,
         ),
         migrations.AlterField(
             model_name='celltype',
             name='cell_subtype',
-            field=models.ForeignKey(blank=True, to='cellsamples.CellSubtype', null=True),
-, on_delete=models.CASCADE            preserve_default=True,
+            field=models.ForeignKey(blank=True, to='cellsamples.CellSubtype', null=True, on_delete=models.CASCADE),
+            preserve_default=True,
         ),
         migrations.AlterField(
             model_name='celltype',

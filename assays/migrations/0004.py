@@ -20,8 +20,8 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='physicalunits',
             name='base_unit',
-            field=models.ForeignKey(blank=True, to='assays.PhysicalUnits', null=True),
-, on_delete=models.CASCADE            preserve_default=True,
+            field=models.ForeignKey(blank=True, to='assays.PhysicalUnits', null=True, on_delete=models.CASCADE),
+            preserve_default=True,
         ),
         migrations.AddField(
             model_name='physicalunits',
@@ -32,8 +32,8 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='assaychipcells',
             name='cell_biosensor',
-            field=models.ForeignKey(default=2, to='cellsamples.Biosensor'),
-, on_delete=models.CASCADE            preserve_default=False,
+            field=models.ForeignKey(default=2, to='cellsamples.Biosensor', on_delete=models.CASCADE),
+            preserve_default=False,
         ),
         migrations.AlterField(
             model_name='assaychipcells',
@@ -44,14 +44,14 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='assaychipreadoutassay',
             name='readout_unit',
-            field=models.ForeignKey(to='assays.PhysicalUnits'),
-, on_delete=models.CASCADE            preserve_default=True,
+            field=models.ForeignKey(to='assays.PhysicalUnits', on_delete=models.CASCADE),
+            preserve_default=True,
         ),
         migrations.AlterField(
             model_name='assayplatecells',
             name='cell_biosensor',
-            field=models.ForeignKey(default=2, to='cellsamples.Biosensor'),
-, on_delete=models.CASCADE            preserve_default=False,
+            field=models.ForeignKey(default=2, to='cellsamples.Biosensor', on_delete=models.CASCADE),
+            preserve_default=False,
         ),
         migrations.AlterField(
             model_name='assayplatecells',
@@ -62,7 +62,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='assayplatereadoutassay',
             name='readout_unit',
-            field=models.ForeignKey(to='assays.PhysicalUnits'),
-, on_delete=models.CASCADE            preserve_default=True,
+            field=models.ForeignKey(to='assays.PhysicalUnits', on_delete=models.CASCADE),
+            preserve_default=True,
         ),
     ]
