@@ -133,8 +133,21 @@ NEVERCACHE_KEY = 'x=scmcpvq_$-9pz3651h=ln0b#-x&%%hz_)u0uzghfwk6#++pl'
 # )
 
 # OLD STYLE
-MIDDLEWARE_CLASSES = (
-    # 'debug_toolbar.middleware.DebugToolbarMiddleware',
+# MIDDLEWARE_CLASSES = (
+#     # 'debug_toolbar.middleware.DebugToolbarMiddleware',
+#     'django.middleware.common.CommonMiddleware',
+#     'django.contrib.sessions.middleware.SessionMiddleware',
+#     'django.middleware.csrf.CsrfViewMiddleware',
+#     'django.contrib.auth.middleware.AuthenticationMiddleware',
+#     'django.contrib.messages.middleware.MessageMiddleware',
+#     # Uncomment the next line for simple clickjacking protection:
+#     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+#     'django.middleware.security.SecurityMiddleware',
+# )
+
+# NEW STYLE
+MIDDLEWARE = (
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -142,11 +155,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware',
     # Uncomment the next line for simple clickjacking protection:
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-)
-
-# NEW STYLE
-MIDDLEWARE = (
-    'debug_toolbar.middleware.DebugToolbarMiddleware',
+    'django.middleware.security.SecurityMiddleware',
 )
 
 ROOT_URLCONF = 'mps.urls'
@@ -187,7 +196,7 @@ TEMPLATES = [
                 # insert your TEMPLATE_LOADERS here
                 'django.template.loaders.filesystem.Loader',
                 'django.template.loaders.app_directories.Loader',
-                'django.template.loaders.eggs.Loader',
+                # 'django.template.loaders.eggs.Loader',
             ],
             # TECHNICALLY NOT NECESSARY
             'debug': DEBUG
