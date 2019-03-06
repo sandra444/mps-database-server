@@ -4,7 +4,7 @@ from django.contrib import messages
 from django.db.models import Q
 from django.http import HttpResponseNotFound
 from django.shortcuts import redirect
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.utils.translation import ugettext as _
 from django.views.generic import DeleteView, DetailView, FormView, ListView
 from django.contrib.auth.decorators import login_required

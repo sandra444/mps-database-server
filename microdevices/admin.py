@@ -12,7 +12,7 @@ from .models import (
     GroupDeferral
 )
 from.forms import MicrophysiologyCenterForm, GroupDeferralForm
-from django.core.urlresolvers import resolve
+from django.urls import resolve
 from django.db.models.fields.files import FieldFile
 
 

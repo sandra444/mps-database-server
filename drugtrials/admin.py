@@ -1,8 +1,8 @@
 from django.contrib import admin
 from django.contrib.admin.widgets import AdminURLFieldWidget
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.utils.translation import ugettext_lazy as _
-from django.utils.text import force_text
+from django.utils.encoding import force_text
 from django.db.models import URLField
 from django.utils.safestring import mark_safe
 

@@ -1,5 +1,5 @@
 from django.conf.urls import include, url
-from django.contrib.auth.views import login
+from django.contrib.auth.views import LoginView
 from djangovoice.models import Feedback
 from djangovoice.views import (
     FeedbackListView, FeedbackWidgetView, FeedbackSubmitView,
@@ -41,7 +41,7 @@ urlpatterns = [
 
     # override login template
     url(r'^signin/$',
-        view=login,
+        view=LoginView,
         name='djangovoice_signin',
         kwargs={
             'template_name': 'djangovoice/signin.html',
