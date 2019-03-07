@@ -24,7 +24,9 @@ except ImportError:
 if socket.gethostname() in 'prody':
     DATABASES = {
         'default': {
-            'ENGINE': 'django.db.backends.postgresql_psycopg2',
+            'ENGINE': 'django.db.backends.postgresql',
+            # Deprecated
+            # 'ENGINE': 'django.db.backends.postgresql_psycopg2',
             'NAME': 'mpsdb',
             'USER': postgresql_username,
             'PASSWORD': postgresql_password,
@@ -36,7 +38,9 @@ if socket.gethostname() in 'prody':
 else:
     DATABASES = {
         'default': {
-            'ENGINE': 'django.db.backends.postgresql_psycopg2',
+            'ENGINE': 'django.db.backends.postgresql',
+            # Deprecated
+            # 'ENGINE': 'django.db.backends.postgresql_psycopg2',
             'NAME': 'mpsdb',
             'USER': 'mps',  # development DB username
             'PASSWORD': '4UhIg',  # development DB password
@@ -132,7 +136,7 @@ NEVERCACHE_KEY = 'x=scmcpvq_$-9pz3651h=ln0b#-x&%%hz_)u0uzghfwk6#++pl'
 #     'django.template.loaders.eggs.Loader',
 # )
 
-# OLD STYLE
+# OLD STYLE: REMOVED
 # MIDDLEWARE_CLASSES = (
 #     # 'debug_toolbar.middleware.DebugToolbarMiddleware',
 #     'django.middleware.common.CommonMiddleware',
@@ -196,6 +200,7 @@ TEMPLATES = [
                 # insert your TEMPLATE_LOADERS here
                 'django.template.loaders.filesystem.Loader',
                 'django.template.loaders.app_directories.Loader',
+                # REMOVED AS OF 2.0
                 # 'django.template.loaders.eggs.Loader',
             ],
             # TECHNICALLY NOT NECESSARY
