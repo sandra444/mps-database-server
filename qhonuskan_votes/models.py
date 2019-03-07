@@ -121,7 +121,7 @@ class VotesField(object):
                 super(Vote, self).delete(*args, **kwargs)
                 vote_changed.send(sender=self)
 
-            def __unicode__(self):
+            def __str__(self):
                 values = {
                     'voter': self.voter.username,
                     'like': _('likes') if self.value > 0 else _('hates'),

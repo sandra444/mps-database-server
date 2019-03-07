@@ -21,6 +21,8 @@ from qhonuskan_votes.models import ObjectsWithScoresManager
 
 from mps.settings import DEFAULT_FROM_EMAIL
 
+from django.urls import reverse
+
 STATUS_CHOICES = (
     ('open', pgettext('status', "Open")),
     ('closed', pgettext('status', "Closed")),
@@ -49,7 +51,7 @@ class Status(models.Model):
 
         super(Status, self).save(**kwargs)
 
-    def __unicode__(self):
+    def __str__(self):
         return str(self.title)
 
     class Meta:
@@ -61,7 +63,7 @@ class Type(models.Model):
     title = models.CharField(max_length=500)
     slug = models.SlugField(max_length=500)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.title
 
 
@@ -113,9 +115,9 @@ class Feedback(models.Model):
         super(Feedback, self).save(**kwargs)
 
     def get_absolute_url(self):
-        return reverse('djangovoice_item', [self.id])
+        return reverse('djangovoice_item', args=[self.id])
 
-    def __unicode__(self):
+    def __str__(self):
         return str(self.title)
 
     class Meta:

@@ -81,7 +81,7 @@ class Target(LockableModel):
     class Meta(object):
         ordering = ('name', )
 
-    def __unicode__(self):
+    def __str__(self):
 
         return self.name
 
@@ -131,7 +131,7 @@ class Assay(LockableModel):
     class Meta(object):
         ordering = ('chemblid', )
 
-    def __unicode__(self):
+    def __str__(self):
 
         return self.chemblid
 
@@ -207,7 +207,7 @@ class Bioactivity(LockableModel):
     def organism(self):
         return self.target.organism
 
-    def __unicode__(self):
+    def __str__(self):
         return '{}: {} {}'.format(
             self.compound,
             self.bioactivity_type,
@@ -230,7 +230,7 @@ class BioactivityType(LockableModel):
     description = models.TextField(default='', blank=True)
     standard_unit = models.TextField(default='', blank=True)
 
-    def __unicode__(self):
+    def __str__(self):
         return str(self.standard_name)
 
 
@@ -297,7 +297,7 @@ class PubChemTarget(LockableModel):
     # Organism is not always listed: not required
     organism = models.TextField(default='', blank=True)
 
-    def __unicode__(self):
+    def __str__(self):
         return str(self.name)
 
 
@@ -317,5 +317,5 @@ class PubChemAssay(LockableModel):
 
     description = models.TextField(default='', blank=True)
 
-    def __unicode__(self):
+    def __str__(self):
         return str(self.aid)

@@ -15,7 +15,7 @@ class Organ(LockableModel):
     class Meta(object):
         ordering = ('organ_name', )
 
-    def __unicode__(self):
+    def __str__(self):
         return '{}'.format(self.organ_name)
 
 
@@ -43,7 +43,7 @@ class CellType(LockableModel):
         ordering = ('species', 'cell_type')
         unique_together = [('cell_type', 'species', 'organ')]
 
-    def __unicode__(self):
+    def __str__(self):
         return '{} ({} {})'.format(
             self.cell_type,
             self.species,
@@ -70,7 +70,7 @@ class CellSubtype(LockableModel):
     # Cell Subtypes with a None value for cell_type are generic
     cell_type = models.ForeignKey(CellType, null=True, blank=True, on_delete=models.CASCADE)
 
-    def __unicode__(self):
+    def __str__(self):
         return '{}'.format(self.cell_subtype)
 
     def get_absolute_url(self):
@@ -85,7 +85,7 @@ class Supplier(LockableModel):
     phone = models.CharField(max_length=255, blank=True)
     address = models.CharField(max_length=255, blank=True)
 
-    def __unicode__(self):
+    def __str__(self):
         return '{}'.format(self.name)
 
 
@@ -100,7 +100,7 @@ class Biosensor(LockableModel):
                                   verbose_name='Lot#')
     description = models.CharField(max_length=512, blank=True)
 
-    def __unicode__(self):
+    def __str__(self):
         return '{}'.format(self.name)
 
 
@@ -180,7 +180,7 @@ class CellSample(FlaggableModel):
         verbose_name = 'Cell Sample'
         ordering = ('-receipt_date', )
 
-    def __unicode__(self):
+    def __str__(self):
         if self.barcode:
             return '{0} {1} ({2}-{3})'.format(
                 self.cell_subtype,

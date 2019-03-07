@@ -16,7 +16,7 @@ class ResourceSubtype(LockableModel):
     name = models.TextField(max_length=40, unique=True, verbose_name='Category')
     description = models.TextField(max_length=400, blank=True, default='')
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
 
@@ -29,7 +29,7 @@ class ResourceType(LockableModel):
     description = models.CharField(max_length=400, blank=True, default='')
     resource_subtype = models.ForeignKey(ResourceSubtype, verbose_name="Category", on_delete=models.CASCADE)
 
-    def __unicode__(self):
+    def __str__(self):
         return '{} ({})'.format(self.resource_subtype,
                                  self.resource_type_name)
 
@@ -44,7 +44,7 @@ class Resource(LockableModel):
     description = models.CharField(max_length=400, blank=True, default='')
     type = models.ForeignKey(ResourceType, on_delete=models.CASCADE)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.resource_name
 
     def subtype(self):
@@ -57,7 +57,7 @@ class Definition(LockableModel):
     definition = models.CharField(max_length=2500, default='')
     reference = models.URLField(default='', blank=True)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.term
 
     def show_url(self):

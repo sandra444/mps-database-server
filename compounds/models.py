@@ -220,7 +220,7 @@ class Compound(LockableModel):
     class Meta(object):
         ordering = ('name',)
 
-    def __unicode__(self):
+    def __str__(self):
         return '{0}'.format(self.name)
 
     def chembl_link(self):
@@ -283,7 +283,7 @@ class SummaryType(LockableModel):
     name = models.CharField(max_length=100)
     description = models.CharField(max_length=500, default='')
 
-    def __unicode__(self):
+    def __str__(self):
         return str(self.name)
 
 
@@ -295,7 +295,7 @@ class PropertyType(LockableModel):
     name = models.CharField(max_length=100)
     description = models.CharField(max_length=500, default='')
 
-    def __unicode__(self):
+    def __str__(self):
         return str(self.name)
 
 
@@ -313,7 +313,7 @@ class CompoundSummary(models.Model):
     summary = models.CharField(max_length=500)
     source = models.CharField(max_length=250)
 
-    def __unicode__(self):
+    def __str__(self):
         return str(self.summary)
 
 
@@ -332,7 +332,7 @@ class CompoundProperty(models.Model):
     value = models.FloatField()
     source = models.CharField(max_length=250)
 
-    def __unicode__(self):
+    def __str__(self):
         return str(self.value)
 
 
@@ -356,7 +356,7 @@ class CompoundSupplier(LockableModel):
     """Compound suppliers so that we can track where compounds come from"""
     name = models.CharField(max_length=255, unique=True)
 
-    def __unicode__(self):
+    def __str__(self):
         return str(self.name)
 
 
@@ -375,7 +375,7 @@ class CompoundInstance(LockableModel):
     # Receipt date
     receipt_date = models.DateField(null=True, blank=True)
 
-    def __unicode__(self):
+    def __str__(self):
         items = [
             str(self.compound), str(self.supplier), str(self.lot), str(self.receipt_date)
         ]

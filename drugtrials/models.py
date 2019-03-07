@@ -18,7 +18,7 @@ class Species(LockableModel):
 
     species_name = models.CharField(max_length=40, unique=True)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.species_name
 
 
@@ -45,7 +45,7 @@ class TrialSource(LockableModel):
     source_website = models.URLField(blank=True, null=True)
     description = models.CharField(max_length=400, blank=True, default='')
 
-    def __unicode__(self):
+    def __str__(self):
         return self.source_name
 
 
@@ -134,7 +134,7 @@ class DrugTrial(LockableModel):
     references = models.CharField(max_length=400, default='',
                                   verbose_name='Trial ID/Reference')
 
-    def __unicode__(self):
+    def __str__(self):
         return '{} from {}'.format(dict(TRIALTYPES)[self.trial_type],
                                            self.source.source_name)
 
@@ -153,7 +153,7 @@ class TestType(LockableModel):
     test_type = models.CharField(max_length=60, unique=True)
     description = models.CharField(max_length=200, blank=True, default='')
 
-    def __unicode__(self):
+    def __str__(self):
         return self.test_type
 
 
@@ -182,7 +182,7 @@ class Test(LockableModel):
     organ = models.ForeignKey(Organ, blank=True, null=True, on_delete=models.CASCADE)
     description = models.CharField(max_length=400, blank=True, default='')
 
-    def __unicode__(self):
+    def __str__(self):
         return '{} :: {} :: {}'.format(
             self.organ,
             self.test_type,
@@ -198,7 +198,7 @@ class FindingType(LockableModel):
     finding_type = models.CharField(max_length=100, unique=True)
     description = models.CharField(max_length=200, blank=True, default='')
 
-    def __unicode__(self):
+    def __str__(self):
         return self.finding_type
 
 
@@ -220,7 +220,7 @@ class Finding(LockableModel):
     # Subject to removal?
     description = models.CharField(max_length=400, blank=True, default='')
 
-    def __unicode__(self):
+    def __str__(self):
         return '{} :: {} :: {}'.format(self.organ, self.finding_type, self.finding_name)
 
 
@@ -230,7 +230,7 @@ class ResultDescriptor(LockableModel):
         ordering = ('result_descriptor', )
     result_descriptor = models.CharField(max_length=40, unique=True)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.result_descriptor
 
 
@@ -328,7 +328,7 @@ class TestResult(models.Model):
             if self.value_units:
                 raise ValidationError("You forgot to enter a value!")
 
-    def __unicode__(self):
+    def __str__(self):
         return ''
 
 FREQUENCIES = (
@@ -393,7 +393,7 @@ class FindingResult(models.Model):
     def get_absolute_url(self):
         return self.drug_trial.get_absolute_url()
 
-    def __unicode__(self):
+    def __str__(self):
         treatments = []
 
         for treatment in self.findingtreatment_set.all():
@@ -417,7 +417,7 @@ class FindingTreatment(models.Model):
         on_delete=models.CASCADE
     )
 
-    def __unicode__(self):
+    def __str__(self):
         if self.concentration:
             return u'{} {} {}'.format(self.compound, self.concentration, self.concentration_unit)
         else:
@@ -429,7 +429,7 @@ class AdverseEvent(models.Model):
     event = models.CharField(max_length=100)
     organ = models.ForeignKey(Organ, blank=True, null=True, on_delete=models.CASCADE)
 
-    def __unicode__(self):
+    def __str__(self):
         return '{}'.format(self.event)
 
 
@@ -457,7 +457,7 @@ class OpenFDACompound(LockableModel):
     # For normalizing data, may change
     estimated_usage = models.IntegerField(blank=True, null=True)
 
-    def __unicode__(self):
+    def __str__(self):
         return '{}'.format(self.compound.name)
 
     def get_absolute_url(self):
@@ -471,5 +471,5 @@ class CompoundAdverseEvent(models.Model):
     event = models.ForeignKey(AdverseEvent, on_delete=models.CASCADE)
     frequency = models.IntegerField()
 
-    def __unicode__(self):
+    def __str__(self):
         return '{}:{}'.format(self.compound, self.event)

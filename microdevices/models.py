@@ -41,7 +41,7 @@ class MicrophysiologyCenter(LockableModel):
         help_text='***PLEASE DO NOT INCLUDE "Admin" OR "Viewer": ONLY SELECT THE BASE GROUP (ie "Taylor_MPS" NOT "Taylor_MPS Admin")***<br>'
     )
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
 
@@ -54,7 +54,7 @@ class Manufacturer(LockableModel):
     contact_person = models.CharField(max_length=250, blank=True, default='')
     website = models.URLField(blank=True, null=True)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
 
@@ -141,7 +141,7 @@ class Microdevice(LockableModel):
 
     references = models.CharField(max_length=2000, blank=True, default='')
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
     def get_absolute_url(self):
@@ -217,7 +217,7 @@ class OrganModel(LockableModel):
 
     references = models.CharField(max_length=2000, blank=True, default='')
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
     def get_absolute_url(self):
@@ -251,7 +251,7 @@ class OrganModelProtocol(models.Model):
     version = models.CharField(max_length=20)
     file = models.FileField(upload_to='protocols', verbose_name='Protocol File')
 
-    def __unicode__(self):
+    def __str__(self):
         return self.version
 
 
@@ -295,5 +295,5 @@ class OrganModelLocation(models.Model):
 #
 #     # VOLUME UNITS TOO?
 #
-#     def __unicode__(self):
+#     def __str__(self):
 #         return self.name

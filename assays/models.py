@@ -162,7 +162,7 @@ class UnitType(LockableModel):
     description = models.CharField(max_length=256,
                                    blank=True, default='')
 
-    def __unicode__(self):
+    def __str__(self):
         return '{}'.format(self.unit_type)
 
 
@@ -209,7 +209,7 @@ class PhysicalUnits(LockableModel):
         verbose_name_plural = 'Physical Units'
         ordering = ['unit_type', 'unit']
 
-    def __unicode__(self):
+    def __str__(self):
         return '{}'.format(self.unit)
 
 
@@ -223,7 +223,7 @@ class AssayModelType(LockableModel):
     assay_type_name = models.CharField(max_length=200, unique=True)
     assay_type_description = models.TextField(blank=True, default='')
 
-    def __unicode__(self):
+    def __str__(self):
         return self.assay_type_name
 
 
@@ -251,7 +251,7 @@ class AssayModel(LockableModel):
                                  choices=types,
                                  verbose_name='Test Type')
 
-    def __unicode__(self):
+    def __str__(self):
         return '{0} ({1})'.format(self.assay_name, self.assay_short_name)
 
 
@@ -272,7 +272,7 @@ class AssayLayout(FlaggableRestrictedModel):
 
     # base_layout = models.ForeignKey(AssayBaseLayout, on_delete=models.CASCADE)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.layout_name
 
     def get_post_submission_url(self):
@@ -303,7 +303,7 @@ class AssayWellType(LockableModel):
                                                   'http://www.w3schools.com'
                                                   '/html/html_colornames.asp')
 
-    def __unicode__(self):
+    def __str__(self):
         return self.well_type
 
     def colored_display(self):
@@ -406,7 +406,7 @@ class AssayCompoundInstance(models.Model):
             split_times.get('minute'),
         )
 
-    def __unicode__(self):
+    def __str__(self):
         return '{0} ({1} {2})\n-Added on: {3}; Duration of: {4}'.format(
             self.compound_instance.compound.name,
             self.concentration,
@@ -491,7 +491,7 @@ class AssayPlateSetup(FlaggableRestrictedModel):
     notebook_page = models.IntegerField(blank=True, null=True)
     notes = models.CharField(max_length=2048, blank=True, default='')
 
-    def __unicode__(self):
+    def __str__(self):
         return '{}'.format(self.assay_plate_id)
 
     def get_absolute_url(self):
@@ -517,7 +517,7 @@ class AssayReader(LockableModel):
     reader_name = models.CharField(max_length=128)
     reader_type = models.CharField(max_length=128)
 
-    def __unicode__(self):
+    def __str__(self):
         return '{0} - {1}'.format(self.reader_name, self.reader_type)
 
 
@@ -544,7 +544,7 @@ class AssayPlateReadoutAssay(models.Model):
     # For the moment, features will be just strings (this avoids potentially complex management)
     feature = models.CharField(max_length=150)
 
-    def __unicode__(self):
+    def __str__(self):
         return '{0}-{1}'.format(self.assay_id.assay_short_name, self.feature)
 
 
@@ -586,7 +586,7 @@ class AssayReadout(models.Model):
 #    readout_unit = models.CharField(max_length=512,unique=True)
 #    description = models.CharField(max_length=512,blank=True,null=True)
 #
-#    def __unicode__(self):
+#    def __str__(self):
 #        return self.readout_unit
 
 
@@ -629,7 +629,7 @@ class AssayPlateReadout(FlaggableRestrictedModel):
     file = models.FileField(upload_to=plate_readout_file_location, verbose_name='Data File',
                             blank=True, null=True)
 
-    def __unicode__(self):
+    def __str__(self):
         return '{0}'.format(self.setup)
 
     def get_absolute_url(self):
@@ -666,7 +666,7 @@ class AssayResultFunction(LockableModel):
     function_results = models.CharField(max_length=100, blank=True, default='')
     description = models.CharField(max_length=200, blank=True, default='')
 
-    def __unicode__(self):
+    def __str__(self):
         return self.function_name
 
 
@@ -681,7 +681,7 @@ class AssayResultType(LockableModel):
     assay_result_type = models.CharField(max_length=100, unique=True)
     description = models.CharField(max_length=200, blank=True, default='')
 
-    def __unicode__(self):
+    def __str__(self):
         return self.assay_result_type
 
 
@@ -748,7 +748,7 @@ class AssayPlateTestResult(FlaggableRestrictedModel):
     )
     summary = models.TextField(default='', blank=True)
 
-    def __unicode__(self):
+    def __str__(self):
         return 'Results for: {}'.format(self.readout)
 
     def get_absolute_url(self):
@@ -782,7 +782,7 @@ class AssayStudyConfiguration(LockableModel):
     # Subject to removal
     # image = models.ImageField(upload_to="configuration",null=True, blank=True)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
     def get_absolute_url(self):
@@ -899,7 +899,7 @@ class AssayRun(FlaggableRestrictedModel):
             current_types += 'CC '
         return '{0}'.format(current_types)
 
-    def __unicode__(self):
+    def __str__(self):
         return str(self.assay_run_id)
 
     def get_absolute_url(self):
@@ -1040,7 +1040,7 @@ class AssayChipCells(models.Model):
     cell_passage = models.CharField(max_length=16, verbose_name='Passage#',
                                     blank=True, default='')
 
-    def __unicode__(self):
+    def __str__(self):
         return '{0}\n~{1:.0e} {2}'.format(
             self.cell_sample,
             self.cellsample_density,
@@ -1099,7 +1099,7 @@ class AssayChipSetup(FlaggableRestrictedModel):
     notebook_page = models.IntegerField(blank=True, null=True)
     notes = models.CharField(max_length=2048, blank=True, default='')
 
-    def __unicode__(self):
+    def __str__(self):
         return '{}'.format(self.assay_chip_id)
         # if self.compound:
         #     return u'Chip-{}:{}({}{})'.format(
@@ -1227,7 +1227,7 @@ class AssayChipReadoutAssay(models.Model):
     # target = models.ForeignKey(AssayTarget, on_delete=models.CASCADE)
     # method = models.ForeignKey(AssayMethod, on_delete=models.CASCADE)
 
-    def __unicode__(self):
+    def __str__(self):
         return '{}'.format(self.assay_id)
 
 
@@ -1278,7 +1278,7 @@ class AssayChipReadout(FlaggableRestrictedModel):
         # Convert to unicode for consistency
         return '{0}'.format(', '.join(list_of_assays))
 
-    def __unicode__(self):
+    def __str__(self):
         return '{0}'.format(self.chip_setup)
 
     def get_absolute_url(self):
@@ -1304,7 +1304,7 @@ class AssayChipTestResult(FlaggableRestrictedModel):
     chip_readout = models.ForeignKey('assays.AssayChipReadout', verbose_name='Chip Readout', on_delete=models.CASCADE)
     summary = models.TextField(default='', blank=True)
 
-    def __unicode__(self):
+    def __str__(self):
         return 'Results for: {}'.format(self.chip_readout)
 
     def assay(self):
@@ -1421,7 +1421,7 @@ class AssayDataUpload(FlaggableRestrictedModel):
     # This ensures that uploads for readouts that have been (for whatever reason) deleted will no longer be hidden
     study = models.ForeignKey(AssayRun, on_delete=models.CASCADE)
 
-    def __unicode__(self):
+    def __str__(self):
         return urllib.parse.unquote(self.file_location.split('/')[-1])
 
 
@@ -1443,7 +1443,7 @@ class AssayDataFileUpload(FlaggableModel):
 
     study = models.ForeignKey('assays.AssayStudy', on_delete=models.CASCADE)
 
-    def __unicode__(self):
+    def __str__(self):
         return urllib.parse.unquote(self.file_location.split('/')[-1])
 
 
@@ -1458,7 +1458,7 @@ class AssayTarget(LockableModel):
     # Tentative
     alt_name = models.CharField(max_length=1000, blank=True, default='')
 
-    def __unicode__(self):
+    def __str__(self):
         return '{0}'.format(self.name)
 
 
@@ -1467,7 +1467,7 @@ class AssaySubtarget(models.Model):
     name = models.CharField(max_length=512, unique=True)
     description = models.CharField(max_length=2000)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
 
@@ -1476,7 +1476,7 @@ class AssayMeasurementType(LockableModel):
     name = models.CharField(max_length=512, unique=True)
     description = models.CharField(max_length=2000)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
 
@@ -1485,7 +1485,7 @@ class AssaySupplier(LockableModel):
     name = models.CharField(max_length=512, unique=True)
     description = models.CharField(max_length=2000)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
 
@@ -1506,7 +1506,7 @@ class AssayMethod(LockableModel):
     # Tentative
     alt_name = models.CharField(max_length=1000, blank=True, default='')
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
 
@@ -1515,7 +1515,7 @@ class AssaySampleLocation(LockableModel):
     name = models.CharField(max_length=512, unique=True)
     description = models.CharField(max_length=2000)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
 
@@ -1529,7 +1529,7 @@ class AssayInstance(models.Model):
     # Name of model "PhysicalUnits" should be renamed, methinks
     unit = models.ForeignKey(PhysicalUnits, on_delete=models.CASCADE)
 
-    def __unicode__(self):
+    def __str__(self):
         return '{0}|{1}|{2}'.format(self.target, self.method, self.unit)
 
 
@@ -1543,7 +1543,7 @@ class AssayInstance(models.Model):
 #     # Description as per usual
 #     description = models.CharField(max_length=2000, default='')
 #
-#     def __unicode__(self):
+#     def __str__(self):
 #         return self.name
 
 
@@ -1715,7 +1715,7 @@ class AssayStudy(FlaggableModel):
         return '-'.join(current_types)
 
     # TODO
-    def __unicode__(self):
+    def __str__(self):
         center_id = self.group.microphysiologycenter_set.first().center_id
         # study_types = self.get_study_types_string()
         return '-'.join([
@@ -1803,7 +1803,7 @@ class AssayMatrix(FlaggableModel):
     # May be useful
     notes = models.CharField(max_length=2048, blank=True, default='')
 
-    def __unicode__(self):
+    def __str__(self):
         return '{0}'.format(self.name)
 
     # def get_organ_models(self):
@@ -1908,7 +1908,7 @@ class AssayMatrixItem(FlaggableModel):
     # Do we want this is to be table or a static list?
     failure_reason = models.ForeignKey(AssayFailureReason, blank=True, null=True, on_delete=models.CASCADE)
 
-    def __unicode__(self):
+    def __str__(self):
         return str(self.name)
 
     def devolved_settings(self, criteria=DEFAULT_SETTING_CRITERIA):
@@ -2137,7 +2137,7 @@ class AssaySetupCell(models.Model):
         else:
             return str(self)
 
-    def __unicode__(self):
+    def __str__(self):
         passage = ''
 
         if self.passage:
@@ -2370,7 +2370,7 @@ class AssaySetupCompound(models.Model):
         else:
             return str(self)
 
-    def __unicode__(self):
+    def __str__(self):
         if self.addition_location:
             return '{0} ({1} {2})\nAdded on: {3}; Duration of: {4}; Added to: {5}'.format(
                 self.compound_instance.compound.name,
@@ -2426,7 +2426,7 @@ class AssayStudySupportingData(models.Model):
 #     # There are a few ways of swapping this in, but we will probably have to edit the migration CAREFULLY
 #     study = models.ForeignKey(AssayStudy, on_delete=models.CASCADE)
 #
-#     def __unicode__(self):
+#     def __str__(self):
 #         return urllib.unquote(self.file_location.split('/')[-1])
 
 
@@ -2472,7 +2472,7 @@ class AssayStudySupportingData(models.Model):
 #         verbose_name_plural = 'Physical Units'
 #         ordering = ['unit_type', 'unit']
 #
-#     def __unicode__(self):
+#     def __str__(self):
 #         return u'{}'.format(self.unit)
 
 
@@ -2483,7 +2483,7 @@ class AssaySetting(LockableModel):
     name = models.CharField(max_length=512, unique=True)
     description = models.CharField(max_length=2000)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
 
@@ -2559,7 +2559,7 @@ class AssaySetupSetting(models.Model):
         else:
             return str(self)
 
-    def __unicode__(self):
+    def __str__(self):
         return '{} {} {}'.format(self.setting.name, self.value, self.unit)
 
 
@@ -2621,7 +2621,7 @@ class AssayStudyAssay(models.Model):
     # Name of model "PhysicalUnits" should be renamed, methinks
     unit = models.ForeignKey(PhysicalUnits, on_delete=models.CASCADE)
 
-    def __unicode__(self):
+    def __str__(self):
         return '{0}|{1}|{2}'.format(self.target, self.method, self.unit)
 
 
@@ -2641,7 +2641,7 @@ class AssayImageSetting(models.Model):
     notes = models.CharField(max_length=500, default='', blank=True)
     color_mapping = models.CharField(max_length=255, default='', blank=True)
 
-    def __unicode__(self):
+    def __str__(self):
         return '{} {}'.format(self.study.name, self.label_name)
 
 
@@ -2696,5 +2696,5 @@ class AssayImage(models.Model):
             'setting_notes': self.setting.notes,
         }
 
-    def __unicode__(self):
+    def __str__(self):
         return '{}'.format(self.file_name)
