@@ -480,7 +480,7 @@ class CreatorOrAdminRequiredMixin(object):
     # Thus, to perform this comparison it is necessary to access request.user via authentication
     def dispatch(self, *args, **kwargs):
         self.object = self.get_object()
-        if not self.request.user.is_authenticated() or (self.request.user != self.object.created_by and not is_group_admin(self.request.user, self.object.group.name)):
+        if not self.request.user.is_authenticated or (self.request.user != self.object.created_by and not is_group_admin(self.request.user, self.object.group.name)):
             return PermissionDenied(self.request, 'You can only delete entries that you have created')
         return super(CreatorOrAdminRequiredMixin, self).dispatch(*args, **kwargs)
 
@@ -575,6 +575,6 @@ class SuperuserRequiredMixin(object):
     @method_decorator(login_required)
     @method_decorator(user_passes_test(user_is_active))
     def dispatch(self, *args, **kwargs):
-        if not self.request.user.is_authenticated() or not self.request.user.is_superuser:
+        if not self.request.user.is_authenticated or not self.request.user.is_superuser:
             return PermissionDenied(self.request, 'You do not have permission to view this page.')
         return super(SuperuserRequiredMixin, self).dispatch(*args, **kwargs)

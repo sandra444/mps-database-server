@@ -110,6 +110,8 @@ import pytz
 # TODO ^ Update Views should be refactored soon
 # NOTE THAT YOU NEED TO MODIFY INLINES HERE, NOT IN FORMS
 
+# TODO TODO TODO render_to_response is DEPRECATED: USE render INSTEAD
+
 
 def add_study_fields_to_form(self, form, add_study=False):
     """Adds study, group, and restricted to a form

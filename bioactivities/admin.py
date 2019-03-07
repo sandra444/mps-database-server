@@ -19,6 +19,8 @@ from .models import (
 from bioactivities.forms import AssayForm
 from bioactivities.forms import TargetsForm
 
+# TODO TODO TODO allow_tags attribute has been removed
+
 
 class TargetAdmin(LockableAdmin):
     """Admin for Bioactivity Target"""
