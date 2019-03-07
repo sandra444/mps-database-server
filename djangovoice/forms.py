@@ -24,7 +24,7 @@ class FeedbackForm(forms.ModelForm):
             field.widget.attrs.update({'class': 'input-block-level'})
 
         # change form fields for user authentication status:
-        if self.user is not None and self.user.is_authenticated():
+        if self.user is not None and self.user.is_authenticated:
             deleted_fields = ['email']
         else:
             deleted_fields = ['anonymous', 'private']

@@ -75,7 +75,7 @@ class FeedbackListView(VoiceMixin, ListView):
             f_filters.update({'private': False})
             f_showpriv = True
 
-        if f_showpriv and self.request.user.is_authenticated():
+        if f_showpriv and self.request.user.is_authenticated:
             # Show everyone's public discussions and user's own private
             # discussions
             queryset = self.model.objects.filter(
@@ -118,7 +118,7 @@ class FeedbackListView(VoiceMixin, ListView):
     def get(self, request, *args, **kwargs):
         f_list = kwargs.get('list')
 
-        if f_list == 'mine' and not request.user.is_authenticated():
+        if f_list == 'mine' and not request.user.is_authenticated:
             to_url = (
                 reverse('auth_login') +
                 '?next=%s' % request.path)
@@ -169,7 +169,7 @@ class FeedbackSubmitView(VoiceMixin, FormView):
         # if project doesn't allow anonymous user submission, check
         # authentication:
         if (not ALLOW_ANONYMOUS_USER_SUBMIT
-                and not request.user.is_authenticated()):
+                and not request.user.is_authenticated):
             login_url = reverse('auth_login')
             return redirect(login_url + '?next=%s' % request.path)
 
