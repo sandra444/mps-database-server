@@ -187,7 +187,7 @@ class FeedbackSubmitView(VoiceMixin, FormView):
     def form_valid(self, form):
         feedback = form.save(commit=False)
 
-        if self.request.user.is_anonymous() and ALLOW_ANONYMOUS_USER_SUBMIT:
+        if self.request.user.is_anonymous and ALLOW_ANONYMOUS_USER_SUBMIT:
             feedback.private = True
             feedback.anonymous = True
 
