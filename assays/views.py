@@ -1066,7 +1066,7 @@ class AssayStudyDataUpload(ObjectGroupRequiredMixin, UpdateView):
                 )
 
                 # Contrived method for marking data
-                for key, value in form.data.items():
+                for key, value in list(form.data.items()):
                     if key.startswith('data_upload_'):
                         current_id = key.replace('data_upload_', '', 1)
                         current_value = value

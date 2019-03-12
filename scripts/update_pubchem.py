@@ -66,7 +66,7 @@ def get_chembl_target(target):
             'synonyms': synonyms,
         })
     except:
-        print('Failed target {}'.format(target))
+        print(('Failed target {}'.format(target)))
 
     return data
 
@@ -113,7 +113,7 @@ def get_chembl_assay(assay):
                     new_target = Target.objects.create(**target_data)
                     data.update({'target_id': new_target.id})
                 except:
-                    print('Failed creating target {}'.format(target))
+                    print(('Failed creating target {}'.format(target)))
             else:
                 existing_assay = existing[0]
                 data.update({'target_id': existing_assay.id})
@@ -128,7 +128,7 @@ def get_chembl_assay(assay):
             'strain': strain,
         })
     except Exception as e:
-        print('Failed assay {}'.format(assay))
+        print(('Failed assay {}'.format(assay)))
         print(e)
 
     return data
@@ -197,7 +197,7 @@ def get_pubchem_target(target):
                 target_model = Target.objects.create(locked=True, **entry)
                 final_target = target_model
 
-                print("Error processing target:", target)
+                print(("Error processing target:", target))
 
     return final_target
 
@@ -427,7 +427,7 @@ def run():
                         print("Failed bioactivity...")
                         fail_bioactivity += 1
         else:
-            print("Failed compound: {}...".format(compound.name))
+            print(("Failed compound: {}...".format(compound.name)))
             fail_compound += 1
 
     print(("Compound Failures:{}".format(fail_compound)))
@@ -474,7 +474,7 @@ def run():
                     updates += 1
                 except Exception as e:
                     failed_updates += 1
-                    print('Failed updating assay {}'.format(assay.source_id))
+                    print(('Failed updating assay {}'.format(assay.source_id)))
                     print(e)
             # Update the chembl assay with pubchem data then delete the old assay
             else:
@@ -495,16 +495,16 @@ def run():
                     replaces += 1
                 except Exception as e:
                     failed_replaces += 1
-                    print('Failed replacing assay {}'.format(assay.source_id))
+                    print(('Failed replacing assay {}'.format(assay.source_id)))
                     print(e)
         else:
-            print('Scrape for {} failed'.format(assay.source_id))
+            print(('Scrape for {} failed'.format(assay.source_id)))
 
-    print('Failed updates:', failed_updates)
-    print('Failed replaces:', failed_replaces)
+    print(('Failed updates:', failed_updates))
+    print(('Failed replaces:', failed_replaces))
 
-    print('Successful updates:', updates)
-    print('Successful replaces:', replaces)
+    print(('Successful updates:', updates))
+    print(('Successful replaces:', replaces))
 
     if initial_bio == PubChemBioactivity.objects.all().count():
         print('Bio number has not changed.')
@@ -538,7 +538,7 @@ def run():
                             normalized_value=bio_value[index]
                         )
                     except:
-                        print('Update of bioactivity {} failed'.format(pk))
+                        print(('Update of bioactivity {} failed'.format(pk)))
 
     print('Adding SINGLE PROTEIN to NCBI target entries')
 
@@ -598,7 +598,7 @@ def run():
                                 # Flag data validity for "Out of Range"
                                 this_bio.data_validity = 'R'
                                 this_bio.save()
-                                print(bio_pk[index], bio_value[index], 'vs', bio_median)
+                                print((bio_pk[index], bio_value[index], 'vs', bio_median))
                                 #print pubchem_id
                                 #print 'https://pubchem.ncbi.nlm.nih.gov/bioassay/' + pubchem_id
                                 total += 1
@@ -613,7 +613,7 @@ def run():
                                         total += 1
                                     this_bio.data_validity = 'T'
                                     this_bio.save()
-                                    print(bio_pk[error_index], bio_value[error_index], 'thousand fold')
+                                    print((bio_pk[error_index], bio_value[error_index], 'thousand fold'))
 
     print(total)
 

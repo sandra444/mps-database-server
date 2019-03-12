@@ -123,8 +123,8 @@ class CompoundAdmin(LockableAdmin):
             url = (
                 'https://www.ebi.ac.uk/chembldb/compound/'
                 'displayimage/' + obj.chemblid)
-            print('<img src="%s">' % \
-                url)
+            print(('<img src="%s">' % \
+                url))
             return '<img src="%s">' % \
                 url
         return ''

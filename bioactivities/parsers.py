@@ -49,7 +49,7 @@ def generate_record_frequency_data(query):
 
     result_list = []
 
-    for key, value in result.items():
+    for key, value in list(result.items()):
         result_list.append([key, value])
 
     return result_list
@@ -76,7 +76,7 @@ def get_compound_frequency_data(query):
 
     result_list = []
 
-    for key, value in result.items():
+    for key, value in list(result.items()):
         result_list.append([key, value])
 
     return result_list

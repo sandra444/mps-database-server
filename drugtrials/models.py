@@ -397,7 +397,7 @@ class FindingResult(models.Model):
         treatments = []
 
         for treatment in self.findingtreatment_set.all():
-            treatments.append(unicode(treatment))
+            treatments.append(str(treatment))
 
         treatments = '; '.join(treatments)
 
@@ -419,9 +419,9 @@ class FindingTreatment(models.Model):
 
     def __str__(self):
         if self.concentration:
-            return u'{} {} {}'.format(self.compound, self.concentration, self.concentration_unit)
+            return '{} {} {}'.format(self.compound, self.concentration, self.concentration_unit)
         else:
-            return u'{}'.format(self.compound)
+            return '{}'.format(self.compound)
 
 
 class AdverseEvent(models.Model):

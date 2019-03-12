@@ -273,7 +273,7 @@ def fetch_dropdown(request):
     for finding in findings:
         # match value to the desired subject ID
         value = str(finding.id)
-        dropdown += u'<option value="' + value + '">' + unicode(finding) + u'</option>'
+        dropdown += '<option value="' + value + '">' + str(finding) + '</option>'
 
     data = {}
 
@@ -1123,7 +1123,7 @@ def get_data_points_for_charting(
             # If by compound
             if key == 'group':
                 # tag = get_list_of_present_compounds(related_compounds_map, raw, ' & ')
-                tag = u'Group {}'.format(setup_to_treatment_group.get(matrix_item_id).get('index') + 1)
+                tag = 'Group {}'.format(setup_to_treatment_group.get(matrix_item_id).get('index') + 1)
             elif key == 'compound':
                 tag = []
 
@@ -1134,8 +1134,8 @@ def get_data_points_for_charting(
                     # This is because a compound can be excluded even if its parent matrix item isn't!
                     valid_compound = True
 
-                    for filter, values in matrix_item_compound_post_filters.items():
-                        if unicode(attr_getter(compound, filter.split('__'))) not in values:
+                    for filter, values in list(matrix_item_compound_post_filters.items()):
+                        if str(attr_getter(compound, filter.split('__'))) not in values:
                             valid_compound = False
                             break
 
@@ -1147,7 +1147,7 @@ def get_data_points_for_charting(
                         concentration = compound.concentration * compound.concentration_unit.scale_factor
                         tag.append(
                             # May need this to have float minutes, unsure
-                            u'{} {} {}'.format(
+                            '{} {} {}'.format(
                                 compound.compound_instance.compound.name,
                                 concentration,
                                 compound.concentration_unit.base_unit,
@@ -1157,9 +1157,9 @@ def get_data_points_for_charting(
                     is_control = False
 
                 if tag:
-                    tag = u' & '.join(tag)
-                elif is_control and (post_filter is None or u'0' in post_filter_compounds):
-                    tag = u'-No Compound-'
+                    tag = ' & '.join(tag)
+                elif is_control and (post_filter is None or '0' in post_filter_compounds):
+                    tag = '-No Compound-'
                 else:
                     continue
             elif key == 'dose':
@@ -1186,7 +1186,7 @@ def get_data_points_for_charting(
                         concentration += compound.concentration * compound.concentration_unit.scale_factor
                         tag.append(
                             # May need this to have float minutes, unsure
-                            u'{} at D{}H{}M{}'.format(
+                            '{} at D{}H{}M{}'.format(
                                 compound.compound_instance.compound.name,
                                 int(raw_time / 24 / 60),
                                 int(raw_time / 60 % 24),
@@ -1292,15 +1292,15 @@ def get_data_points_for_charting(
             if not percent_control:
                 # Not converted to percent control
                 # Newline is used as a delimiter
-                assay_label = target + u'\n' + unit
+                assay_label = target + '\n' + unit
             else:
                 # Convert to percent control
                 if accommodate_units:
-                    current_unit = u'%Control from {}'.format(unit)
+                    current_unit = '%Control from {}'.format(unit)
                 else:
-                    current_unit = u'%Control'
+                    current_unit = '%Control'
                 # Newline is used as a delimiter
-                assay_label = target + u'\n' + current_unit
+                assay_label = target + '\n' + current_unit
 
             current_table = intermediate_data.setdefault(assay_label, [['Time']])
             # row_indices = {}
@@ -1321,7 +1321,7 @@ def get_data_points_for_charting(
 
                 for sample_location, time_values in list(sample_locations.items()):
                     if accommodate_sample_location:
-                        current_key = u'{} || {}'.format(tag, sample_location)
+                        current_key = '{} || {}'.format(tag, sample_location)
                         accommodate_intervals = False
                         include_current = False
 
@@ -1346,8 +1346,8 @@ def get_data_points_for_charting(
 
                             if not percent_control:
                                 current_data.setdefault(current_key, {}).update({concentration: value})
-                                current_data.setdefault(u'{}{}'.format(current_key,  '     ~@i1'), {}).update({concentration: value - interval})
-                                current_data.setdefault(u'{}{}'.format(current_key, '     ~@i2'), {}).update({concentration: value + interval})
+                                current_data.setdefault('{}{}'.format(current_key,  '     ~@i1'), {}).update({concentration: value - interval})
+                                current_data.setdefault('{}{}'.format(current_key, '     ~@i2'), {}).update({concentration: value + interval})
                                 y_header.update({concentration: True})
                                 include_current = True
 
@@ -1363,9 +1363,9 @@ def get_data_points_for_charting(
                                 adjusted_interval = (interval / control_value) * 100
 
                                 current_data.setdefault(current_key, {}).update({concentration: adjusted_value})
-                                current_data.setdefault(u'{}{}'.format(current_key , '     ~@i1'), {}).update(
+                                current_data.setdefault('{}{}'.format(current_key , '     ~@i1'), {}).update(
                                     {concentration: adjusted_value - adjusted_interval})
-                                current_data.setdefault(u'{}{}'.format(current_key, '     ~@i2'), {}).update(
+                                current_data.setdefault('{}{}'.format(current_key, '     ~@i2'), {}).update(
                                     {concentration: adjusted_value + adjusted_interval})
                                 y_header.update({concentration: True})
                                 include_current = True
@@ -1407,13 +1407,13 @@ def get_data_points_for_charting(
                     # Only include intervals if necessary
                     if accommodate_intervals and include_current and not key_present:
                         x_header.extend([
-                            u'{}{}'.format(current_key, '     ~@i1'),
-                            u'{}{}'.format(current_key, '     ~@i2')
+                            '{}{}'.format(current_key, '     ~@i1'),
+                            '{}{}'.format(current_key, '     ~@i2')
                         ])
                     else:
-                        if u'{}{}'.format(current_key, '     ~@i1') in current_data:
-                            del current_data[u'{}{}'.format(current_key, '     ~@i1')]
-                            del current_data[u'{}{}'.format(current_key, '     ~@i2')]
+                        if '{}{}'.format(current_key, '     ~@i1') in current_data:
+                            del current_data['{}{}'.format(current_key, '     ~@i1')]
+                            del current_data['{}{}'.format(current_key, '     ~@i2')]
 
             # for current_key in all_keys:
             #     if current_key not in x_header:
@@ -1796,19 +1796,19 @@ def fetch_assay_study_reproducibility(request):
                 setup_to_treatment_group.get(item_id).get('index')
             ),
             # 'Group {}'.format(len(data_point_treatment_groups) + 1)
-            u'{}'.format(len(data_point_treatment_groups) + 1)
+            '{}'.format(len(data_point_treatment_groups) + 1)
         )
         point.data_group = current_group
         if current_group not in treatment_group_table:
             if point.study_assay.unit.base_unit_id:
                 treatment_group_table.update({
-                    current_group: [unicode(x) for x in list(
+                    current_group: [str(x) for x in list(
                         data_point_attribute_getter_base_values(point)
                     ) + [setup_to_treatment_group.get(item_id).get('index')]]
                 })
             else:
                 treatment_group_table.update({
-                    current_group: [unicode(x) for x in list(
+                    current_group: [str(x) for x in list(
                         data_point_attribute_getter_current_values(point)
                     ) + [setup_to_treatment_group.get(item_id).get('index')]]
                 })
@@ -1816,7 +1816,7 @@ def fetch_assay_study_reproducibility(request):
         data_group_to_studies.setdefault(
             current_group, {}
         ).update({
-            u'<a href="{}" target="_blank">{} ({})</a>'.format(point.study.get_absolute_url(), point.study.name, point.study.group.name): point.study.name
+            '<a href="{}" target="_blank">{} ({})</a>'.format(point.study.get_absolute_url(), point.study.name, point.study.group.name): point.study.name
         })
 
         data_group_to_sample_locations.setdefault(
@@ -1921,11 +1921,11 @@ def fetch_assay_study_reproducibility(request):
     data['data_groups'] = treatment_group_table
 
     final_data_group_to_sample_locations = {}
-    for data_group, current_sample_location in data_group_to_sample_locations.items():
+    for data_group, current_sample_location in list(data_group_to_sample_locations.items()):
         final_data_group_to_sample_locations[data_group] = sorted(current_sample_location)
 
     final_data_group_to_organ_models = {}
-    for data_group, current_organ_model in data_group_to_organ_models.items():
+    for data_group, current_organ_model in list(data_group_to_organ_models.items()):
         final_data_group_to_organ_models[data_group] = sorted(current_organ_model)
 
     data['data_group_to_sample_locations'] = final_data_group_to_sample_locations
@@ -3010,14 +3010,14 @@ def get_inter_study_reproducibility(
                     x_header.update({
                         legend: True,
                         # This is to deal with intervals
-                        u'{}{}'.format(legend, '     ~@i1'): True,
-                        u'{}{}'.format(legend, '     ~@i2'): True,
+                        '{}{}'.format(legend, '     ~@i1'): True,
+                        '{}{}'.format(legend, '     ~@i2'): True,
                     })
                 else:
                     x_header.update({
                         legend: True,
                         # This is to deal with custom tooltips
-                        u'{}{}'.format(legend, '     ~@t'): True,
+                        '{}{}'.format(legend, '     ~@t'): True,
                     })
 
                 for time, values in list(times.items()):
@@ -3044,8 +3044,8 @@ def get_inter_study_reproducibility(
                             value = np.mean(values)
                             std = np.std(values)
                             current_data.setdefault(legend, {}).update({time: value})
-                            current_data.setdefault(u'{}{}'.format(legend, '     ~@i1'), {}).update({time: value - std})
-                            current_data.setdefault(u'{}{}'.format(legend, '     ~@i2'), {}).update({time: value + std})
+                            current_data.setdefault('{}{}'.format(legend, '     ~@i1'), {}).update({time: value - std})
+                            current_data.setdefault('{}{}'.format(legend, '     ~@i2'), {}).update({time: value + std})
                         else:
                             current_data.setdefault(legend, {}).update({time: values[0]})
                         y_header.update({time: True})
@@ -3203,16 +3203,16 @@ def get_inter_study_reproducibility(
                 x_header.update({
                     legend: True,
                     # This is to deal with the style
-                    u'{}{}'.format(legend, '     ~@s'): True,
+                    '{}{}'.format(legend, '     ~@s'): True,
                     # This is to deal with intervals
-                    u'{}{}'.format(legend, '     ~@i1'): True,
-                    u'{}{}'.format(legend, '     ~@i2'): True,
+                    '{}{}'.format(legend, '     ~@i1'): True,
+                    '{}{}'.format(legend, '     ~@i2'): True,
                 })
                 for time, value_shape in list(times.items()):
                     value, shape = value_shape[0], value_shape[1]
                     if shape:
                         current_data.setdefault(legend, {}).update({time: value})
-                        current_data.setdefault(u'{}{}'.format(legend, '     ~@s'), {}).update({time: shape})
+                        current_data.setdefault('{}{}'.format(legend, '     ~@s'), {}).update({time: shape})
                         y_header.update({time: True})
                     else:
                         values = initial_chart_data.get(
@@ -3233,9 +3233,9 @@ def get_inter_study_reproducibility(
                             value = np.mean(values)
                             std = np.std(values)
                             current_data.setdefault(legend, {}).update({time: value})
-                            current_data.setdefault(u'{}{}'.format(legend, '     ~@i1'), {}).update({time: value - std})
-                            current_data.setdefault(u'{}{}'.format(legend, '     ~@i2'), {}).update({time: value + std})
-                            current_data.setdefault(u'{}{}'.format(legend, '     ~@s'), {}).update({time: shape})
+                            current_data.setdefault('{}{}'.format(legend, '     ~@i1'), {}).update({time: value - std})
+                            current_data.setdefault('{}{}'.format(legend, '     ~@i2'), {}).update({time: value + std})
+                            current_data.setdefault('{}{}'.format(legend, '     ~@s'), {}).update({time: shape})
                         else:
                             current_data.setdefault(legend, {}).update({time: values[0]})
 

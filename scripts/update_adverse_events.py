@@ -209,7 +209,7 @@ def run():
         print(compound)
         # TODO CHANGE TO ACCOMODATE ALL ORGANS
         events = get_event_frequency(compound.name, organs)
-        print(len(events))
+        print((len(events)))
         time.sleep(0.2)
 
         if events:

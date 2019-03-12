@@ -129,7 +129,7 @@ def fetch_aggregate_ae_by_compound(request):
         if compound.estimated_usage:
             estimated_usage = '{:,}'.format(compound.estimated_usage)
 
-        checkbox = u'<input class="checkbox big-checkbox compound" type="checkbox" value="{}">'.format(compound.compound.name)
+        checkbox = '<input class="checkbox big-checkbox compound" type="checkbox" value="{}">'.format(compound.compound.name)
 
         data.append({
             # 'checkbox': cgi.escape(compound.compound.name),
@@ -169,7 +169,7 @@ def fetch_aggregate_ae_by_event(request):
         if adverse_event.organ:
             organ_name = adverse_event.organ.organ_name
 
-        checkbox = u'<input class="checkbox big-checkbox adverse-event" type="checkbox" value="{}">'.format(adverse_event.event)
+        checkbox = '<input class="checkbox big-checkbox adverse-event" type="checkbox" value="{}">'.format(adverse_event.event)
 
         if frequency:
             data.append({

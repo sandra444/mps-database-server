@@ -95,7 +95,7 @@ def run(days=180):
 
                             for target in parent_compound_targets:
                                 CompoundTarget.objects.create(compound=parent, **target)
-                            print("Added Compound:", parent.name)
+                            print(("Added Compound:", parent.name))
                         except ValueError:
                             error += 1
                             continue
@@ -141,7 +141,7 @@ def run(days=180):
                     else:
                         skip += 1
             except:
-                print("An error occured:", compound.name, acts)
+                print(("An error occured:", compound.name, acts))
 
             compound.last_update = datetime.date.today()
             compound.save()
@@ -209,7 +209,7 @@ def run(days=180):
                             normalized_value=bio_value[index]
                         )
                     except:
-                        print('Update of bioactivity {} failed'.format(pk))
+                        print(('Update of bioactivity {} failed'.format(pk)))
 
     # Flag questionable entries
     print('Flagging questionable entries...')
@@ -266,7 +266,7 @@ def run(days=180):
                                 # Flag data validity for "Out of Range"
                                 this_bio.data_validity = 'R'
                                 this_bio.save()
-                                print(bio_pk[index], bio_value[index], 'vs', bio_median)
+                                print((bio_pk[index], bio_value[index], 'vs', bio_median))
                                 total += 1
 
                         # Check for possible transcription errors (1000-fold error mistaking uM for nM)
@@ -279,7 +279,7 @@ def run(days=180):
                                         total += 1
                                     this_bio.data_validity = 'T'
                                     this_bio.save()
-                                    print(bio_pk[error_index], bio_value[error_index], 'thousand fold')
+                                    print((bio_pk[error_index], bio_value[error_index], 'thousand fold'))
 
     print(total)
 
