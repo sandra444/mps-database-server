@@ -1097,8 +1097,9 @@ def cluster(request):
             for compound in valid_compounds:
                 values.append(initial_dic[compound][bioactivity])
             # Get median from list after excluding all None values
-            median = np.median(np.array([value for value in values if value is not None]))
-            maximum = max(values)
+            non_null_values = np.array([value for value in values if value is not None])
+            median = np.median(non_null_values)
+            maximum = np.max(non_null_values)
 
             # Avoid anomalies by arbitrarily putting median to 10% when max == median
             if median == maximum:
@@ -1130,8 +1131,9 @@ def cluster(request):
                 # This is a rather inefficient means of acquiring data
                 values.append(compound.get(prop, None))
             # Get median from list after excluding all None values
-            median = np.median(np.array([value for value in values if value is not None]))
-            maximum = max(values)
+            non_null_values = np.array([value for value in values if value is not None])
+            median = np.median(non_null_values)
+            maximum = np.max(non_null_values)
 
             # Avoid anomalies by arbitrarily putting median to 10% when max == median
             if median == maximum:
