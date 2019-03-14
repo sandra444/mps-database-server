@@ -32,6 +32,7 @@ import scipy.stats as stats
 from scipy.interpolate import CubicSpline
 
 import csv
+import codecs
 
 from chardet.universaldetector import UniversalDetector
 
@@ -200,9 +201,13 @@ def unicode_csv_reader(in_file, dialect=csv.excel, **kwargs):
     """Returns the contents of a csv in unicode"""
     chardet_results = charset_detect(in_file)
     encoding = chardet_results.get('encoding')
-    csv_reader = csv.reader(in_file, dialect=dialect, **kwargs)
+    csv_reader = csv.reader(codecs.iterdecode(in_file, encoding), dialect=dialect, **kwargs)
+    rows = []
+
     for row in csv_reader:
-        yield [str(cell.decode(encoding)) for cell in row]
+        rows.append([str(cell) for cell in row])
+
+    return rows
 
 
 class UnicodeWriter:
@@ -887,7 +892,7 @@ class AssayFileProcessor:
 
     def process_csv_file(self):
         data_reader = unicode_csv_reader(self.current_file, delimiter=',')
-        data_list = list(data_reader)
+        data_list = data_reader
 
         # Check if header is valid
         valid_header = self.get_and_validate_header(data_list)
