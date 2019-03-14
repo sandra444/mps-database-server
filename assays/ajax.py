@@ -3109,9 +3109,10 @@ def get_inter_study_reproducibility(
         })
 
         # Get numeric ICC
-        current_icc = row[6] if row[6] else 0
+        current_icc = float(row[6]) if row[6] else 0
+        compare_icc = float(current_dic.get('best')[6]) if current_dic.get('best') and current_dic.get('best')[6] else 0
 
-        if current_dic.get('best', '') and (current_icc > current_dic.get('best')[6] or not current_dic.get('best')[6]):
+        if current_dic.get('best', '') and (current_icc > compare_icc or not compare_icc):
             current_dic.update({
                 'best': row
             })
@@ -3127,9 +3128,10 @@ def get_inter_study_reproducibility(
         # If the current best has no ICC, try CV
         if not current_best[6]:
             for current_type, row in list(current_dic.items()):
-                current_cv = row[5] if row[5] else 999
+                current_cv = float(row[5]) if row[5] else 999
+                compare_cv = float(current_dic.get('best')[5]) if current_dic.get('best') and current_dic.get('best')[5] else 999
 
-                if current_cv < current_dic.get('best')[5]:
+                if current_cv < compare_cv:
                     current_dic.update({
                         'best': row
                     })
