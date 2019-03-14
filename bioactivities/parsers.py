@@ -828,10 +828,11 @@ def heatmap(request):
         pass
 
     # generate a unique full path for data and rows and columns information
+    data_hash = str(len([name for name in os.listdir(os.path.join(MEDIA_ROOT, 'heatmap')) if os.path.isfile(name)]))
 
-    data_hash = hashlib.sha512(
-        str(rearranged_data)
-    ).hexdigest()[:10]
+    # data_hash = hashlib.sha512(
+    #     str(rearranged_data)
+    # ).hexdigest()[:10]
 
     fullpath_without_extension = os.path.join(
         MEDIA_ROOT,
@@ -904,8 +905,9 @@ def heatmap(request):
             for compound in valid_compounds:
                 values.append(initial_dic[compound][bioactivity])
             # Get median from list after excluding all None values
-            median = np.median(np.array([value for value in values if value is not None]))
-            maximum = max(values)
+            non_null_values = np.array([value for value in values if value is not None])
+            median = np.median(non_null_values)
+            maximum = np.max(non_null_values)
 
             # Avoid anomalies by arbitrarily putting median to 10% when max == median
             if median == maximum:
