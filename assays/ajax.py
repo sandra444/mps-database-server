@@ -763,9 +763,10 @@ def get_item_groups(study, criteria, matrix_items=None):
     header_keys = []
 
     # By pulling the setups for the study, I avoid problems with preview data
+    # NOTE THAT STUDY CAN BE MULTIPLE STUDIES, HENCE DIFFERENT FILTER
     if matrix_items is None:
         matrix_items = AssayMatrixItem.objects.filter(
-            study=study
+            study_id__in=study
         )
 
     setups = matrix_items.prefetch_related(

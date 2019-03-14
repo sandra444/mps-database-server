@@ -517,10 +517,8 @@ class AssayFileProcessor:
                     entry.sample_location_id,
                     entry.time,
                     entry.replicate,
-                    # ADD VALUE!
                     # Uses name to deal with subtargets that don't exist yet
                     entry.subtarget.name,
-                    # entry.value
                 ), []
             ).append(entry)
 
@@ -535,10 +533,8 @@ class AssayFileProcessor:
                     entry.sample_location_id,
                     entry.time,
                     entry.replicate,
-                    # ADD VALUE!
                     # Uses name to deal with subtargets that don't exist yet
                     entry.subtarget.name,
-                    # entry.value
                 ), []
             ).append(1)
 
@@ -727,9 +723,7 @@ class AssayFileProcessor:
                         sample_location_id,
                         time,
                         replicate,
-                        # ADD VALUE!
                         subtarget.name,
-                        # value
                     ), []
                 )
 
@@ -850,6 +844,12 @@ class AssayFileProcessor:
             cursor.executemany(query, query_list)
             transaction.commit()
             cursor.close()
+
+            # CRUDE: MARK ALL CONFLICTING AS REPLACED
+            # OBVIOUSLY BAD IDEA TO ITERATE LIKE THIS: VERY SLOW
+            for conflicting_entry in conflicting_entries:
+                conflicting_entry.replaced = True
+                conflicting_entry.save()
 
         # Be sure to subtract the number of replaced points!
         self.preview_data['readout_data'].extend(readout_data)
