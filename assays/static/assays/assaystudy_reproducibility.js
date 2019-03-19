@@ -307,7 +307,12 @@ $(document).ready(function () {
                     criteria: JSON.stringify(window.GROUPING.group_criteria),
                     post_filter: JSON.stringify(window.GROUPING.current_post_filter),
                     csrfmiddlewaretoken: window.COOKIES.csrfmiddlewaretoken,
-                    study: study_id
+                    study: study_id,
+                    item_ids: JSON.stringify($.urlParam('i').split('+')),
+                    target_id: $.urlParam('t'),
+                    unit_id: $.urlParam('u'),
+                    sample_location_id: $.urlParam('s'),
+                    method_id: $.urlParam('m'),
                 },
                 type: 'POST',
                 dataSrc: function(json) {
