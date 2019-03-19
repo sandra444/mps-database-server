@@ -1647,8 +1647,7 @@ def fetch_assay_study_reproducibility(request):
         study_id=study.id
     )
 
-    # If a filter was passed
-    if item_id_filter:
+    if item_id_filter and any(item_id_filter):
         item_id_filter = [int(x) for x in item_id_filter]
         matrix_items = matrix_items.filter(id__in=item_id_filter)
 
