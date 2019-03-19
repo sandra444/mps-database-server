@@ -2450,8 +2450,8 @@ class AssayStudyAssay(models.Model):
     # Name of model "PhysicalUnits" should be renamed, methinks
     unit = models.ForeignKey(PhysicalUnits)
 
-    def __unicode__(self):
-        return u'{0}~@|{1}~@|{2}~@|{3}'.format(self.study_id, self.target, self.method, self.unit)
+    def __str__(self):
+        return '{0}~@|{1}~@|{2}~@|{3}'.format(self.study_id, self.target, self.method, self.unit)
 
 
 class AssayImageSetting(models.Model):
@@ -2544,5 +2544,5 @@ class AssayStudySet(FlaggableModel):
     def get_absolute_url(self):
         return '/assays/assaystudyset/{}/'.format(self.id)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
