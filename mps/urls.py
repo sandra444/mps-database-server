@@ -176,7 +176,7 @@ urlpatterns = [
     #     django.views.static.serve,
     #     {'document_root': settings.MEDIA_ROOT}
     # ),
-    url(r'^__debug__/', include(debug_toolbar.urls)),
+    url('__debug__/', include(debug_toolbar.urls)),
 ]
 
 # Note that the URL path can be whatever you want, but you must include
