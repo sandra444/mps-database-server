@@ -2516,6 +2516,7 @@ def fetch_data_points_from_study_set(request):
                 request.POST.get('key', ''),
                 request.POST.get('mean_type', ''),
                 request.POST.get('interval_type', ''),
+                request.POST.get('number_for_interval', ''),
                 request.POST.get('percent_control', ''),
                 request.POST.get('include_all', ''),
                 request.POST.get('truncate_negative', ''),
