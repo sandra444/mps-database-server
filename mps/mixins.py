@@ -58,7 +58,7 @@ def user_is_valid_study_viewer(user, study):
 
         # Check if user is a stakeholder
         stakeholders = AssayStudyStakeholder.objects.filter(
-            study=study
+            study_id=study.id
         ).prefetch_related(
             'study',
             'group',
@@ -106,7 +106,7 @@ def check_if_user_is_valid_study_viewer(user, study):
 
         # Check if user is a stakeholder
         stakeholders = AssayRunStakeholder.objects.filter(
-            study=study
+            study_id=study.id
         ).prefetch_related(
             'study',
             'group',
