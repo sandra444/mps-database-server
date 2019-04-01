@@ -665,7 +665,7 @@ def get_control_data(
                         study_values = {}
 
                         for point in points:
-                            if truncate_negative and value < 0:
+                            if truncate_negative and point.value < 0:
                                 study_values.setdefault(point.study_id, []).append(0)
                             elif normalize_units:
                                 study_values.setdefault(point.study_id, []).append(point.value * point.study_assay.unit.scale_factor)
@@ -1160,7 +1160,7 @@ def get_data_points_for_charting(
                         study_values = {}
 
                         for point in points:
-                            if truncate_negative and value < 0:
+                            if truncate_negative and point.value < 0:
                                 study_values.setdefault(point.study_id, []).append(0)
                             else:
                                 study_values.setdefault(point.study_id, []).append(point.value)
