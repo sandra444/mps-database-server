@@ -705,7 +705,7 @@ class AssayStudyData(StudyViewerMixin, DetailView):
             data = get_data_as_csv(items, include_header=True, include_all=include_all)
 
             # For specifically text
-            response = HttpResponse(data, content_type='text/csv')
+            response = HttpResponse(data, content_type='text/csv', charset='utf-8')
             response['Content-Disposition'] = 'attachment;filename="' + str(self.object) + '.csv"'
 
             return response
@@ -1906,7 +1906,7 @@ class AssayDataFromFilters(LoginRequiredMixin, TemplateView):
             # include_all = self.request.GET.get('include_all', False)
 
             # For specifically text
-            response = HttpResponse(data, content_type='text/csv')
+            response = HttpResponse(data, content_type='text/csv', charset='utf-8')
             response['Content-Disposition'] = 'attachment;filename=MPS_Download.csv'
 
             return response
