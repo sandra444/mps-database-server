@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block extra_head %}
+
+{% endblock %}
+
+{% block load_js %}
+    <script src="{% static "assays/assaystudy_power_analysis_study.js" %}"></script>
+{% endblock %}
+
+{% block breadcrumbs %}
+    <li><a href="{{ object.get_list_url }}">All Studies</a></li>
+    <li><a href="{{ object.get_absolute_url }}">{{ object }}</a></li>
+    <li class="active">Study Images</li>
+{% endblock %}
+
+{% block content %}
+    <div class="well">
+        <div class="row text-center">
+            <h1>
+                {{ object }}
+            </h1>
+        </div>
+        <div class="row text-center small-padding-top">
+            <a href="{{ object.get_summary_url }}" class="btn btn-primary" role="button">Study Summary</a>
+        </div>
+    </div>
+{% endblock %}

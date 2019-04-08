@@ -1911,3 +1911,14 @@ class AssayDataFromFilters(LoginRequiredMixin, TemplateView):
         # Return nothing otherwise
         else:
             return HttpResponse('', content_type='text/plain')
+
+
+# TODO acquire and send all data like IntraRepro
+class AssayStudyPowerAnalysisStudy(LoginRequiredMixin, DetailView):
+    """Displays the power analysis interface for the current study"""
+    model = AssayStudy
+    template_name = 'assays/assaystudy_power_analysis_study.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(AssayStudyPowerAnalysisStudy, self).get_context_data(**kwargs)
+        return context

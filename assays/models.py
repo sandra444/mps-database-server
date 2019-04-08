@@ -7,7 +7,11 @@ from microdevices.models import (
     OrganModelProtocol,
     MicrophysiologyCenter,
 )
-from mps.base.models import LockableModel, FlaggableModel, FlaggableRestrictedModel
+from mps.base.models import (
+    LockableModel,
+    FlaggableModel,
+    FlaggableRestrictedModel
+)
 from django.contrib.auth.models import Group, User
 
 import urllib
@@ -24,6 +28,7 @@ def attr_getter(item, attributes):
             return None
 
     return item
+
 
 def tuple_attrgetter(*items):
     """Custom attrgetter that ALWAYS returns a tuple"""
@@ -1694,6 +1699,9 @@ class AssayStudy(FlaggableModel):
 
     def get_images_url(self):
         return '{}images/'.format(self.get_absolute_url())
+
+    def get_power_analysis_url(self):
+        return '{}power_analysis/'.format(self.get_absolute_url())
 
     # Dubiously useful, but maybe
     def get_list_url(self):

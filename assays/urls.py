@@ -31,7 +31,8 @@ from assays.views import (
     GraphingReproducibilityFilterView,
     AssayDataFromFilters,
     AssayInterStudyReproducibility,
-    AssayStudyDataPlots
+    AssayStudyDataPlots,
+    AssayStudyPowerAnalysisStudy
 )
 import assays.ajax
 
@@ -144,6 +145,9 @@ urlpatterns = [
 
     # Data from filters
     url(r'^assays/data_from_filters/$', AssayDataFromFilters.as_view(), name='data-from-filters'),
+
+    # Power Analysis
+    url(r'^assays/assaystudy/(?P<pk>[0-9]+)/power_analysis/$', AssayStudyPowerAnalysisStudy.as_view(), name='assay-power-analysis-study'),
 
     # Ajax
     url(r'^assays_ajax/$', assays.ajax.ajax),
