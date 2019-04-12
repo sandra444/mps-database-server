@@ -95,6 +95,7 @@ django-import-export
 django-simple-captcha
 # Keep old-style comments
 django-contrib-comments
+django-rest-framework
 # Using whoosh for now, may switch to a more sophisticated search engine later
 whoosh
 django-haystack
