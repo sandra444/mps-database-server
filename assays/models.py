@@ -14,7 +14,9 @@ from mps.base.models import (
 )
 from django.contrib.auth.models import Group, User
 
-import urllib
+from django.utils.safestring import mark_safe
+
+import urllib.request, urllib.parse, urllib.error
 import collections
 
 
@@ -33,7 +35,7 @@ def attr_getter(item, attributes):
 def tuple_attrgetter(*items):
     """Custom attrgetter that ALWAYS returns a tuple"""
     # NOTE WILL NEED TO CHANGE IF MOVED TO PYTHON 3
-    if any(not (isinstance(item, str) or isinstance(item, unicode)) for item in items):
+    if any(not (isinstance(item, str) or isinstance(item, str)) for item in items):
         raise TypeError('attribute name must be a string')
 
     def g(obj):
@@ -53,14 +55,14 @@ def resolve_attr(obj, attr):
 
 # TODO DEPRECATED, REMOVE SOON
 PHYSICAL_UNIT_TYPES = (
-    (u'V', u'Volume'),
-    (u'C', u'Concentration'),
-    (u'M', u'Mass'),
-    (u'T', u'Time'),
-    (u'F', u'Frequency'),
-    (u'RA', u'Rate'),
-    (u'RE', u'Relative'),
-    (u'O', u'Other'),
+    ('V', 'Volume'),
+    ('C', 'Concentration'),
+    ('M', 'Mass'),
+    ('T', 'Time'),
+    ('F', 'Frequency'),
+    ('RA', 'Rate'),
+    ('RE', 'Relative'),
+    ('O', 'Other'),
 )
 
 types = (
@@ -126,7 +128,7 @@ def get_split_times(time_in_minutes):
         'minute': 0
     }
     time_in_minutes_remaining = time_in_minutes
-    for time_unit, conversion in TIME_CONVERSIONS.items():
+    for time_unit, conversion in list(TIME_CONVERSIONS.items()):
         initial_time_for_current_field = int(time_in_minutes_remaining / conversion)
         if initial_time_for_current_field:
             times[time_unit] = initial_time_for_current_field
@@ -167,8 +169,8 @@ class UnitType(LockableModel):
     description = models.CharField(max_length=256,
                                    blank=True, default='')
 
-    def __unicode__(self):
-        return u'{}'.format(self.unit_type)
+    def __str__(self):
+        return '{}'.format(self.unit_type)
 
 
 # TODO THIS NEEDS TO BE REVISED (IDEALLY REPLACED WITH PHYSICALUNIT BELOW)
@@ -178,34 +180,44 @@ class PhysicalUnits(LockableModel):
     # USE NAME IN LIEU OF UNIT (unit.unit is confusing and dumb)
     # name = models.CharField(max_length=255)
     unit = models.CharField(max_length=255)
-    description = models.CharField(max_length=255,
-                                   blank=True, default='')
+    description = models.CharField(
+        max_length=255,
+        blank=True,
+        default=''
+    )
 
-    unit_type = models.ForeignKey(UnitType)
+    unit_type = models.ForeignKey(UnitType, on_delete=models.CASCADE)
 
     # Base Unit for conversions and scale factor
-    base_unit = models.ForeignKey('assays.PhysicalUnits',
-                                  blank=True,
-                                  null=True)
+    base_unit = models.ForeignKey(
+        'assays.PhysicalUnits',
+        blank=True,
+        null=True,
+        on_delete=models.CASCADE
+    )
 
     # Scale factor gives the conversion to get to the base unit, can also act to sort
-    scale_factor = models.FloatField(blank=True,
-                                     null=True)
+    scale_factor = models.FloatField(
+        blank=True,
+        null=True
+    )
 
-    availability = models.CharField(max_length=255,
-                                    blank=True,
-                                    default='',
-                                    help_text=(u'Type a series of strings for indicating '
-                                               u'where this unit should be listed:'
-                                               u'\ntest = test results\nreadouts = readouts\ncells = cell samples'))
+    availability = models.CharField(
+        max_length=255,
+        blank=True,
+        default='',
+        help_text=('Type a series of strings for indicating '
+                   'where this unit should be listed:'
+                   '\ntest = test results\nreadouts = readouts\ncells = cell samples')
+    )
 
     # verbose_name_plural is used to avoid a double 's' on the model name
     class Meta(object):
         verbose_name_plural = 'Physical Units'
         ordering = ['unit_type', 'unit']
 
-    def __unicode__(self):
-        return u'{}'.format(self.unit)
+    def __str__(self):
+        return '{}'.format(self.unit)
 
 
 # DEPRECATED: SLATED FOR DELETION
@@ -218,7 +230,7 @@ class AssayModelType(LockableModel):
     assay_type_name = models.CharField(max_length=200, unique=True)
     assay_type_description = models.TextField(blank=True, default='')
 
-    def __unicode__(self):
+    def __str__(self):
         return self.assay_type_name
 
 
@@ -234,7 +246,7 @@ class AssayModel(LockableModel):
     # Remember, adding a unique field to existing entries needs to be null during migration
     assay_short_name = models.CharField(max_length=10, default='', unique=True)
 
-    assay_type = models.ForeignKey(AssayModelType)
+    assay_type = models.ForeignKey(AssayModelType, on_delete=models.CASCADE)
     version_number = models.CharField(max_length=200, verbose_name='Version',
                                       blank=True, default='')
     assay_description = models.TextField(verbose_name='Description', blank=True,
@@ -246,8 +258,8 @@ class AssayModel(LockableModel):
                                  choices=types,
                                  verbose_name='Test Type')
 
-    def __unicode__(self):
-        return u'{0} ({1})'.format(self.assay_name, self.assay_short_name)
+    def __str__(self):
+        return '{0} ({1})'.format(self.assay_name, self.assay_short_name)
 
 
 # DEPRECATED: SLATED FOR DELETION
@@ -260,14 +272,14 @@ class AssayLayout(FlaggableRestrictedModel):
         ordering = ('layout_name',)
 
     layout_name = models.CharField(max_length=200, unique=True)
-    device = models.ForeignKey(Microdevice)
+    device = models.ForeignKey(Microdevice, on_delete=models.CASCADE)
 
     # Specifies whether this is a standard (oft used layout)
     standard = models.BooleanField(default=False)
 
-    # base_layout = models.ForeignKey(AssayBaseLayout)
+    # base_layout = models.ForeignKey(AssayBaseLayout, on_delete=models.CASCADE)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.layout_name
 
     def get_post_submission_url(self):
@@ -298,9 +310,10 @@ class AssayWellType(LockableModel):
                                                   'http://www.w3schools.com'
                                                   '/html/html_colornames.asp')
 
-    def __unicode__(self):
+    def __str__(self):
         return self.well_type
 
+    @mark_safe
     def colored_display(self):
         """Colored display for admin list view."""
 
@@ -317,9 +330,9 @@ class AssayWell(models.Model):
     class Meta(object):
         unique_together = [('assay_layout', 'row', 'column')]
 
-    # base_layout = models.ForeignKey(AssayBaseLayout)
-    assay_layout = models.ForeignKey(AssayLayout)
-    well_type = models.ForeignKey(AssayWellType)
+    # base_layout = models.ForeignKey(AssayBaseLayout, on_delete=models.CASCADE)
+    assay_layout = models.ForeignKey(AssayLayout, on_delete=models.CASCADE)
+    well_type = models.ForeignKey(AssayWellType, on_delete=models.CASCADE)
 
     row = models.CharField(max_length=25)
     column = models.CharField(max_length=25)
@@ -328,7 +341,7 @@ class AssayWell(models.Model):
 # DEPRECATED: SLATED FOR DELETION
 class AssayWellTimepoint(models.Model):
     """Timepoints for PLATE wells"""
-    assay_layout = models.ForeignKey(AssayLayout)
+    assay_layout = models.ForeignKey(AssayLayout, on_delete=models.CASCADE)
     timepoint = models.FloatField(default=0)
     row = models.CharField(max_length=25)
     column = models.CharField(max_length=25)
@@ -337,7 +350,7 @@ class AssayWellTimepoint(models.Model):
 # DEPRECATED: SLATED FOR DELETION
 class AssayWellLabel(models.Model):
     """Arbitrary string label for PLATE wells"""
-    assay_layout = models.ForeignKey(AssayLayout)
+    assay_layout = models.ForeignKey(AssayLayout, on_delete=models.CASCADE)
     label = models.CharField(max_length=150)
     row = models.CharField(max_length=25)
     column = models.CharField(max_length=25)
@@ -368,14 +381,15 @@ class AssayCompoundInstance(models.Model):
         )
 
     # Stop-gap, subject to change
-    chip_setup = models.ForeignKey('assays.AssayChipSetup', null=True, blank=True)
+    chip_setup = models.ForeignKey('assays.AssayChipSetup', null=True, blank=True, on_delete=models.CASCADE)
 
     # COMPOUND INSTANCE IS REQUIRED, however null=True was done to avoid a submission issue
-    compound_instance = models.ForeignKey('compounds.CompoundInstance', null=True, blank=True)
+    compound_instance = models.ForeignKey('compounds.CompoundInstance', null=True, blank=True, on_delete=models.CASCADE)
     concentration = models.FloatField()
     concentration_unit = models.ForeignKey(
         'assays.PhysicalUnits',
-        verbose_name='Concentration Unit'
+        verbose_name='Concentration Unit',
+        on_delete=models.CASCADE
     )
 
     # PLEASE NOTE THAT THIS IS IN MINUTES, CONVERTED FROM D:H:M
@@ -400,8 +414,8 @@ class AssayCompoundInstance(models.Model):
             split_times.get('minute'),
         )
 
-    def __unicode__(self):
-        return u'{0} ({1} {2})\n-Added on: {3}; Duration of: {4}'.format(
+    def __str__(self):
+        return '{0} ({1} {2})\n-Added on: {3}; Duration of: {4}'.format(
             self.compound_instance.compound.name,
             self.concentration,
             self.concentration_unit.unit,
@@ -413,15 +427,15 @@ class AssayCompoundInstance(models.Model):
 # DEPRECATED: SLATED FOR DELETION
 class AssayWellCompound(models.Model):
     """Compound for PLATE wells"""
-    assay_layout = models.ForeignKey(AssayLayout)
+    assay_layout = models.ForeignKey(AssayLayout, on_delete=models.CASCADE)
     # TO BE DEPRECATED: USE AssayCompoundInstance instead
-    compound = models.ForeignKey('compounds.Compound', null=True, blank=True)
+    compound = models.ForeignKey('compounds.Compound', null=True, blank=True, on_delete=models.CASCADE)
     # Null=True temporarily
-    assay_compound_instance = models.ForeignKey('assays.AssayCompoundInstance', null=True, blank=True)
+    assay_compound_instance = models.ForeignKey('assays.AssayCompoundInstance', null=True, blank=True, on_delete=models.CASCADE)
     # TO BE DEPRECATED: USE AssayCompoundInstance instead
     concentration = models.FloatField(default=0, null=True, blank=True)
     # TO BE DEPRECATED: USE AssayCompoundInstance instead
-    concentration_unit = models.ForeignKey(PhysicalUnits, null=True, blank=True)
+    concentration_unit = models.ForeignKey(PhysicalUnits, null=True, blank=True, on_delete=models.CASCADE)
     row = models.CharField(max_length=25)
     column = models.CharField(max_length=25)
 
@@ -447,9 +461,9 @@ class AssayQualityIndicator(LockableModel):
 class AssayPlateCells(models.Model):
     """Individual cell parameters for PLATE setup used in inline"""
 
-    assay_plate = models.ForeignKey('AssayPlateSetup')
-    cell_sample = models.ForeignKey('cellsamples.CellSample')
-    cell_biosensor = models.ForeignKey('cellsamples.Biosensor')
+    assay_plate = models.ForeignKey('AssayPlateSetup', on_delete=models.CASCADE)
+    cell_sample = models.ForeignKey('cellsamples.CellSample', on_delete=models.CASCADE)
+    cell_biosensor = models.ForeignKey('cellsamples.Biosensor', on_delete=models.CASCADE)
     cellsample_density = models.FloatField(verbose_name='density', default=0)
 
     cellsample_density_unit = models.CharField(verbose_name='Unit',
@@ -470,10 +484,10 @@ class AssayPlateSetup(FlaggableRestrictedModel):
         verbose_name = 'Plate Setup'
 
     # Might as well be consistent
-    assay_run_id = models.ForeignKey('assays.AssayRun', verbose_name='Study')
+    assay_run_id = models.ForeignKey('assays.AssayRun', verbose_name='Study', on_delete=models.CASCADE)
 
     # The assay layout is approximately equivalent to a chip's Organ Model
-    assay_layout = models.ForeignKey('assays.AssayLayout', verbose_name='Assay Layout')
+    assay_layout = models.ForeignKey('assays.AssayLayout', verbose_name='Assay Layout', on_delete=models.CASCADE)
 
     setup_date = models.DateField(help_text='YYYY-MM-DD')
 
@@ -485,8 +499,8 @@ class AssayPlateSetup(FlaggableRestrictedModel):
     notebook_page = models.IntegerField(blank=True, null=True)
     notes = models.CharField(max_length=2048, blank=True, default='')
 
-    def __unicode__(self):
-        return u'{}'.format(self.assay_plate_id)
+    def __str__(self):
+        return '{}'.format(self.assay_plate_id)
 
     def get_absolute_url(self):
         return '/assays/assayplatesetup/{}/'.format(self.id)
@@ -511,8 +525,8 @@ class AssayReader(LockableModel):
     reader_name = models.CharField(max_length=128)
     reader_type = models.CharField(max_length=128)
 
-    def __unicode__(self):
-        return u'{0} - {1}'.format(self.reader_name, self.reader_type)
+    def __str__(self):
+        return '{0} - {1}'.format(self.reader_name, self.reader_type)
 
 
 # TO BE DEPRECATED To be merged into single "AssayInstance" model
@@ -525,30 +539,30 @@ class AssayPlateReadoutAssay(models.Model):
         # Assay-Feature pairs must be unique
         unique_together = [('readout_id', 'assay_id', 'feature')]
 
-    readout_id = models.ForeignKey('assays.AssayPlateReadout', verbose_name='Readout')
-    assay_id = models.ForeignKey('assays.AssayModel', verbose_name='Assay', null=True)
-    reader_id = models.ForeignKey('assays.AssayReader', verbose_name='Reader')
+    readout_id = models.ForeignKey('assays.AssayPlateReadout', verbose_name='Readout', on_delete=models.CASCADE)
+    assay_id = models.ForeignKey('assays.AssayModel', verbose_name='Assay', null=True, on_delete=models.CASCADE)
+    reader_id = models.ForeignKey('assays.AssayReader', verbose_name='Reader', on_delete=models.CASCADE)
     # Object excluded for now (presumably will be just well)
     # object_type = models.CharField(max_length=6,
     #                         choices=object_types,
     #                         verbose_name='Object of Interest',
     #                         default='F')
-    readout_unit = models.ForeignKey('assays.PhysicalUnits')
+    readout_unit = models.ForeignKey('assays.PhysicalUnits', on_delete=models.CASCADE)
 
     # For the moment, features will be just strings (this avoids potentially complex management)
     feature = models.CharField(max_length=150)
 
-    def __unicode__(self):
-        return u'{0}-{1}'.format(self.assay_id.assay_short_name, self.feature)
+    def __str__(self):
+        return '{0}-{1}'.format(self.assay_id.assay_short_name, self.feature)
 
 
 # TO BE DEPRECATED To be merged into single "AssayData" model
 class AssayReadout(models.Model):
     """An individual value for a PLATE readout"""
 
-    assay_device_readout = models.ForeignKey('assays.AssayPlateReadout')
+    assay_device_readout = models.ForeignKey('assays.AssayPlateReadout', on_delete=models.CASCADE)
     # A plate can have multiple assays, this differentiates between those assays
-    assay = models.ForeignKey('assays.AssayPlateReadoutAssay')
+    assay = models.ForeignKey('assays.AssayPlateReadoutAssay', on_delete=models.CASCADE)
     row = models.CharField(max_length=25)
     column = models.CharField(max_length=25)
     value = models.FloatField()
@@ -560,7 +574,7 @@ class AssayReadout(models.Model):
     # IT WAS DECIDED THAT A FK WOULD NOT BE USED
     # Use quality with each flag separated with a '-' (SUBJECT TO CHANGE)
     # Quality indicator from QualityIndicator table (so that additional can be added)
-    # quality_indicator = models.ForeignKey(AssayQualityIndicator, null=True, blank=True)
+    # quality_indicator = models.ForeignKey(AssayQualityIndicator, null=True, blank=True, on_delete=models.CASCADE)
 
     # This value contains notes for the data point
     notes = models.CharField(max_length=255, default='')
@@ -580,7 +594,7 @@ class AssayReadout(models.Model):
 #    readout_unit = models.CharField(max_length=512,unique=True)
 #    description = models.CharField(max_length=512,blank=True,null=True)
 #
-#    def __unicode__(self):
+#    def __str__(self):
 #        return self.readout_unit
 
 
@@ -605,9 +619,9 @@ class AssayPlateReadout(FlaggableRestrictedModel):
 
     # Cell samples are to be handled in AssayPlateSetup from now on
 
-    setup = models.ForeignKey(AssayPlateSetup)
+    setup = models.ForeignKey(AssayPlateSetup, on_delete=models.CASCADE)
 
-    timeunit = models.ForeignKey(PhysicalUnits, default=23)
+    timeunit = models.ForeignKey(PhysicalUnits, default=23, on_delete=models.CASCADE)
 
     treatment_time_length = models.FloatField(verbose_name='Treatment Duration',
                                               blank=True, null=True)
@@ -623,8 +637,8 @@ class AssayPlateReadout(FlaggableRestrictedModel):
     file = models.FileField(upload_to=plate_readout_file_location, verbose_name='Data File',
                             blank=True, null=True)
 
-    def __unicode__(self):
-        return u'{0}'.format(self.setup)
+    def __str__(self):
+        return '{0}'.format(self.setup)
 
     def get_absolute_url(self):
         return '/assays/assayplatereadout/{}/'.format(self.id)
@@ -660,7 +674,7 @@ class AssayResultFunction(LockableModel):
     function_results = models.CharField(max_length=100, blank=True, default='')
     description = models.CharField(max_length=200, blank=True, default='')
 
-    def __unicode__(self):
+    def __str__(self):
         return self.function_name
 
 
@@ -675,7 +689,7 @@ class AssayResultType(LockableModel):
     assay_result_type = models.CharField(max_length=100, unique=True)
     description = models.CharField(max_length=200, blank=True, default='')
 
-    def __unicode__(self):
+    def __str__(self):
         return self.assay_result_type
 
 
@@ -683,15 +697,21 @@ class AssayResultType(LockableModel):
 class AssayPlateResult(models.Model):
     """Individual result parameters for PLATE RESULTS used in inline"""
 
-    assay_name = models.ForeignKey('assays.AssayPlateReadoutAssay',
-                                   verbose_name='Assay')
+    assay_name = models.ForeignKey(
+        'assays.AssayPlateReadoutAssay',
+        verbose_name='Assay',
+        on_delete=models.CASCADE
+    )
 
-    assay_result = models.ForeignKey('assays.AssayPlateTestResult')
+    assay_result = models.ForeignKey('assays.AssayPlateTestResult', on_delete=models.CASCADE)
 
-    result_function = models.ForeignKey(AssayResultFunction,
-                                        blank=True,
-                                        null=True,
-                                        verbose_name='Function')
+    result_function = models.ForeignKey(
+        AssayResultFunction,
+        blank=True,
+        null=True,
+        verbose_name='Function',
+        on_delete=models.CASCADE
+    )
 
     result = models.CharField(default='1',
                               max_length=8,
@@ -704,16 +724,22 @@ class AssayPlateResult(models.Model):
                                 verbose_name='Severity',
                                 blank=True)
 
-    result_type = models.ForeignKey(AssayResultType,
-                                    blank=True,
-                                    null=True,
-                                    verbose_name='Measure')
+    result_type = models.ForeignKey(
+        AssayResultType,
+        blank=True,
+        null=True,
+        verbose_name='Measure',
+        on_delete=models.CASCADE
+    )
 
     value = models.FloatField(blank=True, null=True)
 
-    test_unit = models.ForeignKey(PhysicalUnits,
-                                  blank=True,
-                                  null=True)
+    test_unit = models.ForeignKey(
+        PhysicalUnits,
+        blank=True,
+        null=True,
+        on_delete=models.CASCADE
+    )
 
 
 # TO BE DEPRECATED To be merged into single "AssayResultset" model
@@ -723,12 +749,15 @@ class AssayPlateTestResult(FlaggableRestrictedModel):
     class Meta(object):
         verbose_name = 'Plate Result'
 
-    readout = models.ForeignKey('assays.AssayPlateReadout',
-                                verbose_name='Plate ID/ Barcode')
+    readout = models.ForeignKey(
+        'assays.AssayPlateReadout',
+        verbose_name='Plate ID/ Barcode',
+        on_delete=models.CASCADE
+    )
     summary = models.TextField(default='', blank=True)
 
-    def __unicode__(self):
-        return u'Results for: {}'.format(self.readout)
+    def __str__(self):
+        return 'Results for: {}'.format(self.readout)
 
     def get_absolute_url(self):
         return '/assays/assayplatetestresult/{}/'.format(self.id)
@@ -761,7 +790,7 @@ class AssayStudyConfiguration(LockableModel):
     # Subject to removal
     # image = models.ImageField(upload_to="configuration",null=True, blank=True)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
     def get_absolute_url(self):
@@ -774,9 +803,9 @@ class AssayStudyConfiguration(LockableModel):
 class AssayStudyModel(models.Model):
     """Individual connections for integrated models"""
 
-    study_configuration = models.ForeignKey(AssayStudyConfiguration)
+    study_configuration = models.ForeignKey(AssayStudyConfiguration, on_delete=models.CASCADE)
     label = models.CharField(max_length=2)
-    organ = models.ForeignKey(OrganModel)
+    organ = models.ForeignKey(OrganModel, on_delete=models.CASCADE)
     sequence_number = models.IntegerField()
     output = models.CharField(max_length=20, blank=True, default='')
     # Subject to change
@@ -802,7 +831,7 @@ class AssayRun(FlaggableRestrictedModel):
 
     # Removed center_id for now: this field is basically for admins anyway
     # May add center_id back later, but group mostly serves the same purpose
-    # center_id = models.ForeignKey('microdevices.MicrophysiologyCenter', verbose_name='Center(s)')
+    # center_id = models.ForeignKey('microdevices.MicrophysiologyCenter', verbose_name='Center(s)', on_delete=models.CASCADE)
     # Study type now multiple boolean fields; May need to add more in the future
     toxicity = models.BooleanField(default=False)
     efficacy = models.BooleanField(default=False)
@@ -811,7 +840,7 @@ class AssayRun(FlaggableRestrictedModel):
     # NOW REFERRED TO AS "Chip Characterization"
     cell_characterization = models.BooleanField(default=False)
     # Subject to change
-    study_configuration = models.ForeignKey(AssayStudyConfiguration, blank=True, null=True)
+    study_configuration = models.ForeignKey(AssayStudyConfiguration, blank=True, null=True, on_delete=models.CASCADE)
     name = models.TextField(default='Study-01', verbose_name='Study Name',
                             help_text='Name-###')
     start_date = models.DateField(help_text='YYYY-MM-DD')
@@ -862,7 +891,7 @@ class AssayRun(FlaggableRestrictedModel):
     signed_off_notes = models.CharField(max_length=255, blank=True, default='')
 
     # THESE ARE NOW EXPLICIT FIELDS IN STUDY
-    # group = models.ForeignKey(Group, help_text='Bind to a group')
+    # group = models.ForeignKey(Group, help_text='Bind to a group', on_delete=models.CASCADE)
 
     # restricted = models.BooleanField(default=True, help_text='Check box to restrict to selected group')
 
@@ -876,10 +905,10 @@ class AssayRun(FlaggableRestrictedModel):
             current_types += 'DM '
         if self.cell_characterization:
             current_types += 'CC '
-        return u'{0}'.format(current_types)
+        return '{0}'.format(current_types)
 
-    def __unicode__(self):
-        return unicode(self.assay_run_id)
+    def __str__(self):
+        return str(self.assay_run_id)
 
     def get_absolute_url(self):
         return '/assays/{}/'.format(self.id)
@@ -906,7 +935,7 @@ def study_supporting_data_location(instance, filename):
 # DEPRECATED: SLATED FOR DELETION
 class StudySupportingData(models.Model):
     """A file (with description) that gives extra data for a Study"""
-    study = models.ForeignKey(AssayRun)
+    study = models.ForeignKey(AssayRun, on_delete=models.CASCADE)
 
     description = models.CharField(
         max_length=1000,
@@ -928,9 +957,9 @@ class AssayChipRawData(models.Model):
     #     unique_together = [('assay_chip_id', 'assay_id', 'field_id', 'time')]
 
     # TO BE REPLACED (readouts likely will not exist in future versions)
-    assay_chip_id = models.ForeignKey('assays.AssayChipReadout')
+    assay_chip_id = models.ForeignKey('assays.AssayChipReadout', on_delete=models.CASCADE)
     # DEPRECATED: ACRA WILL BE REPLACED BY ASSAY INSTANCE
-    assay_id = models.ForeignKey('assays.AssayChipReadoutAssay', null=True, blank=True)
+    assay_id = models.ForeignKey('assays.AssayChipReadoutAssay', null=True, blank=True, on_delete=models.CASCADE)
 
     # Cross reference for users if study ids diverge
     cross_reference = models.CharField(max_length=255, default='')
@@ -954,7 +983,7 @@ class AssayChipRawData(models.Model):
     # IT WAS DECIDED THAT A FK WOULD NOT BE USED
     # Use quality with each flag separated with a '-' (SUBJECT TO CHANGE)
     # Quality indicator from QualityIndicator table (so that additional can be added)
-    # quality_indicator = models.ForeignKey(AssayQualityIndicator, null=True, blank=True)
+    # quality_indicator = models.ForeignKey(AssayQualityIndicator, null=True, blank=True, on_delete=models.CASCADE)
 
     # This value contains notes for the data point
     notes = models.CharField(max_length=255, default='')
@@ -964,9 +993,9 @@ class AssayChipRawData(models.Model):
 
     # New fields
     # TEMPORARILY NOT REQUIRED
-    sample_location = models.ForeignKey('assays.AssaySampleLocation', null=True, blank=True)
+    sample_location = models.ForeignKey('assays.AssaySampleLocation', null=True, blank=True, on_delete=models.CASCADE)
     # TEMPORARILY NOT REQUIRED
-    assay_instance = models.ForeignKey('assays.AssayInstance', null=True, blank=True)
+    assay_instance = models.ForeignKey('assays.AssayInstance', null=True, blank=True, on_delete=models.CASCADE)
 
     # DEFAULTS SUBJECT TO CHANGE
     assay_plate_id = models.CharField(max_length=255, default='N/A')
@@ -980,7 +1009,7 @@ class AssayChipRawData(models.Model):
     time = models.FloatField(default=0)
 
     # Affiliated upload
-    data_upload = models.ForeignKey('assays.AssayDataUpload', null=True, blank=True)
+    data_upload = models.ForeignKey('assays.AssayDataUpload', null=True, blank=True, on_delete=models.CASCADE)
 
 # Expedient solution to absurd problem with choice field (which I dislike)
 cell_choice_dict = {
@@ -1004,9 +1033,9 @@ class AssayChipCells(models.Model):
             'cell_passage'
         )
 
-    assay_chip = models.ForeignKey('AssayChipSetup')
-    cell_sample = models.ForeignKey('cellsamples.CellSample')
-    cell_biosensor = models.ForeignKey('cellsamples.Biosensor')
+    assay_chip = models.ForeignKey('AssayChipSetup', on_delete=models.CASCADE)
+    cell_sample = models.ForeignKey('cellsamples.CellSample', on_delete=models.CASCADE)
+    cell_biosensor = models.ForeignKey('cellsamples.Biosensor', on_delete=models.CASCADE)
     cellsample_density = models.FloatField(verbose_name='density', default=0)
 
     cellsample_density_unit = models.CharField(verbose_name='Unit',
@@ -1019,8 +1048,8 @@ class AssayChipCells(models.Model):
     cell_passage = models.CharField(max_length=16, verbose_name='Passage#',
                                     blank=True, default='')
 
-    def __unicode__(self):
-        return u'{0}\n~{1:.0e} {2}'.format(
+    def __str__(self):
+        return '{0}\n~{1:.0e} {2}'.format(
             self.cell_sample,
             self.cellsample_density,
             cell_choice_dict.get(self.cellsample_density_unit, 'Unknown Unit')
@@ -1034,16 +1063,21 @@ class AssayChipSetup(FlaggableRestrictedModel):
         verbose_name = 'Chip Setup'
         ordering = ('-assay_chip_id', 'assay_run_id',)
 
-    assay_run_id = models.ForeignKey(AssayRun, verbose_name='Study')
+    assay_run_id = models.ForeignKey(AssayRun, verbose_name='Study', on_delete=models.CASCADE)
     setup_date = models.DateField(help_text='YYYY-MM-DD')
 
-    device = models.ForeignKey(Microdevice, verbose_name='Device')
+    device = models.ForeignKey(Microdevice, verbose_name='Device', on_delete=models.CASCADE)
 
     # RENAMED (previously field was erroneously device)
-    organ_model = models.ForeignKey(OrganModel, verbose_name='Organ Model Name', null=True, blank=True)
+    organ_model = models.ForeignKey(OrganModel, verbose_name='Organ Model Name', null=True, blank=True, on_delete=models.CASCADE)
 
-    organ_model_protocol = models.ForeignKey(OrganModelProtocol, verbose_name='Organ Model Protocol',
-                                             null=True, blank=True)
+    organ_model_protocol = models.ForeignKey(
+        OrganModelProtocol,
+        verbose_name='Organ Model Protocol',
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE
+    )
 
     variance = models.CharField(max_length=3000, verbose_name='Variance from Protocol', default='', blank=True)
 
@@ -1056,20 +1090,25 @@ class AssayChipSetup(FlaggableRestrictedModel):
         ("control", "Control"), ("compound", "Compound")), default="control"
     )
 
-    compound = models.ForeignKey('compounds.Compound', null=True, blank=True)
+    compound = models.ForeignKey('compounds.Compound', null=True, blank=True, on_delete=models.CASCADE)
     concentration = models.FloatField(default=0, verbose_name='Conc.',
                                       null=True, blank=True)
-    unit = models.ForeignKey('assays.PhysicalUnits', default=4,
-                             verbose_name='conc. Unit',
-                             null=True, blank=True)
+    unit = models.ForeignKey(
+        'assays.PhysicalUnits',
+        default=4,
+        verbose_name='conc. Unit',
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE
+    )
 
     scientist = models.CharField(max_length=100, blank=True, default='')
     notebook = models.CharField(max_length=256, blank=True, default='')
     notebook_page = models.IntegerField(blank=True, null=True)
     notes = models.CharField(max_length=2048, blank=True, default='')
 
-    def __unicode__(self):
-        return u'{}'.format(self.assay_chip_id)
+    def __str__(self):
+        return '{}'.format(self.assay_chip_id)
         # if self.compound:
         #     return u'Chip-{}:{}({}{})'.format(
         #         self.assay_chip_id,
@@ -1099,7 +1138,7 @@ class AssayChipSetup(FlaggableRestrictedModel):
         """Stringified cells for a setup"""
         cells = []
         for cell in self.assaychipcells_set.all():
-            cells.append(unicode(cell))
+            cells.append(str(cell))
 
         if not cells:
             cells = ['-No Cell Samples-']
@@ -1124,7 +1163,7 @@ class AssayChipSetup(FlaggableRestrictedModel):
         """Stringified cells for a setup"""
         compounds = []
         for compound in self.assaycompoundinstance_set.all():
-            compounds.append(unicode(compound))
+            compounds.append(str(compound))
 
         if not compounds:
             compounds = ['-No Compounds-']
@@ -1176,11 +1215,11 @@ class AssayChipReadoutAssay(models.Model):
         # Changed uniqueness check to include unit (extend to include object?)
         unique_together = [('readout_id', 'assay_id', 'readout_unit')]
 
-    readout_id = models.ForeignKey('assays.AssayChipReadout', verbose_name='Readout')
+    readout_id = models.ForeignKey('assays.AssayChipReadout', verbose_name='Readout', on_delete=models.CASCADE)
     # DEPRECATED
-    assay_id = models.ForeignKey('assays.AssayModel', verbose_name='Assay', null=True, blank=True)
+    assay_id = models.ForeignKey('assays.AssayModel', verbose_name='Assay', null=True, blank=True, on_delete=models.CASCADE)
     # DEPRECATED
-    reader_id = models.ForeignKey('assays.AssayReader', verbose_name='Reader', null=True, blank=True)
+    reader_id = models.ForeignKey('assays.AssayReader', verbose_name='Reader', null=True, blank=True, on_delete=models.CASCADE)
     # DEPRECATED
     object_type = models.CharField(
         max_length=6,
@@ -1190,14 +1229,14 @@ class AssayChipReadoutAssay(models.Model):
         blank=True
     )
     # Will be renamed unit in future table
-    readout_unit = models.ForeignKey(PhysicalUnits)
+    readout_unit = models.ForeignKey(PhysicalUnits, on_delete=models.CASCADE)
 
     # New fields that will be in AssaySpecificAssay (or AssayInstance, not sure about name)
-    # target = models.ForeignKey(AssayTarget)
-    # method = models.ForeignKey(AssayMethod)
+    # target = models.ForeignKey(AssayTarget, on_delete=models.CASCADE)
+    # method = models.ForeignKey(AssayMethod, on_delete=models.CASCADE)
 
-    def __unicode__(self):
-        return u'{}'.format(self.assay_id)
+    def __str__(self):
+        return '{}'.format(self.assay_id)
 
 
 # Likely to become deprecated
@@ -1214,9 +1253,9 @@ class AssayChipReadout(FlaggableRestrictedModel):
         verbose_name = 'Chip Readout'
         ordering = ('chip_setup',)
 
-    chip_setup = models.ForeignKey(AssayChipSetup)
+    chip_setup = models.ForeignKey(AssayChipSetup, on_delete=models.CASCADE)
 
-    timeunit = models.ForeignKey(PhysicalUnits, default=23)
+    timeunit = models.ForeignKey(PhysicalUnits, default=23, on_delete=models.CASCADE)
     treatment_time_length = models.FloatField(verbose_name='Assay Treatment Duration',
                                               blank=True, null=True)
 
@@ -1245,10 +1284,10 @@ class AssayChipReadout(FlaggableRestrictedModel):
         for assay in assays:
             list_of_assays.append(str(assay))
         # Convert to unicode for consistency
-        return u'{0}'.format(', '.join(list_of_assays))
+        return '{0}'.format(', '.join(list_of_assays))
 
-    def __unicode__(self):
-        return u'{0}'.format(self.chip_setup)
+    def __str__(self):
+        return '{0}'.format(self.chip_setup)
 
     def get_absolute_url(self):
         return '/assays/assaychipreadout/{}/'.format(self.id)
@@ -1270,11 +1309,11 @@ class AssayChipTestResult(FlaggableRestrictedModel):
     class Meta(object):
         verbose_name = 'Chip Result'
 
-    chip_readout = models.ForeignKey('assays.AssayChipReadout', verbose_name='Chip Readout')
+    chip_readout = models.ForeignKey('assays.AssayChipReadout', verbose_name='Chip Readout', on_delete=models.CASCADE)
     summary = models.TextField(default='', blank=True)
 
-    def __unicode__(self):
-        return u'Results for: {}'.format(self.chip_readout)
+    def __str__(self):
+        return 'Results for: {}'.format(self.chip_readout)
 
     def assay(self):
         if self.id and not len(AssayChipResult.objects.filter(assay_result_id=self.id).order_by('id')) == 0:
@@ -1285,9 +1324,9 @@ class AssayChipTestResult(FlaggableRestrictedModel):
         if self.id and not len(AssayChipResult.objects.filter(assay_result_id=self.id).order_by('id')) == 0:
             abbreviation = AssayChipResult.objects.filter(assay_result_id=self.id).order_by('id')[0].result
             if abbreviation == '1':
-                return u'Positive'
+                return 'Positive'
             else:
-                return u'Negative'
+                return 'Negative'
         return ''
 
     def result_function(self):
@@ -1322,15 +1361,21 @@ class AssayChipTestResult(FlaggableRestrictedModel):
 class AssayChipResult(models.Model):
     """Individual result parameters for CHIP RESULTS used in inline"""
 
-    assay_name = models.ForeignKey('assays.AssayInstance',
-                                   verbose_name='Assay')
+    assay_name = models.ForeignKey(
+        'assays.AssayInstance',
+        verbose_name='Assay',
+        on_delete=models.CASCADE
+    )
 
-    assay_result = models.ForeignKey(AssayChipTestResult)
+    assay_result = models.ForeignKey(AssayChipTestResult, on_delete=models.CASCADE)
 
-    result_function = models.ForeignKey(AssayResultFunction,
-                                        blank=True,
-                                        null=True,
-                                        verbose_name='Function')
+    result_function = models.ForeignKey(
+        AssayResultFunction,
+        blank=True,
+        null=True,
+        verbose_name='Function',
+        on_delete=models.CASCADE
+    )
 
     result = models.CharField(default='1',
                               max_length=8,
@@ -1343,16 +1388,22 @@ class AssayChipResult(models.Model):
                                 verbose_name='Severity',
                                 blank=True)
 
-    result_type = models.ForeignKey(AssayResultType,
-                                    blank=True,
-                                    null=True,
-                                    verbose_name='Measure')
+    result_type = models.ForeignKey(
+        AssayResultType,
+        blank=True,
+        null=True,
+        verbose_name='Measure',
+        on_delete=models.CASCADE
+    )
 
     value = models.FloatField(blank=True, null=True)
 
-    test_unit = models.ForeignKey(PhysicalUnits,
-                                  blank=True,
-                                  null=True)
+    test_unit = models.ForeignKey(
+        PhysicalUnits,
+        blank=True,
+        null=True,
+        on_delete=models.CASCADE
+    )
 
 
 class AssayDataUpload(FlaggableRestrictedModel):
@@ -1376,10 +1427,10 @@ class AssayDataUpload(FlaggableRestrictedModel):
 
     # Supplying study may seem redundant, however:
     # This ensures that uploads for readouts that have been (for whatever reason) deleted will no longer be hidden
-    study = models.ForeignKey(AssayRun)
+    study = models.ForeignKey(AssayRun, on_delete=models.CASCADE)
 
-    def __unicode__(self):
-        return urllib.unquote(self.file_location.split('/')[-1])
+    def __str__(self):
+        return urllib.parse.unquote(self.file_location.split('/')[-1])
 
 
 class AssayDataFileUpload(FlaggableModel):
@@ -1398,10 +1449,10 @@ class AssayDataFileUpload(FlaggableModel):
     # NOT VERY USEFUL
     # items = models.ManyToManyField(AssayChipReadout)
 
-    study = models.ForeignKey('assays.AssayStudy')
+    study = models.ForeignKey('assays.AssayStudy', on_delete=models.CASCADE)
 
-    def __unicode__(self):
-        return urllib.unquote(self.file_location.split('/')[-1])
+    def __str__(self):
+        return urllib.parse.unquote(self.file_location.split('/')[-1])
 
 
 # NEW MODELS, TO BE INTEGRATED FURTHER LATER
@@ -1415,8 +1466,8 @@ class AssayTarget(LockableModel):
     # Tentative
     alt_name = models.CharField(max_length=1000, blank=True, default='')
 
-    def __unicode__(self):
-        return u'{0}'.format(self.name)
+    def __str__(self):
+        return '{0}'.format(self.name)
 
 
 class AssaySubtarget(models.Model):
@@ -1424,7 +1475,7 @@ class AssaySubtarget(models.Model):
     name = models.CharField(max_length=512, unique=True)
     description = models.CharField(max_length=2000)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
 
@@ -1433,7 +1484,7 @@ class AssayMeasurementType(LockableModel):
     name = models.CharField(max_length=512, unique=True)
     description = models.CharField(max_length=2000)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
 
@@ -1442,7 +1493,7 @@ class AssaySupplier(LockableModel):
     name = models.CharField(max_length=512, unique=True)
     description = models.CharField(max_length=2000)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
 
@@ -1451,10 +1502,10 @@ class AssayMethod(LockableModel):
     # We may want to modify this so that it is unique on name in combination with measurement type?
     name = models.CharField(max_length=512, unique=True)
     description = models.CharField(max_length=2000)
-    measurement_type = models.ForeignKey(AssayMeasurementType)
+    measurement_type = models.ForeignKey(AssayMeasurementType, on_delete=models.CASCADE)
 
     # May or may not be required in the future
-    supplier = models.ForeignKey(AssaySupplier, blank=True, null=True)
+    supplier = models.ForeignKey(AssaySupplier, blank=True, null=True, on_delete=models.CASCADE)
 
     # TODO STORAGE LOCATION
     # TODO TEMPORARILY NOT REQUIRED
@@ -1463,7 +1514,7 @@ class AssayMethod(LockableModel):
     # Tentative
     alt_name = models.CharField(max_length=1000, blank=True, default='')
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
 
@@ -1472,22 +1523,22 @@ class AssaySampleLocation(LockableModel):
     name = models.CharField(max_length=512, unique=True)
     description = models.CharField(max_length=2000)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
 
 # TODO WE WILL NEED TO ADD INSTRUMENT/READER IT SEEMS
 class AssayInstance(models.Model):
     """Specific assays used in the 'inlines'"""
-    study = models.ForeignKey(AssayRun, null=True, blank=True)
-    # study_new = models.ForeignKey('assays.AssayStudy', null=True, blank=True)
-    target = models.ForeignKey(AssayTarget)
-    method = models.ForeignKey(AssayMethod)
+    study = models.ForeignKey(AssayRun, null=True, blank=True, on_delete=models.CASCADE)
+    # study_new = models.ForeignKey('assays.AssayStudy', null=True, blank=True, on_delete=models.CASCADE)
+    target = models.ForeignKey(AssayTarget, on_delete=models.CASCADE)
+    method = models.ForeignKey(AssayMethod, on_delete=models.CASCADE)
     # Name of model "PhysicalUnits" should be renamed, methinks
-    unit = models.ForeignKey(PhysicalUnits)
+    unit = models.ForeignKey(PhysicalUnits, on_delete=models.CASCADE)
 
-    def __unicode__(self):
-        return u'{0}|{1}|{2}'.format(self.target, self.method, self.unit)
+    def __str__(self):
+        return '{0}|{1}|{2}'.format(self.target, self.method, self.unit)
 
 
 # Preliminary schema
@@ -1500,7 +1551,7 @@ class AssayInstance(models.Model):
 #     # Description as per usual
 #     description = models.CharField(max_length=2000, default='')
 #
-#     def __unicode__(self):
+#     def __str__(self):
 #         return self.name
 
 
@@ -1535,7 +1586,7 @@ class AssayStudy(FlaggableModel):
 
     # Subject to change
     # NOTE THAT THE TABLE IS NOW NAMED AssayStudyConfiguration to adhere to standards
-    study_configuration = models.ForeignKey(AssayStudyConfiguration, blank=True, null=True)
+    study_configuration = models.ForeignKey(AssayStudyConfiguration, blank=True, null=True, on_delete=models.CASCADE)
     # Whether or not the name should be unique is an interesting question
     # We could have a constraint on the combination of name and start_date
     # But to constrain by name, start_date, and study_types, we will need to do that in the forms.py file
@@ -1569,7 +1620,7 @@ class AssayStudy(FlaggableModel):
     access_groups = models.ManyToManyField(Group, blank=True, related_name='study_access_groups')
 
     # THESE ARE NOW EXPLICIT FIELDS IN STUDY
-    group = models.ForeignKey(Group, verbose_name='Data Group', help_text='Select the Data Group. The study will be bound to this group')
+    group = models.ForeignKey(Group, verbose_name='Data Group', help_text='Select the Data Group. The study will be bound to this group', on_delete=models.CASCADE)
 
     restricted = models.BooleanField(
         default=True,
@@ -1627,7 +1678,7 @@ class AssayStudy(FlaggableModel):
         current_study = {}
 
         for matrix_item in matrix_items:
-            organ_model_name = u''
+            organ_model_name = ''
 
             if matrix_item.organ_model:
                 organ_model_name = matrix_item.organ_model.name
@@ -1644,20 +1695,20 @@ class AssayStudy(FlaggableModel):
 
             for compound in matrix_item.assaysetupcompound_set.all():
                 current_study.setdefault('compounds', {}).update({
-                    unicode(compound): True
+                    str(compound): True
                 })
 
             for cell in matrix_item.assaysetupcell_set.all():
                 current_study.setdefault('cells', {}).update({
-                    unicode(cell): True
+                    str(cell): True
                 })
 
             for setting in matrix_item.assaysetupsetting_set.all():
                 current_study.setdefault('settings', {}).update({
-                    unicode(setting): True
+                    str(setting): True
                 })
 
-        return u'\n'.join([u' '.join(x) for x in current_study.values()])
+        return '\n'.join([' '.join(x) for x in list(current_study.values())])
 
     def get_study_types_string(self):
         current_types = []
@@ -1669,16 +1720,16 @@ class AssayStudy(FlaggableModel):
             current_types.append('DM')
         if self.cell_characterization:
             current_types.append('CC')
-        return u'-'.join(current_types)
+        return '-'.join(current_types)
 
     # TODO
-    def __unicode__(self):
+    def __str__(self):
         center_id = self.group.microphysiologycenter_set.first().center_id
         # study_types = self.get_study_types_string()
         return '-'.join([
             center_id,
             self.get_study_types_string(),
-            unicode(self.start_date),
+            str(self.start_date),
             self.name
         ])
 
@@ -1733,12 +1784,12 @@ class AssayMatrix(FlaggableModel):
         )
     )
 
-    study = models.ForeignKey(AssayStudy)
+    study = models.ForeignKey(AssayStudy, on_delete=models.CASCADE)
 
-    device = models.ForeignKey(Microdevice, null=True, blank=True)
+    device = models.ForeignKey(Microdevice, null=True, blank=True, on_delete=models.CASCADE)
 
     # Decided against the inclusion of organ model here
-    # organ_model = models.ForeignKey(OrganModel, null=True, blank=True)
+    # organ_model = models.ForeignKey(OrganModel, null=True, blank=True, on_delete=models.CASCADE)
     #
     # organ_model_protocol = models.ForeignKey(
     #     OrganModelProtocol,
@@ -1763,8 +1814,8 @@ class AssayMatrix(FlaggableModel):
     # May be useful
     notes = models.CharField(max_length=2048, blank=True, default='')
 
-    def __unicode__(self):
-        return u'{0}'.format(self.name)
+    def __str__(self):
+        return '{0}'.format(self.name)
 
     # def get_organ_models(self):
     #     organ_models = []
@@ -1810,14 +1861,14 @@ class AssayMatrixItem(FlaggableModel):
         ]
 
     # Technically the study here is redundant (contained in matrix)
-    study = models.ForeignKey(AssayStudy)
+    study = models.ForeignKey(AssayStudy, on_delete=models.CASCADE)
 
     # Probably shouldn't use this trick!
     # This is in fact required, just listed as not being so due to quirk in cleaning
-    matrix = models.ForeignKey(AssayMatrix, null=True, blank=True)
+    matrix = models.ForeignKey(AssayMatrix, null=True, blank=True, on_delete=models.CASCADE)
 
     # This is in fact required, just listed as not being so due to quirk in cleaning
-    # setup = models.ForeignKey('assays.AssaySetup', null=True, blank=True)
+    # setup = models.ForeignKey('assays.AssaySetup', null=True, blank=True, on_delete=models.CASCADE)
 
     name = models.CharField(max_length=512)
     setup_date = models.DateField(help_text='YYYY-MM-DD')
@@ -1833,15 +1884,16 @@ class AssayMatrixItem(FlaggableModel):
     row_index = models.IntegerField()
     column_index = models.IntegerField()
 
-    device = models.ForeignKey(Microdevice, verbose_name='Device')
+    device = models.ForeignKey(Microdevice, verbose_name='Device', on_delete=models.CASCADE)
 
-    organ_model = models.ForeignKey(OrganModel, verbose_name='Model', null=True, blank=True)
+    organ_model = models.ForeignKey(OrganModel, verbose_name='Model', null=True, blank=True, on_delete=models.CASCADE)
 
     organ_model_protocol = models.ForeignKey(
         OrganModelProtocol,
         verbose_name='Model Protocol',
         null=True,
-        blank=True
+        blank=True,
+        on_delete=models.CASCADE
     )
 
     # formerly just 'variance'
@@ -1865,10 +1917,10 @@ class AssayMatrixItem(FlaggableModel):
     # Failure time in minutes
     failure_time = models.FloatField(null=True, blank=True)
     # Do we want this is to be table or a static list?
-    failure_reason = models.ForeignKey(AssayFailureReason, blank=True, null=True)
+    failure_reason = models.ForeignKey(AssayFailureReason, blank=True, null=True, on_delete=models.CASCADE)
 
-    def __unicode__(self):
-        return unicode(self.name)
+    def __str__(self):
+        return str(self.name)
 
     def devolved_settings(self, criteria=DEFAULT_SETTING_CRITERIA):
         """Makes a tuple of cells (for comparison)"""
@@ -1960,19 +2012,19 @@ class AssayMatrixItem(FlaggableModel):
 
     # TODO THESE ARE NOT DRY
     def get_hyperlinked_name(self):
-        return u'<a target="_blank" href="{0}">{1}</a>'.format(self.get_absolute_url(), self.name)
+        return '<a target="_blank" href="{0}">{1}</a>'.format(self.get_absolute_url(), self.name)
 
     def get_hyperlinked_model_or_device(self):
         if not self.organ_model:
-            return u'<a target="_blank" href="{0}">{1} (No Organ Model)</a>'.format(self.device.get_absolute_url(), self.device.name)
+            return '<a target="_blank" href="{0}">{1} (No Organ Model)</a>'.format(self.device.get_absolute_url(), self.device.name)
         else:
-            return u'<a target="_blank" href="{0}">{1}</a>'.format(self.organ_model.get_absolute_url(), self.organ_model.name)
+            return '<a target="_blank" href="{0}">{1}</a>'.format(self.organ_model.get_absolute_url(), self.organ_model.name)
 
     def get_hyperlinked_study(self):
-        return u'<a target="_blank" href="{0}">{1}</a>'.format(self.study.get_absolute_url(), self.study.name)
+        return '<a target="_blank" href="{0}">{1}</a>'.format(self.study.get_absolute_url(), self.study.name)
 
     def get_hyperlinked_matrix(self):
-        return u'<a target="_blank" href="{0}">{1}</a>'.format(self.matrix.get_absolute_url(), self.matrix.name)
+        return '<a target="_blank" href="{0}">{1}</a>'.format(self.matrix.get_absolute_url(), self.matrix.name)
 
     # TODO TODO TODO CHANGE
     def get_absolute_url(self):
@@ -2017,12 +2069,12 @@ class AssaySetupCell(models.Model):
         )
 
     # Now binds directly to items
-    matrix_item = models.ForeignKey(AssayMatrixItem)
+    matrix_item = models.ForeignKey(AssayMatrixItem, on_delete=models.CASCADE)
 
     # No longer bound one-to-one
-    # setup = models.ForeignKey('AssaySetup')
-    cell_sample = models.ForeignKey('cellsamples.CellSample')
-    biosensor = models.ForeignKey('cellsamples.Biosensor')
+    # setup = models.ForeignKey('AssaySetup', on_delete=models.CASCADE)
+    cell_sample = models.ForeignKey('cellsamples.CellSample', on_delete=models.CASCADE)
+    biosensor = models.ForeignKey('cellsamples.Biosensor', on_delete=models.CASCADE)
     density = models.FloatField(verbose_name='density', default=0)
 
     # TODO THIS IS TO BE HAMMERED OUT
@@ -2035,7 +2087,7 @@ class AssaySetupCell(models.Model):
     #             ('ML', 'cells / mL'),
     #             ('MM', 'cells / mm^2'))
     # )
-    density_unit = models.ForeignKey('assays.PhysicalUnits')
+    density_unit = models.ForeignKey('assays.PhysicalUnits', on_delete=models.CASCADE)
     passage = models.CharField(
         max_length=16,
         verbose_name='Passage#',
@@ -2052,7 +2104,7 @@ class AssaySetupCell(models.Model):
     # duration = models.FloatField(null=True, blank=True)
 
     # TODO TODO TODO TEMPORARILY NOT REQUIRED
-    addition_location = models.ForeignKey(AssaySampleLocation, blank=True, default=1)
+    addition_location = models.ForeignKey(AssaySampleLocation, blank=True, default=1, on_delete=models.CASCADE)
 
     # NOT DRY
     def get_addition_time_string(self):
@@ -2076,11 +2128,11 @@ class AssaySetupCell(models.Model):
         if criteria:
             full_string = []
             if 'cell_sample_id' in criteria:
-                full_string.append(unicode(self.cell_sample))
+                full_string.append(str(self.cell_sample))
             if 'cell_sample_id' not in criteria and 'cell_sample.cell_type_id' in criteria:
-                full_string.append(unicode(self.cell_sample.cell_type))
+                full_string.append(str(self.cell_sample.cell_type))
             if 'cell_sample_id' not in criteria and 'cell_sample.cell_subtype_id' in criteria:
-                full_string.append(unicode(self.cell_sample.cell_subtype))
+                full_string.append(str(self.cell_sample.cell_subtype))
             if 'passage' in criteria:
                 full_string.append(self.passage)
             if 'density' in criteria:
@@ -2091,19 +2143,19 @@ class AssaySetupCell(models.Model):
             # if 'duration' in criteria:
             #     full_string.append('Duration of: ' + self.get_duration_string())
             if 'addition_location_id' in criteria:
-                full_string.append(unicode(self.addition_location))
-            return u'{}; '.format(u' '.join(full_string))
+                full_string.append(str(self.addition_location))
+            return '{}; '.format(' '.join(full_string))
         else:
-            return unicode(self)
+            return str(self)
 
-    def __unicode__(self):
+    def __str__(self):
         passage = ''
 
         if self.passage:
             passage = 'p{}'.format(self.passage)
 
         if self.addition_location:
-            return u'{0} {1}\n~{2:.2e} {3}\nAdded to: {4}'.format(
+            return '{0} {1}\n~{2:.2e} {3}\nAdded to: {4}'.format(
                 self.cell_sample,
                 passage,
                 self.density,
@@ -2111,7 +2163,7 @@ class AssaySetupCell(models.Model):
                 self.addition_location
             )
         else:
-            return u'{0} {1}\n~{2:.2e} {3}'.format(
+            return '{0} {1}\n~{2:.2e} {3}'.format(
                 self.cell_sample,
                 passage,
                 self.density,
@@ -2139,19 +2191,19 @@ class AssayDataPoint(models.Model):
             )
         ]
 
-    # setup = models.ForeignKey('assays.AssaySetup')
+    # setup = models.ForeignKey('assays.AssaySetup', on_delete=models.CASCADE)
 
     # May seem excessive, but chaining through fields can be inconvenient
-    study = models.ForeignKey('assays.AssayStudy')
+    study = models.ForeignKey('assays.AssayStudy', on_delete=models.CASCADE)
 
     # Cross reference for users if study ids diverge
     cross_reference = models.CharField(max_length=255, default='')
 
-    matrix_item = models.ForeignKey('assays.AssayMatrixItem')
+    matrix_item = models.ForeignKey('assays.AssayMatrixItem', on_delete=models.CASCADE)
 
-    study_assay = models.ForeignKey('assays.AssayStudyAssay')
+    study_assay = models.ForeignKey('assays.AssayStudyAssay', on_delete=models.CASCADE)
 
-    sample_location = models.ForeignKey('assays.AssaySampleLocation')
+    sample_location = models.ForeignKey('assays.AssaySampleLocation', on_delete=models.CASCADE)
 
     value = models.FloatField(null=True)
 
@@ -2186,10 +2238,10 @@ class AssayDataPoint(models.Model):
     replicate = models.CharField(max_length=255, default='')
 
     # OPTIONAL FOR NOW
-    data_file_upload = models.ForeignKey('assays.AssayDataFileUpload', null=True, blank=True)
+    data_file_upload = models.ForeignKey('assays.AssayDataFileUpload', null=True, blank=True, on_delete=models.CASCADE)
 
     # OPTIONAL
-    subtarget = models.ForeignKey(AssaySubtarget, null=True, blank=True)
+    subtarget = models.ForeignKey(AssaySubtarget, null=True, blank=True, on_delete=models.CASCADE)
 
     def get_time_string(self):
         split_times = get_split_times(self.time)
@@ -2218,9 +2270,9 @@ class AssayDataPoint(models.Model):
 #
 #     # Stop-gap, subject to change
 #     # DEPRECATED
-#     chip_setup = models.ForeignKey('assays.AssayChipSetup', null=True, blank=True)
+#     chip_setup = models.ForeignKey('assays.AssayChipSetup', null=True, blank=True, on_delete=models.CASCADE)
 #     # Shouldn't be optional
-#     # setup = models.ForeignKey('assays.AssaySetup', null=True, blank=True)
+#     # setup = models.ForeignKey('assays.AssaySetup', null=True, blank=True, on_delete=models.CASCADE)
 #
 #     # COMPOUND INSTANCE IS REQUIRED, however null=True was done to avoid a submission issue
 #     compound_instance = models.ForeignKey(
@@ -2268,18 +2320,20 @@ class AssaySetupCompound(models.Model):
         )
 
     # Now binds directly to items
-    matrix_item = models.ForeignKey(AssayMatrixItem)
+    matrix_item = models.ForeignKey(AssayMatrixItem, on_delete=models.CASCADE)
 
     # COMPOUND INSTANCE IS REQUIRED, however null=True was done to avoid a submission issue
     compound_instance = models.ForeignKey(
         'compounds.CompoundInstance',
         null=True,
-        blank=True
+        blank=True,
+        on_delete=models.CASCADE
     )
     concentration = models.FloatField()
     concentration_unit = models.ForeignKey(
         'assays.PhysicalUnits',
-        verbose_name='Concentration Unit'
+        verbose_name='Concentration Unit',
+        on_delete=models.CASCADE
     )
 
     # PLEASE NOTE THAT THIS IS IN MINUTES, CONVERTED FROM D:H:M
@@ -2289,7 +2343,7 @@ class AssaySetupCompound(models.Model):
     duration = models.FloatField(blank=True)
 
     # TODO TODO TODO TEMPORARILY NOT REQUIRED
-    addition_location = models.ForeignKey(AssaySampleLocation, blank=True, default=1)
+    addition_location = models.ForeignKey(AssaySampleLocation, blank=True, default=1, on_delete=models.CASCADE)
 
     # NOT DRY
     def get_addition_time_string(self):
@@ -2322,14 +2376,14 @@ class AssaySetupCompound(models.Model):
             if 'duration' in criteria:
                 full_string.append('Duration of: ' + self.get_duration_string())
             if 'addition_location_id' in criteria:
-                full_string.append(unicode(self.addition_location))
-            return u'{}; '.format(u' '.join(full_string))
+                full_string.append(str(self.addition_location))
+            return '{}; '.format(' '.join(full_string))
         else:
-            return unicode(self)
+            return str(self)
 
-    def __unicode__(self):
+    def __str__(self):
         if self.addition_location:
-            return u'{0} ({1} {2})\nAdded on: {3}; Duration of: {4}; Added to: {5}'.format(
+            return '{0} ({1} {2})\nAdded on: {3}; Duration of: {4}; Added to: {5}'.format(
                 self.compound_instance.compound.name,
                 self.concentration,
                 self.concentration_unit.unit,
@@ -2338,7 +2392,7 @@ class AssaySetupCompound(models.Model):
                 self.addition_location
             )
         else:
-            return u'{0} ({1} {2})\nAdded on: {3}; Duration of: {4}'.format(
+            return '{0} ({1} {2})\nAdded on: {3}; Duration of: {4}'.format(
                 self.compound_instance.compound.name,
                 self.concentration,
                 self.concentration_unit.unit,
@@ -2350,7 +2404,7 @@ class AssaySetupCompound(models.Model):
 # TODO MODIFY StudySupportingData
 class AssayStudySupportingData(models.Model):
     """A file (with description) that gives extra data for a Study"""
-    study = models.ForeignKey(AssayStudy)
+    study = models.ForeignKey(AssayStudy, on_delete=models.CASCADE)
 
     description = models.CharField(
         max_length=1000,
@@ -2381,9 +2435,9 @@ class AssayStudySupportingData(models.Model):
 #     matrix_item = models.ManyToManyField(AssayMatrixItem)
 #
 #     # There are a few ways of swapping this in, but we will probably have to edit the migration CAREFULLY
-#     study = models.ForeignKey(AssayStudy)
+#     study = models.ForeignKey(AssayStudy, on_delete=models.CASCADE)
 #
-#     def __unicode__(self):
+#     def __str__(self):
 #         return urllib.unquote(self.file_location.split('/')[-1])
 
 
@@ -2398,7 +2452,7 @@ class AssayStudySupportingData(models.Model):
 #         default=''
 #     )
 #
-#     unit_type = models.ForeignKey(UnitType)
+#     unit_type = models.ForeignKey(UnitType, on_delete=models.CASCADE)
 #
 #     # Base Unit for conversions and scale factor
 #     base_unit = models.ForeignKey(
@@ -2429,7 +2483,7 @@ class AssayStudySupportingData(models.Model):
 #         verbose_name_plural = 'Physical Units'
 #         ordering = ['unit_type', 'unit']
 #
-#     def __unicode__(self):
+#     def __str__(self):
 #         return u'{}'.format(self.unit)
 
 
@@ -2440,7 +2494,7 @@ class AssaySetting(LockableModel):
     name = models.CharField(max_length=512, unique=True)
     description = models.CharField(max_length=2000)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
 
@@ -2460,13 +2514,13 @@ class AssaySetupSetting(models.Model):
         ]
 
     # Now binds directly to items
-    matrix_item = models.ForeignKey(AssayMatrixItem)
+    matrix_item = models.ForeignKey(AssayMatrixItem, on_delete=models.CASCADE)
 
     # No longer one-to-one
-    # setup = models.ForeignKey('assays.AssaySetup')
-    setting = models.ForeignKey('assays.AssaySetting')
+    # setup = models.ForeignKey('assays.AssaySetup', on_delete=models.CASCADE)
+    setting = models.ForeignKey('assays.AssaySetting', on_delete=models.CASCADE)
     # DEFAULTS TO NONE, BUT IS REQUIRED
-    unit = models.ForeignKey('assays.PhysicalUnits', blank=True, default=14)
+    unit = models.ForeignKey('assays.PhysicalUnits', blank=True, default=14, on_delete=models.CASCADE)
     value = models.CharField(max_length=255)
 
     # Will we include these??
@@ -2477,7 +2531,7 @@ class AssaySetupSetting(models.Model):
     duration = models.FloatField(blank=True)
 
     # TODO TODO TODO TEMPORARILY NOT REQUIRED
-    addition_location = models.ForeignKey(AssaySampleLocation, blank=True, default=1)
+    addition_location = models.ForeignKey(AssaySampleLocation, blank=True, default=1, on_delete=models.CASCADE)
 
     # NOT DRY
     def get_addition_time_string(self):
@@ -2501,7 +2555,7 @@ class AssaySetupSetting(models.Model):
         if criteria:
             full_string = []
             if 'setting_id' in criteria:
-                full_string.append(unicode(self.setting))
+                full_string.append(str(self.setting))
             if 'value' in criteria:
                 full_string.append(self.value)
                 if self.unit:
@@ -2511,13 +2565,13 @@ class AssaySetupSetting(models.Model):
             if 'duration' in criteria:
                 full_string.append('Duration of: ' + self.get_duration_string())
             if 'addition_location_id' in criteria:
-                full_string.append(unicode(self.addition_location))
-            return u'{}; '.format(u' '.join(full_string))
+                full_string.append(str(self.addition_location))
+            return '{}; '.format(' '.join(full_string))
         else:
-            return unicode(self)
+            return str(self)
 
-    def __unicode__(self):
-        return u'{} {} {}'.format(self.setting.name, self.value, self.unit)
+    def __str__(self):
+        return '{} {} {}'.format(self.setting.name, self.value, self.unit)
 
 
 class AssayRunStakeholder(models.Model):
@@ -2526,14 +2580,15 @@ class AssayRunStakeholder(models.Model):
     Stakeholders needs to be consulted (sign off) before data can become available
     """
 
-    study = models.ForeignKey(AssayRun)
+    study = models.ForeignKey(AssayRun, on_delete=models.CASCADE)
 
-    group = models.ForeignKey(Group)
+    group = models.ForeignKey(Group, on_delete=models.CASCADE)
     # Explicitly declared rather than from inheritance to avoid unecessary fields
     signed_off_by = models.ForeignKey(
         User,
         blank=True,
-        null=True
+        null=True,
+        on_delete=models.CASCADE
     )
     signed_off_date = models.DateTimeField(blank=True, null=True)
 
@@ -2551,14 +2606,15 @@ class AssayStudyStakeholder(models.Model):
     Stakeholders needs to be consulted (sign off) before data can become available
     """
 
-    study = models.ForeignKey(AssayStudy)
+    study = models.ForeignKey(AssayStudy, on_delete=models.CASCADE)
 
-    group = models.ForeignKey(Group)
+    group = models.ForeignKey(Group, on_delete=models.CASCADE)
     # Explicitly declared rather than from inheritance to avoid unecessary fields
     signed_off_by = models.ForeignKey(
         User,
         blank=True,
-        null=True
+        null=True,
+        on_delete=models.CASCADE
     )
     signed_off_date = models.DateTimeField(blank=True, null=True)
 
@@ -2569,21 +2625,21 @@ class AssayStudyStakeholder(models.Model):
 
 class AssayStudyAssay(models.Model):
     """Specific assays used in the 'inlines'"""
-    study = models.ForeignKey(AssayStudy, null=True, blank=True)
-    # study_new = models.ForeignKey('assays.AssayStudy', null=True, blank=True)
-    target = models.ForeignKey(AssayTarget)
-    method = models.ForeignKey(AssayMethod)
+    study = models.ForeignKey(AssayStudy, null=True, blank=True, on_delete=models.CASCADE)
+    # study_new = models.ForeignKey('assays.AssayStudy', null=True, blank=True, on_delete=models.CASCADE)
+    target = models.ForeignKey(AssayTarget, on_delete=models.CASCADE)
+    method = models.ForeignKey(AssayMethod, on_delete=models.CASCADE)
     # Name of model "PhysicalUnits" should be renamed, methinks
-    unit = models.ForeignKey(PhysicalUnits)
+    unit = models.ForeignKey(PhysicalUnits, on_delete=models.CASCADE)
 
-    def __unicode__(self):
-        return u'{0}|{1}|{2}'.format(self.target, self.method, self.unit)
+    def __str__(self):
+        return '{0}|{1}|{2}'.format(self.target, self.method, self.unit)
 
 
 class AssayImageSetting(models.Model):
     # Requested, not sure how useful
     # May want to remove soon, why have this be specific to a study? Deletion cascade?
-    study = models.ForeignKey(AssayStudy)
+    study = models.ForeignKey(AssayStudy, on_delete=models.CASCADE)
     # This is necessary in TongYing's scheme, but it is kind of confusing in a way
     label_id = models.CharField(max_length=40, default='', blank=True)
     label_name = models.CharField(max_length=255)
@@ -2596,15 +2652,15 @@ class AssayImageSetting(models.Model):
     notes = models.CharField(max_length=500, default='', blank=True)
     color_mapping = models.CharField(max_length=255, default='', blank=True)
 
-    def __unicode__(self):
-        return u'{} {}'.format(self.study.name, self.label_name)
+    def __str__(self):
+        return '{} {}'.format(self.study.name, self.label_name)
 
 
 class AssayImage(models.Model):
     # May want to have an FK to study for convenience?
-    # study = models.ForeignKey(AssayStudy)
+    # study = models.ForeignKey(AssayStudy, on_delete=models.CASCADE)
     # The associated item
-    matrix_item = models.ForeignKey(AssayMatrixItem)
+    matrix_item = models.ForeignKey(AssayMatrixItem, on_delete=models.CASCADE)
     # The file name
     file_name = models.CharField(max_length=255)
     field = models.CharField(max_length=255)
@@ -2615,14 +2671,14 @@ class AssayImage(models.Model):
     assay_plate_id = models.CharField(max_length=255, default='N/A')
     assay_well_id = models.CharField(max_length=255, default='N/A')
     # PLEASE NOTE THAT I USE TARGET AND METHOD SEPARATE FROM ASSAY INSTANCE
-    method = models.ForeignKey(AssayMethod)
-    target = models.ForeignKey(AssayTarget)
+    method = models.ForeignKey(AssayMethod, on_delete=models.CASCADE)
+    target = models.ForeignKey(AssayTarget, on_delete=models.CASCADE)
     # May become useful
-    subtarget = models.ForeignKey(AssaySubtarget)
-    sample_location = models.ForeignKey(AssaySampleLocation)
+    subtarget = models.ForeignKey(AssaySubtarget, on_delete=models.CASCADE)
+    sample_location = models.ForeignKey(AssaySampleLocation, on_delete=models.CASCADE)
     notes = models.CharField(max_length=500, default='')
     replicate = models.CharField(max_length=255, default='')
-    setting = models.ForeignKey(AssayImageSetting)
+    setting = models.ForeignKey(AssayImageSetting, on_delete=models.CASCADE)
 
     def get_metadata(self):
         return {
@@ -2651,5 +2707,5 @@ class AssayImage(models.Model):
             'setting_notes': self.setting.notes,
         }
 
-    def __unicode__(self):
-        return u'{}'.format(self.file_name)
+    def __str__(self):
+        return '{}'.format(self.file_name)

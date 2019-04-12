@@ -12,8 +12,10 @@ from .models import (
     GroupDeferral
 )
 from.forms import MicrophysiologyCenterForm, GroupDeferralForm
-from django.core.urlresolvers import resolve
+from django.urls import resolve
 from django.db.models.fields.files import FieldFile
+
+from django.utils.safestring import mark_safe
 
 
 class MicrophysiologyCenterAdmin(LockableAdmin):
@@ -56,6 +58,7 @@ class MicrophysiologyCenterAdmin(LockableAdmin):
         ),
     )
 
+    @mark_safe
     def center_site(self, obj):
         return '<a href="%s" target="_blank">%s</a>' % (obj.website, obj.website)
     center_site.allow_tags = True
@@ -90,6 +93,7 @@ class ManufacturerAdmin(LockableAdmin):
         ),
     )
 
+    @mark_safe
     def manufacturer_site(self, obj):
         return '<a href="%s" target="_blank">%s</a>' % (obj.website, obj.website)
     manufacturer_site.allow_tags = True
@@ -103,12 +107,14 @@ class MicrodeviceAdmin(LockableAdmin):
         js = ('microdevices/layout.js',)
         css = {'all': ('assays/customize_admin.css',)}
 
+    @mark_safe
     def device_image_display(self, obj):
         if obj.id and obj.device_image:
             return '<img src="%s">' % \
                    obj.device_image.url
         return ''
 
+    @mark_safe
     def device_cross_section_image_display(self, obj):
         if obj.id and obj.device_cross_section_image:
             return '<img src="%s">' % \
@@ -209,7 +215,7 @@ class MicrodeviceAdmin(LockableAdmin):
             original_obj = obj._meta.concrete_model.objects.get(id=original_pk)
 
             # Iterate through all it's properties
-            for prop, value in vars(original_obj).iteritems():
+            for prop, value in list(vars(original_obj).items()):
                 # if the property is an Image (don't forget to import ImageFieldFile!)
                 if isinstance(getattr(original_obj, prop), FieldFile):
                     # Copy it!
@@ -265,42 +271,42 @@ class OrganModelAdmin(LockableAdmin):
     readonly_fields = ['created_by', 'created_on',
                        'modified_by', 'modified_on']
 
-    fieldsets = (
-        (
-            None, {
-                'fields': (
-                    (
-                        'name', 'organ', 'alt_name', 'base_model', 'model_type'
-                    ),
-                    (
-                        'disease', 'disease_trigger'
-                    ),
-                    (
-                        'device', 'description',
-                    ),
-                    (
-                        'mps', 'epa', 'tctc'
-                    ),
-                    (
-                        'model_image'
-                    ),
-                    (
-                        'references'
-                    )
-                )
-            }
-        ),
-        (
-            'Change Tracking', {
-                'fields': (
-                    'locked',
-                    ('created_by', 'created_on'),
-                    ('modified_by', 'modified_on'),
-                    ('signed_off_by', 'signed_off_date'),
-                )
-            }
-        )
-    )
+    # fieldsets = (
+    #     (
+    #         None, {
+    #             'fields': (
+    #                 (
+    #                     'name', 'organ', 'alt_name', 'base_model', 'model_type'
+    #                 ),
+    #                 (
+    #                     'disease', 'disease_trigger'
+    #                 ),
+    #                 (
+    #                     'device', 'description',
+    #                 ),
+    #                 (
+    #                     'mps', 'epa', 'tctc'
+    #                 ),
+    #                 (
+    #                     'model_image'
+    #                 ),
+    #                 (
+    #                     'references'
+    #                 )
+    #             )
+    #         }
+    #     ),
+    #     (
+    #         'Change Tracking', {
+    #             'fields': (
+    #                 'locked',
+    #                 ('created_by', 'created_on'),
+    #                 ('modified_by', 'modified_on'),
+    #                 ('signed_off_by', 'signed_off_date'),
+    #             )
+    #         }
+    #     )
+    # )
 
     actions = ['update_fields']
     save_on_top = True
