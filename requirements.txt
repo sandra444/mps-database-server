@@ -1,9 +1,9 @@
 # Not used yet
 # matplotlib
 uwsgi
-django-uwsgi-cache
+# django-uwsgi-cache
 networkx
-Django==1.11.18
+Django
 Jinja2
 Markdown
 MarkupSafe
@@ -49,15 +49,15 @@ ipython
 logilab-common
 # Code checking
 mccabe
-# Managed in conda
-# numpy
-# pandas
+numpy
+scipy
+pandas
 # Style checking
 pycodestyle
 # Profiling
 profilehooks
 # Connect to postgres
-psycopg2
+psycopg2-binary
 # Functions for Boolean satisfiability problem
 pycosat
 # Style
@@ -78,8 +78,6 @@ pytz
 rope
 # Helper for rope
 ropemode
-# Managed in conda
-# scipy
 # Compatibility library
 six
 # SQL parser
