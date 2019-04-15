@@ -51,6 +51,7 @@ from .utils import (
     # NO_CELLS_STRING,
     # NO_SETTINGS_STRING,
     intra_status_for_inter,
+    power_analysis
 )
 
 import csv
@@ -3274,6 +3275,216 @@ def study_editor_validation(request):
         return False
 
 
+def fetch_power_analysis(request):
+    study = get_object_or_404(AssayStudy, pk=int(request.POST.get('study', '')))
+    # Contrived!
+    studies = AssayStudy.objects.filter(id=study.id)
+    data = {}
+
+    post_filter = json.loads(request.POST.get('post_filter', '{}'))
+    criteria = json.loads(request.POST.get('criteria', '{}'))
+
+    # If chip data
+    matrix_items = AssayMatrixItem.objects.filter(
+        study_id=study.id
+    )
+
+    assays = AssayStudyAssay.objects.filter(study_id=study.id)
+
+    data_points = AssayDataPoint.objects.filter(
+        study_id=study.id
+    ).prefetch_related(
+    # TODO optimize prefetch!
+        'study__group',
+        'study_assay__target',
+        'study_assay__method',
+        'study_assay__unit__base_unit',
+        'sample_location',
+        'matrix_item__matrix',
+        'matrix_item__organ_model',
+        'subtarget'
+    ).filter(
+        replaced=False,
+        excluded=False,
+        value__isnull=False
+    )
+
+    if not post_filter:
+        assays = assays.prefetch_related(
+            'target',
+            'method'
+        )
+
+        post_filter = acquire_post_filter(studies, assays, matrix_items, data_points)
+
+    else:
+        studies, assays, matrix_items, data_points = apply_post_filter(
+            post_filter, studies, assays, matrix_items, data_points
+        )
+
+    treatment_group_representatives, setup_to_treatment_group, treatment_header_keys = get_item_groups(
+        None,
+        criteria,
+        matrix_items
+    )
+
+    power_analysis_input = []
+
+    data_point_treatment_groups = {}
+    treatment_group_table = {}
+    data_group_to_studies = {}
+    data_group_to_sample_locations = {}
+    data_group_to_organ_models = {}
+
+    # CONTRIVED FOR NOW
+    data_header_keys = [
+        'Target',
+        # 'Method',
+        'Value Unit',
+        # 'Sample Location'
+    ]
+
+    base_tuple = (
+        'study_assay.target_id',
+        # 'study_assay.method_id',
+        'study_assay.unit.base_unit_id',
+        # 'sample_location_id'
+    )
+
+    current_tuple = (
+        'study_assay.target_id',
+        # 'study_assay.method_id',
+        'study_assay.unit_id',
+        # 'sample_location_id'
+    )
+
+    additional_keys = []
+
+    # CRUDE
+    if criteria:
+        group_sample_location = 'sample_location' in criteria.get('special', [])
+        group_method = 'method' in criteria.get('special', [])
+
+        if group_method:
+            data_header_keys.append('Method')
+            additional_keys.append('study_assay.method_id')
+
+        if group_sample_location:
+            data_header_keys.append('Sample Location')
+            additional_keys.append('sample_location_id')
+
+    if additional_keys:
+        base_tuple += tuple(additional_keys)
+        current_tuple += tuple(additional_keys)
+
+    # ASSUME _id termination
+    base_value_tuple = tuple([x.replace('_id', '') for x in base_tuple])
+    current_value_tuple = tuple([x.replace('_id', '') for x in current_tuple])
+
+    # TODO TODO TODO TODO
+    data_point_attribute_getter_base = tuple_attrgetter(*base_tuple)
+    data_point_attribute_getter_current = tuple_attrgetter(*current_tuple)
+
+    data_point_attribute_getter_base_values = tuple_attrgetter(*base_value_tuple)
+    data_point_attribute_getter_current_values = tuple_attrgetter(*current_value_tuple)
+
+    for point in data_points:
+        point.standard_value = point.value
+        item_id = point.matrix_item_id
+        if point.study_assay.unit.base_unit_id:
+            data_point_tuple = data_point_attribute_getter_base(point)
+            point.standard_value *= point.study_assay.unit.scale_factor
+        else:
+            data_point_tuple = data_point_attribute_getter_current(point)
+        current_group = data_point_treatment_groups.setdefault(
+            (
+                data_point_tuple,
+                # setup_to_treatment_group.get(item_id).get('id')
+                setup_to_treatment_group.get(item_id).get('index')
+            ),
+            # 'Group {}'.format(len(data_point_treatment_groups) + 1)
+            u'{}'.format(len(data_point_treatment_groups) + 1)
+        )
+        point.data_group = current_group
+        if current_group not in treatment_group_table:
+            if point.study_assay.unit.base_unit_id:
+                treatment_group_table.update({
+                    current_group: [str(x) for x in list(
+                        data_point_attribute_getter_base_values(point)
+                    ) + [setup_to_treatment_group.get(item_id).get('index')]]
+                })
+            else:
+                treatment_group_table.update({
+                    current_group: [str(x) for x in list(
+                        data_point_attribute_getter_current_values(point)
+                    ) + [setup_to_treatment_group.get(item_id).get('index')]]
+                })
+
+        data_group_to_studies.setdefault(
+            current_group, {}
+        ).update({
+            u'<a href="{}" target="_blank">{} ({})</a>'.format(point.study.get_absolute_url(), point.study.name, point.study.group.name): point.study.name
+        })
+
+        data_group_to_sample_locations.setdefault(
+            current_group, {}
+        ).update({
+            point.sample_location.name: True
+        })
+
+        data_group_to_organ_models.setdefault(
+            current_group, {}
+        ).update({
+            point.matrix_item.organ_model.name: True
+        })
+
+    power_analysis_input.append([
+        'Group',
+        'Time',
+        'Compound Treatment(s)',
+        'Chip ID',
+        'Value'
+    ])
+
+    for point in data_points:
+        power_analysis_input.append([
+            point.data_group,
+            point.time,
+            (point.matrix_item.stringify_compounds()).split('\n')[0],
+            point.matrix_item.name,
+            point.standard_value
+        ])
+
+    power_analysis_data = power_analysis(power_analysis_input)
+
+    # TODO REVISE
+    # if intra_data_table.get('errors', ''):
+    #     return intra_data_table
+
+    data['power_analysis_input'] = power_analysis_input
+    data['power_analysis_data'] = power_analysis_data
+    data['data_groups'] = treatment_group_table
+
+    final_data_group_to_sample_locations = {}
+    for data_group, current_sample_location in data_group_to_sample_locations.items():
+        final_data_group_to_sample_locations[data_group] = sorted(current_sample_location)
+
+    final_data_group_to_organ_models = {}
+    for data_group, current_organ_model in data_group_to_organ_models.items():
+        final_data_group_to_organ_models[data_group] = sorted(current_organ_model)
+
+    data['data_group_to_sample_locations'] = final_data_group_to_sample_locations
+    data['data_group_to_organ_models'] = final_data_group_to_organ_models
+
+    data['header_keys'] = data_header_keys
+
+    data['treatment_groups'] = treatment_group_representatives
+
+    data['post_filter'] = post_filter
+
+    return HttpResponse(json.dumps(data), content_type='application/json')
+
+
 # TODO TODO TODO
 switch = {
     'fetch_center_id': {'call': fetch_center_id},
@@ -3309,6 +3520,9 @@ switch = {
     },
     'fetch_post_filter': {
         'call': fetch_post_filter
+    },
+    'fetch_power_analysis': {
+        'call': fetch_power_analysis
     }
 }
 

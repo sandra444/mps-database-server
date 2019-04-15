@@ -30,6 +30,8 @@ import numpy as np
 import scipy.interpolate as sp
 import scipy.stats as stats
 from scipy.interpolate import CubicSpline
+from sympy import gamma
+import rpy2.robjects as robjects
 
 import csv
 import codecs
@@ -888,40 +890,40 @@ class AssayFileProcessor:
 
 # TODO TODO TODO PLEASE REVISE STYLES WHEN POSSIBLE
 # def ICC_A(X):
-#     # This function is to calculate the ICC absolute agreement value for the input matrix
-#     X = X.dropna()
-#     icc_mat = X.values
+#    # This function is to calculate the ICC absolute agreement value for the input matrix
+#    X = X.dropna()
+#    icc_mat = X.values
 #
-#     Count_Row = icc_mat.shape[0]  # gives number of row count
-#     Count_Col = icc_mat.shape[1]  # gives number of col count
+#    Count_Row = icc_mat.shape[0]  # gives number of row count
+#    Count_Col = icc_mat.shape[1]  # gives number of col count
 #
-#     # ICC row mean
-#     icc_row_mean = icc_mat.mean(axis=1)
+#    # ICC row mean
+#    icc_row_mean = icc_mat.mean(axis=1)
 #
-#     # ICC column mean
-#     icc_col_mean = icc_mat.mean(axis=0)
+#    # ICC column mean
+#    icc_col_mean = icc_mat.mean(axis=0)
 #
-#     # ICC total mean
-#     icc_total_mean = icc_mat.mean()
+#    # ICC total mean
+#    icc_total_mean = icc_mat.mean()
 #
-#     # Sum of squre row and column means
-#     SSC = sum((icc_col_mean - icc_total_mean) ** 2) * Count_Row
+#    # Sum of squre row and column means
+#    SSC = sum((icc_col_mean - icc_total_mean) ** 2) * Count_Row
 #
-#     SSR = sum((icc_row_mean - icc_total_mean) ** 2) * Count_Col
+#    SSR = sum((icc_row_mean - icc_total_mean) ** 2) * Count_Col
 #
-#     # sum of squre errors
-#     SSE = 0
-#     for row in range(Count_Row):
-#         for col in range(Count_Col):
-#             SSE = SSE + (icc_mat[row, col] - icc_row_mean[row] - icc_col_mean[col] + icc_total_mean) ** 2
+#    # sum of squre errors
+#    SSE = 0
+#    for row in range(Count_Row):
+#        for col in range(Count_Col):
+#            SSE = SSE + (icc_mat[row, col] - icc_row_mean[row] - icc_col_mean[col] + icc_total_mean) ** 2
 #
-#     # SSW = SSE + SSC
-#     MSR = SSR / (Count_Row - 1)
-#     MSE = SSE / ((Count_Row - 1) * (Count_Col - 1))
-#     MSC = SSC / (Count_Col - 1)
-#     # MSW = SSW / (Count_Row*(Count_Col-1))
-#     ICC_A = (MSR - MSE) / (MSR + (Count_Col - 1) * MSE + Count_Col * (MSC - MSE) / Count_Row)
-#     return ICC_A
+#    # SSW = SSE + SSC
+#    MSR = SSR / (Count_Row - 1)
+#    MSE = SSE / ((Count_Row - 1) * (Count_Col - 1))
+#    MSC = SSC / (Count_Col - 1)
+#    # MSW = SSW / (Count_Row*(Count_Col-1))
+#    ICC_A = (MSR - MSE) / (MSR + (Count_Col - 1) * MSE + Count_Col * (MSC - MSE) / Count_Row)
+#    return ICC_A
 
 def Max_CV(X):
     #This function is to estimate the maximum CV of all chips' measurements through time (row)
@@ -1920,25 +1922,25 @@ def get_inter_study_reproducibility_report(group_count, inter_data, inter_level,
 
 def intra_status_for_inter(study_data):
     #Calculate and report the reproducibility index and status and other parameters
-     #Select unique group rows by study, organ model,sample location, assay and unit
-    #Drop null value rows
+    # Select unique group rows by study, organ model,sample location, assay and unit
+    # Drop null value rows
     study_data = pd.DataFrame(study_data)
     study_data.columns = ["Time", "Value", "Chip ID"]
     study_data = study_data.dropna(subset=['Value'])
-    #Define the Chip ID column to string type
+    # Define the Chip ID column to string type
     study_data[['Chip ID']] = study_data[['Chip ID']].astype(str)
 
-    #create reproducibility report table
+    # create reproducibility report table
     reproducibility_results_table=study_data
     header_list=study_data.columns.values.tolist()
     header_list.append('Reproducibility Status')
 
-    #Define all columns of reproducibility report table
+    # Define all columns of reproducibility report table
     reproducibility_results_table = reproducibility_results_table.reindex(columns = header_list)
 
-    #Define all columns of reproducibility report table
+    # Define all columns of reproducibility report table
     reproducibility_results_table = reproducibility_results_table.reindex(columns = header_list)
-   #create replicate matrix for intra reproducibility analysis
+   # create replicate matrix for intra reproducibility analysis
     icc_pivot = pd.pivot_table(study_data, values='Value', index='Time',columns=['Chip ID'], aggfunc=np.mean)
     # Check all coulmns are redundent
     if icc_pivot.shape[1]>1 and all(icc_pivot.eq(icc_pivot.iloc[:, 0], axis=0).all(1)):
@@ -1947,7 +1949,7 @@ def intra_status_for_inter(study_data):
         reproducibility_results_table.iloc[0, reproducibility_results_table.columns.get_loc('Reproducibility Status')] ='NA'
     else:
         if icc_pivot.shape[0]>1 and icc_pivot.shape[1]>1:
-            #Call a chip time series reproducibility index dataframe
+            # Call a chip time series reproducibility index dataframe
             rep_index=Reproducibility_Index(icc_pivot)
             if pd.isnull(rep_index.iloc[0][0]) != True:
                 if rep_index.iloc[0][0] <= 15 and rep_index.iloc[0][0] >0:
@@ -1967,7 +1969,7 @@ def intra_status_for_inter(study_data):
             else:
                 reproducibility_results_table.iloc[0, reproducibility_results_table.columns.get_loc('Reproducibility Status')] ='NA'
         elif icc_pivot.shape[0]<2 and icc_pivot.shape[1]>1:
-             #Call a single time reproducibility index dataframe
+             # Call a single time reproducibility index dataframe
             rep_index=Single_Time_Reproducibility_Index(icc_pivot)
             if rep_index.iloc[0][0] <= 5 and rep_index.iloc[0][0] > 0:
                 reproducibility_results_table.iloc[0, reproducibility_results_table.columns.get_loc('Reproducibility Status')] ='Excellent (CV)'
@@ -1983,3 +1985,567 @@ def intra_status_for_inter(study_data):
             reproducibility_results_table.iloc[0, reproducibility_results_table.columns.get_loc('Reproducibility Status')] ='NA'
 
     return reproducibility_results_table.loc[reproducibility_results_table.index[0], 'Reproducibility Status']
+
+
+"""
+> Our MPS Db statistic power analysis is to estimate the probability that a
+statistic test will find a significant difference when such a difference exists
+between two chip/well groups of one MPS model, which have at least two
+replicates in each group within a same experiment, cells, setting, compound,
+target/analyte, sample location and value unit.
+> Selected data will be grouped by Model, cells, setting, study,
+target/Analyte, sample location and value unit.
+> Power analysis will be run on two different groups, such as no compound vs
+ compound groups, which are picked by users, or based on defaults.
+> The results of power analysis will be power, p-value and power vs. sample
+size graphs and related value tables.
+
+There are four methods to calculate the effect size for power analysis:
+type 'd': Cohen's d method, this is default method
+type 'D': Glass’s ∆
+type 'g': Hedges’s g
+type 'gs':Hedges’s g*
+
+@author: Tongying Shun (tos8@pitt.edu)
+"""
+
+
+def pa_effect_size(x, y, type='d'):
+    md = np.abs(np.mean(x) - np.mean(y))
+    nx = len(x)
+    ny = len(y)
+
+    if type == 'gs':
+        m = nx + ny - 2
+        cm = gamma(m / 2) / (np.sqrt(m / 2) * gamma((m - 1) / 2))
+        spsq = ((nx - 1) * np.var(x, ddof=1) +
+                (ny - 1) * np.var(y, ddof=1)) / m
+        theta = cm * md / np.sqrt(spsq)
+    elif type == 'g':
+        spsq = ((nx - 1) * np.var(x, ddof=1) + (ny - 1) *
+                np.var(y, ddof=1)) / (nx + ny - 2)
+        theta = md / np.sqrt(spsq)
+    elif type == 'd':
+        spsq = ((nx - 1) * np.var(x, ddof=1) + (ny - 1) *
+                np.var(y, ddof=1)) / (nx + ny)
+        theta = md / np.sqrt(spsq)
+    else:
+        theta = md / np.std(x, ddof=1)
+    return theta
+
+
+def pa_predicted_sample_size(power, es_value, sig_level=0.05):
+    if power > 0 and power < 1:
+        pdata = robjects.FloatVector([power, es_value, sig_level])
+
+        rstring = """
+        function(pdata){
+        library(pwr)
+        pp <- try(pwr.t.test(n = , d =pdata[2], sig.level =pdata[3], power =pdata[1] ,
+                type = "two.sample",alternative = "two.sided"),silent = TRUE)
+              if (!inherits(pp,"try-error")){
+                sample_size<-pp$n}
+              else
+                sample_size<-0
+        sample_size
+        }
+        """
+        rfunc = robjects.r(rstring)
+        r_result = rfunc(pdata)
+        pr = tuple(r_result)
+        sample_size = pr[0]
+        if sample_size != 0:
+            sample_size = sample_size
+        else:
+            sample_size = np.NAN
+    else:
+        sample_size = np.NAN
+    return sample_size
+
+
+def pa_predicted_power(sample_size, es_value, sig_level=0.05):
+    if sig_level > 0 and sig_level < 1:
+        pdata = robjects.FloatVector([sample_size, es_value, sig_level])
+
+        rstring = """
+        function(pdata){
+        library(pwr)
+        pp <- try(pwr.t.test(n = pdata[1], d =pdata[2], sig.level =pdata[3], power = ,
+                type = "two.sample",alternative = "two.sided"),silent = TRUE)
+              if (!inherits(pp,"try-error")){
+                power_value<-pp$power}
+              else
+                power_value<-0
+        power_value
+        }
+        """
+        rfunc = robjects.r(rstring)
+        r_result = rfunc(pdata)
+        pr = tuple(r_result)
+        power_value = pr[0]
+        if power_value != 0:
+            power_value = power_value
+        else:
+            power_value = np.NAN
+    else:
+        power_value = np.NAN
+    return power_value
+
+
+def pa_predicted_significance_level(sample_size, es_value, power=0.8):
+    if power > 0 and power < 1:
+        pdata = robjects.FloatVector([sample_size, es_value, power])
+
+        rstring = """
+        function(pdata){
+        library(pwr)
+        pp <- try(pwr.t.test(n = pdata[1], d =pdata[2], sig.level = NULL, power = pdata[3],
+                type = "two.sample",alternative = "two.sided"),silent = TRUE)
+              if (!inherits(pp,"try-error")){
+                sig_level<-pp$sig.level}
+              else
+                sig_level<-0
+        sig_level
+        }
+        """
+        rfunc = robjects.r(rstring)
+        r_result = rfunc(pdata)
+        pr = tuple(r_result)
+        sig_level = pr[0]
+        if sig_level != 0:
+            sig_level = sig_level
+        else:
+            sig_level = np.NAN
+    else:
+        sig_level = np.NAN
+    return sig_level
+
+
+def pa_power_one_sample_size(n, es_value):
+    if n > 1:
+        pdata = robjects.FloatVector([n, es_value])
+
+        rstring = """
+        function(pdata){
+        library('pwr')
+        pp <- try(pwr.t.test(n =pdata[1], d =pdata[2], sig.level =0.05, power = ,
+                type = "two.sample",alternative = "two.sided"),silent = TRUE)
+              if (!inherits(pp,"try-error")){
+                power_v<-pp$power}
+              else
+                power_v<-0
+        power_v
+        }
+        """
+        rfunc = robjects.r(rstring)
+        r_result = rfunc(pdata)
+        pr = tuple(r_result)
+        power_v = pr[0]
+        if power_v != 0:
+            power_value = power_v
+        else:
+            power_value = np.NAN
+    else:
+        power_value = np.NAN
+    return power_value
+
+
+def pa_power_two_sample_size(n1, n2, es_value):
+    if n1 > 1 and n2 > 1 and n1 != n2:
+        pdata = robjects.FloatVector([n1, n2, es_value])
+        rstring = """
+        function(pdata){
+        library(pwr)
+        pp <- try(pwr.t2n.test(n1=pdata[1], n2=pdata[2], d=pdata[3],sig.level = 0.05,
+                               power = , alternative = "two.sided"),silent = TRUE)
+              if (!inherits(pp,"try-error")){
+                power_v<-pp$power}
+              else
+                power_v<-0
+        power_v
+        }
+        """
+        rfunc = robjects.r(rstring)
+        r_result = rfunc(pdata)
+        pr = tuple(r_result)
+        power_v = pr[0]
+        if power_v != 0:
+            power_value = power_v
+        else:
+            power_value = np.NAN
+    elif n1 == n2 and n1 > 1:
+        power_value = pa_power_one_sample_size(n1, es_value)
+    else:
+        power_value = power_v
+    return power_value
+
+
+def pa_t_test(x, y):
+    xp = robjects.FloatVector(x)
+    yp = robjects.FloatVector(y)
+    rstring = """
+    function(x,y){
+    t_pvalue<-t.test(x,y)$p.value
+    t_pvalue
+    }
+    """
+    rfunc = robjects.r(rstring)
+    r_result = rfunc(xp, yp)
+    pr = tuple(r_result)
+    p_value = pr[0]
+    return p_value
+
+
+def pa_predicted_sample_size_time_series(power_group_data, type='d', power=0.8, sig_level=0.05):
+    # Predict the sample size for two treatments' time series given power and significance level
+
+    power_group_data = power_group_data.dropna(subset=['Value'])
+    # Confirm whether there are two treatments
+    study_group = power_group_data[["Compound Treatment(s)"]]
+    study_unique_group = study_group.drop_duplicates()
+    if study_unique_group.shape[0] != 2:
+        # only two treatments can be selected"
+        Power_analysis_table = np.NAN
+    else:
+        # Power analysis results
+        Power_analysis_table_key = power_group_data[["Group", "Time"]]
+        Power_analysis_table = Power_analysis_table_key.drop_duplicates()
+        # create power analysis report table
+        header_list = Power_analysis_table.columns.values.tolist()
+        header_list.append('Power')
+        header_list.append('Sample Size')
+        header_list.append('Significance Level')
+
+        # Define all columns of power analysis report table
+        Power_analysis_table = Power_analysis_table.reindex(
+            columns=header_list)
+        # Loop every unique replicate group
+        time_count = len(Power_analysis_table)
+
+        if study_unique_group.shape[0] != 2:
+            err_msg = "two treatments have to be selected"
+            print(err_msg)
+        else:
+            chip_data = power_group_data.groupby(
+                ['Compound Treatment(s)', 'Chip ID', 'Time'], as_index=False)['Value'].mean()
+            cltr_data = chip_data[chip_data['Compound Treatment(s)']
+                                  == study_unique_group.iloc[0, 0]]
+            treat_data = chip_data[chip_data['Compound Treatment(s)']
+                                   == study_unique_group.iloc[1, 0]]
+            for itime in range(time_count):
+                # print('Time '+ str(Power_analysis_table['Time'][itime]) )
+                x = cltr_data[cltr_data['Time']
+                              == Power_analysis_table['Time'][itime]]['Value']
+                y = treat_data[treat_data['Time']
+                               == Power_analysis_table['Time'][itime]]['Value']
+                # effect size for power analysis calculation
+                es_value = pa_effect_size(x, y, type)
+                # Predict sample size
+                predict_sample_size = pa_predicted_sample_size(
+                    power, es_value, sig_level)
+
+                Power_analysis_table.iloc[itime, Power_analysis_table.columns.get_loc(
+                    'Power')] = power
+                Power_analysis_table.iloc[itime, Power_analysis_table.columns.get_loc(
+                    'Sample Size')] = predict_sample_size
+                Power_analysis_table.iloc[itime, Power_analysis_table.columns.get_loc(
+                    'Significance Level')] = sig_level
+
+    return Power_analysis_table
+
+
+def pa_predicted_significance_level_time_series(power_group_data, type='d', sample_size=3, power=0.8):
+    # Predict the sample size for two treatments' time series given power and significance level
+
+    power_group_data = power_group_data.dropna(subset=['Value'])
+    # Confirm whether there are two treatments
+    study_group = power_group_data[["Compound Treatment(s)"]]
+    study_unique_group = study_group.drop_duplicates()
+    if study_unique_group.shape[0] != 2:
+        # only two treatments can be selected"
+        Power_analysis_table = np.NAN
+    else:
+        # Power analysis results
+        Power_analysis_table_key = power_group_data[["Group", "Time"]]
+        Power_analysis_table = Power_analysis_table_key.drop_duplicates()
+        # create power analysis report table
+        header_list = Power_analysis_table.columns.values.tolist()
+        header_list.append('Power')
+        header_list.append('Sample Size')
+        header_list.append('Significance Level')
+
+        # Define all columns of power analysis report table
+        Power_analysis_table = Power_analysis_table.reindex(
+            columns=header_list)
+        # Loop every unique replicate group
+        time_count = len(Power_analysis_table)
+
+        if study_unique_group.shape[0] != 2:
+            err_msg = "two treatments have to be selected"
+            print(err_msg)
+        else:
+            chip_data = power_group_data.groupby(
+                ['Compound Treatment(s)', 'Chip ID', 'Time'], as_index=False)['Value'].mean()
+            cltr_data = chip_data[chip_data['Compound Treatment(s)']
+                                  == study_unique_group.iloc[0, 0]]
+            treat_data = chip_data[chip_data['Compound Treatment(s)']
+                                   == study_unique_group.iloc[1, 0]]
+            for itime in range(time_count):
+                # print('Time '+ str(Power_analysis_table['Time'][itime]) )
+                x = cltr_data[cltr_data['Time']
+                              == Power_analysis_table['Time'][itime]]['Value']
+                y = treat_data[treat_data['Time']
+                               == Power_analysis_table['Time'][itime]]['Value']
+                # effect size for power analysis calculation
+                es_value = pa_effect_size(x, y, type)
+                # Predict sample size
+                predicted_sig_level = pa_predicted_significance_level(
+                    sample_size, es_value, power)
+
+                Power_analysis_table.iloc[itime, Power_analysis_table.columns.get_loc(
+                    'Power')] = power
+                Power_analysis_table.iloc[itime, Power_analysis_table.columns.get_loc(
+                    'Sample Size')] = sample_size
+                Power_analysis_table.iloc[itime, Power_analysis_table.columns.get_loc(
+                    'Significance Level')] = predicted_sig_level
+
+    return Power_analysis_table
+
+
+def pa_predicted_power_time_series(power_group_data, type='d', sample_size=3, sig_level=0.05):
+    # Predict the sample size for two treatments' time series given power and significance level
+
+    power_group_data = power_group_data.dropna(subset=['Value'])
+    # Confirm whether there are two treatments
+    study_group = power_group_data[["Compound Treatment(s)"]]
+    study_unique_group = study_group.drop_duplicates()
+    if study_unique_group.shape[0] != 2:
+        # only two treatments can be selected"
+        Power_analysis_table = np.NAN
+    else:
+        # Power analysis results
+        Power_analysis_table_key = power_group_data[["Group", "Time"]]
+        Power_analysis_table = Power_analysis_table_key.drop_duplicates()
+        # create power analysis report table
+        header_list = Power_analysis_table.columns.values.tolist()
+        header_list.append('Power')
+        header_list.append('Sample Size')
+        header_list.append('Significance Level')
+
+        # Define all columns of power analysis report table
+        Power_analysis_table = Power_analysis_table.reindex(
+            columns=header_list)
+        # Loop every unique replicate group
+        time_count = len(Power_analysis_table)
+
+        if study_unique_group.shape[0] != 2:
+            err_msg = "two treatments have to be selected"
+            print(err_msg)
+        else:
+            chip_data = power_group_data.groupby(
+                ['Compound Treatment(s)', 'Chip ID', 'Time'], as_index=False)['Value'].mean()
+            cltr_data = chip_data[chip_data['Compound Treatment(s)']
+                                  == study_unique_group.iloc[0, 0]]
+            treat_data = chip_data[chip_data['Compound Treatment(s)']
+                                   == study_unique_group.iloc[1, 0]]
+            for itime in range(time_count):
+                # print('Time '+ str(Power_analysis_table['Time'][itime]) )
+                x = cltr_data[cltr_data['Time']
+                              == Power_analysis_table['Time'][itime]]['Value']
+                y = treat_data[treat_data['Time']
+                               == Power_analysis_table['Time'][itime]]['Value']
+                # effect size for power analysis calculation
+                es_value = pa_effect_size(x, y, type)
+                # Predict sample size
+                predicted_power = pa_predicted_power(
+                    sample_size, es_value, sig_level)
+
+                Power_analysis_table.iloc[itime, Power_analysis_table.columns.get_loc(
+                    'Power')] = predicted_power
+                Power_analysis_table.iloc[itime, Power_analysis_table.columns.get_loc(
+                    'Sample Size')] = sample_size
+                Power_analysis_table.iloc[itime, Power_analysis_table.columns.get_loc(
+                    'Significance Level')] = sig_level
+
+    return Power_analysis_table
+
+
+def pa_power_analysis_report(power_group_data, type='d'):
+    # Calculate and report the power analysis for two treatments' time series from replicates assay measurements
+
+    power_group_data = power_group_data.dropna(subset=['Value'])
+    # Confirm whether there are two treatments
+    study_group = power_group_data[["Compound Treatment(s)"]]
+    study_unique_group = study_group.drop_duplicates()
+    if study_unique_group.shape[0] != 2:
+        # only two treatments can be selected"
+        Power_analysis_table = np.NAN
+    else:
+        # Power analysis results
+        Power_analysis_table_key = power_group_data[["Group", "Time"]]
+        Power_analysis_table = Power_analysis_table_key.drop_duplicates()
+        # create power analysis report table
+        header_list = Power_analysis_table.columns.values.tolist()
+        header_list.append('Power')
+        header_list.append('P Value')
+
+        # Define all columns of power analysis report table
+        Power_analysis_table = Power_analysis_table.reindex(
+            columns=header_list)
+        # Loop every unique replicate group
+        time_count = len(Power_analysis_table)
+
+        if study_unique_group.shape[0] != 2:
+            err_msg = "two treatments have to be selected"
+            print(err_msg)
+        else:
+            chip_data = power_group_data.groupby(
+                ['Compound Treatment(s)', 'Chip ID', 'Time'], as_index=False)['Value'].mean()
+            cltr_data = chip_data[chip_data['Compound Treatment(s)']
+                                  == study_unique_group.iloc[0, 0]]
+            treat_data = chip_data[chip_data['Compound Treatment(s)']
+                                   == study_unique_group.iloc[1, 0]]
+            for itime in range(time_count):
+                # print('Time '+ str(Power_analysis_table['Time'][itime]) )
+                x = cltr_data[cltr_data['Time']
+                              == Power_analysis_table['Time'][itime]]['Value']
+                n1 = len(x)
+                y = treat_data[treat_data['Time']
+                               == Power_analysis_table['Time'][itime]]['Value']
+                n2 = len(y)
+                if n1 > 1 and n2 > 1:
+                    # P-value and effect size for power analysis calculation
+                    es_value = pa_effect_size(x, y, type)
+                    p_value = pa_t_test(x, y)
+                    # Power calculation
+                if n1 == n2 and n1 > 1:
+                    power_value = pa_power_one_sample_size(n1, es_value)
+                elif n1 > 1 and n2 > 1 and n1 != n2:
+                    power_value = pa_power_two_sample_size(n1, n2, es_value)
+                else:
+                    power_value = np.NAN
+
+                Power_analysis_table.iloc[itime, Power_analysis_table.columns.get_loc(
+                    'Power')] = power_value
+                Power_analysis_table.iloc[itime, Power_analysis_table.columns.get_loc(
+                    'P Value')] = p_value
+
+    return Power_analysis_table
+
+
+def pa_power_sample_size_curves_matrix(power_group_data, power_inteval=0.02, type='d'):
+    # Calculate and report the power analysis for two treatments' time series from replicates assay measurements
+    max_power = 1
+    power_inteval = 0.01
+
+    power_group_data = power_group_data.dropna(subset=['Value'])
+    # Confirm whether there are two treatments
+    study_group = power_group_data[["Compound Treatment(s)"]]
+    study_unique_group = study_group.drop_duplicates()
+    if study_unique_group.shape[0] != 2:
+        # only two treatments can be selected"
+        Power_analysis_table = np.NAN
+    else:
+        # Power analysis results
+        Power_analysis_table_key = power_group_data[["Group", "Time"]]
+        Power_analysis_table = Power_analysis_table_key.drop_duplicates()
+        # create power analysis report table
+        header_list = Power_analysis_table.columns.values.tolist()
+        header_list.append('Power')
+        header_list.append('Sample Size')
+
+        # Define all columns of power analysis report table
+        Power_Sample_Curves_table = pd.DataFrame(columns=header_list)
+        # Loop every unique replicate group
+        time_count = len(Power_analysis_table)
+
+        if study_unique_group.shape[0] != 2:
+            err_msg = "two treatments have to be selected"
+            print(err_msg)
+        else:
+            chip_data = power_group_data.groupby(
+                ['Compound Treatment(s)', 'Chip ID', 'Time'], as_index=False)['Value'].mean()
+            cltr_data = chip_data[chip_data['Compound Treatment(s)']
+                                  == study_unique_group.iloc[0, 0]]
+            treat_data = chip_data[chip_data['Compound Treatment(s)']
+                                   == study_unique_group.iloc[1, 0]]
+            for itime in range(time_count):
+                min_power = 0.4
+                # print('Time '+ str(Power_analysis_table['Time'][itime]) )
+                x = cltr_data[cltr_data['Time']
+                              == Power_analysis_table['Time'][itime]]['Value']
+                n1 = len(x)
+                y = treat_data[treat_data['Time']
+                               == Power_analysis_table['Time'][itime]]['Value']
+                n2 = len(y)
+                if n1 > 1 and n2 > 1:
+                    # effect size for power analysis calculation
+                    es_value = pa_effect_size(x, y, type)
+                    # Power calculation
+                if n1 == n2 and n1 > 1:
+                    power_value = pa_power_one_sample_size(n1, es_value)
+                elif n1 > 1 and n2 > 1 and n1 != n2:
+                    power_value = pa_power_two_sample_size(n1, n2, es_value)
+                else:
+                    power_value = np.NAN
+
+                if power_value < 0.4:
+                    min_power = power_value
+
+                power_array = np.arange(min_power, max_power, power_inteval)
+                n_pc = len(power_array)
+                # create dataframe for each time point
+                time_power_df = pd.DataFrame(
+                    index=range(n_pc), columns=header_list)
+                for k in range(n_pc):
+                    # print(power_array[k])
+                    input_power = power_array[k]
+                    output_sample_size = pa_predicted_sample_size(
+                        input_power, es_value)
+                    time_power_df.iloc[k,
+                                       0] = Power_analysis_table['Group'][itime]
+                    time_power_df.iloc[k,
+                                       1] = Power_analysis_table['Time'][itime]
+                    time_power_df.iloc[k, 2] = input_power
+                    time_power_df.iloc[k, 3] = output_sample_size
+
+                # Append the calculate power and sample size matrix at each time
+                Power_Sample_Curves_table = Power_Sample_Curves_table.append(
+                    time_power_df, ignore_index=True)
+    return Power_Sample_Curves_table
+
+
+def power_analysis(data):
+    # Initialize a workbook
+
+    # Load the summary data into the dataframe
+    power_group_data = pd.DataFrame(data)
+    # Four different methods for power analysis
+    # If type = 'd', it's Cohen's method, this is default method
+    # If type 'D', it's Glass’s ∆ method
+    # If type it's Hedges’s g method
+    # If type 'gs' it's Hedges’s g* method
+
+    # Call function to get the power values for the two treatments' chip replicates at each time
+    power_results_report = pa_power_analysis_report(power_group_data, type='d')
+    print(power_results_report)
+
+    # Call fuction to get the predicted sample size of chip replicates at each time for given power
+    power_vs_sample_size_curves_matrix = pa_power_sample_size_curves_matrix(
+        power_group_data, power_inteval=0.02, type='d')
+    print(power_vs_sample_size_curves_matrix)
+
+    # Call Sample size prediction
+    sample_size_prediction_matrix = pa_predicted_sample_size_time_series(
+        power_group_data, type='d', power=0.9, sig_level=0.05)
+    print(sample_size_prediction_matrix)
+
+    # Call power prediction
+    power_prediction_matrix = pa_predicted_power_time_series(
+        power_group_data, type='d', sample_size=3, sig_level=0.05)
+    print(power_prediction_matrix)
+
+    # Call significance level prediction
+    sig_level_prediction_matrix = pa_predicted_significance_level_time_series(
+        power_group_data, type='d', sample_size=3, power=0.8)
+    print(sig_level_prediction_matrix)
