@@ -1,6 +1,6 @@
 # Not used yet
 # matplotlib
-uwsgi
+# uwsgi
 # django-uwsgi-cache
 networkx
 Django==2.1.8
