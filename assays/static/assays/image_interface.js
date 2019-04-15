@@ -39,28 +39,8 @@ $(document).ready(function () {
                $(this).dialog("close");
             }
         }],
-        close: function() {
-            // Permit scrolling again
-            $('body').removeClass('stop-scrolling');
-        },
         open: function() {
-            // Prevent scrolling
-            $('body').addClass('stop-scrolling');
-
-            // Change height if necessary
-            // if ($(window).height() < 950) {
-            //     $(this).dialog('option', 'height', $(window).height() - 100);
-            // }
-            // else {
-            //     $(this).dialog('option', 'height', 750);
-            // }
-            //
-            // if ($(window).width() < 1300) {
-            //     $(this).dialog('option', 'width', $(window).width() - 200);
-            // }
-            // else {
-            //     $(this).dialog('option', 'width', 1800);
-            // }
+            $.ui.dialog.prototype.options.open();
 
             $(this).dialog('option', 'width', $(window).width());
             $(this).dialog('option', 'height', ($(window).height()-$('#floating-sliders').height()-1));
@@ -133,7 +113,6 @@ $(document).ready(function () {
             downloadFilename = popupDialogData["file_name"];
             $(".ui-dialog").find(".ui-button-text-only:first").html('<a style="text-decoration: none; color: white;" download href="/media/assay_images/'+study_pk+'/'+downloadFilename+'"><span class="ui-button-text">Download Unaltered '+type+' <span data-toggle="tooltip" title="Some '+type+'s are dark and may require\n intensity adjustment to discern details." class="glyphicon glyphicon-info-sign" aria-hidden="true"></span></span></a>');
 
-            // $("#myDialogText").html('<div class="row no-padding"><div class="thumbnail col-md-12 col-lg-4"><img style="filter: contrast('+contrast+'%)  brightness('+brightness+'%);" src="/media/assay_thumbs/'+study_pk+'/thumbnail_'+popupDialogData["file_name"].split(".")[0]+'_600_600.jpg"/></div><div class="col-md-12 col-lg-7"><table class="table table-hover table-striped table-bordered table-condensed small"><tr><th style="width: 250px;">Chip ID</th><td>'+iChip+'</td></tr><tr><th>Assay Plate ID</th><td>'+iPlate+'</td></tr><tr><th>Assay Well ID</th><td>'+iWell+'</td></tr><tr><th>Time</th><td>'+iTime+'</td></tr><tr><th>Method/Kit</th><td>'+iMethodKit+'</td></tr><tr><th>Target/Analyte</th><td>'+iTargetAnalyte+'</td></tr><tr><th>Subtarget</th><td>'+iSubtarget+'</td></tr><tr><th>Sample Location</th><td>'+iSampleLocation+'</td></tr><tr><th>Replicate</th><td>'+iReplicate+'</td></tr><tr><th>Notes</th><td>'+iNotes+'</td></tr><tr><th>Image File Name</th><td>'+iFileName+'</td></tr><tr><th>Image Field</th><td>'+iField+'</td></tr><tr><th>Image Field Description</th><td>'+iFieldDescription+'</td></tr><tr><th>Image Magnification</th><td>'+iMagnification+'</td></tr><tr><th>Image Resolution</th><td>'+iResolution+'</td></tr><tr><th>Image Resolution Unit</th><td>'+iResolutionUnit+'</td></tr><tr><th>Image Sample Label</th><td>'+iSampleLabel+'</td></tr><tr><th>Image Sample Label Description</th><td>'+iSampleLabelDescription+'</td></tr><tr><th>Image Wavelength (ex/em nm)</th><td>'+iWavelength+'</td></tr><tr><th>Image Color Mapping</th><td>'+iColorMapping+'</td></tr><tr><th>Image Setting Note</th><td>'+iSettingNote+'</td></tr></table></div></div>');
             $("#myDialogText").html('<div class="row no-padding">'+detailDisplay+'<div class="col-md-12 col-lg-7"><table class="table table-hover table-striped table-bordered table-condensed small">'+
                 '<div class="text-center"><label>Note: This '+type.toLowerCase()+' may have been altered to assist with viewing.<br>To perform analysis, please download the unaltered '+type.toLowerCase()+'.</label></div><br>'+
                 '<tr><th style="width: 200px;">Chip ID</th><td>'+iChip+'</td></tr>'+

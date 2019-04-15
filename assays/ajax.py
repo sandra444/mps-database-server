@@ -95,8 +95,8 @@ COMBINED_VALUE_DELIMITER = '~@|'
 convert = lambda text: int(text) if text.isdigit() else text.lower()
 alphanum_key = lambda key: [
     convert(
-        c.replace('     ~@I1', '!').replace('     ~@I2', '"').replace('     ~@S', '"')
-    ) for c in re.split('([0-9]+)', key)
+        c.replace('     ~@i1', '!').replace('     ~@i2', '"').replace('     ~@s', '"')
+    ) for c in re.split('([\d+\.?\d+]+)', key)
 ]
 
 alphanum_key_for_item_groups = lambda pair: re.split('([0-9]+)', pair[0])
@@ -1569,8 +1569,7 @@ def fetch_assay_study_reproducibility(request):
         study_id=study.id
     )
 
-    # If a filter was passed
-    if item_id_filter:
+    if item_id_filter and any(item_id_filter):
         item_id_filter = [int(x) for x in item_id_filter]
         matrix_items = matrix_items.filter(id__in=item_id_filter)
 
