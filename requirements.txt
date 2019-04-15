@@ -3,7 +3,7 @@
 uwsgi
 # django-uwsgi-cache
 networkx
-Django
+Django==2.1.8
 Jinja2
 Markdown
 MarkupSafe
@@ -72,8 +72,10 @@ python-gflags
 python-mimeparse
 # Time zones
 pytz
+# uwsgi
+pyuwsgi
 # Asynchronous messaging with ZeroMQ
-# pyzmq
+pyzmq
 # Refactoring library
 rope
 # Helper for rope
