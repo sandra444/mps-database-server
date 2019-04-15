@@ -2,6 +2,8 @@ from django.db import models
 from mps.base.models import LockableModel
 from django.utils.html import format_html
 
+from django.utils.safestring import mark_safe
+
 
 class ResourceSubtype(LockableModel):
     """A Resource Subtype specifies a category (e.g. supplier, database, etc.
@@ -16,7 +18,7 @@ class ResourceSubtype(LockableModel):
     name = models.TextField(max_length=40, unique=True, verbose_name='Category')
     description = models.TextField(max_length=400, blank=True, default='')
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
 
@@ -27,10 +29,10 @@ class ResourceType(LockableModel):
 
     resource_type_name = models.CharField(max_length=40, unique=True, verbose_name="Type")
     description = models.CharField(max_length=400, blank=True, default='')
-    resource_subtype = models.ForeignKey(ResourceSubtype, verbose_name="Category")
+    resource_subtype = models.ForeignKey(ResourceSubtype, verbose_name="Category", on_delete=models.CASCADE)
 
-    def __unicode__(self):
-        return u'{} ({})'.format(self.resource_subtype,
+    def __str__(self):
+        return '{} ({})'.format(self.resource_subtype,
                                  self.resource_type_name)
 
 
@@ -42,9 +44,9 @@ class Resource(LockableModel):
     resource_name = models.CharField(max_length=60, unique=True, verbose_name="Name")
     resource_website = models.URLField(blank=True, null=True)
     description = models.CharField(max_length=400, blank=True, default='')
-    type = models.ForeignKey(ResourceType)
+    type = models.ForeignKey(ResourceType, on_delete=models.CASCADE)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.resource_name
 
     def subtype(self):
@@ -57,9 +59,10 @@ class Definition(LockableModel):
     definition = models.CharField(max_length=2500, default='')
     reference = models.URLField(default='', blank=True)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.term
 
+    @mark_safe
     def show_url(self):
         if self.reference:
             return format_html(

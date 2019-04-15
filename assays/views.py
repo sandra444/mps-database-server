@@ -110,6 +110,8 @@ import pytz
 # TODO ^ Update Views should be refactored soon
 # NOTE THAT YOU NEED TO MODIFY INLINES HERE, NOT IN FORMS
 
+# TODO TODO TODO render_to_response is DEPRECATED: USE render INSTEAD
+
 
 def add_study_fields_to_form(self, form, add_study=False):
     """Adds study, group, and restricted to a form
@@ -596,7 +598,7 @@ class AssayStudyIndex(StudyViewerMixin, DetailView):
         context = super(AssayStudyIndex, self).get_context_data(**kwargs)
 
         matrices = AssayMatrix.objects.filter(
-            study=self.object
+            study_id=self.object.id
         ).prefetch_related(
             'assaymatrixitem_set',
             'created_by',
@@ -632,7 +634,7 @@ class AssayStudyIndex(StudyViewerMixin, DetailView):
 
         # Stakeholder status
         context['stakeholder_sign_off'] = AssayStudyStakeholder.objects.filter(
-            study=self.object,
+            study_id=self.object.id,
             signed_off_by_id=None,
             sign_off_required=True
         ).count() == 0
@@ -703,8 +705,8 @@ class AssayStudyData(StudyViewerMixin, DetailView):
             data = get_data_as_csv(items, include_header=True, include_all=include_all)
 
             # For specifically text
-            response = HttpResponse(data, content_type='text/csv')
-            response['Content-Disposition'] = 'attachment;filename="' + unicode(self.object) + '.csv"'
+            response = HttpResponse(data, content_type='text/csv', charset='utf-8')
+            response['Content-Disposition'] = 'attachment;filename="' + str(self.object) + '.csv"'
 
             return response
         # Return nothing otherwise
@@ -733,7 +735,7 @@ class AssayStudySignOff(UpdateView):
         # Check if user is a stakeholder admin ONLY IF SIGNED OFF
         if study.signed_off_by:
             stakeholders = AssayStudyStakeholder.objects.filter(
-                study=study
+                study_id=study.id
             ).prefetch_related(
                 'study',
                 'group',
@@ -790,7 +792,7 @@ class AssayStudySignOff(UpdateView):
 
             send_initial_sign_off_alert = False
             initial_number_of_required_sign_offs = AssayStudyStakeholder.objects.filter(
-                study=self.object,
+                study_id=self.object.id,
                 signed_off_by_id=None,
                 sign_off_required=True
             ).count()
@@ -808,7 +810,7 @@ class AssayStudySignOff(UpdateView):
                 save_forms_with_tracking(self, None, formset=[stakeholder_formset], update=True)
 
             current_number_of_required_sign_offs = AssayStudyStakeholder.objects.filter(
-                study=self.object,
+                study_id=self.object.id,
                 signed_off_by_id=None,
                 sign_off_required=True
             ).count()
@@ -831,7 +833,7 @@ class AssayStudySignOff(UpdateView):
                 stakeholder_admin_groups = {
                     group + ADMIN_SUFFIX: True for group in
                     AssayStudyStakeholder.objects.filter(
-                        study=self.object, sign_off_required=True
+                        study_id=self.object.id, sign_off_required=True
                     ).prefetch_related('group').values_list('group__name', flat=True)
                 }
 
@@ -868,10 +870,10 @@ class AssayStudySignOff(UpdateView):
                 stakeholder_viewer_groups = {
                     group: True for group in
                     AssayStudyStakeholder.objects.filter(
-                        study=self.object
+                        study_id=self.object.id
                     ).prefetch_related('group').values_list('group__name', flat=True)
                 }
-                initial_groups = stakeholder_viewer_groups.keys()
+                initial_groups = list(stakeholder_viewer_groups.keys())
 
                 for group in initial_groups:
                     stakeholder_viewer_groups.update({
@@ -950,7 +952,7 @@ class AssayStudySignOff(UpdateView):
                     'assays/email/superuser_initial_sign_off_alert.txt',
                     {
                         'study': self.object,
-                        'stakeholders': AssayStudyStakeholder.objects.filter(study=self.object).order_by('-signed_off_date')
+                        'stakeholders': AssayStudyStakeholder.objects.filter(study_id=self.object.id).order_by('-signed_off_date')
                     }
                 )
 
@@ -965,7 +967,7 @@ class AssayStudySignOff(UpdateView):
                     'assays/email/superuser_stakeholder_alert.txt',
                     {
                         'study': self.object,
-                        'stakeholders': AssayStudyStakeholder.objects.filter(study=self.object).order_by('-signed_off_date')
+                        'stakeholders': AssayStudyStakeholder.objects.filter(study_id=self.object.id).order_by('-signed_off_date')
                     }
                 )
 
@@ -1064,7 +1066,7 @@ class AssayStudyDataUpload(ObjectGroupRequiredMixin, UpdateView):
                 )
 
                 # Contrived method for marking data
-                for key, value in form.data.iteritems():
+                for key, value in list(form.data.items()):
                     if key.startswith('data_upload_'):
                         current_id = key.replace('data_upload_', '', 1)
                         current_value = value
@@ -1073,9 +1075,9 @@ class AssayStudyDataUpload(ObjectGroupRequiredMixin, UpdateView):
                             current_value = False
 
                         if current_value:
-                            data_file_upload = AssayDataFileUpload.objects.filter(study=self.object, id=current_id)
+                            data_file_upload = AssayDataFileUpload.objects.filter(study_id=self.object.id, id=current_id)
                             if data_file_upload:
-                                data_points_to_replace = AssayDataPoint.objects.filter(data_file_upload=data_file_upload).exclude(replaced=True)
+                                data_points_to_replace = AssayDataPoint.objects.filter(data_file_upload__in=data_file_upload).exclude(replaced=True)
                                 data_points_to_replace.update(replaced=True)
 
             return redirect(self.object.get_absolute_url())
@@ -1255,7 +1257,7 @@ class AssayMatrixUpdate(StudyGroupMixin, UpdateView):
         # context['formset'] = AssayMatrixItemFormSetFactory(instance=self.object)
 
         matrix_item_queryset = AssayMatrixItem.objects.filter(
-            matrix=self.object
+            matrix_id=self.object.id
         ).order_by(
             'row_index',
             'column_index'
@@ -1566,10 +1568,10 @@ class AssayMatrixItemUpdate(StudyGroupMixin, UpdateView):
             try:
                 data_point_ids_to_update_raw = json.loads(form.data.get('dynamic_exclusion', '{}'))
                 data_point_ids_to_mark_excluded = [
-                    int(id) for id, value in data_point_ids_to_update_raw.items() if value
+                    int(id) for id, value in list(data_point_ids_to_update_raw.items()) if value
                 ]
                 data_point_ids_to_mark_included = [
-                    int(id) for id, value in data_point_ids_to_update_raw.items() if not value
+                    int(id) for id, value in list(data_point_ids_to_update_raw.items()) if not value
                 ]
                 if data_point_ids_to_mark_excluded:
                     AssayDataPoint.objects.filter(
@@ -1904,7 +1906,7 @@ class AssayDataFromFilters(LoginRequiredMixin, TemplateView):
             # include_all = self.request.GET.get('include_all', False)
 
             # For specifically text
-            response = HttpResponse(data, content_type='text/csv')
+            response = HttpResponse(data, content_type='text/csv', charset='utf-8')
             response['Content-Disposition'] = 'attachment;filename=MPS_Download.csv'
 
             return response

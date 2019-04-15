@@ -17,6 +17,7 @@ from django.views.generic.base import TemplateView
 
 from microdevices.models import MicrophysiologyCenter
 from mps.templatetags.custom_filters import ADMIN_SUFFIX, VIEWER_SUFFIX
+import html
 
 
 def main(request):
@@ -58,12 +59,12 @@ def search(request):
         return HttpResponseRedirect('/')
 
     if app == 'Global':
-        return HttpResponseRedirect(u'/search?q={}'.format(search_term))
+        return HttpResponseRedirect('/search?q={}'.format(search_term))
 
     elif app == 'Bioactivities':
         search_term = [(term + '=' + bioactivities.get(term)) for term in bioactivities if bioactivities.get(term)]
         search_term = '&'.join(search_term)
-        return HttpResponseRedirect(u'/bioactivities/?{}'.format(search_term))
+        return HttpResponseRedirect('/bioactivities/?{}'.format(search_term))
 
     # If, for whatever reason, invalid data is entered, just return to the home page
     else:
@@ -82,7 +83,7 @@ def get_search_queryset_with_permissions(request):
             if group.name.replace(ADMIN_SUFFIX, '').replace(VIEWER_SUFFIX, '') in groups_with_center_full
         }
 
-        for group in user_groups.keys():
+        for group in list(user_groups.keys()):
             sqs = sqs | SearchQuerySet().filter(permissions=group)
 
     return sqs
@@ -91,6 +92,13 @@ def get_search_queryset_with_permissions(request):
 # A generic use of the search_view_factory
 def custom_search(request):
     # Filter on group: either get all with no group or those with a group the user has
+    request.GET = request.GET.copy()
+    request.GET.update({
+        # EXCEEDINGLY CRUDE
+        'q': html.escape(
+            request.GET.get('q', '')
+        ).replace('&#x27;', '&#39;')
+    })
     sqs = get_search_queryset_with_permissions(request)
 
     view = search_view_factory(
