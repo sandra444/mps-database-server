@@ -89,15 +89,20 @@ CONTROL_LABEL = '-Control-'
 # Variable to indicate that these should be split for special filters
 COMBINED_VALUE_DELIMITER = '~@|'
 
+
 # Note manipulations for sorting
-# Somewhat contrived
-# THESE SHOULD BE DEFINED, NOT LAMBDA FUNCTIONS
-convert = lambda text: int(text) if text.isdigit() else text.lower()
-alphanum_key = lambda key: [
-    convert(
-        c.replace('     ~@i1', '!').replace('     ~@i2', '"').replace('     ~@s', '"')
-    ) for c in re.split('([\d+\.?\d+]+)', key)
-]
+def atof(text):
+    try:
+        retval = float(text)
+    except ValueError:
+        retval = text
+    return retval
+
+
+def alphanum_key(text):
+    return [
+        atof(c.replace('     ~@i1', '!').replace('     ~@i2', '"').replace('     ~@s', '"')) for c in re.split(r'[+-]?([0-9]+(?:[.][0-9]*)?|[.][0-9]+)', text)
+    ]
 
 alphanum_key_for_item_groups = lambda pair: re.split('([0-9]+)', pair[0])
 
