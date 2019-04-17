@@ -19,6 +19,12 @@ $(document).ready(function () {
 
             // Blur all
             $('.ui-dialog').find('input, select, button').blur();
+        },
+        create: function() {
+            if ($(window).width() < 900) {
+                $(this).dialog('option', 'width', $(window).width() * 0.75);
+                $(this).dialog('option', 'height', $(window).height() * 0.75);
+            }
         }
     });
 });
