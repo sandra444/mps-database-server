@@ -1876,8 +1876,12 @@ class AssayMatrixItem(FlaggableModel):
     row_index = models.IntegerField()
     column_index = models.IntegerField()
 
+    # TODO DEPRECATED: PURGE
+    # HENCEFORTH ALL ITEMS WILL HAVE AN ORGAN MODEL PROTOCOL
     device = models.ForeignKey(Microdevice, verbose_name='Device', on_delete=models.CASCADE)
 
+    # TODO DEPRECATED: PURGE
+    # HENCEFORTH ALL ITEMS WILL HAVE AN ORGAN MODEL PROTOCOL
     organ_model = models.ForeignKey(OrganModel, verbose_name='Model', null=True, blank=True, on_delete=models.CASCADE)
 
     organ_model_protocol = models.ForeignKey(
@@ -1888,6 +1892,7 @@ class AssayMatrixItem(FlaggableModel):
         on_delete=models.CASCADE
     )
 
+    # TODO DEPRECATED: PURGE
     # formerly just 'variance'
     variance_from_organ_model_protocol = models.CharField(
         max_length=3000,

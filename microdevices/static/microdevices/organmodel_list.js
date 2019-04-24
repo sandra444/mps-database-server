@@ -14,11 +14,11 @@ $(document).ready(function() {
                 'className': 'none',
                 'targets': [8]
             },
-            {
-                'sortable': true,
-                'visible': false,
-                'targets': [9]
-            },
+            // {
+            //     'sortable': true,
+            //     'visible': false,
+            //     'targets': [9]
+            // },
             {
                 "width": "10%",
                 "targets": [0, 1]
