@@ -261,12 +261,14 @@ class OrganModelProtocol(models.Model):
     # Uhh... this should probably just be "name"...
     # TRANSFER ALL VERSIONS TO NAMES
     version = models.CharField(max_length=20)
-    name = models.CharField(max_length=200)
+    # name = models.CharField(max_length=200)
     # THIS SHOULD DEFINITELY NOT BE CALLED SIMPLY "FILE"
-    protocol_file = models.FileField(upload_to='protocols', verbose_name='Protocol File')
+    file = models.FileField(upload_to='protocols', verbose_name='Protocol File')
+    # protocol_file = models.FileField(upload_to='protocols', verbose_name='Protocol File')
 
     def __str__(self):
-        return self.name
+        # return self.name
+        return self.version
 
 
 # TODO SEEMS TO BE UNUSED
