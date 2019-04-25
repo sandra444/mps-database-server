@@ -3,7 +3,7 @@
 from django.db import models
 from django.contrib.auth.models import Group
 
-from mps.base.models import LockableModel, TrackableModel
+from mps.base.models import LockableModel, TrackableModel, FlaggableModel
 from django.core.validators import MaxValueValidator
 
 
@@ -247,7 +247,7 @@ class ValidatedAssay(models.Model):
 
 
 # TODO PLEASE NOTE THIS WILL BE REFERRED TO AS SIMPLY A "VERSION"
-class OrganModelProtocol(models.Model):
+class OrganModelProtocol(FlaggableModel):
     """Organ Model Protocols point to a file detailing the preparation of a model
 
     This model is intended to be an inline
@@ -255,16 +255,20 @@ class OrganModelProtocol(models.Model):
 
     class Meta(object):
         unique_together = [('version', 'organ_model')]
+        # TODO SWITCH TO THIS UNIQUE TOGETHER RESTRICTION ASAP
+        # unique_together = [('name', 'organ_model')]
         verbose_name = 'MPS Model Version'
 
     organ_model = models.ForeignKey(OrganModel, verbose_name='Organ Model', on_delete=models.CASCADE)
     # Uhh... this should probably just be "name"...
     # TRANSFER ALL VERSIONS TO NAMES
-    version = models.CharField(max_length=20)
-    # name = models.CharField(max_length=200)
+    version = models.CharField(max_length=20, default='', blank=True)
+    name = models.CharField(max_length=200)
     # THIS SHOULD DEFINITELY NOT BE CALLED SIMPLY "FILE"
-    file = models.FileField(upload_to='protocols', verbose_name='Protocol File')
-    # protocol_file = models.FileField(upload_to='protocols', verbose_name='Protocol File')
+    # file = models.FileField(upload_to='protocols', verbose_name='Protocol File')
+    protocol_file = models.FileField(upload_to='protocols', verbose_name='Protocol File')
+
+    description = models.CharField(max_length=4000, default='', blank=True)
 
     def __str__(self):
         # return self.name
@@ -292,16 +296,61 @@ class OrganModelLocation(models.Model):
 
 
 # PROTOTYPE
+# JUST THE CELL TYPE APPARENTLY
 class OrganModelCell(models.Model):
-    pass
+    organ_model = models.ForeignKey(OrganModel, on_delete=models.CASCADE)
+    cell_type = models.ForeignKey('cellsamples.CellType', on_delete=models.CASCADE)
 
 
+# JUST INCLUDE EVERYTHING FOR NOW
+# SOMEWHAT UNUSUAL TO HAVE THIS DECOUPLED FROM SETUPCELL
 class OrganModelProtocolCell(models.Model):
-    pass
+    organ_model_protocol = models.ForeignKey(OrganModelProtocol, on_delete=models.CASCADE)
+
+    cell_sample = models.ForeignKey('cellsamples.CellSample', on_delete=models.CASCADE)
+    biosensor = models.ForeignKey('cellsamples.Biosensor', on_delete=models.CASCADE)
+    density = models.FloatField(verbose_name='density', default=0)
+
+    density_unit = models.ForeignKey('assays.PhysicalUnits', on_delete=models.CASCADE)
+    passage = models.CharField(
+        max_length=16,
+        verbose_name='Passage#',
+        blank=True,
+        default=''
+    )
+
+    # DO WE WANT ADDITION TIME AND DURATION?
+    # PLEASE NOTE THAT THIS IS IN MINUTES, CONVERTED FROM D:H:M
+    # TODO TODO TODO TEMPORARILY NOT REQUIRED
+    addition_time = models.FloatField(null=True, blank=True)
+
+    # TODO TODO TODO DO WE WANT DURATION????
+    # duration = models.FloatField(null=True, blank=True)
+
+    # TODO TODO TODO TEMPORARILY NOT REQUIRED
+    addition_location = models.ForeignKey('assays.AssaySampleLocation', blank=True, default=1, on_delete=models.CASCADE)
 
 
+# JUST INCLUDE EVERYTHING FOR NOW
 class OrganModelProtocolSetting(models.Model):
-    pass
+    organ_model_protocol = models.ForeignKey(OrganModelProtocol, on_delete=models.CASCADE)
+
+    # No longer one-to-one
+    # setup = models.ForeignKey('assays.AssaySetup', on_delete=models.CASCADE)
+    setting = models.ForeignKey('assays.AssaySetting', on_delete=models.CASCADE)
+    # DEFAULTS TO NONE, BUT IS REQUIRED
+    unit = models.ForeignKey('assays.PhysicalUnits', blank=True, default=14, on_delete=models.CASCADE)
+    value = models.CharField(max_length=255)
+
+    # Will we include these??
+    # PLEASE NOTE THAT THIS IS IN MINUTES, CONVERTED FROM D:H:M
+    addition_time = models.FloatField(blank=True)
+
+    # PLEASE NOTE THAT THIS IS IN MINUTES, CONVERTED FROM D:H:M
+    duration = models.FloatField(blank=True)
+
+    # TODO TODO TODO TEMPORARILY NOT REQUIRED
+    addition_location = models.ForeignKey('assays.AssaySampleLocation', blank=True, default=1, on_delete=models.CASCADE)
 
 
 # REMOVED FOR NOW

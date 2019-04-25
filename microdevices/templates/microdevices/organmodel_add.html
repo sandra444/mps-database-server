@@ -194,8 +194,9 @@
     <table class="table table-striped inlines" id="{{ protocol_formset.prefix }}-group" name="protocols">
         <thead>
             <tr>
-                <th>Version*</th>
+                <th>Name*</th>
                 <th>File (PDF)*</th>
+                <th>Edit</th>
                 <th>Delete</th>
             </tr>
         </thead>
@@ -210,8 +211,15 @@
                                value="{{ protocol.id.value }}">
                     </td>
                     {% endif %}
-                    <td>{{ protocol.version }}</td>
-                    <td>{{ protocol.file }}</td>
+                    <td>{{ protocol.name }}</td>
+                    <td>{{ protocol.protocol_file }}</td>
+                    {% if protocol.id.value %}
+                    <td>
+                        <a href="{% url 'protocol-update' protocol.id.value %}" class="btn btn-primary">Edit</a>
+                    </td>
+                    {% else %}
+                    <td></td>
+                    {% endif %}
                     <td>{{ protocol.DELETE }}</td>
                 </tr>
             {% endfor %}

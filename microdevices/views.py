@@ -2,8 +2,28 @@ from django.views.generic import DetailView, CreateView, UpdateView, ListView, T
 from django.shortcuts import redirect
 from django import forms
 
-from .forms import MicrodeviceForm, OrganModelForm, OrganModelProtocolFormsetFactory, OrganModelLocationFormsetFactory
-from .models import Microdevice, OrganModel, ValidatedAssay, OrganModelProtocol, MicrophysiologyCenter
+# Really it probably would have been better to have just used namespaces
+from .forms import (
+    MicrodeviceForm,
+    OrganModelForm,
+    OrganModelProtocolFormsetFactory,
+    OrganModelLocationFormsetFactory,
+    OrganModelProtocolForm,
+    OrganModelProtocolCellFormsetFactory,
+    OrganModelProtocolSettingFormsetFactory
+)
+from .models import (
+    Microdevice,
+    OrganModel,
+    ValidatedAssay,
+    OrganModelProtocol,
+    MicrophysiologyCenter,
+    OrganModelProtocolCell,
+    OrganModelProtocolSetting,
+)
+
+from cellsamples.models import CellSample
+
 from mps.mixins import SpecificGroupRequiredMixin, PermissionDenied, user_is_active
 from mps.base.models import save_forms_with_tracking
 from django.contrib.auth.decorators import login_required, user_passes_test
@@ -223,3 +243,73 @@ class MicrophysiologyCenterDetail(DetailView):
         context['contact_email_parts'] = self.object.contact_email.split("@")
 
         return context
+
+
+class OrganModelProtocolUpdate(UpdateView):
+    """Allows Organ Models to be updated"""
+    model = OrganModelProtocol
+    template_name = 'microdevices/organmodelprotocol_add.html'
+    form_class = OrganModelProtocolForm
+
+    @method_decorator(login_required)
+    @method_decorator(user_passes_test(user_is_active))
+    def dispatch(self, *args, **kwargs):
+        """Special dispatch for Organ Model Protocol
+
+        Rejects users with no groups and then rejects users without groups matching the center
+        (if there is a center listed)
+        """
+        self.object = self.get_object()
+        if self.request.user.groups.all().count() == 0 or self.object.organ_model.center and not any(
+            i in self.object.organ_model.center.groups.all() for i in self.request.user.groups.all()
+        ):
+            return PermissionDenied(self.request, 'You must be a member of the center ' + str(self.object.center))
+        return super(OrganModelProtocolUpdate, self).dispatch(*args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super(OrganModelProtocolUpdate, self).get_context_data(**kwargs)
+
+        # Cellsamples will always be the same
+        context['cellsamples'] = CellSample.objects.all().prefetch_related(
+            'cell_type__organ',
+            'supplier',
+            'cell_subtype__cell_type'
+        )
+
+        if 'cell_formset' not in context:
+            if self.request.POST:
+                context['cell_formset'] = OrganModelProtocolCellFormsetFactory(
+                    self.request.POST,
+                    instance=self.object
+                )
+                context['setting_formset'] = OrganModelProtocolSettingFormsetFactory(
+                    self.request.POST,
+                    instance=self.object
+                )
+            else:
+                context['cell_formset'] = OrganModelProtocolCellFormsetFactory(instance=self.object)
+                context['setting_formset'] = OrganModelProtocolSettingFormsetFactory(instance=self.object)
+
+        context['update'] = True
+
+        return context
+
+    def form_valid(self, form):
+        cell_formset = OrganModelProtocolCellFormsetFactory(
+            self.request.POST,
+            instance=form.instance
+        )
+        setting_formset = OrganModelProtocolSettingFormsetFactory(
+            self.request.POST,
+            instance=form.instance
+        )
+        if form.is_valid() and cell_formset.is_valid() and setting_formset.is_valid():
+            save_forms_with_tracking(self, form, formset=[cell_formset, setting_formset], update=True)
+
+            return redirect(self.object.get_post_submission_url())
+        else:
+            return self.render_to_response(self.get_context_data(
+                form=form,
+                cell_formset=cell_formset,
+                setting_formset=setting_formset
+            ))
