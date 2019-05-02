@@ -1461,6 +1461,9 @@ class AssayTarget(LockableModel):
     # Tentative
     alt_name = models.CharField(max_length=1000, blank=True, default='')
 
+    # List of all methods
+    methods = models.ManyToManyField('assays.AssayMethod')
+
     def __str__(self):
         return '{0}'.format(self.name)
 
@@ -2706,3 +2709,12 @@ class AssayImage(models.Model):
 
     def __str__(self):
         return '{}'.format(self.file_name)
+
+
+class AssayType(FlaggableModel):
+    """Describes a genre of assay"""
+    name = models.CharField(max_length=512, unique=True)
+    description = models.CharField(max_length=2000)
+
+    # List of all related targets
+    targets = models.ManyToManyField('assays.AssayTarget')

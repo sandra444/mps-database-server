@@ -42,7 +42,8 @@ from assays.models import (
     AssayImage,
     AssayImageSetting,
     AssaySetting,
-    AssaySubtarget
+    AssaySubtarget,
+    AssayType
 )
 from microdevices.models import MicrophysiologyCenter
 # from compounds.models import Compound
@@ -416,6 +417,7 @@ class AssayTargetAdmin(LockableAdmin):
         'short_name',
         'description'
     )
+    filter_horizontal = ('methods',)
     fieldsets = (
         (
             'Target', {
@@ -424,6 +426,7 @@ class AssayTargetAdmin(LockableAdmin):
                     'alt_name',
                     'short_name',
                     'description',
+                    'methods'
                 )
             }
         ),
@@ -1347,3 +1350,11 @@ class AssaySubtargetAdmin(ImportExportModelAdmin):
     search_fields = ('name', 'description')
 
 admin.site.register(AssaySubtarget, AssaySubtargetAdmin)
+
+
+class AssayTypeAdmin(ImportExportModelAdmin):
+    model = AssayType
+    search_fields = ('name', 'description')
+    filter_horizontal = ('targets',)
+
+admin.site.register(AssayType, AssayTypeAdmin)
