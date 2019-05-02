@@ -231,8 +231,8 @@ class OrganModel(LockableModel):
         return '/microdevices/model/'
 
 
-class OrganModelImage(models.Model):
-    pass
+# class OrganModelImage(models.Model):
+#     pass
 
 
 # TODO DEPRECATED
@@ -274,6 +274,12 @@ class OrganModelProtocol(FlaggableModel):
         # return self.name
         return self.version
 
+    def get_absolute_url(self):
+        return "/microdevices/protocol/{}/".format(self.id)
+
+    def get_post_submission_url(self):
+        return '{}update'.format(self.organ_model.get_absolute_url())
+
 
 # TODO SEEMS TO BE UNUSED
 class GroupDeferral(TrackableModel):
@@ -300,6 +306,7 @@ class OrganModelLocation(models.Model):
 class OrganModelCell(models.Model):
     organ_model = models.ForeignKey(OrganModel, on_delete=models.CASCADE)
     cell_type = models.ForeignKey('cellsamples.CellType', on_delete=models.CASCADE)
+    count = models.IntegerField()
 
 
 # JUST INCLUDE EVERYTHING FOR NOW
