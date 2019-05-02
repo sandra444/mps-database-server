@@ -9,6 +9,7 @@ from .forms import (
     OrganModelProtocolFormsetFactory,
     OrganModelLocationFormsetFactory,
     OrganModelProtocolForm,
+    OrganModelCellFormsetFactory,
     OrganModelProtocolCellFormsetFactory,
     OrganModelProtocolSettingFormsetFactory
 )
@@ -18,6 +19,7 @@ from .models import (
     ValidatedAssay,
     OrganModelProtocol,
     MicrophysiologyCenter,
+    OrganModelCell,
     OrganModelProtocolCell,
     OrganModelProtocolSetting,
 )
@@ -127,10 +129,13 @@ class OrganModelAdd(SpecificGroupRequiredMixin, CreateView):
         if 'protocol_formset' not in context:
             if self.request.POST:
                 context['protocol_formset'] = OrganModelProtocolFormsetFactory(self.request.POST, self.request.FILES)
-                context['location_formset'] = OrganModelLocationFormsetFactory(self.request.POST, self.request.FILES)
+                context['location_formset'] = OrganModelLocationFormsetFactory(self.request.POST)
+                context['cell_formset'] = OrganModelCellFormsetFactory(self.request.POST)
+
             else:
                 context['protocol_formset'] = OrganModelProtocolFormsetFactory()
                 context['location_formset'] = OrganModelLocationFormsetFactory()
+                context['cell_formset'] = OrganModelCellFormsetFactory()
 
         return context
 
@@ -144,8 +149,13 @@ class OrganModelAdd(SpecificGroupRequiredMixin, CreateView):
             self.request.POST,
             instance=form.instance
         )
-        if form.is_valid() and protocol_formset.is_valid() and location_formset.is_valid():
-            save_forms_with_tracking(self, form, formset=[protocol_formset, location_formset], update=False)
+        cell_formset = OrganModelCellFormsetFactory(
+            self.request.POST,
+            instance=form.instance
+        )
+
+        if form.is_valid() and protocol_formset.is_valid() and location_formset.is_valid() and cell_formset.is_valid():
+            save_forms_with_tracking(self, form, formset=[protocol_formset, location_formset, cell_formset], update=False)
 
             # Update the base model to be self-referential if it is missing
             if not form.instance.base_model_id:
@@ -196,9 +206,14 @@ class OrganModelUpdate(UpdateView):
                     self.request.POST,
                     instance=self.object
                 )
+                context['cell_formset'] = OrganModelCellFormsetFactory(
+                    self.request.POST,
+                    instance=self.object
+                )
             else:
                 context['protocol_formset'] = OrganModelProtocolFormsetFactory(instance=self.object)
                 context['location_formset'] = OrganModelLocationFormsetFactory(instance=self.object)
+                context['cell_formset'] = OrganModelCellFormsetFactory(instance=self.object)
 
         context['update'] = True
 
@@ -214,8 +229,13 @@ class OrganModelUpdate(UpdateView):
             self.request.POST,
             instance=form.instance
         )
-        if form.is_valid() and protocol_formset.is_valid() and location_formset.is_valid():
-            save_forms_with_tracking(self, form, formset=[protocol_formset, location_formset], update=True)
+        cell_formset = OrganModelCellFormsetFactory(
+            self.request.POST,
+            instance=form.instance
+        )
+
+        if form.is_valid() and protocol_formset.is_valid() and location_formset.is_valid() and cell_formset.is_valid():
+            save_forms_with_tracking(self, form, formset=[protocol_formset, location_formset, cell_formset], update=True)
 
             # Update the base model to be self-referential if it is missing
             if not form.instance.base_model_id:

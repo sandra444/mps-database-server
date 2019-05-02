@@ -8,6 +8,7 @@ from .models import (
     OrganModelProtocol,
     MicrophysiologyCenter,
     GroupDeferral,
+    OrganModelCell,
     OrganModelProtocolCell,
     OrganModelProtocolSetting,
 )
@@ -202,6 +203,12 @@ class OrganModelProtocolSettingForm(ModelFormSplitTime):
         exclude = tracking
 
 
+class OrganModelCellForm(BootstrapForm):
+    class Meta(object):
+        model = OrganModelProtocolCell
+        exclude = tracking
+
+
 OrganModelProtocolCellFormsetFactory = inlineformset_factory(
     OrganModelProtocol,
     OrganModelProtocolCell,
@@ -214,6 +221,15 @@ OrganModelProtocolSettingFormsetFactory = inlineformset_factory(
     OrganModelProtocol,
     OrganModelProtocolSetting,
     form=OrganModelProtocolSettingForm,
+    extra=1,
+    exclude=[],
+)
+
+
+OrganModelCellFormsetFactory = inlineformset_factory(
+    OrganModel,
+    OrganModelCell,
+    form=OrganModelCellForm,
     extra=1,
     exclude=[],
 )
