@@ -2186,3 +2186,10 @@ class AssayReferenceUpdate(CreatorOrSuperuserRequiredMixin, UpdateView):
             return redirect(self.object.get_post_submission_url())
         else:
             return self.render_to_response(self.get_context_data(form=form))
+
+
+class AssayReferenceDelete(DeletionMixin, DeleteView):
+    """Delete a Reference"""
+    model = AssayReference
+    template_name = 'assays/assayreference_delete.html'
+    success_url = '/assays/references/'
