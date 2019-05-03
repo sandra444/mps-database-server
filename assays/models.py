@@ -1640,6 +1640,11 @@ class AssayStudy(FlaggableModel):
         blank=True, null=True
     )
 
+    # TODO MAKE REQUIRED
+    # TODO DEAL WITH CONFLICTS
+    organ_model = models.ForeignKey(OrganModel, blank=True, null=True)
+    organ_model_protocol = models.ForeignKey(OrganModelProtocol, blank=True, null=True)
+
     # TODO
     # def get_study_types_string(self):
     #     study_types = '-'.join(
