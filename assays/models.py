@@ -1642,8 +1642,8 @@ class AssayStudy(FlaggableModel):
 
     # TODO MAKE REQUIRED
     # TODO DEAL WITH CONFLICTS
-    organ_model = models.ForeignKey(OrganModel, blank=True, null=True)
-    organ_model_protocol = models.ForeignKey(OrganModelProtocol, blank=True, null=True)
+    organ_model = models.ForeignKey(OrganModel, blank=True, null=True, on_delete=models.CASCADE)
+    organ_model_protocol = models.ForeignKey(OrganModelProtocol, blank=True, null=True, on_delete=models.CASCADE)
 
     # TODO
     # def get_study_types_string(self):
