@@ -31,7 +31,8 @@ from assays.views import (
     GraphingReproducibilityFilterView,
     AssayDataFromFilters,
     AssayInterStudyReproducibility,
-    AssayStudyDataPlots
+    AssayStudyDataPlots,
+    AssayStudyAddNew
 )
 import assays.ajax
 
@@ -61,7 +62,7 @@ urlpatterns = [
 
     # NEW_TO_BE_REVISED
     url(r'^assays/assaystudy/$', AssayStudyList.as_view(), name='assay_study_list'),
-    url(r'^assays/assaystudy/add/$', AssayStudyAdd.as_view(), name='assay_study_add'),
+    url(r'^assays/assaystudy/add/$', AssayStudyAddNew.as_view(), name='assay_study_add'),
 
     url(r'^assays/assaymatrixitem/(?P<pk>[0-9]+)/$', AssayMatrixItemDetail.as_view(), name='assay_matrix_item_detail'),
     url(r'^assays/assaymatrixitem/(?P<pk>[0-9]+)/update/$', AssayMatrixItemUpdate.as_view(), name='assay_matrix_item_update'),

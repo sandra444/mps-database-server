@@ -1529,3 +1529,7 @@ class AssayStudyDataUploadForm(BootstrapForm):
                 self.cleaned_data['preview_data'] = file_processor.preview_data
 
         return self.cleaned_data
+
+
+class AssayStudySetupForm(forms.Form):
+    setup_data = forms.CharField(required=True)
