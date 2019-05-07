@@ -6,8 +6,8 @@
     <script src="{% static "js/enter_override.js" %}"></script>
     <script src="{% static "js/calendar.js" %}"></script>
     <script src="{% static "js/flag.js" %}"></script>
-    {# <script src="{% static "js/inline_add.js" %}"></script>#}
-    <script src="{% static "assays/assaystudy_add.js" %}"></script>
+    <script src="{% static "assays/organ_model_filter.js" %}"></script>
+    <script src="{% static "assays/assaystudy_add_new.js" %}"></script>
 {% endblock %}
 
 {% block breadcrumbs %}
@@ -329,17 +329,21 @@
     <legend>Setup Information</legend>
 
     {% include 'generic_field.html' with field=form.organ_model label="MPS Model*" %}
-    {% include 'generic_field.html' with field=form.organ_model label="MPS Model Version*" %}
+    {% include 'generic_field.html' with field=form.organ_model_protocol label="MPS Model Version*" %}
 
     {# Set of buttons for adding cells, compounds, settings etc. #}
+    <div class="padded-bottom">
     <a role="button" class="btn btn-success"><span class="glyphicon glyphicon-plus-sign"></span>Add Cell</a>
     <a role="button" class="btn btn-success"><span class="glyphicon glyphicon-plus-sign"></span>Add Compound</a>
     {# Probably will be renamed #}
     <a role="button" class="btn btn-success"><span class="glyphicon glyphicon-plus-sign"></span>Add Setting</a>
+    </div>
 
     {# TODO PUT THE TABLE THING HERE #}
-    <table id="study_setup_table">
-        <thead></thead>
+    <table class="table table-striped table-bordered table-nonfluid" id="study_setup_table" hidden>
+        <thead>
+            <th>Number of Chips</th>
+        </thead>
         <tbody></tbody>
     </table>
 

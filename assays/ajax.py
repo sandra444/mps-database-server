@@ -3234,6 +3234,35 @@ def fetch_post_filter(request):
     pass
 
 
+def fetch_organ_model_protocol_setup(request):
+    organ_model_protocol_id = request.POST.get('organ_model_protocol_id', 0)
+    organ_model_protocol = get_object_or_404(OrganModelProtocol, pk=organ_model_protocol_id)
+
+    data = {
+        'cells': [],
+        'compounds': [],
+        'settings': [],
+    }
+
+    setup_cells = data.get('cells')
+    setup_compounds = data.get('compounds')
+    setup_settings = data.get('settings')
+
+    for cell in OrganModelProtocolCell.objects.filter(id=organ_model_protocol_id):
+        current_cell = cell.__dict__.pop('_state')
+        setup_cells.append(current_cell)
+
+    for compound in OrganModelProtocolCompound.objects.filter(id=organ_model_protocol_id):
+        current_compound = compound.__dict__.pop('_state')
+        setup_compounds.append(current_compound)
+
+    for setting in OrganModelProtocolSetting.objects.filter(id=organ_model_protocol_id):
+        current_setting = setting.__dict__.pop('_state')
+        setup_settings.append(current_setting)
+
+    return data
+
+
 def study_viewer_validation(request):
     study = None
     if request.POST.get('study', ''):
@@ -3305,8 +3334,11 @@ switch = {
     'intra_repro_in_inter': {
         'call': intra_repro_in_inter
     },
-    'fetch_post_filter': {
-        'call': fetch_post_filter
+    # 'fetch_post_filter': {
+    #     'call': fetch_post_filter
+    # },
+    'fetch_organ_model_protocol_setup': {
+        'call': fetch_organ_model_protocol_setup
     }
 }
 
