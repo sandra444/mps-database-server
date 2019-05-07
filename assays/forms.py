@@ -1533,3 +1533,23 @@ class AssayStudyDataUploadForm(BootstrapForm):
 
 class AssayStudySetupForm(forms.Form):
     setup_data = forms.CharField(required=True)
+
+    def __init__(self, *args, **kwargs):
+        """Init the Study Setup Form
+
+        Kwargs:
+        study -- the study in question
+        """
+        self.study = kwargs.pop('study', None)
+        super(AssayStudySetupForm, self).__init__(*args, **kwargs)
+
+    def clean(self):
+        data = super(AssayStudySetupForm, self).clean()
+
+        # Processing here
+
+        return self.cleaned_data
+
+    def save(self, commit=True):
+        pass
+        # Sort of odd to return something here?
