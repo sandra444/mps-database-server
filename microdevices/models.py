@@ -270,6 +270,19 @@ class OrganModelProtocol(FlaggableModel):
 
     description = models.CharField(max_length=4000, default='', blank=True)
 
+    disease = models.ForeignKey('diseases.Disease', null=True, blank=True, on_delete=models.CASCADE)
+    # Obviously only really relevant for disease models
+    disease_trigger = models.CharField(
+        max_length=10,
+        choices=(
+            ('', ''),
+            ('Compound', 'Induced by Compound'),
+            ('Cells', 'Addition of Diseased Cells'),
+        ),
+        blank=True,
+        default=''
+    )
+
     def __str__(self):
         # return self.name
         return self.version

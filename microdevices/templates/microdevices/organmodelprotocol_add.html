@@ -33,6 +33,10 @@
 
     {% include 'generic_field.html' with field=form.name label="Model Version Name*" %}
 
+    {% include 'generic_field.html' with field=form.disease label="Disease" %}
+
+    {% include 'generic_field.html' with field=form.disease_trigger label="Disease Trigger" %}
+
     {% include 'generic_field.html' with field=form.protocol_file label="Protocol File*" %}
 
     {{ cell_formset.management_form }}
