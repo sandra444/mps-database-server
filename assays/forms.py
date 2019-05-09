@@ -512,8 +512,72 @@ AssayStudyAssayFormSetFactory = inlineformset_factory(
 )
 
 
+class SetupFormsMixin(BootstrapForm):
+    ### ADDING SETUP CELLS
+    cell_cell_sample = forms.IntegerField(required=False)
+    cell_biosensor = forms.ModelChoiceField(
+        queryset=Biosensor.objects.all().prefetch_related('supplier'),
+        required=False,
+        # Default is naive
+        initial=2
+    )
+    cell_density = forms.FloatField(required=False)
+
+    # TODO THIS IS TO BE HAMMERED OUT
+    cell_density_unit = forms.ModelChoiceField(
+        queryset=PhysicalUnits.objects.filter(availability__contains='cell'),
+        required=False
+    )
+
+    cell_passage = forms.CharField(required=False)
+
+    cell_addition_location = forms.ModelChoiceField(queryset=AssaySampleLocation.objects.all().order_by('name'), required=False)
+
+    ### ?ADDING SETUP SETTINGS
+    setting_setting = forms.ModelChoiceField(queryset=AssaySetting.objects.all().order_by('name'), required=False)
+    setting_unit = forms.ModelChoiceField(queryset=PhysicalUnits.objects.all().order_by('base_unit','scale_factor'), required=False)
+
+    setting_value = forms.CharField(required=False)
+
+    setting_addition_location = forms.ModelChoiceField(
+        queryset=AssaySampleLocation.objects.all().order_by('name'),
+        required=False
+    )
+
+    ### ADDING COMPOUNDS
+    compound_compound = forms.ModelChoiceField(queryset=Compound.objects.all().order_by('name'), required=False)
+    # Notice the special exception for %
+    compound_concentration_unit = forms.ModelChoiceField(
+        queryset=(PhysicalUnits.objects.filter(
+            unit_type__unit_type='Concentration'
+        ).order_by(
+            'base_unit',
+            'scale_factor'
+        ) | PhysicalUnits.objects.filter(unit='%')),
+        required=False, initial=4
+    )
+    compound_concentration = forms.FloatField(required=False)
+
+    compound_addition_location = forms.ModelChoiceField(
+        queryset=AssaySampleLocation.objects.all().order_by('name'),
+        required=False
+    )
+    # Text field (un-saved) for supplier
+    compound_supplier_text = forms.CharField(
+        required=False,
+        initial=''
+    )
+    # Text field (un-saved) for lot
+    compound_lot_text = forms.CharField(
+        required=False,
+        initial=''
+    )
+    # Receipt date
+    compound_receipt_date = forms.DateField(required=False)
+
+
 # TODO ADD STUDY
-class AssayMatrixForm(SignOffMixin, BootstrapForm):
+class AssayMatrixForm(SetupFormsMixin, SignOffMixin, BootstrapForm):
     class Meta(object):
         model = AssayMatrix
         exclude = ('study',) + tracking
@@ -623,52 +687,6 @@ class AssayMatrixForm(SignOffMixin, BootstrapForm):
     matrix_item_full_organ_model = forms.ModelChoiceField(queryset=OrganModel.objects.all().order_by('name'), required=False)
     matrix_item_full_organ_model_protocol = forms.ModelChoiceField(queryset=OrganModelProtocol.objects.all(), required=False)
 
-    ### ADDING SETUP CELLS
-    cell_cell_sample = forms.IntegerField(required=False)
-    cell_biosensor = forms.ModelChoiceField(
-        queryset=Biosensor.objects.all().prefetch_related('supplier'),
-        required=False,
-        # Default is naive
-        initial=2
-    )
-    cell_density = forms.FloatField(required=False)
-
-    # TODO THIS IS TO BE HAMMERED OUT
-    cell_density_unit = forms.ModelChoiceField(
-        queryset=PhysicalUnits.objects.filter(availability__contains='cell'),
-        required=False
-    )
-
-    cell_passage = forms.CharField(required=False)
-
-    cell_addition_location = forms.ModelChoiceField(queryset=AssaySampleLocation.objects.all().order_by('name'), required=False)
-
-    ### ?ADDING SETUP SETTINGS
-    setting_setting = forms.ModelChoiceField(queryset=AssaySetting.objects.all().order_by('name'), required=False)
-    setting_unit = forms.ModelChoiceField(queryset=PhysicalUnits.objects.all().order_by('base_unit','scale_factor'), required=False)
-
-    setting_value = forms.CharField(required=False)
-
-    setting_addition_location = forms.ModelChoiceField(queryset=AssaySampleLocation.objects.all().order_by('name'),
-                                                        required=False)
-
-    ### ADDING COMPOUNDS
-    compound_compound = forms.ModelChoiceField(queryset=Compound.objects.all().order_by('name'), required=False)
-    # Notice the special exception for %
-    compound_concentration_unit = forms.ModelChoiceField(
-        queryset=(PhysicalUnits.objects.filter(
-            unit_type__unit_type='Concentration'
-        ).order_by(
-            'base_unit',
-            'scale_factor'
-        ) | PhysicalUnits.objects.filter(unit='%')),
-        required=False, initial=4
-    )
-    compound_concentration = forms.FloatField(required=False)
-
-    compound_addition_location = forms.ModelChoiceField(queryset=AssaySampleLocation.objects.all().order_by('name'),
-                                                       required=False)
-
     ### INCREMENTER
     compound_concentration_increment = forms.FloatField(required=False, initial=1)
     compound_concentration_increment_type = forms.ChoiceField(choices=(
@@ -681,19 +699,6 @@ class AssayMatrixForm(SignOffMixin, BootstrapForm):
         ('lrd', 'Left to Right and Down'),
         ('rlu', 'Right to Left and Up')
     ), required=False)
-
-    # Text field (un-saved) for supplier
-    compound_supplier_text = forms.CharField(
-        required=False,
-        initial=''
-    )
-    # Text field (un-saved) for lot
-    compound_lot_text = forms.CharField(
-        required=False,
-        initial=''
-    )
-    # Receipt date
-    compound_receipt_date = forms.DateField(required=False)
 
     # Options for deletion
     delete_option = forms.ChoiceField(required=False, choices=(
@@ -1531,25 +1536,32 @@ class AssayStudyDataUploadForm(BootstrapForm):
         return self.cleaned_data
 
 
-class AssayStudySetupForm(forms.Form):
+class AssayStudyFormNew(SetupFormsMixin, SignOffMixin, BootstrapForm):
     setup_data = forms.CharField(required=True)
 
     def __init__(self, *args, **kwargs):
-        """Init the Study Setup Form
+        """Init the Study Form
 
         Kwargs:
-        study -- the study in question
+        groups -- a queryset of groups (allows us to avoid N+1 problem)
         """
-        self.study = kwargs.pop('study', None)
-        super(AssayStudySetupForm, self).__init__(*args, **kwargs)
+        self.groups = kwargs.pop('groups', None)
+        super(AssayStudyFormNew, self).__init__(*args, **kwargs)
+        self.fields['group'].queryset = self.groups
+
+    class Meta(object):
+        model = AssayStudy
+        widgets = {
+            'assay_run_id': forms.Textarea(attrs={'rows': 1}),
+            'name': forms.Textarea(attrs={'rows': 1}),
+            'description': forms.Textarea(attrs={'rows': 5, 'cols': 100}),
+        }
+        exclude = tracking + restricted + ('access_groups', 'signed_off_notes', 'bulk_file')
 
     def clean(self):
-        data = super(AssayStudySetupForm, self).clean()
+        """Checks for at least one study type"""
+        # clean the form data, before validation
+        data = super(AssayStudyFormNew, self).clean()
 
-        # Processing here
-
-        return self.cleaned_data
-
-    def save(self, commit=True):
-        pass
-        # Sort of odd to return something here?
+        if not any([data['toxicity'], data['efficacy'], data['disease'], data['cell_characterization']]):
+            raise forms.ValidationError('Please select at least one study type')
