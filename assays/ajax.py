@@ -30,7 +30,9 @@ from microdevices.models import (
     MicrophysiologyCenter,
     Microdevice,
     OrganModel,
-    OrganModelProtocol
+    OrganModelProtocol,
+    OrganModelProtocolCell,
+    OrganModelProtocolSetting,
 )
 
 # from mps.settings import TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX
@@ -3240,27 +3242,36 @@ def fetch_organ_model_protocol_setup(request):
 
     data = {
         'cells': [],
-        'compounds': [],
         'settings': [],
+        # 'compounds': [],
     }
 
+    excluded_keys = ['id', '_state']
+
     setup_cells = data.get('cells')
-    setup_compounds = data.get('compounds')
     setup_settings = data.get('settings')
+    # setup_compounds = data.get('compounds')
 
     for cell in OrganModelProtocolCell.objects.filter(id=organ_model_protocol_id):
-        current_cell = cell.__dict__.pop('_state')
+        current_cell = {
+            key: cell.__dict__.get(key) for key in cell.__dict__.keys() if key not in excluded_keys
+        }
         setup_cells.append(current_cell)
 
-    for compound in OrganModelProtocolCompound.objects.filter(id=organ_model_protocol_id):
-        current_compound = compound.__dict__.pop('_state')
-        setup_compounds.append(current_compound)
-
     for setting in OrganModelProtocolSetting.objects.filter(id=organ_model_protocol_id):
-        current_setting = setting.__dict__.pop('_state')
+        current_setting = {
+            key: setting.__dict__.get(key) for key in setting.__dict__.keys() if key not in excluded_keys
+        }
         setup_settings.append(current_setting)
 
-    return data
+    # for compound in OrganModelProtocolCompound.objects.filter(id=organ_model_protocol_id):
+    #     current_compound = compound.__dict__.pop('_state')
+    #     setup_compounds.append(current_compound)
+
+    return HttpResponse(
+        json.dumps(data),
+        content_type='application/json'
+    )
 
 
 def study_viewer_validation(request):

@@ -57,5 +57,43 @@ $(document).ready(function () {
         });
 
         window.get_protocols(organ_model.val());
+
+        // NOTE THAT THIS IS TRIGGERED ON LOAD
+        protocol.change(function() {
+            // Start SPINNING
+            window.spinner.spin(
+                document.getElementById("spinner")
+            );
+
+            if (protocol.val()) {
+              $.ajax({
+                  url: "/assays_ajax/",
+                  type: "POST",
+                  dataType: "json",
+                  data: {
+                      call: 'fetch_organ_model_protocol_setup',
+                      organ_model_protocol_id: protocol.val(),
+                      csrfmiddlewaretoken: window.COOKIES.csrfmiddlewaretoken,
+                  },
+                  success: function (json) {
+                      // Stop spinner
+                      window.spinner.stop();
+
+                      console.log(json);
+                  },
+                  error: function (xhr, errmsg, err) {
+                      first_run = false;
+
+                      // Stop spinner
+                      window.spinner.stop();
+
+                      console.log(xhr.status + ": " + xhr.responseText);
+                  }
+              });
+            }
+            else {
+                window.spinner.stop();
+            }
+        }).trigger('change');
     }
 });

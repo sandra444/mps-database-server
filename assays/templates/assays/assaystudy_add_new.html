@@ -331,21 +331,23 @@
     {% include 'generic_field.html' with field=form.organ_model label="MPS Model*" %}
     {% include 'generic_field.html' with field=form.organ_model_protocol label="MPS Model Version*" %}
 
-    {# Set of buttons for adding cells, compounds, settings etc. #}
-    <div class="padded-bottom">
-    <a role="button" class="btn btn-success"><span class="glyphicon glyphicon-plus-sign"></span>Add Cell</a>
-    <a role="button" class="btn btn-success"><span class="glyphicon glyphicon-plus-sign"></span>Add Compound</a>
-    {# Probably will be renamed #}
-    <a role="button" class="btn btn-success"><span class="glyphicon glyphicon-plus-sign"></span>Add Setting</a>
-    </div>
-
     {# TODO PUT THE TABLE THING HERE #}
-    <table class="table table-striped table-bordered table-nonfluid" id="study_setup_table" hidden>
-        <thead>
-            <th>Number of Chips</th>
-        </thead>
-        <tbody></tbody>
-    </table>
+    <div id="study_setup_table_section">
+        {# Set of buttons for adding cells, compounds, settings etc. #}
+        <div class="padded-bottom">
+        <a role="button" class="btn btn-success"><span class="glyphicon glyphicon-plus-sign"></span>Add Cell</a>
+        <a role="button" class="btn btn-success"><span class="glyphicon glyphicon-plus-sign"></span>Add Compound</a>
+        {# Probably will be renamed #}
+        <a role="button" class="btn btn-success"><span class="glyphicon glyphicon-plus-sign"></span>Add Setting</a>
+        </div>
+
+        <table class="table table-striped table-bordered table-nonfluid" id="study_setup_table">
+            <thead>
+                <th>Number of Chips</th>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
 
     {# Hidden formset for Cells, Compounds, and Settings #}
     <div hidden>
