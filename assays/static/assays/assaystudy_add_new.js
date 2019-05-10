@@ -11,6 +11,42 @@ $(document).ready(function () {
     window.organ_model = organ_model;
     window.organ_model_protocol = protocol;
 
+    // The different components of a setup
+    var prefixes = [
+        'cell',
+        'compound',
+        'setting',
+    ];
+
+    // SOMEWHAT TASTELESS USE OF VARIABLES TO TRACK WHAT IS BEING EDITED
+    var current_prefix = '';
+    var current_setup_index = 0;
+
+    // CREATE DIALOGS
+    $.each(prefixes, function(index, prefix) {
+        var current_dialog = $('#' + prefix + '_dialog');
+        current_dialog.dialog({
+            width: 825,
+            buttons: [
+            {
+                text: 'Apply',
+                click: function() {
+                    // ACTUALLY MAKE THE CHANGE TO THE RESPECTIVE ENTITY
+                    // TODO TODO TODO
+
+                    $(this).dialog("close");
+                }
+            },
+            {
+                text: 'Cancel',
+                click: function() {
+                   $(this).dialog("close");
+                }
+            }]
+        });
+        current_dialog.removeProp('hidden');
+    });
+
     function get_center_id() {
         if (group_selector.val()) {
             $.ajax({

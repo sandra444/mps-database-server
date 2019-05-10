@@ -4,6 +4,8 @@
 {% block load_js %}
     <script src="{% static "js/image_display.js" %}"></script>
     <script src="{% static "js/enter_override.js" %}"></script>
+    <script src="{% static "assays/compound_instances.js" %}"></script>
+    <script src="{% static "assays/cell_sample_selection.js" %}"></script>
     <script src="{% static "js/calendar.js" %}"></script>
     <script src="{% static "js/flag.js" %}"></script>
     <script src="{% static "assays/organ_model_filter.js" %}"></script>
@@ -333,12 +335,61 @@
 
     {# TODO PUT THE TABLE THING HERE #}
     <div id="study_setup_table_section">
+            {# Section for visibility checkboxes #}
+            {# A litle awkward #}
+            <div class="row no-padding large-padding-top">
+            <div class="col-md-4 col-lg-3">
+                <div class="fancy-checkbox table-filter padded-bottom" align="left">
+                    <input class="visibility-checkbox" type="checkbox" name="show_cells" id="show_cells" value=".cell-display" checked/>
+                    <div class="btn-group">
+                        <label for="show_cells" class="btn btn-success">
+                            <span class="glyphicon glyphicon-ok"></span>
+                            <span> </span>
+                        </label>
+                        <label for="show_cells" class="btn btn-default active">
+                            Show Cells
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4 col-lg-3">
+                <div class="fancy-checkbox table-filter padded-bottom" align="left">
+                    <input class="visibility-checkbox" type="checkbox" name="show_compounds" id="show_compounds" value=".compound-display" checked/>
+                    <div class="btn-group">
+                        <label for="show_compounds" class="btn btn-info">
+                            <span class="glyphicon glyphicon-ok"></span>
+                            <span> </span>
+                        </label>
+                        <label for="show_compounds" class="btn btn-default active">
+                            Show Compounds
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4 col-lg-3">
+                <div class="fancy-checkbox table-filter padded-bottom" align="left">
+                    <input class="visibility-checkbox" type="checkbox" name="show_settings" id="show_settings" value=".setting-display" checked/>
+                    <div class="btn-group">
+                        <label for="show_settings" class="btn btn-warning">
+                            <span class="glyphicon glyphicon-ok"></span>
+                            <span> </span>
+                        </label>
+                        <label for="show_settings" class="btn btn-default active">
+                            Show Settings
+                        </label>
+                    </div>
+                </div>
+            </div>
+            </div>
+
         {# Set of buttons for adding cells, compounds, settings etc. #}
         <div class="padded-bottom">
-        <a role="button" class="btn btn-success"><span class="glyphicon glyphicon-plus-sign"></span>Add Cell</a>
-        <a role="button" class="btn btn-success"><span class="glyphicon glyphicon-plus-sign"></span>Add Compound</a>
+        <a role="button" class="btn btn-success" id="add_new_setup_cell_button"><span class="glyphicon glyphicon-plus-sign"></span>Add Cell</a>
+        <a role="button" class="btn btn-success" id="add_new_setup_compound_button"><span class="glyphicon glyphicon-plus-sign"></span>Add Compound</a>
         {# Probably will be renamed #}
-        <a role="button" class="btn btn-success"><span class="glyphicon glyphicon-plus-sign"></span>Add Setting</a>
+        <a role="button" class="btn btn-success" id="add_new_setup_setting_button"><span class="glyphicon glyphicon-plus-sign"></span>Add Setting</a>
         </div>
 
         <table class="table table-striped table-bordered table-nonfluid" id="study_setup_table">
@@ -349,7 +400,7 @@
         </table>
     </div>
 
-    {# Hidden formset for Cells, Compounds, and Settings #}
+    {# Hidden for Cells, Compounds, and Settings #}
     <div hidden>
 
     </div>
@@ -357,7 +408,7 @@
 
 {# TODO TODO TODO TODO NONE OF THIS IS DRY #}
 {# Compound #}
-<div hidden>
+<div hidden id="compound_dialog" title="Edit a Compound">
     <div class="row thumbnail">
     <div class="col-sm-1"></div>
     <div class="col-sm-11">
@@ -429,7 +480,7 @@
 </div>
 
 {# Cell #}
-<div hidden>
+<div hidden id="cell_dialog" title="Edit a Cell">
     <div class="row thumbnail">
     <div class="col-sm-1"></div>
     <div class="col-sm-11">
@@ -492,7 +543,7 @@
 </div>
 
 {# Setting #}
-<div hidden>
+<div hidden id="setting_dialog" title="Edit a Setting">
     <div class="row thumbnail">
     <div class="col-sm-1"></div>
     <div class="col-sm-11">
@@ -534,6 +585,48 @@
     </table>
     </div>
     </div>
+</div>
+
+<div hidden id="dialog" title="Choose a Cell Sample">
+{#        <div class="alert alert-info text-center" role="alert">#}
+{#            <button role="button" class="btn btn-danger" id="clear_cell_sample">Clear Cell Sample</button>#}
+{#        </div>#}
+    <table id="cellsamples" class="table table-striped table-hover">
+            <thead>
+                <tr>
+                    <th>Select</th>
+                    <th>ID #</th>
+                    <th>Receipt Date</th>
+                    <th>Cell Type</th>
+                    <th>Cell Origin</th>
+                    <th>Supplier</th>
+                    <th>Barcode/Lot#</th>
+                    <th>Patient</th>
+                </tr>
+            </thead>
+
+            <tbody>
+            {% for cellsample in cellsamples %}
+                <tr class="cellsample">
+                    <td>
+                        <button type="button" class="cellsample-selector btn btn-xs btn-primary" data-cell-sample-id="{{ cellsample.id }}" id="cell_sample_{{ cellsample.id }}" name="{{ cellsample }}">Select</button>
+                    </td>
+                    <td>{{ cellsample.id }}</td>
+                    <td>{{ cellsample.receipt_date|date:"M d, Y" }}</td>
+                    <td>{{ cellsample.cell_type }}</td>
+                    <td>{{ cellsample.cell_subtype }}</td>
+                    <td>{{ cellsample.supplier }}</td>
+                    <td>{{ cellsample.barcode }}</td>
+                    <td>
+                        {% if cellsample.patient_age or cellsample.patient_gender != 'N' or cellsample.patient_condition %}
+                            {{ cellsample.patient_age|default:"Unknown" }} year old {{ cellsample.patient_gender }}
+                            {{ cellsample.patient_condition }}
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+    </table>
 </div>
 
 {% endblock %}
