@@ -386,23 +386,33 @@
 
         {# Set of buttons for adding cells, compounds, settings etc. #}
         <div class="padded-bottom">
-        <a role="button" class="btn btn-success" id="add_new_setup_cell_button"><span class="glyphicon glyphicon-plus-sign"></span>Add Cell</a>
-        <a role="button" class="btn btn-success" id="add_new_setup_compound_button"><span class="glyphicon glyphicon-plus-sign"></span>Add Compound</a>
+        <a role="button" class="btn btn-success" id="add_group_button"><span class="glyphicon glyphicon-plus-sign"></span>Add Group</a>
+        </div>
+
+        <div class="padded-bottom">
+        <a role="button" class="btn btn-success" id="add_new_setup_cell_button">Add Cell</a>
+        <a role="button" class="btn btn-success" id="add_new_setup_compound_button">Add Compound</a>
         {# Probably will be renamed #}
-        <a role="button" class="btn btn-success" id="add_new_setup_setting_button"><span class="glyphicon glyphicon-plus-sign"></span>Add Setting</a>
+        <a role="button" class="btn btn-success" id="add_new_setup_setting_button">Add Setting</a>
         </div>
 
         <table class="table table-striped table-bordered table-nonfluid" id="study_setup_table">
             <thead>
                 <th>Number of Chips</th>
+                <th>Test Type</th>
+                <th hidden class="cell_start"></th>
+                <th hidden class="compound_start"></th>
+                <th hidden class="setting_start"></th>
             </thead>
             <tbody></tbody>
         </table>
     </div>
 
     {# Hidden for Cells, Compounds, and Settings #}
-    <div hidden>
-
+    <div>
+        {{ form.setup_data }}
+        {{ form.number_of_items }}
+        {{ form.test_type }}
     </div>
 </form>
 

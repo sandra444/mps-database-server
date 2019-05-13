@@ -38,6 +38,7 @@ from assays.forms import (
     AssayStudyConfigurationForm,
     ReadyForSignOffForm,
     AssayStudyForm,
+    AssayStudyFormNew,
     AssayStudySupportingDataFormSetFactory,
     AssayStudyAssayFormSetFactory,
     AssayMatrixForm,
@@ -1918,7 +1919,7 @@ class AssayDataFromFilters(LoginRequiredMixin, TemplateView):
 class AssayStudyAddNew(OneGroupRequiredMixin, CreateView):
     """Add a study"""
     template_name = 'assays/assaystudy_add_new.html'
-    form_class = AssayStudyForm
+    form_class = AssayStudyFormNew
 
     def get_form(self, form_class=None):
         form_class = self.get_form_class()

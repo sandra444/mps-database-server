@@ -3241,24 +3241,24 @@ def fetch_organ_model_protocol_setup(request):
     organ_model_protocol = get_object_or_404(OrganModelProtocol, pk=organ_model_protocol_id)
 
     data = {
-        'cells': [],
-        'settings': [],
-        # 'compounds': [],
+        'cell': [],
+        'setting': [],
+        # 'compound': [],
     }
 
-    excluded_keys = ['id', '_state']
+    excluded_keys = ['id', '_state', 'organ_model_protocol_id']
 
-    setup_cells = data.get('cells')
-    setup_settings = data.get('settings')
-    # setup_compounds = data.get('compounds')
+    setup_cells = data.get('cell')
+    setup_settings = data.get('setting')
+    # setup_compounds = data.get('compound')
 
-    for cell in OrganModelProtocolCell.objects.filter(id=organ_model_protocol_id):
+    for cell in OrganModelProtocolCell.objects.filter(organ_model_protocol_id=organ_model_protocol_id):
         current_cell = {
             key: cell.__dict__.get(key) for key in cell.__dict__.keys() if key not in excluded_keys
         }
         setup_cells.append(current_cell)
 
-    for setting in OrganModelProtocolSetting.objects.filter(id=organ_model_protocol_id):
+    for setting in OrganModelProtocolSetting.objects.filter(organ_model_protocol_id=organ_model_protocol_id):
         current_setting = {
             key: setting.__dict__.get(key) for key in setting.__dict__.keys() if key not in excluded_keys
         }

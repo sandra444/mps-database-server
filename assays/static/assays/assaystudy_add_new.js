@@ -11,6 +11,12 @@ $(document).ready(function () {
     window.organ_model = organ_model;
     window.organ_model_protocol = protocol;
 
+    // FULL DATA
+    var current_setup_data = [];
+
+    // DATA FOR THE VERSION
+    var current_setup = {};
+
     // The different components of a setup
     var prefixes = [
         'cell',
@@ -84,6 +90,93 @@ $(document).ready(function () {
         IMAGES.display_image(image_selector, image_display_selector, current_image_display_selector);
     });
 
+    var number_of_columns = {
+        'cell': 1,
+        'compound': 1,
+        'setting': 1,
+    };
+
+    // Table vars
+    var study_setup_table = $('#study_setup_table');
+    var study_setup_head = study_setup_table.find('thead').find('tr');
+    var study_setup_body = study_setup_table.find('tbody');
+
+    var setup_data_selector = $('#id_setup_data');
+
+    function modify_setup_data(prefix, content, setup_index, object_index) {
+        if (object_index) {
+            current_setup_data[setup_index][prefix][object_index] = content;
+        }
+        else {
+            current_setup_data[setup_index][prefix] = content;
+        }
+
+        setup_data_selector.val(JSON.stringify(current_setup_data));
+    }
+
+    function spawn_column(prefix) {
+        // UGLY
+        $('.' + prefix + '_start').last().after('<th class="' + prefix + '_start' + '">' + prefix + ' ' + number_of_columns[prefix] + '</th>');
+
+        number_of_columns[prefix] += 1;
+    }
+
+    function populate_table_cell(prefix, content, setup_index, object_index) {
+
+    }
+
+    // JUST USES DEFAULT PROTOCOL FOR NOW
+    function spawn_row() {
+        var new_row = $('<tr>');
+
+        new_row.append(
+            // $('<td>').append(
+            //     $('<input>')
+            //     .addClass('number-of-items')
+            //     .attr('data-setup-index', current_setup_data.length)
+            // )
+            $('<td>').append(
+                $('#id_number_of_items').clone().removeAttr('id')
+            )
+        );
+
+        new_row.append(
+            $('<td>').append(
+                $('#id_test_type').clone().removeAttr('id').removeAttr('style')
+            )
+        );
+
+        $.each(current_setup, function(prefix, content_set) {
+            $.each(content_set, function(index, content) {
+                spawn_column(prefix);
+                new_row.append(
+                    $('<td>').text(JSON.stringify(content))
+                );
+            });
+        });
+
+        study_setup_body.append(new_row);
+
+        current_setup_data.push(
+            $.extend({}, current_setup)
+        );
+        setup_data_selector.val(JSON.stringify(current_setup_data));
+    }
+
+    $(document).on('change', '.test-type', function() {
+        console.log('test_type', $(this).val());
+        modify_setup_data('test_type', $(this).val(), $(this).attr('setup_index'));
+    });
+
+    $(document).on('change', '.number-of-items', function() {
+        console.log('test_type', $(this).val());
+        modify_setup_data('number_of_items', $(this).val(), $(this).attr('setup_index'));
+    });
+
+    // function apply_protocol_setup_to_row() {
+    //
+    // }
+
     // Handling Device flow
     // Make sure global var exists before continuing
     if (window.get_organ_models) {
@@ -116,6 +209,9 @@ $(document).ready(function () {
                       window.spinner.stop();
 
                       console.log(json);
+                      current_setup = $.extend({}, json);
+
+                      spawn_row();
                   },
                   error: function (xhr, errmsg, err) {
                       first_run = false;
