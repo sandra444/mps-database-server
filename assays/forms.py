@@ -25,7 +25,10 @@ from assays.models import (
     AssayTarget,
     AssayMethod,
     AssayStudyModel,
-    AssayStudySet
+    AssayStudySet,
+    AssayReference,
+    AssayStudyReference,
+    AssayStudySetReference,
 )
 from compounds.models import Compound, CompoundInstance, CompoundSupplier
 from microdevices.models import (
@@ -1537,7 +1540,7 @@ class AssayStudyDataUploadForm(BootstrapForm):
 class AssayStudySetForm(SignOffMixin, BootstrapForm):
     class Meta(object):
         model = AssayStudySet
-        exclude = ('',)
+        exclude = tracking
         widgets = {
             'description': forms.Textarea(attrs={'rows': 10})
         }
@@ -1566,3 +1569,33 @@ class AssayStudySetForm(SignOffMixin, BootstrapForm):
         # CONTRIVED
         self.fields['studies'].widget.attrs['class'] = 'no-selectize'
         self.fields['assays'].widget.attrs['class'] = 'no-selectize'
+
+
+class AssayReferenceForm(BootstrapForm):
+
+    query_term = forms.CharField(initial='', required=False)
+
+    class Meta(object):
+        model = AssayReference
+        exclude = tracking
+        widgets = {
+            'query_term': forms.Textarea(attrs={'rows': 1}),
+            'title': forms.Textarea(attrs={'rows': 2}),
+            'authors': forms.Textarea(attrs={'rows': 1}),
+            'abstract': forms.Textarea(attrs={'rows': 10}),
+            'publication': forms.Textarea(attrs={'rows': 1}),
+        }
+
+AssayStudyReferenceFormSetFactory = inlineformset_factory(
+    AssayStudy,
+    AssayStudyReference,
+    extra=1,
+    exclude=[]
+)
+
+AssayStudySetReferenceFormSetFactory = inlineformset_factory(
+    AssayStudySet,
+    AssayStudySetReference,
+    extra=1,
+    exclude=[]
+)

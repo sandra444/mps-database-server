@@ -2613,3 +2613,64 @@ class AssayStudySet(FlaggableModel):
 
     def __str__(self):
         return self.name
+
+
+class AssayReference(FlaggableModel):
+    pubmed_id = models.CharField(verbose_name='PubMed ID', max_length=20, blank=True, default='N/A')
+    title = models.CharField(verbose_name='Title', max_length=255)
+    authors = models.CharField(verbose_name='Authors', max_length=255)
+    abstract = models.CharField(verbose_name='Abstract', max_length=4000, blank=True, default='')
+    publication = models.CharField(verbose_name='Publication', max_length=255)
+    year = models.CharField(verbose_name='Year', max_length=4)
+    doi = models.CharField(verbose_name='DOI', max_length=100, blank=True, default='N/A')
+
+    # Somewhat odd
+    def get_metadata(self):
+        return {
+            'pubmed_id': self.pubmed_id,
+            'title': self.title,
+            'authors': self.authors,
+            'abstract': self.abstract,
+            'publication': self.publication,
+            'year': self.year,
+            'doi': self.doi,
+        }
+
+    def __str__(self):
+        return '{}. {}. {}. {}. doi:{}. PMID:{}'.format(self.authors, self.title, self.publication, self.year, self.doi, self.pubmed_id)
+
+    def get_post_submission_url(self):
+        return '/assays/references/'
+
+    def get_absolute_url(self):
+        return '/assays/references/{}/'.format(self.id)
+
+    def get_delete_url(self):
+        return '{}delete/'.format(self.get_absolute_url())
+
+
+class AssayStudyReference(models.Model):
+    class Meta(object):
+        unique_together = [
+            (
+                'reference',
+                'reference_for'
+            )
+        ]
+
+    reference = models.ForeignKey(AssayReference, on_delete=models.CASCADE)
+    reference_for = models.ForeignKey(AssayStudy, on_delete=models.CASCADE)
+
+
+# TODO TODO TODO
+class AssayStudySetReference(models.Model):
+    class Meta(object):
+        unique_together = [
+            (
+                'reference',
+                'reference_for'
+            )
+        ]
+
+    reference = models.ForeignKey(AssayReference, on_delete=models.CASCADE)
+    reference_for = models.ForeignKey(AssayStudySet, on_delete=models.CASCADE)
