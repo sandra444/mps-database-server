@@ -91,9 +91,9 @@ $(document).ready(function () {
     });
 
     var number_of_columns = {
-        'cell': 1,
-        'compound': 1,
-        'setting': 1,
+        'cell': 0,
+        'compound': 0,
+        'setting': 0,
     };
 
     // Table vars
@@ -102,6 +102,10 @@ $(document).ready(function () {
     var study_setup_body = study_setup_table.find('tbody');
 
     var setup_data_selector = $('#id_setup_data');
+
+    function create_edit_button() {
+        return '<a data-edit-button="true" data-row="" data-prefix="" data-column="" role="button" class="btn btn-primary">Edit</a>'
+    }
 
     function modify_setup_data(prefix, content, setup_index, object_index) {
         if (object_index) {
@@ -116,7 +120,12 @@ $(document).ready(function () {
 
     function spawn_column(prefix) {
         // UGLY
-        $('.' + prefix + '_start').last().after('<th class="' + prefix + '_start' + '">' + prefix + ' ' + number_of_columns[prefix] + '</th>');
+        study_setup_head.find('.' + prefix + '_start').last().after('<th class="' + prefix + '_start' + '">' + prefix + ' ' + (number_of_columns[prefix] + 1) + '</th>');
+
+        // ADD TO EXISTING ROWS AS EMPTY
+        study_setup_body.find('tr').each(function() {
+            $(this).find('.' + prefix + '_start').last().after('<td class="' + prefix + '_start' + '">' + create_edit_button() + '</td>');
+        });
 
         number_of_columns[prefix] += 1;
     }
@@ -146,13 +155,53 @@ $(document).ready(function () {
             )
         );
 
-        $.each(current_setup, function(prefix, content_set) {
-            $.each(content_set, function(index, content) {
-                spawn_column(prefix);
-                new_row.append(
-                    $('<td>').text(JSON.stringify(content))
-                );
-            });
+        $.each(prefixes, function(index, prefix) {
+            var content_set = current_setup[prefix];
+            if (!content_set) {
+                if (!number_of_columns[prefix]) {
+                    new_row.append(
+                        $('<td>')
+                            .attr('hidden', 'hidden')
+                            .addClass(prefix + '_start')
+                    );
+                }
+                else {
+                    for (var i = 0; i < number_of_columns[prefix]; i++) {
+                        new_row.append(
+                            $('<td>')
+                                .html(create_edit_button())
+                                .addClass(prefix + '_start')
+                        );
+                    }
+                }
+            }
+            else {
+                while (number_of_columns[prefix] < content_set.length) {
+                    spawn_column(prefix);
+                }
+
+                for (var i = 0; i < number_of_columns[prefix]; i++) {
+                    var html_contents = [
+                        create_edit_button()
+                    ];
+
+                    var content = content_set[i];
+                    if (content) {
+                        $.each(content, function(key, value) {
+                            html_contents.push(key + ': ' + value);
+                        });
+                    }
+
+                    html_contents = html_contents.join('<br>')
+
+                    new_row.append(
+                        $('<td>')
+                            .html(html_contents)
+                            .addClass(prefix + '_start')
+                    );
+                }
+                // });
+            }
         });
 
         study_setup_body.append(new_row);
@@ -171,6 +220,14 @@ $(document).ready(function () {
     $(document).on('change', '.number-of-items', function() {
         console.log('test_type', $(this).val());
         modify_setup_data('number_of_items', $(this).val(), $(this).attr('setup_index'));
+    });
+
+    $('a[data-add-new-button="true"]').click(function() {
+        spawn_column($(this).attr('data-prefix'));
+    });
+
+    $('#add_group_button').click(function() {
+        spawn_row();
     });
 
     // function apply_protocol_setup_to_row() {
@@ -194,6 +251,8 @@ $(document).ready(function () {
                 document.getElementById("spinner")
             );
 
+            console.log(protocol.val());
+
             if (protocol.val()) {
               $.ajax({
                   url: "/assays_ajax/",
@@ -210,6 +269,10 @@ $(document).ready(function () {
 
                       console.log(json);
                       current_setup = $.extend({}, json);
+
+                      // GET RID OF ANYTHING IN THE TABLE
+                      study_setup_body.empty();
+                      current_setup_data = [];
 
                       spawn_row();
                   },
