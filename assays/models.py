@@ -2147,7 +2147,7 @@ class AssaySetupCell(models.Model):
             passage = 'p{}'.format(self.passage)
 
         if self.addition_location:
-            return '{0} {1}\n~{2:.2e} {3}\nAdded to: {4}'.format(
+            return '{0} {1}\n~{2:.2e} {3}, Added to: {4}'.format(
                 self.cell_sample,
                 passage,
                 self.density,
