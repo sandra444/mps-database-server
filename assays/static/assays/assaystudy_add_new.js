@@ -103,8 +103,8 @@ $(document).ready(function () {
 
     var setup_data_selector = $('#id_setup_data');
 
-    function create_edit_button() {
-        return '<a data-edit-button="true" data-row="" data-prefix="" data-column="" role="button" class="btn btn-primary">Edit</a>'
+    function create_edit_button(prefix) {
+        return '<a data-edit-button="true" data-row="" data-prefix="' + prefix + '" data-column="" role="button" class="btn btn-primary">Edit</a>'
     }
 
     function modify_setup_data(prefix, content, setup_index, object_index) {
@@ -124,7 +124,7 @@ $(document).ready(function () {
 
         // ADD TO EXISTING ROWS AS EMPTY
         study_setup_body.find('tr').each(function() {
-            $(this).find('.' + prefix + '_start').last().after('<td class="' + prefix + '_start' + '">' + create_edit_button() + '</td>');
+            $(this).find('.' + prefix + '_start').last().after('<td class="' + prefix + '_start' + '">' + create_edit_button(prefix) + '</td>');
         });
 
         number_of_columns[prefix] += 1;
@@ -169,7 +169,7 @@ $(document).ready(function () {
                     for (var i = 0; i < number_of_columns[prefix]; i++) {
                         new_row.append(
                             $('<td>')
-                                .html(create_edit_button())
+                                .html(create_edit_button(prefix))
                                 .addClass(prefix + '_start')
                         );
                     }
@@ -182,7 +182,7 @@ $(document).ready(function () {
 
                 for (var i = 0; i < number_of_columns[prefix]; i++) {
                     var html_contents = [
-                        create_edit_button()
+                        create_edit_button(prefix)
                     ];
 
                     var content = content_set[i];
@@ -220,6 +220,11 @@ $(document).ready(function () {
     $(document).on('change', '.number-of-items', function() {
         console.log('test_type', $(this).val());
         modify_setup_data('number_of_items', $(this).val(), $(this).attr('setup_index'));
+    });
+
+    $(document).on('click', 'a[data-edit-button="true"]', function() {
+        console.log(this);
+        $('#' + $(this).attr('data-prefix') + '_dialog').dialog('open');
     });
 
     $('a[data-add-new-button="true"]').click(function() {
