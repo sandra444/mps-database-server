@@ -33,6 +33,13 @@ $(document).ready(function () {
         var current_dialog = $('#' + prefix + '_dialog');
         current_dialog.dialog({
             width: 825,
+            open: function() {
+                $.ui.dialog.prototype.options.open();
+                setTimeout(function() {
+                    // Blur all
+                    $('.ui-dialog').find('input, select, button').blur();
+                }, 250);
+            },
             buttons: [
             {
                 text: 'Apply',

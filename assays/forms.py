@@ -513,6 +513,38 @@ AssayStudyAssayFormSetFactory = inlineformset_factory(
 
 
 class SetupFormsMixin(BootstrapForm):
+    def __init__(self, *args, **kwargs):
+        super(SetupFormsMixin, self).__init__(*args, **kwargs)
+
+        sections_with_times = (
+            'compound',
+            'cell',
+            'setting'
+        )
+
+        for time_unit in list(TIME_CONVERSIONS.keys()):
+            for current_section in sections_with_times:
+                # Create fields for Days, Hours, Minutes
+                self.fields[current_section + '_addition_time_' + time_unit] = forms.FloatField(
+                    initial=0,
+                    required=False,
+                    widget=forms.NumberInput(attrs={
+                        'class': 'form-control',
+                        'style': 'width:75px;'
+                    })
+                )
+                self.fields[current_section + '_duration_' + time_unit] = forms.FloatField(
+                    initial=0,
+                    required=False,
+                    widget=forms.NumberInput(attrs={
+                        'class': 'form-control',
+                        'style': 'width:75px;'
+                    })
+                )
+
+        self.fields['cell_cell_sample'].widget.attrs['style'] = 'width:75px;'
+        self.fields['cell_passage'].widget.attrs['style'] = 'width:75px;'
+
     ### ADDING SETUP CELLS
     cell_cell_sample = forms.IntegerField(required=False)
     cell_biosensor = forms.ModelChoiceField(
@@ -597,35 +629,35 @@ class AssayMatrixForm(SetupFormsMixin, SignOffMixin, BootstrapForm):
         if self.study:
             self.instance.study = self.study
 
-        sections_with_times = (
-            'compound',
-            'cell',
-            'setting'
-        )
-
-        for time_unit in list(TIME_CONVERSIONS.keys()):
-            for current_section in sections_with_times:
-                # Create fields for Days, Hours, Minutes
-                self.fields[current_section + '_addition_time_' + time_unit] = forms.FloatField(
-                    initial=0,
-                    required=False,
-                    widget=forms.NumberInput(attrs={
-                        'class': 'form-control',
-                        'style': 'width:75px;'
-                    })
-                )
-                self.fields[current_section + '_duration_' + time_unit] = forms.FloatField(
-                    initial=0,
-                    required=False,
-                    widget=forms.NumberInput(attrs={
-                        'class': 'form-control',
-                        'style': 'width:75px;'
-                    })
-                )
+        # sections_with_times = (
+        #     'compound',
+        #     'cell',
+        #     'setting'
+        # )
+        #
+        # for time_unit in list(TIME_CONVERSIONS.keys()):
+        #     for current_section in sections_with_times:
+        #         # Create fields for Days, Hours, Minutes
+        #         self.fields[current_section + '_addition_time_' + time_unit] = forms.FloatField(
+        #             initial=0,
+        #             required=False,
+        #             widget=forms.NumberInput(attrs={
+        #                 'class': 'form-control',
+        #                 'style': 'width:75px;'
+        #             })
+        #         )
+        #         self.fields[current_section + '_duration_' + time_unit] = forms.FloatField(
+        #             initial=0,
+        #             required=False,
+        #             widget=forms.NumberInput(attrs={
+        #                 'class': 'form-control',
+        #                 'style': 'width:75px;'
+        #             })
+        #         )
 
         self.fields['matrix_item_notebook_page'].widget.attrs['style'] = 'width:75px;'
-        self.fields['cell_cell_sample'].widget.attrs['style'] = 'width:75px;'
-        self.fields['cell_passage'].widget.attrs['style'] = 'width:75px;'
+        # self.fields['cell_cell_sample'].widget.attrs['style'] = 'width:75px;'
+        # self.fields['cell_passage'].widget.attrs['style'] = 'width:75px;'
 
         # Make sure no selectize
         # CONTRIVED
