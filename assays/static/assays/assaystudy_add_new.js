@@ -27,6 +27,8 @@ $(document).ready(function () {
     // SOMEWHAT TASTELESS USE OF VARIABLES TO TRACK WHAT IS BEING EDITED
     var current_prefix = '';
     var current_setup_index = 0;
+    var current_row_index = null;
+    var current_column_index = null;
 
     // CREATE DIALOGS
     $.each(prefixes, function(index, prefix) {
@@ -35,10 +37,36 @@ $(document).ready(function () {
             width: 825,
             open: function() {
                 $.ui.dialog.prototype.options.open();
+                // BAD
                 setTimeout(function() {
                     // Blur all
                     $('.ui-dialog').find('input, select, button').blur();
                 }, 250);
+
+                // Populate the fields
+                var current_data = $.extend({}, current_setup_data[current_row_index][current_prefix][current_column_index]);
+
+                console.log(current_setup_data);
+
+                $(this).find('input').each(function() {
+                    if ($(this).attr('name')) {
+                        console.log($(this).attr('name'), current_data[$(this).attr('name').replace(current_prefix + '_', '')]);
+                        $(this).val(current_data[$(this).attr('name').replace(current_prefix + '_', '')]);
+                    }
+                });
+
+                $(this).find('select').each(function() {
+                    if ($(this).attr('name')) {
+                        console.log($(this).attr('name'), current_data[$(this).attr('name').replace(current_prefix + '_', '') + '_id']);
+                        this.selectize.setValue(current_data[$(this).attr('name').replace(current_prefix + '_', '') + '_id']);
+                    }
+                });
+
+                // TODO SPECIAL EXCEPTION FOR CELL SAMPLE
+
+                // TODO SPECIAL EXCEPTION FOR TIMES
+
+                console.log(current_data);
             },
             buttons: [
             {
@@ -46,6 +74,36 @@ $(document).ready(function () {
                 click: function() {
                     // ACTUALLY MAKE THE CHANGE TO THE RESPECTIVE ENTITY
                     // TODO TODO TODO
+                    var current_data = {};
+
+                    $(this).find('select, input').each(function() {
+                        console.log($(this).attr('name'), $(this).val());
+                        if ($(this).attr('name')) {
+                            current_data[$(this).attr('name').replace(current_prefix + '_', '')] = $(this).val();
+                        }
+                    });
+
+                    // SLOPPY
+                    var time_prefixes = [
+                        'addition_time',
+                        'duration'
+                    ]
+                    $.each(time_prefixes, function(index, current_time_prefix) {
+                        if (current_data[current_time_prefix + '_minute'] !== undefined) {
+                            current_data[current_time_prefix] = window.SPLIT_TIME.get_minutes(
+                                    current_data[current_time_prefix + '_day'],
+                                    current_data[current_time_prefix + '_hour'],
+                                    current_data[current_time_prefix + '_minute']
+                            );
+                            $.each(window.SPLIT_TIME.time_conversions, function(key, value) {
+                                delete current_data[current_time_prefix + '_' + key];
+                            });
+                        }
+                    });
+
+                    console.log(current_data);
+
+                    current_setup_data[current_row_index][current_prefix][current_column_index] = $.extend({}, current_data);
 
                     $(this).dialog("close");
                 }
@@ -110,8 +168,21 @@ $(document).ready(function () {
 
     var setup_data_selector = $('#id_setup_data');
 
-    function create_edit_button(prefix) {
-        return '<a data-edit-button="true" data-row="" data-prefix="' + prefix + '" data-column="" role="button" class="btn btn-primary">Edit</a>'
+    function create_edit_button(prefix, row_index, column_index) {
+        return '<a data-edit-button="true" data-row="' + row_index + '" data-prefix="' + prefix + '" data-column="' + column_index + '" role="button" class="btn btn-primary">Edit</a>';
+    }
+
+    function create_delete_button(prefix, index) {
+        if (prefix === 'row') {
+            return '<a data-delete-row-button="true" data-row="' + index + '" role="button" class="btn btn-danger">Delete</a>';
+        }
+        else {
+            return '<a data-delete-column-button="true" data-column="' + index + '" data-prefix="' + prefix + '" role="button" class="btn btn-danger">Delete</a>';
+        }
+    }
+
+    function create_clone_button(index) {
+        return '<a data-clone-row-button="true" data-row="' + index + '" role="button" class="btn btn-info">Clone</a>';
     }
 
     function modify_setup_data(prefix, content, setup_index, object_index) {
@@ -126,12 +197,13 @@ $(document).ready(function () {
     }
 
     function spawn_column(prefix) {
+        var column_index = number_of_columns[prefix];
         // UGLY
-        study_setup_head.find('.' + prefix + '_start').last().after('<th class="' + prefix + '_start' + '">' + prefix + ' ' + (number_of_columns[prefix] + 1) + '</th>');
+        study_setup_head.find('.' + prefix + '_start').last().after('<th class="' + prefix + '_start' + '">' + prefix + ' ' + column_index + '<br>' + create_delete_button(prefix, column_index) +'</th>');
 
         // ADD TO EXISTING ROWS AS EMPTY
-        study_setup_body.find('tr').each(function() {
-            $(this).find('.' + prefix + '_start').last().after('<td class="' + prefix + '_start' + '">' + create_edit_button(prefix) + '</td>');
+        study_setup_body.find('tr').each(function(row_index) {
+            $(this).find('.' + prefix + '_start').last().after('<td class="' + prefix + '_start' + '">' + create_edit_button(prefix, row_index, column_index) + '</td>');
         });
 
         number_of_columns[prefix] += 1;
@@ -145,13 +217,12 @@ $(document).ready(function () {
     function spawn_row() {
         var new_row = $('<tr>');
 
+        var row_index = study_setup_body.find('tr').length;
+
         new_row.append(
-            // $('<td>').append(
-            //     $('<input>')
-            //     .addClass('number-of-items')
-            //     .attr('data-setup-index', current_setup_data.length)
-            // )
-            $('<td>').append(
+            $('<td>').html(
+                create_clone_button(row_index) + create_delete_button('row', row_index)
+            ).append(
                 $('#id_number_of_items').clone().removeAttr('id')
             )
         );
@@ -176,7 +247,7 @@ $(document).ready(function () {
                     for (var i = 0; i < number_of_columns[prefix]; i++) {
                         new_row.append(
                             $('<td>')
-                                .html(create_edit_button(prefix))
+                                .html(create_edit_button(prefix, row_index, i))
                                 .addClass(prefix + '_start')
                         );
                     }
@@ -189,7 +260,7 @@ $(document).ready(function () {
 
                 for (var i = 0; i < number_of_columns[prefix]; i++) {
                     var html_contents = [
-                        create_edit_button(prefix)
+                        create_edit_button(prefix, row_index, i)
                     ];
 
                     var content = content_set[i];
@@ -207,7 +278,6 @@ $(document).ready(function () {
                             .addClass(prefix + '_start')
                     );
                 }
-                // });
             }
         });
 
@@ -231,6 +301,9 @@ $(document).ready(function () {
 
     $(document).on('click', 'a[data-edit-button="true"]', function() {
         console.log(this);
+        current_prefix = $(this).attr('data-prefix');
+        current_row_index = $(this).attr('data-row');
+        current_column_index = $(this).attr('data-column');
         $('#' + $(this).attr('data-prefix') + '_dialog').dialog('open');
     });
 
