@@ -51,6 +51,8 @@ from mps.templatetags.custom_filters import is_group_admin, ADMIN_SUFFIX
 
 from django.core.exceptions import NON_FIELD_ERRORS
 
+import ujson as json
+
 # TODO REFACTOR WHITTLING TO BE HERE IN LIEU OF VIEW
 # TODO REFACTOR FK QUERYSETS TO AVOID N+1
 
@@ -1612,24 +1614,32 @@ class AssayStudyFormNew(SetupFormsMixin, SignOffMixin, BootstrapForm):
         return data
 
     def save(self, commit=True):
-        study = super(AssayStudyFormNew, self).save(commit)
+        # PLEASE SEE BASE MODELS
+        # study = super(AssayStudyFormNew, self).save(commit)
+        study = super(AssayStudyFormNew, self).save()
 
-        all_setup_data = json.loads(self.cleaned_data.get('setup_data', []))
+        all_setup_data = json.loads(self.cleaned_data.get('setup_data', '[]'))
 
-        if commit and all_setup_data:
+        # print(self.cleaned_data)
+        # print(self.cleaned_data.get('setup_data', []))
+        # print(json.loads(self.cleaned_data.get('setup_data', '[]')))
+
+        # if commit and all_setup_data:
+        # SEE BASE MODELS FOR WHY COMMIT IS NOT HERE
+        if all_setup_data:
             current_item_number = 1
 
             # CRUDE: JUST MAKE ONE LARGE ROW?
             number_of_items = 0
 
             for setup_group in all_setup_data:
-                number_of_items += int(setup_group.get('number_in_group', '0'))
+                number_of_items += int(setup_group.get('number_of_items', '0'))
 
             new_matrix = AssayMatrix(
                 name=study.name,
                 # Does not work with plates at the moment
                 representation='chips',
-                study=study,
+                study=self.instance,
                 device=None,
                 number_of_rows=1,
                 number_of_columns=number_of_items
@@ -1638,13 +1648,13 @@ class AssayStudyFormNew(SetupFormsMixin, SignOffMixin, BootstrapForm):
             new_matrix.save()
 
             for setup_group in all_setup_data:
-                items_in_group = int(setup_group.pop('number_in_group', '0'))
+                items_in_group = int(setup_group.pop('number_of_items', '0'))
                 test_type = setup_group.get('test_type', '')
                 for iteration in range(items_in_group):
                     new_item = AssayMatrixItem(
                         study=study,
                         matrix=new_matrix,
-                        name=str(current_item_name),
+                        name=str(current_item_number),
                         # JUST MAKE SETUP DATE THE STUDY DATE FOR NOW
                         setup_date=study.start_date,
                         row_index=0,
@@ -1655,19 +1665,21 @@ class AssayStudyFormNew(SetupFormsMixin, SignOffMixin, BootstrapForm):
                         test_type=test_type
                     )
                     new_item.save()
-                    for prefix, current_object in setup_group.items():
-                        current_object.update({
-                            matrix_item:new_item
-                        })
-                        if prefix == 'cell':
-                            new_cell = AssaySetupCell(**current_object)
-                            new_cell.save()
-                        elif prefix == 'compound':
-                            new_conpound = AssaySetupCell()
-                            new_compound.save()
-                        elif prefix == 'setting':
-                            new_setting = AssaySetupSetting()
-                            new_setting.save()
+                    for prefix, current_objects in setup_group.items():
+                        for current_object in current_objects:
+                            if prefix in ['cell', 'compound', 'setting']:
+                                current_object.update({
+                                    'matrix_item': new_item
+                                })
+                                if prefix == 'cell':
+                                    new_cell = AssaySetupCell(**current_object)
+                                    new_cell.save()
+                                elif prefix == 'compound':
+                                    new_conpound = AssaySetupCell(**current_object)
+                                    new_compound.save()
+                                elif prefix == 'setting':
+                                    new_setting = AssaySetupSetting(**current_object)
+                                    new_setting.save()
                     current_item_number += 1
 
         return study
