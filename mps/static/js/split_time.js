@@ -35,5 +35,23 @@ window.SPLIT_TIME.get_split_time = function(time_in_minutes) {
 };
 
 window.SPLIT_TIME.get_minutes = function(days, hours, minutes) {
+    if (parseFloat(minutes)) {
+        minutes = parseFloat(minutes);
+    }
+    else {
+        minutes = 0;
+    }
+    if(parseFloat(hours)) {
+        hours = parseFloat(hours);
+    }
+    else {
+        hours = 0;
+    }
+    if(parseFloat(days)) {
+        days = parseFloat(days);
+    }
+    else {
+        days = 0;
+    }
     return parseFloat(minutes) + (parseFloat(hours) * 60) + (parseFloat(days) * 1440)
 };

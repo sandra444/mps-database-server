@@ -24,6 +24,11 @@ $(document).ready(function () {
         'setting',
     ];
 
+    var time_prefixes = [
+        'addition_time',
+        'duration'
+    ]
+
     // SOMEWHAT TASTELESS USE OF VARIABLES TO TRACK WHAT IS BEING EDITED
     var current_prefix = '';
     var current_setup_index = 0;
@@ -48,14 +53,16 @@ $(document).ready(function () {
 
                 console.log(current_setup_data);
 
-                $(this).find('input').each(function() {
+                var this_popup = $(this);
+
+                this_popup.find('input').each(function() {
                     if ($(this).attr('name')) {
                         console.log($(this).attr('name'), current_data[$(this).attr('name').replace(current_prefix + '_', '')]);
                         $(this).val(current_data[$(this).attr('name').replace(current_prefix + '_', '')]);
                     }
                 });
 
-                $(this).find('select').each(function() {
+                this_popup.find('select').each(function() {
                     if ($(this).attr('name')) {
                         console.log($(this).attr('name'), current_data[$(this).attr('name').replace(current_prefix + '_', '') + '_id']);
                         this.selectize.setValue(current_data[$(this).attr('name').replace(current_prefix + '_', '') + '_id']);
@@ -63,8 +70,23 @@ $(document).ready(function () {
                 });
 
                 // TODO SPECIAL EXCEPTION FOR CELL SAMPLE
+                this_popup.find('input[name="' + prefix + '_cell_sample"]').val(
+                    current_data['cell_sample_id']
+                );
 
                 // TODO SPECIAL EXCEPTION FOR TIMES
+                $.each(time_prefixes, function(index, current_time_prefix) {
+                    var split_time = window.SPLIT_TIME.get_split_time(
+                        current_data[current_time_prefix],
+                    );
+
+                    console.log(split_time);
+
+                    $.each(split_time, function(time_name, time_value) {
+                        console.log(prefix + '_' + current_time_prefix + '_' + time_name);
+                        this_popup.find('input[name="' + prefix + '_' + current_time_prefix + '_' + time_name + '"]').val(time_value);
+                    });
+                });
 
                 console.log(current_data);
             },
@@ -76,18 +98,21 @@ $(document).ready(function () {
                     // TODO TODO TODO
                     var current_data = {};
 
-                    $(this).find('select, input').each(function() {
+                    $(this).find('input').each(function() {
                         console.log($(this).attr('name'), $(this).val());
                         if ($(this).attr('name')) {
                             current_data[$(this).attr('name').replace(current_prefix + '_', '')] = $(this).val();
                         }
                     });
 
+                    $(this).find('select').each(function() {
+                        console.log($(this).attr('name'), $(this).val());
+                        if ($(this).attr('name')) {
+                            current_data[$(this).attr('name').replace(current_prefix + '_', '') + '_id'] = $(this).val();
+                        }
+                    });
+
                     // SLOPPY
-                    var time_prefixes = [
-                        'addition_time',
-                        'duration'
-                    ]
                     $.each(time_prefixes, function(index, current_time_prefix) {
                         if (current_data[current_time_prefix + '_minute'] !== undefined) {
                             current_data[current_time_prefix] = window.SPLIT_TIME.get_minutes(
@@ -101,9 +126,20 @@ $(document).ready(function () {
                         }
                     });
 
+                    // Special exception for cell_sample
+                    if ($(this).find('input[name="' + prefix + '_cell_sample"]')[0]) {
+                        current_data['cell_sample_id'] = $(this).find('input[name="' + prefix + '_cell_sample"]').val();
+                        delete current_data['cell_sample'];
+                    }
+
                     console.log(current_data);
 
-                    current_setup_data[current_row_index][current_prefix][current_column_index] = $.extend({}, current_data);
+                    // current_setup_data[current_row_index][current_prefix][current_column_index] = $.extend({}, current_data);
+                    modify_setup_data(current_prefix, $.extend({}, current_data), current_row_index, current_column_index);
+
+                    var html_contents = get_content_display(current_prefix, current_row_index, current_column_index, current_data);
+
+                    $('a[data-edit-button="true"][data-row="' + current_row_index +'"][data-column="' + current_column_index +'"][data-prefix="' + current_prefix + '"]').parent().html(html_contents);
 
                     $(this).dialog("close");
                 }
@@ -117,6 +153,23 @@ $(document).ready(function () {
         });
         current_dialog.removeProp('hidden');
     });
+
+    // TODO NEEDS MAJOR REVISION
+    function get_content_display(prefix, row_index, column_index, content) {
+        var html_contents = [
+            create_edit_button(prefix, row_index, column_index)
+        ];
+
+        if (content) {
+            $.each(content, function(key, value) {
+                html_contents.push(key + ': ' + value);
+            });
+        }
+
+        html_contents = html_contents.join('<br>');
+
+        return html_contents;
+    }
 
     function get_center_id() {
         if (group_selector.val()) {
@@ -259,18 +312,19 @@ $(document).ready(function () {
                 }
 
                 for (var i = 0; i < number_of_columns[prefix]; i++) {
-                    var html_contents = [
-                        create_edit_button(prefix, row_index, i)
-                    ];
-
-                    var content = content_set[i];
-                    if (content) {
-                        $.each(content, function(key, value) {
-                            html_contents.push(key + ': ' + value);
-                        });
-                    }
-
-                    html_contents = html_contents.join('<br>')
+                    // var html_contents = [
+                    //     create_edit_button(prefix, row_index, i)
+                    // ];
+                    //
+                    // var content = content_set[i];
+                    // if (content) {
+                    //     $.each(content, function(key, value) {
+                    //         html_contents.push(key + ': ' + value);
+                    //     });
+                    // }
+                    //
+                    // html_contents = html_contents.join('<br>')
+                    var html_contents = get_content_display(prefix, row_index, i, content_set[i]);
 
                     new_row.append(
                         $('<td>')
