@@ -276,13 +276,20 @@ $(document).ready(function () {
             $('<td>').html(
                 create_clone_button(row_index) + create_delete_button('row', row_index)
             ).append(
-                $('#id_number_of_items').clone().removeAttr('id')
+                $('#id_number_of_items')
+                    .clone()
+                    .removeAttr('id')
+                    .attr('data-row', row_index)
             )
         );
 
         new_row.append(
             $('<td>').append(
-                $('#id_test_type').clone().removeAttr('id').removeAttr('style')
+                $('#id_test_type')
+                    .clone()
+                    .removeAttr('id')
+                    .removeAttr('style')
+                    .attr('data-row', row_index)
             )
         );
 
@@ -345,12 +352,12 @@ $(document).ready(function () {
 
     $(document).on('change', '.test-type', function() {
         console.log('test_type', $(this).val());
-        modify_setup_data('test_type', $(this).val(), $(this).attr('setup_index'));
+        modify_setup_data('test_type', $(this).val(), $(this).attr('data-row'));
     });
 
     $(document).on('change', '.number-of-items', function() {
         console.log('test_type', $(this).val());
-        modify_setup_data('number_of_items', $(this).val(), $(this).attr('setup_index'));
+        modify_setup_data('number_of_items', $(this).val(), $(this).attr('data-row'));
     });
 
     $(document).on('click', 'a[data-edit-button="true"]', function() {
@@ -408,6 +415,9 @@ $(document).ready(function () {
 
                       console.log(json);
                       current_setup = $.extend({}, json);
+
+                      // FORCE INITIAL TO BE CONTROL
+                      current_setup['test_type'] = 'control';
 
                       // GET RID OF ANYTHING IN THE TABLE
                       study_setup_body.empty();
