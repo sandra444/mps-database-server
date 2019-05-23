@@ -796,7 +796,7 @@ class AssayStudyAdmin(LockableAdmin):
         # 'description',
     )
 
-    filter_horizontal = ('access_groups',)
+    filter_horizontal = ('access_groups', 'collaborator_groups')
 
     fieldsets = (
         (
@@ -833,7 +833,7 @@ class AssayStudyAdmin(LockableAdmin):
         (
             'Study Data Group and Access Group Info', {
                 'fields': (
-                    'group', 'restricted', 'access_groups'
+                    'group', 'restricted', 'access_groups', 'collaborator_groups'
                 ),
             },
         ),
@@ -845,6 +845,7 @@ class AssayStudyAdmin(LockableAdmin):
         qs = super(AssayStudyAdmin, self).get_queryset(request)
         qs = qs.prefetch_related(
             'access_groups',
+            'collaborator_groups',
             'assaystudystakeholder_set__group'
         )
         return qs

@@ -1614,6 +1614,9 @@ class AssayStudy(FlaggableModel):
     # Access groups
     access_groups = models.ManyToManyField(Group, blank=True, related_name='study_access_groups')
 
+    # Collaborator groups
+    collaborator_groups = models.ManyToManyField(Group, blank=True, related_name='study_collaborator_groups')
+
     # THESE ARE NOW EXPLICIT FIELDS IN STUDY
     group = models.ForeignKey(Group, verbose_name='Data Group', help_text='Select the Data Group. The study will be bound to this group', on_delete=models.CASCADE)
 
