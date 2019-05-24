@@ -1647,6 +1647,28 @@ class AssayStudyFormNew(SetupFormsMixin, SignOffMixin, BootstrapForm):
 
             new_matrix.save()
 
+            # COMPOUND STUFF BECAUSE COMPOUND SCHEMA IS MISERABLE
+            # Get all chip setup assay compound instances
+            assay_compound_instances = {}
+
+            # Get all Compound Instances
+            compound_instances = {
+                (
+                    instance.compound.id,
+                    instance.supplier.id,
+                    instance.lot,
+                    str(instance.receipt_date)
+                ): instance for instance in CompoundInstance.objects.all().prefetch_related(
+                    'compound',
+                    'supplier'
+                )
+            }
+
+            # Get all suppliers
+            suppliers = {
+                supplier.name: supplier for supplier in CompoundSupplier.objects.all()
+            }
+
             for setup_group in all_setup_data:
                 items_in_group = int(setup_group.pop('number_of_items', '0'))
                 test_type = setup_group.get('test_type', '')
@@ -1669,17 +1691,101 @@ class AssayStudyFormNew(SetupFormsMixin, SignOffMixin, BootstrapForm):
                         for current_object in current_objects:
                             if prefix in ['cell', 'compound', 'setting']:
                                 current_object.update({
-                                    'matrix_item': new_item
+                                    'matrix_item': new_item,
                                 })
                                 if prefix == 'cell':
                                     new_cell = AssaySetupCell(**current_object)
                                     new_cell.save()
-                                elif prefix == 'compound':
-                                    new_conpound = AssaySetupCell(**current_object)
-                                    new_compound.save()
                                 elif prefix == 'setting':
                                     new_setting = AssaySetupSetting(**current_object)
                                     new_setting.save()
+                                elif prefix == 'compound':
+                                    # CONFUSING NOT DRY BAD
+                                    print(current_object)
+                                    compound = int(current_object.get('compound_id'))
+                                    supplier_text = current_object.get('supplier_text').strip()
+                                    lot_text = current_object.get('lot_text').strip()
+                                    receipt_date = current_object.get('receipt_date')
+                                    # Check if the supplier already exists
+                                    supplier = suppliers.get(supplier_text, '')
+
+                                    concentration = float(current_object.get('concentration'))
+                                    concentration_unit_id = int(current_object.get('concentration_unit_id'))
+                                    addition_location_id = int(current_object.get('addition_location_id'))
+
+                                    addition_time = float(current_object.get('addition_time'))
+                                    duration = float(current_object.get('duration'))
+
+                                    # Otherwise create the supplier
+                                    if not supplier:
+                                        supplier = CompoundSupplier(
+                                            name=supplier_text,
+                                            created_by=study.created_by,
+                                            created_on=study.created_on,
+                                            modified_by=study.modified_by,
+                                            modified_on=study.modified_on
+                                        )
+                                        supplier.save()
+                                        suppliers.update({
+                                            supplier_text: supplier
+                                        })
+
+                                    # Check if compound instance exists
+                                    compound_instance = compound_instances.get((compound, supplier.id, lot_text, str(receipt_date)), '')
+                                    print(compound_instances)
+                                    print((compound, supplier.id, lot_text, receipt_date))
+                                    if not compound_instance:
+                                        compound_instance = CompoundInstance(
+                                            compound_id=compound,
+                                            supplier=supplier,
+                                            lot=lot_text,
+                                            receipt_date=receipt_date,
+                                            created_by=study.created_by,
+                                            created_on=study.created_on,
+                                            modified_by=study.modified_by,
+                                            modified_on=study.modified_on
+                                        )
+                                        compound_instance.save()
+                                        compound_instances.update({
+                                            (compound, supplier.id, lot_text, receipt_date): compound_instance
+                                        })
+
+                                    # Save the AssayCompoundInstance
+                                    conflicting_assay_compound_instance = assay_compound_instances.get(
+                                        (
+                                            new_item.id,
+                                            compound_instance.id,
+                                            concentration,
+                                            concentration_unit_id,
+                                            addition_time,
+                                            duration,
+                                            addition_location_id
+                                        ), None
+                                    )
+                                    if not conflicting_assay_compound_instance:
+                                        new_compound = AssaySetupCompound(
+                                            matrix_item_id=new_item.id,
+                                            compound_instance_id=compound_instance.id,
+                                            concentration=concentration,
+                                            concentration_unit_id=concentration_unit_id,
+                                            addition_time=addition_time,
+                                            duration=duration,
+                                            addition_location_id=addition_location_id
+                                        )
+                                        new_compound.save()
+
+                                    assay_compound_instances.update({
+                                        (
+                                            new_item.id,
+                                            compound_instance.id,
+                                            concentration,
+                                            concentration_unit_id,
+                                            addition_time,
+                                            duration,
+                                            addition_location_id
+                                        ): True
+                                    })
+
                     current_item_number += 1
 
         return study

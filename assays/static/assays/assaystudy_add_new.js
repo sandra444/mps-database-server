@@ -295,7 +295,7 @@ $(document).ready(function () {
 
         $.each(prefixes, function(index, prefix) {
             var content_set = current_setup[prefix];
-            if (!content_set) {
+            if (!content_set.length) {
                 if (!number_of_columns[prefix]) {
                     new_row.append(
                         $('<td>')
@@ -415,6 +415,15 @@ $(document).ready(function () {
 
                       console.log(json);
                       current_setup = $.extend({}, json);
+
+                      // MAKE SURE ALL PREFIXES ARE PRESENT
+                      $.each(prefixes, function(index, prefix) {
+                          if(!current_setup[prefix]) {
+                              current_setup[prefix] = [];
+                          }
+                      });
+
+                      console.log(current_setup);
 
                       // FORCE INITIAL TO BE CONTROL
                       current_setup['test_type'] = 'control';
