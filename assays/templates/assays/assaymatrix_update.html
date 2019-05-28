@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block extra_head %}
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+{% endblock %}
+
+{% block load_js %}
+    <script src="{% static "assays/grouping_filtering.js" %}"></script>
+    <script src="{% static "assays/organ_model_filter.js" %}"></script>
+    <script src="{% static "assays/cell_sample_selection.js" %}"></script>
+    <script src="{% static "assays/assaymatrix_update.js" %}"></script>
+    <script src="{% static "assays/chart_display.js" %}"></script>
+    <script src="{% static "js/calendar.js" %}"></script>
+    <script src="{% static "js/enter_override.js" %}"></script>
+    <script src="{% static "assays/compound_instances.js" %}"></script>
+    <script src="{% static "js/flag.js" %}"></script>
+{% endblock %}
+
+{% block breadcrumbs %}
+    {% if not detail %}
+    <li><a href="/assays/assaystudy/editable_studies/">Editable Studies</a></li>
+    {% else %}
+    <li><a href="/assays/assaystudy/">Studies</a></li>
+    {% endif %}
+    <li><a href="{{ form.instance.study.get_absolute_url }}">{{ form.instance.study }}</a></li>
+    <li class="active">
+            Edit <em>{{ object }}</em>
+    </li>
+{% endblock %}
+
+{% block sidebar %}
+    {% include 'assays/grouping_filtering.html' with charts="true" %}
+{% endblock %}
+
+{% block fluid-content %}
+
+{# This section is a setup table similar to the new study page #}
+
+{# This section will be similar to the series of forms in the matrix page #}
+{# Editing the form rather than generating things from JSON is much simpler #}
+
+{% endblock %}

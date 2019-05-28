@@ -1789,3 +1789,9 @@ class AssayStudyFormNew(SetupFormsMixin, SignOffMixin, BootstrapForm):
                     current_item_number += 1
 
         return study
+
+
+class AssayMatrixFormNew(SetupFormsMixin, SignOffMixin, BootstrapForm):
+    class Meta(object):
+        model = AssayMatrix
+        exclude = tracking + restricted + ('access_groups', 'signed_off_notes', 'bulk_file')

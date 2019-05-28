@@ -53,7 +53,8 @@ from assays.forms import (
     AssayStudySignOffForm,
     AssayStudyStakeholderFormSetFactory,
     AssayStudyDataUploadForm,
-    AssayStudyModelFormSet
+    AssayStudyModelFormSet,
+    AssayMatrixFormNew
 )
 from microdevices.models import MicrophysiologyCenter
 from django import forms
@@ -2038,3 +2039,10 @@ class AssayStudyIndexNew(StudyViewerMixin, DetailView):
         context['detail'] = True
 
         return context
+
+
+class AssayMatrixNew(StudyGroupMixin, UpdateView):
+    """Show all chip and plate models associated with the given study"""
+    model = AssayMatrix
+    template_name = 'assays/assaymatrix_update.html'
+    form_class = AssayMatrixFormNew

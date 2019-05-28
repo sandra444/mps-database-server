@@ -32,7 +32,8 @@ from assays.views import (
     AssayDataFromFilters,
     AssayInterStudyReproducibility,
     AssayStudyDataPlots,
-    AssayStudyAddNew
+    AssayStudyAddNew,
+    AssayMatrixNew
 )
 import assays.ajax
 
@@ -77,6 +78,8 @@ urlpatterns = [
     url(r'^assays/assaymatrix/(?P<pk>[0-9]+)/$', AssayMatrixDetail.as_view(), name='assay_matrix_detail'),
     url(r'^assays/assaymatrix/(?P<pk>[0-9]+)/update/$', AssayMatrixUpdate.as_view(), name='assay_matrix_update'),
     url(r'^assays/assaymatrix/(?P<pk>[0-9]+)/delete/$', AssayMatrixDelete.as_view(), name='assay_matrix_delete'),
+
+    url(r'^assays/assaymatrix/(?P<pk>[0-9]+)/new/$', AssayMatrixNew.as_view(), name='assay_matrix_new'),
 
     # Sign off
     # url(r'^assays/(?P<pk>[0-9]+)/sign_off/$', AssayRunSignOff.as_view(), name='study-sign_off'),
