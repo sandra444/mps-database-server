@@ -66,7 +66,7 @@ $(document).ready(function () {
                 }, 250);
 
                 // Populate the fields
-                var current_data = $.extend({}, current_setup_data[current_row_index][current_prefix][current_column_index]);
+                var current_data = $.extend(true, {}, current_setup_data[current_row_index][current_prefix][current_column_index]);
 
                 console.log(current_setup_data);
 
@@ -151,8 +151,8 @@ $(document).ready(function () {
 
                     console.log(current_data);
 
-                    // current_setup_data[current_row_index][current_prefix][current_column_index] = $.extend({}, current_data);
-                    modify_setup_data(current_prefix, $.extend({}, current_data), current_row_index, current_column_index);
+                    // current_setup_data[current_row_index][current_prefix][current_column_index] = $.extend(true, {}, current_data);
+                    modify_setup_data(current_prefix, current_data, current_row_index, current_column_index);
 
                     var html_contents = get_content_display(current_prefix, current_row_index, current_column_index, current_data);
 
@@ -321,7 +321,7 @@ $(document).ready(function () {
 
     function modify_setup_data(prefix, content, setup_index, object_index) {
         if (object_index) {
-            current_setup_data[setup_index][prefix][object_index] = content;
+            current_setup_data[setup_index][prefix][object_index] = $.extend(true, {}, content);
         }
         else {
             current_setup_data[setup_index][prefix] = content;
@@ -426,7 +426,7 @@ $(document).ready(function () {
         study_setup_body.append(new_row);
 
         current_setup_data.push(
-            $.extend({}, current_setup)
+            $.extend(true, {}, current_setup)
         );
         setup_data_selector.val(JSON.stringify(current_setup_data));
     }
@@ -495,7 +495,7 @@ $(document).ready(function () {
                       window.spinner.stop();
 
                       console.log(json);
-                      current_setup = $.extend({}, json);
+                      current_setup = $.extend(true, {}, json);
 
                       // MAKE SURE ALL PREFIXES ARE PRESENT
                       $.each(prefixes, function(index, prefix) {

@@ -1689,7 +1689,7 @@ class AssayStudyFormNew(SetupFormsMixin, SignOffMixin, BootstrapForm):
                     new_item.save()
                     for prefix, current_objects in setup_group.items():
                         for current_object in current_objects:
-                            if prefix in ['cell', 'compound', 'setting']:
+                            if prefix in ['cell', 'compound', 'setting'] and current_object:
                                 current_object.update({
                                     'matrix_item': new_item,
                                 })
@@ -1701,7 +1701,7 @@ class AssayStudyFormNew(SetupFormsMixin, SignOffMixin, BootstrapForm):
                                     new_setting.save()
                                 elif prefix == 'compound':
                                     # CONFUSING NOT DRY BAD
-                                    print(current_object)
+                                    # print(current_object)
                                     compound = int(current_object.get('compound_id'))
                                     supplier_text = current_object.get('supplier_text').strip()
                                     lot_text = current_object.get('lot_text').strip()
@@ -1732,8 +1732,12 @@ class AssayStudyFormNew(SetupFormsMixin, SignOffMixin, BootstrapForm):
 
                                     # Check if compound instance exists
                                     compound_instance = compound_instances.get((compound, supplier.id, lot_text, str(receipt_date)), '')
-                                    print(compound_instances)
-                                    print((compound, supplier.id, lot_text, receipt_date))
+                                    # print(compound_instances)
+                                    # print((compound, supplier.id, lot_text, receipt_date))
+                                    # FRUSTRATING EXCEPTION
+                                    if not receipt_date:
+                                        receipt_date = None
+
                                     if not compound_instance:
                                         compound_instance = CompoundInstance(
                                             compound_id=compound,
