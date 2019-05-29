@@ -17,6 +17,13 @@ $(document).ready(function () {
     // DATA FOR THE VERSION
     var current_setup = {};
 
+    // CRUDE AND BAD
+    // If I am going to use these, they should be ALL CAPS to indicate global status
+    var item_prefix = 'matrix_item';
+    var cell_prefix = 'cell';
+    var setting_prefix = 'setting';
+    var compound_prefix = 'compound';
+
     // The different components of a setup
     var prefixes = [
         'cell',
@@ -34,6 +41,16 @@ $(document).ready(function () {
     var current_setup_index = 0;
     var current_row_index = null;
     var current_column_index = null;
+
+    // DISPLAYS
+    // JS ACCEPTS STRING LITERALS IN OBJECT INITIALIZATION
+    var empty_html = {};
+    var empty_compound_html = $('#empty_compound_html');
+    var empty_cell_html = $('#empty_cell_html');
+    var empty_setting_html = $('#empty_setting_html');
+    empty_html[compound_prefix] = empty_compound_html;
+    empty_html[cell_prefix] = empty_cell_html;
+    empty_html[setting_prefix] = empty_setting_html;
 
     // CREATE DIALOGS
     $.each(prefixes, function(index, prefix) {
@@ -154,16 +171,80 @@ $(document).ready(function () {
         current_dialog.removeProp('hidden');
     });
 
+    function get_display_for_field(field_name, field_value, prefix) {
+        // NOTE: SPECIAL EXCEPTION FOR CELL SAMPLES
+        if (field_name === 'cell_sample') {
+            // TODO VERY POORLY DONE
+            // return $('#' + 'cell_sample_' + field_value).attr('name');
+            // Global here is a little sloppy, but should always succeed
+            return window.CELLS.cell_sample_id_to_label[field_value];
+        }
+        else {
+            // Ideally, this would be cached in an object or something
+            var origin = $('#id_' + prefix + '_' + field_name);
+
+            console.log(origin);
+            console.log(origin.prop('tagName'));
+
+            // Get the select display if select
+            if (origin.prop('tagName') === 'SELECT') {
+                // Convert to integer if possible, thanks
+                var possible_int = Math.floor(field_value);
+                // console.log(possible_int);
+                if (possible_int) {
+                    // console.log(origin[0].selectize.options[possible_int].text);
+                    return origin[0].selectize.options[possible_int].text;
+                }
+                else {
+                    // console.log(origin[0].selectize.options[field_value].text);
+                    return origin[0].selectize.options[field_value].text;
+                }
+                // THIS IS BROKEN, FOR PRE-SELECTIZE ERA
+                // return origin.find('option[value="' + field_value + '"]').text()
+            }
+            // Just display the thing if there is an origin
+            else if (origin[0]) {
+                return field_value;
+            }
+            // Give back null to indicate this should not be displayed
+            else {
+                return null;
+            }
+        }
+    }
+
     // TODO NEEDS MAJOR REVISION
     function get_content_display(prefix, row_index, column_index, content) {
         var html_contents = [
             create_edit_button(prefix, row_index, column_index)
         ];
 
+        var new_display = empty_html[prefix].clone();
+
         if (content) {
             $.each(content, function(key, value) {
-                html_contents.push(key + ': ' + value);
+                // html_contents.push(key + ': ' + value);
+                // I will need to think about invalid fields
+                var field_name = key.replace('_id', '');
+                if (field_name !== 'addition_time' && field_name !== 'duration') {
+                    var field_display = get_display_for_field(field_name, value, prefix);
+                    new_display.find('.' + prefix + '-' + field_name).html(field_display);
+                }
+                else {
+                    var split_time = window.SPLIT_TIME.get_split_time(
+                        value,
+                    );
+
+                    console.log(split_time);
+
+                    $.each(split_time, function(time_name, time_value) {
+                        console.log(prefix + '_' + key + '_' + time_name);
+                        new_display.find('.' + prefix + '-' + key + '_' + time_name).html(time_value);
+                    });
+                }
             });
+
+            html_contents.push(new_display.html());
         }
 
         html_contents = html_contents.join('<br>');
