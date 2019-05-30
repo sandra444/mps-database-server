@@ -516,8 +516,6 @@ $(document).ready(function () {
                       spawn_row();
                   },
                   error: function (xhr, errmsg, err) {
-                      first_run = false;
-
                       // Stop spinner
                       window.spinner.stop();
 

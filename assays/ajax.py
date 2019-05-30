@@ -3274,6 +3274,15 @@ def fetch_organ_model_protocol_setup(request):
     )
 
 
+def fetch_matrix_setup(request):
+    data = {}
+
+    return HttpResponse(
+        json.dumps(data),
+        content_type='application/json'
+    )
+
+
 def study_viewer_validation(request):
     study = None
     if request.POST.get('study', ''):
@@ -3350,7 +3359,10 @@ switch = {
     # },
     'fetch_organ_model_protocol_setup': {
         'call': fetch_organ_model_protocol_setup
-    }
+    },
+    'fetch_matrix_setup': {
+        'call': fetch_matrix_setup
+    },
 }
 
 
