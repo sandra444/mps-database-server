@@ -791,6 +791,7 @@ class AssayStudyAdmin(LockableAdmin):
         'signed_off_date',
         'stakeholder_display',
         'access_group_display',
+        'collaborator_group_display',
         'restricted',
         'locked',
         # 'description',
@@ -898,6 +899,26 @@ class AssayStudyAdmin(LockableAdmin):
         return '{0}<div hidden id="access_{1}">{2}</div>'.format(trigger, obj.pk, contents)
 
     access_group_display.allow_tags = True
+
+    @mark_safe
+    def collaborator_group_display(self, obj):
+        contents = ''
+        trigger = ''
+        queryset = obj.collaborator_groups.all()
+        count = queryset.count()
+
+        if count:
+            contents = '<br>'.join(
+                [
+                    group.name for group in queryset.order_by('name')
+                ]
+            )
+            trigger = '<a href="javascript:void(0)" onclick=$("#collaborator_{0}").toggle()>Show/Hide Collaborator Groups ({1})</a>'.format(
+                obj.pk, count
+            )
+        return '{0}<div hidden id="collaborator_{1}">{2}</div>'.format(trigger, obj.pk, contents)
+
+    collaborator_group_display.allow_tags = True
 
     # save_related takes the place of save_model so that the inline can be referred to
     # TODO TODO TODO THIS IS NOT VERY DRY
