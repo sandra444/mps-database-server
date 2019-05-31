@@ -428,6 +428,8 @@ $(document).ready(function () {
 
           console.log(json);
 
+          current_setup = $.extend(true, {}, json.current_setup);
+
           // SET THE CURRENT SETUP
           // SET THE CURRENT VALUES FOR THE GROUPS
           // GENERATE THE TABLE

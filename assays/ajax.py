@@ -3236,8 +3236,7 @@ def fetch_post_filter(request):
     pass
 
 
-def fetch_organ_model_protocol_setup(request):
-    organ_model_protocol_id = request.POST.get('organ_model_protocol_id', 0)
+def get_organ_model_protocol_setup(organ_model_protocol_id):
     organ_model_protocol = get_object_or_404(OrganModelProtocol, pk=organ_model_protocol_id)
 
     data = {
@@ -3268,6 +3267,14 @@ def fetch_organ_model_protocol_setup(request):
     #     current_compound = compound.__dict__.pop('_state')
     #     setup_compounds.append(current_compound)
 
+    return data
+
+
+def fetch_organ_model_protocol_setup(request):
+    organ_model_protocol_id = request.POST.get('organ_model_protocol_id', 0)
+
+    data = get_organ_model_protocol_setup(organ_model_protocol_id)
+
     return HttpResponse(
         json.dumps(data),
         content_type='application/json'
@@ -3275,7 +3282,17 @@ def fetch_organ_model_protocol_setup(request):
 
 
 def fetch_matrix_setup(request):
+    matrix_id = request.POST.get('matrix_id', 0)
+    matrix = get_object_or_404(AssayMatrix, pk=matrix_id)
+    organ_model_protocol_id = matrix.study.organ_model_protocol_id
+
     data = {}
+
+    organ_model_protocol = get_organ_model_protocol_setup(organ_model_protocol_id)
+
+    data.update({
+        'current_setup': organ_model_protocol
+    })
 
     return HttpResponse(
         json.dumps(data),
