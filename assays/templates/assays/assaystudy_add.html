@@ -196,6 +196,8 @@
         </div>
     </div>
 
+    {# HIDDEN FOR NOW #}
+    {% comment %}
     <legend>For Integrated Chip Studies</legend>
     {% if form.study_configuration.errors %}
         {% for error in form.study_configuration.errors %}
@@ -219,6 +221,7 @@
             </a>
         </div>
     </div>
+    {% endcomment %}
 
     {{ study_assay_formset.management_form }}
     <legend>Assays</legend>
