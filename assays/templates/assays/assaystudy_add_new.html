@@ -229,6 +229,87 @@
     </div>
     {% endcomment %}
 
+    {# TODO PUT MODEL SELECTION STUFF HERE #}
+    <legend>Setup Information</legend>
+
+    {% include 'generic_field.html' with field=form.organ_model label="MPS Model*" %}
+    {% include 'generic_field.html' with field=form.organ_model_protocol label="MPS Model Version*" %}
+
+    {# TODO PUT THE TABLE THING HERE #}
+    <div id="study_setup_table_section">
+            {# Section for visibility checkboxes #}
+            {# A litle awkward #}
+            <div class="row large-padding-top">
+            <div class="col-md-4 col-lg-3">
+                <div class="fancy-checkbox table-filter padded-bottom" align="left">
+                    <input class="visibility-checkbox" type="checkbox" name="show_cells" id="show_cells" value=".cell-display" checked/>
+                    <div class="btn-group">
+                        <label for="show_cells" class="btn btn-success">
+                            <span class="glyphicon glyphicon-ok"></span>
+                            <span> </span>
+                        </label>
+                        <label for="show_cells" class="btn btn-default active">
+                            Show Cells
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4 col-lg-3">
+                <div class="fancy-checkbox table-filter padded-bottom" align="left">
+                    <input class="visibility-checkbox" type="checkbox" name="show_compounds" id="show_compounds" value=".compound-display" checked/>
+                    <div class="btn-group">
+                        <label for="show_compounds" class="btn btn-info">
+                            <span class="glyphicon glyphicon-ok"></span>
+                            <span> </span>
+                        </label>
+                        <label for="show_compounds" class="btn btn-default active">
+                            Show Compounds
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4 col-lg-3">
+                <div class="fancy-checkbox table-filter padded-bottom" align="left">
+                    <input class="visibility-checkbox" type="checkbox" name="show_settings" id="show_settings" value=".setting-display" checked/>
+                    <div class="btn-group">
+                        <label for="show_settings" class="btn btn-warning">
+                            <span class="glyphicon glyphicon-ok"></span>
+                            <span> </span>
+                        </label>
+                        <label for="show_settings" class="btn btn-default active">
+                            Show Settings
+                        </label>
+                    </div>
+                </div>
+            </div>
+            </div>
+
+        {# Set of buttons for adding cells, compounds, settings etc. #}
+        <div class="padded-bottom">
+        <a role="button" class="btn btn-success" id="add_group_button"><span class="glyphicon glyphicon-plus-sign"></span>Add Group</a>
+        </div>
+
+        <div class="padded-bottom">
+        <a role="button" class="btn btn-success" data-add-new-button="true" data-prefix="cell">Add Cell</a>
+        <a role="button" class="btn btn-success" data-add-new-button="true" data-prefix="compound">Add Compound</a>
+        {# Probably will be renamed #}
+        <a role="button" class="btn btn-success" data-add-new-button="true" data-prefix="setting">Add Setting</a>
+        </div>
+
+        <table class="table table-striped table-bordered table-nonfluid" id="study_setup_table">
+            <thead>
+                <th>Number of Chips</th>
+                <th>Test Type</th>
+                <th hidden class="cell_start"></th>
+                <th hidden class="compound_start"></th>
+                <th hidden class="setting_start"></th>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
     {{ study_assay_formset.management_form }}
     <legend>Assays</legend>
 
@@ -336,87 +417,6 @@
         </tbody>
     </table>
     {% endcomment %}
-
-    {# TODO PUT MODEL SELECTION STUFF HERE #}
-    <legend>Setup Information</legend>
-
-    {% include 'generic_field.html' with field=form.organ_model label="MPS Model*" %}
-    {% include 'generic_field.html' with field=form.organ_model_protocol label="MPS Model Version*" %}
-
-    {# TODO PUT THE TABLE THING HERE #}
-    <div id="study_setup_table_section">
-            {# Section for visibility checkboxes #}
-            {# A litle awkward #}
-            <div class="row large-padding-top">
-            <div class="col-md-4 col-lg-3">
-                <div class="fancy-checkbox table-filter padded-bottom" align="left">
-                    <input class="visibility-checkbox" type="checkbox" name="show_cells" id="show_cells" value=".cell-display" checked/>
-                    <div class="btn-group">
-                        <label for="show_cells" class="btn btn-success">
-                            <span class="glyphicon glyphicon-ok"></span>
-                            <span> </span>
-                        </label>
-                        <label for="show_cells" class="btn btn-default active">
-                            Show Cells
-                        </label>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-md-4 col-lg-3">
-                <div class="fancy-checkbox table-filter padded-bottom" align="left">
-                    <input class="visibility-checkbox" type="checkbox" name="show_compounds" id="show_compounds" value=".compound-display" checked/>
-                    <div class="btn-group">
-                        <label for="show_compounds" class="btn btn-info">
-                            <span class="glyphicon glyphicon-ok"></span>
-                            <span> </span>
-                        </label>
-                        <label for="show_compounds" class="btn btn-default active">
-                            Show Compounds
-                        </label>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-md-4 col-lg-3">
-                <div class="fancy-checkbox table-filter padded-bottom" align="left">
-                    <input class="visibility-checkbox" type="checkbox" name="show_settings" id="show_settings" value=".setting-display" checked/>
-                    <div class="btn-group">
-                        <label for="show_settings" class="btn btn-warning">
-                            <span class="glyphicon glyphicon-ok"></span>
-                            <span> </span>
-                        </label>
-                        <label for="show_settings" class="btn btn-default active">
-                            Show Settings
-                        </label>
-                    </div>
-                </div>
-            </div>
-            </div>
-
-        {# Set of buttons for adding cells, compounds, settings etc. #}
-        <div class="padded-bottom">
-        <a role="button" class="btn btn-success" id="add_group_button"><span class="glyphicon glyphicon-plus-sign"></span>Add Group</a>
-        </div>
-
-        <div class="padded-bottom">
-        <a role="button" class="btn btn-success" data-add-new-button="true" data-prefix="cell">Add Cell</a>
-        <a role="button" class="btn btn-success" data-add-new-button="true" data-prefix="compound">Add Compound</a>
-        {# Probably will be renamed #}
-        <a role="button" class="btn btn-success" data-add-new-button="true" data-prefix="setting">Add Setting</a>
-        </div>
-
-        <table class="table table-striped table-bordered table-nonfluid" id="study_setup_table">
-            <thead>
-                <th>Number of Chips</th>
-                <th>Test Type</th>
-                <th hidden class="cell_start"></th>
-                <th hidden class="compound_start"></th>
-                <th hidden class="setting_start"></th>
-            </thead>
-            <tbody></tbody>
-        </table>
-    </div>
 
     {# Hidden for Cells, Compounds, and Settings #}
     <div hidden>
