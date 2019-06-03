@@ -131,6 +131,8 @@
 
     {% include 'generic_field.html' with field=form.description label="Description" %}
 
+    {# REMOVED FOR NOW #}
+    {% comment %}
     <div class="form-group">
         <label for="use_in_calculations" class="col-sm-2 control-label">Use in Calculations</label>
         <div class="col-sm-10">
@@ -142,6 +144,7 @@
           </div>
         </div>
     </div>
+    {% endcomment %}
 
     {% if form.protocol.errors %}
         {% for error in form.protocol.errors %}
@@ -276,6 +279,8 @@
         </tbody>
     </table>
 
+    {# REMOVED FOR NOW #}
+    {% comment %}
     {{ supporting_data_formset.management_form }}
     <legend>Supporting Data</legend>
     {% if supporting_data_formset.non_form_errors %}
@@ -327,6 +332,7 @@
             {% endfor %}
         </tbody>
     </table>
+    {% endcomment %}
 
     {# TODO PUT MODEL SELECTION STUFF HERE #}
     <legend>Setup Information</legend>
