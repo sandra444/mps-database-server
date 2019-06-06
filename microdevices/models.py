@@ -154,7 +154,7 @@ class Microdevice(LockableModel):
 class OrganModel(LockableModel):
     """An Organ Model describes a way of preparing a device to emulate a particular organ"""
     class Meta(object):
-        verbose_name = 'Organ Model'
+        verbose_name = 'MPS Model'
         ordering = ('name', 'organ',)
 
     # model_name = models.CharField(max_length=200, unique=True)
@@ -233,7 +233,7 @@ class OrganModel(LockableModel):
 class ValidatedAssay(models.Model):
     """Validated Assays show which assays have been approved for a particular Organ Model"""
     # Validated assays for an organ model used in inline
-    organ_model = models.ForeignKey(OrganModel, verbose_name='Organ Model', on_delete=models.CASCADE)
+    organ_model = models.ForeignKey(OrganModel, verbose_name='MPS Model', on_delete=models.CASCADE)
     assay = models.ForeignKey('assays.AssayModel', verbose_name='Assay Model', on_delete=models.CASCADE)
 
 
@@ -246,7 +246,7 @@ class OrganModelProtocol(models.Model):
     class Meta(object):
         unique_together = [('version', 'organ_model')]
 
-    organ_model = models.ForeignKey(OrganModel, verbose_name='Organ Model', on_delete=models.CASCADE)
+    organ_model = models.ForeignKey(OrganModel, verbose_name='MPS Model', on_delete=models.CASCADE)
     # Uhh... this should probably just be "name"...
     version = models.CharField(max_length=20)
     file = models.FileField(upload_to='protocols', verbose_name='Protocol File')
