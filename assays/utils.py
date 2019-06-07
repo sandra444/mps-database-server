@@ -103,7 +103,7 @@ CSV_HEADER_WITH_COMPOUNDS_AND_STUDY = (
     'Hour',
     'Minute',
     'Device',
-    'Organ Model',
+    'MPS Model',
     'Cells',
     'Compound Treatment(s)',
     'Target/Analyte',
@@ -128,7 +128,7 @@ DEFAULT_EXPORT_HEADER = (
     'Hour',
     'Minute',
     'Device',
-    'Organ Model',
+    'MPS Model',
     'Settings',
     'Cells',
     'Compound Treatment(s)',
@@ -376,7 +376,7 @@ class AssayFileProcessor:
         self.errors = []
 
     def valid_data_row(self, row, header_indices):
-        """Confirm that a row is valid"""
+        """Confirm that a row is 'valid'"""
         valid_row = False
 
         for required_column in REQUIRED_COLUMN_HEADERS:
@@ -527,7 +527,10 @@ class AssayFileProcessor:
             # Some lines may not be long enough (have sufficient commas), ignore such lines
             # Some lines may be empty or incomplete, ignore these as well
             # TODO TODO TODO
-            if not self.valid_data_row(line, header_indices):
+            # if not self.valid_data_row(line, header_indices):
+            #     continue
+
+            if not any(line[:18]):
                 continue
 
             matrix_item_name = line[header_indices.get('CHIP ID')]
