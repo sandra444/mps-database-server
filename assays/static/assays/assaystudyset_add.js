@@ -237,16 +237,9 @@ $(document).ready(function () {
         });
     }
 
-    function apply_assay_filter() {
+    function check_assay_filter_button(study_id) {
         var current_filter_button = $('.assay-select-button[data-study-id="' + current_study_id +'"]');
-        var current_assays = study_id_to_assays[current_study_id];
-
-        $.each(current_assay_filter, function(assay_id, add_or_remove) {
-            // Add/remove from m2m
-            // (Can pass selections as an array, but this works too)
-            var current_assay_option = assays_selector.find('option[value="' + assay_id + '"]');
-            current_assay_option.prop('selected', add_or_remove);
-        });
+        var current_assays = study_id_to_assays[study_id];
 
         var study_is_affected = false;
 
@@ -263,6 +256,17 @@ $(document).ready(function () {
         else {
             current_filter_button.removeClass('btn-warning');
         }
+    }
+
+    function apply_assay_filter() {
+        $.each(current_assay_filter, function(assay_id, add_or_remove) {
+            // Add/remove from m2m
+            // (Can pass selections as an array, but this works too)
+            var current_assay_option = assays_selector.find('option[value="' + assay_id + '"]');
+            current_assay_option.prop('selected', add_or_remove);
+        });
+
+        check_assay_filter_button(current_study_id);
     }
 
     function add_or_remove_from_study_table(current_study_option, add_or_remove, initial) {
@@ -433,6 +437,11 @@ $(document).ready(function () {
             current_assay_filter[$(this).val()] = false;
             $(this).attr('checked', false);
         }
+    });
+
+    // Make sure that all of the assay boxes have the correct colors
+    $('.assay-select-button').each(function() {
+        check_assay_filter_button($(this).attr('data-study-id'));
     });
 
     // Get initial assay filter
