@@ -165,6 +165,9 @@ $(document).ready(function () {
     // Assays to deselect/select after hitting confirm
     var current_assay_filter = {};
 
+    // To discern how to modify assays
+    var current_study_id = null;
+
     var assay_dialog_body = $('#assay_dialog_body');
     var assay_table = $('#assay_table');
 
@@ -235,12 +238,31 @@ $(document).ready(function () {
     }
 
     function apply_assay_filter() {
+        var current_filter_button = $('.assay-select-button[data-study-id="' + current_study_id +'"]');
+        var current_assays = study_id_to_assays[current_study_id];
+
         $.each(current_assay_filter, function(assay_id, add_or_remove) {
             // Add/remove from m2m
             // (Can pass selections as an array, but this works too)
             var current_assay_option = assays_selector.find('option[value="' + assay_id + '"]');
             current_assay_option.prop('selected', add_or_remove);
         });
+
+        var study_is_affected = false;
+
+        $.each(current_assays, function(assay_index, assay_id) {
+            if (!current_assay_filter[assay_id]) {
+                study_is_affected = true;
+                return false;
+            }
+        });
+
+        if (study_is_affected) {
+            current_filter_button.addClass('btn-warning');
+        }
+        else {
+            current_filter_button.removeClass('btn-warning');
+        }
     }
 
     function add_or_remove_from_study_table(current_study_option, add_or_remove, initial) {
@@ -313,7 +335,7 @@ $(document).ready(function () {
 
     // TODO dialog for selecting a set of assays (per study)
     $(document).on('click', '.assay-select-button', function() {
-        var current_study_id = $(this).attr('data-study-id');
+        current_study_id = $(this).attr('data-study-id');
         var current_assays = study_id_to_assays[current_study_id];
 
         // Populate the datatable
