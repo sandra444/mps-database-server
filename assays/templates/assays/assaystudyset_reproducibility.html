@@ -7,9 +7,9 @@
 
 {% block load_js %}
     <script src="{% static "assays/grouping_filtering.js" %}"></script>
-    <script src="{% static "assays/repro_triggers.js" %}"></script>
     <script src="{% static "assays/inter_reproducibility.js" %}"></script>
-    <script src="{% static "assays/assay_interstudy_reproducibility.js" %}"></script>
+    <script src="{% static "assays/repro_triggers.js" %}"></script>
+    <script src="{% static "assays/assaystudyset_reproducibility.js" %}"></script>
 {% endblock %}
 
 {% block breadcrumbs %}
@@ -17,55 +17,41 @@
 {% endblock %}
 
 {% block sidebar %}
-    {% include 'assays/grouping_filtering.html' with repro='true' %}
+    {% include 'assays/grouping_filtering.html' with repro="true" %}
 {% endblock %}
 
 {% block fluid-content %}
-<div class="row padded-row text-center padded-bottom large-padding-top hidden-print">
-    <a href="/assays/graphing_reproducibility/?filters=" type="button" class="btn btn-xlarge btn-primary text-center submit-button" id="back_button">
-        <span class="glyphicon glyphicon glyphicon-hand-left" aria-hidden="true"></span>
-        Selection
+<div class="row padded-row text-center padded-bottom large-padding-top">
+    {% if user.id == object.created_by_id %}
+    <a href="/assays/assaystudyset/{{ object.id}}/update" type="button" class="btn btn-xlarge btn-primary submit-button" id="download_submit">
+        <span class="glyphicon glyphicon glyphicon-pencil" aria-hidden="true"></span>
+        Update
     </a>
-    <a href="/assays/assaystudy_data_plots/?" type="button" class="btn btn-xlarge btn-primary text-center submit-button" id="charts_submit">
+    {% endif %}
+    <a href="/assays/assaystudyset/{{ object.id }}/?" type="button" class="btn btn-xlarge btn-primary submit-button" id="charts_submit">
         <span class="glyphicon glyphicon glyphicon-stats" aria-hidden="true"></span>
         Show Plots
     </a>
-    <a href="/assays/data_from_filters/?" type="button" class="btn btn-xlarge btn-info text-center submit-button" id="download_submit">
+    <a href="/assays/assaystudyset/{{ object.id }}/data/?" type="button" class="btn btn-xlarge btn-info submit-button" id="download_submit">
         <span class="glyphicon glyphicon glyphicon-download-alt" aria-hidden="true"></span>
         Download
     </a>
-</div>
+    <div class="well large-margin-top">
+    <div class="form-group row">
+        <div class="col-md-8">
+            <input class="form-control" type="text" id="id_current_url_input" value="">
+        </div>
 
-{% include 'assays/sidebar_extras.html' %}
-
-{# NEEDS TO BE MOVED #}
-{% comment %} <div class="container">
-<div class="well">
-    {# TODO TODO TODO #}
-    <div class="row form-group">
-    <div class="col-sm-6 col-md-4">
-    <label class="radio-inline">
-        <input type="radio" name="inter_level" id="inter_level_by_center" value="1" checked>
-        By Center
-    </label>
-    <label class="radio-inline">
-        <input type="radio" name="inter_level" id="inter_level_by_study" value="0">
-        By Study
-    </label>
-    </div>
-    <div class="col-sm-6 col-md-4">
-    <label>
-        <input type="checkbox" name="initial_norm" id="initial_norm">
-        Normalize by Median Value
-    </label>
-    </div>
-    <div class="col-md-4">
-    <label>Maximum Interpolation Size</label>
-        <input id="max_interpolation_size" class="form-control" type="number" value="2" style="width: 75px; display: inline;">
+        {# Note deprecated #}
+        <div class="col-md-4">
+            <button id="id_copy_url_button" class="btn btn-info">
+                <span class="glyphicon glyphicon glyphicon glyphicon-copy" aria-hidden="true"></span>
+                Copy URL to Clipboard
+            </button>
+        </div>
     </div>
     </div>
 </div>
-</div> {% endcomment %}
 
 <div class="row padded-row">
     <br><div class="text-center"><strong>Reproducibility Breakdown</strong><br><small>(Hover for Details)</small></div>

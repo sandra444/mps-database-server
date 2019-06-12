@@ -15,7 +15,7 @@ from django.utils.safestring import mark_safe
 import urllib.request, urllib.parse, urllib.error
 import collections
 
-
+# TODO REORGANIZE
 # These are here to avoid potentially messy imports, may change later
 def attr_getter(item, attributes):
     """attribute getter for individual items"""
@@ -2246,6 +2246,7 @@ class AssayDataPoint(models.Model):
             split_times.get('minute'),
         )
 
+<<<<<<< HEAD
 # # TODO MODIFY AssayCompoundInstance
 # DEPRECATED: DO NOT USE
 # class AssayCompoundInstance(models.Model):
@@ -2287,6 +2288,8 @@ class AssayDataPoint(models.Model):
 #     # PLEASE NOTE THAT THIS IS IN MINUTES, CONVERTED FROM D:H:M
 #     duration = models.FloatField(blank=True)
 
+=======
+>>>>>>> study_set
 
 class AssaySetupCompound(models.Model):
     """An instance of a compound used in an assay; used in M2M with setup"""
@@ -2413,6 +2416,7 @@ class AssayStudySupportingData(models.Model):
     )
 
 
+<<<<<<< HEAD
 # TODO MODIFY AssayDataUpload
 # Renamed from AssayDataUpload
 # class AssayDataFile(FlaggableModel):
@@ -2483,6 +2487,8 @@ class AssayStudySupportingData(models.Model):
 
 
 # Proposed, may or may not include
+=======
+>>>>>>> study_set
 # TODO Probably should have a ControlledVocabularyMixin for defining name and description consistently
 class AssaySetting(LockableModel):
     """Defines a type of setting (flowrate etc.)"""
@@ -2569,6 +2575,7 @@ class AssaySetupSetting(models.Model):
         return '{} {} {}'.format(self.setting.name, self.value, self.unit)
 
 
+# DEPRECATED
 class AssayRunStakeholder(models.Model):
     """An institution that has interest in a particular study
 
@@ -2628,7 +2635,11 @@ class AssayStudyAssay(models.Model):
     unit = models.ForeignKey(PhysicalUnits, on_delete=models.CASCADE)
 
     def __str__(self):
+<<<<<<< HEAD
         return '{0}|{1}|{2}'.format(self.target, self.method, self.unit)
+=======
+        return '{0}~@|{1}~@|{2}~@|{3}'.format(self.study_id, self.target, self.method, self.unit)
+>>>>>>> study_set
 
 
 class AssayImageSetting(models.Model):
@@ -2702,5 +2713,29 @@ class AssayImage(models.Model):
             'setting_notes': self.setting.notes,
         }
 
+<<<<<<< HEAD
     def __str__(self):
         return '{}'.format(self.file_name)
+=======
+    def __unicode__(self):
+        return u'{}'.format(self.file_name)
+
+
+class AssayStudySet(FlaggableModel):
+    # Name for the set
+    name = models.CharField(max_length=255, unique=True)
+    # Description
+    description = models.CharField(max_length=2000, default='', blank=True)
+
+    studies = models.ManyToManyField(AssayStudy)
+    assays = models.ManyToManyField(AssayStudyAssay)
+
+    def get_post_submission_url(self):
+        return self.get_absolute_url()
+
+    def get_absolute_url(self):
+        return '/assays/assaystudyset/{}/'.format(self.id)
+
+    def __str__(self):
+        return self.name
+>>>>>>> study_set
