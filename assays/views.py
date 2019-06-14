@@ -561,7 +561,7 @@ class AssayStudyUpdate(ObjectGroupRequiredMixin, UpdateView):
             if 'supporting_data_formset' not in context:
                 context['supporting_data_formset'] = AssayStudySupportingDataFormSetFactory(self.request.POST, self.request.FILES, instance=self.object)
             if 'reference_formset' not in context:
-                context['reference_formset'] = AssayStudyReferenceFormSetFactory(self.request.POST)
+                context['reference_formset'] = AssayStudyReferenceFormSetFactory(self.request.POST, instance=self.object)
         else:
             context['study_assay_formset'] = AssayStudyAssayFormSetFactory(instance=self.object)
             context['supporting_data_formset'] = AssayStudySupportingDataFormSetFactory(instance=self.object)
