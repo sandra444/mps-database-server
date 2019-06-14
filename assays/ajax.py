@@ -3380,11 +3380,11 @@ def study_editor_validation(request):
 def get_pubmed_reference_data(request):
     """Returns a dictionary of PubMed data given a PubMed ID"""
     data = {}
-    pubmedid = None
-    if request.POST.get('pubmedid', ''):
-        pubmedid = request.POST.get('pubmedid')
+    term = None
+    if request.POST.get('term', ''):
+        term = request.POST.get('term')
     # Get URL of target for scrape
-    url = u'https://www.ncbi.nlm.nih.gov/pubmed/{}'.format(pubmedid)
+    url = 'https://www.ncbi.nlm.nih.gov/pubmed/?term={}'.format(term)
     # Make the http request
     response = requests.get(url)
     # Get the webpage as text
