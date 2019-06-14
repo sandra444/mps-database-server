@@ -15,7 +15,7 @@ from django.utils.safestring import mark_safe
 import urllib.request, urllib.parse, urllib.error
 import collections
 
-
+# TODO REORGANIZE
 # These are here to avoid potentially messy imports, may change later
 def attr_getter(item, attributes):
     """attribute getter for individual items"""
@@ -2246,47 +2246,6 @@ class AssayDataPoint(models.Model):
             split_times.get('minute'),
         )
 
-# # TODO MODIFY AssayCompoundInstance
-# DEPRECATED: DO NOT USE
-# class AssayCompoundInstance(models.Model):
-#     """An instance of a compound used in an assay; used as an inline"""
-#     class Meta(object):
-#         unique_together = [
-#             (
-#                 'chip_setup',
-#                 # 'setup',
-#                 'compound_instance',
-#                 'concentration',
-#                 'concentration_unit',
-#                 'addition_time',
-#                 'duration'
-#             )
-#         ]
-#
-#     # Stop-gap, subject to change
-#     # DEPRECATED
-#     chip_setup = models.ForeignKey('assays.AssayChipSetup', null=True, blank=True, on_delete=models.CASCADE)
-#     # Shouldn't be optional
-#     # setup = models.ForeignKey('assays.AssaySetup', null=True, blank=True, on_delete=models.CASCADE)
-#
-#     # COMPOUND INSTANCE IS REQUIRED, however null=True was done to avoid a submission issue
-#     compound_instance = models.ForeignKey(
-#         'compounds.CompoundInstance',
-#         null=True,
-#         blank=True
-#     )
-#     concentration = models.FloatField()
-#     concentration_unit = models.ForeignKey(
-#         'assays.PhysicalUnits',
-#         verbose_name='Concentration Unit'
-#     )
-#
-#     # PLEASE NOTE THAT THIS IS IN MINUTES, CONVERTED FROM D:H:M
-#     addition_time = models.FloatField(blank=True)
-#
-#     # PLEASE NOTE THAT THIS IS IN MINUTES, CONVERTED FROM D:H:M
-#     duration = models.FloatField(blank=True)
-
 
 class AssaySetupCompound(models.Model):
     """An instance of a compound used in an assay; used in M2M with setup"""
@@ -2413,76 +2372,6 @@ class AssayStudySupportingData(models.Model):
     )
 
 
-# TODO MODIFY AssayDataUpload
-# Renamed from AssayDataUpload
-# class AssayDataFile(FlaggableModel):
-#     """Shows the history of data uploads for a readout; functions as inline"""
-#     # date_created, created_by, and other fields are used but come from FlaggableModel
-#     file_location = models.URLField(null=True, blank=True)
-#     # Note that there are both chip and plate readouts listed as one file may supply both
-#     # DEPRECATED
-#     chip_readout = models.ManyToManyField(AssayChipReadout)
-#     # DEPRECATED
-#     plate_readout = models.ManyToManyField(AssayPlateReadout)
-#
-#     # Data will be related to a setup rather than a "readout" now
-#     # setup = models.ManyToManyField(AssaySetup)
-#     matrix_item = models.ManyToManyField(AssayMatrixItem)
-#
-#     # There are a few ways of swapping this in, but we will probably have to edit the migration CAREFULLY
-#     study = models.ForeignKey(AssayStudy, on_delete=models.CASCADE)
-#
-#     def __str__(self):
-#         return urllib.unquote(self.file_location.split('/')[-1])
-
-
-# TODO Rename PhysicalUnits to PhysicalUnit
-# TODO REMEMBER TO REPLACE ALL OCCURRENCES AFTER DOING THIS
-# class PhysicalUnit(LockableModel):
-#     """Measures of concentration and so on"""
-#     unit = models.CharField(max_length=256, unique=True)
-#     description = models.CharField(
-#         max_length=256,
-#         blank=True,
-#         default=''
-#     )
-#
-#     unit_type = models.ForeignKey(UnitType, on_delete=models.CASCADE)
-#
-#     # Base Unit for conversions and scale factor
-#     base_unit = models.ForeignKey(
-#         'assays.PhysicalUnits',
-#         blank=True,
-#         null=True
-#     )
-#
-#     # Scale factor gives the conversion to get to the base unit, can also act to sort
-#     scale_factor = models.FloatField(
-#         blank=True,
-#         null=True
-#     )
-#
-#     availability = models.CharField(
-#         max_length=256,
-#         blank=True,
-#         default='',
-#         help_text=(
-#             u'Type a series of strings for indicating '
-#             u'where this unit should be listed:'
-#             u'\ntest = test results\nreadouts = readouts'
-#         )
-#     )
-#
-#     # verbose_name_plural is used to avoid a double 's' on the model name
-#     class Meta(object):
-#         verbose_name_plural = 'Physical Units'
-#         ordering = ['unit_type', 'unit']
-#
-#     def __str__(self):
-#         return u'{}'.format(self.unit)
-
-
-# Proposed, may or may not include
 # TODO Probably should have a ControlledVocabularyMixin for defining name and description consistently
 class AssaySetting(LockableModel):
     """Defines a type of setting (flowrate etc.)"""
@@ -2569,6 +2458,7 @@ class AssaySetupSetting(models.Model):
         return '{} {} {}'.format(self.setting.name, self.value, self.unit)
 
 
+# DEPRECATED
 class AssayRunStakeholder(models.Model):
     """An institution that has interest in a particular study
 
@@ -2628,7 +2518,7 @@ class AssayStudyAssay(models.Model):
     unit = models.ForeignKey(PhysicalUnits, on_delete=models.CASCADE)
 
     def __str__(self):
-        return '{0}|{1}|{2}'.format(self.target, self.method, self.unit)
+        return '{0}~@|{1}~@|{2}~@|{3}'.format(self.study_id, self.target, self.method, self.unit)
 
 
 class AssayImageSetting(models.Model):
@@ -2704,3 +2594,83 @@ class AssayImage(models.Model):
 
     def __str__(self):
         return '{}'.format(self.file_name)
+
+
+class AssayStudySet(FlaggableModel):
+    # Name for the set
+    name = models.CharField(max_length=255, unique=True)
+    # Description
+    description = models.CharField(max_length=2000, default='', blank=True)
+
+    studies = models.ManyToManyField(AssayStudy)
+    assays = models.ManyToManyField(AssayStudyAssay)
+
+    def get_post_submission_url(self):
+        return self.get_absolute_url()
+
+    def get_absolute_url(self):
+        return '/assays/assaystudyset/{}/'.format(self.id)
+
+    def __str__(self):
+        return self.name
+
+
+class AssayReference(FlaggableModel):
+    pubmed_id = models.CharField(verbose_name='PubMed ID', max_length=40, blank=True, default='N/A')
+    title = models.CharField(verbose_name='Title', max_length=2000, unique=True)
+    authors = models.CharField(verbose_name='Authors', max_length=2000)
+    abstract = models.CharField(verbose_name='Abstract', max_length=4000, blank=True, default='')
+    publication = models.CharField(verbose_name='Publication', max_length=255)
+    year = models.CharField(verbose_name='Year', max_length=4)
+    doi = models.CharField(verbose_name='DOI', max_length=100, blank=True, default='N/A')
+
+    # Somewhat odd
+    def get_metadata(self):
+        return {
+            'pubmed_id': self.pubmed_id,
+            'title': self.title,
+            'authors': self.authors,
+            'abstract': self.abstract,
+            'publication': self.publication,
+            'year': self.year,
+            'doi': self.doi,
+        }
+
+    def __str__(self):
+        return '{}. {}. {}. {}. doi:{}. PMID:{}'.format(self.authors, self.title, self.publication, self.year, self.doi, self.pubmed_id)
+
+    def get_post_submission_url(self):
+        return '/assays/references/'
+
+    def get_absolute_url(self):
+        return '/assays/references/{}/'.format(self.id)
+
+    def get_delete_url(self):
+        return '{}delete/'.format(self.get_absolute_url())
+
+
+class AssayStudyReference(models.Model):
+    class Meta(object):
+        unique_together = [
+            (
+                'reference',
+                'reference_for'
+            )
+        ]
+
+    reference = models.ForeignKey(AssayReference, on_delete=models.CASCADE)
+    reference_for = models.ForeignKey(AssayStudy, on_delete=models.CASCADE)
+
+
+# TODO TODO TODO
+class AssayStudySetReference(models.Model):
+    class Meta(object):
+        unique_together = [
+            (
+                'reference',
+                'reference_for'
+            )
+        ]
+
+    reference = models.ForeignKey(AssayReference, on_delete=models.CASCADE)
+    reference_for = models.ForeignKey(AssayStudySet, on_delete=models.CASCADE)
