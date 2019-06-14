@@ -3411,16 +3411,32 @@ def get_pubmed_reference_data(request):
 
     # Get Publication
     if soup.find_all("div", {"class": "cit"}):
-        data['publication'] = soup.select(".abstract > .cit > a")[0].get_text()
+        data['publication'] = soup.select(".cit > a")[0].get_text()
 
-    # Get DOI
+    # Get Year
+    if soup.find_all("div", {"class": "cit"}):
+        data['year'] = soup.select(".cit")[0].get_text().replace(data['publication'], '')[:5].strip()
+        # data['year'] = soup.select(".cit > span")[0].get_text()[0:5]
+
+    # Get PMID and DOI
     if soup.find_all("dl", {"class": "rprtid"}):
-        data['doi'] = soup.select(".rprtid dd a")[0].get_text()
+        pmid_doi_headers = soup.select(".rprtid dt")
+        pmid_doi_stuff = soup.select(".rprtid dd")
+        data['pubmed_id'] = ""
+        data['doi'] = "N/A"
+        for x in range(len(pmid_doi_headers)):
+            if pmid_doi_headers[x].get_text() == "PMID:":
+                data['pubmed_id'] = pmid_doi_stuff[x].get_text()
+            elif pmid_doi_headers[x].get_text() == "DOI:":
+                data['doi'] = pmid_doi_stuff[x].get_text()
     else:
-        data['doi'] = ""
+        data['pubmed_id'] = ""
+        data['doi'] = "N/A"
 
-    return HttpResponse(json.dumps(data),
-                        content_type="application/json")
+    return HttpResponse(
+        json.dumps(data),
+        content_type="application/json"
+    )
 
 
 # TODO TODO TODO
