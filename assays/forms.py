@@ -24,7 +24,11 @@ from assays.models import (
     AssayStudyStakeholder,
     AssayTarget,
     AssayMethod,
-    AssayStudyModel
+    AssayStudyModel,
+    AssayStudySet,
+    AssayReference,
+    AssayStudyReference,
+    AssayStudySetReference,
 )
 from compounds.models import Compound, CompoundInstance, CompoundSupplier
 from microdevices.models import (
@@ -43,7 +47,8 @@ from .utils import (
     # get_plate_details,
     TIME_CONVERSIONS,
     # EXCLUDED_DATA_POINT_CODE,
-    AssayFileProcessor
+    AssayFileProcessor,
+    get_user_accessible_studies,
 )
 from django.utils import timezone
 
@@ -422,7 +427,7 @@ class AssayStudyForm(SignOffMixin, BootstrapForm):
             'name': forms.Textarea(attrs={'rows': 1}),
             'description': forms.Textarea(attrs={'rows': 5, 'cols': 100}),
         }
-        exclude = tracking + restricted + ('access_groups', 'signed_off_notes', 'bulk_file')
+        exclude = tracking + restricted + ('access_groups', 'signed_off_notes', 'bulk_file', 'collaborator_groups')
 
     def clean(self):
         """Checks for at least one study type"""
@@ -463,6 +468,7 @@ class AssayStudyFormAdmin(BootstrapForm):
             groups_without_repeat.exclude(pk=self.instance.group.id)
 
         self.fields['access_groups'].queryset = groups_without_repeat
+        self.fields['collaborator_groups'].queryset = groups_without_repeat
 
     def clean(self):
         # clean the form data, before validation
@@ -1529,3 +1535,67 @@ class AssayStudyDataUploadForm(BootstrapForm):
                 self.cleaned_data['preview_data'] = file_processor.preview_data
 
         return self.cleaned_data
+
+
+class AssayStudySetForm(SignOffMixin, BootstrapForm):
+    class Meta(object):
+        model = AssayStudySet
+        exclude = tracking
+        widgets = {
+            'description': forms.Textarea(attrs={'rows': 10})
+        }
+
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request', None)
+
+        super(AssayStudySetForm, self).__init__(*args, **kwargs)
+
+        study_queryset = get_user_accessible_studies(
+            self.request.user
+        ).prefetch_related(
+            'group__microphysiologycenter_set',
+        )
+        assay_queryset = AssayStudyAssay.objects.filter(
+            study_id__in=study_queryset.values_list('id', flat=True)
+        ).prefetch_related(
+            'target',
+            'method',
+            'unit'
+        )
+
+        self.fields['studies'].queryset = study_queryset
+        self.fields['assays'].queryset = assay_queryset
+
+        # CONTRIVED
+        self.fields['studies'].widget.attrs['class'] = 'no-selectize'
+        self.fields['assays'].widget.attrs['class'] = 'no-selectize'
+
+
+class AssayReferenceForm(BootstrapForm):
+
+    query_term = forms.CharField(initial='', required=False)
+
+    class Meta(object):
+        model = AssayReference
+        exclude = tracking
+        widgets = {
+            'query_term': forms.Textarea(attrs={'rows': 1}),
+            'title': forms.Textarea(attrs={'rows': 2}),
+            'authors': forms.Textarea(attrs={'rows': 1}),
+            'abstract': forms.Textarea(attrs={'rows': 10}),
+            'publication': forms.Textarea(attrs={'rows': 1}),
+        }
+
+AssayStudyReferenceFormSetFactory = inlineformset_factory(
+    AssayStudy,
+    AssayStudyReference,
+    extra=1,
+    exclude=[]
+)
+
+AssayStudySetReferenceFormSetFactory = inlineformset_factory(
+    AssayStudySet,
+    AssayStudySetReference,
+    extra=1,
+    exclude=[]
+)

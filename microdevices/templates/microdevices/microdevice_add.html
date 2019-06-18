@@ -6,6 +6,7 @@
     <script src="{% static "js/enter_override.js" %}"></script>
     <script src="{% static "microdevices/layout.js" %}"></script>
     <script src="{% static "microdevices/microdevice_add.js" %}"></script>
+    <script src="{% static "assays/reference_selection.js" %}"></script>
 {% endblock %}
 
 {% block load_css %}
@@ -82,7 +83,8 @@
     </div>
 </div>
 
-{% include 'generic_field.html' with field=form.references label="References" %}
+{# DEPRECATED #}
+{# {% include 'generic_field.html' with field=form.references label="References" %} #}
 
 <legend>Dimensions</legend>
 
@@ -188,6 +190,10 @@
     </div>
 </div>
 
+<div id="layout_display"></div>
+
+{% include 'add_reference.html' %}
+
 {# These fields are deprecated #}
 {#<div class="form-group">#}
 {#    <label for="row_labels" class="col-sm-2 col-md-2 control-label">Row Labels</label>#}
@@ -200,8 +206,6 @@
 {#    </div>#}
 {#</div>#}
 </form>
-
-<div id="layout_display"></div>
 
 <br>
 {% endblock %}

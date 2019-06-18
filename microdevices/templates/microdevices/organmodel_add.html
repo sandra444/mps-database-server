@@ -17,6 +17,7 @@
     <script src="{% static "js/image_display.js" %}"></script>
     <script src="{% static "js/enter_override.js" %}"></script>
     <script src="{% static "microdevices/organmodel_add.js" %}"></script>
+    <script src="{% static "assays/reference_selection.js" %}"></script>
 {% endblock %}
 
 {% block content %}
@@ -112,7 +113,8 @@
         </div>
     </div>
 
-    {% include 'generic_field.html' with field=form.references label="References" %}
+    {# DEPRECATED #}
+    {# {% include 'generic_field.html' with field=form.references label="References" %} #}
 
     {{ location_formset.management_form }}
     <legend>Locations</legend>
@@ -142,7 +144,7 @@
     <table class="table table-striped inlines" id="{{ location_formset.prefix }}-group" name="locations">
         <thead>
             <tr>
-                <th>Sample Location*</th>
+                <th>Location*</th>
                 <th>Notes*</th>
                 <th>Delete</th>
             </tr>
@@ -217,5 +219,7 @@
             {% endfor %}
         </tbody>
     </table>
+
+    {% include 'add_reference.html' %}
     </form>
 {% endblock %}

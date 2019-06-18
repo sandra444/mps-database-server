@@ -36,7 +36,7 @@
             <a href="{{ object.get_images_url }}" class="btn btn-primary" role="button">Images</a>
             <a id="export_button" href="/assays/assaystudy/{{ object.id }}/data/" class="btn btn-info" role="button">Download Data</a>
             <label class="radio-inline">
-                <input type="checkbox" name="exportinclude_all" id="exportinclude_all" onclick="$('#include_all').prop('checked', $(this).prop('checked'));"/>
+                <input type="checkbox" name="export_include_all" id="export_include_all" />
                 <strong>Include Excluded Data</strong>
             </label>
         </div>
@@ -158,6 +158,10 @@
 {#    </div>#}
 
     {% include 'assays/group_table.html' %}
+
+    {% if object.assaystudyreference_set.count %}
+        {% include 'assays/reference_table.html' with references_set=object.assaystudyreference_set.all %}
+    {% endif %}
 
     {% if object.assaystudysupportingdata_set.count %}
         <legend>Supporting Data</legend>

@@ -42,7 +42,9 @@ from assays.models import (
     AssayImage,
     AssayImageSetting,
     AssaySetting,
-    AssaySubtarget
+    AssaySubtarget,
+    AssayReference,
+    AssayStudyReference
 )
 from microdevices.models import MicrophysiologyCenter
 # from compounds.models import Compound
@@ -771,6 +773,13 @@ class AssayStudyStakeholderInline(admin.TabularInline):
         return super(AssayStudyStakeholderInline, self).formfield_for_foreignkey(db_field, request, **kwargs)
 
 
+class AssayStudyReferenceInline(admin.TabularInline):
+    """Inline for Studies"""
+    model = AssayStudyReference
+    exclude = []
+    extra = 1
+
+
 # TODO REMAKE FOR ASSAY STUDY
 class AssayStudyAdmin(LockableAdmin):
     """Admin for Studies"""
@@ -791,12 +800,13 @@ class AssayStudyAdmin(LockableAdmin):
         'signed_off_date',
         'stakeholder_display',
         'access_group_display',
+        'collaborator_group_display',
         'restricted',
         'locked',
         # 'description',
     )
 
-    filter_horizontal = ('access_groups',)
+    filter_horizontal = ('access_groups', 'collaborator_groups')
 
     fieldsets = (
         (
@@ -833,18 +843,19 @@ class AssayStudyAdmin(LockableAdmin):
         (
             'Study Data Group and Access Group Info', {
                 'fields': (
-                    'group', 'restricted', 'access_groups'
+                    'group', 'restricted', 'access_groups', 'collaborator_groups'
                 ),
             },
         ),
     )
 
-    inlines = [AssayStudyStakeholderInline, AssayStudyAssayInline, AssayStudySupportingDataInline]
+    inlines = [AssayStudyStakeholderInline, AssayStudyAssayInline, AssayStudySupportingDataInline, AssayStudyReferenceInline]
 
     def get_queryset(self, request):
         qs = super(AssayStudyAdmin, self).get_queryset(request)
         qs = qs.prefetch_related(
             'access_groups',
+            'collaborator_groups',
             'assaystudystakeholder_set__group'
         )
         return qs
@@ -897,6 +908,26 @@ class AssayStudyAdmin(LockableAdmin):
         return '{0}<div hidden id="access_{1}">{2}</div>'.format(trigger, obj.pk, contents)
 
     access_group_display.allow_tags = True
+
+    @mark_safe
+    def collaborator_group_display(self, obj):
+        contents = ''
+        trigger = ''
+        queryset = obj.collaborator_groups.all()
+        count = queryset.count()
+
+        if count:
+            contents = '<br>'.join(
+                [
+                    group.name for group in queryset.order_by('name')
+                ]
+            )
+            trigger = '<a href="javascript:void(0)" onclick=$("#collaborator_{0}").toggle()>Show/Hide Collaborator Groups ({1})</a>'.format(
+                obj.pk, count
+            )
+        return '{0}<div hidden id="collaborator_{1}">{2}</div>'.format(trigger, obj.pk, contents)
+
+    collaborator_group_display.allow_tags = True
 
     # save_related takes the place of save_model so that the inline can be referred to
     # TODO TODO TODO THIS IS NOT VERY DRY
@@ -1347,3 +1378,10 @@ class AssaySubtargetAdmin(ImportExportModelAdmin):
     search_fields = ('name', 'description')
 
 admin.site.register(AssaySubtarget, AssaySubtargetAdmin)
+
+
+class AssayReferenceAdmin(ImportExportModelAdmin):
+    model = AssayReference
+    search_fields = ('pubmed_id', 'title', 'authors')
+
+admin.site.register(AssayReference, AssayReferenceAdmin)

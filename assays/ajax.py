@@ -18,6 +18,7 @@ from .models import (
     AssayChipReadoutAssay,
     AssayPlateReadoutAssay,
     AssaySetupCompound,
+    AssayStudySet,
     DEFAULT_SETUP_CRITERIA,
     DEFAULT_SETTING_CRITERIA,
     DEFAULT_COMPOUND_CRITERIA,
@@ -73,6 +74,8 @@ import numpy as np
 from scipy.stats.mstats import gmean
 from scipy.stats import iqr
 
+from bs4 import BeautifulSoup
+import requests
 import re
 
 import logging
@@ -91,15 +94,20 @@ CONTROL_LABEL = '-Control-'
 # Variable to indicate that these should be split for special filters
 COMBINED_VALUE_DELIMITER = '~@|'
 
+
 # Note manipulations for sorting
-# Somewhat contrived
-# THESE SHOULD BE DEFINED, NOT LAMBDA FUNCTIONS
-convert = lambda text: int(text) if text.isdigit() else text.lower()
-alphanum_key = lambda key: [
-    convert(
-        c.replace('     ~@I1', '!').replace('     ~@I2', '"').replace('     ~@S', '"')
-    ) for c in re.split('([0-9]+)', key)
-]
+def atof(text):
+    try:
+        retval = float(text)
+    except ValueError:
+        retval = text
+    return retval
+
+
+def alphanum_key(text):
+    return [
+        atof(c.replace('     ~@i1', '!').replace('     ~@i2', '"').replace('     ~@s', '"')) for c in re.split(r'[+-]?([0-9]+(?:[.][0-9]*)?|[.][0-9]+)', text)
+    ]
 
 alphanum_key_for_item_groups = lambda pair: re.split('([0-9]+)', pair[0])
 
@@ -592,7 +600,8 @@ def get_control_data(
         include_all,
         truncate_negative,
         new_data_for_control=None,
-        normalize_units=False
+        normalize_units=False,
+        group_sample_location=True
 ):
     """Gets control data for performing percent control calculations
 
@@ -636,6 +645,9 @@ def get_control_data(
         method = study_assay.method.name
 
         sample_location = raw.sample_location.name
+
+        if not group_sample_location:
+            sample_location = ''
 
         # chip_id = raw.assay_chip_id.chip_setup.assay_chip_id
 
@@ -818,45 +830,6 @@ def get_item_groups(study, criteria, matrix_items=None):
     return (sorted_treatment_groups, setup_to_treatment_group, header_keys)
 
 
-# TODO PROTOTYPE ONLY
-# def get_paired_id_and_name(field):
-#     return '\n'.join((field.name, unicode(field.id)))
-#
-#
-# def get_data_for_heatmap(raw_data):
-#     data = {
-#         'matrices': {},
-#         'values': {}
-#     }
-#
-#     # Nesting like this is a serious violation of style
-#     for raw in raw_data:
-#         data.get('values').setdefault(
-#             get_paired_id_and_name(raw.matrix_item.matrix), {}
-#         ).setdefault(
-#             get_paired_id_and_name(raw.study_assay.target), {}
-#         ).setdefault(
-#             get_paired_id_and_name(raw.study_assay.method), {}
-#         ).setdefault(
-#             # Dumb exception
-#             '\n'.join((raw.study_assay.unit.unit, unicode(raw.study_assay.unit.id))), {}
-#         ).setdefault(
-#             get_paired_id_and_name(raw.sample_location), {}
-#         ).setdefault(
-#             get_paired_id_and_name(raw.subtarget), {}
-#         ).setdefault(
-#             '\n'.join((raw.get_time_string(), unicode(raw.time))), {}
-#         ).setdefault(
-#             '_'.join([unicode(raw.matrix_item.row_index), unicode(raw.matrix_item.column_index)]), []
-#         ).append(raw.value)
-#
-#         data.get('matrices').setdefault(
-#             get_paired_id_and_name(raw.matrix_item.matrix), [[''] * raw.matrix_item.matrix.number_of_columns for _ in range(raw.matrix_item.matrix.number_of_rows)]
-#         )[raw.matrix_item.row_index][raw.matrix_item.column_index] = raw.matrix_item.name
-#
-#     return data
-
-
 # TODO TODO TODO MAKE SURE STUDY NO LONGER REQUIRED
 # TODO TODO TODO  CLEAN UP
 # TODO WHY ARE THERE SO MANY PARAMS??
@@ -918,25 +891,6 @@ def get_data_points_for_charting(
 
     initial_data = {}
 
-    controls = {}
-    if percent_control:
-        new_data_for_control = None
-        if new_data:
-            new_data_for_control = raw_data
-
-        controls = get_control_data(
-            study,
-            # key,
-            mean_type,
-            include_all,
-            truncate_negative,
-            new_data_for_control=new_data_for_control,
-            normalize_units=normalize_units
-        )
-
-        if controls.get('errors' , ''):
-            return controls
-
     averaged_data = {}
 
     all_keys = {}
@@ -955,6 +909,26 @@ def get_data_points_for_charting(
         group_sample_location = 'sample_location' in criteria.get('special', [])
         group_method = 'method' in criteria.get('special', [])
         group_time = 'time' in criteria.get('special', [])
+
+    controls = {}
+    if percent_control:
+        new_data_for_control = None
+        if new_data:
+            new_data_for_control = raw_data
+
+        controls = get_control_data(
+            study,
+            # key,
+            mean_type,
+            include_all,
+            truncate_negative,
+            new_data_for_control=new_data_for_control,
+            normalize_units=normalize_units,
+            group_sample_location=group_sample_location
+        )
+
+        if controls.get('errors', ''):
+            return controls
 
     # Append the additional_data as necessary
     # Why is this done? It is an expedient way to avoid duplicating data
@@ -1141,6 +1115,9 @@ def get_data_points_for_charting(
                 if all_keys.setdefault(matrix_item_name, matrix_item_id) != matrix_item_id:
                     key_discrimination.update({matrix_item_name: True})
 
+            if not group_sample_location:
+                sample_location = ''
+
             # Set data in nested monstrosity that is initial_data
             initial_data.setdefault(
                 target, {}
@@ -1207,9 +1184,17 @@ def get_data_points_for_charting(
                                 study_id
                             )
 
-                            averaged_data.setdefault(target, {}).setdefault(unit, {}).setdefault(tag, {}).setdefault(sample_location, {}).update({
-                                time: average_interval_study_id
-                            })
+                            averaged_data.setdefault(
+                                target, {}
+                            ).setdefault(
+                                unit, {}
+                            ).setdefault(
+                                tag, {}
+                            ).setdefault(
+                                sample_location, {}
+                            ).setdefault(
+                                time, []
+                            ).append(average_interval_study_id)
 
     accommodate_sample_location = group_sample_location and len(all_sample_locations) > 1
 
@@ -1261,79 +1246,103 @@ def get_data_points_for_charting(
 
                     # all_keys.update({current_key: True})
 
-                    for time, value_interval_study_id in list(time_values.items()):
-                        value = value_interval_study_id[0]
-                        interval = value_interval_study_id[1]
-                        study_id = value_interval_study_id[2]
+                    all_values = {}
+                    all_intervals = {}
 
+                    for time_concentration, current_values in time_values.items():
+                        for value_interval_study_id in current_values:
+                            value = value_interval_study_id[0]
+                            interval = value_interval_study_id[1]
+                            study_id = value_interval_study_id[2]
+
+                            # UGLY NOT DRY
+                            # Contrived combination of time and concentration only for dose-response
+                            if key == 'dose':
+                                concentration = time_concentration[0]
+                                time = time_concentration[1]
+
+                                if not percent_control:
+                                    all_values.setdefault(concentration, []).append(value)
+                                    all_intervals.update({concentration: interval})
+
+                                elif controls.get((study_id, target, unit, sample_location, time), False):
+                                    control_value = controls.get((study_id, target, unit, sample_location, time))
+
+                                    # We can not divide by zero
+                                    if control_value == 0:
+                                        return {
+                                            'errors': 'Could not calculate percent control because some control values are zero (divide by zero error).'
+                                        }
+
+                                    adjusted_value = (value / control_value) * 100
+                                    adjusted_interval = (interval / control_value) * 100
+
+                                    all_values.setdefault(concentration, []).append(adjusted_value)
+                                    all_intervals.update({concentration: adjusted_interval})
+
+                            else:
+                                time = time_concentration
+
+                                if not percent_control:
+                                    all_values.setdefault(time, []).append(value)
+                                    all_intervals.update({time: interval})
+
+                                elif controls.get((study_id, target, unit, sample_location, time), False):
+                                    control_value = controls.get((study_id, target, unit, sample_location, time))
+
+                                    # We can not divide by zero
+                                    if control_value == 0:
+                                        return {'errors': 'Could not calculate percent control because some control values are zero (divide by zero error).'}
+
+                                    adjusted_value = (value / control_value) * 100
+                                    adjusted_interval = (interval / control_value) * 100
+
+                                    all_values.setdefault(time, []).append(adjusted_value)
+                                    all_intervals.update({time: adjusted_interval})
+
+                    for time, values in all_values.items():
+                        if len(values) > 1:
+                            # If geometric mean
+                            if mean_type == 'geometric':
+                                # Geometric mean will sometimes fail (due to zero values and so on)
+                                average = gmean(values)
+                                if np.isnan(average):
+                                    return {'errors': 'Geometric mean could not be calculated (probably due to negative values), please use an arithmetic mean instead.'}
+                            # Median
+                            elif mean_type == 'median':
+                                average = np.median(values)
+                            # If arithmetic mean
+                            else:
+                                average = np.mean(values)
+
+                            # If standard deviation
+                            # NOTE: ONLY STANDARD DEVIATION IS AFFECTED BY number_for_interval
+                            if interval_type == 'std':
+                                interval = np.std(values) * number_for_interval
+                            # IQR
+                            elif interval_type == 'iqr':
+                                # NOTE THAT THIS IS NOT MULTIPLIED BY number_for_interval
+                                interval = iqr(values)
+                            # Standard error if not std
+                            else:
+                                interval = np.std(values) / len(values) ** 0.5
+
+                        else:
+                            average = values[0]
+                            interval = all_intervals[time]
+
+                        current_data.setdefault(current_key, {}).update({time: average})
                         if interval != 0:
                             accommodate_intervals = True
-
-                        # UGLY NOT DRY
-                        # Contrived combination of time and concentration only for dose-response
-                        if key == 'dose':
-                            concentration = time[0]
-                            time = time[1]
-
-                            if not percent_control:
-                                current_data.setdefault(current_key, {}).update({concentration: value})
-                                current_data.setdefault('{}{}'.format(current_key,  '     ~@i1'), {}).update({concentration: value - interval})
-                                current_data.setdefault('{}{}'.format(current_key, '     ~@i2'), {}).update({concentration: value + interval})
-                                y_header.update({concentration: True})
-                                include_current = True
-
-                            elif controls.get((study_id, target, unit, sample_location, time), False):
-                                control_value = controls.get((study_id, target, unit, sample_location, time))
-
-                                # We can not divide by zero
-                                if control_value == 0:
-                                    return {
-                                        'errors': 'Could not calculate percent control because some control values are zero (divide by zero error).'}
-
-                                adjusted_value = (value / control_value) * 100
-                                adjusted_interval = (interval / control_value) * 100
-
-                                current_data.setdefault(current_key, {}).update({concentration: adjusted_value})
-                                current_data.setdefault('{}{}'.format(current_key , '     ~@i1'), {}).update(
-                                    {concentration: adjusted_value - adjusted_interval})
-                                current_data.setdefault('{}{}'.format(current_key, '     ~@i2'), {}).update(
-                                    {concentration: adjusted_value + adjusted_interval})
-                                y_header.update({concentration: True})
-                                include_current = True
-                        else:
-                            if not percent_control:
-                                current_data.setdefault(current_key, {}).update({time: value})
-                                current_data.setdefault('{}     ~@i1'.format(current_key), {}).update({time: value - interval})
-                                current_data.setdefault('{}     ~@i2'.format(current_key), {}).update({time: value + interval})
-                                y_header.update({time: True})
-                                include_current = True
-
-                            elif controls.get((study_id, target, unit, sample_location, time), False):
-                                control_value = controls.get((study_id, target, unit, sample_location, time))
-
-                                # We can not divide by zero
-                                if control_value == 0:
-                                    return {'errors': 'Could not calculate percent control because some control values are zero (divide by zero error).'}
-
-                                adjusted_value = (value / control_value) * 100
-                                adjusted_interval = (interval / control_value) * 100
-
-                                current_data.setdefault(current_key, {}).update({time: adjusted_value})
-                                current_data.setdefault('{}     ~@i1'.format(current_key), {}).update({time: adjusted_value - adjusted_interval})
-                                current_data.setdefault('{}     ~@i2'.format(current_key), {}).update({time: adjusted_value + adjusted_interval})
-                                y_header.update({time: True})
-                                include_current = True
+                            current_data.setdefault(current_key+'     ~@i1', {}).update({time: average - interval})
+                            current_data.setdefault(current_key+'     ~@i2', {}).update({time: average + interval})
+                        y_header.update({time: True})
+                        include_current = True
 
                     key_present = current_key in x_header
 
                     if include_current and not key_present:
                         x_header.append(current_key)
-                    # To include all
-                    # x_header.append(current_key)
-                    # x_header.extend([
-                    #     current_key + '     ~@i1',
-                    #     current_key + '     ~@i2'
-                    # ])
 
                     # Only include intervals if necessary
                     if accommodate_intervals and include_current and not key_present:
@@ -1345,14 +1354,6 @@ def get_data_points_for_charting(
                         if '{}{}'.format(current_key, '     ~@i1') in current_data:
                             del current_data['{}{}'.format(current_key, '     ~@i1')]
                             del current_data['{}{}'.format(current_key, '     ~@i2')]
-
-            # for current_key in all_keys:
-            #     if current_key not in x_header:
-            #         x_header.extend([
-            #             current_key,
-            #             current_key + '     ~@i1',
-            #             current_key + '     ~@i2'
-            #         ])
 
             x_header.sort(key=alphanum_key)
             current_table[0].extend(x_header)
@@ -1861,7 +1862,10 @@ def fetch_assay_study_reproducibility(request):
     data['data_group_to_sample_locations'] = final_data_group_to_sample_locations
     data['data_group_to_organ_models'] = final_data_group_to_organ_models
 
-    data['header_keys'] = data_header_keys
+    data['header_keys'] = {
+        'treatment': treatment_header_keys,
+        'data': data_header_keys
+    }
 
     data['treatment_groups'] = treatment_group_representatives
 
@@ -2726,6 +2730,105 @@ def fetch_data_points_from_filters(request):
         return HttpResponseServerError()
 
 
+def fetch_data_points_from_study_set(request):
+    intention = request.POST.get('intention', 'charting')
+
+    post_filter = json.loads(request.POST.get('post_filter', '{}'))
+
+    study_set_id = int(request.POST.get('study_set_id', 0))
+
+    current_study_set = AssayStudySet.objects.filter(id=study_set_id)
+
+    if current_study_set:
+        current_study_set = current_study_set[0]
+
+        accessible_studies = get_user_accessible_studies(request.user)
+
+        studies = accessible_studies.filter(id__in=current_study_set.studies.all())
+
+        assays = current_study_set.assays.filter(study_id__in=studies)
+
+        matrix_items = AssayMatrixItem.objects.filter(study_id__in=studies)
+
+        # Not particularly DRY
+        data_points = AssayDataPoint.objects.filter(
+            matrix_item_id__in=matrix_items,
+            study_assay_id__in=assays
+        ).prefetch_related(
+            # TODO
+            'study__group',
+            'study_assay__target',
+            'study_assay__method',
+            'study_assay__unit__base_unit',
+            'sample_location',
+            'matrix_item__matrix',
+            'matrix_item__organ_model',
+            'subtarget'
+        ).filter(
+            replaced=False,
+            excluded=False,
+            value__isnull=False
+        )
+
+        if not post_filter:
+            assays = assays.prefetch_related(
+                'target',
+                'method'
+            )
+
+            post_filter = acquire_post_filter(studies, assays, matrix_items, data_points)
+        else:
+            studies, assays, matrix_items, data_points = apply_post_filter(
+                post_filter, studies, assays, matrix_items, data_points
+            )
+
+        if intention == 'charting':
+            data = get_data_points_for_charting(
+                data_points,
+                request.POST.get('key', ''),
+                request.POST.get('mean_type', ''),
+                request.POST.get('interval_type', ''),
+                request.POST.get('number_for_interval', ''),
+                request.POST.get('percent_control', ''),
+                request.POST.get('include_all', ''),
+                request.POST.get('truncate_negative', ''),
+                json.loads(request.POST.get('dynamic_excluded', '{}')),
+                study=studies,
+                matrix_item=None,
+                matrix_items=matrix_items,
+                criteria=json.loads(request.POST.get('criteria', '{}')),
+                post_filter=post_filter
+            )
+
+            data.update({'post_filter': post_filter})
+
+            return HttpResponse(json.dumps(data),
+                                content_type="application/json")
+        elif intention == 'inter_repro':
+            criteria = json.loads(request.POST.get('criteria', '{}'))
+            inter_level = int(request.POST.get('inter_level', 1))
+            max_interpolation_size = int(request.POST.get('max_interpolation_size', 2))
+            initial_norm = int(request.POST.get('initial_norm', 0))
+
+            data = get_inter_study_reproducibility(
+                data_points,
+                matrix_items,
+                inter_level,
+                max_interpolation_size,
+                initial_norm,
+                criteria
+            )
+
+            data.update({'post_filter': post_filter})
+
+            return HttpResponse(json.dumps(data),
+                                content_type="application/json")
+        else:
+            return HttpResponseServerError()
+    else:
+        return HttpResponseServerError()
+
+
 def get_inter_study_reproducibility(
         data_points,
         matrix_items,
@@ -2924,8 +3027,8 @@ def get_inter_study_reproducibility(
             point.time / 1440.0, []
         ).append(point.standard_value)
 
-    for set, chart_groups in list(initial_chart_data.items()):
-        current_set = final_chart_data.setdefault(set, {})
+    for this_set, chart_groups in list(initial_chart_data.items()):
+        current_set = final_chart_data.setdefault(this_set, {})
         for chart_group, legends in list(chart_groups.items()):
             current_data = {}
             current_table = current_set.setdefault(chart_group, [['Time']])
@@ -3051,7 +3154,7 @@ def get_inter_study_reproducibility(
                 'best': row
             })
 
-    for set, current_dic in list(results_rows_full.items()):
+    for this_set, current_dic in list(results_rows_full.items()):
         current_best = current_dic.get('best')
 
         # If the current best has no ICC, try CV
@@ -3065,7 +3168,7 @@ def get_inter_study_reproducibility(
                         'best': row
                     })
 
-    for set, current_dic in list(results_rows_full.items()):
+    for this_set, current_dic in list(results_rows_full.items()):
         current_best = current_dic.get('best')
 
         if current_best[8]:
@@ -3113,8 +3216,8 @@ def get_inter_study_reproducibility(
             row[0] / 1440.0, (row[2], shape)
         )
 
-    for set, chart_groups in list(inter_chart_data.items()):
-        current_set = final_chart_data.setdefault(set, {})
+    for this_set, chart_groups in list(inter_chart_data.items()):
+        current_set = final_chart_data.setdefault(this_set, {})
         for chart_group, legends in list(chart_groups.items()):
             current_data = {}
             current_table = current_set.setdefault(chart_group, [['Time']])
@@ -3124,7 +3227,7 @@ def get_inter_study_reproducibility(
                 # Get the median
                 current_median = np.median([
                     np.median(x) for x in list(initial_chart_data.get(
-                        set
+                        this_set
                     ).get(
                         'average'
                     ).get(
@@ -3148,7 +3251,7 @@ def get_inter_study_reproducibility(
                         y_header.update({time: True})
                     else:
                         values = initial_chart_data.get(
-                            set
+                            this_set
                         ).get(
                             'average'
                         ).get(
@@ -3610,6 +3713,67 @@ def fetch_power_analysis_results(request):
 
     return HttpResponse(json.dumps(data), content_type='application/json')
 
+def get_pubmed_reference_data(request):
+    """Returns a dictionary of PubMed data given a PubMed ID"""
+    data = {}
+    term = None
+    if request.POST.get('term', ''):
+        term = request.POST.get('term')
+    # Get URL of target for scrape
+    url = 'https://www.ncbi.nlm.nih.gov/pubmed/?term={}'.format(term)
+    # Make the http request
+    response = requests.get(url)
+    # Get the webpage as text
+    stuff = response.text
+    # Make a BeatifulSoup object
+    soup = BeautifulSoup(stuff, 'html5lib')
+
+    # Get Title
+    if soup.find_all("div", {"class": "abstract"}):
+        data['title'] = soup.select(".abstract > h1")[0].get_text()
+
+    # Get Authors
+    if soup.find_all("div", {"class": "auths"}):
+        data['authors'] = ", ".join([x.get_text() for x in soup.select(".abstract > .auths > a")])
+
+    # Get Abstract
+    if soup.find_all("div", {"class": "abstr"}):
+        if soup.find_all("div", {"class": "abstr_eng"}):
+            data['abstract'] = soup.select(".abstract > .abstr > .abstr_eng")[0].get_text()
+        else:
+            data['abstract'] = soup.select(".abstract > .abstr")[0].get_text()[8:]
+    else:
+        data['abstract'] = 'None'
+
+    # Get Publication
+    if soup.find_all("div", {"class": "cit"}):
+        data['publication'] = soup.select(".cit > a")[0].get_text()
+
+    # Get Year
+    if soup.find_all("div", {"class": "cit"}):
+        data['year'] = soup.select(".cit")[0].get_text().replace(data['publication'], '')[:5].strip()
+        # data['year'] = soup.select(".cit > span")[0].get_text()[0:5]
+
+    # Get PMID and DOI
+    if soup.find_all("dl", {"class": "rprtid"}):
+        pmid_doi_headers = soup.select(".rprtid dt")
+        pmid_doi_stuff = soup.select(".rprtid dd")
+        data['pubmed_id'] = ""
+        data['doi'] = "N/A"
+        for x in range(len(pmid_doi_headers)):
+            if pmid_doi_headers[x].get_text() == "PMID:":
+                data['pubmed_id'] = pmid_doi_stuff[x].get_text()
+            elif pmid_doi_headers[x].get_text() == "DOI:":
+                data['doi'] = pmid_doi_stuff[x].get_text()
+    else:
+        data['pubmed_id'] = ""
+        data['doi'] = "N/A"
+
+    return HttpResponse(
+        json.dumps(data),
+        content_type="application/json"
+    )
+
 # TODO TODO TODO
 switch = {
     'fetch_center_id': {'call': fetch_center_id},
@@ -3651,7 +3815,13 @@ switch = {
     },
     'fetch_power_analysis_results': {
         'call': fetch_power_analysis_results
-    }
+    },
+    'fetch_data_points_from_study_set': {
+        'call': fetch_data_points_from_study_set
+    },
+    'get_pubmed_reference_data': {
+        'call': get_pubmed_reference_data
+    },
 }
 
 

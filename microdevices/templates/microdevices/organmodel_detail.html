@@ -123,24 +123,29 @@
                 </td>
             </tr>
             {% endif %}
+            {% if object.organmodelreference_set.count %}
             <tr>
                 <td>
                     <b>References</b>
                 </td>
                 <td>
-                    {{ object.references|linebreaksbr }}
+                    {% for reference in object.organmodelreference_set.all %}
+                        <a href="/assays/references/{{ reference.reference.id }}" target="_blank">{{ reference.reference }}</a><br>
+                    {% endfor %}
+                    {#{{ object.references|linebreaksbr|default:'-No References Listed-' }}#}
                 </td>
             </tr>
+            {% endif %}
         </tbody>
     </table>
 
     {% if object.organmodellocation_set.count %}
-    <legend>Sample Locations</legend>
+    <legend>Locations</legend>
 
     <table class="table table-striped table-bordered table-nonfluid" style="background-color: #E8CAAF;">
         <thead>
             <tr>
-                <th>Sample Location</th>
+                <th>Location</th>
                 <th>Description</th>
             </tr>
         </thead>

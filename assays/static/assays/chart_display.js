@@ -9,6 +9,7 @@ window.CHARTS = {
     study_id: '',
     matrix_id: '',
     matrix_item_id: '',
+    study_set_id: '',
     filter: '{}',
     call: '',
     global_options: {}
@@ -486,6 +487,8 @@ $(document).ready(function () {
             // TODO MATRIX AND MATRIX ITEM
             matrix: window.CHARTS.matrix_id,
             matrix_item: window.CHARTS.matrix_item_id,
+            // TRICKY: STUDY SET
+            study_set_id: window.CHARTS.study_set_id,
             criteria: JSON.stringify(window.GROUPING.group_criteria),
             post_filter: JSON.stringify(individual_post_filter),
             csrfmiddlewaretoken: window.COOKIES.csrfmiddlewaretoken
@@ -1115,7 +1118,12 @@ $(document).ready(function () {
             // Try to get a more reasonable size for cells
             columnDefs: [
                 // Treat the group column as if it were just the number
-                { "type": "brute-numeric", "targets": 0, "width": "10%" }
+                { "type": "brute-numeric", "targets": 0, "width": "10%" },
+                // Chips/wells reduced width to 25%
+                {
+                    width: '25%',
+                    targets: [-1]
+                }
             ]
         });
 

@@ -689,29 +689,32 @@ $(document).ready(function () {
         window.GROUPING.refresh_wrapper();
     });
 
-    $(window).resize(function() {
-        if ($(window).width() > 768) {
-             $('#page').addClass('pushed');
-             $('#sidebar').addClass('active');
-        }
-        else {
-            $('#page').removeClass('pushed');
-            $('#sidebar').removeClass('active');
-        }
+    // $(window).resize(function() {
+        // if ($(window).width() > 768) {
+        //      $('#page').addClass('pushed');
+        //      $('#sidebar').addClass('active');
+        // }
+        // else {
+        //     $('#page').removeClass('pushed');
+        //     $('#sidebar').removeClass('active');
+        // }
 
         // Adjust datatables
-        setTimeout(function() {
-            $($.fn.dataTable.tables(true)).DataTable().columns.adjust();
-        }, 250);
-    });
+    //     setTimeout(function() {
+    //         $($.fn.dataTable.tables(true)).DataTable().columns.adjust();
+    //     }, 250);
+    // });
 
-    if($(window).width() > 768) {
+    if ($(window).width() > 768) {
         $('#page').addClass('pushed');
         $('#sidebar').addClass('active');
 
         setTimeout(function() {
             $($.fn.dataTable.tables(true)).DataTable().columns.adjust();
         }, 250);
+    }
+    else {
+        $('#autocollapse').width($(window).width());
     }
 
     // ON LOAD, PROCESS THE GET PARAMS AND APPLY TO ALL SUBMIT BUTTONS
