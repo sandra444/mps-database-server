@@ -3277,7 +3277,6 @@ def study_editor_validation(request):
 
 
 def fetch_power_analysis_group_table(request):
-    print("STARTED")
     study = get_object_or_404(AssayStudy, pk=int(request.POST.get('study', '')))
     # Contrived!
     studies = AssayStudy.objects.filter(id=study.id)
@@ -3324,7 +3323,7 @@ def fetch_power_analysis_group_table(request):
         studies, assays, matrix_items, data_points = apply_post_filter(
             post_filter, studies, assays, matrix_items, data_points
         )
-    print("PREFETCH DONE")
+
     # OLD
     # repro_data = get_repro_data(chip_data)
     # Organization is assay -> unit -> compound/tag -> field -> time -> value
@@ -3340,6 +3339,7 @@ def fetch_power_analysis_group_table(request):
     data_group_to_sample_locations = {}
     data_group_to_organ_models = {}
     compound_table_data = {}
+    compound_avg_val_data = {}
 
     power_analysis_input = []
 
@@ -3366,7 +3366,7 @@ def fetch_power_analysis_group_table(request):
     )
 
     additional_keys = []
-    print("TUPLES & DICTS")
+
     # CRUDE
     if criteria:
         group_sample_location = 'sample_location' in criteria.get('special', [])
@@ -3395,15 +3395,18 @@ def fetch_power_analysis_group_table(request):
     data_point_attribute_getter_base_values = tuple_attrgetter(*base_value_tuple)
     data_point_attribute_getter_current_values = tuple_attrgetter(*current_value_tuple)
 
-    print("STARTING FOR LOOP")
+    initial_chart_data = {}
+    final_chart_data = {}
+
+    pass_to_power_analysis_dict = {}
+
+    matrix_id_to_stringified_compounds = {}
+    for matrix_item in matrix_items:
+        matrix_id_to_stringified_compounds[matrix_item.id] = matrix_item.stringify_compounds();
+
     for point in data_points:
-        point.standard_value = point.value
         item_id = point.matrix_item_id
-        if point.study_assay.unit.base_unit_id:
-            data_point_tuple = data_point_attribute_getter_base(point)
-            point.standard_value *= point.study_assay.unit.scale_factor
-        else:
-            data_point_tuple = data_point_attribute_getter_current(point)
+        data_point_tuple = data_point_attribute_getter_current(point)
         current_group = data_point_treatment_groups.setdefault(
             (
                 data_point_tuple,
@@ -3425,22 +3428,21 @@ def fetch_power_analysis_group_table(request):
                         data_point_attribute_getter_current_values(point)
                     ) + [setup_to_treatment_group.get(item_id).get('index')]]
                 })
+
         compound_table_key = current_group
+        current_time = point.time
         if compound_table_key not in compound_table_data:
             compound_table_data[compound_table_key] = {}
-        compound_table_current_compounds = point.matrix_item.stringify_compounds()
+        compound_table_current_compounds = matrix_id_to_stringified_compounds[point.matrix_item.id]
         if compound_table_current_compounds not in compound_table_data[compound_table_key]:
             compound_table_data[compound_table_key][compound_table_current_compounds] = {
                 'chips': [],
                 'time-points': [],
-                # 'compounds': []
             }
         if point.matrix_item.name not in compound_table_data[compound_table_key][compound_table_current_compounds]['chips']:
             compound_table_data[compound_table_key][compound_table_current_compounds]['chips'].append(point.matrix_item.name)
-        if point.time not in compound_table_data[compound_table_key][compound_table_current_compounds]['time-points']:
-            compound_table_data[compound_table_key][compound_table_current_compounds]['time-points'].append(point.time)
-        # if point.matrix_item.stringify_compounds() not in compound_table_data[compound_table_key]['compounds']:
-        #     compound_table_data[compound_table_key]['compounds'].append(point.matrix_item.stringify_compounds())
+        if current_time not in compound_table_data[compound_table_key][compound_table_current_compounds]['time-points']:
+            compound_table_data[compound_table_key][compound_table_current_compounds]['time-points'].append(current_time)
 
         data_group_to_studies.setdefault(
             current_group, {}
@@ -3459,16 +3461,101 @@ def fetch_power_analysis_group_table(request):
         ).update({
             point.matrix_item.organ_model.name: True
         })
-    print("DONE WITH FOR 1, STARTING FOR 2")
+
+        power_analysis_input.append([
+            point.data_group,
+            current_time,
+            (matrix_id_to_stringified_compounds[point.matrix_item.id]).split('\n')[0],
+            point.matrix_item.name,
+            point.value
+        ])
+
+        if current_group not in compound_avg_val_data:
+            compound_avg_val_data[current_group] = {'times':[]}
+        if compound_table_current_compounds not in compound_avg_val_data[current_group]:
+            compound_avg_val_data[current_group][compound_table_current_compounds] = {}
+        if current_time not in compound_avg_val_data[current_group]['times']:
+            compound_avg_val_data[current_group]['times'].append(current_time)
+        if current_time not in compound_avg_val_data[current_group][compound_table_current_compounds]:
+            compound_avg_val_data[current_group][compound_table_current_compounds][current_time] = point.value
+
+        # TODO BAD NOT DRY
+        # CHARTING STUFF
+        initial_chart_data.setdefault(
+            point.data_group, {}
+        ).setdefault(
+            compound_table_current_compounds, {}
+        ).setdefault(
+            # NOTE CONVERT TO DAYS
+            point.time / 1440.0, []
+        ).append(point.value)
+
+        pass_to_power_analysis_dict.setdefault(point.data_group, {}).setdefault(compound_table_current_compounds, []).append([point.data_group, point.time, compound_table_current_compounds, point.matrix_item.name, point.value])
+
+    # TODO BAD NOT DRY
+    for chart_group, legends in list(initial_chart_data.items()):
+        current_data = {}
+        current_table = final_chart_data.setdefault(chart_group, [['Time']])
+        x_header = {}
+        y_header = {}
+        for legend, times in list(legends.items()):
+            x_header.update({
+                legend: True,
+            })
+
+            x_header.update({
+                legend: True,
+                # This is to deal with intervals
+                '{}{}'.format(legend, '     ~@i1'): True,
+                '{}{}'.format(legend, '     ~@i2'): True,
+            })
+
+            for time, values in list(times.items()):
+                if len(values) > 1:
+                    # TODO TODO TODO ONLY ARITHMETIC MEAN RIGHT NOW
+                    value = np.mean(values)
+                    std = np.std(values)
+                    current_data.setdefault(legend, {}).update({time: value})
+                    current_data.setdefault('{}{}'.format(legend, '     ~@i1'), {}).update({time: value - std})
+                    current_data.setdefault('{}{}'.format(legend, '     ~@i2'), {}).update({time: value + std})
+                else:
+                    current_data.setdefault(legend, {}).update({time: values[0]})
+                y_header.update({time: True})
+
+        x_header_keys = list(x_header.keys())
+        x_header_keys.sort(key=alphanum_key)
+        current_table[0].extend(x_header_keys)
+
+        # if chart_group == 'average':
+        #     current_table[0].extend(x_header_keys)
+        # else:
+        #     current_table[0].extend([x.split('    ~@x')[0] for x in x_header_keys])
+
+        x_header = {x_header_keys[index]: index + 1 for index in range(len(x_header_keys))}
+
+        y_header = list(y_header.keys())
+        y_header.sort(key=lambda x: float(str(x).split('~')[0]))
+        # y_header.sort(key=float)
+
+        for y in y_header:
+            current_table.append([float(str(y).split('~')[0])] + [None] * (len(x_header)))
+            # current_table.append([y] + [None] * (len(x_header)))
+
+        y_header = {y_header[index]: index + 1 for index in range(len(y_header))}
+
+        for x, data_point in list(current_data.items()):
+            for y, value in list(data_point.items()):
+                current_table[y_header.get(y)][x_header.get(x)] = value
+
     for x in compound_table_data:
         temp = []
         for y in compound_table_data[x]:
             temp.append([y, len(compound_table_data[x][y]['chips']), len(compound_table_data[x][y]['time-points'])])
         compound_table_data[x] = temp
-    print("DONE WITH COMPOUND TABLE")
+
     data['compound_table_data'] = compound_table_data
 
-    power_analysis_input.append([
+    power_analysis_input.insert(0, [
         'Group',
         'Time',
         'Compound Treatment(s)',
@@ -3498,26 +3585,29 @@ def fetch_power_analysis_group_table(request):
     data['treatment_groups'] = treatment_group_representatives
 
     data['post_filter'] = post_filter
-    print("FINISHED")
+
+    data['final_chart_data'] = final_chart_data
+
+    data['pass_to_power_analysis_dict'] = pass_to_power_analysis_dict
+
     return HttpResponse(json.dumps(data),
                         content_type='application/json')
 
 
-def fetch_power_analysis_results():
-    data = ''
-    # for point in data_points:
-    #     power_analysis_input.append([
-    #         point.data_group,
-    #         point.time,
-    #         (point.matrix_item.stringify_compounds()).split('\n')[0],
-    #         point.matrix_item.name,
-    #         point.standard_value
-    #     ])
-    #
-    # power_analysis_data = power_analysis(power_analysis_input)
-    #
-    # data['power_analysis_input'] = power_analysis_input
-    # data['power_analysis_data'] = power_analysis_data
+def fetch_power_analysis_results(request):
+    power_analysis_input = json.loads(request.POST.get('full_data', ''))
+    pam = request.POST.get('pam', '')
+    power_analysis_data = power_analysis(power_analysis_input, pam)
+
+    data = {}
+    for key, current_list in power_analysis_data.items():
+        for current_sublist in current_list:
+            for current_index, current_item in enumerate(current_sublist):
+                if type(current_item) is not str and current_item is not None:
+                    current_sublist[current_index] = float(current_item)
+
+    data['power_analysis_data'] = power_analysis_data
+
     return HttpResponse(json.dumps(data), content_type='application/json')
 
 # TODO TODO TODO

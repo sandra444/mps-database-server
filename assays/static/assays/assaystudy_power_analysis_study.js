@@ -12,9 +12,16 @@ $(document).ready(function () {
 
     var group_table = null;
     var compounds_table = null;
-    // var selection_parameters_table = $('#selection-parameters');
-    // var selection_parameters_table_container = $('#selection-parameters-table-container');
+
+    var row_info = null;
+
     var compounds_table_container = $('#compounds-table-container');
+    var average_values_chart_selector = $('#values-vs-time-graph')[0];
+    var power_analysis_container_selector = $('#power-analysis-container');
+    var power_analysis_values_graph = $("#pa-value-graph")[0];
+    var power_analysis_p_value_graph = $("#pa-p-value-graph")[0];
+    var power_analysis_power_graph = $("#pa-power-graph")[0];
+    var power_analysis_sample_size_graph = $("#pa-sample-size-graph")[0];
 
     var active_compounds_checkboxes = 0;
 
@@ -88,8 +95,6 @@ $(document).ready(function () {
             {title: "# of Time Points", data: '5', width: '10%'},
         ];
 
-        // console.log(JSON.stringify(window.GROUPING.group_criteria));
-
         group_table = $('#group-table').DataTable({
             ajax: {
                 url: '/assays_ajax/',
@@ -102,7 +107,6 @@ $(document).ready(function () {
                 },
                 type: 'POST',
                 dataSrc: function(json) {
-                    console.log(json);
                     $("#clone-container").empty();
 
                     data_groups = json.data_groups;
@@ -111,7 +115,8 @@ $(document).ready(function () {
                     treatment_groups = json.treatment_groups;
                     power_analysis_group_table = json.power_analysis_group_table;
                     compounds_table_data = json.compound_table_data;
-                    console.log(compounds_table_data);
+                    final_chart_data = json.final_chart_data;
+                    pass_to_power_analysis_dict = json.pass_to_power_analysis_dict;
 
                     data_group_to_sample_locations = json.data_group_to_sample_locations;
                     data_group_to_organ_models = json.data_group_to_organ_models;
@@ -121,6 +126,7 @@ $(document).ready(function () {
                     cells_index = header_keys.indexOf('Cells');
                     target_index = header_keys.indexOf('Target');
 
+
                     // post_filter setup
                     window.GROUPING.set_grouping_filtering(json.post_filter);
                     // Stop spinner
@@ -129,7 +135,6 @@ $(document).ready(function () {
                 },
                 // Error callback
                 error: function (xhr, errmsg, err) {
-                    console.log("ERR");
                     $("#clone-container").empty();
 
                     // Stop spinner
@@ -150,10 +155,6 @@ $(document).ready(function () {
             paging: false,
             fixedHeader: {headerOffset: 50},
             deferRender: true,
-            drawCallback: function() {
-                // Make sure tooltips displayed properly
-                $('[data-toggle="tooltip"]').tooltip({container:"body", html: true});
-            }
         });
     }
 
@@ -170,16 +171,18 @@ $(document).ready(function () {
     // Group Table Checkbox click event
     $(document).on("click", ".power-analysis-group-checkbox", function() {
         var checkbox = $(this);
-        var number = checkbox.attr('data-power-analysis-group');
-        // var row_info = $(this).data('compounds-table-info').split('$$$$$');
-        // console.log(row_info);
+        var group_number = checkbox.attr('data-power-analysis-group');
+        row_info = $(this).data('compounds-table-info').split('$$$$$');
         if (checkbox.is(':checked')) {
             $('.power-analysis-group-checkbox').each(function(){
                 if (!this.checked) {
                     $(this).parent().parent().hide();
                 }
             });
-            make_compounds_datatable(number);
+            $('#power-analysis-button').attr('disabled', true);
+            active_compounds_checkboxes = 0;
+            make_compounds_datatable(group_number);
+            make_chart(row_info[0], row_info[1], average_values_chart_selector, final_chart_data[group_number]);
         } else {
             $('.power-analysis-group-checkbox').each(function(){
                 if (!this.checked) {
@@ -207,6 +210,7 @@ $(document).ready(function () {
                             $(this).parent().parent().hide();
                         }
                     });
+                    $('#power-analysis-button').attr('disabled', false);
                 }
             } else {
                 active_compounds_checkboxes -= 1;
@@ -217,6 +221,7 @@ $(document).ready(function () {
                         }
                     });
                 }
+                $('#power-analysis-button').attr('disabled', true);
             }
         }
 
@@ -227,7 +232,6 @@ $(document).ready(function () {
     });
 
     function make_compounds_datatable(group_num){
-
         // selection_parameters_table.html(
         //     '<tr><th>Target/Analyte</th><td>'+ selection_parameters[0] + '</td></tr>' +
         //     '<tr><th>Unit</th><td>'+ selection_parameters[1] + '</td></tr>' +
@@ -289,5 +293,448 @@ $(document).ready(function () {
     function unmake_compounds_datatable() {
         compounds_table.destroy()
         compounds_table_container.attr('hidden', true);
+    }
+
+    function make_chart(assay, unit, selector, data) {
+        // TODO MAKE SURE THE CHART_SELECTOR IS WHAT YOU WANT
+        // Clear old chart (when applicable)
+        $(selector).empty();
+
+        // Aliases
+        var assay_data = JSON.parse(JSON.stringify(data));
+
+        // Don't bother if empty
+        if (assay_data[1] === undefined) {
+            selector.innerHTML = '<div class="alert alert-danger" role="alert">' +
+                    '<span class="glyphicon glyphicon-warning-sign" aria-hidden="true"></span>' +
+                    '<span class="sr-only">Danger:</span>' +
+                    ' <strong>' + assay + ' ' + unit + '</strong>' +
+                    '<br>This plot doesn\'t have any valid data.' +
+                '</div>'
+            return;
+        }
+
+        if (selector == power_analysis_p_value_graph || selector == power_analysis_power_graph) {
+            var min_height = 200;
+        } else {
+            var min_height = 400;
+        }
+        options = {
+            // TOO SPECIFIC, OBVIOUSLY
+            // title: assay,
+            interpolateNulls: true,
+            titleTextStyle: {
+                fontSize: 18,
+                bold: true,
+                underline: true
+            },
+            // curveType: 'function',
+            legend: {
+                position: 'top',
+                maxLines: 5,
+                textStyle: {
+                    // fontSize: 8,
+                    bold: true
+                }
+            },
+            hAxis: {
+                // Begins empty
+                title: 'Time (Days)',
+                textStyle: {
+                    bold: true
+                },
+                titleTextStyle: {
+                    fontSize: 14,
+                    bold: true,
+                    italic: false
+                }
+            },
+            vAxis: {
+                title: '',
+                // If < 1000 and > 0.001 don't use scientific! (absolute value)
+                // y_axis_label_type
+                format: '',
+                textStyle: {
+                    bold: true
+                },
+                titleTextStyle: {
+                    fontSize: 14,
+                    bold: true,
+                    italic: false
+                },
+                // This doesn't seem to interfere with displaying negative values
+                minValue: 0,
+                viewWindowMode: 'explicit'
+                // baselineColor: 'none',
+                // ticks: []
+            },
+            pointSize: 5,
+            'chartArea': {
+                'width': '75%',
+                'height': '65%'
+            },
+            'height': min_height,
+            // Individual point tooltips, not aggregate
+            focusTarget: 'datum',
+            intervals: {
+                // style: 'bars'
+                'lineWidth': 0.75
+            },
+            tracking: {
+                is_default: true,
+                use_dose_response: false,
+                // A little too odd
+                // use_percent_control: false,
+                time_conversion: 1,
+                chart_type: 'scatter',
+                tooltip_type: 'datum',
+                revised_unit: null,
+                // Log scale
+                use_x_log: false,
+                use_y_log: false
+            },
+            ajax_data: {
+                key: 'device',
+                mean_type: 'arithmetic',
+                interval_type: 'ste',
+                number_for_interval: '1',
+                percent_control: '',
+                truncate_negative: ''
+            }
+        };
+
+        if (options.tracking.revised_unit) {
+            unit = options.tracking.revised_unit;
+        }
+
+        if (!options) {
+            options = $.extend(true, {}, window.CHARTS.global_options);
+        }
+
+        // Go through y values
+        $.each(assay_data.slice(1), function(current_index, current_values) {
+            // Idiomatic way to remove NaNs
+            var trimmed_values = current_values.slice(1).filter(isNumber);
+
+            var current_max_y = Math.abs(Math.max.apply(null, trimmed_values));
+            var current_min_y = Math.abs(Math.min.apply(null, trimmed_values));
+
+            if (current_max_y > 1000 || current_max_y < 0.001) {
+                options.vAxis.format = '0.00E0';
+                return false;
+            }
+            else if (Math.abs(current_max_y - current_min_y) < 10 && Math.abs(current_max_y - current_min_y) > 0.1 && Math.abs(current_max_y - current_min_y) !== 0) {
+                options.vAxis.format = '0.00';
+                return false;
+            }
+            else if (Math.abs(current_max_y - current_min_y) < 0.1 && Math.abs(current_max_y - current_min_y) !== 0) {
+                options.vAxis.format = '0.00E0';
+                return false;
+            }
+        });
+
+        var current_min_x = assay_data[1][0];
+        var current_max_x = assay_data[assay_data.length - 1][0];
+        var current_x_range = current_max_x - current_min_x;
+
+        // Tack on change
+        // TODO CHANGE THE TITLE
+        options.title = assay;
+        // TODO GET THE UNIT IN QUESTION
+        options.vAxis.title = unit;
+
+        var chart = null;
+
+        var num_colors = 0;
+        var truncated_at_index = null;
+
+        $.each(assay_data[0].slice(1), function(index, value) {
+            if (value.indexOf('     ~@i') === -1) {
+                // NOTE TRUNCATE PAST 40 COLORS
+                if (num_colors >= 40) {
+                    truncated_at_index = index;
+
+                    if (assay_data[0][index + 1].indexOf('     ~@i') !== -1) {
+                        truncated_at_index += 2;
+                    }
+
+                    $.each(assay_data, function(row_index, current_row) {
+                        assay_data[row_index] = current_row.slice(0, truncated_at_index + 1);
+                    });
+
+                    // Indicate truncated in title?
+                    options.title = options.title + ' {TRUNCATED}';
+
+                    return false;
+                }
+
+                num_colors++;
+            }
+        });
+
+        var data = google.visualization.arrayToDataTable(assay_data);
+
+        chart = new google.visualization.LineChart(selector);
+
+        // Change the options
+        if (!options.hAxis.scaleType === 'mirrorLog') {
+            options.hAxis.viewWindowMode = 'explicit';
+            options.hAxis.viewWindow = {
+                max: current_max_x + 0.1 * current_x_range,
+                min: current_min_x - 0.1 * current_x_range
+            };
+        }
+
+        if (chart) {
+            var dataView = new google.visualization.DataView(data);
+
+            // Change interval columns to intervals
+            var interval_setter = [0];
+
+            i = 1;
+            while (i < data.getNumberOfColumns()) {
+                interval_setter.push(i);
+                if (i + 2 < data.getNumberOfColumns() && assay_data[0][i+1].indexOf('     ~@i1') > -1) {
+                    interval_setter.push({sourceColumn: i + 1, role: 'interval'});
+                    interval_setter.push({sourceColumn: i + 2, role: 'interval'});
+                    i += 2;
+                }
+                i += 1;
+            }
+            dataView.setColumns(interval_setter);
+
+            chart.draw(dataView, options);
+
+            // chart.chart_index = index;
+        }
+    }
+
+    // TODO THIS SHOULDN'T BE REDUNDANT
+    function isNumber(obj) {
+        return obj !== undefined && typeof(obj) === 'number' && !isNaN(obj);
+    }
+
+    var remove_col = function(arr, colIndex) {
+        for (var i = 0; i < arr.length; i++) {
+            var row = arr[i];
+            row.splice(colIndex, 1);
+        }
+    }
+
+    function timeSortFunction(a, b) {
+        if (a[0] === b[0]) {
+            return 0;
+        }
+        else {
+            return (a[0] < b[0]) ? -1 : 1;
+        }
+    }
+
+    $("#power-analysis-button").click(function() {
+        fetch_power_analysis_results();
+    });
+
+    function getPivotArray(dataArray, rowIndex, colIndex, dataIndex) {
+        //Code from https://techbrij.com
+        var result = {}, ret = [];
+        var newCols = [];
+        for (var i = 0; i < dataArray.length; i++) {
+
+            if (!result[dataArray[i][rowIndex]]) {
+                result[dataArray[i][rowIndex]] = {};
+            }
+            result[dataArray[i][rowIndex]][dataArray[i][colIndex]] = dataArray[i][dataIndex];
+
+            //To get column names
+            if (newCols.indexOf(dataArray[i][colIndex]) == -1) {
+                newCols.push(dataArray[i][colIndex]);
+            }
+        }
+
+        newCols.sort(function(a, b) { return parseFloat(a) > parseFloat(b) ? 1 : -1});
+        var item = [];
+
+        //Add Header Row
+        item.push('Sample Size');
+        item.push.apply(item, newCols);
+        ret.push(item);
+
+        //Add content
+        for (var key in result) {
+            item = [];
+            item.push(key);
+            for (var i = 0; i < newCols.length; i++) {
+                item.push(result[key][newCols[i]] || null);
+            }
+            ret.push(item);
+        }
+        return ret;
+    };
+
+    function fetch_power_analysis_results() {
+        var current_group = $('.power-analysis-group-checkbox:visible').first().attr('data-power-analysis-group');
+        var compound_first = $('.power-analysis-compounds-checkbox:visible').first().attr('data-power-analysis-compound');
+        var compound_second = $('.power-analysis-compounds-checkbox:visible').last().attr('data-power-analysis-compound');
+
+        var power_analysis_method = $("input[name='pam']:checked").val();
+
+        window.spinner.spin(
+            document.getElementById("spinner")
+        );
+
+        // NOTE: AJAX "success" and "error" are deprecated for 1.8, need to use "done" and "fail"
+        // Consider calling AJAX functions directly
+        $.ajax(
+                "/assays_ajax/",
+                {
+                    data: {
+                        call: 'fetch_power_analysis_results',
+                        csrfmiddlewaretoken: window.COOKIES.csrfmiddlewaretoken,
+                        full_data: JSON.stringify($.merge($.merge([], pass_to_power_analysis_dict[current_group][compound_first]), pass_to_power_analysis_dict[current_group][compound_second])),
+                        pam: power_analysis_method
+                    },
+                    type: 'POST',
+                }
+            )
+            .done(function(data) {
+                // Stop spinner
+                window.spinner.stop();
+
+                power_analysis_container_selector.attr('hidden', false);
+                remove_col(data['power_analysis_data']['power_results_report'], 0);
+                remove_col(data['power_analysis_data']['power_vs_sample_size_curves_matrix'], 0);
+                remove_col(data['power_analysis_data']['power_prediction_matrix'], 0);
+                remove_col(data['power_analysis_data']['sample_size_prediction_matrix'], 0);
+                remove_col(data['power_analysis_data']['sig_level_prediction_matrix'], 0);
+
+                // First Chart - Values vs Time
+                var chart1_data = JSON.parse(JSON.stringify(final_chart_data[current_group]));
+                var indices_to_remove = [];
+                for (var x=0; x<chart1_data[0].length; x++){
+                    if (chart1_data[0][x] !== "Time" && chart1_data[0][x].indexOf(compound_first) === -1 && chart1_data[0][x].indexOf(compound_second) === -1) {
+                        indices_to_remove.push(x)
+                    }
+                }
+                for (var x=0; x<indices_to_remove.length; x++){
+                    remove_col(chart1_data, (indices_to_remove[x] - indices_to_remove.indexOf(indices_to_remove[x])));
+                }
+
+                // Second Chart and Third Chart - P Values vs Time and Power vs Time
+                var p_value_data = JSON.parse(JSON.stringify(data['power_analysis_data']['power_results_report']));
+                var power_data = JSON.parse(JSON.stringify(data['power_analysis_data']['power_results_report']));
+                remove_col(p_value_data, 1);
+                remove_col(power_data, 2);
+                p_value_data.sort(timeSortFunction);
+                power_data.sort(timeSortFunction);
+                for (var x=0; x<p_value_data.length; x++){
+                    p_value_data[x][0] = p_value_data[x][0]/1440;
+                    power_data[x][0] = power_data[x][0]/1440;
+                }
+                p_value_data.unshift(["Time", "P Value"]);
+                power_data.unshift(["Time", "Power"]);
+
+                var sample_size_data = data['power_analysis_data']['power_vs_sample_size_curves_matrix'].sort();
+                for (var x=0; x<sample_size_data.length; x++){
+                    var current_time = sample_size_data[x][0]/1440;
+                    sample_size_data[x][0] = String(current_time);
+                }
+
+                sample_size_data_prepped = getPivotArray(sample_size_data, 2, 0, 1);
+                sample_size_data_prepped.splice(1, 1);
+                for (var x=1; x<sample_size_data_prepped.length; x++){
+                    sample_size_data_prepped[x][0] = parseFloat(sample_size_data_prepped[x][0]);
+                }
+
+                make_chart(row_info[0], 'Avg (Value)', power_analysis_values_graph, chart1_data);
+                make_chart(row_info[0], 'P Value', power_analysis_p_value_graph, p_value_data);
+                make_chart('', 'Power', power_analysis_power_graph, power_data);
+
+                // TODO .8 subject to change
+                sample_size_data_prepped[0][sample_size_data_prepped[0].length-1] = 'POWER';
+                for (var x=1; x<sample_size_data_prepped.length; x++){
+                    sample_size_data_prepped[x][sample_size_data_prepped[0].length-1] = 0.8;
+                }
+
+                contrived_line_dict = {};
+                contrived_line_dict[sample_size_data_prepped[0].length-2] = {
+                    type: "linear",
+                    color: 'black',
+                    visibleInLegend: false,
+                    tooltip: false,
+                };
+
+                var sample_size_google_data = google.visualization.arrayToDataTable(sample_size_data_prepped);
+                var sample_size_google_options = {
+                    // TOO SPECIFIC, OBVIOUSLY
+                    // title: assay,
+                    interpolateNulls: true,
+                    curveType: 'function',
+                    titleTextStyle: {
+                        fontSize: 18,
+                        bold: true,
+                        underline: true
+                    },
+                    legend: {
+                        position: 'top',
+                        maxLines: 5,
+                        textStyle: {
+                            // fontSize: 8,
+                            bold: true
+                        }
+                    },
+                    hAxis: {
+                        // Begins empty
+                        title: 'Sample Size',
+                        textStyle: {
+                            bold: true
+                        },
+                        titleTextStyle: {
+                            fontSize: 14,
+                            bold: true,
+                            italic: false
+                        }
+                    },
+                    vAxis: {
+                        title: '',
+                        // If < 1000 and > 0.001 don't use scientific! (absolute value)
+                        // y_axis_label_type
+                        format: '',
+                        textStyle: {
+                            bold: true
+                        },
+                        titleTextStyle: {
+                            fontSize: 14,
+                            bold: true,
+                            italic: false
+                        },
+                        // This doesn't seem to interfere with displaying negative values
+                        minValue: 0,
+                        viewWindowMode: 'explicit'
+                        // baselineColor: 'none',
+                        // ticks: []
+                    },
+                    pointSize: 0,
+                    'chartArea': {
+                        'width': '75%',
+                        'height': '65%'
+                    },
+                    'height': 400,
+                    // Individual point tooltips, not aggregate
+                    focusTarget: 'datum',
+                    series: contrived_line_dict
+                }
+
+                sample_size_chart = new google.visualization.LineChart(power_analysis_sample_size_graph);
+                sample_size_chart.draw(sample_size_google_data, sample_size_google_options);
+            })
+            .fail(function(xhr, errmsg, err) {
+                $("#clone-container").empty();
+
+                // Stop spinner
+                window.spinner.stop();
+
+                alert('An error has occurred, please try different selections.');
+                console.log(xhr.status + ": " + xhr.responseText);
+            });
     }
 });
