@@ -44,7 +44,8 @@ from assays.models import (
     AssaySetting,
     AssaySubtarget,
     AssayReference,
-    AssayStudyReference
+    AssayStudyReference,
+    AssayStudySet
 )
 from microdevices.models import MicrophysiologyCenter
 # from compounds.models import Compound
@@ -1338,6 +1339,7 @@ class AssayStudyAdmin(LockableAdmin):
 
 admin.site.register(AssayStudy, AssayStudyAdmin)
 
+
 # TODO TODO TODO TODO NEW MODELS HERE
 class AssayMatrixItemAdmin(ImportExportModelAdmin):
     model = AssayMatrixItem
@@ -1351,6 +1353,7 @@ class AssayMatrixAdmin(ImportExportModelAdmin):
     search_fields = ('name', 'notes')
 
 admin.site.register(AssayMatrix, AssayMatrixAdmin)
+
 
 class AssayImageAdmin(ImportExportModelAdmin):
     model = AssayImage
@@ -1385,3 +1388,35 @@ class AssayReferenceAdmin(ImportExportModelAdmin):
     search_fields = ('pubmed_id', 'title', 'authors')
 
 admin.site.register(AssayReference, AssayReferenceAdmin)
+
+
+class AssayStudySetAdminForm(forms.ModelForm):
+    class Meta(object):
+        model = AssayStudySet
+        exclude = ('',)
+        widgets = {
+            'description': forms.Textarea(attrs={'rows': 10})
+        }
+
+    def __init__(self, *args, **kwargs):
+        super(AssayStudySetAdminForm, self).__init__(*args, **kwargs)
+        study_queryset = AssayStudy.objects.all().prefetch_related(
+            'group__microphysiologycenter_set'
+        )
+        assay_queryset = AssayStudyAssay.objects.all().prefetch_related(
+            'target',
+            'method',
+            'unit',
+        )
+
+        self.fields['studies'].queryset = study_queryset
+        self.fields['assays'].queryset = assay_queryset
+
+
+class AssayStudySetAdmin(ImportExportModelAdmin):
+    model = AssayStudySet
+    form = AssayStudySetAdminForm
+    search_fields = ('name', 'description')
+
+
+admin.site.register(AssayStudySet, AssayStudySetAdmin)
