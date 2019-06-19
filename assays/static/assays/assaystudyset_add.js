@@ -249,19 +249,31 @@ $(document).ready(function () {
             var current_assays = study_id_to_assays[study_id];
 
             var study_is_affected = false;
+            var study_is_empty = true;
 
             $.each(current_assays, function(assay_index, assay) {
                 if (!current_assay_filter[assay.id]) {
                     study_is_affected = true;
-                    return false;
+                }
+                else {
+                    study_is_empty = false;
                 }
             });
 
-            if (study_is_affected) {
-                current_filter_button.addClass('btn-warning');
+            // Study is empty
+            if (study_is_empty) {
+                current_filter_button.removeClass('btn-warning');
+                current_filter_button.addClass('btn-danger');
             }
+            // Study is partial
+            else if (study_is_affected) {
+                current_filter_button.addClass('btn-warning');
+                current_filter_button.removeClass('btn-danger');
+            }
+            // Study is full
             else {
                 current_filter_button.removeClass('btn-warning');
+                current_filter_button.removeClass('btn-danger');
             }
         }
     }
