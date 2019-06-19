@@ -1391,6 +1391,13 @@ admin.site.register(AssayReference, AssayReferenceAdmin)
 
 
 class AssayStudySetAdminForm(forms.ModelForm):
+    class Meta(object):
+        model = AssayStudySet
+        exclude = ('',)
+        widgets = {
+            'description': forms.Textarea(attrs={'rows': 10})
+        }
+
     def __init__(self, *args, **kwargs):
         super(AssayStudySetAdminForm, self).__init__(*args, **kwargs)
         study_queryset = AssayStudy.objects.all().prefetch_related(
