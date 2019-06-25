@@ -1572,6 +1572,7 @@ class AssayStudyDataUploadForm(BootstrapForm):
 
 class AssayStudyFormNew(SetupFormsMixin, SignOffMixin, BootstrapForm):
     setup_data = forms.CharField(required=False)
+    processed_setup_data = forms.CharField(required=False)
     number_of_items = forms.CharField(required=False)
     test_type = forms.ChoiceField(
         initial='control',
@@ -1880,7 +1881,7 @@ class AssayStudyFormNew(SetupFormsMixin, SignOffMixin, BootstrapForm):
         })
 
         data.update({
-            'setup_data': new_setup_data
+            'processed_setup_data': new_setup_data
         })
 
         return data
@@ -1894,7 +1895,7 @@ class AssayStudyFormNew(SetupFormsMixin, SignOffMixin, BootstrapForm):
         organ_model_id = study.organ_model_id
         organ_model_protocol_id = study.organ_model_protocol_id
 
-        all_setup_data = self.cleaned_data.get('setup_data', None)
+        all_setup_data = self.cleaned_data.get('processed_setup_data', None)
 
         if all_setup_data:
             new_matrix = all_setup_data.get('new_matrix', None)
