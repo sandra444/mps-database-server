@@ -1890,6 +1890,19 @@ class AssayStudyFormNew(SetupFormsMixin, SignOffMixin, BootstrapForm):
         # PLEASE SEE BASE MODELS
         # study = super(AssayStudyFormNew, self).save(commit)
         study = super(AssayStudyFormNew, self).save()
+
+        # VERY SLOPPY
+        created_by = self.request.user
+        created_on = timezone.now()
+
+        study.created_by = created_by
+        study.created_on = created_on
+        study.modified_by = created_by
+        study.modified_on = created_on
+
+        study.save()
+        # SLOPPY: REVISE
+
         study_id = study.id
         device_id = study.organ_model.device_id
         organ_model_id = study.organ_model_id
