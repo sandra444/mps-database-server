@@ -741,6 +741,8 @@ def get_item_groups(study, criteria, matrix_items=None):
         'assaysetupcompound_set__compound_instance__compound',
         'assaysetupcompound_set__concentration_unit',
         'assaysetupcompound_set__addition_location',
+        # SOMEWHAT FOOLISH
+        'study__group__microphysiologycenter_set'
     )
 
     if not criteria:
@@ -755,6 +757,8 @@ def get_item_groups(study, criteria, matrix_items=None):
     if criteria.get('setup', ''):
         if 'organ_model_id' in criteria.get('setup'):
             header_keys.append('MPS Model')
+        if 'study.group_id' in criteria.get('setup'):
+            header_keys.append('MPS User Group')
         if 'study_id' in criteria.get('setup'):
             header_keys.append('Study')
         if 'matrix_id' in criteria.get('setup'):
@@ -808,6 +812,7 @@ def get_item_groups(study, criteria, matrix_items=None):
             x.get('Settings'),
             x.get('Matrix'),
             x.get('Study'),
+            x.get('MPS User Group'),
             x.get('Items with Same Treatment')[0]
         )
     )
@@ -2064,6 +2069,10 @@ def acquire_post_filter(studies, assays, matrix_items, data_points):
     # Table -> Filter -> value -> [name, in_use]
     post_filter = {}
 
+    studies = studies.prefetch_related(
+        'group__microphysiologycenter_set'
+    )
+
     for study in studies:
         current = post_filter.setdefault(
             'study', {}
@@ -2073,6 +2082,12 @@ def acquire_post_filter(studies, assays, matrix_items, data_points):
             'id__in', {}
         ).update({
             study.id: '{} ({})'.format(study.name, study.group.name)
+        })
+
+        current.setdefault(
+            'group_id__in', {}
+        ).update({
+            study.group_id: '{} ({})'.format(study.group.name, study.group.microphysiologycenter_set.first().name)
         })
 
     assays = assays.prefetch_related(

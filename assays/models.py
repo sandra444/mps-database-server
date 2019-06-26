@@ -1990,6 +1990,7 @@ class AssayMatrixItem(FlaggableModel):
             criteria = {}
         dic = {
             # 'device': self.device.name,
+            'MPS User Group': self.study.group.name,
             'Study': self.get_hyperlinked_study(),
             'Matrix': self.get_hyperlinked_matrix(),
             'MPS Model': self.get_hyperlinked_model_or_device(),
