@@ -92,6 +92,11 @@ CONTROL_LABEL = '-Control-'
 # Variable to indicate that these should be split for special filters
 COMBINED_VALUE_DELIMITER = '~@|'
 
+INTERVAL_1_SIGIL = '     ~@i1'
+INTERVAL_2_SIGIL = '     ~@i2'
+SHAPE_SIGIL = '     ~@s'
+TOOLTIP_SIGIL = '     ~@t'
+
 
 # Note manipulations for sorting
 def atof(text):
@@ -104,7 +109,7 @@ def atof(text):
 
 def alphanum_key(text):
     return [
-        atof(c.replace('     ~@i1', '!').replace('     ~@i2', '"').replace('     ~@s', '"')) for c in re.split(r'[+-]?([0-9]+(?:[.][0-9]*)?|[.][0-9]+)', text)
+        atof(c.replace(INTERVAL_1_SIGIL, '!').replace(INTERVAL_2_SIGIL, '"').replace(SHAPE_SIGIL, '"')) for c in re.split(r'[+-]?([0-9]+(?:[.][0-9]*)?|[.][0-9]+)', text)
     ]
 
 alphanum_key_for_item_groups = lambda pair: re.split('([0-9]+)', pair[0])
@@ -1336,8 +1341,8 @@ def get_data_points_for_charting(
                         current_data.setdefault(current_key, {}).update({time: average})
                         if interval != 0:
                             accommodate_intervals = True
-                            current_data.setdefault(current_key+'     ~@i1', {}).update({time: average - interval})
-                            current_data.setdefault(current_key+'     ~@i2', {}).update({time: average + interval})
+                            current_data.setdefault(current_key+INTERVAL_1_SIGIL, {}).update({time: average - interval})
+                            current_data.setdefault(current_key+INTERVAL_2_SIGIL, {}).update({time: average + interval})
                         y_header.update({time: True})
                         include_current = True
 
@@ -1349,13 +1354,13 @@ def get_data_points_for_charting(
                     # Only include intervals if necessary
                     if accommodate_intervals and include_current and not key_present:
                         x_header.extend([
-                            '{}{}'.format(current_key, '     ~@i1'),
-                            '{}{}'.format(current_key, '     ~@i2')
+                            '{}{}'.format(current_key, INTERVAL_1_SIGIL),
+                            '{}{}'.format(current_key, INTERVAL_2_SIGIL)
                         ])
                     else:
-                        if '{}{}'.format(current_key, '     ~@i1') in current_data:
-                            del current_data['{}{}'.format(current_key, '     ~@i1')]
-                            del current_data['{}{}'.format(current_key, '     ~@i2')]
+                        if '{}{}'.format(current_key, INTERVAL_1_SIGIL) in current_data:
+                            del current_data['{}{}'.format(current_key, INTERVAL_1_SIGIL)]
+                            del current_data['{}{}'.format(current_key, INTERVAL_2_SIGIL)]
 
             x_header.sort(key=alphanum_key)
             current_table[0].extend(x_header)
@@ -3055,14 +3060,14 @@ def get_inter_study_reproducibility(
                     x_header.update({
                         legend: True,
                         # This is to deal with intervals
-                        '{}{}'.format(legend, '     ~@i1'): True,
-                        '{}{}'.format(legend, '     ~@i2'): True,
+                        '{}{}'.format(legend, INTERVAL_1_SIGIL): True,
+                        '{}{}'.format(legend, INTERVAL_2_SIGIL): True,
                     })
                 else:
                     x_header.update({
                         legend: True,
                         # This is to deal with custom tooltips
-                        '{}{}'.format(legend, '     ~@t'): True,
+                        '{}{}'.format(legend, TOOLTIP_SIGIL): True,
                     })
 
                 for time, values in list(times.items()):
@@ -3072,7 +3077,7 @@ def get_inter_study_reproducibility(
                             matrix_item_id = value_pair[1]
 
                             current_data.setdefault(legend, {}).update({'{}~{}'.format(time, index): value})
-                            current_data.setdefault('{}{}'.format(legend, '     ~@t'), {}).update(
+                            current_data.setdefault('{}{}'.format(legend, TOOLTIP_SIGIL), {}).update(
                                 {
                                     '{}~{}'.format(time, index): [time, legend, value, matrix_item_id]
                                 }
@@ -3089,8 +3094,8 @@ def get_inter_study_reproducibility(
                             value = np.mean(values)
                             std = np.std(values)
                             current_data.setdefault(legend, {}).update({time: value})
-                            current_data.setdefault('{}{}'.format(legend, '     ~@i1'), {}).update({time: value - std})
-                            current_data.setdefault('{}{}'.format(legend, '     ~@i2'), {}).update({time: value + std})
+                            current_data.setdefault('{}{}'.format(legend, INTERVAL_1_SIGIL), {}).update({time: value - std})
+                            current_data.setdefault('{}{}'.format(legend, INTERVAL_2_SIGIL), {}).update({time: value + std})
                         else:
                             current_data.setdefault(legend, {}).update({time: values[0]})
                         y_header.update({time: True})
@@ -3250,16 +3255,16 @@ def get_inter_study_reproducibility(
                 x_header.update({
                     legend: True,
                     # This is to deal with the style
-                    '{}{}'.format(legend, '     ~@s'): True,
+                    '{}{}'.format(legend, SHAPE_SIGIL): True,
                     # This is to deal with intervals
-                    '{}{}'.format(legend, '     ~@i1'): True,
-                    '{}{}'.format(legend, '     ~@i2'): True,
+                    '{}{}'.format(legend, INTERVAL_1_SIGIL): True,
+                    '{}{}'.format(legend, INTERVAL_2_SIGIL): True,
                 })
                 for time, value_shape in list(times.items()):
                     value, shape = value_shape[0], value_shape[1]
                     if shape:
                         current_data.setdefault(legend, {}).update({time: value})
-                        current_data.setdefault('{}{}'.format(legend, '     ~@s'), {}).update({time: shape})
+                        current_data.setdefault('{}{}'.format(legend, SHAPE_SIGIL), {}).update({time: shape})
                         y_header.update({time: True})
                     else:
                         values = initial_chart_data.get(
@@ -3280,9 +3285,9 @@ def get_inter_study_reproducibility(
                             value = np.mean(values)
                             std = np.std(values)
                             current_data.setdefault(legend, {}).update({time: value})
-                            current_data.setdefault('{}{}'.format(legend, '     ~@i1'), {}).update({time: value - std})
-                            current_data.setdefault('{}{}'.format(legend, '     ~@i2'), {}).update({time: value + std})
-                            current_data.setdefault('{}{}'.format(legend, '     ~@s'), {}).update({time: shape})
+                            current_data.setdefault('{}{}'.format(legend, INTERVAL_1_SIGIL), {}).update({time: value - std})
+                            current_data.setdefault('{}{}'.format(legend, INTERVAL_2_SIGIL), {}).update({time: value + std})
+                            current_data.setdefault('{}{}'.format(legend, SHAPE_SIGIL), {}).update({time: shape})
                         else:
                             current_data.setdefault(legend, {}).update({time: values[0]})
 
