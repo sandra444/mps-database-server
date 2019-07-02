@@ -1,13 +1,16 @@
 // TODO MODIFY TO ALSO WORK WITH EDIT PAGE
 // TODO MODIFY SO ONLY NECESSARY ARE EXPOSED
 window.MASS_EDIT = {
-    // For study add
-    current_protocol: null,
     // For edit page
-    current_matrix: null,
+    matrix_id: null,
 };
 
 $(document).ready(function () {
+    var is_edit_interface = false;
+    if ($('#id_matrix_item-0-reason_for_flag')[0]) {
+        is_edit_interface = true;
+    }
+
     var setup_data_selector = $('#id_setup_data');
 
     // FULL DATA
@@ -30,8 +33,6 @@ $(document).ready(function () {
         current_setup_data = JSON.parse(setup_data_selector.val());
         keep_current = true;
     }
-
-    console.log(setup_data_selector.val());
 
     // DATA FOR THE VERSION
     var current_setup = {};
@@ -106,17 +107,18 @@ $(document).ready(function () {
                     current_data['cell_sample_id']
                 );
 
-                // TODO SPECIAL EXCEPTION FOR TIMES
-                $.each(time_prefixes, function(index, current_time_prefix) {
-                    var split_time = window.SPLIT_TIME.get_split_time(
-                        current_data[current_time_prefix],
-                    );
+                if (!is_edit_interface) {
+                    // TODO SPECIAL EXCEPTION FOR TIMES
+                    $.each(time_prefixes, function(index, current_time_prefix) {
+                        var split_time = window.SPLIT_TIME.get_split_time(
+                            current_data[current_time_prefix],
+                        );
 
-
-                    $.each(split_time, function(time_name, time_value) {
-                        this_popup.find('input[name="' + prefix + '_' + current_time_prefix + '_' + time_name + '"]').val(time_value);
+                        $.each(split_time, function(time_name, time_value) {
+                            this_popup.find('input[name="' + prefix + '_' + current_time_prefix + '_' + time_name + '"]').val(time_value);
+                        });
                     });
-                });
+                }
             },
             buttons: [
             {
@@ -139,18 +141,20 @@ $(document).ready(function () {
                     });
 
                     // SLOPPY
-                    $.each(time_prefixes, function(index, current_time_prefix) {
-                        if (current_data[current_time_prefix + '_minute'] !== undefined) {
-                            current_data[current_time_prefix] = window.SPLIT_TIME.get_minutes(
-                                    current_data[current_time_prefix + '_day'],
-                                    current_data[current_time_prefix + '_hour'],
-                                    current_data[current_time_prefix + '_minute']
-                            );
-                            $.each(window.SPLIT_TIME.time_conversions, function(key, value) {
-                                delete current_data[current_time_prefix + '_' + key];
-                            });
-                        }
-                    });
+                    if (!is_edit_interface) {
+                        $.each(time_prefixes, function(index, current_time_prefix) {
+                            if (current_data[current_time_prefix + '_minute'] !== undefined) {
+                                current_data[current_time_prefix] = window.SPLIT_TIME.get_minutes(
+                                        current_data[current_time_prefix + '_day'],
+                                        current_data[current_time_prefix + '_hour'],
+                                        current_data[current_time_prefix + '_minute']
+                                );
+                                $.each(window.SPLIT_TIME.time_conversions, function(key, value) {
+                                    delete current_data[current_time_prefix + '_' + key];
+                                });
+                            }
+                        });
+                    }
 
                     // Special exception for cell_sample
                     if ($(this).find('input[name="' + prefix + '_cell_sample"]')[0]) {
@@ -583,5 +587,131 @@ $(document).ready(function () {
         protocol.change(function() {
             set_new_protocol();
         }).trigger('change');
+    }
+
+    // FOR EDIT PAGE ONLY
+
+    // BAD NOT DRY
+    var excluded_fields = {
+        'DELETE': true,
+        'matrix_item': true,
+        'id': true,
+    };
+    function get_field_name(full_field_name) {
+        // To get the field name in question, I can split away everything before the terminal -
+        if (full_field_name) {
+            var field_name = full_field_name.split('-');
+            var field_name = field_name[field_name.length-1];
+            if (!excluded_fields[field_name]) {
+                return field_name;
+            }
+            else {
+                return false;
+            }
+        }
+        else {
+            return false;
+        }
+    }
+
+    function get_groups_from_forms() {
+        // LIST ALL PROFILES
+        // Split into prefixes
+        var unique_entities = {};
+        var full_setups = {};
+        full_setups = {};
+        var setup_to_group = {};
+
+        // Get every item ID paired with its test type
+        $('.matrix_item').each(function() {
+            var current_setup_id = $(this).find('input[name$="-id"]').val();
+            if (current_setup_id) {
+                full_setups[current_setup_id] = {
+                    'test_type': $(this).find('select[name$="-test_type"]').val(),
+                    'cell': [],
+                    'compound': [],
+                    'setting': [],
+                };
+            }
+        });
+
+        // Get every prefix
+        $.each(prefixes, function(index, prefix) {
+            // For every form
+            $('.' + prefix).each(function() {
+                var current_setup_id = $(this).find('input[name$="-matrix_item"]').val();
+                if (current_setup_id) {
+                    var current_setup_data = full_setups[current_setup_id][prefix];
+
+                    var data_to_add = {};
+
+                    $(this).find('input, select').each(function() {
+                        var field_name = get_field_name($(this).attr('name'));
+                        if (field_name) {
+                            data_to_add[field_name] = $(this).val();
+                        }
+                    });
+
+                    current_setup_data.push($.extend(true, {}, data_to_add));
+                }
+            });
+        });
+
+        console.log(full_setups);
+
+        $.each(full_setups, function(setup_id, contents) {
+            var stringified_contents = JSON.stringify(contents);
+            console.log(stringified_contents);
+            if (!unique_entities[stringified_contents]) {
+                unique_entities[stringified_contents] = Object.keys(unique_entities).length;
+            }
+            setup_to_group[setup_id] = unique_entities[stringified_contents];
+        });
+
+        // console.log(unique_entities);
+        console.log(setup_to_group);
+    }
+
+    if (window.MASS_EDIT.matrix_id) {
+        // Make sure global var exists before continuing
+        // ASSUMES STUDY HAS ORGAN MODEL
+        // Start SPINNING
+        window.spinner.spin(
+            document.getElementById("spinner")
+        );
+
+        $.ajax({
+                url: "/assays_ajax/",
+                type: "POST",
+                dataType: "json",
+                data: {
+                call: 'fetch_matrix_setup',
+                matrix_id: window.MASS_EDIT.matrix_id,
+                csrfmiddlewaretoken: window.COOKIES.csrfmiddlewaretoken,
+            },
+            success: function (json) {
+                // Stop spinner
+                window.spinner.stop();
+
+                console.log(json);
+
+                current_setup = $.extend(true, {}, json.current_setup);
+
+                // SET THE CURRENT SETUP
+                // SET THE CURRENT VALUES FOR THE GROUPS
+                // GENERATE THE TABLE
+                // MATCH UP TRIGGERS
+            },
+            error: function (xhr, errmsg, err) {
+                first_run = false;
+
+                // Stop spinner
+                window.spinner.stop();
+
+                console.log(xhr.status + ": " + xhr.responseText);
+            }
+        });
+
+        get_groups_from_forms();
     }
 });

@@ -7,8 +7,10 @@
 
 {% block load_js %}
     <script src="{% static "assays/grouping_filtering.js" %}"></script>
-    <script src="{% static "assays/organ_model_filter.js" %}"></script>
+    {# Removed, perhaps this will make things too complicated? #}
+    {# <script src="{% static "assays/organ_model_filter.js" %}"></script> #}
     <script src="{% static "assays/cell_sample_selection.js" %}"></script>
+    <script src="{% static "assays/modify_matrix.js" %}"></script>
     <script src="{% static "assays/assaymatrix_update.js" %}"></script>
     <script src="{% static "assays/chart_display.js" %}"></script>
     <script src="{% static "js/calendar.js" %}"></script>
