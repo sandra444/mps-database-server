@@ -621,6 +621,7 @@ $(document).ready(function () {
         var full_setups = {};
         full_setups = {};
         var setup_to_group = {};
+        var unique_entity_array = [];
 
         // Get every item ID paired with its test type
         $('.matrix_item').each(function() {
@@ -661,9 +662,12 @@ $(document).ready(function () {
 
         $.each(full_setups, function(setup_id, contents) {
             var stringified_contents = JSON.stringify(contents);
-            console.log(stringified_contents);
-            if (!unique_entities[stringified_contents]) {
-                unique_entities[stringified_contents] = Object.keys(unique_entities).length;
+            // NOTE: THIS EXCLUDES 0 VALUES
+            if (unique_entities[stringified_contents] === undefined) {
+                var index_to_use = unique_entity_array.length;
+                unique_entities[stringified_contents] = index_to_use;
+
+                unique_entity_array.push(stringified_contents);
             }
             setup_to_group[setup_id] = unique_entities[stringified_contents];
         });
