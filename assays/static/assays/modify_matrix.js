@@ -11,6 +11,8 @@ $(document).ready(function () {
         is_edit_interface = true;
     }
 
+    console.log(is_edit_interface);
+
     var setup_data_selector = $('#id_setup_data');
 
     // FULL DATA
@@ -87,6 +89,8 @@ $(document).ready(function () {
 
                 // Populate the fields
                 var current_data = $.extend(true, {}, current_setup_data[current_row_index][current_prefix][current_column_index]);
+
+                console.log('CURRENT_DATA', current_data);
 
                 var this_popup = $(this);
 
@@ -237,10 +241,11 @@ $(document).ready(function () {
                 // html_contents.push(key + ': ' + value);
                 // I will need to think about invalid fields
                 var field_name = key.replace('_id', '');
-                if (field_name !== 'addition_time' && field_name !== 'duration') {
+                if (is_edit_interface || (field_name !== 'addition_time' && field_name !== 'duration')) {
                     var field_display = get_display_for_field(field_name, value, prefix);
                     new_display.find('.' + prefix + '-' + field_name).html(field_display);
                 }
+                // NOTE THIS ONLY HAPPENS WHEN IT IS NEEDED IN ADD PAGE
                 else {
                     var split_time = window.SPLIT_TIME.get_split_time(
                         value,
@@ -327,16 +332,30 @@ $(document).ready(function () {
 
         var row_index = study_setup_body.find('tr').length;
 
-        new_row.append(
-            $('<td>').html(
-                create_clone_button(row_index) + create_delete_button('row', row_index)
-            ).append(
-                $('#id_number_of_items')
-                    .clone()
-                    .removeAttr('id')
-                    .attr('data-row', row_index)
-            )
-        );
+        var buttons_to_add = '';
+        if (!is_edit_interface) {
+            buttons_to_add = create_clone_button(row_index) + create_delete_button('row', row_index);
+            new_row.append(
+                $('<td>').html(
+                    buttons_to_add
+                ).append(
+                    $('#id_number_of_items')
+                        .clone()
+                        .removeAttr('id')
+                        .attr('data-row', row_index)
+                )
+            );
+        }
+        else {
+            new_row.append(
+                $('<td>')
+                .append(
+                    $('<span>')
+                        .attr('data-row', row_index)
+                        .text(group_index_to_item_name[row_index].join(', '))
+                )
+            );
+        }
 
         new_row.append(
             $('<td>').append(
@@ -591,6 +610,26 @@ $(document).ready(function () {
 
     // FOR EDIT PAGE ONLY
 
+    var field_name_to_type = {
+        // CONTRIVED
+        'cell_cell_sample': 'select',
+    };
+
+    $.each(prefixes, function(index, prefix) {
+        var current_dialog = $('#' + prefix + '_dialog');
+        current_dialog.find('input').each(function() {
+            if(!field_name_to_type[$(this).attr('name')]) {
+                field_name_to_type[$(this).attr('name')] = 'input';
+            }
+        });
+
+        current_dialog.find('select').each(function() {
+            if(!field_name_to_type[$(this).attr('name')]) {
+                field_name_to_type[$(this).attr('name')] = 'select';
+            }
+        });
+    });
+
     // BAD NOT DRY
     var excluded_fields = {
         'DELETE': true,
@@ -614,6 +653,9 @@ $(document).ready(function () {
         }
     }
 
+    // TRICKY: PLACE ELSEWHERE
+    var group_index_to_item_name = {};
+
     function get_groups_from_forms() {
         // LIST ALL PROFILES
         // Split into prefixes
@@ -621,7 +663,8 @@ $(document).ready(function () {
         var full_setups = {};
         full_setups = {};
         var setup_to_group = {};
-        var unique_entity_array = [];
+
+        var setup_id_to_name = {};
 
         // Get every item ID paired with its test type
         $('.matrix_item').each(function() {
@@ -633,6 +676,8 @@ $(document).ready(function () {
                     'compound': [],
                     'setting': [],
                 };
+
+                setup_id_to_name[current_setup_id] = $(this).find('input[name$="-name"]').val();
             }
         });
 
@@ -649,7 +694,20 @@ $(document).ready(function () {
                     $(this).find('input, select').each(function() {
                         var field_name = get_field_name($(this).attr('name'));
                         if (field_name) {
-                            data_to_add[field_name] = $(this).val();
+                            var field_type = field_name_to_type[prefix + '_' + field_name];
+                            if (field_type === 'input') {
+                                data_to_add[field_name] = $(this).val();
+                            }
+                            else {
+                                var possible_int = Math.floor($(this).val());
+                                if (possible_int) {
+                                    // THIS IS AN ID FIELD IF IT IS AN INT!
+                                    data_to_add[field_name + '_id'] = possible_int;
+                                }
+                                else {
+                                    data_to_add[field_name] = $(this).val();
+                                }
+                            }
                         }
                     });
 
@@ -664,16 +722,24 @@ $(document).ready(function () {
             var stringified_contents = JSON.stringify(contents);
             // NOTE: THIS EXCLUDES 0 VALUES
             if (unique_entities[stringified_contents] === undefined) {
-                var index_to_use = unique_entity_array.length;
+                var index_to_use = current_setup_data.length;
                 unique_entities[stringified_contents] = index_to_use;
 
-                unique_entity_array.push(stringified_contents);
+                current_setup_data.push($.extend(true, {}, contents));
+
+                group_index_to_item_name[index_to_use] = [];
             }
             setup_to_group[setup_id] = unique_entities[stringified_contents];
+
+            group_index_to_item_name[unique_entities[stringified_contents]].push(setup_id_to_name[setup_id]);
         });
 
         // console.log(unique_entities);
         console.log(setup_to_group);
+        console.log(current_setup_data);
+        console.log(group_index_to_item_name);
+
+        rebuild_table();
     }
 
     if (window.MASS_EDIT.matrix_id) {
@@ -717,5 +783,16 @@ $(document).ready(function () {
         });
 
         get_groups_from_forms();
+
+        // Post submission operation
+        // Special operations for pre-submission
+        $('form').submit(function() {
+            // Iterate over every group and apply the values to the respective forms
+            $.each(function(group_index, contents) {
+                $.each(function() {
+                    
+                });
+            });
+        });
     }
 });

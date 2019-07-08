@@ -1951,6 +1951,12 @@ class AssayStudyFormNew(SetupFormsMixin, SignOffMixin, BootstrapForm):
 
 
 class AssayMatrixFormNew(SetupFormsMixin, SignOffMixin, BootstrapForm):
+    # ADD test_types
+    test_type = forms.ChoiceField(
+        initial='control',
+        choices=TEST_TYPE_CHOICES
+    )
+
     class Meta(object):
         model = AssayMatrix
         exclude = tracking + restricted + ('study',)
@@ -1961,5 +1967,9 @@ class AssayMatrixFormNew(SetupFormsMixin, SignOffMixin, BootstrapForm):
         Kwargs:
         user -- the user in question
         """
+        # PROBABLY DON'T NEED THIS?
         self.user = kwargs.pop('user', None)
         super(AssayMatrixFormNew, self).__init__(*args, **kwargs)
+
+        # SLOPPY
+        self.fields['test_type'].widget.attrs['class'] = 'no-selectize test-type'
