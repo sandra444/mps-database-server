@@ -173,7 +173,8 @@ class OrganModelAdd(SpecificGroupRequiredMixin, CreateView):
             return self.render_to_response(self.get_context_data(
                 form=form,
                 protocol_formset=protocol_formset,
-                location_formset=location_formset
+                location_formset=location_formset,
+                cell_formset=cell_formset
             ))
 
 
@@ -253,7 +254,8 @@ class OrganModelUpdate(UpdateView):
             return self.render_to_response(self.get_context_data(
                 form=form,
                 protocol_formset=protocol_formset,
-                location_formset=location_formset
+                location_formset=location_formset,
+                cell_formset=cell_formset
             ))
 
 
