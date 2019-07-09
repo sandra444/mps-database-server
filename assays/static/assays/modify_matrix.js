@@ -74,6 +74,30 @@ $(document).ready(function () {
     empty_html[cell_prefix] = empty_cell_html;
     empty_html[setting_prefix] = empty_setting_html;
 
+    // var item_final_index = $('.' + item_prefix).length - 1;
+    var cell_final_index = $('.' + cell_prefix).length - 1;
+    var setting_final_index = $('.' + setting_prefix).length - 1;
+    var compound_final_index = $('.' + compound_prefix).length - 1;
+
+    // Due to extra=1 (A SETTING WHICH SHOULD NOT CHANGE) there will always be an empty example at the end
+    // I can use these to make new forms as necessary
+    // var empty_item_form = $('#' + item_prefix + '-' + item_final_index).html();
+    var empty_setting_form = $('#' + setting_prefix + '-' + setting_final_index).html();
+    var empty_cell_form = $('#' + cell_prefix + '-' + cell_final_index).html();
+    var empty_compound_form = $('#' + compound_prefix + '-' + compound_final_index).html();
+
+    var empty_forms = {};
+    // empty_forms[item_prefix] = empty_item_form;
+    empty_forms[compound_prefix] = empty_compound_form;
+    empty_forms[cell_prefix] = empty_cell_form;
+    empty_forms[setting_prefix] = empty_setting_form;
+
+    var final_indexes = {};
+    // final_indexes[item_prefix] = item_final_index;
+    final_indexes[compound_prefix] = compound_final_index;
+    final_indexes[cell_prefix] = cell_final_index;
+    final_indexes[setting_prefix] = setting_final_index;
+
     // CREATE DIALOGS
     $.each(prefixes, function(index, prefix) {
         var current_dialog = $('#' + prefix + '_dialog');
@@ -568,7 +592,38 @@ $(document).ready(function () {
         window.spinner.stop();
     }
 
-     function rebuild_table() {
+    function add_form(prefix, form) {
+        var formset = $('#' + prefix);
+        formset.append(form);
+        $('#id_' + prefix + '-TOTAL_FORMS').val($('.' + prefix).length);
+    }
+
+    // Takes a prefix and an Object of {field_name: value} to spit out a form
+    function generate_form(prefix, values_to_inject) {
+        // TODO TODO TODO
+        // Can't cache this, need to check every call!
+        var number_of_forms = $('.' + prefix).length;
+        var regex_to_replace_old_index = new RegExp("\-" + final_indexes[prefix] + "\-", 'g');
+
+        var new_html = empty_forms[prefix].replace(regex_to_replace_old_index,'-' + number_of_forms + '-');
+        var new_form = $('<div>')
+            .html(new_html)
+            .attr('id', prefix + '-' + number_of_forms)
+            .addClass(prefix);
+
+        // TODO TODO TODO ITEM FORMS NEED TO HAVE ROW AND COLUMN INDICES
+        if (values_to_inject) {
+            $.each(values_to_inject, function(field, value) {
+                new_form.find('input[name$="' + field + '"]').val(value);
+                // TODO NAIVE: Also set the attribute (val sets a property)
+                new_form.find('input[name$="' + field + '"]').attr('value', value);
+            });
+        }
+
+        return new_form;
+    }
+
+    function rebuild_table() {
         // GET RID OF ANYTHING IN THE TABLE
         study_setup_head.find('.new_column').remove();
         study_setup_body.empty();
@@ -655,6 +710,7 @@ $(document).ready(function () {
 
     // TRICKY: PLACE ELSEWHERE
     var group_index_to_item_name = {};
+    var group_index_to_item_id = {};
 
     function get_groups_from_forms() {
         // LIST ALL PROFILES
@@ -727,10 +783,12 @@ $(document).ready(function () {
 
                 current_setup_data.push($.extend(true, {}, contents));
 
+                group_index_to_item_id[index_to_use] = [];
                 group_index_to_item_name[index_to_use] = [];
             }
             setup_to_group[setup_id] = unique_entities[stringified_contents];
 
+            group_index_to_item_id[unique_entities[stringified_contents]].push(setup_id);
             group_index_to_item_name[unique_entities[stringified_contents]].push(setup_id_to_name[setup_id]);
         });
 
@@ -784,15 +842,66 @@ $(document).ready(function () {
 
         get_groups_from_forms();
 
+        function apply_data_to_forms() {
+            // Cache all relevant forms
+            var item_id_to_relevant_forms = {};
+            $.each(group_index_to_item_id, function(group_index, item_ids) {
+                $.each(item_ids, function(item_index, item_id) {
+                    item_id_to_relevant_forms[item_id] = {
+                        'cell': [],
+                        'compound': [],
+                        'setting': [],
+                        'item': $('.matrix_item:has(input[name$="-id"][value="' + item_id + '"])')
+                    };
+
+                    var current_matrix_forms = item_id_to_relevant_forms[item_id];
+
+                    $.each(prefixes, function(prefix_index, prefix) {
+                        $('.'  + prefix + ':has(input[name$="-matrix_item"][value="' + item_id + '"])').each(function() {
+                            current_matrix_forms[prefix].push($(this));
+                        });
+                    });
+                });
+            });
+
+            // Iterate over every group and apply the values to the respective forms
+            $.each(current_setup_data, function(group_index, contents) {
+                if (contents) {
+                    $.each(group_index_to_item_id[group_index], function(item_index, item_id) {
+                        var current_matrix_forms = item_id_to_relevant_forms[item_id];
+
+                        // SET TEST TYPE BEFORE ANYTHING
+                        current_matrix_forms['item'].find('select[name$="-test_type"]').val(contents['test_type']);
+
+                        $.each(prefixes, function(prefix_index, prefix) {
+                            // SET EACH VALUE
+                            $.each(contents[prefix], function(content_index, current_contents) {
+                                // MAKE A NEW FORM AS NECESSARY
+                                if (!current_matrix_forms[prefix][content_index]) {
+                                    var new_form = generate_form(prefix);
+                                    add_form(new_form);
+                                    current_matrix_forms[prefix].push(new_form);
+                                }
+                                var current_form = current_matrix_forms[prefix][content_index];
+
+                                $.each(current_contents, function(current_name, current_value) {
+                                    var current_name = current_name.replace('_id', '');
+                                    current_form.find('input[name$="-' + current_name + '"]').val(current_value);
+                                });
+                            });
+                        });
+                    });
+                }
+            });
+        }
+
+        // TEST
+        apply_data_to_forms();
+
         // Post submission operation
         // Special operations for pre-submission
         $('form').submit(function() {
-            // Iterate over every group and apply the values to the respective forms
-            $.each(function(group_index, contents) {
-                $.each(function() {
-                    
-                });
-            });
+            apply_data_to_forms();
         });
     }
 });

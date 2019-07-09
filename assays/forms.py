@@ -1959,7 +1959,8 @@ class AssayMatrixFormNew(SetupFormsMixin, SignOffMixin, BootstrapForm):
 
     class Meta(object):
         model = AssayMatrix
-        exclude = tracking + restricted + ('study',)
+        # ODD
+        fields = []
 
     def __init__(self, *args, **kwargs):
         """Init the Study Form

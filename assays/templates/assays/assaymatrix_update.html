@@ -37,6 +37,26 @@
 
 {% block fluid-content %}
 
+<form method="post">
+
+<h1>
+    Edit <em>{{ object }}</em>
+</h1>
+
+{% csrf_token %}
+
+{% include "submit.html" with flag="y" group=form.instance.group.name %}
+
+{% include 'errors.html' %}
+
+{{ form.errors }}
+{{ item_formset.errors }}
+{{ compound_formset.errors }}
+{{ cell_formset.errors }}
+{{ setting_formset.errors }}
+
+{% include 'tracking.html' %}
+
 {# This section is a setup table similar to the new study page #}
 {# TODO PUT THE TABLE THING HERE #}
 {# TODO TODO VERY MUCH NOT DRY #}
@@ -162,6 +182,7 @@
 {% endfor %}
 </div>
 </div>
+</form>
 {# End FORMS #}
 
 {% include 'assays/group_editing.html' %}
