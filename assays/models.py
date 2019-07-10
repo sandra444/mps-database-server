@@ -395,7 +395,7 @@ class AssayCompoundInstance(models.Model):
 
     def get_addition_time_string(self):
         split_times = get_split_times(self.addition_time)
-        return 'D{0} H{1} M{2}'.format(
+        return 'D{0:02} H{1:02} M{2:02}'.format(
             split_times.get('day'),
             split_times.get('hour'),
             split_times.get('minute'),
@@ -403,7 +403,7 @@ class AssayCompoundInstance(models.Model):
 
     def get_duration_string(self):
         split_times = get_split_times(self.duration)
-        return 'D{0} H{1} M{2}'.format(
+        return 'D{0:02} H{1:02} M{2:02}'.format(
             split_times.get('day'),
             split_times.get('hour'),
             split_times.get('minute'),
@@ -2144,7 +2144,7 @@ class AssaySetupCell(models.Model):
     # NOT DRY
     def get_addition_time_string(self):
         split_times = get_split_times(self.addition_time)
-        return 'D{0} H{1} M{2}'.format(
+        return 'D{0:02} H{1:02} M{2:02}'.format(
             split_times.get('day'),
             split_times.get('hour'),
             split_times.get('minute'),
@@ -2152,7 +2152,7 @@ class AssaySetupCell(models.Model):
 
     # def get_duration_string(self):
     #     split_times = get_split_times(self.duration)
-    #     return 'D{0} H{1} M{2}'.format(
+    #     return 'D{0:02} H{1:02} M{2:02}'.format(
     #         split_times.get('day'),
     #         split_times.get('hour'),
     #         split_times.get('minute'),
@@ -2280,7 +2280,7 @@ class AssayDataPoint(models.Model):
 
     def get_time_string(self):
         split_times = get_split_times(self.time)
-        return 'D{0} H{1} M{2}'.format(
+        return 'D{0:02} H{1:02} M{2:02}'.format(
             split_times.get('day'),
             split_times.get('hour'),
             split_times.get('minute'),
@@ -2342,7 +2342,7 @@ class AssaySetupCompound(models.Model):
     # NOT DRY
     def get_addition_time_string(self):
         split_times = get_split_times(self.addition_time)
-        return 'D{0} H{1} M{2}'.format(
+        return 'D{0:02} H{1:02} M{2:02}'.format(
             split_times.get('day'),
             split_times.get('hour'),
             split_times.get('minute'),
@@ -2350,7 +2350,7 @@ class AssaySetupCompound(models.Model):
 
     def get_duration_string(self):
         split_times = get_split_times(self.duration)
-        return 'D{0} H{1} M{2}'.format(
+        return 'D{0:02} H{1:02} M{2:02}'.format(
             split_times.get('day'),
             split_times.get('hour'),
             split_times.get('minute'),
@@ -2460,7 +2460,7 @@ class AssaySetupSetting(models.Model):
     # NOT DRY
     def get_addition_time_string(self):
         split_times = get_split_times(self.addition_time)
-        return 'D{0} H{1} M{2}'.format(
+        return 'D{0:02} H{1:02} M{2:02}'.format(
             split_times.get('day'),
             split_times.get('hour'),
             split_times.get('minute'),
@@ -2468,7 +2468,7 @@ class AssaySetupSetting(models.Model):
 
     def get_duration_string(self):
         split_times = get_split_times(self.duration)
-        return 'D{0} H{1} M{2}'.format(
+        return 'D{0:02} H{1:02} M{2:02}'.format(
             split_times.get('day'),
             split_times.get('hour'),
             split_times.get('minute'),
