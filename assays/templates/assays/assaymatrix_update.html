@@ -49,11 +49,11 @@
 
 {% include 'errors.html' %}
 
-{{ form.errors }}
-{{ item_formset.errors }}
-{{ compound_formset.errors }}
-{{ cell_formset.errors }}
-{{ setting_formset.errors }}
+{# {{ form.errors }} #}
+{# {{ item_formset.errors }} #}
+{# {{ compound_formset.errors }} #}
+{# {{ cell_formset.errors }} #}
+{# {{ setting_formset.errors }} #}
 
 {% include 'tracking.html' %}
 
@@ -112,8 +112,8 @@
 
     {# Set of buttons for adding cells, compounds, settings etc. #}
     <div class="padded-bottom">
-    <a role="button" class="btn btn-success" id="add_group_button"><span class="glyphicon glyphicon-plus-sign"></span>Add Group</a>
-    </div>
+    {# <a role="button" class="btn btn-success" id="add_group_button"><span class="glyphicon glyphicon-plus-sign"></span>Add Group</a> #}
+    {# </div> #}
 
     <div class="padded-bottom">
     <a role="button" class="btn btn-success" data-add-new-button="true" data-prefix="cell">Add Cell</a>
@@ -134,8 +134,8 @@
     </table>
 </div>
 
-{# <div style="display: none;"> #}
-<div>
+<div style="display: none;">
+{# <div> #}
 {# START FORMS #}
 {{ item_formset.management_form }}
 {{ compound_formset.management_form }}
