@@ -548,6 +548,23 @@ $(document).ready(function () {
         spawn_row(null, true);
     });
 
+    // SLOPPY: PLEASE REVISE
+    // Triggers for hiding elements
+    function change_matrix_visibility() {
+        $('.visibility-checkbox').each(function() {
+            var class_to_hide = $(this).attr('value') + ':not([hidden])';
+            if ($(this).prop('checked')) {
+                $(class_to_hide).show();
+            }
+            else {
+                $(class_to_hide).hide();
+            }
+        });
+    }
+
+    $('.visibility-checkbox').change(change_matrix_visibility);
+    change_matrix_visibility();
+
     // function apply_protocol_setup_to_row() {
     //
     // }
