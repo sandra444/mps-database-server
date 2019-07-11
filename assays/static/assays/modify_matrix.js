@@ -11,12 +11,15 @@ $(document).ready(function () {
         is_edit_interface = true;
     }
 
-    console.log(is_edit_interface);
+    // console.log(is_edit_interface);
 
     var setup_data_selector = $('#id_setup_data');
 
     // FULL DATA
     var current_setup_data = [];
+
+    // FOR EDITING INTERFACE ONLY
+    var form_slated_for_deletion = [];
 
     // ODD, NOT GOOD
     var organ_model = $('#id_organ_model');
@@ -114,7 +117,7 @@ $(document).ready(function () {
                 // Populate the fields
                 var current_data = $.extend(true, {}, current_setup_data[current_row_index][current_prefix][current_column_index]);
 
-                console.log('CURRENT_DATA', current_data);
+                // console.log('CURRENT_DATA', current_data);
 
                 var this_popup = $(this);
 
@@ -318,7 +321,7 @@ $(document).ready(function () {
     }
 
     function replace_setup_data() {
-        console.log(current_setup_data);
+        // console.log(current_setup_data);
         setup_data_selector.val(JSON.stringify(current_setup_data));
     }
 
@@ -463,41 +466,76 @@ $(document).ready(function () {
         current_prefix = $(this).attr('data-prefix');
         current_column_index = $(this).attr('data-column');
 
-        // DELETE EVERY COLUMN FOR THIS PREFIX THEN REBUILD
-        $.each(current_setup_data, function(index, current_content) {
-            current_content[current_prefix].splice(current_column_index, 1);
-        });
+        if (is_edit_interface) {
+            $('.subform-delete[data-column="' + current_column_index + '"][data-prefix="' + current_prefix + '"]').each(function() {
+                mark_for_deletion($(this));
+            });
+        }
+        else {
+            // DELETE EVERY COLUMN FOR THIS PREFIX THEN REBUILD
+            $.each(current_setup_data, function(index, current_content) {
+                current_content[current_prefix].splice(current_column_index, 1);
+            });
 
-        number_of_columns[current_prefix] -= 1;
+            number_of_columns[current_prefix] -= 1;
+        }
 
         rebuild_table();
     });
 
+    // NOT ALLOWED IN EDIT?
     $(document).on('click', 'a[data-clone-row-button="true"]', function() {
         current_row_index = Math.floor($(this).attr('data-row'));
         spawn_row(current_setup_data[current_row_index], true);
     });
 
+    // NOT ALLOWED IN EDIT?
     $(document).on('click', 'a[data-delete-row-button="true"]', function() {
         current_row_index = Math.floor($(this).attr('data-row'));
 
         // JUST FLAT OUT DELETE THE ROW
         current_setup_data.splice(current_row_index, 1);
 
-        console.log('DELETE', current_row_index, current_setup_data);
+        // console.log('DELETE', current_row_index, current_setup_data);
 
         rebuild_table();
     });
+
+    function mark_for_deletion(subform) {
+        // REDUNDANT BAD
+        current_row_index = Math.floor(subform.attr('data-row'));
+        current_column_index = Math.floor(subform.attr('data-column'));
+        current_prefix = subform.attr('data-prefix');
+
+        var item_ids = group_index_to_item_id[current_row_index];
+
+        // console.log('IDS', item_ids);
+
+        $.each(item_ids, function(i, item_id) {
+            var current_form = item_id_to_relevant_forms[item_id][current_prefix][current_column_index].find('input[name$="-DELETE"]');
+            var current_status = current_form.prop('checked');
+            current_form.prop('checked', !current_status);
+
+            // console.log(current_form);
+        });
+    }
 
     $(document).on('click', '.subform-delete', function() {
         current_row_index = Math.floor($(this).attr('data-row'));
         current_column_index = Math.floor($(this).attr('data-column'));
         current_prefix = $(this).attr('data-prefix');
 
+        if (is_edit_interface) {
+            // MARK ALL SUBFORMS IN QUESTION AS DELETED
+            // TODO
+            mark_for_deletion($(this));
+        }
         // DELETE THE DATA HERE
-        current_setup_data[current_row_index][current_prefix][current_column_index] = {};
+        else {
+            current_setup_data[current_row_index][current_prefix][current_column_index] = {};
+        }
 
-        console.log('DELETE', current_row_index, current_setup_data);
+        // console.log('DELETE', current_row_index, current_setup_data);
 
         rebuild_table();
     });
@@ -515,7 +553,7 @@ $(document).ready(function () {
     // }
 
     function set_new_protocol() {
-        console.log('SET NEW PROTOCOL', first_run, keep_current);
+        // console.log('SET NEW PROTOCOL', first_run, keep_current);
         // TERMINATE EARLY IF FIRST RUN
         if (first_run) {
             first_run = false;
@@ -527,7 +565,7 @@ $(document).ready(function () {
             document.getElementById("spinner")
         );
 
-        console.log('CHECK', protocol.val(), current_protocol);
+        // console.log('CHECK', protocol.val(), current_protocol);
 
         current_setup = {};
 
@@ -548,7 +586,7 @@ $(document).ready(function () {
                   // Stop spinner
                   window.spinner.stop();
 
-                  console.log(json);
+                  // console.log(json);
                   current_setup = $.extend(true, {}, json);
 
                   // MAKE SURE ALL PREFIXES ARE PRESENT
@@ -558,19 +596,19 @@ $(document).ready(function () {
                       }
                   });
 
-                  console.log(current_setup);
+                  // console.log(current_setup);
 
                   // FORCE INITIAL TO BE CONTROL
                   current_setup['test_type'] = 'control';
 
-                  console.log('KEEP CURRENT 1', keep_current);
+                  // console.log('KEEP CURRENT 1', keep_current);
                   if (keep_current) {
                       keep_current = false;
                   }
                   else {
                       current_setup_data = [];
                   }
-                  console.log('KEEP CURRENT 2', keep_current);
+                  // console.log('KEEP CURRENT 2', keep_current);
 
                   rebuild_table();
               },
@@ -587,7 +625,7 @@ $(document).ready(function () {
             rebuild_table();
         }
 
-        console.log(current_setup_data);
+        // console.log(current_setup_data);
 
         window.spinner.stop();
     }
@@ -623,6 +661,87 @@ $(document).ready(function () {
         return new_form;
     }
 
+    // TESTING
+    // Cache all relevant forms
+    var item_id_to_relevant_forms = {};
+
+    function apply_data_to_forms() {
+        // Reset forms slated for deletion
+        form_slated_for_deletion = [];
+        $.each(group_index_to_item_id, function(group_index, item_ids) {
+            form_slated_for_deletion.push({
+                // SLOPPY
+                'cell': {},
+                'compound': {},
+                'setting': {},
+            });
+
+            $.each(item_ids, function(item_index, item_id) {
+                item_id_to_relevant_forms[item_id] = {
+                    // SLOPPY
+                    'cell': [],
+                    'compound': [],
+                    'setting': [],
+                    'item': $('.matrix_item:has(input[name$="-id"][value="' + item_id + '"])')
+                };
+
+                var current_matrix_forms = item_id_to_relevant_forms[item_id];
+
+                $.each(prefixes, function(prefix_index, prefix) {
+                    $('.'  + prefix + ':has(input[name$="-matrix_item"][value="' + item_id + '"])').each(function() {
+                        current_matrix_forms[prefix].push($(this));
+                    });
+                });
+            });
+        });
+
+        // Iterate over every group and apply the values to the respective forms
+        $.each(current_setup_data, function(group_index, contents) {
+            if (contents) {
+                $.each(group_index_to_item_id[group_index], function(item_index, item_id) {
+                    var current_matrix_forms = item_id_to_relevant_forms[item_id];
+
+                    // SET TEST TYPE BEFORE ANYTHING
+                    current_matrix_forms['item'].find('select[name$="-test_type"]').val(contents['test_type']);
+
+                    $.each(prefixes, function(prefix_index, prefix) {
+                        // SET EACH VALUE
+                        $.each(contents[prefix], function(content_index, current_contents) {
+                            // MAKE A NEW FORM AS NECESSARY
+                            if (!current_matrix_forms[prefix][content_index]) {
+                                var new_form = generate_form(prefix);
+                                add_form(prefix, new_form);
+                                current_matrix_forms[prefix].push(new_form);
+                            }
+                            var current_form = current_matrix_forms[prefix][content_index];
+
+                            $.each(current_contents, function(current_name, current_value) {
+                                var current_name = current_name.replace('_id', '');
+                                current_form.find('input[name$="-' + current_name + '"]').val(current_value);
+                            });
+
+                            if (current_form.find('input[name$="-DELETE"]').prop('checked')) {
+                                form_slated_for_deletion[group_index][prefix][content_index] = true;
+                            }
+                        });
+                    });
+                });
+            }
+        });
+
+        // console.log(form_slated_for_deletion);
+
+        $.each(form_slated_for_deletion, function(group_index, content) {
+            $.each(content, function(prefix, current_content) {
+                $.each(current_content, function(content_index, mark) {
+                    if (mark) {
+                        $('.subform-delete[data-prefix="' + prefix + '"][data-row="' + group_index + '"][data-column="' + content_index + '"]').parent().parent().addClass('strikethrough');
+                    }
+                });
+            });
+        });
+    }
+
     function rebuild_table() {
         // GET RID OF ANYTHING IN THE TABLE
         study_setup_head.find('.new_column').remove();
@@ -645,6 +764,11 @@ $(document).ready(function () {
         }
 
         replace_setup_data();
+
+        // EXPENSIVE, BUT ULTIMATELY PROBABLY WORTH IT
+        if (is_edit_interface) {
+            apply_data_to_forms();
+        }
     }
 
     // Handling Device flow
@@ -772,7 +896,7 @@ $(document).ready(function () {
             });
         });
 
-        console.log(full_setups);
+        // console.log(full_setups);
 
         $.each(full_setups, function(setup_id, contents) {
             var stringified_contents = JSON.stringify(contents);
@@ -793,9 +917,9 @@ $(document).ready(function () {
         });
 
         // console.log(unique_entities);
-        console.log(setup_to_group);
-        console.log(current_setup_data);
-        console.log(group_index_to_item_name);
+        // console.log(setup_to_group);
+        // console.log(current_setup_data);
+        // console.log(group_index_to_item_name);
 
         rebuild_table();
     }
@@ -821,7 +945,7 @@ $(document).ready(function () {
                 // Stop spinner
                 window.spinner.stop();
 
-                console.log(json);
+                // console.log(json);
 
                 current_setup = $.extend(true, {}, json.current_setup);
 
@@ -842,66 +966,16 @@ $(document).ready(function () {
 
         get_groups_from_forms();
 
-        function apply_data_to_forms() {
-            // Cache all relevant forms
-            var item_id_to_relevant_forms = {};
-            $.each(group_index_to_item_id, function(group_index, item_ids) {
-                $.each(item_ids, function(item_index, item_id) {
-                    item_id_to_relevant_forms[item_id] = {
-                        'cell': [],
-                        'compound': [],
-                        'setting': [],
-                        'item': $('.matrix_item:has(input[name$="-id"][value="' + item_id + '"])')
-                    };
+        // Initially apply to forms if editing
+        // if (is_edit_interface) {
+        //     apply_data_to_forms();
+        // }
 
-                    var current_matrix_forms = item_id_to_relevant_forms[item_id];
-
-                    $.each(prefixes, function(prefix_index, prefix) {
-                        $('.'  + prefix + ':has(input[name$="-matrix_item"][value="' + item_id + '"])').each(function() {
-                            current_matrix_forms[prefix].push($(this));
-                        });
-                    });
-                });
-            });
-
-            // Iterate over every group and apply the values to the respective forms
-            $.each(current_setup_data, function(group_index, contents) {
-                if (contents) {
-                    $.each(group_index_to_item_id[group_index], function(item_index, item_id) {
-                        var current_matrix_forms = item_id_to_relevant_forms[item_id];
-
-                        // SET TEST TYPE BEFORE ANYTHING
-                        current_matrix_forms['item'].find('select[name$="-test_type"]').val(contents['test_type']);
-
-                        $.each(prefixes, function(prefix_index, prefix) {
-                            // SET EACH VALUE
-                            $.each(contents[prefix], function(content_index, current_contents) {
-                                // MAKE A NEW FORM AS NECESSARY
-                                if (!current_matrix_forms[prefix][content_index]) {
-                                    var new_form = generate_form(prefix);
-                                    add_form(new_form);
-                                    current_matrix_forms[prefix].push(new_form);
-                                }
-                                var current_form = current_matrix_forms[prefix][content_index];
-
-                                $.each(current_contents, function(current_name, current_value) {
-                                    var current_name = current_name.replace('_id', '');
-                                    current_form.find('input[name$="-' + current_name + '"]').val(current_value);
-                                });
-                            });
-                        });
-                    });
-                }
-            });
-        }
-
-        // TEST
-        apply_data_to_forms();
-
+        // SLOPPY WAY TO DO THIS
         // Post submission operation
         // Special operations for pre-submission
-        $('form').submit(function() {
-            apply_data_to_forms();
-        });
+        // $('form').submit(function() {
+        //     apply_data_to_forms();
+        // });
     }
 });
