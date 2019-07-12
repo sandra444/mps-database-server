@@ -2083,9 +2083,10 @@ class AssayMatrixNew(StudyGroupMixin, UpdateView):
         ).order_by(
             'row_index',
             'column_index'
-        ).prefetch_related(
-            'device'
         )
+        # ).prefetch_related(
+        #     'device'
+        # )
 
         # TODO SORTING CAN MAKE SURE THAT THE FORMS APPEAR IN THE RIGHT ORDER, BUT DECREASE PERFORMANCE
         compound_queryset = AssaySetupCompound.objects.filter(
