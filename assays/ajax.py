@@ -2417,6 +2417,7 @@ def apply_post_filter(post_filter, studies, assays, matrix_items, data_points):
         **assay_post_filters
     )
 
+    # REVISED
     # Special exceptions for combined filters
     combined_compounds_data = post_filter.setdefault('matrix_item', {}).setdefault(
         'assaysetupcompound__concentration__concentration_unit_id__in', {}
@@ -2424,6 +2425,8 @@ def apply_post_filter(post_filter, studies, assays, matrix_items, data_points):
 
     compound_concentration_filter = {}
     compound_unit_filter = {}
+    compound_concentration_filters = []
+    compound_unit_filters = []
 
     for concentration_unit_id in list(combined_compounds_data.keys()):
         concentration_unit_id = concentration_unit_id.split(COMBINED_VALUE_DELIMITER)
@@ -2435,6 +2438,12 @@ def apply_post_filter(post_filter, studies, assays, matrix_items, data_points):
         compound_unit_filter.update({
             unit: True
         })
+        compound_concentration_filters.append(
+            concentration
+        )
+        compound_unit_filters.append(
+            unit
+        )
 
     post_filter.get('matrix_item', {}).update({
         'assaysetupcompound__concentration__in': compound_concentration_filter,
@@ -2449,6 +2458,8 @@ def apply_post_filter(post_filter, studies, assays, matrix_items, data_points):
 
     cell_density_filter = {}
     cell_unit_filter = {}
+    cell_density_filters = []
+    cell_unit_filters = []
 
     for density_unit_id in list(combined_cells_data.keys()):
         density_unit_id = density_unit_id.split(COMBINED_VALUE_DELIMITER)
@@ -2460,6 +2471,12 @@ def apply_post_filter(post_filter, studies, assays, matrix_items, data_points):
         cell_unit_filter.update({
             unit: True
         })
+        cell_density_filters.append(
+            density
+        )
+        cell_unit_filters.append(
+            unit
+        )
 
     post_filter.get('matrix_item', {}).update({
         'assaysetupcell__density__in': cell_density_filter,
@@ -2474,6 +2491,8 @@ def apply_post_filter(post_filter, studies, assays, matrix_items, data_points):
 
     setting_value_filter = {}
     setting_unit_filter = {}
+    setting_value_filters = []
+    setting_unit_filters = []
 
     for value_unit_id in list(combined_settings_data.keys()):
         value_unit_id = value_unit_id.split(COMBINED_VALUE_DELIMITER)
@@ -2485,6 +2504,12 @@ def apply_post_filter(post_filter, studies, assays, matrix_items, data_points):
         setting_unit_filter.update({
             unit: True
         })
+        setting_value_filters.append(
+            value
+        )
+        setting_unit_filters.append(
+            unit
+        )
 
     post_filter.get('matrix_item', {}).update({
         'assaysetupsetting__value__in': setting_value_filter,
@@ -2555,6 +2580,36 @@ def apply_post_filter(post_filter, studies, assays, matrix_items, data_points):
         matrix_items = matrix_items.filter(
             **matrix_item_setting_post_filters
         )
+
+    # COMBINED FIELDS IF NECESSARY
+    # TODO TODO TODO
+    # INEFFICIENT REVISE
+    # ODD AND CONTRIVED: VIOLATES RO3
+    # Compounds
+    if compound_concentration_filters:
+        compound_total = AssayMatrixItem.objects.none()
+        for index in range(len(compound_concentration_filters)):
+            compound_total = compound_total | matrix_items.filter(
+                assaysetupcompound__concentration=compound_concentration_filters[index],
+                assaysetupcompound__concentration_unit_id=compound_unit_filters[index]
+            )
+        matrix_items = compound_total
+    if cell_density_filters:
+        cell_total = AssayMatrixItem.objects.none()
+        for index in range(len(cell_density_filters)):
+            cell_total = cell_total | matrix_items.filter(
+                assaysetupcell__density=cell_density_filters[index],
+                assaysetupcell__density_unit_id=cell_unit_filters[index]
+            )
+        matrix_items = cell_total
+    if setting_value_filters:
+        setting_total = AssayMatrixItem.objects.none()
+        for index in range(len(setting_value_filters)):
+            setting_total = matrix_items | matrix_items.filter(
+                assaysetupsetting__value=setting_value_filters[index],
+                assaysetupsetting__unit_id=setting_unit_filters[index]
+            )
+        matrix_item = setting_total
 
     matrix_items = matrix_items.distinct()
 
