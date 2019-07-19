@@ -106,7 +106,7 @@ def atof(text):
 
 def alphanum_key(text):
     return [
-        atof(c.replace('     ~@i1', '!').replace('     ~@i2', '"').replace('     ~@s', '"')) for c in re.split(r'[+-]?([0-9]+(?:[.][0-9]*)?|[.][0-9]+)', text)
+        atof(c.replace('     ~@i1', '!').replace('     ~@i2', '"').replace('     ~@s', '"').replace('\n', '')) for c in re.split(r'[+-]?([0-9]+(?:[.][0-9]*)?|[.][0-9]+)', text)
     ]
 
 alphanum_key_for_item_groups = lambda pair: re.split('([0-9]+)', pair[0])
@@ -3568,7 +3568,7 @@ def fetch_power_analysis_group_table(request):
         power_analysis_input.append([
             point.data_group,
             current_time,
-            (matrix_id_to_stringified_compounds[point.matrix_item.id]).split('\n')[0],
+            matrix_id_to_stringified_compounds[point.matrix_item.id],
             point.matrix_item.name,
             point.value
         ])
