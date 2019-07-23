@@ -30,8 +30,8 @@
     <script type="text/javascript" charset="utf-8" src="{% static "js/buttons.html5.min.js" %}"></script>
     <script type="text/javascript" charset="utf-8" src="{% static "js/buttons.print.min.js" %}"></script>
     <script type="text/javascript" charset="utf-8" src="{% static "js/datatable_options.js" %}"></script>
-    <!-- Help JS -->
-    <script type="text/javascript" charset="utf-8" src="{% static "js/help.js" %}"></script>
+    <!-- About JS -->
+    <script type="text/javascript" charset="utf-8" src="{% static "js/about.js" %}"></script>
     {% endcompress %}
 
     {% compress css %}
@@ -379,9 +379,9 @@
 
    <div id="about_releases" class="container padded-bottom">
 
-      <h1 class="sub1-bars"> Studies Planned for Release in the Next 90 Days </h1>
+      <h1 class="sub1-bars"> Studies Planned for Release in the Next {{ number_of_days }} Days </h1>
       <!--ask Luke about the hidden id for this...it works as glossary_table but that is from the help page-->
-      <table hidden id="glossary_table" class="display" cellspacing="0" width="100%">
+      <table hidden id="about_studies_for_release_table" class="display" cellspacing="0" width="100%">
 
       <thead>
          <tr>
