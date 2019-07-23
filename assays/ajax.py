@@ -1053,8 +1053,10 @@ def get_data_points_for_charting(
                 for compound in current_compound_profile:
                     # TERRIBLE CONDITIONAL
                     if (compound.get('valid_compound') and
-                        compound.get('addition_time') <= raw_time and
-                        compound.get('addition_time') + compound.get('duration') >= raw_time
+                        compound.get('addition_time') <= raw_time
+                        # NO LONGER CONSIDER DURATION
+#                        compound.get('addition_time') <= raw_time and
+#                        compound.get('addition_time') + compound.get('duration') >= raw_time
                     ):
                         # THIS VALUE IS ALREADY SCALED
                         concentration = compound.get('concentration')
@@ -1086,8 +1088,10 @@ def get_data_points_for_charting(
                 for compound in current_compound_profile:
                     # TERRIBLE CONDITIONAL
                     if (compound.get('valid_compound') and
-                        compound.get('addition_time') <= raw_time and
-                        compound.get('addition_time') + compound.get('duration') >= raw_time
+                        compound.get('addition_time') <= raw_time
+                        # NO LONGER CONSIDER DURATION
+#                        compound.get('addition_time') <= raw_time and
+#                        compound.get('addition_time') + compound.get('duration') >= raw_time
                     ):
                         # THIS VALUE IS ALREADY SCALED: SEE get_compound_profile
                         concentration += compound.get('concentration')
