@@ -43,7 +43,7 @@ from assays.models import (
     AssayImageSetting,
     AssaySetting,
     AssaySubtarget,
-    AssayType
+    AssayCategory
 )
 from microdevices.models import MicrophysiologyCenter
 # from compounds.models import Compound
@@ -1352,9 +1352,9 @@ class AssaySubtargetAdmin(ImportExportModelAdmin):
 admin.site.register(AssaySubtarget, AssaySubtargetAdmin)
 
 
-class AssayTypeAdmin(ImportExportModelAdmin):
-    model = AssayType
+class AssayCategoryAdmin(ImportExportModelAdmin):
+    model = AssayCategory
     search_fields = ('name', 'description')
     filter_horizontal = ('targets',)
 
-admin.site.register(AssayType, AssayTypeAdmin)
+admin.site.register(AssayCategory, AssayCategoryAdmin)
