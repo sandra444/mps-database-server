@@ -803,7 +803,7 @@ class AssayStudyAdmin(LockableAdmin):
         'access_group_display',
         'collaborator_group_display',
         'restricted',
-        # 'locked',
+        'locked',
         # 'description',
     )
 
