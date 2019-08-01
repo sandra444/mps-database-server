@@ -39,6 +39,7 @@ window.GROUPING = {
     // Probably doesn't need to be global
     group_criteria: null,
     post_filter: null,
+    // PARAMS
     filters_param: '',
     group_criteria_param: '',
     post_filter_param: '',
@@ -112,6 +113,10 @@ $(document).ready(function () {
                 }
             });
         }
+
+        // Set parent_model and filter to empty string
+        current_parent_model = '';
+        current_filter = '';
     }
 
     // Semi-arbitrary at the moment
@@ -313,6 +318,15 @@ $(document).ready(function () {
 
         window.GROUPING.group_criteria = {};
 
+        // TODO: KLUDGE TO DEAL WITH PAIRED CRITERIA (units and value)
+        // TODO: Might be a good idea to have both together in a string that gets split?
+        // TODO PLEASE AVOID MAGIC STRINGS LIKE THIS
+        var paired_criteria = {
+            'density': 'density_unit_id',
+            'concentration': 'concentration_unit_id',
+            'value': 'unit_id',
+        };
+
         grouping_checkbox_selector.each(function(index, current_checkbox) {
             if (this.checked) {
                 criteria_string.push('1');
@@ -322,6 +336,13 @@ $(document).ready(function () {
                 window.GROUPING.group_criteria[$(this).attr('data-group-relation')].push(
                     $(this).attr('data-group')
                 );
+
+                // ADD PAIRED CRITERIA IF NECESSARY
+                if (paired_criteria[$(this).attr('data-group')]) {
+                    window.GROUPING.group_criteria[$(this).attr('data-group-relation')].push(
+                        paired_criteria[$(this).attr('data-group')]
+                    );
+                }
             }
             else {
                 criteria_string.push('0');
@@ -481,6 +502,12 @@ $(document).ready(function () {
             close: function () {
                 // Purge the buffer
                 filter_buffer = {};
+
+                // Set parent model and filter to empty string
+                current_parent_model = '';
+                current_filter = '';
+
+                // "Super" close
                 $.ui.dialog.prototype.options.close();
             },
             buttons: [
@@ -512,6 +539,16 @@ $(document).ready(function () {
     post_filter_spawn_selector.click(function() {
         // Parent row
         var current_title = $(this).parent().parent().find('td').eq(2).html();
+
+        // If this is the same filter as is open, close it
+        if (
+            $(this).attr('data-parent-model') === current_parent_model &&
+            $(this).attr('data-filter-relation') === current_filter
+        ) {
+            filter_popup.dialog('close');
+            // End function immediately
+            return;
+        }
 
         // Current parent model
         current_parent_model = $(this).attr('data-parent-model');
@@ -551,7 +588,8 @@ $(document).ready(function () {
                 $.each(full_post_filter_data, function (obj_val, obj_name) {
                     var row = '<tr>';
 
-                    if (current_post_filter_data[obj_val]) {
+                    // SPECIFIC TO AVOID PROBLEMS WITH 0 AND EMPTY STRING
+                    if (current_post_filter_data[obj_val] !== undefined) {
                         row += '<td><input data-table-index="' + index + '" data-obj-name="' + obj_name + '" class="big-checkbox post-filter-checkbox" type="checkbox" value="' + obj_val + '" checked="checked"></td>';
                     }
                     else {
@@ -560,7 +598,8 @@ $(document).ready(function () {
 
                     if (obj_name) {
                         obj_name += '';
-                        obj_name = obj_name.replace('~@|', ' ');
+                        // obj_name = obj_name.replace('~@|', ' ');
+                        obj_name = obj_name.replace(window.SIGILS.COMBINED_VALUE_SIGIL, ' ');
                     }
 
                     // WARNING: NAIVE REPLACE

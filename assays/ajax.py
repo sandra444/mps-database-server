@@ -92,6 +92,11 @@ CONTROL_LABEL = '-Control-'
 # Variable to indicate that these should be split for special filters
 COMBINED_VALUE_DELIMITER = '~@|'
 
+INTERVAL_1_SIGIL = '     ~@i1'
+INTERVAL_2_SIGIL = '     ~@i2'
+SHAPE_SIGIL = '     ~@s'
+TOOLTIP_SIGIL = '     ~@t'
+
 
 # Note manipulations for sorting
 def atof(text):
@@ -104,7 +109,7 @@ def atof(text):
 
 def alphanum_key(text):
     return [
-        atof(c.replace('     ~@i1', '!').replace('     ~@i2', '"').replace('     ~@s', '"')) for c in re.split(r'[+-]?([0-9]+(?:[.][0-9]*)?|[.][0-9]+)', text)
+        atof(c.replace(INTERVAL_1_SIGIL, '!').replace(INTERVAL_2_SIGIL, '"').replace(SHAPE_SIGIL, '"')) for c in re.split(r'[+-]?([0-9]+(?:[.][0-9]*)?|[.][0-9]+)', text)
     ]
 
 alphanum_key_for_item_groups = lambda pair: re.split('([0-9]+)', pair[0])
@@ -716,7 +721,7 @@ def get_control_data(
 
 
 # TODO WE MAY WANT THE DEFINITION OF A TREATMENT GROUP TO CHANGE, WHO KNOWS
-def get_item_groups(study, criteria, matrix_items=None):
+def get_item_groups(study, criteria, matrix_items=None, compound_profile=False, matrix_item_compound_post_filters=None):
     treatment_groups = {}
     setup_to_treatment_group = {}
     header_keys = []
@@ -741,6 +746,8 @@ def get_item_groups(study, criteria, matrix_items=None):
         'assaysetupcompound_set__compound_instance__compound',
         'assaysetupcompound_set__concentration_unit',
         'assaysetupcompound_set__addition_location',
+        # SOMEWHAT FOOLISH
+        'study__group__microphysiologycenter_set'
     )
 
     if not criteria:
@@ -755,6 +762,8 @@ def get_item_groups(study, criteria, matrix_items=None):
     if criteria.get('setup', ''):
         if 'organ_model_id' in criteria.get('setup'):
             header_keys.append('MPS Model')
+        if 'study.group_id' in criteria.get('setup'):
+            header_keys.append('MPS User Group')
         if 'study_id' in criteria.get('setup'):
             header_keys.append('Study')
         if 'matrix_id' in criteria.get('setup'):
@@ -785,7 +794,14 @@ def get_item_groups(study, criteria, matrix_items=None):
         if criteria.get('cell', ''):
             treatment_group_tuple += setup.devolved_cells(criteria.get('cell'))
 
-        current_representative = treatment_groups.setdefault(treatment_group_tuple, setup.quick_dic(criteria))
+        current_representative = treatment_groups.get(treatment_group_tuple, None)
+
+        if current_representative is None:
+            current_representative = setup.quick_dic(compound_profile=compound_profile,
+            matrix_item_compound_post_filters=matrix_item_compound_post_filters, criteria=criteria)
+            treatment_groups.update({
+                treatment_group_tuple: current_representative
+            })
 
         current_representative.get('Items with Same Treatment').append(
             setup.get_hyperlinked_name()
@@ -808,6 +824,7 @@ def get_item_groups(study, criteria, matrix_items=None):
             x.get('Settings'),
             x.get('Matrix'),
             x.get('Study'),
+            x.get('MPS User Group'),
             x.get('Items with Same Treatment')[0]
         )
     )
@@ -865,26 +882,6 @@ def get_data_points_for_charting(
     new_data - indicates whether data in raw_data is new
     additional_data - data to merge with raw_data (used when displaying individual readouts for convenience)
     """
-    # Organization is assay -> unit -> compound/tag -> field -> time -> value
-    treatment_group_representatives, setup_to_treatment_group, header_keys = get_item_groups(
-        study,
-        criteria,
-        matrix_items
-    )
-
-    final_data = {
-        'sorted_assays': [],
-        'assays': [],
-        'heatmap': {
-            'matrices': {},
-            'values': {}
-        },
-        'header_keys': header_keys,
-        'assay_ids': {}
-    }
-
-    assay_ids = final_data.get('assay_ids')
-
     intermediate_data = {}
 
     initial_data = {}
@@ -967,6 +964,30 @@ def get_data_points_for_charting(
             ] for current_filter in post_filter.get('matrix_item', {}) if current_filter.startswith('assaysetupcompound__')
         }
 
+    compound_profile = key == 'dose' or key == 'compound'
+
+    # Organization is assay -> unit -> compound/tag -> field -> time -> value
+    treatment_group_representatives, setup_to_treatment_group, header_keys = get_item_groups(
+        study,
+        criteria,
+        matrix_items,
+        compound_profile=compound_profile,
+        matrix_item_compound_post_filters=matrix_item_compound_post_filters
+    )
+
+    final_data = {
+        'sorted_assays': [],
+        'assays': [],
+        'heatmap': {
+            'matrices': {},
+            'values': {}
+        },
+        'header_keys': header_keys,
+        'assay_ids': {}
+    }
+
+    assay_ids = final_data.get('assay_ids')
+
     # Process number_for_interval
     try:
         number_for_interval = float(number_for_interval)
@@ -1027,28 +1048,24 @@ def get_data_points_for_charting(
 
                 is_control = True
 
-                for compound in raw.matrix_item.assaysetupcompound_set.all():
-                    # Makes sure the compound doesn't violate filters
-                    # This is because a compound can be excluded even if its parent matrix item isn't!
-                    valid_compound = True
+                current_compound_profile = setup_to_treatment_group.get(matrix_item_id).get('compound_profile')
 
-                    for filter, values in list(matrix_item_compound_post_filters.items()):
-                        if str(attr_getter(compound, filter.split('__'))) not in values:
-                            valid_compound = False
-                            break
-
+                for compound in current_compound_profile:
                     # TERRIBLE CONDITIONAL
-                    if (valid_compound and
-                        compound.addition_time <= raw_time and
-                        compound.addition_time + compound.duration >= raw_time
+                    if (compound.get('valid_compound') and
+                        compound.get('addition_time') <= raw_time
+                        # NO LONGER CONSIDER DURATION
+#                        compound.get('addition_time') <= raw_time and
+#                        compound.get('addition_time') + compound.get('duration') >= raw_time
                     ):
-                        concentration = compound.concentration * compound.concentration_unit.scale_factor
+                        # THIS VALUE IS ALREADY SCALED
+                        concentration = compound.get('concentration')
                         tag.append(
                             # May need this to have float minutes, unsure
                             '{} {} {}'.format(
-                                compound.compound_instance.compound.name,
+                                compound.get('name'),
                                 concentration,
-                                compound.concentration_unit.base_unit,
+                                compound.get('base_unit')
                             )
                         )
 
@@ -1066,26 +1083,22 @@ def get_data_points_for_charting(
 
                 is_control = True
 
-                for compound in raw.matrix_item.assaysetupcompound_set.all():
-                    # Makes sure the compound doesn't violate filters
-                    # This is because a compound can be excluded even if its parent matrix item isn't!
-                    valid_compound = True
+                current_compound_profile = setup_to_treatment_group.get(matrix_item_id).get('compound_profile')
 
-                    for filter, values in list(matrix_item_compound_post_filters.items()):
-                        if str(attr_getter(compound, filter.split('__'))) not in values:
-                            valid_compound = False
-                            break
-
+                for compound in current_compound_profile:
                     # TERRIBLE CONDITIONAL
-                    if (valid_compound and
-                        compound.addition_time <= raw_time and
-                        compound.addition_time + compound.duration >= raw_time
+                    if (compound.get('valid_compound') and
+                        compound.get('addition_time') <= raw_time
+                        # NO LONGER CONSIDER DURATION
+#                        compound.get('addition_time') <= raw_time and
+#                        compound.get('addition_time') + compound.get('duration') >= raw_time
                     ):
-                        concentration += compound.concentration * compound.concentration_unit.scale_factor
+                        # THIS VALUE IS ALREADY SCALED: SEE get_compound_profile
+                        concentration += compound.get('concentration')
                         tag.append(
                             # May need this to have float minutes, unsure
                             '{} at D{}H{}M{}'.format(
-                                compound.compound_instance.compound.name,
+                                compound.get('name'),
                                 int(raw_time / 24 / 60),
                                 int(raw_time / 60 % 24),
                                 int(raw_time % 60)
@@ -1332,8 +1345,8 @@ def get_data_points_for_charting(
                         current_data.setdefault(current_key, {}).update({time: average})
                         if interval != 0:
                             accommodate_intervals = True
-                            current_data.setdefault(current_key+'     ~@i1', {}).update({time: average - interval})
-                            current_data.setdefault(current_key+'     ~@i2', {}).update({time: average + interval})
+                            current_data.setdefault(current_key+INTERVAL_1_SIGIL, {}).update({time: average - interval})
+                            current_data.setdefault(current_key+INTERVAL_2_SIGIL, {}).update({time: average + interval})
                         y_header.update({time: True})
                         include_current = True
 
@@ -1345,13 +1358,13 @@ def get_data_points_for_charting(
                     # Only include intervals if necessary
                     if accommodate_intervals and include_current and not key_present:
                         x_header.extend([
-                            '{}{}'.format(current_key, '     ~@i1'),
-                            '{}{}'.format(current_key, '     ~@i2')
+                            '{}{}'.format(current_key, INTERVAL_1_SIGIL),
+                            '{}{}'.format(current_key, INTERVAL_2_SIGIL)
                         ])
                     else:
-                        if '{}{}'.format(current_key, '     ~@i1') in current_data:
-                            del current_data['{}{}'.format(current_key, '     ~@i1')]
-                            del current_data['{}{}'.format(current_key, '     ~@i2')]
+                        if '{}{}'.format(current_key, INTERVAL_1_SIGIL) in current_data:
+                            del current_data['{}{}'.format(current_key, INTERVAL_1_SIGIL)]
+                            del current_data['{}{}'.format(current_key, INTERVAL_2_SIGIL)]
 
             x_header.sort(key=alphanum_key)
             current_table[0].extend(x_header)
@@ -2064,6 +2077,10 @@ def acquire_post_filter(studies, assays, matrix_items, data_points):
     # Table -> Filter -> value -> [name, in_use]
     post_filter = {}
 
+    studies = studies.prefetch_related(
+        'group__microphysiologycenter_set'
+    )
+
     for study in studies:
         current = post_filter.setdefault(
             'study', {}
@@ -2073,6 +2090,12 @@ def acquire_post_filter(studies, assays, matrix_items, data_points):
             'id__in', {}
         ).update({
             study.id: '{} ({})'.format(study.name, study.group.name)
+        })
+
+        current.setdefault(
+            'group_id__in', {}
+        ).update({
+            study.group_id: '{} ({})'.format(study.group.name, study.group.microphysiologycenter_set.first().name)
         })
 
     assays = assays.prefetch_related(
@@ -2362,12 +2385,11 @@ def acquire_post_filter(studies, assays, matrix_items, data_points):
             data_point.sample_location_id: data_point.sample_location.name
         })
 
-        # Out for now
-        # current.setdefault(
-        #     'time__in', {}
-        # ).update({
-        #     data_point.time: data_point.time
-        # })
+        current.setdefault(
+            'time__in', {}
+        ).update({
+            data_point.time: data_point.get_time_string()
+        })
 
     # STUPID, EXPEDIENT
     post_filter = json.loads(json.dumps(post_filter))
@@ -2399,6 +2421,7 @@ def apply_post_filter(post_filter, studies, assays, matrix_items, data_points):
         **assay_post_filters
     )
 
+    # REVISED
     # Special exceptions for combined filters
     combined_compounds_data = post_filter.setdefault('matrix_item', {}).setdefault(
         'assaysetupcompound__concentration__concentration_unit_id__in', {}
@@ -2406,6 +2429,8 @@ def apply_post_filter(post_filter, studies, assays, matrix_items, data_points):
 
     compound_concentration_filter = {}
     compound_unit_filter = {}
+    compound_concentration_filters = []
+    compound_unit_filters = []
 
     for concentration_unit_id in list(combined_compounds_data.keys()):
         concentration_unit_id = concentration_unit_id.split(COMBINED_VALUE_DELIMITER)
@@ -2417,6 +2442,12 @@ def apply_post_filter(post_filter, studies, assays, matrix_items, data_points):
         compound_unit_filter.update({
             unit: True
         })
+        compound_concentration_filters.append(
+            concentration
+        )
+        compound_unit_filters.append(
+            unit
+        )
 
     post_filter.get('matrix_item', {}).update({
         'assaysetupcompound__concentration__in': compound_concentration_filter,
@@ -2431,6 +2462,8 @@ def apply_post_filter(post_filter, studies, assays, matrix_items, data_points):
 
     cell_density_filter = {}
     cell_unit_filter = {}
+    cell_density_filters = []
+    cell_unit_filters = []
 
     for density_unit_id in list(combined_cells_data.keys()):
         density_unit_id = density_unit_id.split(COMBINED_VALUE_DELIMITER)
@@ -2442,6 +2475,12 @@ def apply_post_filter(post_filter, studies, assays, matrix_items, data_points):
         cell_unit_filter.update({
             unit: True
         })
+        cell_density_filters.append(
+            density
+        )
+        cell_unit_filters.append(
+            unit
+        )
 
     post_filter.get('matrix_item', {}).update({
         'assaysetupcell__density__in': cell_density_filter,
@@ -2456,6 +2495,8 @@ def apply_post_filter(post_filter, studies, assays, matrix_items, data_points):
 
     setting_value_filter = {}
     setting_unit_filter = {}
+    setting_value_filters = []
+    setting_unit_filters = []
 
     for value_unit_id in list(combined_settings_data.keys()):
         value_unit_id = value_unit_id.split(COMBINED_VALUE_DELIMITER)
@@ -2467,6 +2508,12 @@ def apply_post_filter(post_filter, studies, assays, matrix_items, data_points):
         setting_unit_filter.update({
             unit: True
         })
+        setting_value_filters.append(
+            value
+        )
+        setting_unit_filters.append(
+            unit
+        )
 
     post_filter.get('matrix_item', {}).update({
         'assaysetupsetting__value__in': setting_value_filter,
@@ -2507,33 +2554,119 @@ def apply_post_filter(post_filter, studies, assays, matrix_items, data_points):
     )
 
     # Compounds
+    # if post_filter.get('matrix_item', {}).get('assaysetupcompound__compound_instance__compound_id__in', {}).get(
+    #         '0', None
+    # ):
+    #     matrix_items = matrix_items.filter(
+    #         **matrix_item_compound_post_filters
+    #     ) | matrix_items.filter(assaysetupcompound__isnull=True)
+    # else:
+    #     matrix_items = matrix_items.filter(
+    #         **matrix_item_compound_post_filters
+    #     )
+
+    # Cells
+    # if post_filter.get('matrix_item', {}).get('assaysetupcell__cell_sample_id__in', {}).get('0', None):
+    #     matrix_items = matrix_items.filter(
+    #         **matrix_item_cell_post_filters
+    #     ) | matrix_items.filter(assaysetupcell__isnull=True)
+    # else:
+    #     matrix_items = matrix_items.filter(
+    #         **matrix_item_cell_post_filters
+    #     )
+
+    # Setting
+    # if post_filter.get('matrix_item', {}).get('assaysetupsetting__setting_id__in', {}).get('0', None):
+    #     matrix_items = matrix_items.filter(
+    #         **matrix_item_setting_post_filters
+    #     ) | matrix_items.filter(assaysetupsetting__isnull=True)
+    # else:
+    #     matrix_items = matrix_items.filter(
+    #         **matrix_item_setting_post_filters
+    #     )
+
+    # COMBINED FIELDS IF NECESSARY
+    # TODO TODO TODO
+    # INEFFICIENT REVISE
+    # ODD AND CONTRIVED: VIOLATES RO3
+    # Compounds
+    compound_total = None
+    if compound_concentration_filters:
+        compound_total = AssayMatrixItem.objects.none()
+        for index in range(len(compound_concentration_filters)):
+            compound_total = compound_total | matrix_items.filter(
+                assaysetupcompound__concentration=compound_concentration_filters[index],
+                assaysetupcompound__concentration_unit_id=compound_unit_filters[index]
+            )
+
     if post_filter.get('matrix_item', {}).get('assaysetupcompound__compound_instance__compound_id__in', {}).get(
             '0', None
     ):
-        matrix_items = matrix_items.filter(
-            **matrix_item_compound_post_filters
-        ) | matrix_items.filter(assaysetupcompound__isnull=True)
+        if compound_total is not None:
+            matrix_items = compound_total.filter(
+                **matrix_item_compound_post_filters
+            ) | matrix_items.filter(assaysetupcompound__isnull=True)
+        else:
+            matrix_items = matrix_items.filter(
+                **matrix_item_compound_post_filters
+            ) | matrix_items.filter(assaysetupcompound__isnull=True)
     else:
+        if compound_total is not None:
+            matrix_items = compound_total
+
         matrix_items = matrix_items.filter(
             **matrix_item_compound_post_filters
         )
 
-    # Cells
+    cell_total = None
+    if cell_density_filters:
+        cell_total = AssayMatrixItem.objects.none()
+        for index in range(len(cell_density_filters)):
+            cell_total = cell_total | matrix_items.filter(
+                assaysetupcell__density=cell_density_filters[index],
+                assaysetupcell__density_unit_id=cell_unit_filters[index]
+            )
+
     if post_filter.get('matrix_item', {}).get('assaysetupcell__cell_sample_id__in', {}).get('0', None):
-        matrix_items = matrix_items.filter(
-            **matrix_item_cell_post_filters
-        ) | matrix_items.filter(assaysetupcell__isnull=True)
+        if cell_total is not None:
+            matrix_items = cell_total.filter(
+                **matrix_item_cell_post_filters
+            ) | matrix_items.filter(assaysetupcell__isnull=True)
+
+        else:
+            matrix_items = matrix_items.filter(
+                **matrix_item_cell_post_filters
+            ) | matrix_items.filter(assaysetupcell__isnull=True)
     else:
+        if cell_total is not None:
+            matrix_items = cell_total
+
         matrix_items = matrix_items.filter(
             **matrix_item_cell_post_filters
         )
 
-    # Setting
+    setting_total = None
+    if setting_value_filters:
+        setting_total = AssayMatrixItem.objects.none()
+        for index in range(len(setting_value_filters)):
+            setting_total = setting_total | matrix_items.filter(
+                assaysetupsetting__value=setting_value_filters[index],
+                assaysetupsetting__unit_id=setting_unit_filters[index]
+            )
+
     if post_filter.get('matrix_item', {}).get('assaysetupsetting__setting_id__in', {}).get('0', None):
-        matrix_items = matrix_items.filter(
-            **matrix_item_setting_post_filters
-        ) | matrix_items.filter(assaysetupsetting__isnull=True)
+        if setting_total is not None:
+            matrix_items = setting_total.filter(
+                **matrix_item_setting_post_filters
+            ) | matrix_items.filter(assaysetupsetting__isnull=True)
+        else:
+            matrix_items = matrix_items.filter(
+                **matrix_item_setting_post_filters
+            ) | matrix_items.filter(assaysetupsetting__isnull=True)
     else:
+        if setting_total is not None:
+            matrix_items = setting_total
+
         matrix_items = matrix_items.filter(
             **matrix_item_setting_post_filters
         )
@@ -3041,14 +3174,14 @@ def get_inter_study_reproducibility(
                     x_header.update({
                         legend: True,
                         # This is to deal with intervals
-                        '{}{}'.format(legend, '     ~@i1'): True,
-                        '{}{}'.format(legend, '     ~@i2'): True,
+                        '{}{}'.format(legend, INTERVAL_1_SIGIL): True,
+                        '{}{}'.format(legend, INTERVAL_2_SIGIL): True,
                     })
                 else:
                     x_header.update({
                         legend: True,
                         # This is to deal with custom tooltips
-                        '{}{}'.format(legend, '     ~@t'): True,
+                        '{}{}'.format(legend, TOOLTIP_SIGIL): True,
                     })
 
                 for time, values in list(times.items()):
@@ -3058,7 +3191,7 @@ def get_inter_study_reproducibility(
                             matrix_item_id = value_pair[1]
 
                             current_data.setdefault(legend, {}).update({'{}~{}'.format(time, index): value})
-                            current_data.setdefault('{}{}'.format(legend, '     ~@t'), {}).update(
+                            current_data.setdefault('{}{}'.format(legend, TOOLTIP_SIGIL), {}).update(
                                 {
                                     '{}~{}'.format(time, index): [time, legend, value, matrix_item_id]
                                 }
@@ -3075,8 +3208,8 @@ def get_inter_study_reproducibility(
                             value = np.mean(values)
                             std = np.std(values)
                             current_data.setdefault(legend, {}).update({time: value})
-                            current_data.setdefault('{}{}'.format(legend, '     ~@i1'), {}).update({time: value - std})
-                            current_data.setdefault('{}{}'.format(legend, '     ~@i2'), {}).update({time: value + std})
+                            current_data.setdefault('{}{}'.format(legend, INTERVAL_1_SIGIL), {}).update({time: value - std})
+                            current_data.setdefault('{}{}'.format(legend, INTERVAL_2_SIGIL), {}).update({time: value + std})
                         else:
                             current_data.setdefault(legend, {}).update({time: values[0]})
                         y_header.update({time: True})
@@ -3236,16 +3369,16 @@ def get_inter_study_reproducibility(
                 x_header.update({
                     legend: True,
                     # This is to deal with the style
-                    '{}{}'.format(legend, '     ~@s'): True,
+                    '{}{}'.format(legend, SHAPE_SIGIL): True,
                     # This is to deal with intervals
-                    '{}{}'.format(legend, '     ~@i1'): True,
-                    '{}{}'.format(legend, '     ~@i2'): True,
+                    '{}{}'.format(legend, INTERVAL_1_SIGIL): True,
+                    '{}{}'.format(legend, INTERVAL_2_SIGIL): True,
                 })
                 for time, value_shape in list(times.items()):
                     value, shape = value_shape[0], value_shape[1]
                     if shape:
                         current_data.setdefault(legend, {}).update({time: value})
-                        current_data.setdefault('{}{}'.format(legend, '     ~@s'), {}).update({time: shape})
+                        current_data.setdefault('{}{}'.format(legend, SHAPE_SIGIL), {}).update({time: shape})
                         y_header.update({time: True})
                     else:
                         values = initial_chart_data.get(
@@ -3266,9 +3399,9 @@ def get_inter_study_reproducibility(
                             value = np.mean(values)
                             std = np.std(values)
                             current_data.setdefault(legend, {}).update({time: value})
-                            current_data.setdefault('{}{}'.format(legend, '     ~@i1'), {}).update({time: value - std})
-                            current_data.setdefault('{}{}'.format(legend, '     ~@i2'), {}).update({time: value + std})
-                            current_data.setdefault('{}{}'.format(legend, '     ~@s'), {}).update({time: shape})
+                            current_data.setdefault('{}{}'.format(legend, INTERVAL_1_SIGIL), {}).update({time: value - std})
+                            current_data.setdefault('{}{}'.format(legend, INTERVAL_2_SIGIL), {}).update({time: value + std})
+                            current_data.setdefault('{}{}'.format(legend, SHAPE_SIGIL), {}).update({time: shape})
                         else:
                             current_data.setdefault(legend, {}).update({time: values[0]})
 

@@ -112,7 +112,7 @@ $(document).ready(function () {
                 },
                 {
                     'visible': false,
-                    'targets': [7, 8, 12]
+                    'targets': [7, 8, 12, 14, 15]
                 },
                 {
                     'className': 'none',
@@ -152,7 +152,8 @@ $(document).ready(function () {
         var assay_id = $(this).val();
         // The text of each option contains the data we need
         // It is delimited with @~|
-        var split_name = $(this).text().split('~@|');
+        // var split_name = $(this).text().split('~@|');
+        var split_name = $(this).text().split(window.SIGILS.COMBINED_VALUE_SIGIL);
         var study_id = split_name[0];
         var target = split_name[1];
         var method = split_name[2];
@@ -314,7 +315,7 @@ $(document).ready(function () {
             selected_studies_table_selector.append(new_row);
 
             // Select/de-select all associated assays by default
-            if (!initial) {
+            if (!initial && study_id_to_assays[study_id]) {
                 $.each(study_id_to_assays[study_id], function(index, value) {
                     assays_selector.find('option[value="' + value.id + '"]').prop('selected', true);
                 });
@@ -330,9 +331,11 @@ $(document).ready(function () {
             current.remove();
 
             // Select/de-select all associated assays by default
-            $.each(study_id_to_assays[study_id], function(index, value) {
-                assays_selector.find('option[value="' + value.id + '"]').prop('selected', false);
-            });
+            if (study_id_to_assays[study_id]) {
+                $.each(study_id_to_assays[study_id], function(index, value) {
+                    assays_selector.find('option[value="' + value.id + '"]').prop('selected', false);
+                });
+            }
         }
     }
 
