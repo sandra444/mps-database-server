@@ -588,7 +588,8 @@ $(document).ready(function () {
                 $.each(full_post_filter_data, function (obj_val, obj_name) {
                     var row = '<tr>';
 
-                    if (current_post_filter_data[obj_val]) {
+                    // SPECIFIC TO AVOID PROBLEMS WITH 0 AND EMPTY STRING
+                    if (current_post_filter_data[obj_val] !== undefined) {
                         row += '<td><input data-table-index="' + index + '" data-obj-name="' + obj_name + '" class="big-checkbox post-filter-checkbox" type="checkbox" value="' + obj_val + '" checked="checked"></td>';
                     }
                     else {
