@@ -34,8 +34,9 @@ $(document).ready(function () {
         $("#myCarousel").carousel(5);
     });
 
+    $('.collapse').collapse()
 
-    $(".collapsible1, .collapsible2, .collapsible3").click(function() {
+    $(".collapsible1").click(function() {
         var content = this.nextElementSibling;
         if ($(content).css("display") != "none") {
             $(content).css("display", "none");
@@ -62,8 +63,14 @@ $(document).ready(function () {
         $(initial_hash).find('button').next().first().css("display", "block");
     }
 
-    // Call datatables for glossary
+    // Call datatables
     var about_studies_for_release_table = $('#about_studies_for_release_table').DataTable({
+        dom: 'B<"row">lfrtip',
+        "iDisplayLength": 10,
+        responsive: true
+    });
+
+    var about_models_and_centers_table = $('#about_models_and_centers_table').DataTable({
         dom: 'B<"row">lfrtip',
         "iDisplayLength": 10,
         responsive: true

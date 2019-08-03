@@ -2,9 +2,14 @@ from django.shortcuts import render
 from django.http import HttpResponseRedirect
 
 #sck added
+from django.utils import timezone
+#from django.db.models.functions import (ExtractYear, ExtractMonth, ExtractDay)
+from django.db.models import F, ExpressionWrapper, DateField, DateTimeField
 from datetime import date, timedelta
+#from django.db.models.functions import Concat
+from cellsamples.models import Organ
 
-from assays.models import AssayStudy
+from assays.models import AssayStudy, OrganModel
 from .forms import SearchForm
 
 from haystack.query import SearchQuerySet
@@ -125,10 +130,13 @@ def mps_help(request):
     return render(request, 'help.html', c)
 
 
-#This is an sckplaceholder
+#added sck
 def mps_about(request):
     number_of_days = 90
     a_months_ago = date.today() - timedelta(days=365) + timedelta(days=number_of_days)
+    #cellsamples_organ.organ_name
+    #microdevices_organmodel.name
+    #microdevices_microphysiologycenter.name
 
     d = {
         'number_of_days': number_of_days,
@@ -140,7 +148,23 @@ def mps_about(request):
             group_id__in=[21, 47, 109]
         ).exclude(
             signed_off_date__isnull=True
-        )
+        ).annotate(
+            scheduled_release_date=ExpressionWrapper(
+                F('signed_off_date') + timedelta(days=365.2425),
+                output_field=DateTimeField()),
+            ),
+        #Choices are: created_by, modified_by, signed_off_by, organ, disease, center, device, base_model
+        #organ, name, center
+        'about_models': OrganModel.objects.select_related('organ', 'center'),
+        #'about_models': Organ.objects.all().select_related('center'),
+        #no 'about_models': OrganModel.objects.all().select_related('name', 'organ_id', 'center_id'),
+        #'about_models2': OrganModel.objects.all().select_related('center')
+        #'about_models2': OrganModel.objects.select_related('center')
+        #'about_models2': OrganModel.objects.select_related('center').values('center', 'organ').distinct()
+        # https://stackoverflow.com/questions/36937322/django-queryset-exclude-regex
+        #'about_models2': OrganModel.objects.select_related('center').exclude(
+        #    organ=r'*Demo*'
+        #)
     }
 
     return render(request, 'about.html', d)
