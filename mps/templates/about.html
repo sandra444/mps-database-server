@@ -48,30 +48,11 @@
 
     <style>
     .sub1-bars {font-style: normal; font-size: 180%; margin-top: 3%; font-weight: 700}
-
     .sub1-bars {font-style: italic; font-size: 180%; margin-top: 3%; font-weight: 700}
 
-    .collapse:hover { font-weight: bold; font-size: 120%}
-
-    .collapsible1 {background-color: SteelBlue; font-size: 120%; color: white; cursor: pointer; padding: 10px;
-        width: 100%; border: none; text-align: left; outline: none; margin-bottom: 2px; margin-top: 1px; }
+    .collapsible1 {background-color: WhiteSmoke; font-size: 120%; color: steelblue; cursor: pointer; padding: 5px;
+    width: 100%; border: none; text-align: left; outline: none; margin-bottom: 2px; margin-top: 1px; }
     .content1 {display: none; transition: max-height 0.1s ease-out;}
-
-    .carousel{
-        background: #2f4357;
-        margin-top: 20px;
-    }
-    .carousel-item{
-        text-align: center;
-        min-height: 280px; /* Prevent carousel from being distorted if for some reason image doesn't load */
-    }
-    .bs-example{
-        margin: 20px;
-    }
-    .carousel-indicators li, .carousel a{
-        cursor: pointer;
-    }
-
     </style>
     {% endcompress %}
 
@@ -109,25 +90,26 @@
 
                     <li><a href="#about_overview">Overview</a></li>
 
-                    <li><a href="#about_features">Popular Features</a></li>
+                    <li><a href="#about_features">Key Features</a></li>
 
-                    <li><a href="#about_data">Contributing Data</a></li>
+                    <li><a href="#about_models_and_centers">MPS Models</a></li>
 
-                    <li><a href="#about_releases">Scheduled Data Releases</a></li>
+                    <li><a href="#about_data">Contribute Data</a></li>
+
+                    <li><a href="#about_releases">Scheduled Releases</a></li>
 
                     <li><a href="#about_faqs">FAQs</a></li>
 
                 </ul>
             </div>
         </div>
-
     </div>
     {# Close class container #}
 </nav>
 
 <div class="offset-help-navbar">
 
-   <div id="about_overview" class="container">
+    <div id="about_overview" class="container">
         <h1 class="sub1-bars"> Overview </h1>
         <div id="a_overview">
             <ul class="list-group">
@@ -135,15 +117,17 @@
                     <ul class="list-unstyled">
                         <li><b><i>Microphysiology Systems Database</i></b>
                         <br><br>
-                        The Microphysiology Systems Database (MPS-Db) combines the loading, storage, and sharing of experimentally derived assay data and data curated from external reference sources with visualization and analysis tools to provide a platform for designing experimental studies and performing data analysis and computational modeling.
+                        The Microphysiology Systems Database (MPS-Db) is a centralized resource, key to managing the  design and application of Microphysiology Systems (MPS) experimental models. It is a platform to analyze data and interpret MPS model results in the context of human physiology, and design computational models. The MPS-Db is an open source, internet accessible website that aggregates preclinical and clinical data from a variety of open source and proprietary databases as along with experimental data from MPS models. Through a simple icon driven interface the MPS-Db enables the design and implementation of multifactor and multichip studies, the capture and standardization of MPS  experimental data and metadata (description of the experimental design and conditions), and provides tools to analyze the data, and statistically assess the performance of the MPS models (e.g., reproducibility and power analysis). Data from any MPS organ model constructed on any type of platform from microplates to sophisticated, microfluidic devices evaluating any biological phenotype (e.g., secreted factors, cell morphology, cell viability, cellular and metabolic functions) measured in any assay (e.g., biosensors, ELISA, high content imaging, mass spec analysis) can be accommodated in the MPS-Db (
+                            <a target="_blank" href="https://www.liebertpub.com/doi/abs/10.1089/aivt.2016.0011">Gough et al. 2016</a>).
                         <br><br>
+                        The MPS-Db website is managed by the
+                            <a target="_blank" href="https://www.upddi.pitt.edu/">University of Pittsburgh Drug Discovery Institute</a>). Additional information about the MPS Database, included detailed instructions for using database features and contributing data to the database, can be found on the
+                            <a target="_blank" href="https://mps.csb.pitt.edu/help/"><i>Help</i></a> page. Questions and comments should be directed to MPSHELP@pitt.edu.
+                            <br><br>
                         The MPS-Db is funded by the National Center for Advancing Translational Sciences
                             <a target="_blank" href="https://ncats.nih.gov/tissuechip"> Tissue Chips Program</a>, the National Center for Advancing Translational Sciences (NCATS)
                             <a target="_blank" href="https://ncats.nih.gov/tissuechip/projects/centers"> Tissue Chip Testing Centers Program</a>, and in part by the
                             <a target="_blank" href="http://www.vanderbilt.edu/vprompt/index.php">Vanderbilt-Pittsburgh Resource</a> for Organotypic Models for Predictive Toxicology.
-                        <br><br>
-                        Additional information about the MPS Database, included detailed instructions for using database features and contributing data to the database, can be found on the
-                            <a target="_blank" href="https://mps.csb.pitt.edu/help/"><i>Help</i></a> page.
                         </li>
                     </ul>
                 </li>
@@ -151,90 +135,14 @@
         </div>
    </div>
 
-   <div id="about_features" class="container">
-            <h1 class="sub1-bars"> Popular Features </h1>
+    <div id="about_features" class="container">
+        <h1 class="sub1-bars"> Key Features </h1>
 
-
-            <div class="container-fluid">
-      <h1>Hello World!</h1>
-      <div class="row">
-        <div class="col-sm-8" style="background-color:yellow;">
-
-                    <div id="myCarousel" class="carousel slide" data-interval="1000" data-ride="carousel">
-                <!-- Indicators -->
-                <ol class="carousel-indicators">
-                    <li data-target="#myCarousel" data-slide-to="0" class="active"></li>
-                    <li data-target="#myCarousel" data-slide-to="1"></li>
-                    <li data-target="#myCarousel" data-slide-to="2"></li>
-
-                </ol>
-
-                <!-- Wrapper for slides -->
-                <div class="carousel-inner">
-                    <div class="item active">
-                    <img src="/static/img/about/compare_adverse_events.jpg" alt="Select Compounds, then Compare Adverse Events.">
-                        <div class="carousel-caption d-none d-md-block">
-                            <h2></h2>
-                            <p></p>
-                        </div>
-                        <div>
-                            <h1>Compare Adverse Events</h1>
-                            <p>Using data from the FDA Adverse Event Reporting System (FAERS) the CDC's National Ambulatory Medical Care Survey (NAMCS) database, a GUI enables quick comparison of adverse events associated with one or more compounds. Sort and search tools facilitate rapid identification of compounds and events, and selections are made by simply checking the boxes next to the compounds and adverse events of interest. Results are plotted, and the plot is updated as compound and event selections are modified. This feature is available to all MPS-Db users.</p>
-                        </div>
-                    </div>
-
-                    <div class="item">
-                    <img src="/static/img/about/lamps_model.jpg" alt="Select Models, the View MPS Models." >
-                        <div class="carousel-caption d-none d-md-block">
-                        </div>
-                        <div>
-                            <h1>Learn About MPS Models Being Used in Translational Medicine</h1>
-                            <p>Visit the MPS Models page and scroll through the list of MPS models in use by researchers working at the leading edge of the field. Select <b>View</b> to access detailed information on a model's design and construction. The MPS Model list is open to all MPS-Db users.</p>
-                        </div>
-                    </div>
-
-                    <div class="item">
-                    <img src="/static/img/about/lamps_model.jpg" alt="Select Models, the View MPS Models." >
-                        <div class="carousel-caption d-none d-md-block">
-                        </div>
-                        <div>
-                            <h1>Learn About MPS Models Being Used in Translational Medicine</h1>
-                            <p>Visit the MPS Models page and scroll through the list of MPS models in use by researchers working at the leading edge of the field. Select <b>View</b> to access detailed information on a model's design and construction. The MPS Model list is open to all MPS-Db users.</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Left and right controls -->
-                <a class="left carousel-control" href="#myCarousel" data-slide="prev">
-                <span class="glyphicon glyphicon-chevron-left"></span>
-                <span class="sr-only">Previous</span>
-                </a>
-                <a class="right carousel-control" href="#myCarousel" data-slide="next">
-                <span class="glyphicon glyphicon-chevron-right"></span>
-                <span class="sr-only">Next</span>
-                </a>
-                <!-- Carousel controls -->
-                <a class="carousel-control-prev">
-                <span class="carousel-control-prev-icon"></span>
-                </a>
-                <a class="carousel-control-next">
-                <span class="carousel-control-next-icon"></span>
-                </a>
-
-            </div>
-
-        </div>
-
-        <div class="col-sm-4" style="background-color:pink;">
-          <p>Sed ut perspiciatis...</p>
-        </div>
-      </div>
     </div>
 
 
 
-
-            <div>
+    <div>
             <!--
 
                         <div id="a_features01">
@@ -333,7 +241,7 @@
         </div>
 
 
-        </div>
+
 
    <div id="about_data" class="container">
         <h1 class="sub1-bars"> Contributing Data </h1>
@@ -410,10 +318,52 @@
         </div>
    </div>
 
+   <div id="about_models_and_centers" class="container padded-bottom">
+        <h1 class="sub1-bars"> Organs, Centers and Models </h1>
+            <ul class="list-group">
+                <li class="list-group-item">
+                    <ul class="list-unstyled">
+                        <li>
+                        Descriptions of MPS Models developed by institutions funded by NCATS are available in the MPS database. To see a list of models, visit the
+                            <a target="_blank" href="https://mps.csb.pitt.edu/microdevices/model/"><i>MPS Model</i></a> list page.
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        <table hidden id="about_models_and_centers_table" class="display" cellspacing="0" width="100%">
+        <thead>
+         <tr>
+            <th>Organ</th>
+            <th>Center</th>
+            <!--<th>Organ Model</th>-->
+          </tr>
+        </thead>
+
+        <tbody>
+          {% for each in about_models %}
+            <tr>
+              <td>{{ each.organ }}</td>
+              <td>{{ each.center }}</td>
+              <!--<td>{{ each.name }} </td>-->
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+   </div>
+
    <div id="about_releases" class="container padded-bottom">
-    <!-- when add the hidden, table disappears...but without, does not format correctly -->
-      <h1 class="sub1-bars"> Scheduled Releases in Next {{ number_of_days }} Days </h1>
-      <table id="about_studies_for_release_table" class="display" cellspacing="0" width="100%">
+   <!-- when add the hidden, table disappears...but without, does not format correctly -->
+        <h1 class="sub1-bars"> Scheduled Releases in Next {{ number_of_days }} Days </h1>
+           <ul class="list-group">
+            <li class="list-group-item">
+                <ul class="list-unstyled">
+                    <li>
+                    The table shows studies that were embargoed, but that should be opening to the broader scientific community within the next in next {{ number_of_days }} days.
+                    </li>
+                </ul>
+            </li>
+        </ul>
+      <table hidden id="about_studies_for_release_table" class="display" cellspacing="0" width="100%">
         <thead>
          <tr>
             <th>Study Name</th>
@@ -434,162 +384,91 @@
       </table>
    </div>
 
-   <div id="about_models_and_centers" class="container padded-bottom">
-
-      <h1 class="sub1-bars"> Organs, Centers and Models </h1>
-            <ul class="list-group">
-                <li class="list-group-item">
-                    <ul class="list-unstyled">
-                        <li>
-                        MPS Models from several leading institutions have been loaded into the MPS Database.
-                        </li>
-                    </ul>
-                </li>
-            </ul>
-        <table id="about_models_and_centers_table" class="display" cellspacing="0" width="100%">
-        <thead>
-         <tr>
-            <th>Organ</th>
-            <th>Center</th>
-            <th>Organ Model</th>
-          </tr>
-        </thead>
-
-        <tbody>
-          {% for each in about_models %}
-            <tr>
-              <td>{{ each.organ }}</td>
-              <td>{{ each.center }}</td>
-              <td>{{ each.name }} </td>
-            </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-   </div>
-
    <div id="about_faqs" class="container">
         <h1 class="sub1-bars"> Frequently Asked Questions </h1>
         <div id="a_faqs">
-            <div class="accordion" id="#accordFAQs">
-
-              <div class="card">
-                <div class="card-header" id="headingOne">
-                  <h2 class="mb-0">
-                    <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
-                      How do I become a registered MPS Database user?
-                    </button>
-                  </h2>
-                </div>
-                <div id="collapseOne" class="collapse show" aria-labelledby="headingOne" data-parent="#accordFAQs">
-                  <div class="card-body">
-                    Registration is easy and free. Just go to the
-                            <a href="https://mps.csb.pitt.edu/accounts/login/#" target="_blank" >MPS login page</a>
-                            and click on the option to register, or just
-                            <a href="https://mps.csb.pitt.edu/register/#" >click here</a>. 
-                  </div>
-                </div>
-              </div>
-                
-              <div class="card">
-                <div class="card-header" id="headingTwo">
-                  <h2 class="mb-0">
-                    <button class="btn btn-link collapsed" type="button" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
-                      How can I learn more about the features of the MPS Database?
-                    </button>
-                  </h2>
-                </div>
-                <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordFAQs">
-                  <div class="card-body">
-                    The MPS Database Help page provides detailed information and step-by-step examples on how to use the features of the MPS-Db. Click on the Help tab on the home page or click <a target="_blank" href="https://mps.csb.pitt.edu/help/"><i>here</i></a> to visit the page. </li>
-                  </div>
-                </div>
-              </div>
-                
-              <div class="card">
-                <div class="card-header" id="headingThree">
-                  <h2 class="mb-0">
-                    <button class="btn btn-link collapsed" type="button" data-toggle="collapse" data-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
-                      Can I use the MPS Database to select compounds to test in my MPS Models?
-                    </button>
-                  </h2>
-                </div>
-                <div id="collapseThree" class="collapse" aria-labelledby="headingThree" data-parent="#accordFAQs">
-                  <div class="card-body">
-                    The database offers multiple ways of looking at compound data. Some users like to review the compound list, and sort, for example, by LogP. Then, use the global search to find additional information about promising compounds (such as, drug trials associated with a specific compound). 
-                  </div>
-                </div>
-              </div>
-                
-               <div class="card">
-                <div class="card-header" id="headingFour">
-                  <h2 class="mb-0">
-                    <button class="btn btn-link collapsed" type="button" data-toggle="collapse" data-target="#collapseFour" aria-expanded="false" aria-controls="collapseFour">
-                      Is there a cost associated with using the MPS Database?
-                    </button>
-                  </h2>
-                </div>
-                <div id="collapseFour" class="collapse" aria-labelledby="headingFour" data-parent="#accordFAQs">
-                  <div class="card-body">
-                    The MPS-Db is an open source, internet accessible website. Many of the features in the database are unrestricted and available to all database users.
-                  </div>
-                </div>
-              </div>               
-
-               <div class="card">
-                <div class="card-header" id="headingFive">
-                  <h2 class="mb-0">
-                    <button class="btn btn-link collapsed" type="button" data-toggle="collapse" data-target="#collapseFive" aria-expanded="false" aria-controls="collapseFive">
-                      How can I add an analyze my assay data?
-                    </button>
-                  </h2>
-                </div>
-                <div id="collapseFive" class="collapse" aria-labelledby="headingFive" data-parent="#accordFAQs">
-                  <div class="card-body">
-                    To add assay data to the database, you must be assigned to a <i>Data Group</i> and granted the permission needed to add studies to and edit studies associated with a <i>Data Group</i>. These permissions must be granted by an MPS Database Administrator. Contact an administrator by sending an email to MPSHELP@pitt.edu with "Getting Setup to Contribute Data to the MPS Database" in the subject line. Detailed information on how to review and analyze data in the MPS Database is available on the database's
-                            <a target="_blank" href="https://mps.csb.pitt.edu/help/"><i>Help</i></a> page. </li>
-                  </div>
-                </div>
-              </div>
-
-               <div class="card">
-                <div class="card-header" id="headingSix">
-                  <h2 class="mb-0">
-                    <button class="btn btn-link collapsed" type="button" data-toggle="collapse" data-target="#collapseSix" aria-expanded="false" aria-controls="collapseSix">
-                      How can I review assay data submitted by another researcher?
-                    </button>
-                  </h2>
-                </div>
-                <div id="collapseSix" class="collapse" aria-labelledby="headingSix" data-parent="#accordFAQs">
-                  <div class="card-body">
-                    Researcher's who provide data are not required by the MPS Database Center to share their data. Studies that have been shared publicly will show on the
+            <button class="collapsible1">How do I become a registered MPS Database user? </button>
+            <div class="content1">
+                <ul class="list-group">
+                    <li class="list-group-item">
+                        <ul class="list-unstyled">
+                        Registration is easy and free. Just go to the
+                        <a href="https://mps.csb.pitt.edu/accounts/login/#" target="_blank" >MPS login page</a>
+                        and click on the option to register, or just
+                        <a href="https://mps.csb.pitt.edu/register/#" >click here</a>.
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+            <button class="collapsible1">How can I learn more about the features of the MPS Database? </button>
+            <div class="content1">
+                <ul class="list-group">
+                    <li class="list-group-item">
+                        <ul class="list-unstyled">
+                        The MPS Database Help page provides detailed information and step-by-step examples on how to use the features of the MPS-Db. Click on the Help tab on the home page or click <a target="_blank" href="https://mps.csb.pitt.edu/help/"><i>here</i></a> to visit the page.
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+            <button class="collapsible1">Can I use the MPS Database to select compounds to test in my MPS Models? </button>
+            <div class="content1">
+                <ul class="list-group">
+                    <li class="list-group-item">
+                        <ul class="list-unstyled">
+                        The database offers multiple ways of looking at compound data. Some users like to review the compound list, and sort, for example, by LogP. Then, use the global search to find additional information about promising compounds (such as, drug trials associated with a specific compound).
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+            <button class="collapsible1">Is there a cost associated with using the MPS Database? </button>
+            <div class="content1">
+                <ul class="list-group">
+                    <li class="list-group-item">
+                        <ul class="list-unstyled">
+                        The MPS-Db is an open source, internet accessible website. Many of the features in the database are unrestricted and available to all database users.
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+            <button class="collapsible1">How can I add an analyze my assay data? </button>
+            <div class="content1">
+                <ul class="list-group">
+                    <li class="list-group-item">
+                        <ul class="list-unstyled">
+                        To add assay data to the database, you must be assigned to a <i>Data Group</i> and granted the permission needed to add studies to and edit studies associated with a <i>Data Group</i>. These permissions must be granted by an MPS Database Administrator. Contact an administrator by sending an email to MPSHELP@pitt.edu with "Getting Setup to Contribute Data to the MPS Database" in the subject line. Detailed information on how to review and analyze data in the MPS Database is available on the database's
+                            <a target="_blank" href="https://mps.csb.pitt.edu/help/"><i>Help</i></a> page.
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+            <button class="collapsible1">How can I review assay data submitted by another researcher? </button>
+            <div class="content1">
+                <ul class="list-group">
+                    <li class="list-group-item">
+                        <ul class="list-unstyled">
+                        Researcher's who provide data are not required by the MPS Database Center to share their data. Studies that have been shared publicly will show on the
                             <a href="https://mps.csb.pitt.edu/assays/assaystudy/#" target="_blank" >Study List Page</a>
-                             of the database. Study data can also be accessed in other ways, for example, through the inter-study analysis feature, and when reviewing the Target/Analytes and Method/Kits lists (available through the Studies->Study Components menu). Review the <a target="_blank" href="https://mps.csb.pitt.edu/help/"><i>Help</i></a> page to learn about these features.
-                  </div>
-                </div>
-              </div>
-
-               <div class="card">
-                <div class="card-header" id="headingSeven">
-                  <h2 class="mb-0">
-                    <button class="btn btn-link collapsed" type="button" data-toggle="collapse" data-target="#collapseSeven" aria-expanded="false" aria-controls="collapseSeven">
-                      I am a data "stakeholder", how can I see the data I need to review?
-                    </button>
-                  </h2>
-                </div>
-                <div id="collapseSeven" class="collapse" aria-labelledby="headingSeven" data-parent="#accordFAQs">
-                  <div class="card-body">
-                    To access any data that are not publicly available, you must be a registered user of the MPS Database. Once you are registered, an MPS Database Administrator will grant you the appropriate permission to  acknowledge that you have reviewed the relevant study data. After permission has been granted, the study (or studies) that are waiting for your review will show on the
+                             of the database. Studies that you have been granted permission to view can also be accessed through the inter-study analysis feature, and when reviewing the Target/Analytes and Method/Kits lists (available through the Studies->Study Components menu). Review the <a target="_blank" href="https://mps.csb.pitt.edu/help/"><i>Help</i></a> page to learn about these features.
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+            <button class="collapsible1"> I am a data "stakeholder", how can I see the data I need to review? </button>
+            <div class="content1">
+                <ul class="list-group">
+                    <li class="list-group-item">
+                        <ul class="list-unstyled">
+                        To access any data that are not publicly available, you must be a registered user of the MPS Database. Once you are registered, an MPS Database Administrator will grant you the appropriate permission to  acknowledge that you have reviewed the relevant study data. After permission has been granted, the study (or studies) that are waiting for your review will show on the
                             <a href="https://mps.csb.pitt.edu/assays/assaystudy/#" target="_blank" >Study List Page</a>
                              of the database. Look for studies with a check mark, but without an eye or a pencil icon in the Review column.
-                  </div>
-                </div>
-              </div>
-
+                        </ul>
+                    </li>
+                </ul>
             </div>
         </div>
-
    </div>
 
 </div>
+
 </body>
 </html>

@@ -155,7 +155,8 @@ def mps_about(request):
             ),
         #Choices are: created_by, modified_by, signed_off_by, organ, disease, center, device, base_model
         #organ, name, center
-        'about_models': OrganModel.objects.select_related('organ', 'center'),
+        'about_models': OrganModel.objects.select_related('organ', 'center')
+           # .distinct("microdevices_organmodel.organ_id", "microdevices_organmodel.center_id"),
         #'about_models': Organ.objects.all().select_related('center'),
         #no 'about_models': OrganModel.objects.all().select_related('name', 'organ_id', 'center_id'),
         #'about_models2': OrganModel.objects.all().select_related('center')
@@ -165,6 +166,7 @@ def mps_about(request):
         #'about_models2': OrganModel.objects.select_related('center').exclude(
         #    organ=r'*Demo*'
         #)
+        ,
     }
 
     return render(request, 'about.html', d)

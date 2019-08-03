@@ -2,40 +2,6 @@ $(document).ready(function () {
     // Resolve anchors going to the incorrect location
     var offset = 60;
 
-
-    // Activate carousel
-    $("#myCarousel").carousel();
-
-    // Enable carousel control
-    $(".carousel-control-prev").click(function(){
-        $("#myCarousel").carousel('prev');
-    });
-    $(".carousel-control-next").click(function(){
-        $("#myCarousel").carousel('next');
-    });
-
-    // Enable carousel indicators
-    $(".slide-one").click(function(){
-        $("#myCarousel").carousel(0);
-    });
-    $(".slide-two").click(function(){
-        $("#myCarousel").carousel(1);
-    });
-    $(".slide-three").click(function(){
-        $("#myCarousel").carousel(2);
-    });
-    $(".slide-four").click(function(){
-        $("#myCarousel").carousel(3);
-    });
-    $(".slide-five").click(function(){
-        $("#myCarousel").carousel(4);
-    });
-    $(".slide-six").click(function(){
-        $("#myCarousel").carousel(5);
-    });
-
-    $('.collapse').collapse()
-
     $(".collapsible1").click(function() {
         var content = this.nextElementSibling;
         if ($(content).css("display") != "none") {
