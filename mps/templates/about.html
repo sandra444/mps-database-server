@@ -48,11 +48,19 @@
 
     <style>
     .sub1-bars {font-style: normal; font-size: 180%; margin-top: 3%; font-weight: 700}
-    .sub1-bars {font-style: italic; font-size: 180%; margin-top: 3%; font-weight: 700}
-
-    .collapsible1 {background-color: WhiteSmoke; font-size: 120%; color: steelblue; cursor: pointer; padding: 5px;
+    .sub2-bars {font-style: italic; font-size: 100%; }
+    .blues1 {color: steelblue; cursor: pointer; text-align: left;
+    font-style: normal; padding-bottom: 10px; display: inline-block;}
+    .slide_header {background-color: whitesmoke; color: steelblue; text-align: center;
+    font-style: normal; padding-bottom: 2px; font-size: 105%;}
+    .collapsible1 {background-color: white; font-size: 120%; color: steelblue; cursor: pointer; padding: 5px;
     width: 100%; border: none; text-align: left; outline: none; margin-bottom: 2px; margin-top: 1px; }
     .content1 {display: none; transition: max-height 0.1s ease-out;}
+    .collapsible2 {font-size: 100%; color: steelblue; padding: 0px; line-height: 10px;
+     border: none; text-align: left; outline: none; margin-bottom: 0px; margin-top: 0px; padding: 0px;}
+    .content2a {display: block; transition: max-height 0.1s ease-out;}
+    .content2b {display: none; transition: max-height 0.1s ease-out;}
+
     </style>
     {% endcompress %}
 
@@ -117,8 +125,7 @@
                     <ul class="list-unstyled">
                         <li><b><i>Microphysiology Systems Database</i></b>
                         <br><br>
-                        The Microphysiology Systems Database (MPS-Db) is a centralized resource, key to managing the  design and application of Microphysiology Systems (MPS) experimental models. It is a platform to analyze data and interpret MPS model results in the context of human physiology, and design computational models. The MPS-Db is an open source, internet accessible website that aggregates preclinical and clinical data from a variety of open source and proprietary databases as along with experimental data from MPS models. Through a simple icon driven interface the MPS-Db enables the design and implementation of multifactor and multichip studies, the capture and standardization of MPS  experimental data and metadata (description of the experimental design and conditions), and provides tools to analyze the data, and statistically assess the performance of the MPS models (e.g., reproducibility and power analysis). Data from any MPS organ model constructed on any type of platform from microplates to sophisticated, microfluidic devices evaluating any biological phenotype (e.g., secreted factors, cell morphology, cell viability, cellular and metabolic functions) measured in any assay (e.g., biosensors, ELISA, high content imaging, mass spec analysis) can be accommodated in the MPS-Db (
-                            <a target="_blank" href="https://www.liebertpub.com/doi/abs/10.1089/aivt.2016.0011">Gough et al. 2016</a>).
+                        The Microphysiology Systems Database (MPS-Db) is a centralized resource, key to managing the  design and application of Microphysiology Systems (MPS) experimental models. It is a platform to analyze data and interpret MPS model results in the context of human physiology, and design computational models. The MPS-Db is an open source, internet accessible website that aggregates preclinical and clinical data from a variety of open source and proprietary databases as along with experimental data from MPS models. Through a simple icon driven interface the MPS-Db enables the design and implementation of multifactor and multichip studies, the capture and standardization of MPS  experimental data and metadata (description of the experimental design and conditions), and provides tools to analyze the data, and statistically assess the performance of the MPS models (e.g., reproducibility and power analysis). Data from any MPS organ model constructed on any type of platform from microplates to sophisticated, microfluidic devices evaluating any biological phenotype (e.g., secreted factors, cell morphology, cell viability, cellular and metabolic functions) measured in any assay (e.g., biosensors, ELISA, high content imaging, mass spec analysis) can be accommodated in the MPS-Db (<a target="_blank" href="https://www.liebertpub.com/doi/abs/10.1089/aivt.2016.0011">Gough et al. 2016</a>).
                         <br><br>
                         The MPS-Db website is managed by the
                             <a target="_blank" href="https://www.upddi.pitt.edu/">University of Pittsburgh Drug Discovery Institute</a>). Additional information about the MPS Database, included detailed instructions for using database features and contributing data to the database, can be found on the
@@ -137,111 +144,168 @@
 
     <div id="about_features" class="container">
         <h1 class="sub1-bars"> Key Features </h1>
+        <div id="a_features">
+            <ul class="list-group">
+                <li class="list-group-item">
+                    <ul class="list-unstyled">
+                        <div class="row" >
+                            <div class="col-sm-3">
+                                <div>
+                                    <p class="sub2-bars">Click to Learn More</p>
+                                    <a href="#f01" class="blues1">Database Overview</a>
+                                    <a href="#f02" class="blues1">Global Search</a>
+                                    <a href="#f03" class="blues1">MPS Models</a>
+                                    <a href="#f04" class="blues1">Compound Information</a>
+                                    <a href="#f05" class="blues1">Comparing Adverse Events</a>
+                                    <a href="#f06" class="blues1">Drug Trials</a>
+                                    <a href="#f07" class="blues1">Analyzing Data</a>
+                                    <a href="#f08" class="blues1">Disease Portal</a>
+                                </div>
+                            </div>
+                            <div class="col-sm-9" >
+                                <div id="f01">
+                                <button class="collapsible2"></button>
+                                    <div class="content2a">
+                                        <ul class="list-group">
+                                            <li class="list-group-item">
+                                                <ul class="list-unstyled">
+                                                    <div id="fea01" class="slide_header">
+                                                    Overview of the MPS Database - Get Figure from Mark
+                                                    </div>
+                                                    <br><img src="/static/img/about/study_grouping.jpg" alt="Data are grouped into studies" class="img-responsive" height="190" width="550">
+                                                    <br>MPS database is a centralized resource for storing, managing, and analysing MPS data.
+                                                </ul>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
 
-    </div>
+                                <div id="f02">
+                                <button class="collapsible2"></button>
+                                    <div class="content2b">
+                                        <ul class="list-group">
+                                            <li class="list-group-item">
+                                                <ul class="list-unstyled">
+                                                    <div id="fea02" class="slide_header">
+                                                    Find Information Quickly Using the Global Search
+                                                    </div>
+                                                    <br><img src="/static/img/about/global_search.jpg" alt="Select Compounds, then View Drug Trials." class="img-responsive" height="360" width="590">
+                                                    <br>The global search simplifies the process of finding information. Enter a compound, a disease, a device, or other keys word (e.g., Cmax) to quickly locate matches in the database.
+                                                </ul>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
 
+                                <div id="f03">
+                                <button class="collapsible2"></button>
+                                    <div class="content2b">
+                                        <ul class="list-group">
+                                            <li class="list-group-item">
+                                                <ul class="list-unstyled">
+                                                    <div id="fea03" class="slide_header">
+                                                    Learn About MPS Models Being Used in Translational Medicine
+                                                    </div>
+                                                    <br><img src="/static/img/about/lamps_model.jpg" alt="Select Models, the View MPS Models." class="img-responsive" height="330" width="520" >
+                                                    <br>Visit the MPS Models page and scroll through the list of MPS models in use by researchers working at the leading edge of the field. Select <b>View</b> to access detailed information on a model's design and construction. The MPS Model list is open to all MPS-Db users.
+                                                </ul>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
 
+                                <div id="f04">
+                                <button class="collapsible2"></button>
+                                    <div class="content2b">
+                                        <ul class="list-group">
+                                            <li class="list-group-item">
+                                                <ul class="list-unstyled">
+                                                    <div id="fea04" class="slide_header">
+                                                    Review Compound Information
+                                                    </div>
+                                                    <br><img src="/static/img/about/compound_list.jpg" alt="Select Compounds, then View Chemical Data." class="img-responsive" height="380" width="620">
+                                                    <br>Review compound information, including LogP, molecular weight, compound synonyms, and a link to the compound in ChEMBL, all presented in a searchable and sortable table. Select <b>View</b> to access additional compound properties.
+                                                </ul>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
 
-    <div>
-            <!--
+                                <div id="f05">
+                                <button class="collapsible2"></button>
+                                    <div class="content2b">
+                                        <ul class="list-group">
+                                            <li class="list-group-item">
+                                                <ul class="list-unstyled">
+                                                    <div id="fea05" class="slide_header">
+                                                    Compare Adverse Drug Related Events
+                                                    </div>
+                                                    <br><img src="/static/img/about/compare_adverse_events.jpg" alt="Select Compounds, then Compare Adverse Events." class="img-responsive" height="250" width="500" >
+                                                    <br>Using data from the FDA Adverse Event Reporting System (FAERS) the CDC's National Ambulatory Medical Care Survey (NAMCS) database, a GUI enables quick comparison of adverse events associated with one or more compounds. Sort and search tools facilitate rapid identification of compounds and events, and selections are made by simply checking the boxes next to the compounds and adverse events of interest. Results are plotted, and the plot is updated as compound and event selections are modified. This feature is available to all MPS-Db users.
+                                                </ul>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
 
-                        <div id="a_features01">
-                            <ul class="list-group">
-                                <li class="list-group-item">
-                                    <ul class="list-unstyled">
-                                        <li>
-                                            <b><i>Compare Adverse Events</i></b>
-                                            <br><br>
-                                            Using data from the FDA Adverse Event Reporting System (FAERS) the CDC's National Ambulatory Medical Care Survey (NAMCS) database, a GUI enables quick comparison of adverse events associated with one or more compounds. Sort and search tools facilitate rapid identification of compounds and events, and selections are made by simply checking the boxes next to the compounds and adverse events of interest. Results are plotted, and the plot is updated as compound and event selections are modified. This feature is available to all MPS-Db users.
-                                            <br><br><img src="/static/img/about/compare_adverse_events.jpg" alt="Select Compounds, then Compare Adverse Events." class="img-responsive" height="250" width="500" >
-                                        </li>
-                                    </ul>
-                                </li>
-                            </ul>
+                                <div id="f06">
+                                <button class="collapsible2"></button>
+                                    <div class="content2b">
+                                        <ul class="list-group">
+                                            <li class="list-group-item">
+                                                <ul class="list-unstyled">
+                                                    <div id="fea06" class="slide_header">
+                                                    Review Drug Trial Information
+                                                    </div>
+                                                    <br><img src="/static/img/about/drug_trials_list.jpg" alt="Select Compounds, then View Drug Trials." class="img-responsive" height="380" width="620">
+                                                    <br>Review drug trial information, aggregated together from multiple sources, presented in a searchable and sortable table. Select a drug trial to view and learn more about the results of the trial and the source of the data.
+                                                </ul>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+
+                                <div id="f07">
+                                <button class="collapsible2"></button>
+                                    <div class="content2b">
+                                        <ul class="list-group">
+                                            <li class="list-group-item">
+                                                <ul class="list-unstyled">
+                                                    <div id="fea07" class="slide_header">
+                                                    Analyze Experimentally Derived Assay Data
+                                                    </div>
+                                                    <br><img src="/static/img/about/study_summary_graph.jpg" alt="Contribute your data and use the online tools to analyze your data." class="img-responsive" height="230" width="480">
+                                                    <br>Design and setup a study, upload assay data and then use the online tools to visualize, analyze, and computationally model the results. The database includes a comprehensive interface for filtering and grouping data, and provides customizable tools for visualizing data. Data can be kept private, shared with a small group of colleagues, or opened to all registered database users. Registered users with editor access can add and edit study data. All MPS-Db users can access the built-in tools to analyze and model data that have been shared with them or that have been opened to the public.
+                                                </ul>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+
+                                <div id="f08">
+                                <button class="collapsible2"></button>
+                                    <div class="content2b">
+                                        <ul class="list-group">
+                                            <li class="list-group-item">
+                                                <ul class="list-unstyled">
+                                                    <div id="fea08" class="slide_header">
+                                                    Disease Portal
+                                                    </div>
+                                                    <br><img src="/static/img/about/study_summary_graph.jpg" alt="Contribute your data and use the online tools to analyze your data." class="img-responsive" height="230" width="480">
+                                                    <br>Not Done yet .... get figure
+                                                </ul>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+
+                            </div>
                         </div>
-
-                        <div id="a_features02">
-                            <ul class="list-group">
-                                <li class="list-group-item">
-                                    <ul class="list-unstyled">
-                                        <li>
-                                            <b><i>Learn About MPS Models Being Used in Translational Medicine </i></b>
-                                            <br><br>
-                                            Visit the MPS Models page and scroll through the list of MPS models in use by researchers working at the leading edge of the field. Select <b>View</b> to access detailed information on a model's design and construction. The MPS Model list is open to all MPS-Db users.
-                                            <br><br><img src="/static/img/about/lamps_model.jpg" alt="Select Models, the View MPS Models." class="img-responsive" height="330" width="520" >
-                                        </li>
-                                    </ul>
-                                </li>
-                            </ul>
-                        </div>
-
-                        <div id="a_features03">
-                            <ul class="list-group">
-                                <li class="list-group-item">
-                                    <ul class="list-unstyled">
-                                        <li>
-                                            <b><i>Analyze Experimentally Derived Assay Data </i></b>
-                                            <br><br>
-                                            Design and setup a study, upload assay data and then use the online tools to visualize, analyze, and computationally model the results. The database includes a comprehensive interface for filtering and grouping data, and provides customizable tools for visualizing data. Data can be kept private, shared with a small group of colleagues, or opened to all registered database users. Registered users with editor access can add and edit study data. All MPS-Db users can access the built-in tools to analyze and model data that have been shared with them or that have been opened to the public.
-                                            <br><br><img src="/static/img/about/study_summary_graph.jpg" alt="Contribute your data and use the online tools to analyze your data." class="img-responsive" height="230" width="480">
-                                        </li>
-                                    </ul>
-                                </li>
-                            </ul>
-                        </div>
-
-                        <div id="a_features04">
-                            <ul class="list-group">
-                                <li class="list-group-item">
-                                    <ul class="list-unstyled">
-                                        <li>
-                                            <b><i>Review Compound Information </i></b>
-                                            <br><br>
-                                            Review compound information, including LogP, molecular weight, compound synonyms, and a link to the compound in ChEMBL, all presented in a searchable and sortable table. Select <b>View</b> to access additional compound properties.
-                                            <br><br><img src="/static/img/about/compound_list.jpg" alt="Select Compounds, then View Chemical Data." class="img-responsive" height="380" width="620">
-                                        </li>
-                                    </ul>
-                                </li>
-                            </ul>
-                        </div>
-
-                        <div id="a_features05">
-                            <ul class="list-group">
-                                <li class="list-group-item">
-                                    <ul class="list-unstyled">
-                                        <li>
-                                            <b><i>Review Drug Trial Information </i></b>
-                                            <br><br>
-                                            Review drug trial information, aggregated together from multiple sources, presented in a searchable and sortable table. Select a drug trial to view and learn more about the results of the trial and the source of the data.
-                                            <br><br><img src="/static/img/about/drug_trials_list.jpg" alt="Select Compounds, then View Drug Trials." class="img-responsive" height="380" width="620">
-                                        </li>
-                                    </ul>
-                                </li>
-                            </ul>
-                        </div>
-
-                        <div id="a_features06">
-                            <ul class="list-group">
-                                <li class="list-group-item">
-                                    <ul class="list-unstyled">
-                                        <li>
-                                            <b><i>Global Search Function </i></b>
-                                            <br><br>The global search simplifies the process of finding information. Enter a compound, a disease, a device, or other keys word (e.g., Cmax) to quickly locate matches in the database.
-                                            <br><br><img src="/static/img/about/global_search.jpg" alt="Select Compounds, then View Drug Trials." class="img-responsive" height="360" width="590">
-                                        </li>
-                                    </ul>
-                                </li>
-                            </ul>
-                        </div>
-
-            -->
-
-
-
+                    </ul>
+                </li>
+            </ul>
         </div>
-
-
-
+    </div>
 
    <div id="about_data" class="container">
         <h1 class="sub1-bars"> Contributing Data </h1>
@@ -465,6 +529,7 @@
                     </li>
                 </ul>
             </div>
+            <h1><br><br><br><br></h1>
         </div>
    </div>
 

@@ -11,6 +11,13 @@ $(document).ready(function () {
         }
     });
 
+    $(".collalsible2").click(function() {
+        var content = this.nextElementSibling;
+        $('content2a').css("display", "none");
+        $('content2b').css("display", "none");
+        $(content).css("display", "block");
+    });
+
     $('a').not("[href*='/']").click(function(event) {
         event.preventDefault();
         if ($($(this).attr('href'))[0]) {

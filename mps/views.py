@@ -4,7 +4,7 @@ from django.http import HttpResponseRedirect
 #sck added
 from django.utils import timezone
 #from django.db.models.functions import (ExtractYear, ExtractMonth, ExtractDay)
-from django.db.models import F, ExpressionWrapper, DateField, DateTimeField
+from django.db.models import F, ExpressionWrapper, DateField, DateTimeField, Q
 from datetime import date, timedelta
 #from django.db.models.functions import Concat
 from cellsamples.models import Organ
@@ -155,7 +155,15 @@ def mps_about(request):
             ),
         #Choices are: created_by, modified_by, signed_off_by, organ, disease, center, device, base_model
         #organ, name, center
-        'about_models': OrganModel.objects.select_related('organ', 'center')
+        #https://stackoverflow.com/questions/21355601/django-orm-inner-join
+        'about_models': OrganModel.objects.exclude(
+            name__in=['Demo-Organ']).select_related(
+            'organ', 'center')
+            #.distinct('organ', 'center')
+        #('cellsamples_organ.organ_name', 'microdevices_microphysiologycenter.name')
+        #'about_models': OrganModel.objects.select_related('organ', 'center')
+        #    .filter(organ__in=[item['organ'] for organ in distinct])
+        #    .exclude(organ__in=['Demo-Organ'])
            # .distinct("microdevices_organmodel.organ_id", "microdevices_organmodel.center_id"),
         #'about_models': Organ.objects.all().select_related('center'),
         #no 'about_models': OrganModel.objects.all().select_related('name', 'organ_id', 'center_id'),
