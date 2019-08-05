@@ -8,6 +8,7 @@ from django.db.models import F, ExpressionWrapper, DateField, DateTimeField, Q
 from datetime import date, timedelta
 #from django.db.models.functions import Concat
 from cellsamples.models import Organ
+from django.db.models import Count
 
 from assays.models import AssayStudy, OrganModel
 from .forms import SearchForm
@@ -138,6 +139,24 @@ def mps_about(request):
     #microdevices_organmodel.name
     #microdevices_microphysiologycenter.name
 
+    all_organ_models = OrganModel.objects.exclude(
+        name__in=['Demo-Organ']
+    ).prefetch_related('organ', 'center')
+
+    distinct_by_name_and_center = {}
+
+    for organ_model in all_organ_models:
+        distinct_by_name_and_center[
+            (organ_model.organ.organ_name, organ_model.center.name)
+        ] = distinct_by_name_and_center.setdefault(
+            (organ_model.organ.organ_name, organ_model.center.name), 0
+        ) + 1
+
+    reduce_distinct_to_list = []
+
+    for current_tuple, count in distinct_by_name_and_center.items():
+        reduce_distinct_to_list.append([current_tuple[0], current_tuple[1], count])
+
     d = {
         'number_of_days': number_of_days,
         'about_studies': AssayStudy.objects.filter(
@@ -153,28 +172,9 @@ def mps_about(request):
                 F('signed_off_date') + timedelta(days=365.2425),
                 output_field=DateTimeField()),
             ),
-        #Choices are: created_by, modified_by, signed_off_by, organ, disease, center, device, base_model
-        #organ, name, center
-        #https://stackoverflow.com/questions/21355601/django-orm-inner-join
-        'about_models': OrganModel.objects.exclude(
-            name__in=['Demo-Organ']).select_related(
-            'organ', 'center')
-            #.distinct('organ', 'center')
-        #('cellsamples_organ.organ_name', 'microdevices_microphysiologycenter.name')
-        #'about_models': OrganModel.objects.select_related('organ', 'center')
-        #    .filter(organ__in=[item['organ'] for organ in distinct])
-        #    .exclude(organ__in=['Demo-Organ'])
-           # .distinct("microdevices_organmodel.organ_id", "microdevices_organmodel.center_id"),
-        #'about_models': Organ.objects.all().select_related('center'),
-        #no 'about_models': OrganModel.objects.all().select_related('name', 'organ_id', 'center_id'),
-        #'about_models2': OrganModel.objects.all().select_related('center')
-        #'about_models2': OrganModel.objects.select_related('center')
-        #'about_models2': OrganModel.objects.select_related('center').values('center', 'organ').distinct()
-        # https://stackoverflow.com/questions/36937322/django-queryset-exclude-regex
-        #'about_models2': OrganModel.objects.select_related('center').exclude(
-        #    organ=r'*Demo*'
-        #)
-        ,
+
+        'about_models_distinct': reduce_distinct_to_list,
+        'about_models': all_organ_models,
     }
 
     return render(request, 'about.html', d)
