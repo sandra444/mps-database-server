@@ -8,7 +8,7 @@ from django.db.models import F, ExpressionWrapper, DateField, DateTimeField, Q
 from datetime import date, timedelta
 #from django.db.models.functions import Concat
 from cellsamples.models import Organ
-from django.db.models import Count
+#from django.db.models import Count
 
 from assays.models import AssayStudy, OrganModel
 from .forms import SearchForm
@@ -174,7 +174,7 @@ def mps_about(request):
             ),
 
         'about_models_distinct': reduce_distinct_to_list,
-        'about_models': all_organ_models,
+        #'about_models': all_organ_models,
     }
 
     return render(request, 'about.html', d)
