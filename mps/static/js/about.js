@@ -31,9 +31,9 @@ $(document).ready(function () {
         console.log($('#overview_section').find('.content2:eq("' + current_index + '")'));
         $('#overview_section').find('.content2:eq("' + current_index + '")').css('display', 'block');
         if (current_index==2){
-            $('.organs_and_models').css('display', 'block');
+            $('.organs-and-models').css('display', 'block');
         } else {
-            $('.organs_and_models').css('display', 'none');
+            $('.organs-and-models').css('display', 'none');
         }
     });
 
@@ -64,11 +64,11 @@ $(document).ready(function () {
         responsive: true
     });
 
-    var about_models_and_centers_table = $('#about_models_and_centers_table').DataTable({
+/*    var about_models_and_centers_table = $('#about_models_and_centers_table').DataTable({
         dom: 'B<"row">lfrtip',
         "iDisplayLength": 10,
         responsive: true
-    });
+    });*/
 
     var about_models_and_centers_distinct_table = $('#about_models_and_centers_distinct_table').DataTable({
         dom: 'B<"row">lfrtip',

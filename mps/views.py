@@ -10,7 +10,7 @@ from datetime import date, timedelta
 from cellsamples.models import Organ
 #from django.db.models import Count
 
-from assays.models import AssayStudy, OrganModel
+from assays.models import AssayStudy, OrganModel, AssayMatrixItem
 from .forms import SearchForm
 
 from haystack.query import SearchQuerySet
@@ -133,11 +133,25 @@ def mps_help(request):
 
 #added sck
 def mps_about(request):
-    number_of_days = 90
+    number_of_days = 30
     a_months_ago = date.today() - timedelta(days=365) + timedelta(days=number_of_days)
     #cellsamples_organ.organ_name
     #microdevices_organmodel.name
     #microdevices_microphysiologycenter.name
+
+    soon_released = AssayStudy.objects.filter(
+            restricted=True,
+            locked=False,
+            signed_off_date__lt=a_months_ago
+        ).exclude(
+            group_id__in=[21, 47, 109]
+        ).exclude(
+            signed_off_date__isnull=True
+        ).annotate(
+            scheduled_release_date=ExpressionWrapper(
+                F('signed_off_date') + timedelta(days=365.2425),
+                output_field=DateTimeField()),
+            )
 
     all_organ_models = OrganModel.objects.exclude(
         name__in=['Demo-Organ']
@@ -159,21 +173,25 @@ def mps_about(request):
 
     d = {
         'number_of_days': number_of_days,
-        'about_studies': AssayStudy.objects.filter(
-            restricted=True,
-            locked=False,
-            signed_off_date__lt=a_months_ago
-        ).exclude(
-            group_id__in=[21, 47, 109]
-        ).exclude(
-            signed_off_date__isnull=True
-        ).annotate(
-            scheduled_release_date=ExpressionWrapper(
-                F('signed_off_date') + timedelta(days=365.2425),
-                output_field=DateTimeField()),
-            ),
+        'about_studies': soon_released,
+
+        #This way before added the model to the study table
+        # 'about_studies': AssayStudy.objects.filter(
+        #     restricted=True,
+        #     locked=False,
+        #     signed_off_date__lt=a_months_ago
+        # ).exclude(
+        #     group_id__in=[21, 47, 109]
+        # ).exclude(
+        #     signed_off_date__isnull=True
+        # ).annotate(
+        #     scheduled_release_date=ExpressionWrapper(
+        #         F('signed_off_date') + timedelta(days=365.2425),
+        #         output_field=DateTimeField()),
+        #     ),
 
         'about_models_distinct': reduce_distinct_to_list,
+        #This way if do not want the distinct and want the model names
         #'about_models': all_organ_models,
     }
 
