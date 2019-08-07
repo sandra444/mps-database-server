@@ -30,6 +30,9 @@ from microdevices.models import MicrophysiologyCenter
 from mps.templatetags.custom_filters import ADMIN_SUFFIX, VIEWER_SUFFIX
 import html
 
+# Spaghetti code
+from assays.views import get_queryset_with_organ_model_map
+
 
 def main(request):
     if request.method == 'POST':
@@ -140,18 +143,21 @@ def mps_about(request):
     #microdevices_microphysiologycenter.name
 
     soon_released = AssayStudy.objects.filter(
-            restricted=True,
-            locked=False,
-            signed_off_date__lt=a_months_ago
-        ).exclude(
-            group_id__in=[21, 47, 109]
-        ).exclude(
-            signed_off_date__isnull=True
-        ).annotate(
-            scheduled_release_date=ExpressionWrapper(
-                F('signed_off_date') + timedelta(days=365.2425),
-                output_field=DateTimeField()),
-            )
+        restricted=True,
+        locked=False,
+        signed_off_date__lt=a_months_ago
+    ).exclude(
+        group_id__in=[21, 47, 109]
+    ).exclude(
+        signed_off_date__isnull=True
+    ).annotate(
+        scheduled_release_date=ExpressionWrapper(
+            F('signed_off_date') + timedelta(days=365.2425),
+            output_field=DateTimeField()
+        ),
+    )
+
+    get_queryset_with_organ_model_map(soon_released)
 
     all_organ_models = OrganModel.objects.exclude(
         name__in=['Demo-Organ']

@@ -413,6 +413,7 @@
          <tr>
             <th>Study Name</th>
             <th>Study Description</th>
+            <th>MPS Models</th>
             <th>Scheduled Release</th>
           </tr>
         </thead>
@@ -422,6 +423,7 @@
             <tr>
               <td>{{ each3.name }}</td>
               <td>{{ each3.description }}</td>
+              <td>{{ each3.organ_models|default:"-No MPS Models-" }}</td>
               <td>{{ each3.scheduled_release_date|date:'m-d-Y' }} </td>
             </tr>
           {% endfor %}
