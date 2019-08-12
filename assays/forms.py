@@ -1618,7 +1618,8 @@ class AssayStudyFormNew(SetupFormsMixin, SignOffMixin, BootstrapForm):
         new_items = None
         new_related = None
 
-        errors = []
+        errors = {'organ_model': []}
+        current_errors = errors.get('organ_model')
 
         study = super(AssayStudyFormNew, self).save(commit=False)
 
@@ -1661,7 +1662,7 @@ class AssayStudyFormNew(SetupFormsMixin, SignOffMixin, BootstrapForm):
                 print('MATRIX')
                 print(e)
                 # raise forms.ValidationError(e)
-                errors.append(e)
+                current_errors.append(e)
 
             # new_matrix.save()
 
@@ -1725,7 +1726,7 @@ class AssayStudyFormNew(SetupFormsMixin, SignOffMixin, BootstrapForm):
                         print('ITEM')
                         print(e)
                         # raise forms.ValidationError(e)
-                        errors.append(e)
+                        current_errors.append(e)
 
                     current_related_list = new_related.setdefault(
                         str(len(new_items)), []
@@ -1748,7 +1749,7 @@ class AssayStudyFormNew(SetupFormsMixin, SignOffMixin, BootstrapForm):
                                         print('CELL')
                                         print(e)
                                         # raise forms.ValidationError(e)
-                                        errors.append(e)
+                                        current_errors.append(e)
                                     # new_cell.save()
                                 elif prefix == 'setting':
                                     new_setting = AssaySetupSetting(**current_object)
@@ -1759,7 +1760,7 @@ class AssayStudyFormNew(SetupFormsMixin, SignOffMixin, BootstrapForm):
                                         print('SETTING')
                                         print(e)
                                         # raise forms.ValidationError(e)
-                                        errors.append(e)
+                                        current_errors.append(e)
                                     # new_setting.save()
                                 elif prefix == 'compound':
                                     # CONFUSING NOT DRY BAD
@@ -1768,6 +1769,14 @@ class AssayStudyFormNew(SetupFormsMixin, SignOffMixin, BootstrapForm):
                                     supplier_text = current_object.get('supplier_text').strip()
                                     lot_text = current_object.get('lot_text').strip()
                                     receipt_date = current_object.get('receipt_date')
+
+                                    # NOTE THE DEFAULT, PLEASE DO THIS IN A WAY THAT IS MORE DRY
+                                    if not supplier_text:
+                                        supplier_text = 'N/A'
+
+                                    if not lot_text:
+                                        lot_text = 'N/A'
+
                                     # Check if the supplier already exists
                                     supplier = suppliers.get(supplier_text, '')
 
@@ -1792,7 +1801,7 @@ class AssayStudyFormNew(SetupFormsMixin, SignOffMixin, BootstrapForm):
                                             supplier.save()
                                         except Exception as e:
                                             # raise forms.ValidationError(e)
-                                            errors.append(e)
+                                            current_errors.append(e)
 
                                         suppliers.update({
                                             supplier_text: supplier
@@ -1823,7 +1832,7 @@ class AssayStudyFormNew(SetupFormsMixin, SignOffMixin, BootstrapForm):
                                             compound_instance.save()
                                         except Exception as e:
                                             # raise forms.ValidationError(e)
-                                            errors.append(e)
+                                            current_errors.append(e)
 
                                         compound_instances.update({
                                             (compound, supplier.id, lot_text, str(receipt_date)): compound_instance
@@ -1860,7 +1869,7 @@ class AssayStudyFormNew(SetupFormsMixin, SignOffMixin, BootstrapForm):
                                             print('COMPOUND')
                                             print(e)
                                             # raise forms.ValidationError(e)
-                                            errors.append(e)
+                                            current_errors.append(e)
                                         # new_compound.save()
 
                                     assay_compound_instances.update({
