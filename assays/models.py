@@ -2095,12 +2095,11 @@ class AssaySetupCell(models.Model):
 
         ordering = (
             'addition_time',
-            'cell_sample__cell_type__name',
             'cell_sample',
-            'addition_location__name',
-            'biosensor__name',
+            'addition_location',
+            'biosensor',
             'density',
-            'density_unit__name',
+            'density_unit',
             'passage'
         )
 
@@ -2307,11 +2306,10 @@ class AssaySetupCompound(models.Model):
 
         ordering = (
             'addition_time',
-            'compound_instance__compound__name',
-            'addition_location__name',
-            'concentration_unit__scale_factor',
+            'compound_instance',
+            'addition_location',
+            'concentration_unit',
             'concentration',
-            'concentration_unit__name',
             'duration',
         )
 
@@ -2441,9 +2439,9 @@ class AssaySetupSetting(models.Model):
 
         ordering = (
             'addition_time',
-            'setting__name',
-            'addition_location__name',
-            'unit__name',
+            'setting',
+            'addition_location',
+            'unit',
             'value',
             'duration',
         )
