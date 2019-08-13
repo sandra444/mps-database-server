@@ -1637,10 +1637,16 @@ class AssayStudyFormNew(SetupFormsMixin, SignOffMixin, BootstrapForm):
             current_item_number = 1
 
             # CRUDE: JUST MAKE ONE LARGE ROW?
-            number_of_items = 0
+            # number_of_items = 0
+            #
+            # for setup_group in all_setup_data:
+            #     number_of_items += int(setup_group.get('number_of_items', '0'))
 
+            # Find max for number of columns
+            number_of_columns = 0
             for setup_group in all_setup_data:
-                number_of_items += int(setup_group.get('number_of_items', '0'))
+                if int(setup_group.get('number_of_items', '0')) > number_of_columns:
+                    number_of_columns = int(setup_group.get('number_of_items', '0'))
 
             new_matrix = AssayMatrix(
                 name=data.get('name'),
@@ -1648,8 +1654,10 @@ class AssayStudyFormNew(SetupFormsMixin, SignOffMixin, BootstrapForm):
                 representation='chips',
                 # study=self.instance,
                 device=None,
-                number_of_rows=1,
-                number_of_columns=number_of_items,
+                number_of_rows=len(all_setup_data),
+                number_of_columns=number_of_columns,
+                # number_of_rows=1,
+                # number_of_columns=number_of_items,
                 created_by=created_by,
                 created_on=created_on,
                 modified_by=created_by,
@@ -1691,7 +1699,9 @@ class AssayStudyFormNew(SetupFormsMixin, SignOffMixin, BootstrapForm):
             new_items = []
             new_related = {}
 
-            for setup_group in all_setup_data:
+            # NOTE: ROW IS DERIVED FROM THE GROUP IN QUESTION
+            # ALL ITEMS IN THE GROUP ARE IN THE COLUMNS OF SAID ROW
+            for setup_row, setup_group in enumerate(all_setup_data):
                 items_in_group = int(setup_group.pop('number_of_items', '0'))
                 test_type = setup_group.get('test_type', '')
                 for iteration in range(items_in_group):
@@ -1701,8 +1711,9 @@ class AssayStudyFormNew(SetupFormsMixin, SignOffMixin, BootstrapForm):
                         name=str(current_item_number),
                         # JUST MAKE SETUP DATE THE STUDY DATE FOR NOW
                         setup_date=data.get('start_date'),
-                        row_index=0,
-                        column_index=current_item_number-1,
+                        row_index=setup_row,
+                        column_index=iteration,
+                        # column_index=current_item_number-1,
                         # device=study.organ_model.device,
                         # organ_model=study.organ_model,
                         # organ_model_protocol=study.organ_model_protocol,
@@ -1722,6 +1733,7 @@ class AssayStudyFormNew(SetupFormsMixin, SignOffMixin, BootstrapForm):
                             'organ_model_protocol',
                         ])
                         new_items.append(new_item)
+
                     except Exception as e:
                         print('ITEM')
                         print(e)
@@ -1887,8 +1899,8 @@ class AssayStudyFormNew(SetupFormsMixin, SignOffMixin, BootstrapForm):
 
                     current_item_number += 1
 
-        if errors:
-            raise forms.ValidationError(errors)
+        if current_errors:
+            raise forms.ValidationError(current_errors)
 
         new_setup_data.update({
             'new_matrix': new_matrix,
