@@ -89,7 +89,7 @@ DEFAULT_SETTING_CRITERIA = (
     'value',
     'addition_time',
     'duration',
-    'addition_location'
+    'addition_location_id'
 )
 
 DEFAULT_COMPOUND_CRITERIA = (
@@ -99,7 +99,7 @@ DEFAULT_COMPOUND_CRITERIA = (
     'concentration_unit_id',
     'addition_time',
     'duration',
-    'addition_location'
+    'addition_location_id'
 )
 
 DEFAULT_CELL_CRITERIA = (
@@ -111,7 +111,7 @@ DEFAULT_CELL_CRITERIA = (
     'density',
     'density_unit_id',
     'passage',
-    'addition_location'
+    'addition_location_id'
 )
 
 # TODO EMPLOY THIS FUNCTION ELSEWHERE
