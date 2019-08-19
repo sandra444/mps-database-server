@@ -411,6 +411,16 @@ $(document).ready(function () {
             fixedHeader: {headerOffset: 50},
             deferRender: true,
         });
+
+        active_compounds_checkboxes = 0;
+        unmake_compounds_datatable();
+        avg_val_graph_check();
+
+        // Empty old graph containers
+        $(power_analysis_p_value_graph).empty();
+        $(power_analysis_power_graph).empty();
+        $(power_analysis_sample_size_graph).empty();
+        $('#time-points-table_wrapper').hide();
     }
 
     function escapeHtml(html) {
@@ -454,6 +464,12 @@ $(document).ready(function () {
         $('[data-toggle="tooltip"]').tooltip({container:"body", html: true});
         // Recalc Fixed Headers
         $($.fn.dataTable.tables(true)).DataTable().fixedHeader.adjust();
+
+        // Empty old graph containers
+        $(power_analysis_p_value_graph).empty();
+        $(power_analysis_power_graph).empty();
+        $(power_analysis_sample_size_graph).empty();
+        $('#time-points-table_wrapper').hide();
     });
 
     // Compounds Table Checkbox click event
@@ -952,6 +968,7 @@ $(document).ready(function () {
                     }
                 });
             }
+
 
             // Empty old graph containers
             $(power_analysis_p_value_graph).empty();
