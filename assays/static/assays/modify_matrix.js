@@ -404,7 +404,7 @@ $(document).ready(function () {
                 $('<td>').append(
                     $('<h3>').append($('<span>')
                         .addClass('label label-primary')
-                        .text('Group ' + row_index)
+                        .text('Group ' + (row_index + 1))
                     )
                 )
             );
