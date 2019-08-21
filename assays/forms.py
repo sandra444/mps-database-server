@@ -699,6 +699,8 @@ class AssayMatrixForm(SetupFormsMixin, SignOffMixin, BootstrapForm):
     )
 
     matrix_item_setup_date = forms.DateField(required=False)
+    # Foolish!
+    matrix_item_setup_date_popup = forms.DateField(required=False)
 
     matrix_item_test_type = forms.ChoiceField(required=False, choices=TEST_TYPE_CHOICES)
 
