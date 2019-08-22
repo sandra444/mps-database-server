@@ -6,8 +6,10 @@ $(document).ready(function () {
     $(".collapsible1").click(function() {
         var content = this.nextElementSibling;
         if ($(content).css("display") != "none") {
+            $(this).css('font-weight', 'normal');
             $(content).css("display", "none");
         } else {
+            $(this).css('font-weight', 'bold');
             $(content).css("display", "block");
         }
     });
