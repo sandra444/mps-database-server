@@ -396,6 +396,7 @@ $(document).ready(function () {
                         .clone()
                         .removeAttr('id')
                         .attr('data-row', row_index)
+                        .attr('required', 'required')
                 )
             );
         }
