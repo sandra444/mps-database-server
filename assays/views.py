@@ -1942,6 +1942,7 @@ class AssayDataFromFilters(TemplateView):
             return HttpResponse('', content_type='text/plain')
 
 
+# TODO acquire and send all data like IntraRepro
 class AssayStudySetAdd(OneGroupRequiredMixin, CreateView):
     model = AssayStudySet
     template_name = 'assays/assaystudyset_add.html'
@@ -2255,3 +2256,9 @@ class AssayReferenceDelete(DeletionMixin, DeleteView):
     model = AssayReference
     template_name = 'assays/assayreference_delete.html'
     success_url = '/assays/references/'
+
+
+class AssayStudyPowerAnalysisStudy(StudyViewerMixin, DetailView):
+    """Displays the power analysis interface for the current study"""
+    model = AssayStudy
+    template_name = 'assays/assaystudy_power_analysis_study.html'
