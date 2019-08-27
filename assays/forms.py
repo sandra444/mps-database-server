@@ -393,7 +393,7 @@ class AssayStudyAssayInlineFormSet(BaseInlineFormSet):
 
         unit_queryset = PhysicalUnits.objects.filter(
             availability__icontains='readout'
-        ).order_by('unit_type', 'base_unit', 'scale_factor')
+        ).order_by('unit_type__unit_type', 'base_unit__unit', 'scale_factor')
 
         for form in self.forms:
             form.fields['target'].queryset = target_queryset
@@ -560,7 +560,9 @@ class SetupFormsMixin(BootstrapForm):
 
     # TODO THIS IS TO BE HAMMERED OUT
     cell_density_unit = forms.ModelChoiceField(
-        queryset=PhysicalUnits.objects.filter(availability__contains='cell'),
+        queryset=PhysicalUnits.objects.filter(
+            availability__contains='cell'
+        ).order_by('unit'),
         required=False
     )
 
@@ -586,7 +588,7 @@ class SetupFormsMixin(BootstrapForm):
         queryset=(PhysicalUnits.objects.filter(
             unit_type__unit_type='Concentration'
         ).order_by(
-            'base_unit',
+            'base_unit__unit',
             'scale_factor'
         ) | PhysicalUnits.objects.filter(unit='%')),
         required=False, initial=4
@@ -1011,7 +1013,7 @@ class AssaySetupCompoundInlineFormSet(BaseInlineFormSet):
         concentration_unit_queryset = PhysicalUnits.objects.filter(
             unit_type__unit_type='Concentration'
         ).order_by(
-            'base_unit',
+            'base_unit__unit',
             'scale_factor'
         ) | PhysicalUnits.objects.filter(unit='%')
 
@@ -1207,7 +1209,7 @@ class AssaySetupCellForm(ModelFormSplitTime):
         self.fields['cell_sample'].widget.attrs['style'] = 'width:75px;'
         self.fields['passage'].widget.attrs['style'] = 'width:75px;'
 
-        self.fields['density_unit'].queryset = PhysicalUnits.objects.filter(availability__contains='cell')
+        self.fields['density_unit'].queryset = PhysicalUnits.objects.filter(availability__contains='cell').order_by('unit')
 
 
 # TODO: IDEALLY THE CHOICES WILL BE PASSED VIA A KWARG
