@@ -326,7 +326,6 @@ def get_data_as_list_of_lists(ids, data_points=None, both_assay_names=False, inc
             'matrix_item__device',
             'matrix_item__organ_model',
             'matrix_item__matrix',
-            'study_assay__category',
             'study_assay__target',
             'study_assay__method',
             'study_assay__unit',
@@ -374,7 +373,6 @@ def get_data_as_list_of_lists(ids, data_points=None, both_assay_names=False, inc
         time_in_minutes = data_point.time
         times = get_split_times(time_in_minutes)
 
-        category = data_point.study_assay.category.name
         target = data_point.study_assay.target.name
         method = data_point.study_assay.method.name
         sample_location = data_point.sample_location.name
@@ -430,7 +428,6 @@ def get_data_as_list_of_lists(ids, data_points=None, both_assay_names=False, inc
                     settings,
                     cells,
                     compounds,
-                    category,
                     target,
                     subtarget,
                     method,
