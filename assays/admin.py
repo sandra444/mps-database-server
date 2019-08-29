@@ -82,7 +82,7 @@ from django.utils.safestring import mark_safe
 
 
 def modify_templates():
-    """Writes totally new templates for chips and both types of plates"""
+    """Writes totally new templates based on the dropdowns"""
     # Where will I store the templates?
     template_root = MEDIA_ROOT + '/excel_templates/'
 
