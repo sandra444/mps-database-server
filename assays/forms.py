@@ -1656,6 +1656,20 @@ class AssayStudyFormNew(SetupFormsMixin, SignOffMixin, BootstrapForm):
         else:
             all_setup_data = []
 
+        # Never consider if no model
+        if not self.cleaned_data.get('organ_model', None):
+            all_setup_data = []
+
+        # Catch technically empty setup data
+        setup_data_is_empty = True
+
+        for group_set in all_setup_data:
+            if group_set:
+                setup_data_is_empty = not any(group_set.values())
+
+        if setup_data_is_empty:
+            all_setup_data = []
+
         # if commit and all_setup_data:
         # SEE BASE MODELS FOR WHY COMMIT IS NOT HERE
         if all_setup_data:
