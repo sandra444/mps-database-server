@@ -34,7 +34,7 @@ $(document).ready(function () {
     var keep_current = false;
 
     // TRICKY
-    if (protocol.val() && setup_data_selector.val()) {
+    if (organ_model.val() && setup_data_selector.val()) {
         current_setup_data = JSON.parse(setup_data_selector.val());
         keep_current = true;
     }
@@ -419,7 +419,7 @@ $(document).ready(function () {
                         .clone()
                         .removeAttr('id')
                         .attr('data-row', row_index)
-                        .attr('required', 'required')
+                        // .attr('required', 'required')
                 )
             );
         }
@@ -910,8 +910,8 @@ $(document).ready(function () {
     // Make sure global var exists before continuing
     if (window.get_organ_models) {
         organ_model.change(function() {
-            // Reset the current setup
-            reset_current_setup(true);
+            // NO LONGER ALWAYS RESETS
+            // reset_current_setup(true);
 
             // Get and display correct protocol options
             // Asynchronous
@@ -927,9 +927,7 @@ $(document).ready(function () {
 
             // Make the table
             rebuild_table();
-        });
-
-        window.get_protocols(organ_model.val());
+        }).trigger('change');
 
         // NOTE THAT THIS IS TRIGGERED ON LOAD
         protocol.change(function() {
