@@ -13,6 +13,7 @@ from assays.models import (
     AssayStudySupportingData,
     AssayStudyAssay,
     AssayMatrix,
+    AssayCategory,
     TEST_TYPE_CHOICES,
     PhysicalUnits,
     AssaySampleLocation,
@@ -395,10 +396,18 @@ class AssayStudyAssayInlineFormSet(BaseInlineFormSet):
             availability__icontains='readout'
         ).order_by('unit_type__unit_type', 'base_unit__unit', 'scale_factor')
 
+        category_queryset = AssayCategory.objects.all().order_by('name')
+
         for form in self.forms:
             form.fields['target'].queryset = target_queryset
             form.fields['method'].queryset = method_queryset
             form.fields['unit'].queryset = unit_queryset
+
+            form.fields['category'] = forms.ModelChoiceField(
+                queryset=category_queryset,
+                required=False,
+                empty_label='All'
+            )
 
 
 class ReadyForSignOffForm(forms.Form):

@@ -3312,6 +3312,22 @@ def fetch_assay_associations(request):
 
     categories = AssayCategory.objects.all().prefetch_related('targets')
 
+    # CONTRIVED FOR "ALL" CATEGORY
+    current_dropdown = [{'value': "", 'text': '---------'}]
+
+    for target in AssayTarget.objects.all():
+        # match value to the desired subject ID
+        value = str(target.id)
+        # dropdown += '<option value="' + value + '">' + str(finding) + '</option>'
+        current_dropdown.append({'value': value, 'text': str(target)})
+
+    current_dropdown = sorted(current_dropdown, key=lambda k: k['text'])
+
+    category_to_targets.update({
+        '': current_dropdown
+    })
+    # END "ALL" CATEGORY
+
     for category in categories:
         current_dropdown = [{'value': "", 'text': '---------'}]
 
