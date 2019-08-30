@@ -1108,6 +1108,9 @@ $(document).ready(function () {
         // console.log(group_index_to_item_name);
 
         rebuild_table();
+
+        // Show the table
+        $('#study_setup_table_section').show('slow');
     }
 
     if (window.MASS_EDIT.matrix_id) {
