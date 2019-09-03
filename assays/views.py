@@ -1986,68 +1986,6 @@ class AssayStudyAddNew(OneGroupRequiredMixin, CreateView):
             )
 
 
-# TODO ADD PERMISSION MIXINS
-class AssayStudyIndexNew(StudyViewerMixin, DetailView):
-    """Show all chip and plate models associated with the given study"""
-    model = AssayStudy
-    context_object_name = 'study_index'
-    template_name = 'assays/assaystudy_index.html'
-
-    # For permission mixin
-    def get_object(self, queryset=None):
-        self.study = super(AssayStudyIndex, self).get_object()
-        return self.study
-
-    def get_context_data(self, **kwargs):
-        context = super(AssayStudyIndex, self).get_context_data(**kwargs)
-
-        matrices = AssayMatrix.objects.filter(
-            study_id=self.object.id
-        ).prefetch_related(
-            'assaymatrixitem_set',
-            'created_by',
-        )
-
-        items = AssayMatrixItem.objects.filter(
-            matrix_id__in=matrices
-        ).prefetch_related(
-            'device',
-            'created_by',
-            'matrix',
-            'organ_model',
-            'assaysetupcompound_set__compound_instance__compound',
-            'assaysetupcompound_set__concentration_unit',
-            'assaysetupcompound_set__addition_location',
-            'assaysetupcell_set__cell_sample__cell_type__organ',
-            'assaysetupcell_set__cell_sample__cell_subtype',
-            'assaysetupcell_set__cell_sample__supplier',
-            'assaysetupcell_set__addition_location',
-            'assaysetupcell_set__density_unit',
-            'assaysetupsetting_set__setting',
-            'assaysetupsetting_set__unit',
-            'assaysetupsetting_set__addition_location',
-        )
-
-        # Cellsamples will always be the same
-        context['matrices'] = matrices
-        context['items'] = items
-
-        get_user_status_context(self, context)
-
-        context['ready_for_sign_off_form'] = ReadyForSignOffForm()
-
-        # Stakeholder status
-        context['stakeholder_sign_off'] = AssayStudyStakeholder.objects.filter(
-            study_id=self.object.id,
-            signed_off_by_id=None,
-            sign_off_required=True
-        ).count() == 0
-
-        context['detail'] = True
-
-        return context
-
-
 class AssayMatrixNew(StudyGroupMixin, UpdateView):
     """Show all chip and plate models associated with the given study"""
     model = AssayMatrix
