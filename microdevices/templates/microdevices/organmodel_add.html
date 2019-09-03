@@ -167,8 +167,6 @@
         </tbody>
     </table>
 
-    {# HIDE FOR NOW #}
-    <div hidden>
     {{ cell_formset.management_form }}
     <legend>Cell Types</legend>
 
@@ -207,7 +205,7 @@
         <thead>
             <tr>
                 <th>Cell Type*</th>
-                <th>Count*</th>
+                {# <th>Count*</th> #}
                 <th>Delete</th>
             </tr>
         </thead>
@@ -223,13 +221,13 @@
                     </td>
                     {% endif %}
                     <td>{{ cell.cell_type }}</td>
-                    <td>{{ cell.count }}</td>
+                    {# HIDE FOR NOW #}
+                    {# <td>{{ cell.count }}</td> #}
                     <td>{{ cell.DELETE }}</td>
                 </tr>
             {% endfor %}
         </tbody>
     </table>
-    </div>
 
     {{ protocol_formset.management_form }}
     <legend>Protocols</legend>
