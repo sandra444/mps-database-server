@@ -42,6 +42,8 @@
 
 <h1>
     Edit <em>{{ object }}</em>
+    {# Link to alt edit page #}
+    <a class="btn btn-primary" href="{{ object.get_absolute_url }}">Edit as Matrix</a>
 </h1>
 
 {% csrf_token %}
@@ -51,6 +53,8 @@
 {% include 'errors.html' %}
 
 {% include 'tracking.html' %}
+
+{% include "sign_off_form.html" with group=form.instance.study.group.name %}
 
 {# NOT VERY GOOD, BUT MAY BE HELPFUL #}
 {% if item_formset.errors.0 %}
