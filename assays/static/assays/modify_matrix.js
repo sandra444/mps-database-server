@@ -168,7 +168,7 @@ $(document).ready(function () {
 
                 // TODO, ANOTHER BARBARIC EXCEPTION (not the best way to handle defaults...)
                 // TODO PLEASE REVISE
-                if (!current_data['biosensor_id']) {
+                if (this_popup.find('#id_cell_biosensor')[0] && !current_data['biosensor_id']) {
                     this_popup.find('#id_cell_biosensor')[0].selectize.setValue(
                         2
                     );
