@@ -1139,6 +1139,12 @@ $(document).ready(function () {
             group_index_to_item_name[unique_entities[stringified_contents]].push(setup_id_to_name[setup_id]);
         });
 
+        // IF THIS IS EMPTY, TERMINATE EARLY AND SHOW AN ERROR MESSAGE
+        if (!Object.keys(group_index_to_item_name).length) {
+            $('#invalid_matrix_message').show();
+            return;
+        }
+
         rebuild_table();
 
         // Show the table
