@@ -13,6 +13,7 @@ from assays.models import (
     AssayStudySupportingData,
     AssayStudyAssay,
     AssayMatrix,
+    AssayCategory,
     TEST_TYPE_CHOICES,
     PhysicalUnits,
     AssaySampleLocation,
@@ -55,6 +56,8 @@ from django.utils import timezone
 from mps.templatetags.custom_filters import is_group_admin, ADMIN_SUFFIX
 
 from django.core.exceptions import NON_FIELD_ERRORS
+
+import ujson as json
 
 # TODO REFACTOR WHITTLING TO BE HERE IN LIEU OF VIEW
 # TODO REFACTOR FK QUERYSETS TO AVOID N+1
@@ -177,8 +180,9 @@ class ModelFormSplitTime(BootstrapForm):
                     'duration': cleaned_data.get('duration') + cleaned_data.get('duration_' + time_unit, 0) * conversion
                 })
 
-            if self.fields.get('duration', None) is not None and cleaned_data.get('duration') <= 0:
-                raise forms.ValidationError({'duration': ['Duration cannot be zero or negative.']})
+            # NOW IN MODEL
+            # if self.fields.get('duration', None) is not None and cleaned_data.get('duration') <= 0:
+            #     raise forms.ValidationError({'duration': ['Duration cannot be zero or negative.']})
 
         return cleaned_data
 
@@ -395,12 +399,20 @@ class AssayStudyAssayInlineFormSet(BaseInlineFormSet):
 
         unit_queryset = PhysicalUnits.objects.filter(
             availability__icontains='readout'
-        ).order_by('unit_type', 'base_unit', 'scale_factor')
+        ).order_by('unit_type__unit_type', 'base_unit__unit', 'scale_factor')
+
+        category_queryset = AssayCategory.objects.all().order_by('name')
 
         for form in self.forms:
             form.fields['target'].queryset = target_queryset
             form.fields['method'].queryset = method_queryset
             form.fields['unit'].queryset = unit_queryset
+
+            form.fields['category'] = forms.ModelChoiceField(
+                queryset=category_queryset,
+                required=False,
+                empty_label='All'
+            )
 
 
 class ReadyForSignOffForm(forms.Form):
@@ -518,26 +530,9 @@ AssayStudyAssayFormSetFactory = inlineformset_factory(
 )
 
 
-# TODO ADD STUDY
-class AssayMatrixForm(SignOffMixin, BootstrapForm):
-    class Meta(object):
-        model = AssayMatrix
-        exclude = ('study',) + tracking
-        widgets = {
-            'number_of_columns': forms.NumberInput(attrs={'style': 'width: 100px;'}),
-            'number_of_rows': forms.NumberInput(attrs={'style': 'width: 100px;'}),
-            'name': forms.Textarea(attrs={'rows': 1}),
-            'notes': forms.Textarea(attrs={'rows': 3}),
-            'variance_from_organ_model_protocol': forms.Textarea(attrs={'rows': 3}),
-        }
-
+class SetupFormsMixin(BootstrapForm):
     def __init__(self, *args, **kwargs):
-        self.study = kwargs.pop('study', None)
-        self.user = kwargs.pop('user', None)
-        super(AssayMatrixForm, self).__init__(*args, **kwargs)
-
-        if self.study:
-            self.instance.study = self.study
+        super(SetupFormsMixin, self).__init__(*args, **kwargs)
 
         sections_with_times = (
             'compound',
@@ -565,14 +560,133 @@ class AssayMatrixForm(SignOffMixin, BootstrapForm):
                     })
                 )
 
-        self.fields['matrix_item_notebook_page'].widget.attrs['style'] = 'width:75px;'
         self.fields['cell_cell_sample'].widget.attrs['style'] = 'width:75px;'
         self.fields['cell_passage'].widget.attrs['style'] = 'width:75px;'
+
+    ### ADDING SETUP CELLS
+    cell_cell_sample = forms.IntegerField(required=False)
+    cell_biosensor = forms.ModelChoiceField(
+        queryset=Biosensor.objects.all().prefetch_related('supplier'),
+        required=False,
+        # Default is naive
+        initial=2
+    )
+    cell_density = forms.FloatField(required=False)
+
+    # TODO THIS IS TO BE HAMMERED OUT
+    cell_density_unit = forms.ModelChoiceField(
+        queryset=PhysicalUnits.objects.filter(
+            availability__contains='cell'
+        ).order_by('unit'),
+        required=False
+    )
+
+    cell_passage = forms.CharField(required=False)
+
+    cell_addition_location = forms.ModelChoiceField(queryset=AssaySampleLocation.objects.all().order_by('name'), required=False)
+
+    ### ?ADDING SETUP SETTINGS
+    setting_setting = forms.ModelChoiceField(queryset=AssaySetting.objects.all().order_by('name'), required=False)
+    setting_unit = forms.ModelChoiceField(queryset=PhysicalUnits.objects.all().order_by('base_unit','scale_factor'), required=False)
+
+    setting_value = forms.CharField(required=False)
+
+    setting_addition_location = forms.ModelChoiceField(
+        queryset=AssaySampleLocation.objects.all().order_by('name'),
+        required=False
+    )
+
+    ### ADDING COMPOUNDS
+    compound_compound = forms.ModelChoiceField(queryset=Compound.objects.all().order_by('name'), required=False)
+    # Notice the special exception for %
+    compound_concentration_unit = forms.ModelChoiceField(
+        queryset=(PhysicalUnits.objects.filter(
+            unit_type__unit_type='Concentration'
+        ).order_by(
+            'base_unit__unit',
+            'scale_factor'
+        ) | PhysicalUnits.objects.filter(unit='%')),
+        required=False, initial=4
+    )
+    compound_concentration = forms.FloatField(required=False)
+
+    compound_addition_location = forms.ModelChoiceField(
+        queryset=AssaySampleLocation.objects.all().order_by('name'),
+        required=False
+    )
+    # Text field (un-saved) for supplier
+    compound_supplier_text = forms.CharField(
+        required=False,
+        initial=''
+    )
+    # Text field (un-saved) for lot
+    compound_lot_text = forms.CharField(
+        required=False,
+        initial=''
+    )
+    # Receipt date
+    compound_receipt_date = forms.DateField(required=False)
+
+
+# TODO ADD STUDY
+class AssayMatrixForm(SetupFormsMixin, SignOffMixin, BootstrapForm):
+    class Meta(object):
+        model = AssayMatrix
+        exclude = ('study',) + tracking
+        widgets = {
+            'number_of_columns': forms.NumberInput(attrs={'style': 'width: 100px;'}),
+            'number_of_rows': forms.NumberInput(attrs={'style': 'width: 100px;'}),
+            'name': forms.Textarea(attrs={'rows': 1}),
+            'notes': forms.Textarea(attrs={'rows': 3}),
+            'variance_from_organ_model_protocol': forms.Textarea(attrs={'rows': 3}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        self.study = kwargs.pop('study', None)
+        self.user = kwargs.pop('user', None)
+        super(AssayMatrixForm, self).__init__(*args, **kwargs)
+
+        if self.study:
+            self.instance.study = self.study
+
+        # sections_with_times = (
+        #     'compound',
+        #     'cell',
+        #     'setting'
+        # )
+        #
+        # for time_unit in list(TIME_CONVERSIONS.keys()):
+        #     for current_section in sections_with_times:
+        #         # Create fields for Days, Hours, Minutes
+        #         self.fields[current_section + '_addition_time_' + time_unit] = forms.FloatField(
+        #             initial=0,
+        #             required=False,
+        #             widget=forms.NumberInput(attrs={
+        #                 'class': 'form-control',
+        #                 'style': 'width:75px;'
+        #             })
+        #         )
+        #         self.fields[current_section + '_duration_' + time_unit] = forms.FloatField(
+        #             initial=0,
+        #             required=False,
+        #             widget=forms.NumberInput(attrs={
+        #                 'class': 'form-control',
+        #                 'style': 'width:75px;'
+        #             })
+        #         )
+
+        self.fields['matrix_item_notebook_page'].widget.attrs['style'] = 'width:75px;'
+        # self.fields['cell_cell_sample'].widget.attrs['style'] = 'width:75px;'
+        # self.fields['cell_passage'].widget.attrs['style'] = 'width:75px;'
 
         # Make sure no selectize
         # CONTRIVED
         self.fields['matrix_item_full_organ_model'].widget.attrs['class'] = 'no-selectize'
         self.fields['matrix_item_full_organ_model_protocol'].widget.attrs['class'] = 'no-selectize'
+
+        # No selectize on action either (hides things, looks odd)
+        # CONTRIVED
+        self.fields['action'].widget.attrs['class'] += ' no-selectize'
 
     ### ADDITIONAL MATRIX FIELDS (unsaved)
     number_of_items = forms.IntegerField(required=False)
@@ -603,6 +717,8 @@ class AssayMatrixForm(SignOffMixin, BootstrapForm):
     )
 
     matrix_item_setup_date = forms.DateField(required=False)
+    # Foolish!
+    matrix_item_setup_date_popup = forms.DateField(required=False)
 
     matrix_item_test_type = forms.ChoiceField(required=False, choices=TEST_TYPE_CHOICES)
 
@@ -629,52 +745,6 @@ class AssayMatrixForm(SignOffMixin, BootstrapForm):
     matrix_item_full_organ_model = forms.ModelChoiceField(queryset=OrganModel.objects.all().order_by('name'), required=False)
     matrix_item_full_organ_model_protocol = forms.ModelChoiceField(queryset=OrganModelProtocol.objects.all(), required=False)
 
-    ### ADDING SETUP CELLS
-    cell_cell_sample = forms.IntegerField(required=False)
-    cell_biosensor = forms.ModelChoiceField(
-        queryset=Biosensor.objects.all().prefetch_related('supplier'),
-        required=False,
-        # Default is naive
-        initial=2
-    )
-    cell_density = forms.FloatField(required=False)
-
-    # TODO THIS IS TO BE HAMMERED OUT
-    cell_density_unit = forms.ModelChoiceField(
-        queryset=PhysicalUnits.objects.filter(availability__contains='cell'),
-        required=False
-    )
-
-    cell_passage = forms.CharField(required=False)
-
-    cell_addition_location = forms.ModelChoiceField(queryset=AssaySampleLocation.objects.all().order_by('name'), required=False)
-
-    ### ?ADDING SETUP SETTINGS
-    setting_setting = forms.ModelChoiceField(queryset=AssaySetting.objects.all().order_by('name'), required=False)
-    setting_unit = forms.ModelChoiceField(queryset=PhysicalUnits.objects.all().order_by('base_unit','scale_factor'), required=False)
-
-    setting_value = forms.CharField(required=False)
-
-    setting_addition_location = forms.ModelChoiceField(queryset=AssaySampleLocation.objects.all().order_by('name'),
-                                                        required=False)
-
-    ### ADDING COMPOUNDS
-    compound_compound = forms.ModelChoiceField(queryset=Compound.objects.all().order_by('name'), required=False)
-    # Notice the special exception for %
-    compound_concentration_unit = forms.ModelChoiceField(
-        queryset=(PhysicalUnits.objects.filter(
-            unit_type__unit_type='Concentration'
-        ).order_by(
-            'base_unit',
-            'scale_factor'
-        ) | PhysicalUnits.objects.filter(unit='%')),
-        required=False, initial=4
-    )
-    compound_concentration = forms.FloatField(required=False)
-
-    compound_addition_location = forms.ModelChoiceField(queryset=AssaySampleLocation.objects.all().order_by('name'),
-                                                       required=False)
-
     ### INCREMENTER
     compound_concentration_increment = forms.FloatField(required=False, initial=1)
     compound_concentration_increment_type = forms.ChoiceField(choices=(
@@ -687,19 +757,6 @@ class AssayMatrixForm(SignOffMixin, BootstrapForm):
         ('lrd', 'Left to Right and Down'),
         ('rlu', 'Right to Left and Up')
     ), required=False)
-
-    # Text field (un-saved) for supplier
-    compound_supplier_text = forms.CharField(
-        required=False,
-        initial=''
-    )
-    # Text field (un-saved) for lot
-    compound_lot_text = forms.CharField(
-        required=False,
-        initial=''
-    )
-    # Receipt date
-    compound_receipt_date = forms.DateField(required=False)
 
     # Options for deletion
     delete_option = forms.ChoiceField(required=False, choices=(
@@ -975,7 +1032,7 @@ class AssaySetupCompoundInlineFormSet(BaseInlineFormSet):
         concentration_unit_queryset = PhysicalUnits.objects.filter(
             unit_type__unit_type='Concentration'
         ).order_by(
-            'base_unit',
+            'base_unit__unit',
             'scale_factor'
         ) | PhysicalUnits.objects.filter(unit='%')
 
@@ -1175,7 +1232,7 @@ class AssaySetupCellForm(ModelFormSplitTime):
         self.fields['cell_sample'].widget.attrs['style'] = 'width:75px;'
         self.fields['passage'].widget.attrs['style'] = 'width:75px;'
 
-        self.fields['density_unit'].queryset = PhysicalUnits.objects.filter(availability__contains='cell')
+        self.fields['density_unit'].queryset = PhysicalUnits.objects.filter(availability__contains='cell').order_by('unit')
 
 
 # TODO: IDEALLY THE CHOICES WILL BE PASSED VIA A KWARG
@@ -1607,3 +1664,540 @@ AssayStudySetReferenceFormSetFactory = inlineformset_factory(
     extra=1,
     exclude=[]
 )
+
+
+# Convoluted
+def process_error_for_study_new(prefix, row, column, full_error):
+    current_error = dict(full_error)
+    modified_error = []
+
+    for error_field, error_values in current_error.items():
+        for error_value in error_values:
+            modified_error.append([
+                '|'.join([str(x) for x in [
+                    prefix,
+                    row,
+                    column,
+                    error_field
+                ]]) + '-' + error_value
+            ])
+
+    return modified_error
+
+
+# Perhaps it would have been more intelligent to leverage the forms in the add
+# There would have been different consquences for doing so, but consistency
+class AssayStudyFormNew(SetupFormsMixin, SignOffMixin, BootstrapForm):
+    setup_data = forms.CharField(required=False)
+    processed_setup_data = forms.CharField(required=False)
+    number_of_items = forms.CharField(required=False)
+    test_type = forms.ChoiceField(
+        initial='control',
+        choices=TEST_TYPE_CHOICES,
+        required=False
+    )
+
+    def __init__(self, *args, **kwargs):
+        """Init the Study Form
+
+        Kwargs:
+        groups -- a queryset of groups (allows us to avoid N+1 problem)
+        """
+        self.groups = kwargs.pop('groups', None)
+        self.request = kwargs.pop('request', None)
+        super(AssayStudyFormNew, self).__init__(*args, **kwargs)
+        self.fields['group'].queryset = self.groups
+
+        # Make sure there are only organ models with versions
+        # Removed for now
+        # self.fields['organ_model'].queryset = OrganModel.objects.filter(
+        #     organmodelprotocol__isnull=False
+        # ).distinct()
+
+        # SLOPPY
+        self.fields['test_type'].widget.attrs['class'] += ' no-selectize test-type'
+        # Bad
+        self.fields['test_type'].widget.attrs['style'] = 'width:100px;'
+        self.fields['number_of_items'].widget.attrs['class'] = 'form-control number-of-items'
+        # Bad
+        # self.fields['number_of_items'].widget.attrs['style'] = 'margin-top:10px;'
+
+    class Meta(object):
+        model = AssayStudy
+        widgets = {
+            'assay_run_id': forms.Textarea(attrs={'rows': 1}),
+            'name': forms.Textarea(attrs={'rows': 1}),
+            'description': forms.Textarea(attrs={'rows': 5, 'cols': 100}),
+        }
+        exclude = tracking + restricted + ('access_groups', 'signed_off_notes', 'bulk_file')
+
+    def clean(self):
+        """Checks for at least one study type"""
+        # clean the form data, before validation
+        data = super(AssayStudyFormNew, self).clean()
+
+        if not any([data['toxicity'], data['efficacy'], data['disease'], data['cell_characterization']]):
+            raise forms.ValidationError('Please select at least one study type')
+
+        # SLOPPY NOT DRY
+        new_setup_data = {}
+        new_matrix = None
+        new_items = None
+        new_related = None
+
+        errors = {'organ_model': [], 'setup_data': []}
+        current_errors = errors.get('setup_data')
+
+        study = super(AssayStudyFormNew, self).save(commit=False)
+
+        if self.cleaned_data.get('setup_data', None):
+            all_setup_data = json.loads(self.cleaned_data.get('setup_data', '[]'))
+        else:
+            all_setup_data = []
+
+        # Never consider if no model
+        if not self.cleaned_data.get('organ_model', None):
+            all_setup_data = []
+
+        # Catch technically empty setup data
+        setup_data_is_empty = True
+
+        for group_set in all_setup_data:
+            if group_set:
+                setup_data_is_empty = not any(group_set.values())
+
+        if setup_data_is_empty:
+            all_setup_data = []
+
+        # if commit and all_setup_data:
+        # SEE BASE MODELS FOR WHY COMMIT IS NOT HERE
+        if all_setup_data:
+            created_by = self.request.user
+            created_on = timezone.now()
+
+            current_item_number = 1
+
+            # CRUDE: JUST MAKE ONE LARGE ROW?
+            # number_of_items = 0
+            #
+            # for setup_group in all_setup_data:
+            #     number_of_items += int(setup_group.get('number_of_items', '0'))
+
+            # Find max for number of columns
+            number_of_columns = 0
+            for setup_group in all_setup_data:
+                if int(setup_group.get('number_of_items', '0')) > number_of_columns:
+                    number_of_columns = int(setup_group.get('number_of_items', '0'))
+
+            new_matrix = AssayMatrix(
+                name=data.get('name', ''),
+                # Does not work with plates at the moment
+                representation='chips',
+                # study=self.instance,
+                device=None,
+                number_of_rows=len(all_setup_data),
+                number_of_columns=number_of_columns,
+                # number_of_rows=1,
+                # number_of_columns=number_of_items,
+                created_by=created_by,
+                created_on=created_on,
+                modified_by=created_by,
+                modified_on=created_on,
+            )
+
+            try:
+                new_matrix.full_clean(exclude=['study'])
+            except forms.ValidationError as e:
+                errors.get('organ_model').append(e.values())
+
+            # new_matrix.save()
+
+            # COMPOUND STUFF BECAUSE COMPOUND SCHEMA IS MISERABLE
+            # Get all chip setup assay compound instances
+            assay_compound_instances = {}
+
+            # Get all Compound Instances
+            compound_instances = {
+                (
+                    instance.compound.id,
+                    instance.supplier.id,
+                    instance.lot,
+                    str(instance.receipt_date)
+                ): instance for instance in CompoundInstance.objects.all().prefetch_related(
+                    'compound',
+                    'supplier'
+                )
+            }
+
+            # Get all suppliers
+            suppliers = {
+                supplier.name: supplier for supplier in CompoundSupplier.objects.all()
+            }
+
+            new_items = []
+            new_related = {}
+
+            # NOTE: ROW IS DERIVED FROM THE GROUP IN QUESTION
+            # ALL ITEMS IN THE GROUP ARE IN THE COLUMNS OF SAID ROW
+            for setup_row, setup_group in enumerate(all_setup_data):
+                items_in_group = int(setup_group.pop('number_of_items', '0'))
+                test_type = setup_group.get('test_type', '')
+
+                # To break out to prevent repeat errors
+                group_has_error = False
+
+                for iteration in range(items_in_group):
+                    new_item = AssayMatrixItem(
+                        # study=study,
+                        # matrix=new_matrix,
+                        name=str(current_item_number),
+                        # JUST MAKE SETUP DATE THE STUDY DATE FOR NOW
+                        setup_date=data.get('start_date', ''),
+                        row_index=setup_row,
+                        column_index=iteration,
+                        # column_index=current_item_number-1,
+                        # device=study.organ_model.device,
+                        # organ_model=study.organ_model,
+                        # organ_model_protocol=study.organ_model_protocol,
+                        test_type=test_type,
+                        created_by=created_by,
+                        created_on=created_on,
+                        modified_by=created_by,
+                        modified_on=created_on,
+                    )
+
+                    try:
+                        new_item.full_clean(exclude=[
+                            'study',
+                            'matrix',
+                            'device',
+                            'organ_model',
+                            'organ_model_protocol',
+                        ])
+                        new_items.append(new_item)
+
+                    except forms.ValidationError as e:
+                        # raise forms.ValidationError(e)
+                        errors.get('organ_model').append(e.values())
+                        group_has_error = True
+
+                    current_related_list = new_related.setdefault(
+                        str(len(new_items)), []
+                    )
+
+                    # new_item.save()
+                    for prefix, current_objects in setup_group.items():
+                        for setup_column, current_object in enumerate(current_objects):
+                            if prefix in ['cell', 'compound', 'setting'] and current_object:
+                                current_object.update({
+                                    'matrix_item': new_item,
+                                })
+                                if prefix == 'cell':
+                                    new_cell = AssaySetupCell(**current_object)
+
+                                    try:
+                                        new_cell.full_clean(exclude=['matrix_item'])
+                                        current_related_list.append(new_cell)
+                                    except forms.ValidationError as e:
+                                        # raise forms.ValidationError(e)
+                                        current_errors.append(
+                                            process_error_for_study_new(
+                                                prefix,
+                                                setup_row,
+                                                setup_column,
+                                                e
+                                            )
+                                        )
+                                        group_has_error = True
+
+                                    # new_cell.save()
+                                elif prefix == 'setting':
+                                    new_setting = AssaySetupSetting(**current_object)
+                                    try:
+                                        new_setting.full_clean(exclude=['matrix_item'])
+                                        current_related_list.append(new_setting)
+                                    except forms.ValidationError as e:
+                                        # raise forms.ValidationError(e)
+                                        current_errors.append(
+                                            process_error_for_study_new(
+                                                prefix,
+                                                setup_row,
+                                                setup_column,
+                                                e
+                                            )
+                                        )
+                                        group_has_error = True
+
+                                    # new_setting.save()
+                                elif prefix == 'compound':
+                                    # CONFUSING NOT DRY BAD
+                                    compound = int(current_object.get('compound_id', '0'))
+                                    supplier_text = current_object.get('supplier_text', 'N/A').strip()
+                                    lot_text = current_object.get('lot_text', 'N/A').strip()
+                                    receipt_date = current_object.get('receipt_date', '')
+
+                                    # NOTE THE DEFAULT, PLEASE DO THIS IN A WAY THAT IS MORE DRY
+                                    if not supplier_text:
+                                        supplier_text = 'N/A'
+
+                                    if not lot_text:
+                                        lot_text = 'N/A'
+
+                                    # Check if the supplier already exists
+                                    supplier = suppliers.get(supplier_text, '')
+
+                                    concentration = current_object.get('concentration', '0')
+                                    # Annoying, bad
+                                    if not concentration:
+                                        concentration = 0.0
+                                    else:
+                                        concentration = float(concentration)
+                                    concentration_unit_id = int(current_object.get('concentration_unit_id', '0'))
+                                    addition_location_id = int(current_object.get('addition_location_id', '0'))
+
+                                    addition_time = current_object.get('addition_time', '0')
+                                    duration = current_object.get('duration', '0')
+
+                                    if not addition_time:
+                                        addition_time = 0.0
+                                    else:
+                                        addition_time = float(addition_time)
+
+                                    if not duration:
+                                        duration = 0.0
+                                    else:
+                                        duration = float(duration)
+
+                                    # Otherwise create the supplier
+                                    if not supplier:
+                                        supplier = CompoundSupplier(
+                                            name=supplier_text,
+                                            created_by=created_by,
+                                            created_on=created_on,
+                                            modified_by=created_by,
+                                            modified_on=created_on,
+                                        )
+                                        try:
+                                            supplier.full_clean()
+                                            supplier.save()
+                                        except forms.ValidationError as e:
+                                            # raise forms.ValidationError(e)
+                                            current_errors.append(
+                                                process_error_for_study_new(
+                                                    prefix,
+                                                    setup_row,
+                                                    setup_column,
+                                                    e
+                                                )
+                                            )
+                                            group_has_error = True
+
+                                        suppliers.update({
+                                            supplier_text: supplier
+                                        })
+
+                                    # FRUSTRATING EXCEPTION
+                                    if not receipt_date:
+                                        receipt_date = None
+
+                                    # Check if compound instance exists
+                                    compound_instance = compound_instances.get((compound, supplier.id, lot_text, str(receipt_date)), '')
+
+                                    if not compound_instance:
+                                        compound_instance = CompoundInstance(
+                                            compound_id=compound,
+                                            supplier=supplier,
+                                            lot=lot_text,
+                                            receipt_date=receipt_date,
+                                            created_by=created_by,
+                                            created_on=created_on,
+                                            modified_by=created_by,
+                                            modified_on=created_on,
+                                        )
+                                        try:
+                                            compound_instance.full_clean()
+                                            compound_instance.save()
+                                        except forms.ValidationError as e:
+                                            # raise forms.ValidationError(e)
+                                            current_errors.append(
+                                                process_error_for_study_new(
+                                                    prefix,
+                                                    setup_row,
+                                                    setup_column,
+                                                    e
+                                                )
+                                            )
+                                            group_has_error = True
+
+                                        compound_instances.update({
+                                            (compound, supplier.id, lot_text, str(receipt_date)): compound_instance
+                                        })
+
+                                    # Save the AssayCompoundInstance
+                                    conflicting_assay_compound_instance = assay_compound_instances.get(
+                                        (
+                                            # new_item.id,
+                                            current_item_number,
+                                            compound_instance.id,
+                                            concentration,
+                                            concentration_unit_id,
+                                            addition_time,
+                                            duration,
+                                            addition_location_id
+                                        ), None
+                                    )
+                                    if not conflicting_assay_compound_instance:
+                                        new_compound = AssaySetupCompound(
+                                            # matrix_item_id=new_item.id,
+                                            compound_instance_id=compound_instance.id,
+                                            concentration=concentration,
+                                            concentration_unit_id=concentration_unit_id,
+                                            addition_time=addition_time,
+                                            duration=duration,
+                                            addition_location_id=addition_location_id
+                                        )
+
+                                        try:
+                                            new_compound.full_clean(exclude=['matrix_item'])
+                                            current_related_list.append(new_compound)
+                                        except forms.ValidationError as e:
+                                            # raise forms.ValidationError(e)
+                                            current_errors.append(
+                                                process_error_for_study_new(
+                                                    prefix,
+                                                    setup_row,
+                                                    setup_column,
+                                                    e
+                                                )
+                                            )
+                                            group_has_error = True
+
+                                        # new_compound.save()
+
+                                    assay_compound_instances.update({
+                                        (
+                                            # new_item.id,
+                                            current_item_number,
+                                            compound_instance.id,
+                                            concentration,
+                                            concentration_unit_id,
+                                            addition_time,
+                                            duration,
+                                            addition_location_id
+                                        ): True
+                                    })
+
+                    current_item_number += 1
+
+                    # Don't keep iterating through this group if there is a problem
+                    if group_has_error:
+                        break
+
+        if current_errors:
+            errors.get('organ_model').append(['Please review the table below for errors.'])
+            raise forms.ValidationError(errors)
+
+        new_setup_data.update({
+            'new_matrix': new_matrix,
+            'new_items': new_items,
+            'new_related': new_related,
+        })
+
+        data.update({
+            'processed_setup_data': new_setup_data
+        })
+
+        return data
+
+    def save(self, commit=True):
+        # PLEASE SEE BASE MODELS
+        # study = super(AssayStudyFormNew, self).save(commit)
+        study = super(AssayStudyFormNew, self).save()
+
+        # VERY SLOPPY
+        created_by = self.request.user
+        created_on = timezone.now()
+
+        study.created_by = created_by
+        study.created_on = created_on
+        study.modified_by = created_by
+        study.modified_on = created_on
+
+        study.save()
+        # SLOPPY: REVISE
+
+        study_id = study.id
+
+        if study.organ_model_id:
+            device_id = study.organ_model.device_id
+        else:
+            device_id = None
+
+        organ_model_id = study.organ_model_id
+        organ_model_protocol_id = study.organ_model_protocol_id
+
+        all_setup_data = self.cleaned_data.get('processed_setup_data', None)
+
+        if all_setup_data:
+            new_matrix = all_setup_data.get('new_matrix', None)
+            new_items = all_setup_data.get('new_items', None)
+            new_related = all_setup_data.get('new_related', None)
+
+            if new_matrix:
+                new_matrix.study_id = study_id
+                new_matrix.save()
+                new_matrix_id = new_matrix.id
+
+                new_item_ids = {}
+
+                for new_item in new_items:
+                    # ADD MATRIX and tracking
+                    new_item.matrix_id = new_matrix_id
+                    new_item.study_id = study_id
+                    new_item.device_id = device_id
+                    new_item.organ_model_id = organ_model_id
+                    new_item.organ_model_protocol_id = organ_model_protocol_id
+                    new_item.save()
+
+                    new_item_ids.update({
+                        new_item.name: new_item.id
+                    })
+
+                for current_item_name, new_related_data_set in new_related.items():
+                    new_item_id = new_item_ids.get(current_item_name, None)
+
+                    if new_item_id:
+                        for new_related_data in new_related_data_set:
+                            # ADD MATRIX ITEM
+                            new_related_data.matrix_item_id = new_item_id
+                            new_related_data.save()
+
+        return study
+
+
+class AssayMatrixFormNew(SetupFormsMixin, SignOffMixin, BootstrapForm):
+    # ADD test_types
+    test_type = forms.ChoiceField(
+        initial='control',
+        choices=TEST_TYPE_CHOICES
+    )
+
+    class Meta(object):
+        model = AssayMatrix
+        # ODD
+        fields = []
+
+    def __init__(self, *args, **kwargs):
+        """Init the Study Form
+
+        Kwargs:
+        user -- the user in question
+        """
+        # PROBABLY DON'T NEED THIS?
+        self.user = kwargs.pop('user', None)
+        super(AssayMatrixFormNew, self).__init__(*args, **kwargs)
+
+        # SLOPPY
+        self.fields['test_type'].widget.attrs['class'] += ' no-selectize test-type'
+        # Bad
+        self.fields['test_type'].widget.attrs['style'] = 'width:100px;'

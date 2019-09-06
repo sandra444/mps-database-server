@@ -45,7 +45,8 @@ from assays.models import (
     AssaySubtarget,
     AssayReference,
     AssayStudyReference,
-    AssayStudySet
+    AssayStudySet,
+    AssayCategory
 )
 from microdevices.models import MicrophysiologyCenter
 # from compounds.models import Compound
@@ -84,7 +85,7 @@ from django.utils.safestring import mark_safe
 
 
 def modify_templates():
-    """Writes totally new templates for chips and both types of plates"""
+    """Writes totally new templates based on the dropdowns"""
     # Where will I store the templates?
     template_root = MEDIA_ROOT + '/excel_templates/'
 
@@ -171,7 +172,7 @@ def modify_templates():
     value_units = PhysicalUnits.objects.filter(
         availability__contains='readout'
     ).order_by(
-        'base_unit',
+        'base_unit__unit',
         'scale_factor'
     ).values_list('unit', flat=True)
 
@@ -419,6 +420,7 @@ class AssayTargetAdmin(LockableAdmin):
         'short_name',
         'description'
     )
+    filter_horizontal = ('methods',)
     fieldsets = (
         (
             'Target', {
@@ -427,6 +429,7 @@ class AssayTargetAdmin(LockableAdmin):
                     'alt_name',
                     'short_name',
                     'description',
+                    'methods'
                 )
             }
         ),
@@ -737,7 +740,7 @@ class AssayStudyAssayInline(admin.TabularInline):
         elif db_field.name == 'unit':
             unit_queryset = PhysicalUnits.objects.filter(
                 availability__icontains='readout'
-            ).order_by('unit_type', 'base_unit', 'scale_factor')
+            ).order_by('unit_type__unit_type', 'base_unit__unit', 'scale_factor')
             kwargs["queryset"] = unit_queryset
         return super(AssayStudyAssayInline, self).formfield_for_foreignkey(db_field, request, **kwargs)
 
@@ -1420,3 +1423,11 @@ class AssayStudySetAdmin(ImportExportModelAdmin):
 
 
 admin.site.register(AssayStudySet, AssayStudySetAdmin)
+
+
+class AssayCategoryAdmin(ImportExportModelAdmin):
+    model = AssayCategory
+    search_fields = ('name', 'description')
+    filter_horizontal = ('targets',)
+
+admin.site.register(AssayCategory, AssayCategoryAdmin)

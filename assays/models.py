@@ -20,6 +20,9 @@ import urllib.request, urllib.parse, urllib.error
 import collections
 
 # TODO REORGANIZE
+import django.forms as forms
+
+
 # These are here to avoid potentially messy imports, may change later
 def attr_getter(item, attributes):
     """attribute getter for individual items"""
@@ -1466,6 +1469,9 @@ class AssayTarget(LockableModel):
     # Tentative
     alt_name = models.CharField(max_length=1000, blank=True, default='')
 
+    # List of all methods
+    methods = models.ManyToManyField('assays.AssayMethod')
+
     def __str__(self):
         return '{0}'.format(self.name)
 
@@ -1644,6 +1650,11 @@ class AssayStudy(FlaggableModel):
         verbose_name='Data File',
         blank=True, null=True
     )
+
+    # TODO MAKE REQUIRED
+    # TODO DEAL WITH CONFLICTS
+    organ_model = models.ForeignKey(OrganModel, blank=True, null=True, on_delete=models.CASCADE)
+    organ_model_protocol = models.ForeignKey(OrganModelProtocol, blank=True, null=True, on_delete=models.CASCADE)
 
     # TODO
     # def get_study_types_string(self):
@@ -1887,8 +1898,12 @@ class AssayMatrixItem(FlaggableModel):
     row_index = models.IntegerField()
     column_index = models.IntegerField()
 
+    # TODO DEPRECATED: PURGE
+    # HENCEFORTH ALL ITEMS WILL HAVE AN ORGAN MODEL PROTOCOL
     device = models.ForeignKey(Microdevice, verbose_name='Device', on_delete=models.CASCADE)
 
+    # TODO DEPRECATED: PURGE
+    # HENCEFORTH ALL ITEMS WILL HAVE AN ORGAN MODEL PROTOCOL
     organ_model = models.ForeignKey(OrganModel, verbose_name='Model', null=True, blank=True, on_delete=models.CASCADE)
 
     organ_model_protocol = models.ForeignKey(
@@ -1899,6 +1914,7 @@ class AssayMatrixItem(FlaggableModel):
         on_delete=models.CASCADE
     )
 
+    # TODO DEPRECATED: PURGE
     # formerly just 'variance'
     variance_from_organ_model_protocol = models.CharField(
         max_length=3000,
@@ -2118,7 +2134,12 @@ class AssaySetupCell(models.Model):
     # No longer bound one-to-one
     # setup = models.ForeignKey('AssaySetup', on_delete=models.CASCADE)
     cell_sample = models.ForeignKey('cellsamples.CellSample', on_delete=models.CASCADE)
-    biosensor = models.ForeignKey('cellsamples.Biosensor', on_delete=models.CASCADE)
+    biosensor = models.ForeignKey(
+        'cellsamples.Biosensor',
+        on_delete=models.CASCADE,
+        # Default is naive
+        default=2
+    )
     density = models.FloatField(verbose_name='density', default=0)
 
     # TODO THIS IS TO BE HAMMERED OUT
@@ -2385,6 +2406,11 @@ class AssaySetupCompound(models.Model):
         else:
             return str(self)
 
+    def clean(self):
+        # PREVENT DURATION OF 0
+        if not self.duration or self.duration <= 0:
+            raise forms.ValidationError({'duration': ['Duration cannot be zero or negative.']})
+
     def __str__(self):
         if self.addition_location:
             return '{0} ({1} {2})\nAdded on: {3}; Duration of: {4}; Added to: {5}'.format(
@@ -2513,6 +2539,11 @@ class AssaySetupSetting(models.Model):
         else:
             return str(self)
 
+    def clean(self):
+        # PREVENT DURATION OF 0
+        if not self.duration or self.duration <= 0:
+            raise forms.ValidationError({'duration': ['Duration cannot be zero or negative.']})
+
     def __str__(self):
         return '{} {} {}'.format(self.setting.name, self.value, self.unit)
 
@@ -2576,6 +2607,15 @@ class AssayStudyAssay(models.Model):
     # Name of model "PhysicalUnits" should be renamed, methinks
     unit = models.ForeignKey(PhysicalUnits, on_delete=models.CASCADE)
 
+    # CATEGORY IS NOT ACTUALLY STORED
+    # category = models.ForeignKey(
+    #     'assays.AssayCategory',
+    #     null=True,
+    #     blank=True,
+    #     on_delete=models.CASCADE
+    # )
+
+    # TODO TODO TODO NOTE THAT ADDING CATEGORY HERE WILL INTERUPT OTHER SCRIPTS
     def __str__(self):
         return '{0}~@|{1}~@|{2}~@|{3}'.format(self.study_id, self.target, self.method, self.unit)
 
@@ -2733,3 +2773,20 @@ class AssayStudySetReference(models.Model):
 
     reference = models.ForeignKey(AssayReference, on_delete=models.CASCADE)
     reference_for = models.ForeignKey(AssayStudySet, on_delete=models.CASCADE)
+
+
+class AssayCategory(FlaggableModel):
+    """Describes a genre of assay"""
+
+    class Meta(object):
+        verbose_name = 'Assay Category'
+        verbose_name_plural = 'Assay Categories'
+
+    name = models.CharField(max_length=512, unique=True)
+    description = models.CharField(max_length=2000)
+
+    # List of all related targets
+    targets = models.ManyToManyField('assays.AssayTarget')
+
+    def __str__(self):
+        return '{}'.format(self.name)

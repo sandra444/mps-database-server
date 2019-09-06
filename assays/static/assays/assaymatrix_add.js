@@ -1,8 +1,9 @@
 // Functions for displaying Assay Matrices
 // TODO WE MAY WANT THIS IN MULTIPLE LOCATIONS, BUT AT THE MOMENT I AM ASSUMING ADD ONLY
 // TODO THIS FILE IS A MESS
+// TODO PLEASE TRY TO USE ':input' WHEN POSSIBLE TO AVOID MANUALLY LISTSING THE DIFFERENT TYPES OF INPUTS (select, textarea, etc.)
 $(document).ready(function () {
-    // TODO TODO TODO IN THE FUTURE FILE-SCOPE VARIABLES SHOULD BE IN ALL-CAPS
+    // TODO TODO TODO IN THE FUTURE FILE-SCOPE CONSTANTS SHOULD BE IN ALL-CAPS
     // The matrix's ID
     var matrix_id = Math.floor(window.location.href.split('/')[5]);
 
@@ -107,13 +108,6 @@ $(document).ready(function () {
     final_indexes[cell_prefix] = cell_final_index;
     final_indexes[setting_prefix] = setting_final_index;
 
-    // For converting between times
-    var time_conversions = {
-        'day': 1440.0,
-        'hour': 60.0,
-        'minute': 1.0
-    };
-
     // For using incrementers
     // TODO TODO SUBJECT TO CHANGE
     var incrementers = {
@@ -153,32 +147,6 @@ $(document).ready(function () {
         }
 
         return new_form;
-    }
-
-    // DEPRECATED
-    // WILL PROBABLY JUST HANDLE THIS IN PYTHON
-    function get_split_time(time_in_minutes) {
-        var times = {
-            'day': 0,
-            'hour': 0,
-            'minute': 0
-        };
-
-        var time_in_minutes_remaining = time_in_minutes;
-        $.each(time_conversions, function(time_unit, conversion) {
-            var initial_time_for_current_field = Math.floor(time_in_minutes_remaining / conversion);
-            if (initial_time_for_current_field) {
-                times[time_unit] = initial_time_for_current_field;
-                time_in_minutes_remaining -= initial_time_for_current_field * conversion;
-            }
-        });
-
-        // Add fractions of minutes if necessary
-        if (time_in_minutes_remaining) {
-            times['minute'] += time_in_minutes_remaining
-        }
-
-        return times
     }
 
     // This function turns numbers into letters
@@ -527,19 +495,19 @@ $(document).ready(function () {
                 });
 
                 // Hide deletes for forms without names
-                if (!$(this).find('input[name$="-name"]').val()) {
-                    display.find('.form-delete').hide();
-                }
-                else {
-                    display.find('.form-delete').show();
-                }
+                // if (!$(this).find('input[name$="-name"]').val()) {
+                //     display.find('.form-delete').hide();
+                // }
+                // else {
+                //     display.find('.form-delete').show();
+                // }
 
                 var errors_display = null;
                 var errors_list = null;
 
                 var item_was_marked_deleted = false;
 
-                if (prefix === 'item') {
+                if (prefix === 'matrix_item') {
                     item_was_marked_deleted = $(this).find('input[name$="DELETE"]').prop('checked');
                 }
 
@@ -1141,18 +1109,202 @@ $(document).ready(function () {
         // }
     });
 
+    // SLOPPY ADDITIONS FROM modify_matrix
+    // NEEDS BETTER INTEGRATION
+    // Add show details
+    // NOT DRY
+    // Show details
+    function show_hide_full_details() {
+        var current_value_show_details = $('#show_details').prop('checked');
+
+        // Hide all contents of "bubbles"
+        // Bad selector
+        $.each(prefixes, function(prefix_index, prefix) {
+            $('.' + prefix + '-display').children().hide();
+        });
+
+        // If checked, unhide all
+        if (current_value_show_details) {
+            // Bad selector
+            $.each(prefixes, function(prefix_index, prefix) {
+                $('.' + prefix + '-display').children().show();
+            });
+        }
+        // Otherwise, just unhide the first line of the "bubble"
+        else {
+            $('.important-display').show();
+        }
+
+        change_matrix_visibility();
+    }
+
+    $('#show_details').change(show_hide_full_details);
+    show_hide_full_details();
+
+    // Add editing functionality
+    var current_edit_prefix = null;
+    var current_edit_subform_index = null;
+    var current_edit_form_index = null;
+
+    var time_prefixes = [
+        'addition_time',
+        'duration'
+    ];
+
+    // CREATE DIALOGS
+    // NOT DRY
+    // STRANGE NOT GOOD
+    $.each(prefixes, function(index, prefix) {
+        var current_dialog = $('#' + prefix + '_dialog');
+        current_dialog.dialog({
+            width: 825,
+            open: function() {
+                $.ui.dialog.prototype.options.open();
+                // BAD
+                setTimeout(function() {
+                    // Blur all
+                    $('.ui-dialog').find('input, select, button').blur();
+                }, 150);
+
+                // Populate the fields
+                var subform_identifier = current_edit_prefix + '-' + current_edit_subform_index;
+
+                // FOR ITEM
+                if (!current_edit_subform_index) {
+                    subform_identifier = current_edit_prefix + '-' + current_edit_form_index;
+                }
+
+                var current_fields = $('#' + subform_identifier).find('select, input, textarea').not('[id$="-selectized"]');
+
+                var current_data = {};
+
+                current_fields.each(function() {
+                    current_data[$(this).attr('name').replace(subform_identifier + '-', '')] = $(this).val();
+                });
+
+                var this_popup = $(this);
+
+                // BE SURE TO INCLUDE TEXTAREA
+                this_popup.find('input, textarea').each(function() {
+                    if ($(this).attr('name')) {
+                        $(this).val(current_data[$(this).attr('name').replace(current_edit_prefix + '_', '')]);
+                    }
+                });
+
+                this_popup.find('select').each(function() {
+                    if ($(this).attr('name')) {
+                        this.selectize.setValue(current_data[$(this).attr('name').replace(current_edit_prefix + '_', '')]);
+                    }
+                });
+
+                // TODO SPECIAL EXCEPTION FOR DATEPICKER
+                if (this_popup.find('#id_matrix_item_setup_date_popup')) {
+                    var date_picker = this_popup.find('#id_matrix_item_setup_date_popup');
+                    var curr_date = current_data['setup_date'];
+                    date_picker.datepicker('setDate', curr_date);
+                }
+
+                // TODO SPECIAL EXCEPTION FOR CELL SAMPLE
+                // BAD
+                if (current_data['cell_sample']) {
+                    this_popup.find('#id_cell_sample_label').text($('#cell_sample_' + current_data['cell_sample']).attr('name'));
+                }
+                else {
+                    this_popup.find('#id_cell_sample_label').text('');
+                }
+
+                if ($.isEmptyObject(current_data)) {
+                    // TODO SPECIAL EXCEPTION FOR TIMES
+                    $.each(time_prefixes, function(index, current_time_prefix) {
+                        var split_time = window.SPLIT_TIME.get_split_time(
+                            current_data[current_time_prefix]
+                        );
+
+                        $.each(split_time, function(time_name, time_value) {
+                            this_popup.find('input[name="' + prefix + '_' + current_time_prefix + '_' + time_name + '"]').val(time_value);
+                        });
+                    });
+                }
+            },
+            buttons: [
+            {
+                text: 'Apply',
+                click: function() {
+                    // ACTUALLY MAKE THE CHANGE TO THE RESPECTIVE ENTITY
+                    // TODO TODO TODO
+
+                    // Modify the data
+                    // ITERATE OVER EVERY VALUE IN THE FORM AND MODIFY
+                    // Populate the fields
+                    var subform_identifier = current_edit_prefix + '-' + current_edit_subform_index;
+
+                    // FOR ITEM
+                    if (!current_edit_subform_index) {
+                        subform_identifier = current_edit_prefix + '-' + current_edit_form_index;
+                    }
+
+                    // REVISE REVISE REIVSE
+                    // BE SURE TO INCLUDE TEXAREA
+                    $(this).find('input, select, textarea').each(function() {
+                        if ($(this).attr('name')) {
+                            $('#id_' + subform_identifier + '-' + $(this).attr('name').replace(current_edit_prefix + '_', '')).val($(this).val());
+                        }
+                    });
+
+                    // TODO SPECIAL EXCEPTION FOR DATEPICKER
+                    // SLOPPY
+                    if ($('#id_matrix_item_setup_date_popup')) {
+                        var date_picker = $('#id_matrix_item_setup_date_popup');
+                        var curr_date = date_picker.val();
+                        $('#id_' + subform_identifier + '-setup_date').val(
+                            curr_date
+                        );
+                    }
+
+                    // REFRESH
+                    // SLOW, EXCESSIVE
+                    refresh_all_contents_from_forms();
+
+                    $(this).dialog("close");
+                }
+            },
+            {
+                text: 'Cancel',
+                click: function() {
+                   $(this).dialog("close");
+                }
+            }]
+        });
+        current_dialog.removeProp('hidden');
+    });
+
+    $(document).on('click', '.subform-edit', function() {
+        // Ugly acquisition
+        var current_edit_section = $(this).parent().parent();
+        current_edit_prefix = current_edit_section.attr('data-prefix');
+        current_edit_subform_index = current_edit_section.attr('data-subform-index');
+        current_edit_form_index = current_edit_section.attr('data-form-index');
+
+        // IF THIS IS FOR AN ITEM
+        if (!current_edit_form_index && !current_edit_prefix) {
+            current_edit_form_index = current_edit_section.parent().attr('data-form-index');
+            current_edit_prefix = 'matrix_item';
+        }
+
+        $('#' + current_edit_prefix + '_dialog').dialog('open');
+    });
+
     // Special operations for pre-submission
     $('form').submit(function() {
         // Iterate over every Matrix Item form
         // EXCEEDINGLY NAIVE, PLEASE REVISE
         $('.' + item_prefix).each(function(form_index) {
-            // Removed the notion of shadow deleting "empty" items
             var empty = true;
 
             var current_name = $(this).find('input[name$="-name"]').val();
             if (current_name) {
                 $(this).find('input:not(:checkbox)').each(function(input_index) {
-                    if($(this).val()) {
+                    if ($(this).val()) {
                         if(
                             $(this).attr('name').indexOf('_index') === -1 &&
                             $(this).attr('name').indexOf('-name') === -1 &&

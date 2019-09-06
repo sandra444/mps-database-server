@@ -4,11 +4,14 @@
 {% block load_js %}
     <script src="{% static "js/image_display.js" %}"></script>
     <script src="{% static "js/enter_override.js" %}"></script>
+    <script src="{% static "js/split_time.js" %}"></script>
+    <script src="{% static "assays/compound_instances.js" %}"></script>
+    <script src="{% static "assays/cell_sample_selection.js" %}"></script>
     <script src="{% static "js/calendar.js" %}"></script>
     <script src="{% static "js/flag.js" %}"></script>
-    {# <script src="{% static "js/inline_add.js" %}"></script>#}
+    <script src="{% static "assays/organ_model_filter.js" %}"></script>
+    <script src="{% static "assays/modify_matrix.js" %}"></script>
     <script src="{% static "assays/assaystudy_add.js" %}"></script>
-    <script src="{% static "assays/reference_selection.js" %}"></script>
 {% endblock %}
 
 {% block breadcrumbs %}
@@ -129,6 +132,8 @@
 
     {% include 'generic_field.html' with field=form.description label="Description" %}
 
+    {# REMOVED FOR NOW #}
+    {% comment %}
     <div class="form-group">
         <label for="use_in_calculations" class="col-sm-2 control-label">Use in Calculations</label>
         <div class="col-sm-10">
@@ -140,6 +145,7 @@
           </div>
         </div>
     </div>
+    {% endcomment %}
 
     {% if form.protocol.errors %}
         {% for error in form.protocol.errors %}
@@ -224,6 +230,129 @@
     </div>
     {% endcomment %}
 
+    {# TODO PUT MODEL SELECTION STUFF HERE #}
+    <legend>Study Setup</legend>
+
+    {% include 'generic_field.html' with field=form.organ_model label="MPS Model" %}
+    {# Use the show/hide from organ_model_filtering #}
+    <div id="protocol_div">
+    {% include 'generic_field.html' with field=form.organ_model_protocol label="MPS Model Version" %}
+    </div>
+
+    {# TODO PUT THE TABLE THING HERE #}
+    <div hidden id="study_setup_table_section">
+            {# Section for visibility checkboxes #}
+            {# A litle awkward #}
+            <div class="row large-padding-top">
+            <div class="col-md-4 col-lg-3">
+                <div class="fancy-checkbox table-filter padded-bottom" align="left">
+                    <input class="visibility-checkbox" type="checkbox" name="show_cells" id="show_cells" value=".cell_start" checked/>
+                    <div class="btn-group">
+                        <label for="show_cells" class="btn btn-success">
+                            <span class="glyphicon glyphicon-ok"></span>
+                            <span> </span>
+                        </label>
+                        <label for="show_cells" class="btn btn-default active">
+                            Show Cells
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4 col-lg-3">
+                <div class="fancy-checkbox table-filter padded-bottom" align="left">
+                    <input class="visibility-checkbox" type="checkbox" name="show_compounds" id="show_compounds" value=".compound_start" checked/>
+                    <div class="btn-group">
+                        <label for="show_compounds" class="btn btn-info">
+                            <span class="glyphicon glyphicon-ok"></span>
+                            <span> </span>
+                        </label>
+                        <label for="show_compounds" class="btn btn-default active">
+                            Show Compounds
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4 col-lg-3">
+                <div class="fancy-checkbox table-filter padded-bottom" align="left">
+                    <input class="visibility-checkbox" type="checkbox" name="show_settings" id="show_settings" value=".setting_start" checked/>
+                    <div class="btn-group">
+                        <label for="show_settings" class="btn btn-warning">
+                            <span class="glyphicon glyphicon-ok"></span>
+                            <span> </span>
+                        </label>
+                        <label for="show_settings" class="btn btn-default active">
+                            Show Settings
+                        </label>
+                    </div>
+                </div>
+            </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-4 col-lg-3">
+                    <div class="fancy-checkbox table-filter padded-bottom" align="left">
+                        {# useless value #}
+                        <input type="checkbox" name="show_details" id="show_details" value=".full_details" />
+                        <div class="btn-group">
+                            <label for="show_details" class="btn btn-default">
+                                <span class="glyphicon glyphicon-ok"></span>
+                                <span> </span>
+                            </label>
+                            <label for="show_details" class="btn btn-default active">
+                                Show Full Details
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 col-lg-3" hidden>
+                    <div class="fancy-checkbox table-filter padded-bottom" align="left">
+                        <input class="visibility-checkbox" type="checkbox" name="show_errors" id="show_errors" value=".error-display" checked/>
+                        <div class="btn-group">
+                            <label for="show_settings" class="btn btn-warning">
+                                <span class="glyphicon glyphicon-ok"></span>
+                                <span> </span>
+                            </label>
+                            <label for="show_errors" class="btn btn-danger active">
+                                Show Errors
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                {# Spacer, contrived #}
+                <div class="col-md-4 col-lg-3"></div>
+            </div>
+
+        <div id="setup_table_errors" hidden>
+            {{ form.setup_data.errors }}
+        </div>
+
+        {# Set of buttons for adding cells, compounds, settings etc. #}
+        <div class="padded-bottom">
+        <a role="button" class="btn btn-success" id="add_group_button"><span class="glyphicon glyphicon-plus-sign"></span>Add Setup Group</a>
+        </div>
+
+        <div class="padded-bottom">
+        <a role="button" class="btn btn-success" data-add-new-button="true" data-prefix="cell">Add Cell</a>
+        <a role="button" class="btn btn-success" data-add-new-button="true" data-prefix="compound">Add Compound</a>
+        {# Probably will be renamed #}
+        <a role="button" class="btn btn-success" data-add-new-button="true" data-prefix="setting">Add Setting</a>
+        </div>
+
+        <table class="table table-striped table-bordered table-nonfluid" id="study_setup_table">
+            <thead>
+                <th>Setup Group</th>
+                <th>Number of Chips</th>
+                <th>Test Type</th>
+                <th hidden class="cell_start"></th>
+                <th hidden class="compound_start"></th>
+                <th hidden class="setting_start"></th>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
     {{ study_assay_formset.management_form }}
     <legend>Assays</legend>
 
@@ -279,6 +408,8 @@
         </tbody>
     </table>
 
+    {# REMOVED FOR NOW #}
+    {% comment %}
     {{ supporting_data_formset.management_form }}
     <legend>Supporting Data</legend>
     {% if supporting_data_formset.non_form_errors %}
@@ -330,7 +461,20 @@
             {% endfor %}
         </tbody>
     </table>
+    {% endcomment %}
 
-    {% include 'add_reference.html' %}
+    {# Hidden for Cells, Compounds, and Settings #}
+    {# <div hidden> #}
+        {# {{ form.setup_data }} #}
+        {# {{ form.number_of_items }} #}
+        {# {{ form.test_type }} #}
+    {# </div> #}
+    {# Hidden #}
+    <div hidden>
+        {{ form.setup_data }}
+    </div>
 </form>
+
+{% include 'assays/group_editing.html' %}
+
 {% endblock %}

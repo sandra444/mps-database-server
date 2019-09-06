@@ -9,12 +9,19 @@ from .models import (
     MicrophysiologyCenter,
     GroupDeferral,
     OrganModelReference,
-    MicrodeviceReference
+    MicrodeviceReference,
+    OrganModelCell,
+    OrganModelProtocolCell,
+    OrganModelProtocolSetting,
 )
+from cellsamples.models import CellType
 from assays.models import AssayMatrixItem, AssaySampleLocation
 from diseases.models import Disease
 from mps.forms import SignOffMixin, BootstrapForm
 from django.forms.models import inlineformset_factory
+
+# A little strange to import this way: spaghetti
+from assays.forms import ModelFormSplitTime, PhysicalUnits
 
 # These are all of the tracking fields
 tracking = ('created_by', 'created_on', 'modified_on', 'modified_by', 'signed_off_by', 'signed_off_date')
@@ -94,18 +101,32 @@ OrganModelLocationFormsetFactory = inlineformset_factory(
 )
 
 
-class OrganModelProtocolForm(BootstrapForm):
-    """Form for Organ Model Protocols (as part of an inline)"""
+class OrganModelProtocolInlineForm(BootstrapForm):
     class Meta(object):
         model = OrganModelProtocol
-        exclude = ('',)
+        fields = ('name', 'protocol_file')
+
+        widgets = {
+            'name': forms.Textarea(attrs={'rows': 1}),
+        }
+
+
+class OrganModelProtocolForm(BootstrapForm):
+    class Meta(object):
+        model = OrganModelProtocol
+        exclude = tracking + ('organ_model',)
+
+        widgets = {
+            'name': forms.Textarea(attrs={'rows': 1}),
+            'description': forms.Textarea(attrs={'rows': 6}),
+        }
 
 
 class OrganModelProtocolInlineFormset(BaseInlineFormSet):
     """Formset of organ model protocols"""
     class Meta(object):
         model = OrganModelProtocol
-        exclude = ('',)
+        exclude = tracking
 
     def clean(self):
         forms_data = [f for f in self.forms if f.cleaned_data]
@@ -124,13 +145,10 @@ class OrganModelProtocolInlineFormset(BaseInlineFormSet):
 OrganModelProtocolFormsetFactory = inlineformset_factory(
     OrganModel,
     OrganModelProtocol,
-    form=OrganModelProtocolForm,
+    form=OrganModelProtocolInlineForm,
     formset=OrganModelProtocolInlineFormset,
-    extra=1,
-    exclude=[],
-    widgets={
-        'version': forms.TextInput(attrs={'size': 10})
-    }
+    fields=('name', 'protocol_file'),
+    extra=1
 )
 
 OrganModelReferenceFormSetFactory = inlineformset_factory(
@@ -178,3 +196,64 @@ class GroupDeferralForm(BootstrapForm):
         )
 
         self.fields['group'].queryset = groups_with_center_full
+
+
+class OrganModelProtocolCellForm(ModelFormSplitTime):
+    class Meta(object):
+        model = OrganModelProtocolCell
+        exclude = tracking
+
+    def __init__(self, *args, **kwargs):
+        # self.static_choices = kwargs.pop('static_choices', None)
+        super(OrganModelProtocolCellForm, self).__init__(*args, **kwargs)
+
+        # Change widget size
+        self.fields['cell_sample'].widget.attrs['style'] = 'width:75px;'
+        self.fields['passage'].widget.attrs['style'] = 'width:75px;'
+
+        self.fields['density_unit'].queryset = PhysicalUnits.objects.filter(availability__contains='cell').order_by('unit')
+
+
+class OrganModelProtocolSettingForm(ModelFormSplitTime):
+    class Meta(object):
+        model = OrganModelProtocolSetting
+        exclude = tracking
+
+
+class OrganModelCellForm(BootstrapForm):
+    def __init__(self, *args, **kwargs):
+        # self.static_choices = kwargs.pop('static_choices', None)
+        super(OrganModelCellForm, self).__init__(*args, **kwargs)
+
+        # Avoid N+1 problem
+        self.fields['cell_type'].queryset = CellType.objects.all().prefetch_related('organ')
+
+    class Meta(object):
+        model = OrganModelProtocolCell
+        exclude = tracking
+
+
+OrganModelProtocolCellFormsetFactory = inlineformset_factory(
+    OrganModelProtocol,
+    OrganModelProtocolCell,
+    form=OrganModelProtocolCellForm,
+    extra=1,
+    exclude=[],
+)
+
+OrganModelProtocolSettingFormsetFactory = inlineformset_factory(
+    OrganModelProtocol,
+    OrganModelProtocolSetting,
+    form=OrganModelProtocolSettingForm,
+    extra=1,
+    exclude=[],
+)
+
+
+OrganModelCellFormsetFactory = inlineformset_factory(
+    OrganModel,
+    OrganModelCell,
+    form=OrganModelCellForm,
+    extra=1,
+    exclude=[],
+)

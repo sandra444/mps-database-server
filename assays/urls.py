@@ -44,7 +44,9 @@ from assays.views import (
     AssayReferenceAdd,
     AssayReferenceUpdate,
     AssayReferenceDetail,
-    AssayReferenceDelete
+    AssayReferenceDelete,
+    AssayStudyAddNew,
+    AssayMatrixNew
 )
 import assays.ajax
 
@@ -68,7 +70,7 @@ urlpatterns = [
 
     # NEW_TO_BE_REVISED
     url(r'^assays/assaystudy/$', AssayStudyList.as_view(), name='assay_study_list'),
-    url(r'^assays/assaystudy/add/$', AssayStudyAdd.as_view(), name='assay_study_add'),
+    url(r'^assays/assaystudy/add/$', AssayStudyAddNew.as_view(), name='assay_study_add'),
 
     url(r'^assays/assaymatrixitem/(?P<pk>[0-9]+)/$', AssayMatrixItemDetail.as_view(), name='assay_matrix_item_detail'),
     url(r'^assays/assaymatrixitem/(?P<pk>[0-9]+)/update/$', AssayMatrixItemUpdate.as_view(), name='assay_matrix_item_update'),
@@ -83,6 +85,8 @@ urlpatterns = [
     url(r'^assays/assaymatrix/(?P<pk>[0-9]+)/$', AssayMatrixDetail.as_view(), name='assay_matrix_detail'),
     url(r'^assays/assaymatrix/(?P<pk>[0-9]+)/update/$', AssayMatrixUpdate.as_view(), name='assay_matrix_update'),
     url(r'^assays/assaymatrix/(?P<pk>[0-9]+)/delete/$', AssayMatrixDelete.as_view(), name='assay_matrix_delete'),
+
+    url(r'^assays/assaymatrix/(?P<pk>[0-9]+)/new/$', AssayMatrixNew.as_view(), name='assay_matrix_new'),
 
     url(r'^assays/studyconfiguration/$', AssayStudyConfigurationList.as_view(), name='studyconfiguration_list'),
     url(r'^assays/studyconfiguration/add/$', AssayStudyConfigurationAdd.as_view(), name='studyconfiguration_add'),
@@ -150,7 +154,7 @@ urlpatterns = [
 
     # Power Analysis
     url(r'^assays/assaystudy/(?P<pk>[0-9]+)/power_analysis/$', AssayStudyPowerAnalysisStudy.as_view(), name='assay-power-analysis-study'),
-  
+
     # References
     url(r'^assays/references/$', AssayReferenceList.as_view(), name='assay-reference-list'),
     url(r'^assays/references/add/$', AssayReferenceAdd.as_view(), name='assay-reference-add'),

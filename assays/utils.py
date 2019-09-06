@@ -869,7 +869,7 @@ class AssayFileProcessor:
                 at_least_one_valid_sheet = True
 
         if not at_least_one_valid_sheet:
-            self.errors.append(
+            raise forms.ValidationError(
                 'No valid sheets were detected in the file. Please check to make sure your headers are correct and start in the top-left corner.'
             )
 
@@ -885,7 +885,7 @@ class AssayFileProcessor:
 
         # IF NOT VALID, THROW ERROR
         else:
-            self.errors.append('The file is not formatted correctly. Please check the header of the file.')
+            raise forms.ValidationError('The file is not formatted correctly. Please check the header of the file.')
 
     def process_file(self):
         # Save the data upload if necessary (ostensibly save should only run after validation)
