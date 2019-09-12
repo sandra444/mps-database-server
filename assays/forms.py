@@ -595,6 +595,13 @@ class AssayMatrixForm(SignOffMixin, BootstrapForm):
         ('delete', 'Delete Selected'),
     ), required=False)
 
+    well_plate_size = forms.ChoiceField(choices=(
+        ('', 'Please Select Well Plate Size'),
+        ('24', '24 well plate'),
+        ('96', '96 well plate'),
+        ('384', '384 well plate'),
+    ), required=False)
+
     # The matrix_item isn't just to be annoying, I want to avoid conflicts with other fields
     ### ADDING ITEM FIELDS
     matrix_item_name = forms.CharField(
