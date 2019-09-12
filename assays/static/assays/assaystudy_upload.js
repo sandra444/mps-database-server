@@ -206,48 +206,71 @@ $(document).ready(function () {
         {"1":"chip3","2":3,"3":"my treatment 3"}
     ];
 
-    var HEADERMOUNTIANS = ["A","B","C"]
+    var HEADERMOUNTIANS = ["A","B","C"];
 
     $('input[type="radio"]').click(function() {
         var inputValue = $(this).attr("value");
         var inputName = $(this).attr("name");
-        console.log(inputName)
-        console.log(inputValue)
-        if (inputName == "upload_type")
+        console.log("x", inputName);
+        console.log("y", inputValue);
+        if (inputName == "upload_type") {
             if (inputValue == "raw_plate") {
                 $('.supporting-data').addClass('hidden');
                 $('.mif-c').addClass('hidden');
                 $('.raw-plate').removeClass('hidden');
-                buildTableChips(MOUNTAINS)
-            }
-            else if(inputValue == "supporting_data") {
+                $('.sample-times').removeClass('hidden');
+                buildTableChips(MOUNTAINS);
+                //providePlateOptions(standard_well_plates);
+                //addFormFromForms(action);
+                //set quirky defaults
+                $('.new-plate-map').removeClass('hidden');
+            } else if (inputValue == "supporting_data") {
                 $('.mif-c').addClass('hidden');
                 $('.raw-plate').addClass('hidden');
                 $('.supporting-data').removeClass('hidden');
-
             } else {
+                // mif_c
                 $('.raw-plate').addClass('hidden');
                 $('.supporting-data').addClass('hidden');
                 $('.mif-c').removeClass('hidden');
             }
-        else if (inputName == "plate_map_type_option") {
-            console.log(inputName)
+        } else if (inputName == "plate_map_type_option") {
+            //console.log(inputName);
+            //console.log(inputValue);
+            //sample empty matrix
             if (inputValue == "sample") {
+                console.log("a", inputName);
+                console.log("b", inputValue);
+                $('.matrix-times').addClass('hidden');
+                $('.empty-times').addClass('hidden');
                 $('.sample-times').removeClass('hidden');
-                $('.study-matrices').addClass('hidden');
-            } else {
+            } else if (inputValue == "empty") {
+                console.log("c", inputName)
+                console.log("d", inputValue)
                 $('.sample-times').addClass('hidden');
-                $('.study-matrices').removeClass('hidden');
+                $('.matrix-times').addClass('hidden');
+                $('.empty-times').removeClass('hidden');
+            } else {
+                // matrix
+                console.log("e", inputName);
+                console.log("f", inputValue);
+                $('.empty-times').addClass('hidden');
+                $('.sample-times').addClass('hidden');
+                $('.matrix-times').removeClass('hidden');
+            }
+        } else if (inputName == "plate_map_new_overwrite") {
+            //console.log(inputValue);
+            if (inputValue == "new_map") {
+                $('.new-plate-map').removeClass('hidden');
+            } else {
+                $('.new-plate-map').addClass('hidden');
             }
         } else {
             var passme = true;
+
         }
-    //console.log($('input[name=upload_type]:checked').val())
+    //console.log($('input[name=upload_type]:checked').val());
     });
-
-
-
-
 
 
     function buildTableChips(data) {
@@ -264,6 +287,7 @@ $(document).ready(function () {
         thead.appendChild(headRow);
         tablecellsselection.appendChild(thead);
         data.forEach(function(el) {
+            console.log(el)
           var tr = document.createElement("tr");
           for (var o in el) {
             var td = document.createElement("td");
@@ -275,5 +299,43 @@ $(document).ready(function () {
         tablecellsselection.appendChild(tbody);
         return tablecellsselection;
     }
+
+
+
+    //var HEADERWELLS = ["A","B"];
+    //var standard_well_plates = $('#standard_well_plates');
+    //sck get plate info for basic plates
+/*    function providePlateOptions(data) {
+         console.log(data);
+        var thead = document.createElement("thead");
+        var tbody = document.createElement("tbody");
+        var headRow = document.createElement("tr");
+        HEADERWELLS.forEach(function(el) {
+          var th=document.createElement("th");
+          th.appendChild(document.createTextNode(el));
+          headRow.appendChild(th);
+        });
+        thead.appendChild(headRow);
+        tablestandardwellplates.appendChild(thead);
+        //data.forEach(function(el) {
+          var tr = document.createElement("tr");
+        //  for (var o in el) {
+            var td = document.createElement("td");
+            td.appendChild(document.createTextNode(data)
+            //td.appendChild(document.createTextNode(el[o]))
+            tr.appendChild(td);
+          }
+          tbody.appendChild(tr);
+        });
+        tablestandardwellplates.appendChild(tbody);
+        return tablestandardwellplates;
+    }*/
+
+    $(".select-plate-size").change(function() {
+        var inputValue = $(this).val()
+        console.log("s", inputValue);
+        $("input[name=testingme]:text").val(inputValue);
+
+    });
 
 });

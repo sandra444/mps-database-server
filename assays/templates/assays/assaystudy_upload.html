@@ -37,9 +37,7 @@
     </h1>
 
     <legend><br>Select the Type of File to Upload</legend>
-
     {# sck for raw_plate #}
-    <!--<p> Please Specific the Format of the File to Upload (option to delete a previously uploaded file provided below): </p>-->
     <label><input type="radio" name="upload_type" value="mif_c" checked="checked"> MIF-C </label>
     - Upload processed assay data in the required columnar format.
     <br>
@@ -59,96 +57,100 @@
     {# sck for raw_plate Add/Edit Plate Maps#}
     <div class="raw-plate hidden">
         <legend><br>Plate Map General Information</legend>
-        <div class="container">
-            <div class="row">
-                <div class="col-sm-12" >
-                    <b>Select Plate Map Information: </b>
-                </div>
+        <div class="row">
+            <div class="col-sm-12" >
+                <b>Select <i>Starting</i> Source: </b>
             </div>
-            <div class="row">
-                <div class="col-sm-12" >
-                    <label><input type="radio" name="plate_map_type_option" value="sample" checked="checked"></label>
-                    Samples were removed from MPS device and put in a separate plate for plate reader analysis (a plate map).
-                </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-12" >
+                <label><input type="radio" name="plate_map_type_option" value="matrix"> Use an Existing Matrix </label>
+                - MPS model is a plate and the same plate was put directly in the plate reader.
             </div>
-            <div class="row">
-                <div class="col-sm-12" >
-                    <label><input type="radio" name="plate_map_type_option" value="matrix"></label>
-                    Entire experiment conducted in plate and plate was placed in the plate reader (a "Matrix").
-                </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-12" >
+                <label><input type="radio" name="plate_map_type_option" value="sample" checked="checked"> Previously Saved Plate Map </label>
+                - Previously saved a plate map and want to edit or copy.
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-12" >
+                <label><input type="radio" name="plate_map_type_option" value="empty" > Empty Plate </label>
+                - Start from an empty well plate.
             </div>
         </div>
     </div>
 
+
     {# sck for raw_plate Extra Info About Plate Maps#}
     <div class="raw-plate hidden">
-        <div class="container">
-            <div class="sample-times">
-                <div class="row">
-                    <div class="col-sm-12" >
-                        <i><b><br>How will the plate maps be used? </b></i>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-sm-12" >
-                        <label><input type="radio" name="sample_time_option" value="one_time_point" checked="checked"></label>
-                        Samples for each assay plate will be from 1 and only one time point.
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-sm-12" >
-                        <label><input type="radio" name="sample_time_option" value="multiple_time_points"></label>
-                        Sample on the assay plate will be from multiple time points.
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-sm-4" >
-                        <i><b><br>Select plate map to work with: </b></i>
-                    </div>
-                    <div class="col-sm-1" >
-                        <i><b><br>OR </b></i>
-                    </div>
-                    <div class="col-sm-4" >
-                        <i><b><br>Select a plate size: </b></i>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-sm-4" >
-                        <p>---make a select box that pulls the maps from ? (yet to be determined how we will store but will be with study)</p>
-                    </div>
-                    <div class="col-sm-1" >
-                        <i><b><br></b></i>
-                    </div>
-                    <div class="col-sm-4" >
-                        <p>---make a select box that of standard plate sizes and configurations</p>
-                    </div>
-                </div>
-            </div>
-            <div class="study-matrices hidden">
-                <div class="row">
-                    <div class="col-sm-12" >
-                        <i><b><br>Select matrix to work with: </b></i>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-sm-12" >
-                        <p>---make a select box that pulls the matrices from this study</p>
-                    </div>
-                </div>
-            </div>
+        <div class="sample-times hidden">
             <div class="row">
-                <div class="col-sm-2" >
-                    <i><b>Plate Map Name: </b></i>
+                <div class="col-sm-12">
+                    <i><b><br>Select Plate Map to Start: </b></i>
+                    <select name="well_plate_select" form="well_plate_form">
+                    <option value="0">-----------</option>
+                    <option value="1">LDH 20190223 Plate Map for Day 1</option>
+                    <option value="2">LDH 20190223 Plate Map for Day 2</option>
+                    <option value="3">LDH 20190223 Plate Map for Day 3</option>
+                    </select>
                 </div>
-                <div class="col-sm-3" >
+            </div>
+
+            <div class="row">
+                <div class="col-sm-12" >
+                    <label><input type="radio" name="plate_map_new_overwrite" value="new_map" checked="checked"> Copy to New      </label>
+                    <label><input type="radio" name="plate_map_new_overwrite" value="overwrite_map" > Edit Map (save as) </label>
+                </div>
+            </div>
+        </div>
+
+        <div class="empty-times hidden">
+            <div class="row">
+                <div class="col-sm-12" >
+                    <i><b>Select Plate Size: </b></i>
+                    <select class="select-plate-size">
+                    <option value="0">-----------</option>
+                    <option value="24">24 - rows A-D columns 1-6</option>
+                    <option value="96">96 - rows A-H columns 1-12</option>
+                    <option value="384">384 - rows A-P columns 1-14</option>
+                    </select>
+                    <!--go over with Luke see line 598 of forms.py..make sure selected value shows in console log and in form!-->
+                    {% include 'generic_field.html' with field=form.well_plate_size label=" " %}
+                </div>
+            </div>
+            what was picked: <input type="text" name="testingme">
+        </div>
+        <div class="matrix-times hidden">
+            <div class="row">
+                <div class="col-sm-12">
+                    <!--how to pull these from the study. go over with Luke-->
+                    <i><b><br>Select Matrix to Start: </b></i>
+                    <select>
+                    <option value="0">-----------</option>
+                    <option value="1">Matrix of Chips 1-6</option>
+                    <option value="2">Matrix of Chips 12-16</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="new-plate-map">
+             <div class="row">
+                <div class="col-sm-12" >
+                    <i><b>Name New Plate Map: </b></i>
                     <form>
-                      <input type="text" name="current_plate_map_name"><br>
+                      <input type="text" name="current_plate_map_name">
                     </form>
                 </div>
-                <div class="col-sm-7" >
-                    <i>(assign a new name to create a new plate map, leave selected plate map to edit existing) </i>
-                </div>
             </div>
+        </div>
+
+
+        <div>
+            <br>
+            <br>
+
         </div>
     </div>
 
@@ -168,28 +170,26 @@
                 </div>
         </div>{% endcomment %}
 
-        <div class="container">
-            <div class=row">
-                <div class="col-sm-3" >
-                    <div>
-                        <table class="table table-striped table-bordered">
-                              <tr>
-                                <td>filter</td>
-                                <td>Chip ID</td>
-                              </tr>
-                              <tr>
-                                <td>filter</td>
-                                <td>thinking about</td>
-                              </tr>
-                        </table>
-                    </div>
+        <div class="row">
+            <div class="col-sm-3" >
+                <div>
+                    <table class="table table-striped table-bordered">
+                          <tr>
+                            <td>filter</td>
+                            <td>Chip ID</td>
+                          </tr>
+                          <tr>
+                            <td>filter</td>
+                            <td>thinking about</td>
+                          </tr>
+                    </table>
                 </div>
-                <div class="col-sm-9" >
-                    <div>
-                        <table class="table table-bordered table-inverse" summary="Table selection with plugin" id="tablecellsselection">
-                        <!-- table is built in the js file-->
-                        </table>
-                    </div>
+            </div>
+            <div class="col-sm-9" >
+                <div>
+                    <table class="table table-bordered table-inverse" summary="Table selection with plugin" id="tablecellsselection">
+                    <!-- table is built in the js file-->
+                    </table>
                 </div>
             </div>
         </div>
@@ -198,11 +198,12 @@
 
     {# sck for raw_plate The Plate Map#}
     <div class="raw-plate hidden">
-    <legend><br>Position Samples on the Plate</legend>
+    <legend><br>Position Chips on the Plate</legend>
 
-        <div class=row">
+        <div class="row">
             <div class="col-sm-12" >
                 <div>
+
                     <table class="table table-striped table-bordered">
                         <tr>
                            <td>thinking about</td>
@@ -225,6 +226,27 @@
         </div>
     </div>
 
+    <div class="raw-plate hidden">
+        <div >
+            <div class="row">
+                <div class="col-sm-12" >
+                    <i><b><br>Select unit and sample times to be used on this plate </b></i>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-12" >
+                    <label><input type="radio" name="sample_time_option" value="one_time_point" checked="checked"> One Sample Time </label>
+                    - Samples on assay plate will be from 1 and only one time point.
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-12" >
+                    <label><input type="radio" name="sample_time_option" value="multiple_time_points"> Mixed Sample Times </label>
+                    - Sample on assay plate will be from multiple time points.
+                </div>
+            </div>
+        </div>
+    </div>
 
     {# sck for raw_plate Table summarizing all previously plate map file processing (including way working on..if submitted)#}
     <div class="raw-plate hidden">
@@ -260,8 +282,6 @@
         {% endfor %}
     <div class="form-group has-error">
     {% else %}
-    <!-- sck added this /div tag, there seemed to be one end div tag missing...need to check with Luke-->
-    </div>
     <div class="form-group">
     {% endif %}
         <label for="bulk_file" class="col-sm-2 control-label">File*</label>
