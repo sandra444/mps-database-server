@@ -210,7 +210,7 @@ class OrganModelAdd(SpecificGroupRequiredMixin, CreateView):
             if protocol_formset.has_changed():
                 # CRUDE change tracking
                 for protocol in protocol_formset:
-                    if protocol.has_changed():
+                    if protocol.has_changed() and not protocol.cleaned_data.get('DELETE', False):
                         protocol.instance.modified_by_id = self.request.user.id
                         protocol.instance.modified_on = form.instance.modified_on
 
@@ -325,7 +325,7 @@ class OrganModelUpdate(UpdateView):
             if protocol_formset.has_changed():
                 # CRUDE change tracking
                 for protocol in protocol_formset:
-                    if protocol.has_changed():
+                    if protocol.has_changed() and not protocol.cleaned_data.get('DELETE', False):
                         protocol.instance.modified_by_id = self.request.user.id
                         protocol.instance.modified_on = form.instance.modified_on
 
