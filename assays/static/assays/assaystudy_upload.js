@@ -276,6 +276,7 @@ $(document).ready(function () {
     function buildTableChips(data) {
         //var table = document.createElement("table");
         //table.className="gridtable";
+        $('#tablecellsselection').empty();
         var thead = document.createElement("thead");
         var tbody = document.createElement("tbody");
         var headRow = document.createElement("tr");
@@ -291,6 +292,7 @@ $(document).ready(function () {
           var tr = document.createElement("tr");
           for (var o in el) {
             var td = document.createElement("td");
+            $(td).attr('data-test', o);
             td.appendChild(document.createTextNode(el[o]))
             tr.appendChild(td);
           }
@@ -300,6 +302,19 @@ $(document).ready(function () {
         return tablecellsselection;
     }
 
+    function test() {
+        $('.ui-selected').each(function() {
+            // console.log($(this).attr('data-test'));
+            console.log($(this).text());
+        });
+    }
+
+    $('#tablecellsselection').selectable({
+        // SUBJECT TO CHANGE: WARNING!
+        filter: 'td',
+        distance: 1,
+        stop: test
+    });
 
 
     //var HEADERWELLS = ["A","B"];
@@ -331,7 +346,7 @@ $(document).ready(function () {
         return tablestandardwellplates;
     }*/
 
-    $(".select-plate-size").change(function() {
+    $("#id_well_plate_size").change(function() {
         var inputValue = $(this).val()
         console.log("s", inputValue);
         $("input[name=testingme]:text").val(inputValue);

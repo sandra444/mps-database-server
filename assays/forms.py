@@ -595,13 +595,6 @@ class AssayMatrixForm(SignOffMixin, BootstrapForm):
         ('delete', 'Delete Selected'),
     ), required=False)
 
-    well_plate_size = forms.ChoiceField(choices=(
-        ('', 'Please Select Well Plate Size'),
-        ('24', '24 well plate'),
-        ('96', '96 well plate'),
-        ('384', '384 well plate'),
-    ), required=False)
-
     # The matrix_item isn't just to be annoying, I want to avoid conflicts with other fields
     ### ADDING ITEM FIELDS
     matrix_item_name = forms.CharField(
@@ -1514,6 +1507,18 @@ class AssayStudyDataUploadForm(BootstrapForm):
     # EVIL WAY TO GET PREVIEW DATA
     preview_data = forms.BooleanField(initial=False, required=False)
 
+    well_plate_size = forms.ChoiceField(choices=(
+        ('', 'Please Select Well Plate Size'),
+        ('24', '24 well plate'),
+        ('96', '96 well plate'),
+        ('384', '384 well plate'),
+    ), required=False)
+
+    matrix_list = forms.ModelChoiceField(
+        queryset=AssayMatrix.objects.none(),
+        required=False,
+    )
+
     class Meta(object):
         model = AssayStudy
         fields = ('bulk_file',)
@@ -1527,6 +1532,8 @@ class AssayStudyDataUploadForm(BootstrapForm):
         self.request = kwargs.pop('request', None)
 
         super(AssayStudyDataUploadForm, self).__init__(*args, **kwargs)
+
+        self.fields['matrix_list'].queryset = AssayMatrix.objects.filter(study_id=self.instance.id)
 
     def clean(self):
         data = super(AssayStudyDataUploadForm, self).clean()
