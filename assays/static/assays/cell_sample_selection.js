@@ -22,7 +22,7 @@ $(document).ready(function () {
 
     // Open and then close dialog so it doesn't get placed in window itself
     // RENAME
-    var dialog = $('#dialog');
+    var dialog = $('#cellsample_dialog');
     dialog.dialog({
         width: 900,
         height: 500,
@@ -54,7 +54,7 @@ $(document).ready(function () {
         cell_sample_id_selector.val(cell_sample_id);
         var cell_sample_name = $(this).attr('data-name');
         cell_sample_label_selector.text(cell_sample_name);
-        $('#dialog').dialog('close');
+        dialog.dialog('close');
     });
 
     // Display all labels (irrelevant in matrix)
