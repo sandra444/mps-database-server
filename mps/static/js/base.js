@@ -128,9 +128,10 @@ $(document).ready(function () {
         "','win','toolbars=0,width=1000,height=760,left=200,top=200,scrollbars=1,resizable=1')"
     );
 
-    // Bind a listener to the navbar that causes a collapse if it is oversized
+    // Navbar select
     var navbar = $('#autocollapse');
 
+    // Bind a listener to the navbar that causes a collapse if it is oversized
     function autocollapse() {
         navbar.removeClass('collapsed');
         if (navbar.innerHeight() > 51) {
@@ -138,6 +139,18 @@ $(document).ready(function () {
         }
     }
 
-    $(document).on('ready', autocollapse);
-    $(window).on('resize', autocollapse);
+    // Remove navbar etc. if this is a popup
+    if ($.urlParam('popup') === '1') {
+        // Kill navbar
+        navbar.remove();
+        // Remove margin from page
+        // $('#page').removeAttr('style');
+        // Remove breadcumbs
+        $('#breadcrumbs').remove();
+    }
+    // If there is a navbar, add autocollapse triggers
+    else {
+        $(document).on('ready', autocollapse);
+        $(window).on('resize', autocollapse);
+    }
 });
