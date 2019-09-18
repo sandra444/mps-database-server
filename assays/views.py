@@ -1048,6 +1048,39 @@ class AssayStudyDataUpload(ObjectGroupRequiredMixin, UpdateView):
 
         context['update'] = True
 
+        #sck for plate reader
+        matrices = AssayMatrix.objects.filter(
+            study_id=self.object.id
+        ).prefetch_related(
+            'assaymatrixitem_set',
+            'created_by',
+        )
+        # sck for plate reader
+        items = AssayMatrixItem.objects.filter(
+            matrix_id__in=matrices
+        ).prefetch_related(
+            'device',
+            'created_by',
+            'matrix',
+            'organ_model',
+            'assaysetupcompound_set__compound_instance__compound',
+            'assaysetupcompound_set__concentration_unit',
+            'assaysetupcompound_set__addition_location',
+            'assaysetupcell_set__cell_sample__cell_type__organ',
+            'assaysetupcell_set__cell_sample__cell_subtype',
+            'assaysetupcell_set__cell_sample__supplier',
+            'assaysetupcell_set__addition_location',
+            'assaysetupcell_set__density_unit',
+            'assaysetupsetting_set__setting',
+            'assaysetupsetting_set__unit',
+            'assaysetupsetting_set__addition_location',
+        )
+
+        context['matrices'] = matrices
+        context['items'] = items
+
+        context['detail'] = True
+
         return context
 
     def form_valid(self, form):

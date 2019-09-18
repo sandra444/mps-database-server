@@ -219,7 +219,8 @@ $(document).ready(function () {
                 $('.mif-c').addClass('hidden');
                 $('.raw-plate').removeClass('hidden');
                 $('.sample-times').removeClass('hidden');
-                buildTableChips(MOUNTAINS);
+                //buildTableChips(MOUNTAINS);
+                $('#tablecellsselection').empty();
                 //providePlateOptions(standard_well_plates);
                 //addFormFromForms(action);
                 //set quirky defaults
@@ -244,12 +245,14 @@ $(document).ready(function () {
                 $('.matrix-times').addClass('hidden');
                 $('.empty-times').addClass('hidden');
                 $('.sample-times').removeClass('hidden');
+                $('.overwrite-plate').removeClass('hidden');
             } else if (inputValue == "empty") {
                 console.log("c", inputName)
                 console.log("d", inputValue)
                 $('.sample-times').addClass('hidden');
                 $('.matrix-times').addClass('hidden');
                 $('.empty-times').removeClass('hidden');
+                $('.overwrite-plate').addClass('hidden');
             } else {
                 // matrix
                 console.log("e", inputName);
@@ -257,6 +260,7 @@ $(document).ready(function () {
                 $('.empty-times').addClass('hidden');
                 $('.sample-times').addClass('hidden');
                 $('.matrix-times').removeClass('hidden');
+                $('.overwrite-plate').addClass('hidden');
             }
         } else if (inputName == "plate_map_new_overwrite") {
             //console.log(inputValue);
@@ -273,7 +277,7 @@ $(document).ready(function () {
     });
 
 
-    function buildTableChips(data) {
+/*    function buildTableChips(data) {
         //var table = document.createElement("table");
         //table.className="gridtable";
         $('#tablecellsselection').empty();
@@ -300,22 +304,7 @@ $(document).ready(function () {
         });
         tablecellsselection.appendChild(tbody);
         return tablecellsselection;
-    }
-
-    function test() {
-        $('.ui-selected').each(function() {
-            // console.log($(this).attr('data-test'));
-            console.log($(this).text());
-        });
-    }
-
-    $('#tablecellsselection').selectable({
-        // SUBJECT TO CHANGE: WARNING!
-        filter: 'td',
-        distance: 1,
-        stop: test
-    });
-
+    }*/
 
     //var HEADERWELLS = ["A","B"];
     //var standard_well_plates = $('#standard_well_plates');
@@ -346,11 +335,230 @@ $(document).ready(function () {
         return tablestandardwellplates;
     }*/
 
+    // note: form.well_plate_size referenced list this in js
+    // this will only happen if the user selected to start from an empty plate and then picked the plate size
     $("#id_well_plate_size").change(function() {
         var inputValue = $(this).val()
-        console.log("s", inputValue);
-        $("input[name=testingme]:text").val(inputValue);
+        console.log("what input value top of plate size ", inputValue);
+        $("input[name=selectedplatesize]:text").val(inputValue);
+        // want to make an empty plate layout of the size selected
+        var data_packed =[]
+        var row_labels = []
+        var col_labels = []
+        var row_contents = []
+        var row_labels_all = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P']
+        var col_labels_all = ['1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20','21','22','23','24']
+        console.log("start of plate size ", inputValue);
+        $("input[name=enteredplatename]:text").val(inputValue);
 
+        if (inputValue == '24') {
+            console.log("24 ", inputValue)
+            row_labels = row_labels_all.slice(0,4) //['A','B','C','D']
+            col_labels = col_labels_all.slice(0,6) //['1','2','3','4','5','6']
+        } else if (inputValue == '96') {
+            console.log("96 ", inputValue)
+            row_labels = row_labels_all.slice(0,8) //['A','B','C','D','E','F','G','H']
+            col_labels = col_labels_all.slice(0,12) //['1','2','3','4','5','6','7','8','9','10','11','12']
+        } else {
+            // '384'
+            console.log("384 ", inputValue)
+            row_labels = row_labels_all
+            col_labels = col_labels_all
+        }
+        console.log(col_labels)
+        console.log(row_labels)
+        row_labels.forEach(function(rl) {
+            var row_dict = {}
+            // add for the row label
+            row_dict['0'] = rl
+            console.log(rl)
+            col_labels.forEach(function(cl) {
+                console.log("col ",cl)
+                // this is working 20190917
+                row_dict[cl] = rl + " " + cl
+                console.log("row dict ", row_dict[cl])
+            })
+            console.log("row dict should be all ", row_dict)
+            row_contents.push(row_dict);
+        });
+
+        console.log(row_contents)
+        // add a label to the front of column labels to hold the row labels
+        data_packed = [['Plate'].concat(col_labels), row_contents, row_labels]
+        buildTableChips(data_packed)
+        });
+
+    function buildTableChips(data) {
+        // col_labels, row_labels, row_contents
+        console.log("data", data)
+        $('#tablecellsselection').empty();
+        var thead = document.createElement("thead");
+        var tbody = document.createElement("tbody");
+        var headRow = document.createElement("tr");
+        console.log("what's here")
+        console.log("data0", data[0])
+        console.log("data1", data[1])
+        console.log("data2", data[2])
+        // column headers
+        data[0].forEach(function(el) {
+            var th=document.createElement("th");
+            th.appendChild(document.createTextNode(el));
+            headRow.appendChild(th);
+        });
+        thead.appendChild(headRow);
+        tablecellsselection.appendChild(thead);
+        // add the content, and add a place for sample location and sample time, with class for show/hide
+        var idx = 0
+        data[1].forEach(function(el) {
+            var trc = document.createElement("tr");
+            var trl = document.createElement("tr");
+            var trt = document.createElement("tr");
+            // build content row
+            for (var o in el) {
+                if (o == 0) {
+                    //content
+                    var tdc = document.createElement("th");
+                    $(tdc).attr('data-col', o);
+                    $(tdc).attr('data-row', el[0]);
+                    $(tdc).addClass('plate-content');
+                    tdc.appendChild(document.createTextNode(el[o]));
+                    trc.appendChild(tdc);
+                    // location
+                    var tdl = document.createElement("th");
+                    $(tdl).attr('data-col', o);
+                    $(tdl).attr('data-row', el[0]);
+                    $(tdl).addClass('plate-location hidden');
+                    tdl.appendChild(document.createTextNode(el[o]+" (location)"));
+                    trl.appendChild(tdl);
+                    // time
+                    var tdt = document.createElement("th");
+                    $(tdt).attr('data-col', o);
+                    $(tdt).attr('data-row', el[0]);
+                    $(tdt).addClass('plate-time hidden');
+                    tdt.appendChild(document.createTextNode(el[o]+" (time)"));
+                    trt.appendChild(tdt);
+                } else {
+                    //content
+                    var tdc = document.createElement("td");
+                    $(tdc).attr('data-col', o);
+                    $(tdc).attr('data-row', el[0]);
+                    $(tdc).addClass('plate-content');
+                    tdc.appendChild(document.createTextNode(""));
+                    trc.appendChild(tdc);
+                    // location
+                    var tdl = document.createElement("td");
+                    $(tdl).attr('data-col', o);
+                    $(tdl).attr('data-row', el[0]);
+                    $(tdl).addClass('plate-location hidden');
+                    tdl.appendChild(document.createTextNode(""));
+                    trl.appendChild(tdl);
+                    // time
+                    var tdt = document.createElement("td");
+                    $(tdt).attr('data-col', o);
+                    $(tdt).attr('data-row', el[0]);
+                    $(tdt).addClass('plate-time hidden');
+                    tdt.appendChild(document.createTextNode(""));
+                    trt.appendChild(tdt);
+                }
+            }
+            tbody.appendChild(trc);
+            tbody.appendChild(trl);
+            tbody.appendChild(trt);
+        });
+        tablecellsselection.appendChild(tbody);
+        return tablecellsselection;
+    }
+
+   $('#show_on_plate_map1').change(function() {
+       console.log("here1");
+       if ($(this).is(':checked')) {
+            $('.plate-content').removeClass('hidden');
+       } else {
+            $('.plate-content').addClass('hidden');
+       }
+   });
+   $('#show_on_plate_map2').change(function() {
+       console.log("here2");
+       if ($(this).is(':checked')) {
+            $('.plate-location').removeClass('hidden');
+       } else {
+            $('.plate-location').addClass('hidden');
+       }
+   });
+   $('#show_on_plate_map3').change(function() {
+       console.log("here3");
+       if ($(this).is(':checked')) {
+            $('.plate-time').removeClass('hidden');
+       } else {
+            $('.plate-time').addClass('hidden');
+       }
+   });
+
+
+    $("#id_well_plate_new_name").focusout(function() {
+        var inputValue = $(this).val()
+        console.log("plate name ", inputValue);
+        $("input[name=enteredplatename]:text").val(inputValue);
     });
+
+    $("#id_well_plate_size").change(function() {
+        var inputValue = $(this).val()
+        console.log("what input value top of plate size ", inputValue);
+    });
+
+    $("#id_matrix_item_list").change(function() {
+        var inputValue = $(this).text()
+        console.log("what input matrix item ", inputValue);
+    });
+
+    $("#id_model_location_list").change(function() {
+        var inputValue = $(this).text()
+        console.log("what location ", inputValue);
+    });
+
+    $("#id_sample_time_entry").change(function() {
+        var inputValue = $(this).val()
+        console.log("what sample time ", inputValue);
+    });
+
+
+    function changeSelected() {
+        $('.ui-selected').each(function() {
+            //<td data-col="4" data-row="A" class="plate-location ui-selectee">A 4 (location)</td>
+            console.log($(this));
+            console.log($(this).class);
+            console.log($(this).text());
+            console.log($(this).attr('data-col'));
+            console.log($(this).attr('data-row'));
+            //<td data-col="3" data-row="B" class="plate-location">B 3 (location)</td>
+            if ($(this).hasClass("plate-content")) {
+                console.log("content ",$("#id_matrix_item_list").text());
+                //$(this).text = $("#id_matrix_item_list").text();
+                //$("input[name=enteredplatename]:text").val(inputValue)
+                //$(this).text("new content");
+                $(this).text($("#id_matrix_item_list").text());
+            } else if ($(this).hasClass("plate-location")) {
+                console.log("location ",$("#id_model_location_list").text());
+                //$(this).text = $("#id_model_location_list").text();
+                //$(this).text("new location");
+                $(this).text($("#id_model_location_list").text());
+            } else {
+                // plate-time
+                console.log("time ",$("id_sample_time_entry").val());
+                //$(this).text = $("id_sample_time_entry").text();
+                //$(this).text("new time");
+                console.log($("id_sample_time_entry").val());
+                $(this).text(String($("id_sample_time_entry").val()));
+            }
+        });
+    }
+
+    $('#tablecellsselection').selectable({
+        // SUBJECT TO CHANGE: WARNING!
+        filter: 'td',
+        distance: 1,
+        stop: changeSelected
+    });
+
 
 });

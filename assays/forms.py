@@ -35,8 +35,10 @@ from microdevices.models import (
     MicrophysiologyCenter,
     Microdevice,
     OrganModel,
-    OrganModelProtocol
+    OrganModelProtocol,
+    OrganModelLocation,
 )
+
 from mps.forms import SignOffMixin, BootstrapForm
 import string
 from captcha.fields import CaptchaField
@@ -1507,17 +1509,74 @@ class AssayStudyDataUploadForm(BootstrapForm):
     # EVIL WAY TO GET PREVIEW DATA
     preview_data = forms.BooleanField(initial=False, required=False)
 
+    # TODO - these need to come from saved plate maps (not developed yet)
+    existing_plate_map_list = forms.ChoiceField(choices=(
+        ('', '---'),
+        ('1', 'LDH 20190223 Plate Map for Day 1'),
+        ('2', 'LDH 20190223 Plate Map for Day 2'),
+        ('3', 'LDH 20190223 Plate Map for Day 3'),
+    ), required=False)
+
     well_plate_size = forms.ChoiceField(choices=(
-        ('', 'Please Select Well Plate Size'),
+        ('', '---'),
         ('24', '24 well plate'),
         ('96', '96 well plate'),
         ('384', '384 well plate'),
+    ), required=False)
+
+    plate_map_time_unit = forms.ChoiceField(choices=(
+        ('1', 'Day'),
+        ('2', 'Hour'),
+        ('3', 'Minute'),
+    ), required=False)
+
+    plate_map_well_use = forms.ChoiceField(choices=(
+        ('s', 'Sample'),
+        ('n', 'Standard'),
+        ('b', 'Blank'),
     ), required=False)
 
     matrix_list = forms.ModelChoiceField(
         queryset=AssayMatrix.objects.none(),
         required=False,
     )
+
+    assay_list = forms.ChoiceField(choices=(
+        ('0', '---'),
+        ('1', 'some method - LDH'),
+        ('2', 'some method - BUN'),
+    ), required=False)
+
+    assay_unit_list = forms.ChoiceField(choices=(
+        ('0', 'nM'),
+        ('1', 'RFU'),
+        ('2', 'what else?'),
+    ), required=False)
+
+    # TODO add a blank one on top "---" when pull from queryset AND order them by name (for now)
+    matrix_item_list = forms.ModelChoiceField(
+        queryset=AssayMatrixItem.objects.none(),
+        required=False,
+    )
+
+    well_plate_new_name = forms.CharField(
+        required=False,
+        widget=forms.Textarea(attrs={'cols': 50, 'rows': 1})
+    )
+
+    # TODO change the format of this text field, want click enter to exit field and no ability to go to new row
+    sample_time_entry = forms.CharField(
+        required=False,
+        widget=forms.Textarea(attrs={'cols': 10, 'rows': 1})
+    )
+
+    # TODO add a blank one on top "---" when pull from queryset
+    model_location_list = forms.ChoiceField(choices=(
+        ('0', '---'),
+        ('1', 'Apical'),
+        ('2', 'Basal'),
+    ), required=False)
+    # sck organ_model_id and sample_location_id in OrganModelLocation
 
     class Meta(object):
         model = AssayStudy
@@ -1534,6 +1593,10 @@ class AssayStudyDataUploadForm(BootstrapForm):
         super(AssayStudyDataUploadForm, self).__init__(*args, **kwargs)
 
         self.fields['matrix_list'].queryset = AssayMatrix.objects.filter(study_id=self.instance.id)
+
+        self.fields['matrix_item_list'].queryset = AssayMatrixItem.objects.filter(study_id=self.instance.id)
+
+        #self.fields['model_location_list'].queryset = AssaySampleLocation.objects.filter(study_id=self.instance.id)
 
     def clean(self):
         data = super(AssayStudyDataUploadForm, self).clean()
