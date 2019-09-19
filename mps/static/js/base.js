@@ -140,16 +140,7 @@ $(document).ready(function () {
     }
 
     // Remove navbar etc. if this is a popup
-    if ($.urlParam('popup') === '1') {
-        // Kill navbar
-        navbar.remove();
-        // Remove margin from page
-        // $('#page').removeAttr('style');
-        // Remove breadcumbs
-        $('#breadcrumbs').remove();
-    }
-    // If there is a navbar, add autocollapse triggers
-    else {
+    if ($.urlParam('popup') !== '1') {
         $(document).on('ready', autocollapse);
         $(window).on('resize', autocollapse);
     }
