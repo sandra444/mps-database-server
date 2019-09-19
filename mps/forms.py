@@ -34,8 +34,9 @@ class BootstrapForm(forms.ModelForm):
             # Not really a good idea to use "private" attributes...
             if getattr(self.fields[field], '_queryset', ''):
                 current_model = self.fields[field]._queryset.model
-                self.fields[field].widget.attrs['data-app'] = current_model._meta.app_label
-                self.fields[field].widget.attrs['data-model'] = current_model._meta.object_name
+                if current_model and current_model._meta.object_name:
+                    self.fields[field].widget.attrs['data-app'] = current_model._meta.app_label
+                    self.fields[field].widget.attrs['data-model'] = current_model._meta.object_name
 
             if widget_type in WIDGETS_TO_ADD_FORM_CONTROL_TO:
                 self.fields[field].widget.attrs['class'] = 'form-control'
