@@ -144,4 +144,41 @@ $(document).ready(function () {
         $(document).on('ready', autocollapse);
         $(window).on('resize', autocollapse);
     }
+    else {
+        // Get rid of footer in popup
+        $('#footer').remove();
+    }
+
+    // SLOPPY
+    window.handle_popup_result = function(result) {
+        alert("result of popup is: " + result);
+    }
+
+    function close_and_return_pk() {
+        try {
+            window.opener.handle_popup_result($.urlParam('new_pk'));
+        }
+        catch (err) {
+            alert('An error has occurred while retrieving the new entry.');
+        }
+        window.close();
+        return false;
+    }
+
+    // Close if set to close
+    if ($.urlParam('popup') == '1' && $.urlParam('close') == '1') {
+        setTimeout(function() {
+             close_and_return_pk();
+        }, 3000)
+    }
+
+    // Crude: Triggers to spawn popups
+    $('.popup-link').click(function() {
+        window.open(
+            $(this).attr('data-href'),
+            $(this).attr('data-window-name'),
+            // Defaults for now
+            'toolbars=0,width=1000,height=760,left=200,top=200,scrollbars=1,resizable=1'
+        )
+    });
 });

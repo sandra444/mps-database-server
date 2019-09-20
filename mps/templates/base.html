@@ -308,24 +308,18 @@
   <div id="page" style="margin-top: 70px;">
 
   {# For most elements #}
+  {% if request.GET.popup == '1' and request.GET.close == '1' %}
+    Success! This window will close in 3 seconds.
+  {% else %}
   <div id="content" class="container">
 
-{# No breadcrumbs in popup #}
-{% if request.GET.popup != '1' %}
+  {# No breadcrumbs in popup #}
+  {% if request.GET.popup != '1' %}
   <ol id="breadcrumbs" class="breadcrumb">
     <li><a href="/">Home</a></li>
     {% block breadcrumbs %}{% endblock %}
   </ol>
-{% endif %}
-
-  {# Still have yet to make use of messages; should do so soon #}
-{#  {% if messages %}#}
-{#  <ul class="messages">#}
-{#    {% for message in messages %}#}
-{#    <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>#}
-{#    {% endfor %}#}
-{#  </ul>#}
-{#  {% endif %}#}
+  {% endif %}
 
   {% block content %}{% endblock %}
 
@@ -336,6 +330,7 @@
 
   {% block fluid-content %}{% endblock %}
   </div>
+  {% endif %}
 
   <div id="footer" class="container hidden-print">
     <footer>
