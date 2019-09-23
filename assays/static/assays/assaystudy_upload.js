@@ -198,7 +198,13 @@ $(document).ready(function () {
 */
 
     //sck for raw_plate
-
+    $('#matrix_items_table').DataTable({
+        "iDisplayLength": 25,
+        "sDom": '<B<"row">lfrtip>',
+        fixedHeader: {headerOffset: 50},
+        responsive: true,
+        "order": [[2, "asc"]],
+    });
     // test data
     var MOUNTAINS = [
         {"1":"chip1","2":1,"3":"my treatment 1"},
@@ -518,9 +524,12 @@ $(document).ready(function () {
 
     $("#id_sample_time_entry").change(function() {
         var inputValue = $(this).val()
-        console.log("what sample time ", inputValue);
+        console.log("on change ", inputValue);
     });
-
+    $("#id_sample_time_entry").focusout(function() {
+        var inputValue = $(this).val()
+        console.log("on exit ", inputValue);
+    });
 
     function changeSelected() {
         $('.ui-selected').each(function() {
@@ -544,11 +553,11 @@ $(document).ready(function () {
                 $(this).text($("#id_model_location_list").text());
             } else {
                 // plate-time
-                console.log("time ",$("id_sample_time_entry").val());
+                console.log("time ",$("#id_sample_time_entry").val());
                 //$(this).text = $("id_sample_time_entry").text();
                 //$(this).text("new time");
-                console.log($("id_sample_time_entry").val());
-                $(this).text(String($("id_sample_time_entry").val()));
+                console.log($("#id_sample_time_entry").val());
+                $(this).text($("#id_sample_time_entry").val());
             }
         });
     }

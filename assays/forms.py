@@ -41,6 +41,7 @@ from microdevices.models import (
 
 from mps.forms import SignOffMixin, BootstrapForm
 import string
+from decimal import Decimal
 from captcha.fields import CaptchaField
 
 from .utils import (
@@ -1565,9 +1566,9 @@ class AssayStudyDataUploadForm(BootstrapForm):
     )
 
     # TODO change the format of this text field, want click enter to exit field and no ability to go to new row
-    sample_time_entry = forms.CharField(
+    sample_time_entry = forms.DecimalField(
         required=False,
-        widget=forms.Textarea(attrs={'cols': 10, 'rows': 1})
+        initial=1,
     )
 
     # TODO add a blank one on top "---" when pull from queryset
