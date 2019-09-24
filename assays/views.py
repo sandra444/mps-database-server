@@ -2339,6 +2339,11 @@ class AssayStudyPowerAnalysisStudy(StudyViewerMixin, DetailView):
     template_name = 'assays/assaystudy_power_analysis_study.html'
 
 
+class AssayStudyPlateMap(TemplateView):
+    """Displays the plate map page for the current study"""
+    template_name = 'assays/assaystudy_plate_map.html'
+
+
 class AssayMatrixNew(StudyGroupMixin, UpdateView):
     """Show all chip and plate models associated with the given study"""
     model = AssayMatrix

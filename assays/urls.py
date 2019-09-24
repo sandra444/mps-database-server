@@ -33,6 +33,7 @@ from assays.views import (
     AssayInterStudyReproducibility,
     AssayStudyDataPlots,
     AssayStudyPowerAnalysisStudy,
+    AssayStudyPlateMap,
     AssayDataFromFilters,
     AssayStudySetAdd,
     AssayStudySetUpdate,
@@ -154,6 +155,9 @@ urlpatterns = [
 
     # Power Analysis
     url(r'^assays/assaystudy/(?P<pk>[0-9]+)/power_analysis/$', AssayStudyPowerAnalysisStudy.as_view(), name='assay-power-analysis-study'),
+
+    # Plate Map
+    url(r'^assays/assaystudy/(?P<pk>[0-9]+)/plate_map/$', AssayStudyPlateMap.as_view(), name='assay-plate-map'),
 
     # References
     url(r'^assays/references/$', AssayReferenceList.as_view(), name='assay-reference-list'),
