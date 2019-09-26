@@ -2111,6 +2111,7 @@ class AssayStudySetUpdate(CreatorOrSuperuserRequiredMixin, UpdateView):
 
 
 class AssayStudyAddNew(OneGroupRequiredMixin, AssayStudyMixin, CreateView):
+    template_name = 'assays/assaystudy_add_new.html'
     form_class = AssayStudyFormNew
 
     # TODO TO BE REMOVED
