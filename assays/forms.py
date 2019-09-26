@@ -53,7 +53,7 @@ from .utils import (
 )
 from django.utils import timezone
 
-from mps.templatetags.custom_filters import is_group_admin, ADMIN_SUFFIX
+from mps.templatetags.custom_filters import is_group_admin, filter_groups, ADMIN_SUFFIX
 
 from django.core.exceptions import NON_FIELD_ERRORS
 
@@ -428,9 +428,8 @@ class AssayStudyForm(SignOffMixin, BootstrapForm):
         Kwargs:
         groups -- a queryset of groups (allows us to avoid N+1 problem)
         """
-        self.groups = kwargs.pop('groups', None)
         super(AssayStudyForm, self).__init__(*args, **kwargs)
-        self.fields['group'].queryset = self.groups
+        self.fields['group'].queryset = filter_groups(self.user)
 
     class Meta(object):
         model = AssayStudy
@@ -1611,12 +1610,10 @@ class AssayStudySetForm(SignOffMixin, BootstrapForm):
         }
 
     def __init__(self, *args, **kwargs):
-        self.request = kwargs.pop('request', None)
-
         super(AssayStudySetForm, self).__init__(*args, **kwargs)
 
         study_queryset = get_user_accessible_studies(
-            self.request.user
+            self.user
         ).prefetch_related(
             'group__microphysiologycenter_set',
         )
@@ -1703,10 +1700,8 @@ class AssayStudyFormNew(SetupFormsMixin, SignOffMixin, BootstrapForm):
         Kwargs:
         groups -- a queryset of groups (allows us to avoid N+1 problem)
         """
-        self.groups = kwargs.pop('groups', None)
-        self.request = kwargs.pop('request', None)
         super(AssayStudyFormNew, self).__init__(*args, **kwargs)
-        self.fields['group'].queryset = self.groups
+        self.fields['group'].queryset = filter_groups(self.user)
 
         # Make sure there are only organ models with versions
         # Removed for now
@@ -1772,7 +1767,7 @@ class AssayStudyFormNew(SetupFormsMixin, SignOffMixin, BootstrapForm):
         # if commit and all_setup_data:
         # SEE BASE MODELS FOR WHY COMMIT IS NOT HERE
         if all_setup_data:
-            created_by = self.request.user
+            created_by = self.user
             created_on = timezone.now()
 
             current_item_number = 1
@@ -2115,7 +2110,7 @@ class AssayStudyFormNew(SetupFormsMixin, SignOffMixin, BootstrapForm):
         study = super(AssayStudyFormNew, self).save()
 
         # VERY SLOPPY
-        created_by = self.request.user
+        created_by = self.user
         created_on = timezone.now()
 
         study.created_by = created_by
