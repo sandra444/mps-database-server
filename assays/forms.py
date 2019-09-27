@@ -546,7 +546,7 @@ class SetupFormsMixin(BootstrapForm):
                     initial=0,
                     required=False,
                     widget=forms.NumberInput(attrs={
-                        'class': 'form-control',
+                        'class': 'form-control required',
                         'style': 'width:75px;'
                     })
                 )
@@ -554,13 +554,33 @@ class SetupFormsMixin(BootstrapForm):
                     initial=0,
                     required=False,
                     widget=forms.NumberInput(attrs={
-                        'class': 'form-control',
+                        'class': 'form-control required',
                         'style': 'width:75px;'
                     })
                 )
 
         self.fields['cell_cell_sample'].widget.attrs['style'] = 'width:75px;'
         self.fields['cell_passage'].widget.attrs['style'] = 'width:75px;'
+
+        # DUMB, BAD (can't have them be "actually" required or they prevent submission
+        add_required_to = [
+            'cell_cell_sample',
+            'cell_biosensor',
+            'cell_density',
+            'cell_density_unit',
+            'cell_addition_location',
+            'setting_setting',
+            'setting_unit',
+            'setting_value',
+            'setting_addition_location',
+            'compound_compound',
+            'compound_concentration_unit',
+            'compound_concentration',
+            'compound_addition_location',
+        ]
+
+        for current_field in add_required_to:
+            self.fields[current_field].widget.attrs['class'] += ' required'
 
     ### ADDING SETUP CELLS
     cell_cell_sample = forms.IntegerField(required=False)
@@ -674,6 +694,7 @@ class AssayMatrixForm(SetupFormsMixin, SignOffMixin, BootstrapForm):
         #             })
         #         )
 
+        # Changing these things in init is bad
         self.fields['matrix_item_notebook_page'].widget.attrs['style'] = 'width:75px;'
         # self.fields['cell_cell_sample'].widget.attrs['style'] = 'width:75px;'
         # self.fields['cell_passage'].widget.attrs['style'] = 'width:75px;'
@@ -686,6 +707,19 @@ class AssayMatrixForm(SetupFormsMixin, SignOffMixin, BootstrapForm):
         # No selectize on action either (hides things, looks odd)
         # CONTRIVED
         self.fields['action'].widget.attrs['class'] += ' no-selectize'
+
+        # DUMB, BAD (can't have them be "actually" required or they prevent submission
+        add_required_to = [
+            'matrix_item_name',
+            'matrix_item_setup_date',
+            'matrix_item_test_type',
+            'matrix_item_name',
+            'matrix_item_device',
+            'matrix_item_organ_model',
+        ]
+
+        for current_field in add_required_to:
+            self.fields[current_field].widget.attrs['class'] += ' required'
 
     ### ADDITIONAL MATRIX FIELDS (unsaved)
     number_of_items = forms.IntegerField(required=False)
