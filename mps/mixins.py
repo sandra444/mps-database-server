@@ -23,6 +23,8 @@ from mps.base.models import save_forms_with_tracking
 
 from django.views.generic import UpdateView
 
+import urllib
+
 
 # Unsemantic! Breaks PEP! BAD!
 def PermissionDenied(request, message, log_in_link=True):
@@ -496,9 +498,12 @@ class FormHandlerMixin(object):
             if is_popup:
                 if self.object.id:
                     return redirect(
-                        '{}?popup=1&close=1&new_pk={}'.format(
+                        '{}?popup=1&close=1&app={}&model={}&new_pk={}&new_name={}'.format(
                             self.object.get_post_submission_url(),
-                            self.object.id
+                            self.object._meta.app_label,
+                            self.object._meta.object_name,
+                            self.object.id,
+                            urllib.parse.quote(str(self.object)),
                         )
                     )
                 else:

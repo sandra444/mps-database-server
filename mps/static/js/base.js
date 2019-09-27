@@ -149,19 +149,30 @@ $(document).ready(function () {
         $('#footer').remove();
     }
 
-    // SLOPPY
-    window.handle_popup_result = function(result) {
-        alert("result of popup is: " + result);
-    }
-
     function close_and_return_pk() {
-        try {
-            window.opener.handle_popup_result($.urlParam('new_pk'));
-        }
-        catch (err) {
-            alert('An error has occurred while retrieving the new entry.');
-        }
+        // SLOPPY
+        window.opener.SELECTIZE.refresh_dropdown(
+            $.urlParam('app'),
+            $.urlParam('model'),
+            $.urlParam('new_pk'),
+            $.urlParam('new_name')
+        );
+
+        // try {
+        //     // SLOPPY
+        //     window.opener.SELECTIZE.refresh_dropdown(
+        //         $.urlParam('app'),
+        //         $.urlParam('model'),
+        //         $.urlParam('new_pk'),
+        //         $.urlParam('new_name')
+        //     );
+        // }
+        // catch (err) {
+        //     alert('An error has occurred while retrieving the new entry.');
+        // }
+
         window.close();
+
         return false;
     }
 

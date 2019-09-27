@@ -706,7 +706,7 @@ class AssayMatrixForm(SetupFormsMixin, SignOffMixin, BootstrapForm):
 
         # No selectize on action either (hides things, looks odd)
         # CONTRIVED
-        self.fields['action'].widget.attrs['class'] += ' no-selectize'
+        # self.fields['action'].widget.attrs['class'] += ' no-selectize'
 
         # DUMB, BAD (can't have them be "actually" required or they prevent submission
         add_required_to = [
@@ -725,22 +725,22 @@ class AssayMatrixForm(SetupFormsMixin, SignOffMixin, BootstrapForm):
     number_of_items = forms.IntegerField(required=False)
 
     ### ITEM FIELD HELPERS
-    action = forms.ChoiceField(choices=(
-        ('', 'Please Select an Action'),
-        ('add_name', 'Add Names/IDs*'),
-        ('add_test_type', 'Add Test Type*'),
-        ('add_date', 'Add Setup Date*'),
-        ('add_device', 'Add Device/MPS Model Information*'),
-        ('add_settings', 'Add Settings'),
-        ('add_compounds', 'Add Compounds'),
-        ('add_cells', 'Add Cells'),
-        ('add_notes', 'Add Notes/Notebook Information'),
-        # ADD BACK LATER
-        # ('copy', 'Copy Contents'),
-        # TODO TODO TODO TENTATIVE
-        # ('clear', 'Clear Contents'),
-        ('delete', 'Delete Selected'),
-    ), required=False)
+    # action = forms.ChoiceField(choices=(
+    #     ('', 'Please Select an Action'),
+    #     ('add_name', 'Add Names/IDs*'),
+    #     ('add_test_type', 'Add Test Type*'),
+    #     ('add_date', 'Add Setup Date*'),
+    #     ('add_device', 'Add Device/MPS Model Information*'),
+    #     ('add_settings', 'Add Settings'),
+    #     ('add_compounds', 'Add Compounds'),
+    #     ('add_cells', 'Add Cells'),
+    #     ('add_notes', 'Add Notes/Notebook Information'),
+    #     # ADD BACK LATER
+    #     # ('copy', 'Copy Contents'),
+    #     # TODO TODO TODO TENTATIVE
+    #     # ('clear', 'Clear Contents'),
+    #     ('delete', 'Delete Selected'),
+    # ), required=False)
 
     # The matrix_item isn't just to be annoying, I want to avoid conflicts with other fields
     ### ADDING ITEM FIELDS

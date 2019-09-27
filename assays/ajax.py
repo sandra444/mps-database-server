@@ -4087,6 +4087,7 @@ dropdown_processing = {
 }
 
 
+# Why here in Assays?
 def fetch_dropdown(request):
     """Returns dropdown values in JSON to be processed by selectize"""
     dropdown = [{'value': "", 'text': '---------'}]
