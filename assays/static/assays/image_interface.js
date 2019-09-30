@@ -196,8 +196,10 @@ $(document).ready(function () {
                 +metadata_list[image_id]["sample_label"]+", "+metadata_list[image_id]["magnification"]
                 +"x at " + metadata_list[image_id]["time"];
 
-                var extension = metadata_list[image_id]["file_name"].split(".").pop().toLowerCase();
+                var extension = $.trim(metadata_list[image_id]["file_name"].split(".").pop().toLowerCase());
+                console.log(extension)
                 if (['flv', 'avi', 'mp4', 'mov', 'wmv'].indexOf(extension) >= 0){
+                    console.log("Hittin' that")
                     $('[data-column="' + cls + '"][data-row="' + tableData[image_id][0] + '"]').append('<span data-pic="'+image_id
                     +'" style="vertical-align: top; display: inline-block; margin:2px;" class="image_thumbnail"><figure><div style="position: absolute; z-index: 0;"><img alt="'
                     +metadata_list[image_id]["file_name"]+'" style="height: 120px; width: 120px; filter: contrast('+contrast+'%) brightness('+brightness+'%);" src="/media/assay_thumbs/'
@@ -205,6 +207,7 @@ $(document).ready(function () {
                     +'_120_120.jpg"/></div><div onMouseOver="this.style.opacity='+"1"+'" onMouseOut="this.style.opacity='+"0.5"+'" style="position: absolute; z-index: 1; opacity: 0.5;"><img src="/media/assay_images/playbutton.png" style="padding: 30px; filter: invert(1);"/></div><div style="padding-top:120px;"><figcaption style="width: 120px; word-wrap: break-word;" class="caption text-center">'+ caption +'</figcaption></div></figure></span>');
                 }
                 else {
+                    console.log("Not hitting that.")
                     $('[data-column="' + cls + '"][data-row="' + tableData[image_id][0] + '"]').append('<span data-pic="'+image_id
                     +'" style="vertical-align: top; display: inline-block; margin:2px;" class="image_thumbnail"><figure><img alt="'
                     +metadata_list[image_id]["file_name"]+'" style="height: 120px; width: 120px; filter: contrast('+contrast+'%) brightness('+brightness+'%);" src="/media/assay_thumbs/'
