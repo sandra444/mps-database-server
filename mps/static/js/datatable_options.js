@@ -129,6 +129,9 @@ $(document).ready(function () {
             new_row.find('td').eq(6).text('NEW');
             new_row.find('td').eq(7).text('NEW');
 
+            // Acquire the label
+            window.CELLS.cell_sample_id_to_label[new_pk] = new_name;
+
             cell_sample_table.DataTable().row.add(new_row).draw();
         }
         // If reference
