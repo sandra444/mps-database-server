@@ -110,12 +110,30 @@ $(document).ready(function () {
         new_name
     ) {
         if (current_model === 'CellSample') {
+            var cell_sample_table = $('#cellsamples');
 
+            var new_row = cell_sample_table
+                .find('tbody')
+                .find('tr')
+                .first()
+                .clone()
+                .addClass('success');
+
+            // CRUDE
+            new_row.find('.cellsample-selector').attr('data-cell-sample-id', new_pk);
+            new_row.find('td').eq(1).text(new_pk);
+            new_row.find('td').eq(2).text('NEW');
+            new_row.find('td').eq(3).text(new_name);
+            new_row.find('td').eq(4).text('NEW');
+            new_row.find('td').eq(5).text('NEW');
+            new_row.find('td').eq(6).text('NEW');
+            new_row.find('td').eq(7).text('NEW');
+
+            cell_sample_table.DataTable().row.add(new_row).draw();
         }
         // If reference
         else if (current_model === 'AssayReference') {
             var split_name = new_name.split('.');
-            console.log(split_name);
             var authors = split_name[0];
             var title = split_name[1];
             // SLOPPY
