@@ -1,3 +1,9 @@
+// CRUDE SOLUTION
+// Contrary to the idea that this is only for options
+window.TABLES = {
+    add_new_row_to_selection_list: null
+};
+
 // Add method to sort by checkbox
 // (I reversed it so that ascending will place checked first)
 $(document).ready(function () {
@@ -95,6 +101,42 @@ $(document).ready(function () {
             // $($.fn.dataTable.tables(true)).DataTable().responsive.recalc();
             // $($.fn.dataTable.tables(true)).DataTable().fixedHeader.adjust();
         }, 250);
+    }
+
+    window.TABLES.add_new_row_to_selection_list = function(
+        current_app,
+        current_model,
+        new_pk,
+        new_name
+    ) {
+        if (current_model === 'CellSample') {
+
+        }
+        // If reference
+        else if (current_model === 'AssayReference') {
+            var split_name = new_name.split('.');
+            console.log(split_name);
+            var authors = split_name[0];
+            var title = split_name[1];
+            // SLOPPY
+            var pmid = new_name.slice(new_name.indexOf('PMID:') + 5);
+
+            var reference_table = $('#reference_table');
+
+            var new_row = reference_table
+                .find('tbody')
+                .find('tr')
+                .first()
+                .clone()
+                .addClass('success');
+            new_row.find('button').attr('data-reference-id', new_pk);
+            new_row.find('td[data-reference-field="id"]').text(new_pk);
+            new_row.find('td[data-reference-field="pubmed_id"]').text(pmid);
+            new_row.find('td[data-reference-field="title"]').text(title);
+            new_row.find('td[data-reference-field="authors"]').text(authors);
+
+            reference_table.DataTable().row.add(new_row).draw();
+        }
     }
 });
 // $.fn.dataTable.TableTools.defaults.aButtons = [
