@@ -85,6 +85,8 @@ from bs4 import BeautifulSoup
 import requests
 import re
 
+from mps.utils import *
+
 import logging
 logger = logging.getLogger(__name__)
 
@@ -97,15 +99,6 @@ logger = logging.getLogger(__name__)
 # TODO OPTIMIZE DATABASE HITS
 # Global variable for what to call control values (avoid magic strings)
 CONTROL_LABEL = '-Control-'
-
-# Variable to indicate that these should be split for special filters
-COMBINED_VALUE_DELIMITER = '~@|'
-
-INTERVAL_1_SIGIL = '     ~@i1'
-INTERVAL_2_SIGIL = '     ~@i2'
-SHAPE_SIGIL = '     ~@s'
-TOOLTIP_SIGIL = '     ~@t'
-
 
 # Note manipulations for sorting
 def atof(text):
