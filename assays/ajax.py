@@ -4081,22 +4081,22 @@ dropdown_processing = {
 
 
 # Why here in Assays?
-def fetch_dropdown(request):
-    """Returns dropdown values in JSON to be processed by selectize"""
-    dropdown = [{'value': "", 'text': '---------'}]
-    data = {'dropdown': dropdown}
-
-    app = request.POST.get('app', '')
-    model = request.POST.get('model', '')
-
-    entries = apps.get_model(app_label=app, model_name=model).objects.all()
-
-    for entry in entries:
-        # match value to the desired subject ID
-        value = str(entry.id)
-        dropdown.append({'value': value, 'text': str(entry)})
-
-    return JsonResponse(data)
+# def fetch_dropdown(request):
+#     """Returns dropdown values in JSON to be processed by selectize"""
+#     dropdown = [{'value': "", 'text': '---------'}]
+#     data = {'dropdown': dropdown}
+#
+#     app = request.POST.get('app', '')
+#     model = request.POST.get('model', '')
+#
+#     entries = apps.get_model(app_label=app, model_name=model).objects.all()
+#
+#     for entry in entries:
+#         # match value to the desired subject ID
+#         value = str(entry.id)
+#         dropdown.append({'value': value, 'text': str(entry)})
+#
+#     return JsonResponse(data)
 
 # TODO TODO TODO
 switch = {
@@ -4158,10 +4158,10 @@ switch = {
     'fetch_assay_associations': {
         'call': fetch_assay_associations
     },
-    'fetch_dropdown': {
-        'call': fetch_dropdown,
-        'validation': valid_user_validation
-    }
+    # 'fetch_dropdown': {
+    #     'call': fetch_dropdown,
+    #     'validation': valid_user_validation
+    # }
 }
 
 
