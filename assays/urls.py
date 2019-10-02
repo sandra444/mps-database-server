@@ -33,7 +33,6 @@ from assays.views import (
     AssayInterStudyReproducibility,
     AssayStudyDataPlots,
     AssayStudyPowerAnalysisStudy,
-    AssayStudyPlateMap,
     AssayDataFromFilters,
     AssayStudySetAdd,
     AssayStudySetUpdate,
@@ -47,7 +46,12 @@ from assays.views import (
     AssayReferenceDetail,
     AssayReferenceDelete,
     AssayStudyAddNew,
-    AssayMatrixNew
+    AssayMatrixNew,
+    PlateReaderMapUpdate,
+    PlateReaderMapAdd,
+    PlateReaderMapIndex,
+    PlateReaderMapDetail,
+    PlateReaderMapDelete,
 )
 import assays.ajax
 
@@ -156,9 +160,6 @@ urlpatterns = [
     # Power Analysis
     url(r'^assays/assaystudy/(?P<pk>[0-9]+)/power_analysis/$', AssayStudyPowerAnalysisStudy.as_view(), name='assay-power-analysis-study'),
 
-    # Plate Map
-    url(r'^assays/assaystudy/(?P<pk>[0-9]+)/plate_map/$', AssayStudyPlateMap.as_view(), name='assay-plate-map'),
-
     # References
     url(r'^assays/references/$', AssayReferenceList.as_view(), name='assay-reference-list'),
     url(r'^assays/references/add/$', AssayReferenceAdd.as_view(), name='assay-reference-add'),
@@ -168,4 +169,12 @@ urlpatterns = [
 
     # Ajax
     url(r'^assays_ajax/$', assays.ajax.ajax),
+
+    # Plate Map (add and update will go to the same page, content = True for one of them...)
+    url(r'^assays/assaystudy/(?P<pk>[0-9]+)/platereadermap/$', PlateReaderMapIndex.as_view(), name='assayplatemap-index'),
+    url(r'^assays/platereadermap/add/$', PlateReaderMapAdd.as_view(), name='assay-platereadermap-add'),
+    url(r'^assays/platereadermap/(?P<pk>[0-9]+)/$', PlateReaderMapDetail.as_view(), name='assay-platereadermap-detail'),
+    url(r'^assays/platereadermap/(?P<pk>[0-9]+)/update/$', PlateReaderMapUpdate.as_view(), name='assay-platereadermap-update'),
+    url(r'^assays/platereadermap/(?P<pk>[0-9]+)/delete/$', PlateReaderMapDelete.as_view(), name='assay-platereadermap-delete'),
+
 ]

@@ -509,7 +509,7 @@ class AssayPlateSetup(FlaggableRestrictedModel):
         return '/assays/assayplatesetup/{}/'.format(self.id)
 
     def get_post_submission_url(self):
-        return '/assays/{}/'.format(self.assay_run_id)
+        return '/assays/{}/'.format(self.assay_run_id_id)
 
     def get_clone_url(self):
         return '/assays/{0}/assayplatesetup/add?clone={1}'.format(self.assay_run_id_id, self.id)
@@ -2793,10 +2793,10 @@ class AssayCategory(FlaggableModel):
 
 
 # Matrix that is a plate map for plate reader assays
-class PlateReaderMap(FlaggableModel):
-    """Used to organize data in the interface. An Plate Reader Map is a assay plate map"""
+class AssayPlateMap(FlaggableModel):
+    """Used to organize data in the interface. An Plate Map is a assay plate map"""
     class Meta(object):
-        verbose_name_plural = 'Plate Reader Map'
+        verbose_name_plural = 'Assay Plate Map'
         unique_together = [('study_id', 'name')]
     name = models.CharField(max_length=255)
     description = models.CharField(max_length=256,
@@ -2834,22 +2834,22 @@ class PlateReaderMap(FlaggableModel):
         return '{0}'.format(self.name)
 
     def get_absolute_url(self):
-        return '/assays/platereadermap/{}'.format(self.id)
+        return '/assays/assayplatemap/{}'.format(self.id)
     def get_post_submission_url(self):
         return self.study.get_post_submission_url()
 
 
-class PlateReaderMapItem(FlaggableModel):
+class AssayPlateMapItem(FlaggableModel):
     class Meta(object):
-        verbose_name = 'Plate Reader Map Item'
+        verbose_name = 'Assay Plate Map Item'
         unique_together = [
-            ('platereadermap_id', 'row_index', 'column_index')
+            ('assayplatemap_id', 'row_index', 'column_index')
         ]
 
     # Technically the study here is redundant (contained in plate map) but keep it because it make's life easier
     study_id = models.ForeignKey(AssayStudy, on_delete=models.CASCADE)
     # Luke's "trick" This is in fact required, just listed as not being so due to quirk in cleaning
-    platereadermap_id = models.ForeignKey(PlateReaderMap, null=True, blank=True, on_delete=models.CASCADE)
+    assayplatemap_id = models.ForeignKey(AssayPlateMap, null=True, blank=True, on_delete=models.CASCADE)
 
     name = models.CharField(max_length=100)
     # Now binds directly to items, standards and blanks will not have a matrix_item, so they can be null or blank
@@ -2900,9 +2900,9 @@ class PlateReaderMapItem(FlaggableModel):
 
     #read from the raw data file with the user input unit for sample
     #for standard, should be the standard concentration and associated unit
-    assayvalue = models.FloatField(default=0)
+    rawvalue = models.FloatField(default=0)
 
-    assayvalue_unit_id = models.ForeignKey(
+    rawvalue_unit_id = models.ForeignKey(
         'assays.PhysicalUnits',
         verbose_name='Reporting Unit',
         default=1,
@@ -2913,7 +2913,7 @@ class PlateReaderMapItem(FlaggableModel):
         return str(self.name)
 
     def get_absolute_url(self):
-        return '/assays/platereadermapitem/{}/'.format(self.id)
+        return '/assays/assayplatemapitem/{}/'.format(self.id)
 
     def get_post_submission_url(self):
         return self.study.get_absolute_url()

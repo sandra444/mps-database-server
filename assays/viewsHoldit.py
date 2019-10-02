@@ -32,8 +32,8 @@ from assays.models import (
     AssayStudySupportingData,
     AssayStudySet,
     AssayReference,
-    PlateReaderMapItem,
-    PlateReaderMap
+    AssayPlateMapItem,
+    AssayPlateMap
 )
 from assays.forms import (
     AssayStudyConfigurationForm,
@@ -60,7 +60,7 @@ from assays.forms import (
     AssayReferenceForm,
     AssayStudySetReferenceFormSetFactory,
     AssayMatrixFormNew,
-    PlateReaderMapForm
+    AssayPlateMapForm
 )
 from microdevices.models import MicrophysiologyCenter
 from django import forms
@@ -2521,14 +2521,14 @@ class AssayMatrixNew(StudyGroupMixin, UpdateView):
 #    model = AssayStudy
 #    template_name = 'assays/assaystudy_power_analysis_study.html'
 
-class PlateReaderMapEdit(ObjectGroupRequiredMixin, UpdateView):
+class AssayPlateMap(ObjectGroupRequiredMixin, UpdateView):
     """Displays the plate map page for the current study"""
-    template_name = 'assays/assaystudy_platereadermap_edit.html'
-    model = PlateReaderMap
-    form_class = PlateReaderMapForm
+    template_name = 'assays/assaystudy_plate_map.html'
+    model = AssayPlateMap
+    form_class = AssayPlateMapForm
 
     def get_context_data(self, **kwargs):
-        context = super(PlateReaderMapEdit, self).get_context_data(**kwargs)
+        context = super(AssayPlateMap, self).get_context_data(**kwargs)
         context['update'] = False
         return context
 
@@ -2548,14 +2548,14 @@ class PlateReaderMapEdit(ObjectGroupRequiredMixin, UpdateView):
     #     else:
     #         return form_class(instance=self.get_object())
 
-class PlateReaderMapAdd(OneGroupRequiredMixin, CreateView):
+class AssayPlateMapNew(OneGroupRequiredMixin, CreateView):
     """Displays the plate map page for the current study"""
-    template_name = 'assays/assaystudy_platereadermap_add.html'
-    model = PlateReaderMap
-    form_class = PlateReaderMapForm
+    template_name = 'assays/assaystudy_plate_map_new.html'
+    model = AssayPlateMap
+    form_class = AssayPlateMapForm
 
     def get_context_data(self, **kwargs):
-        context = super(PlateReaderMapAdd, self).get_context_data(**kwargs)
+        context = super(AssayPlateMapNew, self).get_context_data(**kwargs)
         context['update'] = False
         return context
 
@@ -2566,53 +2566,14 @@ class PlateReaderMapAdd(OneGroupRequiredMixin, CreateView):
         else:
             return self.render_to_response(self.get_context_data(form=form))
 
-#using AssayStudyIndex as example
-class PlateReaderMapIndex(StudyViewerMixin, DetailView):
-    """Show all assay platemaps associated with the given study"""
+class AssayPlateMapIndex(StudyViewerMixin):
     model = AssayStudy
-    context_object_name = 'platereadermap_index'
-    template_name = 'assays/assaystudy_platereadermap_index.html'
+    context_object_name = 'study_index'
+    template_name = 'assays/assaystudy_plate_map_index.html'
+
+    #template_name = 'assays/assaystudy_index.html'
 
     # For permission mixin
     def get_object(self, queryset=None):
-        self.study = super(PlateReaderMapIndex, self).get_object()
+        self.study = super(AssayStudyIndex, self).get_object()
         return self.study
-
-    def get_context_data(self, **kwargs):
-        context = super(PlateReaderMapIndex, self).get_context_data(**kwargs)
-
-        platereadermaps = PlateReaderMap.objects.filter(
-            study_id=self.object.id
-        ).prefetch_related(
-            'platereadermapitem_set',
-            'created_by',
-        )
-        context['platereadermaps'] = platereadermaps
-
-        platereadermapitems = PlateReaderMapItem.objects.filter(
-            platereadermap_id__in=platereadermaps
-        ).prefetch_related(
-            'well_use',
-            'time',
-            'time_unit',
-            'row_index',
-            'col_index',
-            'sample_replicate',
-        )
-
-        context['platereadermaps'] = platereadermaps
-        context['platereaderitems'] = platereadermapitems
-
-        return context
-
-class PlateReaderMapDetail(StudyViewerMixin, DetailView):
-    model = PlateReaderMap
-    template_name = 'assays/assaystudy_platereadermap_detail.html'
-
-class PlateReaderMapUpdate(StudyViewerMixin, UpdateView):
-    model = PlateReaderMap
-    template_name = 'assays/assaystudy_platereadermap_detail.html'
-
-class PlateReaderMapDelete(StudyViewerMixin, DeleteView):
-    model = PlateReaderMap
-    template_name = 'assays/assaystudy_platereadermap_detail.html'

@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% load static %}
+{% load custom_filters %}
+
+{% block breadcrumbs %}
+    <li><a href="/assays/assaystudy/">Studies</a></li>
+    <li class="active">{{ object }}</li>
+{% endblock %}
+
+{% block load_js %}
+    <script src="{% static "assays/assaystudy_platereadermap_index.js" %}"></script>
+{% endblock %}
+
+{% block content %}
+    {% include 'tracking.html' with study_submit='true' %}
+
+    <div class="padded-bottom">
+        <div class="well">
+            <h1 class="text-center">
+                {{ object }}
+            </h1>
+        </div>
+
+        <legend>
+            <h2>
+                Assay Plate Maps
+                {# Hide setup add buttons if the study is marked reviewed #}
+                {% if user|is_group_editor:object.group.name and not object.signed_off_by %}
+                <div>
+                    <a href="/assays/platereadermap/add" class="btn btn-success" role="button">Add Assay Plate Map</a>
+                </div>
+                {% endif %}
+            </h2>
+        </legend>
+
+        {% if platereadermaps %}
+        <div>
+        <table id="platereadermaps" class="display table table-striped table-hover" cellspacing="0" width="100%">
+            <thead>
+                <tr>
+                    <th>View or Edit</th>
+                    <th>Assay Plate Name</th>
+                    <th>Wells in the Plate</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for plate in platereadermaps %}
+                <tr id={{ plate.id }} name={{ plate.id }}>
+                    <td>
+                        <a class="btn btn-primary" href="{% url 'assay-platereadermap-detail' plate.id %}">View</a>
+                        <a class="btn btn-primary" href="{% url 'assay-platereadermap-update' plate.id %}">Edit</a>
+                           <!--View/Edit-->
+                    </td>
+                    <td>{{ plate.id }}-{{ plate.name }}</td>
+                    <td>
+                        {% for apmitem in plate.platereadermapitem_set.all|dictsort:"name" %}
+                            {{ apmitem.name }};
+                        {% endfor %}
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        </div>
+        {% else %}
+        <div class="alert alert-warning" role="alert">
+            No assay plate maps exist for this study
+        </div>
+        {% endif %}
+    </div>
+
+{% endblock %}
+

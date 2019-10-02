@@ -46,7 +46,9 @@ from assays.models import (
     AssayReference,
     AssayStudyReference,
     AssayStudySet,
-    AssayCategory
+    AssayCategory,
+    PlateReaderMap,
+    PlateReaderMapItem
 )
 from microdevices.models import MicrophysiologyCenter
 # from compounds.models import Compound
@@ -1431,3 +1433,17 @@ class AssayCategoryAdmin(ImportExportModelAdmin):
     filter_horizontal = ('targets',)
 
 admin.site.register(AssayCategory, AssayCategoryAdmin)
+
+
+class PlateReaderMapItemAdmin(ImportExportModelAdmin):
+    model = PlateReaderMapItem
+    search_fields = ('name',)
+
+admin.site.register(PlateReaderMapItem, PlateReaderMapItemAdmin)
+
+
+class PlateReaderMapAdmin(ImportExportModelAdmin):
+    model = PlateReaderMap
+    search_fields = ('name', 'description')
+
+admin.site.register(PlateReaderMap, PlateReaderMapAdmin)
