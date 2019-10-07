@@ -12,6 +12,7 @@
     <script src="{% static "assays/organ_model_filter.js" %}"></script>
     <script src="{% static "assays/modify_matrix.js" %}"></script>
     <script src="{% static "assays/assaystudy_add.js" %}"></script>
+    <script src="{% static "assays/reference_selection.js" %}"></script>
 {% endblock %}
 
 {% block breadcrumbs %}
@@ -224,7 +225,7 @@
             <br>
             <a href="/assays/studyconfiguration">
                 <span class="glyphicon glyphicon-plus text-success" aria-hidden="true"></span>
-                Add/Edit Integrated Study Configurations (Must Refresh Page to See Change)
+                Add/Edit Integrated Study Configurations
             </a>
         </div>
     </div>
@@ -234,6 +235,18 @@
     <legend>Study Setup</legend>
 
     {% include 'generic_field.html' with field=form.organ_model label="MPS Model" %}
+    <div class="row">
+        <div class="col-sm-2"></div>
+        <div class="col-sm-10">
+            <a class="popup-link" data-href="/microdevices/model/add/?popup=1" data-window-name="compounds">
+                <span class="glyphicon glyphicon-plus text-success" aria-hidden="true"></span>
+                Create New MPS Model
+            </a>
+        </div>
+    </div>
+
+    <br>
+
     {# Use the show/hide from organ_model_filtering #}
     <div id="protocol_div">
     {% include 'generic_field.html' with field=form.organ_model_protocol label="MPS Model Version" %}
@@ -408,8 +421,7 @@
         </tbody>
     </table>
 
-    {# REMOVED FOR NOW #}
-    {% comment %}
+    {# ADDED BACK #}
     {{ supporting_data_formset.management_form }}
     <legend>Supporting Data</legend>
     {% if supporting_data_formset.non_form_errors %}
@@ -438,8 +450,8 @@
     <table class="table table-striped inlines" id="{{ supporting_data_formset.prefix }}-group" name="supporting_data">
         <thead>
             <tr>
-                <th>Description*</th>
                 <th>Supporting Data File*</th>
+                <th>Description*</th>
                 <th>Delete</th>
             </tr>
         </thead>
@@ -454,14 +466,15 @@
                                value="{{ supporting_data.id.value }}">
                     </td>
                     {% endif %}
-                    <td>{{ supporting_data.description }}</td>
                     <td>{{ supporting_data.supporting_data }}</td>
+                    <td>{{ supporting_data.description }}</td>
                     <td>{{ supporting_data.DELETE }}</td>
                 </tr>
             {% endfor %}
         </tbody>
     </table>
-    {% endcomment %}
+
+    {% include 'add_reference.html' %}
 
     {# Hidden for Cells, Compounds, and Settings #}
     {# <div hidden> #}

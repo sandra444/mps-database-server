@@ -128,9 +128,10 @@ $(document).ready(function () {
         "','win','toolbars=0,width=1000,height=760,left=200,top=200,scrollbars=1,resizable=1')"
     );
 
-    // Bind a listener to the navbar that causes a collapse if it is oversized
+    // Navbar select
     var navbar = $('#autocollapse');
 
+    // Bind a listener to the navbar that causes a collapse if it is oversized
     function autocollapse() {
         navbar.removeClass('collapsed');
         if (navbar.innerHeight() > 51) {
@@ -138,6 +139,61 @@ $(document).ready(function () {
         }
     }
 
-    $(document).on('ready', autocollapse);
-    $(window).on('resize', autocollapse);
+    // Remove navbar etc. if this is a popup
+    if ($.urlParam('popup') !== '1') {
+        $(document).on('ready', autocollapse);
+        $(window).on('resize', autocollapse);
+    }
+    // else {
+    //     // Get rid of footer in popup
+    //     $('#footer').remove();
+    // }
+
+    // Close if set to close
+    if ($.urlParam('popup') == '1' && $.urlParam('close') == '1') {
+        // Return pk etc.
+        // SLOPPY
+        // CATEGORICALLY A BAD PLACE FOR THIS
+        // NOT DRY HANDLING
+        // If cellsample
+        // This will run even before it is closed (in case user closes the window early)
+        if ($.urlParam('model') === 'CellSample' || $.urlParam('model') === 'AssayReference') {
+            // SLOPPY
+            window.opener.TABLES.add_new_row_to_selection_list(
+                $.urlParam('app'),
+                $.urlParam('model'),
+                $.urlParam('new_pk'),
+                decodeURIComponent($.urlParam('new_name'))
+            );
+        }
+        else {
+            // Crude propogation
+            var current_window = window.opener;
+            while (current_window) {
+                // SLOPPY
+                current_window.SELECTIZE.refresh_dropdown(
+                    $.urlParam('app'),
+                    $.urlParam('model'),
+                    $.urlParam('new_pk'),
+                    decodeURIComponent($.urlParam('new_name'))
+                );
+
+                current_window = current_window.opener;
+            }
+        }
+
+        setTimeout(function() {
+             window.close();
+        }, 3000)
+    }
+
+    // Crude: Triggers to spawn popups
+    $('.popup-link').click(function() {
+        window.open(
+            $(this).attr('data-href'),
+            $(this).attr('data-window-name'),
+            // Defaults for now
+            'toolbars=0,width=1000,height=760,left=200,top=200,scrollbars=1,resizable=1'
+        )
+    });
 });

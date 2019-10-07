@@ -22,6 +22,8 @@ import collections
 # TODO REORGANIZE
 import django.forms as forms
 
+from mps.utils import *
+
 
 # These are here to avoid potentially messy imports, may change later
 def attr_getter(item, attributes):
@@ -2406,11 +2408,6 @@ class AssaySetupCompound(models.Model):
         else:
             return str(self)
 
-    def clean(self):
-        # PREVENT DURATION OF 0
-        if not self.duration or self.duration <= 0:
-            raise forms.ValidationError({'duration': ['Duration cannot be zero or negative.']})
-
     def __str__(self):
         if self.addition_location:
             return '{0} ({1} {2})\nAdded on: {3}; Duration of: {4}; Added to: {5}'.format(
@@ -2538,11 +2535,6 @@ class AssaySetupSetting(models.Model):
             return '{}; '.format(' '.join(full_string))
         else:
             return str(self)
-
-    def clean(self):
-        # PREVENT DURATION OF 0
-        if not self.duration or self.duration <= 0:
-            raise forms.ValidationError({'duration': ['Duration cannot be zero or negative.']})
 
     def __str__(self):
         return '{} {} {}'.format(self.setting.name, self.value, self.unit)
@@ -2735,14 +2727,22 @@ class AssayReference(FlaggableModel):
             'doi': self.doi,
         }
 
+    # CRUDE
+    def get_string_for_processing(self):
+        return COMBINED_VALUE_DELIMITER.join(str(x) for x in [
+            self.authors,
+            self.title,
+            self.pubmed_id
+        ])
+
     def __str__(self):
         return '{}. {}. {}. {}. doi:{}. PMID:{}'.format(self.authors, self.title, self.publication, self.year, self.doi, self.pubmed_id)
 
     def get_post_submission_url(self):
-        return '/assays/references/'
+        return '/assays/assayreference/'
 
     def get_absolute_url(self):
-        return '/assays/references/{}/'.format(self.id)
+        return '/assays/assayreference/{}/'.format(self.id)
 
     def get_delete_url(self):
         return '{}delete/'.format(self.get_absolute_url())
