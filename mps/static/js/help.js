@@ -2,7 +2,7 @@ $(document).ready(function () {
     // Resolve anchors going to the incorrect location
     var offset = 60;
 
-    $(".collapsible1, .collapsible2, .collapsible3").click(function() {
+    $(".collapsible1, .collapsible2, .collapsible3, .collapsible4").click(function() {
         var content = this.nextElementSibling;
         if ($(content).css("display") != "none") {
             $(content).css("display", "none");
@@ -10,6 +10,21 @@ $(document).ready(function () {
             $(content).css("display", "block");
         }
     });
+
+    //https://api.jquery.com/click/
+    $("#expand_all").click(function(){
+        //alert( "Handler for .click() called." );
+        //console.log("clicked the button")
+        //https://stackoverflow.com/questions/24844566/click-all-buttons-on-page
+        // Get all buttons with the name 'all' and store in a NodeList called 'buttons'
+        var buttons = document.getElementsByName('my_buttons');
+        // Loop through and call the click() function on each button
+        for(var i = 0; i <= buttons.length; i++)
+           //console.log(i)
+           buttons[i].click();
+           var content = this.nextElementSibling;
+           $(content).css("display", "block");
+    })
 
     $('a').not("[href*='/']").click(function(event) {
         event.preventDefault();
