@@ -2793,19 +2793,21 @@ class AssayCategory(FlaggableModel):
 
 
 # Matrix that is a plate map for plate reader assays
-class PlateReaderMap(FlaggableModel):
-    """Used to organize data in the interface. An Plate Reader Map is a assay plate map"""
+class AssayPlateReaderMap(FlaggableModel):
+    """Used to organize data in the interface. An Assay Plate Reader Map is a assay plate map"""
     class Meta(object):
-        verbose_name_plural = 'Plate Reader Map'
-        unique_together = [('study_id', 'name')]
-    name = models.CharField(max_length=255)
+        verbose_name_plural = 'Assay Plate Reader Map'
+        unique_together = [('study', 'name')]
+    name = models.CharField(max_length=255,
+                                   blank=True)
     description = models.CharField(max_length=256,
                                    blank=True, default='')
-    study_id = models.ForeignKey(AssayStudy, on_delete=models.CASCADE)
+    study = models.ForeignKey(AssayStudy, blank=True, on_delete=models.CASCADE)
     device = models.CharField(
         verbose_name='Plate Size',
         max_length=20,
         default='96',
+        blank=True,
         choices=(
             ('24', '24 Well Plate'),
             ('96', '96 Well Plate'),
@@ -2814,17 +2816,17 @@ class PlateReaderMap(FlaggableModel):
     )
 
     # This must correspond to the row index ... 0 - A, 1 - B
-    row_labels = models.CharField(
-        verbose_name='Plate Row Labels',
-        max_length=250,
-        default='A B C D E F G H I J K L M N O P Q R S T U V W X Y Z'
-    )
+    #row_labels = models.CharField(
+    #    verbose_name='Plate Row Labels',
+    #    max_length=250,
+    #    default='A B C D E F G H I J K L M N O P Q R S T U V W X Y Z'
+    #)
     # This must correspond to the column index ... 0 - 1, 1 - 2
-    column_labels = models.CharField(
-        verbose_name='Plate Column Labels',
-        max_length=250,
-        default='1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30'
-    )
+    #column_labels = models.CharField(
+    #    verbose_name='Plate Column Labels',
+    #    max_length=250,
+    #    default='1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30'
+    #)
 
     # Number of rows and columns that are used in the plate map
     #number_of_rows = models.IntegerField(null=True, blank=True)
@@ -2834,32 +2836,39 @@ class PlateReaderMap(FlaggableModel):
         return '{0}'.format(self.name)
 
     def get_absolute_url(self):
-        return '/assays/platereadermap/{}'.format(self.id)
+        return '/assays/assayplatereadermap/{}/'.format(self.id)
+
     def get_post_submission_url(self):
-        return self.study.get_post_submission_url()
+        return '/assays/assayplatereadermap/'
+
+    def get_delete_url(self):
+        return '{}delete/'.format(self.get_absolute_url())
 
 
-class PlateReaderMapItem(FlaggableModel):
+class AssayPlateReaderMapItem(FlaggableModel):
     class Meta(object):
-        verbose_name = 'Plate Reader Map Item'
+        verbose_name = 'Assay Plate Reader Map Item'
         unique_together = [
-            ('platereadermap_id', 'row_index', 'column_index')
+            ('assayplatereadermap', 'row_index', 'column_index')
         ]
 
     # Technically the study here is redundant (contained in plate map) but keep it because it make's life easier
-    study_id = models.ForeignKey(AssayStudy, on_delete=models.CASCADE)
+    study = models.ForeignKey(AssayStudy, blank=True, on_delete=models.CASCADE)
     # Luke's "trick" This is in fact required, just listed as not being so due to quirk in cleaning
-    platereadermap_id = models.ForeignKey(PlateReaderMap, null=True, blank=True, on_delete=models.CASCADE)
+    assayplatereadermap = models.ForeignKey(AssayPlateReaderMap, on_delete=models.CASCADE)
 
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=100, blank=True, default="none")
     # Now binds directly to items, standards and blanks will not have a matrix_item, so they can be null or blank
-    matrix_item_id = models.ForeignKey(AssayMatrixItem, null=True, blank=True, on_delete=models.CASCADE)
+    matrix_item = models.ForeignKey(AssayMatrixItem, null=True, blank=True, on_delete=models.CASCADE)
     # Keep these for easy reference to a location in a plate. A labeled list, in order, will be in the plate model
-    row_index = models.IntegerField()
-    column_index = models.IntegerField()
+    row_index = models.IntegerField(default=1, blank=True )
+    column_index = models.IntegerField(default=1, blank=True )
+
+    sample_location = models.ForeignKey('AssaySampleLocation', null=True, blank=True, default=1,
+        on_delete=models.CASCADE)
 
     sample_replicate = models.IntegerField(
-        default=1,
+        default=1, blank=True,
         choices=(
             (1, 1),
             (2, 2),
@@ -2876,7 +2885,7 @@ class PlateReaderMapItem(FlaggableModel):
     well_use = models.CharField(
         verbose_name='Well Use',
         max_length=8,
-        default='sample',
+        default='empty', blank=True,
         choices=(
             ('sample', 'Sample'),
             ('standard', 'Standard'),
@@ -2888,34 +2897,40 @@ class PlateReaderMapItem(FlaggableModel):
     time_unit = models.CharField(
         verbose_name='Unit',
         max_length=8,
-        default='dy',
+        default='day', blank=True,
         choices=(
-            ('dy', 'day'),
-            ('hr', 'hour'),
-            ('mn', 'minute')
+            ('day', 'day'),
+            ('hour', 'hour'),
+            ('minute', 'minute')
         )
     )
 
-    time = models.FloatField(default=0)
+    time = models.FloatField(default=0, blank=True)
 
     #read from the raw data file with the user input unit for sample
     #for standard, should be the standard concentration and associated unit
-    assayvalue = models.FloatField(default=0)
+    assayvalue = models.FloatField(null=True, blank=True )
 
-    assayvalue_unit_id = models.ForeignKey(
+    assayvalue_unit = models.ForeignKey(
         'assays.PhysicalUnits',
         verbose_name='Reporting Unit',
-        default=1,
+        null=True, blank=True,
         on_delete=models.CASCADE
     )
 
+    #def __str__(self):
+    #    return str(self.name)
+
     def __str__(self):
-        return str(self.name)
+        return '{0}'.format(self.name)
 
     def get_absolute_url(self):
-        return '/assays/platereadermapitem/{}/'.format(self.id)
+        return '/assays/assayplatereadermapitem/{}/'.format(self.id)
 
     def get_post_submission_url(self):
-        return self.study.get_absolute_url()
+        return '/assays/assayplatereadermapitem/'
+
+    def get_delete_url(self):
+        return '{}delete/'.format(self.get_absolute_url())
 
 #TODO need a model for the status of the processing (where in the loading, calibration, and processing)

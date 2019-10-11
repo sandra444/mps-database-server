@@ -32,8 +32,8 @@ from assays.models import (
     AssayStudySupportingData,
     AssayStudySet,
     AssayReference,
-    PlateReaderMapItem,
-    PlateReaderMap
+    AssayPlateReaderMapItem,
+    AssayPlateReaderMap,
 )
 from assays.forms import (
     AssayStudyConfigurationForm,
@@ -60,7 +60,11 @@ from assays.forms import (
     AssayReferenceForm,
     AssayStudySetReferenceFormSetFactory,
     AssayMatrixFormNew,
-    PlateReaderMapForm
+    AssayPlateReaderMapForm,
+    AssayPlateReaderMapItem,
+    AssayPlateReaderMapItemFormSet,
+    AssayPlateReadMapExtras,
+
 )
 from microdevices.models import MicrophysiologyCenter
 from django import forms
@@ -2521,14 +2525,14 @@ class AssayMatrixNew(StudyGroupMixin, UpdateView):
 #    model = AssayStudy
 #    template_name = 'assays/assaystudy_power_analysis_study.html'
 
-class PlateReaderMapEdit(ObjectGroupRequiredMixin, UpdateView):
+class AssayPlateReaderMapUpdate(ObjectGroupRequiredMixin, UpdateView):
     """Displays the plate map page for the current study"""
-    template_name = 'assays/assaystudy_platereadermap_edit.html'
-    model = PlateReaderMap
-    form_class = PlateReaderMapForm
+    template_name = 'assays/assayplatereadermap_update.html'
+    model = AssayPlateReaderMap
+    form_class = AssayPlateReaderMapForm
 
     def get_context_data(self, **kwargs):
-        context = super(PlateReaderMapEdit, self).get_context_data(**kwargs)
+        context = super(AssayPlateReaderMapUpdate, self).get_context_data(**kwargs)
         context['update'] = False
         return context
 
@@ -2548,14 +2552,14 @@ class PlateReaderMapEdit(ObjectGroupRequiredMixin, UpdateView):
     #     else:
     #         return form_class(instance=self.get_object())
 
-class PlateReaderMapAdd(OneGroupRequiredMixin, CreateView):
+class AssayPlateReaderMapAdd(OneGroupRequiredMixin, CreateView):
     """Displays the plate map page for the current study"""
-    template_name = 'assays/assaystudy_platereadermap_add.html'
-    model = PlateReaderMap
-    form_class = PlateReaderMapForm
+    template_name = 'assays/assayplatereadermap_add.html'
+    model = AssayPlateReaderMap
+    form_class = AssayPlateReaderMapForm
 
     def get_context_data(self, **kwargs):
-        context = super(PlateReaderMapAdd, self).get_context_data(**kwargs)
+        context = super(AssayPlateReaderMapAdd, self).get_context_data(**kwargs)
         context['update'] = False
         return context
 
@@ -2567,52 +2571,193 @@ class PlateReaderMapAdd(OneGroupRequiredMixin, CreateView):
             return self.render_to_response(self.get_context_data(form=form))
 
 #using AssayStudyIndex as example
-class PlateReaderMapIndex(StudyViewerMixin, DetailView):
-    """Show all assay platemaps associated with the given study"""
+class AssayPlateReaderMapIndex(StudyViewerMixin, DetailView):
+    """Show all assay plate maps associated with the given study"""
     model = AssayStudy
-    context_object_name = 'platereadermap_index'
-    template_name = 'assays/assaystudy_platereadermap_index.html'
+    context_object_name = 'assayplatereadermap_index'
+    template_name = 'assays/assayplatereadermap_index.html'
 
     # For permission mixin
     def get_object(self, queryset=None):
-        self.study = super(PlateReaderMapIndex, self).get_object()
+        self.study = super(AssayPlateReaderMapIndex, self).get_object()
         return self.study
 
     def get_context_data(self, **kwargs):
-        context = super(PlateReaderMapIndex, self).get_context_data(**kwargs)
+        context = super(AssayPlateReaderMapIndex, self).get_context_data(**kwargs)
 
-        platereadermaps = PlateReaderMap.objects.filter(
-            study_id=self.object.id
+        assayplatereadermaps = AssayPlateReaderMap.objects.filter(
+            study=self.object.id
         ).prefetch_related(
-            'platereadermapitem_set',
+            'assayplatereadermapitem_set',
             'created_by',
         )
-        context['platereadermaps'] = platereadermaps
+        context['assayplatereadermaps'] = assayplatereadermaps
 
-        platereadermapitems = PlateReaderMapItem.objects.filter(
-            platereadermap_id__in=platereadermaps
-        ).prefetch_related(
-            'well_use',
-            'time',
-            'time_unit',
-            'row_index',
-            'col_index',
-            'sample_replicate',
+        assayplatereadermapitems = AssayPlateReaderMapItem.objects.filter(
+            assayplatereadermap__in=assayplatereadermaps
         )
 
-        context['platereadermaps'] = platereadermaps
-        context['platereaderitems'] = platereadermapitems
+        context['assayplatereaderitems'] = assayplatereadermapitems
+        context['detail'] = True
+        return context
+
+class AssayPlateReaderMapDetail(StudyViewerMixin, DetailView):
+    model = AssayPlateReaderMap
+    template_name = 'assays/assayplatereadermap_detail.html'
+    context_object_name = 'assayplatereadermap_detail.html'
+
+
+class AssayPlateReaderMapDelete(StudyViewerMixin, DeleteView):
+    model = AssayPlateReaderMap
+    template_name = 'assays/assayplatereadermap_delete.html'
+
+
+class AssayPlateReaderMapUpdate(StudyGroupMixin, UpdateView):
+    model = AssayPlateReaderMap
+    template_name = 'assays/assayplatereadermap_update.html'
+    form_class = AssayPlateReaderMapForm
+    # form_class = AssayPlateReaderMapItemFormSet
+
+    # For permission mixin
+    # def get_object(self, queryset=None):
+    #     self.assayplatereadermap = super(AssayPlateReaderMapUpdate, self).get_object()
+    #     return self.assayplatereadermap
+
+    def get_context_data(self, **kwargs):
+        context = super(AssayPlateReaderMapUpdate, self).get_context_data(**kwargs)
+        #passing the study_id to the form to get back the matrix items list for this study
+        context['formextras'] = AssayPlateReadMapExtras(study_id=self.object.study_id)
+
+        if 'formset' not in context:
+            if self.request.POST:
+                context['formset'] = AssayPlateReaderMapItemFormSet(self.request.POST, instance=self.object)
+            else:
+                context['formset'] = AssayPlateReaderMapItemFormSet(instance=self.object)
+
+
+        # Should be object
+        # context['assayplatereadermap'] = super(AssayPlateReaderMapUpdate, self).get_object()
+
+        #if self.request.POST:
+        #    if 'assayplatereadermapitem_formset' not in context:
+        #        context['assayplatereadermapitem_formset'] = AssayPlateReaderMapItemFormSet(self.request.POST, instance=self.object)
+        #else:
+        #    context['assayplatereadermap_formset'] = AssayPlateReaderMapItemFormSet(instance=self.object)
+
+        context['update'] = True
+
+
+        # if (inputValue == '24') {
+        #     console.log("24 ", inputValue)
+        #     row_labels = row_labels_all.slice(0,4) //['A','B','C','D']
+        #     col_labels = col_labels_all.slice(0,6) //['1','2','3','4','5','6']
+        # } else if (inputValue == '96') {
+        #     console.log("96 ", inputValue)
+        #     row_labels = row_labels_all.slice(0,8) //['A','B','C','D','E','F','G','H']
+        #     col_labels = col_labels_all.slice(0,12) //['1','2','3','4','5','6','7','8','9','10','11','12']
+        # } else {
+        #     // '384'
+        #     console.log("384 ", inputValue)
+        #     row_labels = row_labels_all
+        #     col_labels = col_labels_all
+        # }
+
+        studyitems = AssayMatrixItem.objects.filter(
+            study_id=self.object.study
+        ).prefetch_related(
+            'device',
+            'created_by',
+            'matrix',
+            'organ_model',
+            'assaysetupcompound_set__compound_instance__compound',
+            'assaysetupcompound_set__concentration_unit',
+            'assaysetupcompound_set__addition_location',
+            'assaysetupcell_set__cell_sample__cell_type__organ',
+            'assaysetupcell_set__cell_sample__cell_subtype',
+            'assaysetupcell_set__cell_sample__supplier',
+            'assaysetupcell_set__addition_location',
+            'assaysetupcell_set__density_unit',
+            'assaysetupsetting_set__setting',
+            'assaysetupsetting_set__unit',
+            'assaysetupsetting_set__addition_location',
+        )
+
+        #group_items = [()]
+        #for each in studyitems.all():
+        # for x in item.assaysetupcompound_set.all %}{{x.compound_instance.compound}}{% endfor %} < / td > -->
+
+        context['studyitems'] = studyitems
+        context['numberstudyitems'] = len(studyitems)
+
+        # items = AssayMatrixItem.objects.filter(
+        #     matrix_id__in=AssayPlateReaderMapItemFormSet.matrix_id
+        # ).prefetch_related(
+        #     'device',
+        #     'created_by',
+        #     'matrix',
+        #     'organ_model',
+        #     'assaysetupcompound_set__compound_instance__compound',
+        #     'assaysetupcompound_set__concentration_unit',
+        #     'assaysetupcompound_set__addition_location',
+        #     'assaysetupcell_set__cell_sample__cell_type__organ',
+        #     'assaysetupcell_set__cell_sample__cell_subtype',
+        #     'assaysetupcell_set__cell_sample__supplier',
+        #     'assaysetupcell_set__addition_location',
+        #     'assaysetupcell_set__density_unit',
+        #     'assaysetupsetting_set__setting',
+        #     'assaysetupsetting_set__unit',
+        #     'assaysetupsetting_set__addition_location',
+        # )
+        # context['items'] = items
 
         return context
 
-class PlateReaderMapDetail(StudyViewerMixin, DetailView):
-    model = PlateReaderMap
-    template_name = 'assays/assaystudy_platereadermap_detail.html'
+    def form_valid(self, form):
+        formset = AssayPlateReaderMapItemFormSet(self.request.POST, instance=self.object)
 
-class PlateReaderMapUpdate(StudyViewerMixin, UpdateView):
-    model = PlateReaderMap
-    template_name = 'assays/assaystudy_platereadermap_detail.html'
+        if form.is_valid() and formset.is_valid():
+            save_forms_with_tracking(self, form, formset=[formset], update=True)
+            return redirect(self.object.get_post_submission_url())
+        else:
+            return self.render_to_response(self.get_context_data(form=form, formset=formset))
 
-class PlateReaderMapDelete(StudyViewerMixin, DeleteView):
-    model = PlateReaderMap
-    template_name = 'assays/assaystudy_platereadermap_detail.html'
+    # def get_form(self, form_class=None):
+    #     form_class = self.get_form_class()
+    #     AssayPlateReaderMapItemFormSet = inlineformset_factory(
+    #         AssayPlateReaderMap,
+    #         AssayPlateReaderMapItem,
+    #         form=AssayPlateReaderMapItemForm,
+    #         extra=1,
+    #         exclude=[]
+    #     )
+    #     # If POST
+    #     if self.request.method == 'POST':
+    #         return form_class(self.request.POST, instance=self.object, request=self.request)
+    #     # If GET
+    #     else:
+    #         return form_class(instance=self.object, request=self.request)
+    #
+    # def form_valid(self, form):
+    #     assayplatereadermapitem_formset = AssayPlateReaderMapItemFormSet(
+    #         self.request.POST,
+    #         instance=form.instance
+    #     )
+    #
+    #     if form.is_valid() and assayplatereadermapitem_formset.is_valid():
+    #         save_forms_with_tracking(self, form, formset=[assayplatereadermapitem_formset], update=True)
+    #         form.save_m2m()
+    #         return redirect(
+    #             self.object.get_absolute_url()
+    #         )
+    #     else:
+    #         return self.render_to_response(
+    #             self.get_context_data(
+    #                 form=form
+    #             )
+    #         )
+    #
+
+
+
+
+

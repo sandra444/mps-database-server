@@ -30,6 +30,8 @@ from assays.models import (
     AssayReference,
     AssayStudyReference,
     AssayStudySetReference,
+    AssayPlateReaderMap,
+    AssayPlateReaderMapItem,
 )
 from compounds.models import Compound, CompoundInstance, CompoundSupplier
 from microdevices.models import (
@@ -2203,96 +2205,86 @@ class AssayMatrixFormNew(SetupFormsMixin, SignOffMixin, BootstrapForm):
         self.fields['test_type'].widget.attrs['style'] = 'width:100px;'
 
 
-class PlateReaderMapForm(BootstrapForm):
-    """Form for Assay Plate Maps"""
+#need this form for the assay plate reader map index page (list of plate maps)
+class AssayPlateReaderMapForm(BootstrapForm):
+    """Form for Assay Plate Reader Maps """
 
-    # EVIL WAY TO GET PREVIEW DATA
-    #preview_data = forms.BooleanField(initial=False, required=False)
+    class Meta(object):
+        model = AssayPlateReaderMap
+        fields = ['name', 'description', 'device', 'study']
+        widgets = {
+            'description': forms.Textarea(attrs={'cols': 50, 'rows': 3}),
+        }
 
-    # TODO - these need to come from saved plate maps (not developed yet)
-    existing_plate_map_list = forms.ChoiceField(choices=(
-        ('', '---'),
-        ('1', 'LDH 20190223 Plate Map for Day 1'),
-        ('2', 'LDH 20190223 Plate Map for Day 2'),
-        ('3', 'LDH 20190223 Plate Map for Day 3'),
-    ), required=False)
 
-    well_plate_size = forms.ChoiceField(choices=(
-        ('', '---'),
-        ('24', '24 well plate'),
-        ('96', '96 well plate'),
-        ('384', '384 well plate'),
-    ), required=False)
+#this is a second form that comes into the assay plate map update page
+class AssayPlateReadMapExtras(forms.Form):
 
-    plate_map_time_unit = forms.ChoiceField(choices=(
-        ('1', 'Day'),
-        ('2', 'Hour'),
-        ('3', 'Minute'),
-    ), required=False)
+    #initilize with the study_id as a kwarg
+    def __init__(self, *args, **kwargs):
+        study_id = kwargs.pop('study_id', None)
+        super(AssayPlateReadMapExtras, self).__init__(*args, **kwargs)
+        self.fields['p_matrix_items_in_study'].queryset = AssayMatrixItem.objects.filter(study_id=study_id)
 
-    plate_map_well_use = forms.ChoiceField(choices=(
-        ('s', 'Sample'),
-        ('n', 'Standard'),
-        ('b', 'Blank'),
-    ), required=False)
-
-    matrix_list = forms.ModelChoiceField(
-        queryset=AssayMatrix.objects.none(),
-        required=False,
-    )
-
-    assay_list = forms.ChoiceField(choices=(
-        ('0', '---'),
-        ('1', 'some method - LDH'),
-        ('2', 'some method - BUN'),
-    ), required=False)
-
-    assay_unit_list = forms.ChoiceField(choices=(
-        ('0', 'nM'),
-        ('1', 'RFU'),
-        ('2', 'what else?'),
-    ), required=False)
-
-    # TODO add a blank one on top "---" when pull from queryset AND order them by name (for now)
-    matrix_item_list = forms.ModelChoiceField(
+    #starting with the queryset none, then init it in the function
+    p_matrix_items_in_study = forms.ModelChoiceField(
         queryset=AssayMatrixItem.objects.none(),
         required=False,
     )
 
-    well_plate_new_name = forms.CharField(
-        required=False,
-        widget=forms.Textarea(attrs={'cols': 50, 'rows': 1})
+    p_sample_replicate = forms.ChoiceField(
+        choices=(
+            (1, 1),
+            (2, 2),
+            (3, 3),
+            (4, 4),
+            (5, 5),
+            (6, 6),
+            (7, 7),
+            (8, 8),
+            (9, 9)
+        )
     )
 
-    # TODO change the format of this text field, want click enter to exit field and no ability to go to new row
-    sample_time_entry = forms.DecimalField(
+    p_well_use = forms.ChoiceField(
+        choices=(
+            ('sample', 'Sample'),
+            ('standard', 'Standard'),
+            ('blank', 'Blank'),
+            ('empty', 'Empty/Unused')
+        )
+    )
+
+    p_time_unit = forms.ChoiceField(
+        choices=(
+            ('day', 'day'),
+            ('hour', 'hour'),
+            ('minute', 'minute')
+        )
+    )
+
+    p_time = forms.DecimalField(
         required=False,
         initial=1,
     )
 
-    # TODO add a blank one on top "---" when pull from queryset
-    model_location_list = forms.ChoiceField(choices=(
-        ('0', '---'),
-        ('1', 'Apical'),
-        ('2', 'Basal'),
-    ), required=False)
-    # sck organ_model_id and sample_location_id in OrganModelLocation
+    p_sample_location = forms.ModelChoiceField(
+         queryset=AssaySampleLocation.objects.all(),
+         required=False,
+    )
 
-    #class Meta(object):
-        #model = AssayStudy
-        #fields = ('bulk_file',)
+class AssayPlateReaderMapItemForm(BootstrapForm):
+    """Form for Assay Plate Reader Map Items """
 
-    def __init__(self, *args, **kwargs):
-        """Init the Bulk Form
+    class Meta(object):
+        model = AssayPlateReaderMapItem
+        exclude = []
 
-        kwargs:
-        request -- the current request
-        """
-        self.request = kwargs.pop('request', None)
-
-        self.fields['matrix_list'].queryset = AssayMatrix.objects.filter(study_id=self.instance.id)
-
-        self.fields['matrix_item_list'].queryset = AssayMatrixItem.objects.filter(study_id=self.instance.id)
-
-        #self.fields['model_location_list'].queryset = AssaySampleLocation.objects.filter(study_id=self.instance.id)
+AssayPlateReaderMapItemFormSet = inlineformset_factory(
+    AssayPlateReaderMap,
+    AssayPlateReaderMapItem,
+    form=AssayPlateReaderMapItemForm,
+    extra=0,
+    exclude=[],
+)
 

@@ -47,11 +47,11 @@ from assays.views import (
     AssayReferenceDelete,
     AssayStudyAddNew,
     AssayMatrixNew,
-    PlateReaderMapUpdate,
-    PlateReaderMapAdd,
-    PlateReaderMapIndex,
-    PlateReaderMapDetail,
-    PlateReaderMapDelete,
+    AssayPlateReaderMapUpdate,
+    AssayPlateReaderMapAdd,
+    AssayPlateReaderMapIndex,
+    AssayPlateReaderMapDetail,
+    AssayPlateReaderMapDelete,
 )
 import assays.ajax
 
@@ -171,10 +171,9 @@ urlpatterns = [
     url(r'^assays_ajax/$', assays.ajax.ajax),
 
     # Plate Map (add and update will go to the same page, content = True for one of them...)
-    url(r'^assays/assaystudy/(?P<pk>[0-9]+)/platereadermap/$', PlateReaderMapIndex.as_view(), name='assayplatemap-index'),
-    url(r'^assays/platereadermap/add/$', PlateReaderMapAdd.as_view(), name='assay-platereadermap-add'),
-    url(r'^assays/platereadermap/(?P<pk>[0-9]+)/$', PlateReaderMapDetail.as_view(), name='assay-platereadermap-detail'),
-    url(r'^assays/platereadermap/(?P<pk>[0-9]+)/update/$', PlateReaderMapUpdate.as_view(), name='assay-platereadermap-update'),
-    url(r'^assays/platereadermap/(?P<pk>[0-9]+)/delete/$', PlateReaderMapDelete.as_view(), name='assay-platereadermap-delete'),
-
+    url(r'^assays/assaystudy/(?P<pk>[0-9]+)/assayplatereadermap/$', AssayPlateReaderMapIndex.as_view(), name='assayplatereadermap-index'),
+    url(r'^assays/assayplatereadermap/add/$', AssayPlateReaderMapAdd.as_view(), name='assayplatereadermap-add'),
+    url(r'^assays/assayplatereadermap/(?P<pk>[0-9]+)/$', AssayPlateReaderMapDetail.as_view(), name='assayplatereadermap-detail'),
+    url(r'^assays/assayplatereadermap/(?P<pk>[0-9]+)/update/$', AssayPlateReaderMapUpdate.as_view(), name='assayplatereadermap-update'),
+    url(r'^assays/assayplatereadermap/(?P<pk>[0-9]+)/delete/$', AssayPlateReaderMapDelete.as_view(), name='assayplatereadermap-delete'),
 ]

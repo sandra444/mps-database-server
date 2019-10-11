@@ -4,11 +4,12 @@
 
 {% block breadcrumbs %}
     <li><a href="/assays/assaystudy/">Studies</a></li>
-    <li class="active">{{ object }}</li>
+    <li><a href="{{ object.get_absolute_url }}">{{ object }}</a></li>
+    <li class="active">Assay Plate Reader Maps</li>
 {% endblock %}
 
 {% block load_js %}
-    <script src="{% static "assays/assaystudy_platereadermap_index.js" %}"></script>
+    <script src="{% static "assays/assayplatereadermap_index.js" %}"></script>
 {% endblock %}
 
 {% block content %}
@@ -23,37 +24,39 @@
 
         <legend>
             <h2>
-                Assay Plate Maps
+                Assay Plate Reader Maps
                 {# Hide setup add buttons if the study is marked reviewed #}
                 {% if user|is_group_editor:object.group.name and not object.signed_off_by %}
                 <div>
-                    <a href="/assays/platereadermap/add" class="btn btn-success" role="button">Add Assay Plate Map</a>
+                    <a href="{% url 'assayplatereadermap-add' %}" class="btn btn-success" role="button">Add Map</a>
                 </div>
                 {% endif %}
             </h2>
         </legend>
 
-        {% if platereadermaps %}
+        {% if assayplatereadermaps %}
         <div>
-        <table id="platereadermaps" class="display table table-striped table-hover" cellspacing="0" width="100%">
+        <table id="assayplatereadermaps" class="display table table-striped table-hover" cellspacing="0" width="100%">
             <thead>
                 <tr>
                     <th>View or Edit</th>
-                    <th>Assay Plate Name</th>
-                    <th>Wells in the Plate</th>
+                    <th>Assay Plate Reader Map Name</th>
+                    <th>Wells in the Assay Plate Reader Map</th>
                 </tr>
             </thead>
             <tbody>
-            {% for plate in platereadermaps %}
-                <tr id={{ plate.id }} name={{ plate.id }}>
+            {% for plate in assayplatereadermaps %}
+                <tr>
                     <td>
-                        <a class="btn btn-primary" href="{% url 'assay-platereadermap-detail' plate.id %}">View</a>
-                        <a class="btn btn-primary" href="{% url 'assay-platereadermap-update' plate.id %}">Edit</a>
-                           <!--View/Edit-->
+                        <a class="btn btn-primary" href="{% url 'assayplatereadermap-detail' plate.id  %}">View </a>
+                        {% if not object.signed_off_by %}
+                            <a class="btn btn-primary" href="{% url 'assayplatereadermap-update' plate.id  %}">Edit </a>
+                        {% endif %}
                     </td>
-                    <td>{{ plate.id }}-{{ plate.name }}</td>
+                    <!--<td>ID: {{ plate.id }} - NAME: {{ plate.name }}</td>-->
+                    <td>{{ plate.name }}</td>
                     <td>
-                        {% for apmitem in plate.platereadermapitem_set.all|dictsort:"name" %}
+                        {% for apmitem in plate.assayplatereadermapitem_set.all|dictsort:"name" %}
                             {{ apmitem.name }};
                         {% endfor %}
                     </td>
