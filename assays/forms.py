@@ -2216,8 +2216,16 @@ class AssayPlateReaderMapForm(BootstrapForm):
             'description': forms.Textarea(attrs={'cols': 50, 'rows': 3}),
         }
 
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None)
+        super(AssayPlateReaderMapForm, self).__init__(*args, **kwargs)
+        self.fields['name'].widget.attrs['class'] += ' no-selectize'
+        self.fields['description'].widget.attrs['class'] += ' no-selectize'
+        self.fields['device'].widget.attrs['class'] += ' no-selectize'
+        self.fields['study'].widget.attrs['class'] += ' no-selectize'
 
 #this is a second form that comes into the assay plate map update page
+#no qc on this form is needed, it just feeds the drop downs.
 class AssayPlateReadMapExtras(forms.Form):
 
     #initilize with the study_id as a kwarg
@@ -2225,49 +2233,27 @@ class AssayPlateReadMapExtras(forms.Form):
         study_id = kwargs.pop('study_id', None)
         super(AssayPlateReadMapExtras, self).__init__(*args, **kwargs)
         self.fields['p_matrix_items_in_study'].queryset = AssayMatrixItem.objects.filter(study_id=study_id)
+        #self.fields['p_matrix_items_in_study'].queryset = AssayMatrixItem.objects.filter(study_id=293)
 
     #starting with the queryset none, then init it in the function
     p_matrix_items_in_study = forms.ModelChoiceField(
         queryset=AssayMatrixItem.objects.none(),
         required=False,
     )
-
     p_sample_replicate = forms.ChoiceField(
-        choices=(
-            (1, 1),
-            (2, 2),
-            (3, 3),
-            (4, 4),
-            (5, 5),
-            (6, 6),
-            (7, 7),
-            (8, 8),
-            (9, 9)
-        )
+        choices=((1, 1), (2, 2), (3, 3), (4, 4), (5, 5), (6, 6), (7, 7), (8, 8), (9, 9))
     )
-
     p_well_use = forms.ChoiceField(
-        choices=(
-            ('sample', 'Sample'),
-            ('standard', 'Standard'),
-            ('blank', 'Blank'),
-            ('empty', 'Empty/Unused')
-        )
+        choices=(('empty', 'Empty/Unused'),('sample', 'Sample'),('standard', 'Standard'),('blank', 'Blank'))
     )
-
     p_time_unit = forms.ChoiceField(
-        choices=(
-            ('day', 'day'),
-            ('hour', 'hour'),
-            ('minute', 'minute')
-        )
+        choices=(('day', 'day'),('hour', 'hour'),('minute', 'minute'))
     )
-
     p_time = forms.DecimalField(
         required=False,
         initial=1,
     )
-
+    p_time.widget.attrs.update({'class': 'form-control'})
     p_sample_location = forms.ModelChoiceField(
          queryset=AssaySampleLocation.objects.all(),
          required=False,
@@ -2279,6 +2265,21 @@ class AssayPlateReaderMapItemForm(BootstrapForm):
     class Meta(object):
         model = AssayPlateReaderMapItem
         exclude = []
+
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None)
+        super(AssayPlateReaderMapItemForm, self).__init__(*args, **kwargs)
+        self.fields['name'].widget.attrs['class'] += ' no-selectize'
+        self.fields['well_use'].widget.attrs['class'] += ' no-selectize'
+        self.fields['sample_location'].widget.attrs['class'] += ' no-selectize'
+        self.fields['sample_replicate'].widget.attrs['class'] += ' no-selectize'
+        self.fields['time'].widget.attrs['class'] += ' no-selectize'
+        self.fields['time_unit'].widget.attrs['class'] += ' no-selectize'
+        self.fields['matrix_item'].widget.attrs['class'] += ' no-selectize'
+        self.fields['row_index'].widget.attrs['class'] += ' no-selectize'
+        self.fields['column_index'].widget.attrs['class'] += ' no-selectize'
+        self.fields['column_index'].widget.attrs['class'] += ' no-selectize'
+        self.fields['study'].widget.attrs['class'] += ' no-selectize'
 
 AssayPlateReaderMapItemFormSet = inlineformset_factory(
     AssayPlateReaderMap,

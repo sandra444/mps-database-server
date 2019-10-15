@@ -1,8 +1,18 @@
 $(document).ready(function () {
+    console.log("in js file 1");
 
-    platelabels($("#id_device").val());
-    //console.log("working")
-    $('.id_p_time').addClass('form-control');
+    // these should be the same as the model defaults
+    let global_plate_matrix_item_show = "";
+    let global_plate_matrix_item_value = 0;
+    let global_plate_well_use = "empty";
+    let global_plate_time = 1;
+    let global_plate_time_unit = "day";
+    let global_plate_replicate = 1;
+    let global_plate_location_show = "";
+    let global_plate_location_value = 0;
+    let global_plate_size = 24;
+
+    // did now seem to work so put in forms.py $('.id_p_time').addClass('form-control');
 
     //so can select table cells - keep
     $('#plate_table').selectable({
@@ -12,7 +22,7 @@ $(document).ready(function () {
         stop: changeSelected
     });
 
-   //to format the reference table - keep
+    //to format the reference table - keep
     $('#matrix_items_table').DataTable({
         "iDisplayLength": 25,
         "sDom": '<B<"row">lfrtip>',
@@ -21,106 +31,84 @@ $(document).ready(function () {
         "order": [[2, "asc"]],
     });
 
-    //show hide buttons - changing the class hide status based on checked or unchecked
-   $('#show_item').change(function() {
+    console.log("in js file 2");
+
+    //show hide buttons - changing the class of the plate map to show/hide based on checked or unchecked
+    $('#show_item').change(function() {
        //console.log("show_item");
        if ($(this).is(':checked')) {
             $('.plate-cells-item').removeClass('hidden');
-            console.log("show_item remove hidden");
        } else {
             $('.plate-cells-item').addClass('hidden');
-            console.log("show_item add hidden");
        }
-   });
-   $('#show_time').change(function() {
+    });
+    $('#show_time').change(function() {
        if ($(this).is(':checked')) {
             $('.plate-cells-time').removeClass('hidden');
        } else {
             $('.plate-cells-time').addClass('hidden');
        }
-   });
-   $('#show_location').change(function() {
+    });
+    $('#show_location').change(function() {
        if ($(this).is(':checked')) {
             $('.plate-cells-location').removeClass('hidden');
        } else {
             $('.plate-cells-location').addClass('hidden');
        }
-   });
-   $('#show_use').change(function() {
+    });
+    $('#show_use').change(function() {
        if ($(this).is(':checked')) {
             $('.plate-cells-use').removeClass('hidden');
        } else {
             $('.plate-cells-use').addClass('hidden');
        }
-   });
-   $('#show_replicate').change(function() {
+    });
+    $('#show_replicate').change(function() {
        if ($(this).is(':checked')) {
             $('.plate-cells-replicate').removeClass('hidden');
        } else {
             $('.plate-cells-replicate').addClass('hidden');
        }
-   });
-   $('#show_label').change(function() {
+    });
+    $('#show_label').change(function() {
        if ($(this).is(':checked')) {
             $('.plate-cells-label').removeClass('hidden');
        } else {
             $('.plate-cells-label').addClass('hidden');
        }
-   });
-
-    // The six selections
-    // five for dragging onto plate and time unit
-    // This is for viewing only
-    $("#id_p_matrix_items_in_study").change(function() {
-        var matrixItemText = $(this).text();
-        console.log("what input matrix item text ", matrixItemText);
-    });
-    $("#id_p_matrix_items_in_study").change(function() {
-        var matrixItemValue = $(this).val();
-        console.log("what input matrix item val", matrixItemValue);
-    });
-    $("#id_p_sample_location").change(function() {
-        var locationValue = $(this).val();
-        console.log("what location ", locationValue);
-    });
-    $("#id_p_time").focusout(function() {
-        var timeValue = $(this).val();
-        console.log("on exit time", timeValue);
-    });
-    $("#id_p_well_use").change(function() {
-        var welluseValue = $(this).val();
-        console.log("what well use ", welluseValue);
-    });
-    $("#id_p_sample_replicate").change(function() {
-        var replicateValue = $(this).val();
-        console.log("what replicate ", replicateValue);
-    });
-    $("#id_p_time_unit").change(function() {
-        var timeUnitValue = $(this).val();
-        console.log("on change time unit ", timeUnitValue);
     });
 
-    $("#id_device").change(function() {
-      var plateSizeValue = $(this).val();
-      console.log("what input plate size change ", plateSizeValue);
-      platelabels(plateSizeValue);
+    console.log("in js file 3");
+
+    // when loading, what and how to load the plate
+    if ($("#page_called").val() === 'add') {
+        $("#device").val(global_plate_size);
+        platelabels($(global_plate_size), "y");
+    } else {
+        platelabels($("#device").val(), "n");
+    }
+
+    // when add page and the user changes the plate size, have to reload empty plate the correct size
+    $("#device").change(function() {
+      global_plate_size = $(this).val();
+      platelabels(global_plate_size, "y");
     });
 
-    function platelabels(size)
+    function platelabels(size, adding)
     {
         //console.log("in the function");
+        console.log("in platelabels function");
         //$("input[name=selectedplatesize]:text").val(inputValue);
         //$("input[name=enteredplatename]:text").val(inputValue);
-        var row_labels = [];
-        var col_labels = [];
-        var row_contents = [];
+        let row_labels = [];
+        let col_labels = [];
+        let row_contents = [];
 
         //note that this arrangement will be first is 0 for both row and column
-        var row_labels_all = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P'];
-        var col_labels_all = ['1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20','21','22','23','24'];
+        let row_labels_all = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P'];
+        let col_labels_all = ['1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20','21','22','23','24'];
         //console.log("start of plate size ", size);
-        if (size == '24') {
-            //console.log("24 ", size);
+        if (size === 24) {
             row_labels = row_labels_all.slice(0,4); //['A','B','C','D'];
             col_labels = col_labels_all.slice(0,6); //['1','2','3','4','5','6'];
             row_contents = [
@@ -129,8 +117,7 @@ $(document).ready(function () {
 ["C1", "C2", "C3", "C4", "C5", "C6"],
 ["D1", "D2", "D3", "D4", "D5", "D6"]
                 ];
-        } else if (size == '96') {
-            //console.log("96 ", size);
+        } else if (size === 96) {
             row_labels = row_labels_all.slice(0,8); //['A','B','C','D','E','F','G','H'];
             col_labels = col_labels_all.slice(0,12); //['1','2','3','4','5','6','7','8','9','10','11','12'];
             row_contents =
@@ -147,7 +134,6 @@ $(document).ready(function () {
 
         } else {
             // '384'
-            //console.log("384 ", size);
             row_labels = row_labels_all;
             col_labels = col_labels_all;
             row_contents =
@@ -169,254 +155,314 @@ $(document).ready(function () {
 ["O1", "O2", "O3", "O4", "O5", "O6", "O7", "O8", "O9", "O10", "O11", "O12", "O13", "O14", "O15", "O16", "O17", "O18", "O19", "O20", "O21", "O22", "O23", "O24"],
 ["P1", "P2", "P3", "P4", "P5", "P6", "P7", "P8", "P9", "P10", "P11", "P12", "G13", "P14", "P15", "P16", "P17", "P18", "P19", "P20", "P21", "P22", "P23", "P24"]
                     ];
-        };
+        }
 
         // add a label to the front of column labels to hold the row labels
         //data_packed = [['Plate'].concat(col_labels), row_contents, row_labels]
-        //var data_packed = [];
-        data_packed = [col_labels, row_labels, row_contents];
-        buildPlate(data_packed);
-    };
+        //let data_packed = [];
+        let data_packed = [col_labels, row_labels, row_contents];
+        buildPlate(data_packed, adding);
+    }
 
-    function buildPlate(data) {
+    function buildPlate(data, adding) {
+        let list_formset_fields = ['sample_location','matrix_item','time','time_unit','well_use','sample_replicate']
+        console.log("in build plate function");
         //console.log("data", data);
-        var thead = document.createElement("thead");
-        var tbody = document.createElement("tbody");
-        var tr = document.createElement("tr");
-        var td = document.createElement("td");
-        var headRow = document.createElement("tr");
-
+        //this table's table tag and closing tag are in the html file
         $('#plate_table').empty();
-
-        // column headers
-        // first column header
-        var th=document.createElement("th");
+        let thead = document.createElement("thead");
+        //let td = document.createElement("td");
+        let headRow = document.createElement("tr");
+        // column headers: first, then the rest in loop
+        let th=document.createElement("th");
         th.appendChild(document.createTextNode("Label"));
         headRow.appendChild(th);
-        // rest of column headers
         data[0].forEach(function(col) {
-            var th=document.createElement("th");
+            let th=document.createElement("th");
             th.appendChild(document.createTextNode(col));
             headRow.appendChild(th);
-        })
-
+        });
         thead.appendChild(headRow);
         plate_table.appendChild(thead);
 
         // for each row
-        // get the first column
-        var ridx = 0
-        //console.log("data[1]: ",data[1])
+        let tbody = document.createElement("tbody");
+        //let tr = document.createElement("tr");
+        // get the first column (A B C D E...)
+        let formsetidx = 0;
+        let ridx = 0;
         data[1].forEach(function(row) {
-            //console.log("ridx: ", ridx)
-            //console.log("data[1][ridx]: ", data[1][ridx])
-            var trlabel = document.createElement("tr");
-            var trloc = document.createElement("tr");
-            var trtime = document.createElement("tr");
-            var tritem = document.createElement("tr");
-            var truse = document.createElement("tr");
-            var trrep = document.createElement("tr");
+            let trbodyrow = document.createElement("tr");
+            let tdbodyrow = document.createElement("th");
+            tdbodyrow.appendChild(document.createTextNode(data[1][ridx]));
+            trbodyrow.appendChild(tdbodyrow);
 
-            var tdlabel = document.createElement("th");
-            $(tdlabel).addClass('plate-label');
-            tdlabel.appendChild(document.createTextNode(data[1][ridx]));
-            trlabel.appendChild(tdlabel);
-
-            var tdloc = document.createElement("th");
-            $(tdloc).addClass('plate-location');
-            tdloc.appendChild(document.createTextNode(data[1][ridx]));
-            trloc.appendChild(tdloc);
-
-            var tdtime = document.createElement("th");
-            $(tdtime).addClass('plate-time');
-            tdtime.appendChild(document.createTextNode(data[1][ridx]));
-            trtime.appendChild(tdtime);
-
-            var tditem = document.createElement("th");
-            $(tditem).addClass('plate-item');
-            tditem.appendChild(document.createTextNode(data[1][ridx]));
-            tritem.appendChild(tditem);
-
-            var tduse = document.createElement("th");
-            $(tduse).addClass('plate-use');
-            tduse.appendChild(document.createTextNode(data[1][ridx]));
-            truse.appendChild(tduse);
-
-            var tdrep = document.createElement("th");
-            $(tdrep).addClass('plate-replicate');
-            tdrep.appendChild(document.createTextNode(data[1][ridx]));
-            trrep.appendChild(tdrep);
-
-
-            var cidx = 0;
-
-            //.plate-item {background-color: #fffccc}
-            //.plate-location {background-color: #c1e3e6}
-            //.plate-time {background-color: #d1e8d4}
-            //.plate-use {background-color: #baa861}
-            //.plate-replicate {background-color: #cc3f54}
-            //.plate-label {background-color: #c4c2be}
+            let cidx = 0;
 
             // build content row (same row as the row_labels (A=A, B=B, etc.)
+            // while in a row, go through each column
+            // make these six in a nested table
+
             data[2][ridx].forEach(function(el) {
 
-                var tdlabel = document.createElement("td");
-                $(tdlabel).attr('data-col', cidx);
-                $(tdlabel).attr('data-row', ridx);
+                let tdlabel = document.createElement("td");
+                $(tdlabel).attr('data-index', formsetidx);
                 $(tdlabel).attr('id', "label|"+ridx+","+cidx);
-                $(tdlabel).addClass('plate-label');
-                tdlabel.appendChild(document.createTextNode(el));
-                trlabel.appendChild(tdlabel);
+                //for coloring
+                $(tdlabel).addClass('map-label');
+                $(tdlabel).addClass('no-selectize');
 
-                var tdloc = document.createElement("td");
-                $(tdloc).attr('data-col', cidx);
-                $(tdloc).attr('data-row', ridx);
+                let tdloc = document.createElement("td");
+                $(tdloc).attr('data-index', formsetidx);
                 $(tdloc).attr('id', "location|"+ridx+","+cidx);
-                $(tdloc).addClass('plate-location');
-                tdloc.appendChild(document.createTextNode(el));
-                trloc.appendChild(tdloc);
+                $(tdloc).addClass('map-location');
+                $(tdloc).addClass('no-selectize');
 
-                var tdtime = document.createElement("td");
-                $(tdtime).attr('data-col', cidx);
-                $(tdtime).attr('data-row', ridx);
+                let tdtime = document.createElement("td");
+                $(tdtime).attr('data-index', formsetidx);
                 $(tdtime).attr('id', "time|"+ridx+","+cidx);
-                $(tdtime).addClass('plate-time');
-                tdtime.appendChild(document.createTextNode(el));
-                trtime.appendChild(tdtime);
+                $(tdtime).addClass('map-time');
+                $(tdtime).addClass('no-selectize');
 
-                var tditem = document.createElement("td");
-                $(tditem).attr('data-col', cidx);
-                $(tditem).attr('data-row', ridx);
+                let tditem = document.createElement("td");
+                $(tditem).attr('data-index', formsetidx);
                 $(tditem).attr('id', "item|"+ridx+","+cidx);
-                $(tditem).addClass('plate-item');
-                tditem.appendChild(document.createTextNode(el));
-                tritem.appendChild(tditem);
+                $(tditem).addClass('map-item');
+                $(tditem).addClass('no-selectize');
 
-                var tduse = document.createElement("td");
-                $(tduse).attr('data-col', cidx);
-                $(tduse).attr('data-row', ridx);
+                let tduse = document.createElement("td");
+                $(tduse).attr('data-index', formsetidx);
                 $(tduse).attr('id', "use|"+ridx+","+cidx);
-                $(tduse).addClass('plate-use');
-                tduse.appendChild(document.createTextNode(el));
-                truse.appendChild(tduse);
+                $(tduse).addClass('map-use');
+                $(tduse).addClass('no-selectize');
 
-                var tdrep = document.createElement("td");
-                $(tdrep).attr('data-col', cidx);
-                $(tdrep).attr('data-row', ridx);
+                let tdrep = document.createElement("td");
+                $(tdrep).attr('data-index', formsetidx);
                 $(tdrep).attr('id', "replicate|"+ridx+","+cidx);
-                $(tdrep).addClass('plate-replicate');
-                tdrep.appendChild(document.createTextNode(el));
-                trrep.appendChild(tdrep);
+                $(tdrep).addClass('map-replicate');
+                $(tdrep).addClass('no-selectize');
 
-                cidx = cidx + 0;
-            })
-            tbody.appendChild(trlabel);
-            tbody.appendChild(truse);
-            tbody.appendChild(tritem);
-            tbody.appendChild(trloc);
-            tbody.appendChild(trtime);
-            tbody.appendChild(trrep);
-            ridx = ridx + 1
-        })
+                let cellTableTD = document.createElement("td");
+                $(cellTableTD).attr('id', "#nt_"+ridx+","+cidx);
+                let cellTable = document.createElement("table");
+                let cellBody = document.createElement("body");
+
+                let celliTR1 = document.createElement("tr");
+                let celliTR2 = document.createElement("tr");
+                let celliTR3 = document.createElement("tr");
+                let celliTR4 = document.createElement("tr");
+                let celliTR5 = document.createElement("tr");
+                let celliTR6 = document.createElement("tr");
+
+                //for hiding
+                $(celliTR1).addClass('plate-cells-label');
+                $(celliTR2).addClass('plate-cells-use');
+                $(celliTR3).addClass('plate-cells-item');
+                $(celliTR4).addClass('plate-cells-time');
+                $(celliTR5).addClass('plate-cells-location');
+                $(celliTR6).addClass('plate-cells-replicate');
+                // example $(celliTR6).addClass('plate-cells-replicate hidden');
+
+
+                if (adding === "y") {
+                    //https://simpleit.rocks/python/django/dynamic-add-form-with-add-button-in-django-modelformset-template/
+                    $('#form_set').append($('#empty_form').html().replace(/__prefix__/g, formsetidx));
+                    $('#id_form-TOTAL_FORMS').val(parseInt(formsetidx));
+                    //https://medium.com/all-about-django/adding-forms-dynamically-to-a-django-formset-375f1090c2b0
+                    //list_formset_fields.forEach(function(ef) {
+                        $('#empty_form').html().attr('name').replace('set-undefined-', 'set-' + formsetidx + '-');
+                        $('#empty_form').html().attr('id').replace('set-undefined-', 'set-' + formsetidx + '-');
+                    //});
+
+                    tduse.appendChild(document.createTextNode("empty"));
+                    tditem.appendChild(document.createTextNode("-"));
+                    tdtime.appendChild(document.createTextNode("0"));
+                    tdloc.appendChild(document.createTextNode("-"));
+                    tdrep.appendChild(document.createTextNode("1"));
+                    tdlabel.appendChild(document.createTextNode(el));
+
+                    //$("input[name=enteredplatename]:text").val(inputValue);
+                    $('#id_assayplatereadermapitem_set-' + $(this).attr('data-index') + '-study').val($('#object_study').val());
+                    $('#id_assayplatereadermapitem_set-' + $(this).attr('data-index') + '-assayplatereadermap').val($('#object_plate_size').val());
+
+                    $('#id_assayplatereadermapitem_set-' + $(this).attr('data-index') + '-row_index').val(ridx);
+                    $('#id_assayplatereadermapitem_set-' + $(this).attr('data-index') + '-column_index').val(cidx);
+                    //<br>form device {% include 'generic_field.html' with field=form.device label="Plate Size"  %}
+                    //<br>plate size <h4 id="object_plate_size">{{ object.device }}</h4>
+                    //<br>plate id <h4 id="object_plate_id">{{ object.id }}</h4>
+                    //<br>study <h4 id="object_study">{{ object.study }}</h4>
+                    //<br>form name {% include 'generic_field.html' with field=form.name label="Map Name"  %}
+                    //{#  This is used to know if building plate from scratch or from existing plate (add, view, update)#}
+                    //<br>page called <div id="page_called"><br>{{ page_called }}<br></div>
+
+                } else {
+                    // the formset where ridx is row_index and cidx is column_index
+                    //    row_index = models.IntegerField(default=1, blank=True )
+                    //     column_index = models.IntegerField(default=1, blank=True )
+                    // or where el (A1, A2) is name
+                    //#TODO fix this later...
+                    //id_assayplatereadermapitem_set-0-study-selectized
+                    if (formsetidx < 3) {
+                        //left them undefined
+                        //tditem.appendChild(document.createTextNode($('#id_assayplatereadermapitem_set-' + formsetidx + '-matrix_item').data('value')));
+                        //tdloc.appendChild(document.createTextNode($('#id_assayplatereadermapitem_set-' + formsetidx + '-sample_location').data('value')));
+
+                        // this fills them with the pk...close..need to get the associated name
+                        tditem.appendChild(document.createTextNode($('#id_assayplatereadermapitem_set-' + formsetidx + '-matrix_item').val()));
+                        tdloc.appendChild(document.createTextNode($('#id_assayplatereadermapitem_set-' + formsetidx + '-sample_location').val()));
+                        //TODO figure out how to fill with the name instead of the pk
+                        let myname_matrixitem = $('#id_assayplatereadermapitem_set-' + formsetidx + '-matrix_item')
+                        let myname_location = $('#id_assayplatereadermapitem_set-' + formsetidx + '-location')
+
+
+                        tduse.appendChild(document.createTextNode($('#id_assayplatereadermapitem_set-' + formsetidx + '-well_use').val()));
+                        tdtime.appendChild(document.createTextNode($('#id_assayplatereadermapitem_set-' + formsetidx + '-time').val()));
+                        tdrep.appendChild(document.createTextNode($('#id_assayplatereadermapitem_set-' + formsetidx + '-sample_replicate').val()));
+                        tdlabel.appendChild(document.createTextNode($('#id_assayplatereadermapitem_set-' + formsetidx + '-name').val()));
+
+/*                        console.log($('#id_assayplatereadermapitem_set-' + formsetidx + '-well_use').val());
+                        // this prints ALL the matrix items...not what we want, but could be why the loading time .text
+                        console.log($('#id_assayplatereadermapitem_set-' + formsetidx + '-matrix_item').text());
+                        console.log($('#id_assayplatereadermapitem_set-' + formsetidx + '-time').val());
+                        // this prints ALL the matrix items...not what we want, but could be why the loading time .text
+                        console.log($('#id_assayplatereadermapitem_set-' + formsetidx + '-sample_location').text());
+                        console.log($('#id_assayplatereadermapitem_set-' + formsetidx + '-sample_replicate').val());
+                        console.log($('#id_assayplatereadermapitem_set-' + formsetidx + '-name').val());*/
+
+                    } else {
+                        tduse.appendChild(document.createTextNode("empty"));
+                        tditem.appendChild(document.createTextNode("-"));
+                        tdtime.appendChild(document.createTextNode("0"));
+                        tdloc.appendChild(document.createTextNode("-"));
+                        tdrep.appendChild(document.createTextNode("1"));
+                        tdlabel.appendChild(document.createTextNode(el));
+                    }
+                }
+                formsetidx = formsetidx + 1;
+
+                // put it all together
+                celliTR1.appendChild(tdlabel);
+                cellBody.appendChild(celliTR1);
+                celliTR2.appendChild(tduse);
+                cellBody.appendChild(celliTR2);
+                celliTR3.appendChild(tditem);
+                cellBody.appendChild(celliTR3);
+                celliTR4.appendChild(tdtime);
+                cellBody.appendChild(celliTR4);
+                celliTR5.appendChild(tdloc);
+                cellBody.appendChild(celliTR5);
+                celliTR6.appendChild(tdrep);
+                cellBody.appendChild(celliTR6);
+                cellTable.appendChild(cellBody);
+                cellTableTD.appendChild(cellTable);
+                trbodyrow.appendChild(cellTableTD);
+
+                cidx = cidx + 1;
+            });
+
+            tbody.appendChild(trbodyrow);
+            ridx = ridx + 1;
+        });
+
         plate_table.appendChild(tbody);
         return plate_table
     }
 
+    console.log("in js file 4");
 
-    //this will work, need to keep try of which in the formset, and change the form set of the selected table cell
-    //https://www.geeksforgeeks.org/how-to-change-selected-value-of-a-drop-down-list-using-jquery/
-    //https://stackoverflow.com/questions/8978328/get-the-value-of-a-dropdown-in-jquery
+    // Set the global or other variables for the six selections
+    // five for dragging onto plate and time unit
+    $("#id_p_matrix_items_in_study").change(function() {
+        //http://jsfiddle.net/9aXYc/39/
+        global_plate_matrix_item_show = $(this).val();
+        global_plate_matrix_item_value = $(this).data('value');
+        console.log('data value: ', global_plate_matrix_item_show);
+        console.log('value: ', global_plate_matrix_item_value);
+    });
+    $("#id_p_sample_location").change(function() {
+        global_plate_location_show = $(this).val();
+        global_plate_location_value = $(this).data('value');
+        console.log('data value: ', global_plate_location_show);
+        console.log('value: ', global_plate_location_value);
+    });
+    $("#id_p_time").focusout(function() {
+        global_plate_time = $(this).val();
+    });
+    $("#id_p_well_use").change(function() {
+        global_plate_well_use = $(this).val();
+    });
+    $("#id_p_sample_replicate").change(function() {
+        global_plate_replicate = $(this).val();
+    });
+    $("#id_p_time_unit").change(function() {
+        global_plate_time_unit = $(this).val();
+        let i;
+        for (i = 0; i < global_plate_size; i++) {
+          $('#id_assayplatereadermapitem_set-' + i + '-time_unit').val(global_plate_time_unit);
+        }
+    });
+
+    console.log("in js file 5");
+
+    // replace in plate map
+    // https://www.geeksforgeeks.org/how-to-change-selected-value-of-a-drop-down-list-using-jquery/
+    // https://stackoverflow.com/questions/8978328/get-the-value-of-a-dropdown-in-jquery
     function changeSelected() {
-        $('.ui-selected').each(function() {
+        $('.ui-selected').each(function () {
+            if ($(this).hasClass("map-location") && (!$(this).hasClass("hidden"))) {
+                //fills with the pk  TODO get filled with name
+                $(this).text(global_plate_location_show);
 
-            //.plate-item {background-color: #fffccc}
-            //.plate-location {background-color: #c1e3e6}
-            //.plate-time {background-color: #d1e8d4}
-            //.plate-use {background-color: #baa861}
-            //.plate-replicate {background-color: #cc3f54}
-            //.plate-label {background-color: #c4c2be}
+                //did not make a change
+                //$('#id_assayplatereadermapitem_set-' + $(this).attr('data-index') + '-sample_location').data(global_plate_location_value);
+                $('#id_assayplatereadermapitem_set-' + $(this).attr('data-index') + '-sample_location').val(global_plate_location_show);
 
-            //$(tdlabel).attr('id', "label|"+ridx+","+cidx);
-            var myid1 = "#id_assayplatereadermapitem_set-"+"0"+ "-time";
-            console.log("MYID1 = " + myid1);
-            console.log("whati: ",$(myid1).val());
-            $(myid1).val(10);
-            console.log("whato: ",$(myid1).val());
+            } else if ($(this).hasClass("map-item") && (!$(this).hasClass("hidden"))) {
+                //fills with the pk  TODO get filled with name
+                $(this).text(global_plate_matrix_item_show);
 
-            //$("#id_assayplatereadermapitem_set-0-sample_location option[value="+loc+"]").text();
-            //$("#id_assayplatereadermapitem_set-0-sample_location").val(loc);
-            //$('#id_assayplatereadermapitem_set-0-sample_location-selectized option:selected').val(loc);
-//<div class="selectize-input items has-options full has-items"><div class="item" data-value="2">Effluent-Brain</div><input type="select-one" autocomplete="off" tabindex="" id="id_assayplatereadermapitem_set-0-sample_location-selectized" style="width: 4px; opacity: 0; position: absolute; left: -10000px;"></div>
+                //$(this).data('value', global_plate_matrix_item_value);
 
-            //$('.c2r2 option[value=loc]').attr('selected','selected');
+                //did not make a change
+                //$('#id_assayplatereadermapitem_set-' + $(this).attr('data-index') + '-matrix_item').data(global_plate_matrix_item_value);
+                //this is working correctly
+                $('#id_assayplatereadermapitem_set-' + $(this).attr('data-index') + '-matrix_item').val(global_plate_matrix_item_show);
 
-            ///    if (field_name == 'name' || current_form.find('input[name$="name"]').val()) {
-            //        form_field_to_add_to.val(current_value);
-            //if (current_method_id) {
-            //    current_method[0].selectize.setValue(current_method_id);
-            //}
-
-            //var myid2 = "#id_assayplatereadermapitem_set-"+"0"+ "-sample_location"
-            //console.log("whati: ",$("#id_assayplatereadermapitem_set-0-sample_location").text());
-            ///console.log("to: ",$("#id_p_sample_location").option())
-            //$("#id_assayplatereadermapitem_set-0-sample_location option[value=35]")attr('selcted',})"($("#id_p_sample_location").text());
-            //onsole.log("whato: ",$("#id_assayplatereadermapitem_set-0-sample_location-selectized").text);
-
-            // var myid3 = "#id_assayplatereadermapitem_set-"+"0"+ "-well_use-selectized"
-            // console.log("whati: ",$(myid3).text());
-            // console.log("to: ",$("#id_p_well_use").text())
-            // $(myid3).text($("#id_p_well_use").text());
-            // console.log("whato: ",$(myid3).text());
-            //
-            // var myid4 = "#id_assayplatereadermapitem_set-"+"0"+ "-name-selectized"
-            // console.log("whati: ",$(myid4).text());
-            // console.log("to: ",$("#id_p_matrix_items_in_study").text())
-            // $(myid4).text($("#id_p_matrix_items_in_study").text());
-            // console.log("whato: ",$(myid4).text());
-
-
-            // console.log($(this));
-            // console.log($(this).class);
-            // console.log($(this).text());
-            // console.log($(this).attr('dcol'));
-            // console.log($(this).attr('drow'));
-            // //<td data-col="3" data-row="B" class="plate-location">B 3 (location)</td>
-            // if ($(this).hasClass("plate-label")) {
-            //     #console.log("content ",$("#id_p_well_use").text());
-            //     //$(this).text = $("#id_matrix_item_list").text();
-            //     //$("input[name=enteredplatename]:text").val(inputValue)
-            //     //$(this).text("new content");
-            //     #$(this).text($("#id_p_well_use").text());
-            // } else if ($(this).hasClass("plate-location")) {
-            //     console.log("location ",$("#id_p_sample_location").text());
-            //     #$(this).text($("#id_p_sample_location").text());
-            // } else {
-            //     console.log("time ",$("#id_p_time").val());
-            //     #$(this).text($("#id_p_time").val());
-            // }
+            } else if ($(this).hasClass("map-time") && (!$(this).hasClass("hidden"))) {
+                $(this).text(global_plate_time);
+                $('#id_assayplatereadermapitem_set-' + $(this).attr('data-index') + '-time').val(global_plate_time);
+            } else if ($(this).hasClass("map-replicate") && (!$(this).hasClass("hidden"))) {
+                $(this).text(global_plate_replicate);
+                $('#id_assayplatereadermapitem_set-' + $(this).attr('data-index') + '-sample_replicate').val(global_plate_replicate);
+            } else if ($(this).hasClass("map-use") && (!$(this).hasClass("hidden"))) {
+                $(this).text(global_plate_well_use);
+                $('#id_assayplatereadermapitem_set-' + $(this).attr('data-index') + '-well_use').val(global_plate_well_use);
+            } else {
+                //console.log("this.text else", $(this).text())
+            }
+            //#TODO need to figure out why the model foreign keys are not going in correctly.
         });
     }
 
+    console.log("in js file 6");
 
-
-    //<input type="number" name="assayplatereadermapitem_set-0-time" value="1.0" step="any" class="form-control" id="id_assayplatereadermapitem_set-0-time">
-
-
-
-
-
-
-
-/*
-$('#add_more').click(function() {
-	var form_idx = $('#id_form-TOTAL_FORMS').val();
-	$('#form_set').append($('#empty_form').html().replace(/__prefix__/g, form_idx));
-	$('#id_form-TOTAL_FORMS').val(parseInt(form_idx) + 1);
-});
-*/
-
-
-
-
+    //keep for references for now - can use if formset is not hidden
+    //https://simpleit.rocks/python/django/dynamic-add-form-with-add-button-in-django-modelformset-template/
+    $('#add_more').click(function() {
+    var form_idx = $('#id_form-TOTAL_FORMS').val();
+    $('#form_set').append($('#empty_form').html().replace(/__prefix__/g, form_idx));
+    $('#id_form-TOTAL_FORMS').val(parseInt(form_idx) + 1);
+    //error $('#empty_form').html().attr('name').replace('set-undefined-', 'set-' + form_idx + 1 + '-');
+    // error$('#empty_form').html().attr('id').replace('set-undefined-', 'set-' + form_idx + 1 + '-');
+    //$('#empty_form').html().id = "newid";
+    //$('#empty_form').html().name = "newname";
+        //TODO figure out how to reference new formsets...maybe Luke knows
+    });
 
 });
+
+//        console.log("start of plate size ", inputValue);
+//         $("input[name=enteredplatename]:text").val(inputValue);
+
+
+

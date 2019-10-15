@@ -2798,20 +2798,16 @@ class AssayPlateReaderMap(FlaggableModel):
     class Meta(object):
         verbose_name_plural = 'Assay Plate Reader Map'
         unique_together = [('study', 'name')]
-    name = models.CharField(max_length=255,
-                                   blank=True)
-    description = models.CharField(max_length=256,
-                                   blank=True, default='')
+    name = models.CharField(max_length=255, blank=True)
+    description = models.CharField(max_length=256, blank=True, default='')
     study = models.ForeignKey(AssayStudy, blank=True, on_delete=models.CASCADE)
-    device = models.CharField(
+    device = models.IntegerField(
         verbose_name='Plate Size',
-        max_length=20,
-        default='96',
-        blank=True,
+        default=24, blank=True,
         choices=(
-            ('24', '24 Well Plate'),
-            ('96', '96 Well Plate'),
-            ('384', '384 Well Plate')
+            (24, '24 Well Plate'),
+            (96, '96 Well Plate'),
+            (384, '384 Well Plate')
         )
     )
 
@@ -2861,8 +2857,8 @@ class AssayPlateReaderMapItem(FlaggableModel):
     # Now binds directly to items, standards and blanks will not have a matrix_item, so they can be null or blank
     matrix_item = models.ForeignKey(AssayMatrixItem, null=True, blank=True, on_delete=models.CASCADE)
     # Keep these for easy reference to a location in a plate. A labeled list, in order, will be in the plate model
-    row_index = models.IntegerField(default=1, blank=True )
-    column_index = models.IntegerField(default=1, blank=True )
+    row_index = models.IntegerField(default=1, blank=True)
+    column_index = models.IntegerField(default=1, blank=True)
 
     sample_location = models.ForeignKey('AssaySampleLocation', null=True, blank=True, default=1,
         on_delete=models.CASCADE)

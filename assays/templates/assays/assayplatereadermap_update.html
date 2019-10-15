@@ -2,14 +2,11 @@
 {% load static %}
 
 {% block load_js %}
-    <script src="{% static "js/split_time.js" %}"></script>
     <script src="{% static "assays/assayplatereadermap_update.js" %}"></script>
-    <script src="{% static "assays/compound_instances.js" %}"></script>
 {% endblock %}
 
 {% block breadcrumbs %}
     <li><a href="/assays/assaystudy/">Studies</a>
-    <li><a href="{{ form.instance.study.get_absolute_url }}">{{ form.instance.study }}</a></li>
     <li><a href="{% url 'assayplatereadermap-index' object.study.id %}">Assay Plate Reader Maps</a>
     <li class="active">
         {% if object %}
@@ -49,9 +46,17 @@
                     </div>
                 </div>
             {% else %}
-                <!--TODO sck remove this later...it should only be on the add page-->
-                  {% include 'generic_field.html' with field=form.device label="Plate Size"  %}
-{#                Plate Size: {{ object.device }}#}
+                <div >
+                    <!--TODO sck remove this later...it should only be on the add page-->
+                    <br><b>form device</b> {% include 'generic_field.html' with field=form.device label="Plate Size"  %}
+                    <br><b>plate size</b> <h4 id="object_plate_size">{{ object.device }}</h4>
+                    <br><b>plate id</b> <h4 id="object_plate_id">{{ object.id }}</h4>
+                    <br><b>study</b> <h4 id="object_study">{{ object.study }}</h4>
+                    <br><b>study id </b> <h4 id="object_study">{{ object.study.id }}</h4>
+                    <br><b>form name</b> {% include 'generic_field.html' with field=form.name label="Map Name"  %}
+                    {#  This is used to know if building plate from scratch or from existing plate (add, view, update)#}
+                    <br><b>page called</b> <div id="page_called"><br>{{ page_called }}<br></div>
+                </div>
             {% endif %}
 
             <div class="row">
@@ -83,9 +88,6 @@
 
         {# {{  formset }} is the wells in the map   #}
         <div>
-        {% if formset %}
-            {# need this or form save   #}
-            {{ formset.management_form }}
 
             {# rows of show hide buttons   #}
             <div>
@@ -109,7 +111,7 @@
                         <div class="fancy-checkbox table-filter padded-bottom" align="left">
                             <input class="visibility-checkbox" type="checkbox" name="show_location" id="show_location" value=".location_start" checked/>
                             <div class="btn-group">
-                                <label for="show_location" class="btn plate-location">
+                                <label for="show_location" class="btn plate-location" d>
                                     <span class="glyphicon glyphicon-ok"></span>
                                     <span> </span>
                                 </label>
@@ -124,7 +126,7 @@
                         <div class="fancy-checkbox table-filter padded-bottom" align="left">
                             <input class="visibility-checkbox" type="checkbox" name="show_time" id="show_time" value=".time_start" checked/>
                             <div class="btn-group">
-                                <label for="show_time" class="btn plate-time">
+                                <label for="show_time" class="btn plate-time" >
                                     <span class="glyphicon glyphicon-ok"></span>
                                     <span> </span>
                                 </label>
@@ -140,9 +142,9 @@
                 <div class="row ">
                     <div class="col-md-3 col-lg-3">
                         <div class="fancy-checkbox table-filter padded-bottom" align="left">
-                            <input class="visibility-checkbox" type="checkbox" name="show_use" id="show_use" value=".use_start" />
+                            <input class="visibility-checkbox" type="checkbox" name="show_use" id="show_use" value=".use_start" checked/>
                             <div class="btn-group">
-                                <label for="show_use" class="btn plate-use">
+                                <label for="show_use" class="btn plate-use" >
                                     <span class="glyphicon glyphicon-ok"></span>
                                     <span> </span>
                                 </label>
@@ -155,7 +157,7 @@
 
                     <div class="col-md-3 col-lg-3">
                         <div class="fancy-checkbox table-filter padded-bottom" align="left">
-                            <input class="visibility-checkbox" type="checkbox" name="show_replicate" id="show_replicate" value=".replicate_start" />
+                            <input class="visibility-checkbox" type="checkbox" name="show_replicate" id="show_replicate" value=".replicate_start" checked/>
                             <div class="btn-group">
                                 <label for="show_replicate" class="btn plate-replicate">
                                     <span class="glyphicon glyphicon-ok"></span>
@@ -170,7 +172,7 @@
 
                     <div class="col-md-3 col-lg-3">
                         <div class="fancy-checkbox table-filter padded-bottom" align="left">
-                            <input class="visibility-checkbox" type="checkbox" name="show_label" id="show_label" value=".label_start" />
+                            <input class="visibility-checkbox" type="checkbox" name="show_label" id="show_label" value=".label_start" checked/>
                             <div class="btn-group">
                                 <label for="show_label" class="btn plate-label">
                                     <span class="glyphicon glyphicon-ok"></span>
@@ -188,7 +190,8 @@
 
             {# select what to put in the wells - from formextras, not the formset   #}
             <div>
-                <legend>Make Selections and Drag onto Plate</legend>
+                <legend>Make Selections and Drag onto Plate (hidden content is not changed)</legend>
+
                 <div class="row ">
                     <div class="col-md-3 col-lg-3">
                         <label >
@@ -249,26 +252,11 @@
 
             {#  table of well plate              #}
             <div>
-                <table class="table table-bordered table-inverse" summary="Table selection with plugin" id="plate_table">
+{#                <table class="table table-bordered table-inverse" summary="Table selection with plugin" id="plate_table">#}
+                <table class="table table-bordered table-inverse" id="plate_table">
+
                     {#  table made in javascript                  #}
                 </table>
-            </div>
-
-            {#  formsets may want to hide later                #}
-            <div>
-                {% for item in formset %}
-                    name {{ item.name }}
-                    matrix_item {{ item.matrix_item }}
-                    rowi {{ item.row_index }}
-                    coli {{ item.column_index }}
-                    location {{ item.sample_location }}
-                    replicate {{ item.sample_replicate }}
-                    welluse {{ item.well_use }}
-                    timeunit {{ item.time_unit }}
-                    time {{ item.time }}
-                    value {{ item.assayvalue }}
-                    value unit {{ item.assayvalue_unit }}
-                {% endfor %}
             </div>
 
             <hr>
@@ -313,18 +301,30 @@
             {% include 'tracking.html' %}
             <h6>tracking end</h6>{% endcomment %}
 
-            <div>
-                {#Use for error checking#}
-                For testing<br>
-                form.errors<br>
-                {{ form.errors }}<br>
-                formset.errors<br>
-                {{ formset.errors }}<br>
+            {# need this or form save   #}
+            {{ formset.management_form }}
+            <div class="no-selectize">
+                <h3>FormSet </h3>
+                <div id="form_set">
+                    {% for form in formset.forms %}
+                        {{form.non_field_errors}}
+                        {{form.errors}}
+                        <table class='no_error'>
+                            {{ form }}
+                        </table>
+                    {% endfor %}
+                </div>
+                <input type="button" value="Add More" id="add_more">
+                <div id="empty_form" style="display:none">
+                    <table class='no_error'>
+                        {{ formset.empty_form }}
+                    </table>
+                </div>
             </div>
 
             <div>
-                {% if form.errors %}
-                    {% for field, error in form.errors.items %}
+                {% if formset.errors %}
+                    {% for field, error in formset.errors.items %}
                         <div class="alert alert-danger" role="alert">
                             <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
                             <span class="sr-only">Error:</span>
@@ -335,13 +335,16 @@
                 <br>
             </div>
 
-        {% else %}
-            <div class="alert alert-warning" role="alert">
-                No wells exist for this plate reader map...this could only happen if there was an error or if changed by an admin. Contact an admin for help.
+            <h2>later errors</h2>
+            <div>
+                    {#Use for error checking#}
+                    For testing<br>
+                    form.errors<br>
+                    {{ form.errors }}<br>
+                    formset.errors<br>
+                    {{ formset.errors }}<br>
             </div>
-        {% endif %}
 
-    {# end if {{  formset }} is the wells in the map   #}
     </div>
 
     </form>
