@@ -50,7 +50,7 @@ from assays.views import (
     AssayPlateReaderMapUpdate,
     AssayPlateReaderMapAdd,
     AssayPlateReaderMapIndex,
-    AssayPlateReaderMapDetail,
+    AssayPlateReaderMapView,
     AssayPlateReaderMapDelete,
 )
 import assays.ajax
@@ -171,9 +171,10 @@ urlpatterns = [
     url(r'^assays_ajax/$', assays.ajax.ajax),
 
     # Plate Map (add and update will go to the same page, content = True for one of them...)
+    # Note pk vs. study_id
     url(r'^assays/assaystudy/(?P<pk>[0-9]+)/assayplatereadermap/$', AssayPlateReaderMapIndex.as_view(), name='assayplatereadermap-index'),
-    url(r'^assays/assayplatereadermap/add/$', AssayPlateReaderMapAdd.as_view(), name='assayplatereadermap-add'),
-    url(r'^assays/assayplatereadermap/(?P<pk>[0-9]+)/$', AssayPlateReaderMapDetail.as_view(), name='assayplatereadermap-detail'),
+    url(r'^assays/assaystudy/(?P<study_id>[0-9]+)/assayplatereadermap/add/$', AssayPlateReaderMapAdd.as_view(), name='assayplatereadermap-add'),
+    url(r'^assays/assayplatereadermap/(?P<pk>[0-9]+)/view/$', AssayPlateReaderMapView.as_view(), name='assayplatereadermap-view'),
     url(r'^assays/assayplatereadermap/(?P<pk>[0-9]+)/update/$', AssayPlateReaderMapUpdate.as_view(), name='assayplatereadermap-update'),
     url(r'^assays/assayplatereadermap/(?P<pk>[0-9]+)/delete/$', AssayPlateReaderMapDelete.as_view(), name='assayplatereadermap-delete'),
 ]

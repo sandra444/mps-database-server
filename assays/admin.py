@@ -1443,7 +1443,7 @@ admin.site.register(AssayPlateReaderMap, AssayPlateReaderMapAdmin)
 
 class AssayPlateReaderMapItemAdmin(ImportExportModelAdmin):
     model = AssayPlateReaderMapItem
-    list_display = ('name', 'well_use', 'assayplatereadermap', 'row_index', 'column_index', 'sample_replicate', 'sample_location', 'matrix_item', 'time', 'time_unit', 'assayvalue', 'assayvalue_unit')
+    list_display = ('name', 'well_use', 'assayplatereadermap', 'row_index', 'column_index', 'plate_index', 'replicate', 'location', 'matrix_item', 'time', 'time_unit', 'standard_value', 'standard_value_unit')
     search_fields = ('name', 'well_use')
 
 admin.site.register(AssayPlateReaderMapItem, AssayPlateReaderMapItemAdmin)

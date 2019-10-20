@@ -2834,8 +2834,9 @@ class AssayPlateReaderMap(FlaggableModel):
     def get_absolute_url(self):
         return '/assays/assayplatereadermap/{}/'.format(self.id)
 
+    # Same as get_absolute_url for now
     def get_post_submission_url(self):
-        return '/assays/assayplatereadermap/'
+        return '/assays/assaystudy/{}/assayplatereadermap/'.format(self.study_id)
 
     def get_delete_url(self):
         return '{}delete/'.format(self.get_absolute_url())
@@ -2845,7 +2846,8 @@ class AssayPlateReaderMapItem(FlaggableModel):
     class Meta(object):
         verbose_name = 'Assay Plate Reader Map Item'
         unique_together = [
-            ('assayplatereadermap', 'row_index', 'column_index')
+            ('assayplatereadermap', 'row_index', 'column_index'),
+            ('assayplatereadermap', 'plate_index')
         ]
 
     # Technically the study here is redundant (contained in plate map) but keep it because it make's life easier
@@ -2857,13 +2859,14 @@ class AssayPlateReaderMapItem(FlaggableModel):
     # Now binds directly to items, standards and blanks will not have a matrix_item, so they can be null or blank
     matrix_item = models.ForeignKey(AssayMatrixItem, null=True, blank=True, on_delete=models.CASCADE)
     # Keep these for easy reference to a location in a plate. A labeled list, in order, will be in the plate model
-    row_index = models.IntegerField(default=1, blank=True)
-    column_index = models.IntegerField(default=1, blank=True)
+    row_index = models.IntegerField(default=999, blank=True)
+    column_index = models.IntegerField(default=999, blank=True)
+    plate_index = models.IntegerField(default=999, blank=True)
 
-    sample_location = models.ForeignKey('AssaySampleLocation', null=True, blank=True, default=1,
+    location = models.ForeignKey('AssaySampleLocation', null=True, blank=True, default=0,
         on_delete=models.CASCADE)
 
-    sample_replicate = models.IntegerField(
+    replicate = models.IntegerField(
         default=1, blank=True,
         choices=(
             (1, 1),
@@ -2895,9 +2898,9 @@ class AssayPlateReaderMapItem(FlaggableModel):
         max_length=8,
         default='day', blank=True,
         choices=(
-            ('day', 'day'),
-            ('hour', 'hour'),
-            ('minute', 'minute')
+            ('day', 'Day'),
+            ('hour', 'Hour'),
+            ('minute', 'Minute')
         )
     )
 
@@ -2905,9 +2908,9 @@ class AssayPlateReaderMapItem(FlaggableModel):
 
     #read from the raw data file with the user input unit for sample
     #for standard, should be the standard concentration and associated unit
-    assayvalue = models.FloatField(null=True, blank=True )
+    standard_value = models.FloatField(null=True, blank=True )
 
-    assayvalue_unit = models.ForeignKey(
+    standard_value_unit = models.ForeignKey(
         'assays.PhysicalUnits',
         verbose_name='Reporting Unit',
         null=True, blank=True,

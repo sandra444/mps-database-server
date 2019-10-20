@@ -1,3 +1,4 @@
+import datetime
 from django import forms
 from django.contrib.auth.models import Group
 from django.forms.models import (
@@ -2204,88 +2205,134 @@ class AssayMatrixFormNew(SetupFormsMixin, SignOffMixin, BootstrapForm):
         # Bad
         self.fields['test_type'].widget.attrs['style'] = 'width:100px;'
 
-
-#need this form for the assay plate reader map index page (list of plate maps)
-class AssayPlateReaderMapForm(BootstrapForm):
-    """Form for Assay Plate Reader Maps """
-
-    class Meta(object):
-        model = AssayPlateReaderMap
-        fields = ['name', 'description', 'device', 'study']
-        widgets = {
-            'description': forms.Textarea(attrs={'cols': 50, 'rows': 3}),
-        }
-
-    def __init__(self, *args, **kwargs):
-        self.user = kwargs.pop('user', None)
-        super(AssayPlateReaderMapForm, self).__init__(*args, **kwargs)
-        self.fields['name'].widget.attrs['class'] += ' no-selectize'
-        self.fields['description'].widget.attrs['class'] += ' no-selectize'
-        self.fields['device'].widget.attrs['class'] += ' no-selectize'
-        self.fields['study'].widget.attrs['class'] += ' no-selectize'
-
-#this is a second form that comes into the assay plate map update page
-#no qc on this form is needed, it just feeds the drop downs.
+### ASSAY PLATE MAP START
+# this is a second form that comes into the assay plate map update page
+# no qc on this form is needed, it just feeds the drop downs to select from to place on plate map
 class AssayPlateReadMapExtras(forms.Form):
 
     #initilize with the study_id as a kwarg
     def __init__(self, *args, **kwargs):
         study_id = kwargs.pop('study_id', None)
         super(AssayPlateReadMapExtras, self).__init__(*args, **kwargs)
-        self.fields['p_matrix_items_in_study'].queryset = AssayMatrixItem.objects.filter(study_id=study_id)
-        #self.fields['p_matrix_items_in_study'].queryset = AssayMatrixItem.objects.filter(study_id=293)
+        self.fields['p_matrix_item'].queryset = AssayMatrixItem.objects.filter(study_id=study_id)
+        self.fields['b_matrix_item'].queryset = AssayMatrixItem.objects.filter(study_id=study_id)
+        #self.fields['p_matrix_item'].queryset = AssayMatrixItem.objects.filter(study_id=293)
+        self.fields['b_matrix_item'].widget.attrs.update({'class': 'no-selectize'})
+        self.fields['b_location'].widget.attrs.update({'class': 'no-selectize'})
 
     #starting with the queryset none, then init it in the function
-    p_matrix_items_in_study = forms.ModelChoiceField(
+    b_matrix_item = forms.ModelChoiceField(
         queryset=AssayMatrixItem.objects.none(),
         required=False,
     )
-    p_sample_replicate = forms.ChoiceField(
+    p_matrix_item = forms.ModelChoiceField(
+        queryset=AssayMatrixItem.objects.none(),
+        required=False,
+    )
+    p_replicate = forms.ChoiceField(
         choices=((1, 1), (2, 2), (3, 3), (4, 4), (5, 5), (6, 6), (7, 7), (8, 8), (9, 9))
     )
     p_well_use = forms.ChoiceField(
-        choices=(('empty', 'Empty/Unused'),('sample', 'Sample'),('standard', 'Standard'),('blank', 'Blank'))
+        choices=(('empty', 'Empty/Unused'), ('sample', 'Sample'), ('standard', 'Standard'), ('blank', 'Blank'))
     )
     p_time_unit = forms.ChoiceField(
-        choices=(('day', 'day'),('hour', 'hour'),('minute', 'minute'))
+        choices=(('day', 'Day'), ('hour', 'Hour'), ('minute', 'Minute'))
     )
     p_time = forms.DecimalField(
         required=False,
         initial=1,
     )
     p_time.widget.attrs.update({'class': 'form-control'})
-    p_sample_location = forms.ModelChoiceField(
+    p_location = forms.ModelChoiceField(
+         queryset=AssaySampleLocation.objects.all(),
+         required=False,
+    )
+    b_location = forms.ModelChoiceField(
          queryset=AssaySampleLocation.objects.all(),
          required=False,
     )
 
-class AssayPlateReaderMapItemForm(BootstrapForm):
+#need this form for the item for set..it is called in the views.py
+class AssayPlateReaderMapForm(BootstrapForm):
+    """Form for Assay Plate Reader Maps """
+
+    class Meta(object):
+        model = AssayPlateReaderMap
+        fields = ['name', 'description', 'device']
+        widgets = {
+            'description': forms.Textarea(attrs={'cols': 50, 'rows': 3}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        self.study = kwargs.pop('study', None)
+        super(AssayPlateReaderMapForm, self).__init__(*args, **kwargs)
+        self.fields['device'].widget.attrs['class'] += ' no-selectize'
+        self.fields['name'].initial = datetime.datetime.now().strftime ("%Y%m%d")+"-"+ datetime.datetime.now().strftime('%H:%M:%S')
+
+        if self.study:
+            self.instance.study = self.study
+
+class AssayPlateReaderMapItemForm(forms.ModelForm):
     """Form for Assay Plate Reader Map Items """
 
     class Meta(object):
         model = AssayPlateReaderMapItem
-        exclude = []
+        exclude = tracking + ('study',)
+
+    # def __init__(self, *args, **kwargs):
+    #     super(AssayPlateReaderMapItemForm, self).__init__(*args, **kwargs)
+    #     self.fields['name'].widget.attrs.update({'class': ' no-selectize'})
+    #     self.fields['well_use'].widget.attrs.update({'class': ' no-selectize'})
+    #     self.fields['location'].widget.attrs.update({'class': ' no-selectize'})
+    #     self.fields['replicate'].widget.attrs.update({'class': ' no-selectize'})
+    #     self.fields['time'].widget.attrs.update({'class': ' no-selectize'})
+    #     self.fields['time_unit'].widget.attrs.update({'class': ' no-selectize'})
+    #     self.fields['matrix_item'].widget.attrs.update({'class': ' no-selectize'})
+    #     self.fields['row_index'].widget.attrs.update({'class': ' no-selectize'})
+    #     self.fields['column_index'].widget.attrs.update({'class': ' no-selectize'})
+    #     self.fields['plate_index'].widget.attrs.update({'class': ' no-selectize'})
+    #     self.fields['standard_value'].widget.attrs.update({'class': ' no-selectize'})
+    #     self.fields['standard_value_unit'].widget.attrs.update({'class': ' no-selectize'})
+
+
+class AssayPlateReaderMapItemFormSet(BaseInlineFormSetForcedUniqueness):
+    custom_fields = (
+        'matrix_item',
+        'location',
+        'standard_value_unit',
+    )
 
     def __init__(self, *args, **kwargs):
+        # Get the study
+        self.study = kwargs.pop('study', None)
         self.user = kwargs.pop('user', None)
-        super(AssayPlateReaderMapItemForm, self).__init__(*args, **kwargs)
-        self.fields['name'].widget.attrs['class'] += ' no-selectize'
-        self.fields['well_use'].widget.attrs['class'] += ' no-selectize'
-        self.fields['sample_location'].widget.attrs['class'] += ' no-selectize'
-        self.fields['sample_replicate'].widget.attrs['class'] += ' no-selectize'
-        self.fields['time'].widget.attrs['class'] += ' no-selectize'
-        self.fields['time_unit'].widget.attrs['class'] += ' no-selectize'
-        self.fields['matrix_item'].widget.attrs['class'] += ' no-selectize'
-        self.fields['row_index'].widget.attrs['class'] += ' no-selectize'
-        self.fields['column_index'].widget.attrs['class'] += ' no-selectize'
-        self.fields['column_index'].widget.attrs['class'] += ' no-selectize'
-        self.fields['study'].widget.attrs['class'] += ' no-selectize'
+        super(AssayPlateReaderMapItemFormSet, self).__init__(*args, **kwargs)
 
-AssayPlateReaderMapItemFormSet = inlineformset_factory(
+        if not self.study:
+            self.study = self.instance.study
+
+        self.dic = get_dic_for_custom_choice_field(self)
+
+        for form in self.forms:
+            for field in self.custom_fields:
+                form.fields[field] = DicModelChoiceField(field, self.model, self.dic)
+
+            if self.study:
+                form.instance.study = self.study
+
+            if form.instance.pk:
+                form.instance.modified_by = self.user
+            else:
+                form.instance.created_by = self.user
+
+        # TODO UNIQUENESS CONTRAINTS HERE
+
+AssayPlateReaderMapItemFormSetFactory = inlineformset_factory(
     AssayPlateReaderMap,
     AssayPlateReaderMapItem,
+    formset=AssayPlateReaderMapItemFormSet,
     form=AssayPlateReaderMapItemForm,
-    extra=0,
-    exclude=[],
+    extra=1,
+    #study is not needed and it adds overhead on load and save if included
+    exclude=tracking + ('study',),
 )
-

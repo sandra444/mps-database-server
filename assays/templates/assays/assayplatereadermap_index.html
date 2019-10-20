@@ -15,24 +15,25 @@
 {% block content %}
     {% include 'tracking.html' with study_submit='true' %}
 
+    {# Title of page #}
     <div class="padded-bottom">
         <div class="well">
             <h1 class="text-center">
-                {{ object }}
+                <em><b>Assay Plate Reader Map List</b></em><br><br>
+                Study: {{ object }}
             </h1>
         </div>
 
-        <legend>
+        <div>
             <h2>
-                Assay Plate Reader Maps
                 {# Hide setup add buttons if the study is marked reviewed #}
                 {% if user|is_group_editor:object.group.name and not object.signed_off_by %}
                 <div>
-                    <a href="{% url 'assayplatereadermap-add' %}" class="btn btn-success" role="button">Add Map</a>
+                    <a href="{% url 'assayplatereadermap-add' object.id %}" class="btn btn-success" role="button">Add Map</a>
                 </div>
                 {% endif %}
             </h2>
-        </legend>
+        </div>
 
         {% if assayplatereadermaps %}
         <div>
@@ -41,25 +42,28 @@
                 <tr>
                     <th>View or Edit</th>
                     <th>Assay Plate Reader Map Name</th>
-                    <th>Wells in the Assay Plate Reader Map</th>
+                    <th>Description</th>
+                    <th>Size</th>
                 </tr>
             </thead>
             <tbody>
             {% for plate in assayplatereadermaps %}
                 <tr>
-                    <td>
-                        <a class="btn btn-primary" href="{% url 'assayplatereadermap-detail' plate.id  %}">View </a>
-                        {% if not object.signed_off_by %}
-                            <a class="btn btn-primary" href="{% url 'assayplatereadermap-update' plate.id  %}">Edit </a>
-                        {% endif %}
+                    <td style='white-space: nowrap'>
+                            <a class="btn btn-primary" href="{% url 'assayplatereadermap-view' plate.id  %}">View </a>
+                            {% if not object.signed_off_by %}
+                                <a class="btn btn-primary" href="{% url 'assayplatereadermap-update' plate.id  %}">Edit </a>
+                            {% endif %}
                     </td>
                     <!--<td>ID: {{ plate.id }} - NAME: {{ plate.name }}</td>-->
                     <td>{{ plate.name }}</td>
-                    <td>
+                    <td>{{ plate.description }}</td>
+                    <td>{{ plate.device }}</td>
+{% comment %}                    <td>
                         {% for apmitem in plate.assayplatereadermapitem_set.all|dictsort:"name" %}
-                            {{ apmitem.name }};
+                            {{ apmitem.name }}-{{ apmitem.matrix_item }};
                         {% endfor %}
-                    </td>
+                    </td>{% endcomment %}
                 </tr>
             {% endfor %}
             </tbody>
