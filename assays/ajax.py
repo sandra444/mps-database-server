@@ -904,13 +904,13 @@ def get_data_points_for_charting(
     # Accommodation of "special" grouping
     group_sample_location = True
     group_method = True
-    group_time = True
+    grouse_time = True
 
     # CRUDE
     if criteria:
         group_sample_location = 'sample_location' in criteria.get('special', [])
         group_method = 'method' in criteria.get('special', [])
-        group_time = 'time' in criteria.get('special', [])
+        grouse_time = 'time' in criteria.get('special', [])
 
     controls = {}
     if percent_control:

@@ -1423,7 +1423,6 @@ class AssayStudySetAdmin(ImportExportModelAdmin):
     form = AssayStudySetAdminForm
     search_fields = ('name', 'description')
 
-
 admin.site.register(AssayStudySet, AssayStudySetAdmin)
 
 
@@ -1434,17 +1433,14 @@ class AssayCategoryAdmin(ImportExportModelAdmin):
 
 admin.site.register(AssayCategory, AssayCategoryAdmin)
 
+
+# do not want to allow editing of the wells in the plate in the admin
+# the relationship between the item and item value tables needs to be controlled by the GUI
 class AssayPlateReaderMapAdmin(ImportExportModelAdmin):
     model = AssayPlateReaderMap
-    list_display = ('name', 'description', 'device')
+    list_display = ('name', 'description', 'device', 'study_assay', 'time_unit', 'plate_reader_unit', 'study_assay')
     search_fields = ('name', 'description')
 
 admin.site.register(AssayPlateReaderMap, AssayPlateReaderMapAdmin)
 
-class AssayPlateReaderMapItemAdmin(ImportExportModelAdmin):
-    model = AssayPlateReaderMapItem
-    list_display = ('name', 'well_use', 'assayplatereadermap', 'row_index', 'column_index', 'plate_index', 'replicate', 'location', 'matrix_item', 'time', 'time_unit', 'standard_value', 'standard_value_unit')
-    search_fields = ('name', 'well_use')
-
-admin.site.register(AssayPlateReaderMapItem, AssayPlateReaderMapItemAdmin)
 

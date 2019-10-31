@@ -2792,143 +2792,131 @@ class AssayCategory(FlaggableModel):
         return '{}'.format(self.name)
 
 
-# Matrix that is a plate map for plate reader assays
+# ASSAY PLATE MAP SECTION
 class AssayPlateReaderMap(FlaggableModel):
-    """Used to organize data in the interface. An Assay Plate Reader Map is a assay plate map"""
+    """Assay Plate Reader Map is a assay plate map"""
     class Meta(object):
         verbose_name_plural = 'Assay Plate Reader Map'
         unique_together = [('study', 'name')]
-    name = models.CharField(max_length=255, blank=True)
-    description = models.CharField(max_length=256, blank=True, default='')
     study = models.ForeignKey(AssayStudy, blank=True, on_delete=models.CASCADE)
+    name = models.CharField(max_length=255, blank=True)
+    description = models.CharField(max_length=2000, blank=True, default='')
     device = models.IntegerField(
-        verbose_name='Plate Size',
+        verbose_name='Device Size',
         default=24, blank=True,
-        choices=(
-            (24, '24 Well Plate'),
-            (96, '96 Well Plate'),
-            (384, '384 Well Plate')
-        )
+        choices=( (24, '24 Well Plate'), (96, '96 Well Plate'), (384, '384 Well Plate') )
     )
-
-    # This must correspond to the row index ... 0 - A, 1 - B
-    #row_labels = models.CharField(
-    #    verbose_name='Plate Row Labels',
-    #    max_length=250,
-    #    default='A B C D E F G H I J K L M N O P Q R S T U V W X Y Z'
-    #)
-    # This must correspond to the column index ... 0 - 1, 1 - 2
-    #column_labels = models.CharField(
-    #    verbose_name='Plate Column Labels',
-    #    max_length=250,
-    #    default='1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30'
-    #)
-
-    # Number of rows and columns that are used in the plate map
-    #number_of_rows = models.IntegerField(null=True, blank=True)
-    #number_of_columns = models.IntegerField(null=True, blank=True)
-
+    time_unit = models.CharField(
+        max_length=8,
+        default='day', blank=True,
+        choices=( ('day', 'Day'), ('hour', 'Hour'), ('minute', 'Minute') )
+    )
+    plate_reader_unit = models.ForeignKey(
+        'assays.PhysicalUnits',
+        null=True, blank=True,
+        on_delete=models.CASCADE
+    )
+    study_assay = models.ForeignKey('assays.AssayStudyAssay', null=True, blank=True, on_delete=models.CASCADE)
     def __str__(self):
         return '{0}'.format(self.name)
-
     def get_absolute_url(self):
         return '/assays/assayplatereadermap/{}/'.format(self.id)
-
-    # Same as get_absolute_url for now
     def get_post_submission_url(self):
         return '/assays/assaystudy/{}/assayplatereadermap/'.format(self.study_id)
-
     def get_delete_url(self):
         return '{}delete/'.format(self.get_absolute_url())
 
+class AssayPlateReaderMapDataFile(models.Model):
+    class Meta(object):
+        verbose_name = 'Assay Plate Reader Imported Files'
+        unique_together = [
+            ('study', 'plate_reader_file_location'),
+        ]
+    study = models.ForeignKey(AssayStudy, blank=True, on_delete=models.CASCADE)
+    description = models.CharField(max_length=2000, blank=True, default='')
+    plate_reader_file_location = models.URLField(null=True, blank=True)
 
-class AssayPlateReaderMapItem(FlaggableModel):
+class AssayPlateReaderMapDataFileBlock(models.Model):
+    class Meta(object):
+        verbose_name = 'Assay Plate Reader Data Blocks'
+        unique_together = [
+            ('study', 'data_block', 'assayplatereadermapdatafile'),
+        ]
+    study = models.ForeignKey(AssayStudy, blank=True, on_delete=models.CASCADE)
+    assayplatereadermap = models.ForeignKey(AssayPlateReaderMap, on_delete=models.CASCADE)
+    assayplatereadermapdatafile = models.ForeignKey('AssayPlateReaderMapDataFile', null=True, blank=True, on_delete=models.CASCADE)
+    name = models.CharField(verbose_name='Block Name', max_length=255, blank=True)
+    description = models.CharField(max_length=2000, blank=True, default='')
+    data_block = models.IntegerField(default=1, null=True)
+    #this will be a link later
+    processing_set = models.IntegerField(null=True)
+
+class AssayPlateReaderMapItem(models.Model):
     class Meta(object):
         verbose_name = 'Assay Plate Reader Map Item'
         unique_together = [
-            ('assayplatereadermap', 'row_index', 'column_index'),
-            ('assayplatereadermap', 'plate_index')
+            ('study', 'assayplatereadermap', 'plate_index'),
         ]
-
-    # Technically the study here is redundant (contained in plate map) but keep it because it make's life easier
     study = models.ForeignKey(AssayStudy, blank=True, on_delete=models.CASCADE)
-    # Luke's "trick" This is in fact required, just listed as not being so due to quirk in cleaning
     assayplatereadermap = models.ForeignKey(AssayPlateReaderMap, on_delete=models.CASCADE)
-
     name = models.CharField(max_length=100, blank=True, default="none")
-    # Now binds directly to items, standards and blanks will not have a matrix_item, so they can be null or blank
-    matrix_item = models.ForeignKey(AssayMatrixItem, null=True, blank=True, on_delete=models.CASCADE)
-    # Keep these for easy reference to a location in a plate. A labeled list, in order, will be in the plate model
     row_index = models.IntegerField(default=999, blank=True)
     column_index = models.IntegerField(default=999, blank=True)
     plate_index = models.IntegerField(default=999, blank=True)
-
-    location = models.ForeignKey('AssaySampleLocation', null=True, blank=True, default=0,
-        on_delete=models.CASCADE)
-
-    replicate = models.IntegerField(
-        default=1, blank=True,
-        choices=(
-            (1, 1),
-            (2, 2),
-            (3, 3),
-            (4, 4),
-            (5, 5),
-            (6, 6),
-            (7, 7),
-            (8, 8),
-            (9, 9)
-        )
-    )
-
+    matrix_item = models.ForeignKey(AssayMatrixItem, null=True, blank=True, on_delete=models.CASCADE)
     well_use = models.CharField(
         verbose_name='Well Use',
         max_length=8,
         default='empty', blank=True,
-        choices=(
-            ('sample', 'Sample'),
-            ('standard', 'Standard'),
-            ('blank', 'Blank'),
-            ('empty', 'Empty/Unused')
-        )
+        choices=( ('sample', 'Sample'), ('standard', 'Standard'), ('blank', 'Blank'), ('empty', 'Empty/Unused') )
     )
-
-    time_unit = models.CharField(
-        verbose_name='Unit',
-        max_length=8,
-        default='day', blank=True,
-        choices=(
-            ('day', 'Day'),
-            ('hour', 'Hour'),
-            ('minute', 'Minute')
-        )
-    )
-
-    time = models.FloatField(default=0, blank=True)
-
-    #read from the raw data file with the user input unit for sample
-    #for standard, should be the standard concentration and associated unit
-    standard_value = models.FloatField(null=True, blank=True )
-
-    standard_value_unit = models.ForeignKey(
-        'assays.PhysicalUnits',
-        verbose_name='Reporting Unit',
-        null=True, blank=True,
-        on_delete=models.CASCADE
-    )
-
-    #def __str__(self):
-    #    return str(self.name)
-
+    location = models.ForeignKey('AssaySampleLocation', null=True, blank=True, default=0, on_delete=models.CASCADE)
+    #for standard, should be the standard concentration and associated unit put INTO the plate
+    standard_value = models.FloatField(null=True, blank=True)
     def __str__(self):
         return '{0}'.format(self.name)
-
     def get_absolute_url(self):
         return '/assays/assayplatereadermapitem/{}/'.format(self.id)
-
     def get_post_submission_url(self):
         return '/assays/assayplatereadermapitem/'
+    def get_delete_url(self):
+        return '{}delete/'.format(self.get_absolute_url())
 
+class AssayPlateReaderMapItemValue(models.Model):
+    class Meta(object):
+        verbose_name = 'Assay Plate Reader Map Instance (one set for each data block)'
+        unique_together = [
+            ('study', 'assayplatereadermap', 'assayplatereadermapdatafile', 'assayplatereadermapdatafileblock', 'plate_index','time'),
+        ]
+    study = models.ForeignKey(AssayStudy, blank=True, on_delete=models.CASCADE)
+    assayplatereadermap = models.ForeignKey(AssayPlateReaderMap, on_delete=models.CASCADE)
+    assayplatereadermapdatafile = models.ForeignKey('AssayPlateReaderMapDataFile', null=True, blank=True, on_delete=models.CASCADE)
+    assayplatereadermapdatafileblock = models.ForeignKey('AssayPlateReaderMapDataFileBlock', null=True, blank=True, on_delete=models.CASCADE)
+    name = models.CharField(max_length=100, blank=True, default="none")
+    row_index = models.IntegerField(default=999, blank=True)
+    column_index = models.IntegerField(default=999, blank=True)
+    plate_index = models.IntegerField(default=999, blank=True)
+    matrix_item = models.ForeignKey(AssayMatrixItem, null=True, blank=True, on_delete=models.CASCADE)
+    well_use = models.CharField(
+        verbose_name='Well Use',
+        max_length=8,
+        default='empty', blank=True,
+        choices=( ('sample', 'Sample'), ('standard', 'Standard'), ('blank', 'Blank'), ('empty', 'Empty/Unused') )
+    )
+    #raw value read from the plate for all wells in this plate
+    value = models.FloatField(null=True, blank=True)
+    time = models.FloatField(default=0, blank=True)
+    caution_flag = models.CharField(max_length=255, default='', null=True, blank=True)
+    excluded = models.BooleanField(default=False, null=True, blank=True)
+    #replaced = models.BooleanField(default=False)
+    notes = models.CharField(max_length=255, default='', null=True, blank=True)
+    replicate = models.CharField(max_length=255, default='', null=True, blank=True)
+    def __str__(self):
+        return '{0}'.format(self.name)
+    def get_absolute_url(self):
+        return '/assays/assayplatereadermapitem/{}/'.format(self.id)
+    def get_post_submission_url(self):
+        return '/assays/assayplatereadermapitem/'
     def get_delete_url(self):
         return '{}delete/'.format(self.get_absolute_url())
 

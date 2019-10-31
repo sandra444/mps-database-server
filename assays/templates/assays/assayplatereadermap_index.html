@@ -35,21 +35,61 @@
             </h2>
         </div>
 
+
         {% if assayplatereadermaps %}
+        {#    {{distinct_base_plate_map}}#}
+        {#    {{ reduce_distinct_base_name }}#}
+        {% comment %}
+        Keep for now as example of grouping table may need later
         <div>
-        <table id="assayplatereadermaps" class="display table table-striped table-hover" cellspacing="0" width="100%">
+        <h3>List of Base Plate Map Name and Count of Associated Specific Plate Maps</h3>
+            <table id="reduce_distinct_base_name" class="display table table-striped table-hover" cellspacing="0" width="100%">
+                <thead>
+                    <tr>
+                        <th>Base Assay Plate Reader Map Name</th>
+                        <th>Size</th>
+                        <th># Sample Times</th>
+                        <th>Standard Target/Method/Unit</th>
+                        <th>Number of Associated Specific Plate Maps</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for map in reduce_distinct_base_name %}
+                    <tr>
+                        <td>{{ map.0 }}</td>
+                        <td>{{ map.1 }}</td>
+                        <td>{{ map.2 }}</td>
+                        <td>{{ map.3 }}</td>
+                        <td>{{ map.4 }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endcomment %}
+
+        <div>
+            <h3>
+                <div><p id="plate_map_index_tooltip"></p>
+                    <label for="plate_map_index_tooltip">Plate Map List &nbsp;</label>
+                </div>
+            </h3>
+            <table id="assayplatereadermaps" class="display table table-striped table-hover" cellspacing="0" width="100%">
             <thead>
                 <tr>
                     <th>View or Edit</th>
-                    <th>Assay Plate Reader Map Name</th>
-                    <th>Description</th>
+                    <th>Name</th>
                     <th>Size</th>
+                    <th>Sample Time Unit</th>
+                    <th>Plate Reader Unit</th>
+                    <th>Standard </th>
+                    <th>Description</th>
                 </tr>
             </thead>
             <tbody>
             {% for plate in assayplatereadermaps %}
                 <tr>
-                    <td style='white-space: nowrap'>
+                    <td class="no-wrap">
                             <a class="btn btn-primary" href="{% url 'assayplatereadermap-view' plate.id  %}">View </a>
                             {% if not object.signed_off_by %}
                                 <a class="btn btn-primary" href="{% url 'assayplatereadermap-update' plate.id  %}">Edit </a>
@@ -57,13 +97,19 @@
                     </td>
                     <!--<td>ID: {{ plate.id }} - NAME: {{ plate.name }}</td>-->
                     <td>{{ plate.name }}</td>
-                    <td>{{ plate.description }}</td>
                     <td>{{ plate.device }}</td>
-{% comment %}                    <td>
+                    <td>{{ plate.time_unit }}</td>
+                    <td>{{ plate.plate_reader_unit }}</td>
+                    <td>{{ plate.study_assay }}</td>
+                    <td>{{ plate.description }}</td>
+
+                    {% comment %}
+                    <td>
                         {% for apmitem in plate.assayplatereadermapitem_set.all|dictsort:"name" %}
                             {{ apmitem.name }}-{{ apmitem.matrix_item }};
                         {% endfor %}
-                    </td>{% endcomment %}
+                    </td>
+                    {% endcomment %}
                 </tr>
             {% endfor %}
             </tbody>

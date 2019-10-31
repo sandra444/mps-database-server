@@ -35,294 +35,550 @@
 
 {% block content %}
     <form class="form-horizontal" method="post" enctype="multipart/form-data">
-        {# Title of page #}
         <div class="padded-bottom">
-        <div class="well">
-            <h1 class="text-center">
-                <em><b>Assay Plate Reader Map
-                {% if update %}
-                    Update
-                {% else %}
-                    {% if review %}
-                        Review
+            {# Title of page #}
+            <div class="well">
+                <h1 class="text-center">
+                    <em><b>Assay Plate Reader Map
+                    {% if update %}
+                        Update (plate map id {{ object.id }})
                     {% else %}
-                        Add
+                        {% if review %}
+                            Review
+                        {% else %}
+                            Add
+                        {% endif %}
                     {% endif %}
-                {% endif %}
-                </b></em><br><br>
-            {% if update %}
-                {{ object.device }} Well Plate Map: <em>{{ object }}</em>
-            {% else %}
-                {% if review %}
+                    </b></em><br><br>
+                {% if update %}
                     {{ object.device }} Well Plate Map: <em>{{ object }}</em>
                 {% else %}
+                    {% if review %}
+                        {{ object.device }} Well Plate Map: <em>{{ object }}</em>
+                    {% else %}
+                        New Well Plate Map
+                    {% endif %}
                 {% endif %}
-            {% endif %}
-            <br>
-            {% csrf_token %}
-            </h1>
-            {# Need the page_called element for use in the js file - keep  #}
-            <div id="check_load" class="hidden">{{ page_called }}</div>
-            </h1>
-        </div>
-
-        {# parent plate map edits #}
-        <div>
-            <h4>
-            <br>
-            {% if add %}
-                <div class="row">
-                    <div class="col-sm-12">
-                        {% include 'generic_field.html' with field=form.device label="Plate Size"  %}
-                    </div>
-                </div>
-            {% else %}
+                <br>
+                {% csrf_token %}
+                </h1>
                 {# Need the page_called element for use in the js file - keep  #}
-                <div id="existing_device_size" class="hidden">{{ object.device }}</div>
-{#                <div >#}
-{#                    <!--TODO sck remove this later...it should only be on the add page-->#}
-{#                    <br><b>form device</b> {% include 'generic_field.html' with field=form.device label="Plate Size"  %}#}
-{#                    <br><b>plate size</b> <h4 id="object_plate_size">{{ object.device }}</h4>#}
-{#                    <br><b>plate id</b> <h4 id="object_plate_id">{{ object.id }}</h4>#}
-{#                    <br><b>study</b> <h4 id="object_study">{{ object.study }}</h4>#}
-{#                    <br><b>study id </b> <h4 id="object_study">{{ object.study.id }}</h4>#}
-{#                    <br><b>form name</b> {% include 'generic_field.html' with field=form.name label="Map Name"  %}#}
-                    {#  This is used to know if building plate from scratch or from existing plate (add, review, update)#}
-{#                </div>#}
-
-                <div class='hidden'>
-                    {# This takes forever if queryset is not passed (dropdowns often need prefetches) #}
-                    {# Study should be passed in backend #}
-        {#            {% include 'generic_field.html' with field=form.study label="Study" %}#}
-                    {% include 'generic_field.html' with field=form.device label="Device" %}
-                </div>
-
-            {% endif %}
+                <div id="check_load" class="hidden">{{ page_called }}</div>
+                </h1>
+            </div>
 
             <div class="row">
-                <div class="col-sm-12">
-                    {% include 'generic_field.html' with field=form.name label="Map Name"  %}
+                {# need these in javascript #}
+                <div class="hidden" id="ns_matrix_item">
+                    {{ assay_map_additional_info.ns_matrix_item }}
+                    {{ assay_map_additional_info.ns_location }}
+                </div>
+                {# need this in javascript #}
+                <div class="hidden" id="target_method_unit">
+                    {{ assay_map_additional_info.ns_method_target_unit }}
                 </div>
             </div>
-            <div class="row">
-                <div class="col-sm-12">
-                    {% include 'generic_field.html' with field=form.description label="Description" %}
-                </div>
-            </div>
-            </h4>
 
-        </div>
-
-        {# {{  formset }} is the wells in the map   #}
-        <div>
-
-            {# select what to put in the wells - from formextras, not the formset   #}
+            {# global plate map edits #}
             <div>
-                <legend>Make Selections and Drag onto Plate</legend>
+                <h4>
+                <br>
+                {% if add %}
+                    <div class="row">
+                        <div class="col-sm-8">
+                            {% include 'generic_field.html' with field=form.device label="Plate Size"  %}
+                        </div>
+                    </div>
+                {% else %}
+                    {# Need the page_called element for use in the js file - keep  #}
+                    <div id="existing_device_size" class="hidden">{{ object.device }}</div>
+
+                    {# {% include 'generic_field.html' with field=form.device label="Device" %}#}
+                    {# <br><b>form device</b> {% include 'generic_field.html' with field=form.device label="Plate Size"  %}#}
+                    {# <br><b>plate size</b> <h4 id="object_plate_size">{{ object.device }}</h4>#}
+                    {# <br><b>plate id</b> <h4 id="object_plate_id">{{ object.id }}</h4>#}
+                    {# <br><b>study</b> <h4 id="object_study">{{ object.study }}</h4>#}
+                    {# <br><b>study id </b> <h4 id="object_study">{{ object.study.id }}</h4>#}
+                    {# <br><b>form name</b> {% include 'generic_field.html' with field=form.name label="Map Name"  %}#}
+
+                    {# This takes FOREVER if queryset is not passed (dropdowns often need prefetches) #}
+                    {# Study should be passed in backend - do not to the following!#}
+                    {# {% include 'generic_field.html' with field=form.study label="Study" %}#}
+
+                {% endif %}
 
                 <div class="row">
-                    <ul class="list-group">
-                        <li class="list-group-item">
-                            <ul class="list-unstyled">
-                                <li>
-                                    <ul class="filled-circle">
-                                        <li>To clear matrix items, hide the matrix items in the plate, set Well Use to 'Empty/Unused', drag across wells to clear. </li>
-                                        <li>Well use will automatically be changed to 'Sample' when matrix items are assigned. </li>
-                                    </ul>
-                                </li>
-                            </ul>
-                        </li>
-                     </ul>
+                    <div class="col-sm-8">
+                        {% include 'generic_field.html' with field=form.name label="Name"  %}
+                    </div>
+                    <div class="col-sm-4">
+                    </div>
                 </div>
-
-                {# rows of show hide buttons   #}
-                <div class="row ">
-
-                    <div class="col-md-2 col-lg-2">
-                        <div class="fancy-checkbox table-filter padded-bottom" align="left">
-                            <input class="visibility-checkbox" type="checkbox" name="show_well_use" id="show_well_use" value=".well_use_start" checked/>
-                            <div class="btn-group">
-                                <label for="show_well_use" class="btn plate-well-use" >
-                                    <span class="glyphicon glyphicon-ok"></span>
-                                    <span> </span>
-                                </label>
-                                <label for="show_well_use" class="btn btn-default active">
-                                    Well Use
-                                </label>
-                            </div>
-                        </div>
+                <div class="row">
+                    <div class="col-sm-8">
+                        {% include 'generic_field.html' with field=form.description label="Description" %}
                     </div>
+                     <div class="col-sm-4">
 
-                    <div class="col-md-2 col-lg-2">
-                        <div class="fancy-checkbox table-filter padded-bottom" align="left">
-                            <input class="visibility-checkbox" type="checkbox" name="show_matrix_item" id="show_matrix_item" value=".matrix_item_start" checked/>
-                            <div class="btn-group">
-                                <label for="show_matrix_item" class="btn plate-matrix-item">
-                                    <span class="glyphicon glyphicon-ok"></span>
-                                    <span> </span>
-                                </label>
-                                <label for="show_matrix_item" class="btn btn-default active">
-                                    Matrix Item
-                                </label>
-                            </div>
-                        </div>
                     </div>
-
-                    <div class="col-md-2 col-lg-2">
-                        <div class="fancy-checkbox table-filter padded-bottom" align="left">
-                            <input class="visibility-checkbox" type="checkbox" name="show_location" id="show_location" value=".location_start" checked/>
-                            <div class="btn-group">
-                                <label for="show_location" class="btn plate-location" d>
-                                    <span class="glyphicon glyphicon-ok"></span>
-                                    <span> </span>
-                                </label>
-                                <label for="show_location" class="btn btn-default active">
-                                    Location
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-md-2 col-lg-2">
-                        <div class="fancy-checkbox table-filter padded-bottom" align="left">
-                            <input class="visibility-checkbox" type="checkbox" name="show_time" id="show_time" value=".time_start" checked/>
-                            <div class="btn-group">
-                                <label for="show_time" class="btn plate-time" >
-                                    <span class="glyphicon glyphicon-ok"></span>
-                                    <span> </span>
-                                </label>
-                                <label for="show_time" class="btn btn-default active">
-                                    Time
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-md-2 col-lg-2">
-                        <div class="fancy-checkbox table-filter padded-bottom" align="left">
-                            <input class="visibility-checkbox" type="checkbox" name="show_replicate" id="show_replicate" value=".replicate_start" checked/>
-                            <div class="btn-group">
-                                <label for="show_replicate" class="btn plate-replicate">
-                                    <span class="glyphicon glyphicon-ok"></span>
-                                    <span> </span>
-                                </label>
-                                <label for="show_replicate" class="btn btn-default active">
-                                    Replicate
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-md-2 col-lg-2">
-                        <div class="fancy-checkbox table-filter padded-bottom" align="left">
-                            <input class="visibility-checkbox" type="checkbox" name="show_label" id="show_label" value=".label_start" checked/>
-                            <div class="btn-group">
-                                <label for="show_label" class="btn plate-label">
-                                    <span class="glyphicon glyphicon-ok"></span>
-                                    <span> </span>
-                                </label>
-                                <label for="show_label" class="btn btn-default active">
-                                    Label
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-
                 </div>
+                <div class="row">
+                    <div class="col-sm-8">
+                        {% include 'generic_field.html' with field=form.time_unit label="Time Unit" %}
+                    </div>
+                    <div class="col-sm-4">
+                        <div><p id="sample_time_unit_tooltip"></p>
+                            <label for="sample_time_unit_tooltip">&nbsp;</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-8">
+                        {% include 'generic_field.html' with field=form.plate_reader_unit label="Plate Reader Unit" %}
+                    </div>
+                    <div class="col-sm-4">
+                        <div><p id="plate_reader_unit_tooltip"></p>
+                            <label for="plate_reader_unit_tooltip">&nbsp;</label>
+                        </div>
+                    </div>
+                </div>
+                {% comment %}
+                <div class="row">
+                    <div class="col-sm-8">
+                        {% include 'generic_field.html' with field=form.plate_use label="Plate Use" %}
+                    </div>
+                    <div class="col-sm-4">
+                        Use 'one' indicates one and only one sample time on plate, 'mix' indicates multiple sample times.
+                    </div>
+                </div>
+                {% endcomment %}
+                </h4>
+            </div>
 
-                {# rows of select boxes used to edit  #}
+            {# Optional things to show in the plate map #}
+            <div>
+                <legend>Show/Hide Additional Information in Plate</legend>
+                    {# rows of show hide buttons   #}
+                    <div class="row ">
+                        <div class="col-md-2">
+                            <div class="fancy-checkbox table-filter padded-bottom" align="left">
+                                <input class="visibility-checkbox" type="checkbox" name="show_compound" id="show_compound" value=".compound_start" >
+                                <div class="btn-group">
+                                    <label for="show_compound" class="btn plate-compound" >
+                                        <span class="glyphicon glyphicon-ok check-mark-color"></span>
+                                        <span> </span>
+                                    </label>
+                                    <label for="show_compound" class="btn btn-default active">
+                                        Compound
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-1 ">
+                            <div><p></p>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="fancy-checkbox table-filter padded-bottom" align="left">
+                                <input class="visibility-checkbox" type="checkbox" name="show_cell" id="show_cell" value=".cell_start" >
+                                <div class="btn-group">
+                                    <label for="show_cell" class="btn plate-cell" >
+                                        <span class="glyphicon glyphicon-ok check-mark-color"></span>
+                                        <span> </span>
+                                    </label>
+                                    <label for="show_cell" class="btn btn-default active">
+                                        Cells
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-1 ">
+                            <div><p></p>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="fancy-checkbox table-filter padded-bottom" align="left">
+                                <input class="visibility-checkbox" type="checkbox" name="show_setting" id="show_setting" value=".setting_start" >
+                                <div class="btn-group">
+                                    <label for="show_setting" class="btn plate-setting" >
+                                        <span class="glyphicon glyphicon-ok check-mark-color"></span>
+                                        <span> </span>
+                                    </label>
+                                    <label for="show_setting" class="btn btn-default active">
+                                        Settings
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-1 ">
+                            <div><p></p>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="fancy-checkbox table-filter padded-bottom" align="left">
+                                <input class="visibility-checkbox" type="checkbox" name="show_label" id="show_label" value=".label_start" >
+                                <div class="btn-group">
+                                    <label for="show_label" class="btn plate-label">
+                                        <span class="glyphicon glyphicon-ok check-mark-color"></span>
+                                        <span> </span>
+                                    </label>
+                                    <label for="show_label" class="btn btn-default active">
+                                        Label
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-1 ">
+                            <div><p></p>
+                            </div>
+                        </div>
+                    </div>
+            </div>
+
+
+            {# what to work on   #}
+            <div>
+                <legend>Select Well Use</legend>
+
+                    <div class="row ">
+                        <div class="col-md-2">
+                            <div class="fancy-checkbox table-filter padded-bottom" align="left">
+                                <input class="visibility-checkbox" type="checkbox" name="show_well_use" id="show_well_use" value=".well_use_start" >
+                                <div class="btn-group">
+                                    <label for="show_well_use" class="btn plate-well-use" >
+                                        <span class="glyphicon glyphicon-ok "></span>
+                                        <span> </span>
+                                    </label>
+                                    <label for="show_well_use" class="btn btn-default active">
+                                        Well Use
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        {% if review %}
+                        {% else %}
+                        <div class="col-md-2">
+                            {{ assay_map_additional_info.se_well_use }}
+                        </div>
+                        <div class="col-md-6">
+                            <div><p id="well_use_tooltip"></p>
+                                <label for="well_use_tooltip">&nbsp;</label>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+            </div>
+
+            {# Working on the Samples #}
+            <div>
+                <legend>Sample Information</legend>
+                    {# rows of show hide buttons   #}
+                    <div class="row ">
+                        <div class="col-md-2">
+                            <div class="fancy-checkbox table-filter padded-bottom" align="left">
+                                <input class="visibility-checkbox" type="checkbox" name="show_matrix_item" id="show_matrix_item" value=".matrix_item_start">
+                                <div class="btn-group">
+                                    <label for="show_matrix_item" class="btn plate-matrix-item">
+                                        <span class="glyphicon glyphicon-ok"></span>
+                                        <span> </span>
+                                    </label>
+                                    <label for="show_matrix_item" class="btn btn-default active">
+                                        Matrix Item
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        {% if review %}
+                        {% else %}
+                            <div class="col-md-1 ">
+                                <div><p id="sample_matrix_item_tooltip"></p>
+                                    <label for="sample_matrix_item_tooltip">&nbsp;</label>
+                                </div>
+                            </div>
+                        {%  endif %}
+
+                        <div class="col-md-2">
+                            <div class="fancy-checkbox table-filter padded-bottom" align="left">
+                                <input class="visibility-checkbox" type="checkbox" name="show_location" id="show_location" value=".location_start">
+                                <div class="btn-group">
+                                    <label for="show_location" class="btn plate-location" d>
+                                        <span class="glyphicon glyphicon-ok "></span>
+                                        <span> </span>
+                                    </label>
+                                    <label for="show_location" class="btn btn-default active">
+                                        Location
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        {% if review %}
+                        {% else %}
+                            <div class="col-md-1 ">
+                                <div><p id="sample_location_tooltip"></p>
+                                    <label for="sample_location_tooltip">&nbsp;</label>
+                                </div>
+                            </div>
+                        {%  endif %}
+
+                        <div class="col-md-2">
+                            <div class="fancy-checkbox table-filter padded-bottom" align="left">
+                                <input class="visibility-checkbox" type="checkbox" name="show_time" id="show_time" value=".time_start"/>
+                                <div class="btn-group">
+                                    <label for="show_time" class="btn plate-time" >
+                                        <span class="glyphicon glyphicon-ok "></span>
+                                        <span> </span>
+                                    </label>
+                                    <label for="show_time" class="btn btn-default active">
+                                        Time
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        {% if review %}
+                        {% else %}
+                            <div class="col-md-1 ">
+                                <div><p id="sample_time_tooltip"></p>
+                                    <label for="sample_time_tooltip">&nbsp;</label>
+                                </div>
+                            </div>
+                        {%  endif %}
+                    </div>
+
+                    {# rows of select boxes used to edit  #}
+                    {% if review %}
+                    {% else %}
+                        <div class="row">
+                            <div class="sample-section hidden ">
+                                <div class="col-md-2">
+                                    <label >
+                                        Matrix Item
+                                    </label>
+                                   {{ assay_map_additional_info.se_matrix_item }}
+                                </div>
+                                <div class="col-md-1">
+                                    <div class="big-checkbox">
+{#                                        <label class="sample-section hidden"><input type="radio" name="sample_change" value="matrix_item"> Apply </label>#}
+                                        <input type="checkbox" name="change_matrix_item" value="matrix_item" checked />
+                                    </div>
+                                </div>
+                                <div class="col-md-2 ">
+                                    <label >
+                                        Sample Location
+                                    </label>
+                                    {{ assay_map_additional_info.se_location }}
+                                </div>
+                                <div class="col-md-1">
+                                    <div class="big-checkbox">
+{#                                        <label class="sample-section hidden"><input type="radio" name="sample_change" value="location"> Apply </label>#}
+                                        <input type="checkbox" name="change_location" value="matrix_location" checked />
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <label >
+                                        Sample Time
+                                    </label>
+                                    {{ assay_map_additional_info.se_time }}
+                                </div>
+                                <div class="col-md-1">
+                                    <div class="big-checkbox">
+{#                                        <label class="sample-section hidden"><input type="radio" name="sample_change" value="time"> Apply </label>#}
+                                        <input type="checkbox" name="change_time" value="matrix_time" checked />
+                                    </div>
+                                </div>
+                                <div class="col-md-3 "><br>
+                                    <div><p id="sample_tooltip"></p>
+                                        <label for="sample_tooltip">&nbsp;</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+            </div>
+
+            {# Working on the Standards #}
+            <div>
+                <legend><br>Standard Information</legend>
+                    {# rows of show hide buttons   #}
+                    <div class="row ">
+                        <div class="col-md-2">
+                            <div class="fancy-checkbox table-filter padded-bottom" align="left">
+                                <input class="visibility-checkbox" type="checkbox" name="show_standard_value" id="show_standard_value" value=".standard_value_start">
+                                <div class="btn-group">
+                                    <label for="show_standard_value" class="btn plate-standard-value">
+                                        <span class="glyphicon glyphicon-ok"></span>
+                                        <span> </span>
+                                    </label>
+                                    <label for="show_standard_value" class="btn btn-default active">
+                                        Standard
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row ">
+                        <div class="col-md-9">
+                            <label>
+                            Standard Target, Method, and Unit for Plate
+                            </label>
+                            <div id="standard_target_selected">
+                                {{ assay_map_additional_info.se_method_target_unit }}
+                            </div>
+                        </div>
+                        {# rows of select boxes used to edit  #}
+                        {% if review %}
+                        {% else %}
+                        <div class="standard-section hidden">
+                             <div class="col-md-1"><br>
+                                <div><p id="standard_tooltip"></p>
+                                    <label for="standard_tooltip">&nbsp;</label>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <label>
+                                Standard Value
+                                </label>
+                                {{ assay_map_additional_info.se_standard_value }}
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+            </div>
+
+            {# Options for dragging #}
+            <div class="option-section hidden">
                 {% if review %}
                 {% else %}
-                    <div class="row ">
-
-                        <div class="col-md-2 col-lg-2">
-                            <label >
-                                Well Use
-                            </label>
-                            {{ formextras.p_well_use }}
+                    <div class="row">
+                        <legend><br>Options for Dragging in Plate Map</legend>
+                        <div class="col-md-4">
+                            <div class=row">
+                                <label>Drag Action </label>
+                            </div>
+                            <div class=row">
+                                <input type="radio" name="change_method" value="copy" checked> Copy When Dragging
+                            </div>
+                            <div class=row">
+                                <input type="radio" name="change_method" value="increment"> Increment (Time or Standard Value only)
+                            </div>
                         </div>
-
-                        <div class="col-md-2 col-lg-2">
-                            <label >
-                                Matrix Item
-                            </label>
-                           {{ formextras.p_matrix_item }}
+                        <div class="increment-section hidden">
+                            <div class="col-md-2">
+                                <div class=row">
+                                    <label>Increment Operation</label>
+                                </div>
+                                <div class=row">
+                                    {{ assay_map_additional_info.se_increment_operation }}
+                                </div>
+                                 {# need this in javascript #}
+                                <div class="hidden" id="ns_increment_operation">
+                                    {{ assay_map_additional_info.ns_increment_operation }}
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class=row">
+                                    <label>Increment By</label>
+                                </div>
+                                <div class=row">
+                                    {{ assay_map_additional_info.se_increment_value }}
+                                </div>
+                                 {# need this in javascript #}
+                                <div class="hidden" id="se_increment_value">
+                                    {{ assay_map_additional_info.se_increment_value }}
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class=row">
+                                    <label>Increment Direction</label>
+                                </div>
+                                <div class=row">
+                                    <input type="radio" name="increment_direction" value="left" checked> Left to Right and Down
+                                </div>
+                                <div class=row">
+                                    <input type="radio" name="increment_direction" value="right"> Right to Left and Up
+                                </div>
+                            </div>
                         </div>
-
-                        <div class="col-md-2 col-lg-2">
-                            <label >
-                                Sample Location
-                            </label>
-                            {{ formextras.p_location }}
+                        <div class="col-md-1">
+                            <div class=row">
+                            </div>
                         </div>
-
-                        <div class="col-md-2 col-lg-2">
-                            <label >
-                                Sample Time
-                            </label>
-                            {{ formextras.p_time }}
-                        </div>
-
-                        <div class="col-md-2 col-lg-2">
-                            <label >
-                                Replicate #
-                            </label>
-                            {{ formextras.p_replicate }}
-                        </div>
-
-    {#                    <div class="col-md-3 col-lg-3">#}
-    {#                        <label >#}
-    {#                            Well Label#}
-    {#                        </label>#}
-    {#                        #}
-    {#                    </div>#}
-
-                        <div class="col-md-2 col-lg-2">
-                            <label >
-                                Time Unit (for all)
-                            </label>
-                            {{ formextras.p_time_unit }}
-                        </div>
-
                     </div>
                 {% endif %}
             </div>
 
-            <hr>
-
-            {#  table of well plate              #}
-            <div>
-{#                <table class="table table-bordered table-inverse" summary="Table selection with plugin" id="plate_table">#}
-                <table class="table table-bordered table-inverse" id="plate_table">
-
-                    {#  table made in javascript                  #}
-                </table>
+            <div class="row">
+                <br>
             </div>
 
-            <hr>
-            {# reference table of chip setup #}
+            {# {{  formset }} is the wells in the map   #}
             <div>
+                <legend>Plate Map</legend>
+                {#  table of well plate              #}
+                <div class="col-md-12">
+    {#                <table class="table table-bordered table-inverse" summary="Table selection with plugin" id="plate_table">#}
+                    <table class="table table-bordered table-inverse" id="plate_table">
+
+                        {#  table made in javascript                  #}
+                    </table>
+                </div>
+            </div>
+
+            {# reference table of chip setup FEEDS the setup info in the PLATE MAP KEEP#}
+            <div class="hidden row">
+            <hr>
                 <legend>For Reference - Chips in the Study</legend>
-                {% if numberstudyitems > 0 %}
+                {% if study_items|length > 0 %}
                     <div class="padded-bottom">
                         <table id="matrix_items_table" class="table table-striped table-bordered dataTable " >
                             <thead>
                                 <tr role="row">
                                     <th>Name</th>
-                                    <!--<th>throw</th>-->
                                     <th>Compound</th>
+                                    <th>Compound Short</th>
                                     <th>Cell</th>
+                                    <th>Cell Short</th>
                                     <th>Setting</th>
+                                    <th>Setting Short</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {% for item in studyitems %}
+                                {% for item in study_items %}
                                     <tr id={{ item.id }} name={{ item.id }}>
                                         <td>{{ item.name }}</td>
-                                        <!--<td>{% for x in item.assaysetupcompound_set.all %}{{ x.compound_instance.compound }}{% endfor %}</td>-->
-                                        <td>{{ item.stringify_compounds|linebreaksbr }}</td>
-                                        <td>{{ item.stringify_cells|linebreaksbr }}</td>
-                                        <td>{{ item.stringify_settings|linebreaksbr }}</td>
+                                        <td id="{{ item.id }}-compound">{{ item.stringify_compounds|linebreaksbr }}</td>
+                                        <td id="{{ item.id }}-compound-short">
+                                            {%  if item.assaysetupcompound_set.all|length > 0 %}
+                                                {% for x in item.assaysetupcompound_set.all %}
+                                                    {{ x.compound_instance.compound }} ({{ x.concentration }} {{ x.concentration_unit }})<br>
+                                                {% endfor %}
+                                            {% else %}
+                                                -none-
+                                            {% endif %}
+                                        </td>
+                                        <td id="{{ item.id }}-cell">{{ item.stringify_cells|linebreaksbr }}</td>
+                                        <td id="{{ item.id }}-cell-short">
+                                            {%  if item.assaysetupcell_set.all|length > 0 %}
+                                                {% for x in item.assaysetupcell_set.all %}
+                                                    {{ x.cell_sample.cell_type }} ({{ x.density }} {{ x.density_unit }})<br>
+                                                {% endfor %}
+                                            {% else %}
+                                                -none-
+                                            {% endif %}
+                                        </td>
+                                        <td id="{{ item.id }}-setting">{{ item.stringify_settings|linebreaksbr }}</td>
+                                        <td id="{{ item.id }}-setting-short">
+                                            {%  if item.assaysetupsetting_set.all|length > 0 %}
+                                                {% for x in item.assaysetupsetting_set.all %}
+                                                    {{ x.setting }} ({{ x.value }} {{ x.unit }})<br>
+                                                {% endfor %}
+                                            {% else %}
+                                                -none-
+                                            {% endif %}
+                                        </td>
                                     </tr>
                                 {% endfor %}
                             </tbody>
@@ -348,15 +604,27 @@
 
             {# need this (mangement_form) or form will not save   #}
             {{ formset.management_form }}
-            <div class="hidden">
+            <div >
                 <div class="no-selectize">
-                    {{ formextras.b_matrix_item }}
-                    {{ formextras.b_location }}
+                    {# this is the main formset (plate and plate itmes)  #}
                     <h3>FormSet </h3>
-                    <div id="form_set">
+                    <div id="formset">
                         {% for form in formset %}
                             {# No ID for now #}
     {#                        <div id="{{ form.prefix }}" class="inline no-selectize">#}
+                            <div class="inline no-selectize">
+                            {{ form }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {{ value_formset.management_form }}
+            <div >
+                <div class="no-selectize">
+                    <h3>value_formset </h3>
+                    <div id="value_formset">
+                        {% for form in value_formset %}
                             <div class="inline no-selectize">
                                 {{ form }}
                             </div>
@@ -364,7 +632,21 @@
                     </div>
                 </div>
             </div>
+{#            {{ other_formset.management_form }}#}
+{#            <div >#}
+{#                <div class="no-selectize">#}
+{#                    <h3>Other_FormSet </h3>#}
+{#                    <div id="value_formset">#}
+{#                        {% for form in other_formset %}#}
+{#                            <div class="inline no-selectize">#}
+{#                                {{ form }}#}
+{#                            </div>#}
+{#                        {% endfor %}#}
+{#                    </div>#}
+{#                </div>#}
+{#            </div>#}
 
+            {# these are the ones that show to user   #}
             <div>
                 {% if formset.errors %}
                     {% for field, error in formset.errors.items %}
@@ -378,7 +660,6 @@
                 <br>
             </div>
 
-
             <div class="hidden">
                 <h2>For Development Testing</h2>
                 {#Use for error checking#}
@@ -387,9 +668,10 @@
                 {{ form.errors }}<br>
                 formset.errors<br>
                 {{ formset.errors }}<br>
+                value_formset.errors<br>
+                {{ value_formset.errors }}<br>
             </div>
-
-    </div>
+        </div>
 
     </form>
 {% endblock %}
