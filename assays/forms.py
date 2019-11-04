@@ -2329,7 +2329,16 @@ class AssayPlateReaderMapForm(BootstrapForm):
         self.fields['name'].initial = datetime.datetime.now().strftime ("%Y%m%d")+"-"+ datetime.datetime.now().strftime('%H:%M:%S')
         #self.fields['my_test'].initial = str(my_instance.id)
 
+        #may need to revisit this later, do for not so ADD will work
+        self.fields['se_file_block'].required = False
+        self.fields['ns_file_block'].required = False
+        self.fields['my_test'].required = False
+        self.fields['dict_index_file_pk_block_pk'].required = False
+        self.fields['number_file_block_combos'].required = False
+
+
         #############################
+        #this is for the dropdown and should be parallel to the dict
         as_value_formset = AssayPlateReaderMapItemValue.objects.filter(
             assayplatereadermap=my_instance.id
         ).filter(

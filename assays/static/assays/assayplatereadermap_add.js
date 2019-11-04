@@ -8,6 +8,7 @@ $(document).ready(function () {
     let global_plate_matrix_item = 0;
     let global_plate_well_use = "empty";
     let global_plate_time = null;
+    let global_plate_sample_value = null;
     let global_plate_standard_value = null;
     let global_plate_time_unit = "day";
     let global_plate_location_text = "Unspecified";
@@ -21,10 +22,24 @@ $(document).ready(function () {
     let global_plate_sample_change_matrix_item = true;
     let global_plate_sample_change_location = true;
     let global_plate_sample_change_time = true;
+
     let global_plate_use = 'one';
+
+    try {
+        // this should happen if the file-block has been assigned
+        let global_plate_number_file_block_sets = document.getElementById("id_number_file_block_combos").value;
+    }
+    catch(err) {
+       let global_plate_number_file_block_sets = 0;
+    }
+
+
     //TODO need condition for if null
+    //make option to see sample value that shows when file is selected
     //set the default id_se_file_block-selectized to empty (null)
-    let global_plate_number_file_block_sets = document.getElementById("id_number_file_block_combos").value;
+    //deal with the race error for input blocks
+    //use example of time to get html input for input boxes
+   // let global_plate_number_file_block_sets = document.getElementById("id_number_file_block_combos").value;
     //TODO add a hover time with info about plate map
 
                             //form.se_file_block label="File-Block"  %}
@@ -37,7 +52,7 @@ $(document).ready(function () {
 
 
 
-    doLoadFileAssociation();
+   // doLoadFileAssociation();
 
     let global_plate_sample_time_unit_tooltip = "Time unit applies to all sample times on the plate.";
     $('#sample_time_unit_tooltip').next().html($('#sample_time_unit_tooltip').next().html() + make_escaped_tooltip(global_plate_sample_time_unit_tooltip));
@@ -64,6 +79,9 @@ $(document).ready(function () {
 
     let global_plate_standard_tooltip = "Select the target/method/unit associated to this plate map. Use the backspace button to clear selection. Select value of standard and drag onto plate.";
     $('#standard_tooltip').next().html($('#standard_tooltip').next().html() + make_escaped_tooltip(global_plate_standard_tooltip));
+
+    let global_plate_file_block_tooltip = "Changes made to the plate map (including sample location and standard concentration) will apply to all uses of the plate map. Changes made to the sample time will apply only to the specific file-block to which the plate map was assigned.";
+    $('#file_block_tooltip').next().html($('#file_block_tooltip').next().html() + make_escaped_tooltip(global_plate_file_block_tooltip));
 
     function doLoadFileAssociation() {
         //console.log("intro trigger: ",global_plate_number_file_block_sets)
@@ -142,21 +160,21 @@ $(document).ready(function () {
         }
     }).trigger('change');
 
-    $("#id_se_time").focusout(function() {
-        global_plate_time = $(this).val();
-    });
-    $("#id_se_time").change(function() {
-        global_plate_time = $(this).val();
-    });
-    $("#id_se_time").mouseleave(function() {
-        global_plate_time = $(this).val();
-    });
-    $("#id_se_time").mouseout(function() {
-        global_plate_time = $(this).val();
-    });
-    $("#id_se_time").mouseover(function() {
-        global_plate_time = $(this).val();
-    });
+    // $("#id_se_time").focusout(function() {
+    //     global_plate_time = $(this).val();
+    // });
+    // $("#id_se_time").change(function() {
+    //     global_plate_time = $(this).val();
+    // });
+    // $("#id_se_time").mouseleave(function() {
+    //     global_plate_time = $(this).val();
+    // });
+    // $("#id_se_time").mouseout(function() {
+    //     global_plate_time = $(this).val();
+    // });
+    // $("#id_se_time").mouseover(function() {
+    //     global_plate_time = $(this).val();
+    // });
 
     $("#id_se_standard_value").focusout(function() {
         global_plate_standard_value = $(this).val();
@@ -702,6 +720,8 @@ $(document).ready(function () {
         // children of each cell of the plate map table that is selected
         $('.ui-selected').children().each(function () {
             // send each selected cell of the table to the function for processing
+            global_plate_sample_change_time = document.getElementById('id_se_time').value;
+            console.log(global_plate_sample_change_time)
             if ($(this).hasClass("map-well-use")) {
                 let idx = $(this).attr('data-index');
                 welluseChange(idx);

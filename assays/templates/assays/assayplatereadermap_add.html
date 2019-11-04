@@ -137,7 +137,7 @@
                             <div class="col-sm-2">
                             </div>
                             <div class="col-sm-6">
-                                <p>This plate map has not yet been used.</p>
+                                <p>This plate map has not yet been used (assigned to a file-block).</p>
                             </div>
                         </div>
                     </div>
@@ -147,6 +147,11 @@
                             </div>
                             <div class="col-sm-6">
                                 <p>This plate map is currently being used. Be careful making changes.</p>
+                            </div>
+                            <div class="col-md-1"><br>
+                                <div><p id="file_block_tooltip"></p>
+                                    <label for="file_block_tooltip">&nbsp;</label>
+                                </div>
                             </div>
                         </div>
                         <div class="row">
@@ -713,7 +718,7 @@
                 <br>
             </div>
 
-            <div class="hidden">
+            <div >
                 <h2>For Development Testing</h2>
                 {#Use for error checking#}
                 For testing<br>
