@@ -2828,17 +2828,20 @@ class AssayPlateReaderMap(FlaggableModel):
 
 class AssayPlateReaderMapDataFile(models.Model):
     class Meta(object):
-        verbose_name = 'Assay Plate Reader Imported Files'
+        verbose_name = 'Assay Plate Reader Imported File'
         unique_together = [
             ('study', 'plate_reader_file_location'),
         ]
     study = models.ForeignKey(AssayStudy, blank=True, on_delete=models.CASCADE)
+    name = models.CharField(verbose_name='File Name', max_length=255, blank=True)
     description = models.CharField(max_length=2000, blank=True, default='')
     plate_reader_file_location = models.URLField(null=True, blank=True)
+    def __str__(self):
+        return '{0}'.format(self.name)
 
 class AssayPlateReaderMapDataFileBlock(models.Model):
     class Meta(object):
-        verbose_name = 'Assay Plate Reader Data Blocks'
+        verbose_name = 'Assay Plate Reader Data Block'
         unique_together = [
             ('study', 'data_block', 'assayplatereadermapdatafile'),
         ]
@@ -2850,6 +2853,8 @@ class AssayPlateReaderMapDataFileBlock(models.Model):
     data_block = models.IntegerField(default=1, null=True)
     #this will be a link later
     processing_set = models.IntegerField(null=True)
+    def __str__(self):
+        return '{0}'.format(self.name)
 
 class AssayPlateReaderMapItem(models.Model):
     class Meta(object):

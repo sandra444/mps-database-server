@@ -22,6 +22,22 @@ $(document).ready(function () {
     let global_plate_sample_change_location = true;
     let global_plate_sample_change_time = true;
     let global_plate_use = 'one';
+    //TODO need condition for if null
+    //set the default id_se_file_block-selectized to empty (null)
+    let global_plate_number_file_block_sets = document.getElementById("id_number_file_block_combos").value;
+    //TODO add a hover time with info about plate map
+
+                            //form.se_file_block label="File-Block"  %}
+                            //    <div class="hidden" id="ns_file_block">  id_se_file_block-selectized   ns_file_block
+                            //        {{ form.ns_file_block }}
+
+
+                            //    <div class="hidden" id="dict_index_file_pk_block_pk">
+                            //        {{ form.dict_index_file_pk_block_pk }}   dict_index_file_pk_block_pk
+
+
+
+    doLoadFileAssociation();
 
     let global_plate_sample_time_unit_tooltip = "Time unit applies to all sample times on the plate.";
     $('#sample_time_unit_tooltip').next().html($('#sample_time_unit_tooltip').next().html() + make_escaped_tooltip(global_plate_sample_time_unit_tooltip));
@@ -48,6 +64,17 @@ $(document).ready(function () {
 
     let global_plate_standard_tooltip = "Select the target/method/unit associated to this plate map. Use the backspace button to clear selection. Select value of standard and drag onto plate.";
     $('#standard_tooltip').next().html($('#standard_tooltip').next().html() + make_escaped_tooltip(global_plate_standard_tooltip));
+
+    function doLoadFileAssociation() {
+        //console.log("intro trigger: ",global_plate_number_file_block_sets)
+        if (global_plate_number_file_block_sets > 0) {
+            $('.select-value-set').removeClass('hidden');
+            $('.no-select-value-set').addClass('hidden');
+        } else {
+            $('.no-select-value-set').removeClass('hidden');
+            $('.select-value-set').addClass('hidden');
+        }
+    }
 
     // currently there are two radio button: change_method (increment and copy) and increment_direction (left and right)
     $("input[type='radio'][name='change_method']").click(function() {
@@ -421,6 +448,11 @@ $(document).ready(function () {
 
     // It is VERY IMPORTANT to understand that the visual representation of the plate
     // is pulled from the order of the original creation of the plate items!
+
+    //TODO get the right value set when more than the added on (assigned to file)
+    // global_plate_number_file_block_sets > 0....
+    // make sure only changing the value set the user selected, if more than one!!..
+    //TODO make sure filling/changing correct sets...
     function buildPlate(data, aore) {
         let key_value_plate_index_row_index = {};
         let key_value_plate_index_column_index = {};
@@ -841,3 +873,37 @@ $(document).ready(function () {
 
 
 
+/*sample=matrix item, standard, blank, empty; replicate=1,2,3..; location=sample location; time=sample time;*/
+/*name=A1, A2, A3; use=standard, sample, blank, empty; */
+/*hiding and check box color DARKER*/
+// .plate-matrix-item {background-color: yellow}
+// .plate-location {background-color: #d1cffa}
+// .plate-time {background-color: #b5fbb4}
+// .plate-well-use {background-color: WhiteSmoke }
+// .plate-label {background-image: linear-gradient(to bottom, #1e1e1e 0,#080800 100%);}
+// .plate-compound {background-image: linear-gradient(to bottom,#5bc0de 0,#2aabd2 100%);}
+// .plate-cell {background-image: linear-gradient(to bottom,#5cb85c 0,#419641 100%);}
+// .plate-setting {background-image: linear-gradient(to bottom, #f0ad4e 0, #eb9316 100%);}
+// .plate-standard-value {background-color: #fbb4bc;}
+//
+// /*color of things in the table (lighter colors)*/
+// .map-matrix-item {display: block; background-color: yellow; border-radius: 1px;
+//     padding:3px; margin:0px; border: 1px solid white}
+// .map-location {display: block; background-color:  #d1cffa; border-radius: 1px;
+//     padding:3px; margin:0px; border: 1px solid white}
+// .map-time {display: block; background-color: #b5fbb4; border-radius: 1px;
+//     padding:3px; margin:0px; border: 1px solid white}
+// .map-well-use {display: block; background-color: WhiteSmoke ; border-radius: 1px;
+//     padding:3px; margin:0px; border: 1px solid white}
+// .map-label {color: white; display: block; background-color: #080808;
+//     border-color: #080808;}
+// .map-compound {display: block; background-color: #d9edf7;
+//     border-color: #bce8f1;}
+// .map-cell{display: block; background-color: #dff0d8;
+//     border-color: #d6e9c6;}
+// .map-setting{display: block; background-color: #fcf8e3;
+//     border-color: #faebcc;}
+// .map-standard-value {display: block; background-color: #fbb4bc; border-radius: 1px;
+//     padding:3px; margin:0px; border: 1px solid white}
+// .check-mark-color {color: white}
+// .big-checkbox {padding-top:15px; padding-left:5px; width: 30px; height: 30px;}

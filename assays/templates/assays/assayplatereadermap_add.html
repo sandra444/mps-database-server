@@ -41,7 +41,7 @@
                 <h1 class="text-center">
                     <em><b>Assay Plate Reader Map
                     {% if update %}
-                        Update (plate map id {{ object.id }})
+                        Update
                     {% else %}
                         {% if review %}
                             Review
@@ -104,7 +104,6 @@
                     {# This takes FOREVER if queryset is not passed (dropdowns often need prefetches) #}
                     {# Study should be passed in backend - do not to the following!#}
                     {# {% include 'generic_field.html' with field=form.study label="Study" %}#}
-
                 {% endif %}
 
                 <div class="row">
@@ -112,8 +111,62 @@
                         {% include 'generic_field.html' with field=form.name label="Name"  %}
                     </div>
                     <div class="col-sm-4">
+                        <div class="hidden">
+                            <p>plate map id {{ object.id }}</p>
+                        </div>
                     </div>
                 </div>
+                {% if add %}
+                {% else %}
+                    {# use this form field to stuff in choices ->  se_file_block = forms.ChoiceField()     #}
+                    {# IF the plate map has a set of value formsets assigned a file_block)     #}
+                    <div class="row">
+                        {# need this in javascript #}
+                        <div class="hidden" id="number_value_formsets">
+                            {{ form.number_file_block_combos }}
+                        </div>
+                    </div>
+{#                    <div class="row">#}
+{#                        <div class="col-sm-8">#}
+{#                                {% include 'generic_field.html' with field=form.number_file_block_combos label="Number File/Blocks"  %}#}
+{#                                {% include 'generic_field.html' with field=form.my_test label="My Test"  %}#}
+{#                        </div>#}
+{#                    </div>#}
+                    <div class="no-select-value-set">
+                        <div class="row">
+                            <div class="col-sm-2">
+                            </div>
+                            <div class="col-sm-6">
+                                <p>This plate map has not yet been used.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="select-value-set">
+                        <div class="row">
+                            <div class="col-sm-2">
+                            </div>
+                            <div class="col-sm-6">
+                                <p>This plate map is currently being used. Be careful making changes.</p>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-8">
+                                {% include 'generic_field.html' with field=form.se_file_block label="File-Block"  %}
+                            </div>
+                            <div class="col-sm-4">
+                                {# need this in javascript #}
+                                <div class="hidden" id="ns_file_block">
+                                    {{ form.ns_file_block }}
+                                </div>
+                                {# need this in javascript #}
+                                <div class="hidden" id="dict_index_file_pk_block_pk">
+                                    {{ form.dict_index_file_pk_block_pk }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+
                 <div class="row">
                     <div class="col-sm-8">
                         {% include 'generic_field.html' with field=form.description label="Description" %}

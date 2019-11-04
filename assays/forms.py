@@ -2226,6 +2226,7 @@ class AssayPlateReadMapAdditionalInfoForm(forms.Form):
         self.fields['se_matrix_item'].queryset = AssayMatrixItem.objects.filter(study_id=study_id)
         self.fields['ns_matrix_item'].queryset = AssayMatrixItem.objects.filter(study_id=study_id)
 
+
         my_filtered_mtu = AbstractClassAssayStudyAssay.objects.filter(
             study_id=study_id
         ).prefetch_related(
@@ -2241,34 +2242,6 @@ class AssayPlateReadMapAdditionalInfoForm(forms.Form):
         self.fields['ns_matrix_item'].widget.attrs.update({'class': 'no-selectize'})
         self.fields['ns_method_target_unit'].widget.attrs.update({'class': 'no-selectize'})
         self.fields['ns_location'].widget.attrs.update({'class': 'no-selectize'})
-
-    # This does not work exactly as expected from here, for now, put in the views.py
-    #     self.fields['ns_matrix_item_with_setup'].queryset = AssayMatrixItem.objects.filter(
-    #         study_id=study_id
-    #         ).prefetch_related(
-    #             #    'device',
-    #             #    'created_by',
-    #             #    'matrix',
-    #             #    'organ_model',
-    #             'assaysetupcompound_set__compound_instance__compound',
-    #             'assaysetupcompound_set__concentration_unit',
-    #             'assaysetupcompound_set__addition_location',
-    #             'assaysetupcell_set__cell_sample__cell_type__organ',
-    #             'assaysetupcell_set__cell_sample__cell_subtype',
-    #             'assaysetupcell_set__cell_sample__supplier',
-    #             'assaysetupcell_set__addition_location',
-    #             'assaysetupcell_set__density_unit',
-    #             'assaysetupsetting_set__setting',
-    #             'assaysetupsetting_set__unit',
-    #             'assaysetupsetting_set__addition_location',
-    #         )
-    #
-    #     self.fields['ns_matrix_item_with_setup'].widget.attrs['class'] = 'no-selectize'
-    #
-    # ns_matrix_items_with_setup = forms.ModelChoiceField(
-    #     queryset=AssayMatrixItem.objects.none(),
-    #     required=False,
-    # )
 
     #starting with the queryset none, then init it in the function
     ns_method_target_unit = forms.ModelChoiceField(
@@ -2332,22 +2305,71 @@ class AssayPlateReaderMapForm(BootstrapForm):
 
     class Meta(object):
         model = AssayPlateReaderMap
-        fields = ['name', 'description', 'device', 'study_assay', 'time_unit', 'plate_reader_unit']
+        fields = ['id', 'name', 'description', 'device', 'study_assay', 'time_unit', 'plate_reader_unit']
         #fields = ['name', 'description', 'device',]
         widgets = {
             'description': forms.Textarea(attrs={'cols': 50, 'rows': 3}),
         }
 
     def __init__(self, *args, **kwargs):
+        my_test = kwargs.pop('extra', 0)
+        dict_index_file_pk_block_pk = kwargs.pop('extra', 0)
+        se_file_block = kwargs.pop('extra', 0)
+        ns_file_block = kwargs.pop('extra', 0)
+        #there will be a platemap, item, value set with NO file/block
+        #this is the one that is copied during file upload
+        number_file_block_combos = kwargs.pop('extra', 0)
         self.study = kwargs.pop('study', None)
         self.user = kwargs.pop('user', None)
         super(AssayPlateReaderMapForm, self).__init__(*args, **kwargs)
+        my_instance = self.instance
         self.fields['device'].widget.attrs['class'] += ' no-selectize'
         self.fields['study_assay'].widget.attrs['class'] += ' no-selectize'
+        self.fields['ns_file_block'].widget.attrs['class'] += ' no-selectize'
         self.fields['name'].initial = datetime.datetime.now().strftime ("%Y%m%d")+"-"+ datetime.datetime.now().strftime('%H:%M:%S')
+        #self.fields['my_test'].initial = str(my_instance.id)
+
+        #############################
+        as_value_formset = AssayPlateReaderMapItemValue.objects.filter(
+            assayplatereadermap=my_instance.id
+        ).filter(
+            plate_index=0
+        ).filter(
+            assayplatereadermapdatafileblock__isnull=False
+        )
+        number_value_sets = len(as_value_formset)
+        self.fields['number_file_block_combos'].initial = number_value_sets
+
+        distinct_plate_map = []
+        distinct_plate_map_id = {}
+
+        #queryset should have one record for each value set that HAS a file-block associated to it
+        i = 0
+        for record in as_value_formset:
+            pick_value = str(i)
+            pick_string = record.assayplatereadermapdatafile.name + '-' + record.assayplatereadermapdatafileblock.name
+            distinct_plate_map.append((pick_value, pick_string))
+            distinct_plate_map_id[i] = (record.assayplatereadermapdatafile.id, record.assayplatereadermapdatafileblock.id)
+            i = i+1
+
+        self.fields['se_file_block'].choices = distinct_plate_map
+        self.fields['ns_file_block'].choices = distinct_plate_map
+
+        #test_choices = (('divide', 'Divide'), ('multiply', 'Multiply'), ('subtract', 'Subtract'), ('add', 'Add'))
+        #test_choices = [('divide', 'Divide'), ('multiply', 'Multiply'), ('subtract', 'Subtract'), ('add', 'Add')]
+        #self.fields['ns_file_block'].choices = test_choices
+
+        self.fields['my_test'].initial = distinct_plate_map_id
+        self.fields['dict_index_file_pk_block_pk'].initial = distinct_plate_map_id
 
         if self.study:
             self.instance.study = self.study
+
+    se_file_block = forms.ChoiceField()
+    ns_file_block = forms.ChoiceField()
+    my_test = forms.CharField(widget=forms.TextInput())
+    dict_index_file_pk_block_pk = forms.CharField(widget=forms.TextInput())
+    number_file_block_combos = forms.CharField(widget=forms.TextInput())
 
 class AssayPlateReaderMapItemForm(forms.ModelForm):
     """Form for Assay Plate Reader Map Items """

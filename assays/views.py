@@ -2609,7 +2609,8 @@ class AssayPlateReaderMapAdd(StudyGroupMixin, CreateView):
                     study=study,
                     user=self.request.user
                 )
-
+        #the add should not have any files attached to it!
+        ##############################
         if 'value_formset' not in context:
             if self.request.POST:
                 context['value_formset'] = AssayPlateReaderMapItemValueFormSetFactory(
@@ -2702,6 +2703,31 @@ class AssayPlateReaderMapUpdate(StudyGroupMixin, UpdateView):
                     user=self.request.user
                 )
 
+        ##############################
+        # need to figure out how to get the user to pick the one they want
+        # Trying this in the forms....
+
+        # distinct_plate_map = {}
+        # reduce_distinct_name = []
+        #
+        # as_value_formset = AssayPlateReaderMapItemValue.objects.filter(
+        #     assayplatereadermap=self.object.id
+        # ).filter(
+        #     plate_index=0
+        # )
+        #
+        # for record in as_value_formset:
+        #     if (record.plate_index == 0):
+        #         distinct_plate_map[(record.assayplatereadermapdatafile, record.assayplatereadermapdatafileblock, record.plate_index)] = distinct_plate_map.setdefault(
+        #             (record.assayplatereadermapdatafile, record.assayplatereadermapdatafileblock, record.plate_index), 0
+        #         ) + 1
+        #
+        # for current_tuple, count in distinct_plate_map.items():
+        #     reduce_distinct_name.append([current_tuple[0], current_tuple[1], current_tuple[2],  count])
+        #
+        # context['distinct_plate_map'] = distinct_plate_map
+        # context['reduce_distinct_name'] = reduce_distinct_name
+
         if 'value_formset' not in context:
             if self.request.POST:
                 context['value_formset'] = AssayPlateReaderMapItemValueFormSetFactory(
@@ -2766,6 +2792,7 @@ class AssayPlateReaderMapView(StudyGroupMixin, UpdateView):
                     user=self.request.user
                 )
 
+        ##############################
         if 'value_formset' not in context:
             if self.request.POST:
                 context['value_formset'] = AssayPlateReaderMapItemValueFormSetFactory(
@@ -2808,6 +2835,8 @@ class AssayPlateReaderMapDelete(StudyViewerMixin, DeleteView):
     model = AssayPlateReaderMap
     template_name = 'assays/assayplatereadermap_delete.html'
     # works to return to study list page....... success_url = '/assays/assaystudy/'
+
+    #TODO figure out how to NOT allow deletion if been used (linked to a file/block)
 
     def get_success_url(self):
         # goes to the M&I list page.... return self.object.study.get_absolute_url()
