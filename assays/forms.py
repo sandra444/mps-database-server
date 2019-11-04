@@ -1146,12 +1146,14 @@ class AssaySetupCompoundInlineFormSet(BaseInlineFormSet):
             # Text field (un-saved) for supplier
             form.fields['supplier_text'] = forms.CharField(
                 initial='',
-                widget=forms.TextInput(attrs={'class': 'form-control'})
+                widget=forms.TextInput(attrs={'class': 'form-control'}),
+                required=False
             )
             # Text field (un-saved) for lot
             form.fields['lot_text'] = forms.CharField(
                 initial='',
-                widget=forms.TextInput(attrs={'class': 'form-control'})
+                widget=forms.TextInput(attrs={'class': 'form-control'}),
+                required=False
             )
             # Receipt date
             form.fields['receipt_date'] = forms.DateField(
@@ -1244,6 +1246,13 @@ class AssaySetupCompoundInlineFormSet(BaseInlineFormSet):
             instance = super(BootstrapForm, form).save(commit=False)
 
             current_data = form.cleaned_data
+
+            # Bad
+            if not current_data.get('supplier_text'):
+                current_data['supplier_text'] = 'N/A'
+
+            if not current_data.get('lot_text'):
+                current_data['lot_text'] = 'N/A'
 
             compound = current_data.get('compound')
             supplier_text = current_data.get('supplier_text').strip()
