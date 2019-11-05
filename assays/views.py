@@ -2703,31 +2703,6 @@ class AssayPlateReaderMapUpdate(StudyGroupMixin, UpdateView):
                     user=self.request.user
                 )
 
-        ##############################
-        # need to figure out how to get the user to pick the one they want
-        # Trying this in the forms....
-
-        # distinct_plate_map = {}
-        # reduce_distinct_name = []
-        #
-        # as_value_formset = AssayPlateReaderMapItemValue.objects.filter(
-        #     assayplatereadermap=self.object.id
-        # ).filter(
-        #     plate_index=0
-        # )
-        #
-        # for record in as_value_formset:
-        #     if (record.plate_index == 0):
-        #         distinct_plate_map[(record.assayplatereadermapdatafile, record.assayplatereadermapdatafileblock, record.plate_index)] = distinct_plate_map.setdefault(
-        #             (record.assayplatereadermapdatafile, record.assayplatereadermapdatafileblock, record.plate_index), 0
-        #         ) + 1
-        #
-        # for current_tuple, count in distinct_plate_map.items():
-        #     reduce_distinct_name.append([current_tuple[0], current_tuple[1], current_tuple[2],  count])
-        #
-        # context['distinct_plate_map'] = distinct_plate_map
-        # context['reduce_distinct_name'] = reduce_distinct_name
-
         if 'value_formset' not in context:
             if self.request.POST:
                 context['value_formset'] = AssayPlateReaderMapItemValueFormSetFactory(
@@ -2772,7 +2747,7 @@ class AssayPlateReaderMapView(StudyGroupMixin, UpdateView):
     form_class = AssayPlateReaderMapForm
 
     def get_context_data(self, **kwargs):
-        context = super(AssayPlateReaderMapUpdate, self).get_context_data(**kwargs)
+        context = super(AssayPlateReaderMapView, self).get_context_data(**kwargs)
         ##############################
         context['review'] = True
         context['page_called'] = 'review'
@@ -2792,7 +2767,6 @@ class AssayPlateReaderMapView(StudyGroupMixin, UpdateView):
                     user=self.request.user
                 )
 
-        ##############################
         if 'value_formset' not in context:
             if self.request.POST:
                 context['value_formset'] = AssayPlateReaderMapItemValueFormSetFactory(

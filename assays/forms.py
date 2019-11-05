@@ -2225,8 +2225,11 @@ class AssayPlateReadMapAdditionalInfoForm(forms.Form):
         super(AssayPlateReadMapAdditionalInfoForm, self).__init__(*args, **kwargs)
         self.fields['se_matrix_item'].queryset = AssayMatrixItem.objects.filter(study_id=study_id)
         self.fields['ns_matrix_item'].queryset = AssayMatrixItem.objects.filter(study_id=study_id)
+        # self.fields['se_matrix_item'].queryset = AssayMatrixItem.objects.filter(study_id=293)
+        self.fields['ns_matrix_item'].widget.attrs.update({'class': 'no-selectize'})
+        self.fields['ns_location'].widget.attrs.update({'class': 'no-selectize'})
 
-
+        # for selection
         my_filtered_mtu = AbstractClassAssayStudyAssay.objects.filter(
             study_id=study_id
         ).prefetch_related(
@@ -2234,16 +2237,10 @@ class AssayPlateReadMapAdditionalInfoForm(forms.Form):
             'method',
             'unit',
         )
-
         self.fields['se_method_target_unit'].queryset = my_filtered_mtu
         self.fields['ns_method_target_unit'].queryset = my_filtered_mtu
-
-        #self.fields['se_matrix_item'].queryset = AssayMatrixItem.objects.filter(study_id=293)
-        self.fields['ns_matrix_item'].widget.attrs.update({'class': 'no-selectize'})
         self.fields['ns_method_target_unit'].widget.attrs.update({'class': 'no-selectize'})
-        self.fields['ns_location'].widget.attrs.update({'class': 'no-selectize'})
 
-    #starting with the queryset none, then init it in the function
     ns_method_target_unit = forms.ModelChoiceField(
         queryset=AssayStudyAssay.objects.none(),
         required=False,
@@ -2324,7 +2321,6 @@ class AssayPlateReaderMapForm(BootstrapForm):
         super(AssayPlateReaderMapForm, self).__init__(*args, **kwargs)
         my_instance = self.instance
         self.fields['device'].widget.attrs['class'] += ' no-selectize'
-        self.fields['study_assay'].widget.attrs['class'] += ' no-selectize'
         self.fields['ns_file_block'].widget.attrs['class'] += ' no-selectize'
         self.fields['name'].initial = datetime.datetime.now().strftime ("%Y%m%d")+"-"+ datetime.datetime.now().strftime('%H:%M:%S')
         #self.fields['my_test'].initial = str(my_instance.id)
@@ -2336,6 +2332,14 @@ class AssayPlateReaderMapForm(BootstrapForm):
         self.fields['dict_index_file_pk_block_pk'].required = False
         self.fields['number_file_block_combos'].required = False
 
+        self.fields['study_assay'].queryset = AbstractClassAssayStudyAssay.objects.filter(
+            study_id=self.study
+        ).prefetch_related(
+            'target',
+            'method',
+            'unit',
+        )
+        self.fields['study_assay'].widget.attrs['class'] += ' no-selectize'
 
         #############################
         #this is for the dropdown and should be parallel to the dict
@@ -2374,11 +2378,13 @@ class AssayPlateReaderMapForm(BootstrapForm):
         if self.study:
             self.instance.study = self.study
 
+
     se_file_block = forms.ChoiceField()
     ns_file_block = forms.ChoiceField()
     my_test = forms.CharField(widget=forms.TextInput())
     dict_index_file_pk_block_pk = forms.CharField(widget=forms.TextInput())
     number_file_block_combos = forms.CharField(widget=forms.TextInput())
+
 
 class AssayPlateReaderMapItemForm(forms.ModelForm):
     """Form for Assay Plate Reader Map Items """
@@ -2396,7 +2402,9 @@ class AssayPlateReaderMapItemValueForm(forms.ModelForm):
     """Form for Assay Plate Reader Map Items """
     class Meta(object):
         model = AssayPlateReaderMapItemValue
-        exclude = tracking + ('study', )
+        #exclude = tracking + ('study', )
+        fields = ['id', 'assayplatereadermapdatafile', 'assayplatereadermapdatafileblock', 'plate_index',
+                  'value', 'time']
 
 # class AssayPlateReaderMapOtherItemValueForm(forms.ModelForm):
 #     """Form for Assay Plate Reader Map Items """
@@ -2437,7 +2445,8 @@ class AssayPlateReaderMapItemFormSet(BaseInlineFormSetForcedUniqueness):
 #TODO sck note - may need to do this for some of the other select fields in the other formsets....
 class AssayPlateReaderMapItemValueFormSet(BaseInlineFormSetForcedUniqueness):
     custom_fields = (
-        'matrix_item',
+        #'matrix_item',
+        'assayplatereadermapdatafile', 'assayplatereadermapdatafileblock',
     )
 
     def __init__(self, *args, **kwargs):

@@ -2889,7 +2889,7 @@ class AssayPlateReaderMapItem(models.Model):
 
 class AssayPlateReaderMapItemValue(models.Model):
     class Meta(object):
-        verbose_name = 'Assay Plate Reader Map Instance (one set for each data block)'
+        verbose_name = 'Assay Plate Reader Map Raw Value'
         unique_together = [
             ('study', 'assayplatereadermap', 'assayplatereadermapdatafile', 'assayplatereadermapdatafileblock', 'plate_index','time'),
         ]
@@ -2897,17 +2897,17 @@ class AssayPlateReaderMapItemValue(models.Model):
     assayplatereadermap = models.ForeignKey(AssayPlateReaderMap, on_delete=models.CASCADE)
     assayplatereadermapdatafile = models.ForeignKey('AssayPlateReaderMapDataFile', null=True, blank=True, on_delete=models.CASCADE)
     assayplatereadermapdatafileblock = models.ForeignKey('AssayPlateReaderMapDataFileBlock', null=True, blank=True, on_delete=models.CASCADE)
-    name = models.CharField(max_length=100, blank=True, default="none")
-    row_index = models.IntegerField(default=999, blank=True)
-    column_index = models.IntegerField(default=999, blank=True)
+    # name = models.CharField(max_length=100, blank=True, default="none")
+    # row_index = models.IntegerField(default=999, blank=True)
+    # column_index = models.IntegerField(default=999, blank=True)
     plate_index = models.IntegerField(default=999, blank=True)
-    matrix_item = models.ForeignKey(AssayMatrixItem, null=True, blank=True, on_delete=models.CASCADE)
-    well_use = models.CharField(
-        verbose_name='Well Use',
-        max_length=8,
-        default='empty', blank=True,
-        choices=( ('sample', 'Sample'), ('standard', 'Standard'), ('blank', 'Blank'), ('empty', 'Empty/Unused') )
-    )
+    # matrix_item = models.ForeignKey(AssayMatrixItem, null=True, blank=True, on_delete=models.CASCADE)
+    # well_use = models.CharField(
+    #     verbose_name='Well Use',
+    #     max_length=8,
+    #     default='empty', blank=True,
+    #     choices=( ('sample', 'Sample'), ('standard', 'Standard'), ('blank', 'Blank'), ('empty', 'Empty/Unused') )
+    # )
     #raw value read from the plate for all wells in this plate
     value = models.FloatField(null=True, blank=True)
     time = models.FloatField(default=0, blank=True)

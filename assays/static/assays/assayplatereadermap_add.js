@@ -3,13 +3,14 @@ $(document).ready(function () {
     //console.log("in js file 1");
     // # id, . class
 
-    // match global defaults is good start
+    // set global variables
     let global_plate_matrix_item_text = "";
     let global_plate_matrix_item = 0;
     let global_plate_well_use = "empty";
-    let global_plate_time = null;
-    let global_plate_sample_value = null;
-    let global_plate_standard_value = null;
+    let global_plate_time = 0;
+    let global_plate_sample_value = 0;
+    let global_plate_standard_value = 0;
+    let global_plate_block_value = 0;
     let global_plate_time_unit = "day";
     let global_plate_location_text = "Unspecified";
     let global_plate_location = 0;
@@ -22,38 +23,31 @@ $(document).ready(function () {
     let global_plate_sample_change_matrix_item = true;
     let global_plate_sample_change_location = true;
     let global_plate_sample_change_time = true;
+    let global_plate_number_file_block_sets = 0;
+    let global_plate_study_assay_text = "";
+    let global_plate_study_assay = 0;
 
-    let global_plate_use = 'one';
-
+    // set based on add or update and if the plate map has been assigned to a file-block
     try {
         // this should happen if the file-block has been assigned
-        let global_plate_number_file_block_sets = document.getElementById("id_number_file_block_combos").value;
+        global_plate_number_file_block_sets = document.getElementById("id_number_file_block_combos").value;
+        doLoadFileAssociation();
     }
     catch(err) {
-       let global_plate_number_file_block_sets = 0;
+        global_plate_number_file_block_sets = 0;
+        doLoadFileAssociation();
+    }
+    function doLoadFileAssociation() {
+        if (global_plate_number_file_block_sets > 0) {
+            $('.select-value-set').removeClass('hidden');
+            //$('.no-select-value-set').addClass('hidden');
+        } else {
+            //$('.no-select-value-set').removeClass('hidden');
+            $('.select-value-set').addClass('hidden');
+        }
     }
 
-
-    //TODO need condition for if null
-    //make option to see sample value that shows when file is selected
-    //set the default id_se_file_block-selectized to empty (null)
-    //deal with the race error for input blocks
-    //use example of time to get html input for input boxes
-   // let global_plate_number_file_block_sets = document.getElementById("id_number_file_block_combos").value;
-    //TODO add a hover time with info about plate map
-
-                            //form.se_file_block label="File-Block"  %}
-                            //    <div class="hidden" id="ns_file_block">  id_se_file_block-selectized   ns_file_block
-                            //        {{ form.ns_file_block }}
-
-
-                            //    <div class="hidden" id="dict_index_file_pk_block_pk">
-                            //        {{ form.dict_index_file_pk_block_pk }}   dict_index_file_pk_block_pk
-
-
-
-   // doLoadFileAssociation();
-
+    // set the tooltips
     let global_plate_sample_time_unit_tooltip = "Time unit applies to all sample times on the plate.";
     $('#sample_time_unit_tooltip').next().html($('#sample_time_unit_tooltip').next().html() + make_escaped_tooltip(global_plate_sample_time_unit_tooltip));
 
@@ -83,18 +77,11 @@ $(document).ready(function () {
     let global_plate_file_block_tooltip = "Changes made to the plate map (including sample location and standard concentration) will apply to all uses of the plate map. Changes made to the sample time will apply only to the specific file-block to which the plate map was assigned.";
     $('#file_block_tooltip').next().html($('#file_block_tooltip').next().html() + make_escaped_tooltip(global_plate_file_block_tooltip));
 
-    function doLoadFileAssociation() {
-        //console.log("intro trigger: ",global_plate_number_file_block_sets)
-        if (global_plate_number_file_block_sets > 0) {
-            $('.select-value-set').removeClass('hidden');
-            $('.no-select-value-set').addClass('hidden');
-        } else {
-            $('.no-select-value-set').removeClass('hidden');
-            $('.select-value-set').addClass('hidden');
-        }
-    }
+    let global_plate_file_block_number_tooltip = "The number of times this plate map has been assigned to a block of data. A plate reader output file can contain one or more blocks of data. A block of data is the same dimensions as a plate map.";
+    $('#file_block_number_tooltip').next().html($('#file_block_number_tooltip').next().html() + make_escaped_tooltip(global_plate_file_block_number_tooltip));
 
     // currently there are two radio button: change_method (increment and copy) and increment_direction (left and right)
+    // class show/hide and also wht is checked/unchecked based on radio button
     $("input[type='radio'][name='change_method']").click(function() {
         global_plate_change_method = $(this).val();
         if (global_plate_change_method === 'increment') {
@@ -106,43 +93,46 @@ $(document).ready(function () {
     $("input[type='radio'][name='increment_direction']").click(function() {
         global_plate_increment_direction = $(this).val();
     });
-
     $("input[type='checkbox'][name='change_matrix_item']").click(function() {
         global_plate_sample_change_matrix_item = $(this).prop('checked');
-        console.log(global_plate_sample_change_matrix_item)
+        //console.log(global_plate_sample_change_matrix_item)
     });
     $("input[type='checkbox'][name='change_location']").click(function() {
         global_plate_sample_change_location = $(this).prop('checked');
-        console.log(global_plate_sample_change_location)
+        //console.log(global_plate_sample_change_location)
     });
     $("input[type='checkbox'][name='change_time']").click(function() {
         global_plate_sample_change_time = $(this).prop('checked');
-        console.log(global_plate_sample_change_time)
+        //console.log(global_plate_sample_change_time)
     });
 
-
-    // get the copy of the empty formset (the "extra" in the forms.py)
-    // The forms.py has an extra of 1
-    // for the add page, it gets copied x times (24, 96, 384)
-    // the update page also comes with one extra
-    // Just takes the html and purges it (avoid duplicate formset instances etc)
-    var first_item_form = $('#formset').find('.inline').first()[0].outerHTML;
+    // get the copy of the empty formsets (the "extra" in the forms.py), then remove the empty
+    // The forms.py has an extra of 1 for the add page, it gets copied x times (24, 96, 384)
+    // The update page also comes with one extra
+    let first_item_form = $('#formset').find('.inline').first()[0].outerHTML;
     if ($('#formset').find('.inline').length === 1 && $("#check_load").html() === 'add') {
         $('#formset').find('.inline').first().remove();
     }
-    var first_value_form = $('#value_formset').find('.inline').first()[0].outerHTML;
+    let first_value_form = $('#value_formset').find('.inline').first()[0].outerHTML;
     if ($('#value_formset').find('.inline').length === 1 && $("#check_load").html() === 'add') {
         $('#value_formset').find('.inline').first().remove();
     }
+    // adding these made 2x forms, so moved it back to where had it before
+    //$('#id_assayplatereadermapitem_set-TOTAL_FORMS').val(global_plate_size);
+    // }).trigger('change');
 
-    // Set the global or other variables for the six selections
-    // five for dragging onto plate and time unit
+    // Set the global or other variables for the selections
     $("#id_se_matrix_item").change(function() {
         //global_plate_location = $("#id_se_matrix_item").children("option:selected").text();
         global_plate_matrix_item_text = $(this).children("option:selected").text();
         global_plate_matrix_item = $(this).val();
         // to return the pk
         // $(this).val();
+    });
+    $("#id_se_method_target_unit").change(function() {
+        global_plate_study_assay_text = $(this).children("option:selected").text();
+        global_plate_study_assay = $(this).val();
+        changeStudyAssay();
     });
     $("#id_se_location").change(function() {
         //global_plate_location = $("#id_se_location").children("option:selected").text();
@@ -151,74 +141,36 @@ $(document).ready(function () {
         // to return the pk
         // $(this).val();
     });
-    $("#id_plate_use").change(function() {
-        global_plate_use = $(this).val();
-        if (global_plate_use === 'one') {
-            $('.sample-time').addClass('hidden');
-        } else {
-            $('.sample-time').removeClass('hidden');
-        }
-    }).trigger('change');
-
-    // $("#id_se_time").focusout(function() {
-    //     global_plate_time = $(this).val();
-    // });
-    // $("#id_se_time").change(function() {
-    //     global_plate_time = $(this).val();
-    // });
-    // $("#id_se_time").mouseleave(function() {
-    //     global_plate_time = $(this).val();
-    // });
-    // $("#id_se_time").mouseout(function() {
-    //     global_plate_time = $(this).val();
-    // });
-    // $("#id_se_time").mouseover(function() {
-    //     global_plate_time = $(this).val();
-    // });
-
-    $("#id_se_standard_value").focusout(function() {
-        global_plate_standard_value = $(this).val();
-        //console.log("focus")
-    });
-    $("#id_se_standard_value").change(function() {
-        global_plate_standard_value = $(this).val();
-        //console.log("change")
-    });
-    $("#id_se_standard_value").mouseleave(function() {
-        global_plate_standard_value = $(this).val();
-        //console.log("mouseleave")
+    $("#id_se_time").mouseout(function() {
+        global_plate_time = $(this).val();
     });
     $("#id_se_standard_value").mouseout(function() {
         global_plate_standard_value = $(this).val();
-        //console.log("mouseout")
-    });
-    $("#id_se_standard_value").mouseover(function() {
-        global_plate_standard_value = $(this).val();
-        //console.log("mouseover")
-    });
-
-    $("#id_se_increment_value").focusout(function() {
-        global_plate_increment_value = $(this).val();
-        //console.log("focus")
-    });
-    $("#id_se_increment_value").change(function() {
-        global_plate_increment_value = $(this).val();
-        //console.log("change")
-    });
-    $("#id_se_increment_value").mouseleave(function() {
-        global_plate_increment_value = $(this).val();
-        //console.log("mouseleave")
     });
     $("#id_se_increment_value").mouseout(function() {
         global_plate_increment_value = $(this).val();
-        //console.log("mouseout")
     });
-    $("#id_se_increment_value").mouseover(function() {
-        global_plate_increment_value = $(this).val();
-        //console.log("mouseover")
+    $("#id_se_increment_operation").change(function() {
+    global_plate_increment_operation = $(this).val();
+    });
+    $("#id_se_time_unit").change(function() {
+        global_plate_time_unit = $(this).val();
+        //console.log($(this).children("option:selected").text());
+
+        // this loop worked as expected at the time time tested
+        // $('#formset').children().each(function() {
+        //     console.log($(this).children("option:selected").text());
+        //     if ( $(this).hasClass("item") && ( $(this).attr("data-value",'minute') || $(this).attr("data-value",'hour') || $(this).attr("data-value",'day') ) )
+        //     {
+        //     }
+        // });
+        // Moved to the main plate map, not the items, so don't need this anymore
+        // for (i = 0; i < global_plate_size; i++) {
+        //     $('#id_assayplatereadermapitem_set-' + i + '-time_unit').val(global_plate_time_unit);
+        // };
     });
 
-    // Controlling more of what shows and doesn't
+    // Controlling more of what shows and does not
     $("#id_se_well_use").change(function() {
         global_plate_well_use = $(this).val();
         $("input[name=change_method][value=copy]").prop( "checked", true );
@@ -228,46 +180,22 @@ $(document).ready(function () {
         } else {
             $('.increment-section').addClass('hidden');
         }
-
+        // hide all, then unhide what want to show
         $('.sample-section').addClass('hidden');
         $('.standard-section').addClass('hidden');
         $('.option-section').addClass('hidden');
+        $('.non-sample-section').addClass('hidden');
         global_plate_sample_change = 'none';
         if (global_plate_well_use === 'sample') {
             $('.sample-section').removeClass('hidden');
             $('.option-section').removeClass('hidden');
         } else if (global_plate_well_use === 'standard') {
+            $('.non-sample-section').removeClass('hidden');
             $('.standard-section').removeClass('hidden');
             $('.option-section').removeClass('hidden');
         } else {
+            $('.non-sample-section').removeClass('hidden');
         }
-    });
-
-    $("#id_se_increment_operation").change(function() {
-    global_plate_increment_operation = $(this).val();
-    });
-
-    $("#id_se_increment_operation").change(function() {
-    global_plate_increment_operation = $(this).val();
-    });
-
-    $("#id_se_time_unit").change(function() {
-        global_plate_time_unit = $(this).val();
-        //console.log($(this).children("option:selected").text());
-
-        // this loop worked as expected, replacement did not work at the time time tested
-        // $('#formset').children().each(function() {
-        //     console.log($(this).children("option:selected").text());
-        //     if ( $(this).hasClass("item") && ( $(this).attr("data-value",'minute') || $(this).attr("data-value",'hour') || $(this).attr("data-value",'day') ) )
-        //     {
-        //         $(this).attr("data-value", global_plate_time_unit);
-        //         $(this).val(global_plate_time_unit);
-        //     }
-        // });
-        // Moved to the main plate map, not the items, so don't need this anymore
-        // for (i = 0; i < global_plate_size; i++) {
-        //     $('#id_assayplatereadermapitem_set-' + i + '-time_unit').val(global_plate_time_unit);
-        // };
     });
 
     //so can select table cells - keep
@@ -278,7 +206,7 @@ $(document).ready(function () {
         stop: changeSelected
     });
 
-    //to format the reference table - keep
+    //to format the reference table - keep - although, do not plan to show table, but need for javascript
     $('#matrix_items_table').DataTable({
         "iDisplayLength": 25,
         "sDom": '<B<"row">lfrtip>',
@@ -289,15 +217,44 @@ $(document).ready(function () {
 
     // when loading, what and how to load the plate
     // if add page, start with empty table (plate), if existing, pull from formsets
+    $('.show-add').addClass('hidden');
+    $('.hide-add').addClass('hidden');
     if ($("#check_load").html() === 'add') {
+        $('.show-add').removeClass('hidden');
         global_plate_size = 24;
         platelabels(global_plate_size, "adding");
     } else {
-        let elem = document.getElementById ("existing_device_size");
+        $('.hide-add').removeClass('hidden');
+        // set initially displaced in the standard target method unit
+        let elem_standard_text = document.getElementById ("existing_study_assay_text");
+        let elem_standard = document.getElementById ("existing_study_assay");
+        global_plate_study_assay_text = elem_standard_text.innerText.trim();
+        global_plate_study_assay = elem_standard.innerText.trim();
+        if (global_plate_study_assay_text != 'None') {
+            changeStudyAssay()
+        }
+        let elem_size = document.getElementById ("existing_device_size");
         //global_plate_size = $("#existing_device_size").val(); does not work...
-        global_plate_size = elem.innerText;
-        //console.log('update plate size ', global_plate_size)
+        global_plate_size = elem_size.innerText;
         platelabels(global_plate_size, "existing");
+    }
+    function changeStudyAssay() {
+        //$('#existing_study_assay').val(global_plate_study_assay);
+        console.log(global_plate_study_assay_text)
+        console.log(global_plate_study_assay)
+        $("#id_ns_method_target_unit").find('option[value=global_plate_study_assay]').attr('selected','selected')
+        // let select_study_assay = document.getElementById("id_ns_method_target_unit");
+        // console.log(select_study_assay.options.length)
+        // for(let i = 0; i < select_study_assay.options.length; i++){
+        //     console.log(select_study_assay.options[i].value)
+        //     if(select_study_assay.options[i].value == global_plate_study_assay ){
+        //         console.log("equal ",i," ",select_study_assay.options[i].value)
+        //         //select_study_assay.options[i].selected = true;
+        //         //document.getElementById().selectedIndex = i;
+        //
+        //     }
+        // }
+        //$("#id_ns_method_target_unit > [value=global_plate_study_assay]").attr("selected", "true");
     }
 
     // when add page and the user changes the plate size, have to reload empty plate the correct size
@@ -307,27 +264,22 @@ $(document).ready(function () {
         global_plate_size = $("#id_device").val();
         platelabels(global_plate_size, "adding");
     });
-    // adding these made 2x forms, so moved it back to where had it before
-    //$('#id_assayplatereadermapitem_set-TOTAL_FORMS').val(global_plate_size);
-    // }).trigger('change');
-
-    // var $saveme = $('#standard_target_selected').selectize();
-    // var myselection = $saveme[0].selectize;;
-    // console.log(myselection)
-
 
     // show hide buttons - changing the class of the plate map to show/hide based on checked or unchecked
-    // list of ones to start checked so can be easily changed
-    let check_list1 = ['#show_matrix_item', '#show_time', '#show_location',
-        '#show_well_use', '#show_label',
-        '#show_compound', '#show_cell', '#show_setting', '#show_standard_value'];
-    let check_list2 = ['.plate-cells-matrix-item', '.plate-cells-time', '.plate-cells-location',
-        '.plate-cells-well-use', '.plate-cells-label',
-        '.plate-cells-compound', '.plate-cells-cell', '.plate-cells-setting', '.plate-cells-standard-value'];
-    check_list1 = ['#show_matrix_item', '#show_time', '#show_location',
-        '#show_well_use', '#show_standard_value'];
-    check_list2 = ['.plate-cells-matrix-item', '.plate-cells-time', '.plate-cells-location',
-        '.plate-cells-well-use', '.plate-cells-standard-value'];
+    // list of ones to start checked so can be easily changed if people decide they want different defaults
+    let check_list1 = ['#show_well_use', '#show_matrix_item', '#show_time', '#show_location',
+        '#show_label', '#show_compound', '#show_cell', '#show_setting',
+        '#show_standard_value'];
+    check_list1 = ['#show_well_use', '#show_matrix_item', '#show_time', '#show_location',
+        '#show_standard_value'];
+    let check_list2 = ['.plate-cells-well-use', '.plate-cells-matrix-item', '.plate-cells-time', '.plate-cells-location',
+        '.plate-cells-label', '.plate-cells-compound', '.plate-cells-cell', '.plate-cells-setting',
+        '.plate-cells-standard-value',
+        '.plate-cells-block-value'];
+    check_list2 = ['.plate-cells-well-use', '.plate-cells-matrix-item', '.plate-cells-time', '.plate-cells-location',
+        '.plate-cells-standard-value'
+        ];
+    // check to show and show them
     checkidx = 0;
     check_list1.forEach(function() {
         $(check_list1[checkidx]).prop('checked', true);
@@ -335,6 +287,7 @@ $(document).ready(function () {
         checkidx = checkidx + 1;
     });
 
+    // show/hide in plate map based on the fancy check boxes
     $('#show_matrix_item').change(function() {
        if ($(this).is(':checked')) {
             $('.plate-cells-matrix-item').removeClass('hidden');
@@ -398,17 +351,22 @@ $(document).ready(function () {
             $('.plate-cells-standard-value').addClass('hidden');
        }
     });
+    $('#show_block_value').change(function() {
+       if ($(this).is(':checked')) {
+            $('.plate-cells-block-value').removeClass('hidden');
+       } else {
+            $('.plate-cells-block-value').addClass('hidden');
+       }
+    });
 
-    function platelabels(size, aore)
-    {
+    // make the basis for the plate map based on the plate size and if it is add or update/view
+    function platelabels(size, aore) {
         let row_labels = [];
         let col_labels = [];
         let row_contents = [];
-
         //note that this arrangement will be first is 0 for both row and column
         let row_labels_all = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P'];
         let col_labels_all = ['1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20','21','22','23','24'];
-        //console.log("start of plate size ", size);
         if (size == 24) {
             row_labels = row_labels_all.slice(0,4); //['A','B','C','D'];
             col_labels = col_labels_all.slice(0,6); //['1','2','3','4','5','6'];
@@ -421,8 +379,7 @@ $(document).ready(function () {
         } else if (size == 96) {
             row_labels = row_labels_all.slice(0,8); //['A','B','C','D','E','F','G','H'];
             col_labels = col_labels_all.slice(0,12); //['1','2','3','4','5','6','7','8','9','10','11','12'];
-            row_contents =
-                    [
+            row_contents = [
 ["A1", "A2", "A3", "A4", "A5", "A6", "A7", "A8", "A9", "A10", "A11", "A12"],
 ["B1", "B2", "B3", "B4", "B5", "B6", "B7", "B8", "B9", "B10", "B11", "B12"],
 ["C1", "C2", "C3", "C4", "C5", "C6", "C7", "C8", "C9", "C10", "C11", "C12"],
@@ -432,13 +389,11 @@ $(document).ready(function () {
 ["G1", "G2", "G3", "G4", "G5", "G6", "G7", "G8", "G9", "G10", "G11", "G12"],
 ["H1", "H2", "H3", "H4", "H5", "H6", "H7", "H8", "H9", "H10", "H11", "H12"]
                     ];
-
         } else {
             // '384'
             row_labels = row_labels_all;
             col_labels = col_labels_all;
-            row_contents =
-                    [
+            row_contents = [
 ["A1", "A2", "A3", "A4", "A5", "A6", "A7", "A8", "A9", "A10", "A11", "A12", "A13", "A14", "A15", "A16", "A17", "A18", "A19", "A20", "A21", "A22", "A23", "A24"],
 ["B1", "B2", "B3", "B4", "B5", "B6", "B7", "B8", "B9", "B10", "B11", "B12", "B13", "B14", "B15", "B16", "B17", "B18", "B19", "B20", "B21", "B22", "B23", "B24"],
 ["C1", "C2", "C3", "C4", "C5", "C6", "C7", "C8", "C9", "C10", "C11", "C12", "C13", "C14", "C15", "C16", "C17", "C18", "C19", "C20", "C21", "C22", "C23", "C24"],
@@ -458,14 +413,45 @@ $(document).ready(function () {
                     ];
         }
         let data_packed = [col_labels, row_labels, row_contents];
-        //console.log(col_labels)
-        //console.log(row_labels)
-        //console.log(row_contents)
+        // build the plate map with the dimensions of the row_contents (plus headers)
+        // It is VERY IMPORTANT to understand that the visual representation of the plate
+        // is pulled from the order of the original creation of the plate items!
         buildPlate(data_packed, aore);
     }
 
-    // It is VERY IMPORTANT to understand that the visual representation of the plate
-    // is pulled from the order of the original creation of the plate items!
+
+// make sure value set matches want is displayed in file-block - it should alwasy be the 0, so get the matches from diction 0
+    //get standard to show in box if selected...
+
+    //TODO need condition for if null
+    //make option to see sample value that shows when file is selected
+    //set the standard on open of view or update
+    //set the default id_se_file_block-selectized to empty (null) - maybe
+   // global_plate_number_file_block_sets > 0   - number blocks (value sets with be this + 1 - the empty template maybe..may not have an empty if decide to fill it
+
+
+                            //form.se_file_block label="File-Block"  %}
+                            //    <div class="hidden" id="ns_file_block">  id_se_file_block-selectized   ns_file_block
+                            //        {{ form.ns_file_block }}
+
+
+                            //    <div class="hidden" id="dict_index_file_pk_block_pk">
+                            //        {{ form.dict_index_file_pk_block_pk }}   dict_index_file_pk_block_pk
+
+
+
+
+
+
+
+
+    // var $saveme = $('#standard_target_selected').selectize();
+    // var myselection = $saveme[0].selectize;;
+    // console.log(myselection)
+
+
+
+
 
     //TODO get the right value set when more than the added on (assigned to file)
     // global_plate_number_file_block_sets > 0....
@@ -512,13 +498,12 @@ $(document).ready(function () {
             //tdbodyrow.appendChild(document.createTextNode(data[1][ridx]));
             $(tdbodyrow).html(data[1][ridx] + side_label_button);
             trbodyrow.appendChild(tdbodyrow);
-
             let cidx = 0;
-
             // build content row (same row as the row_labels (A=A, B=B, etc.)
             // while in a row, go through each column
 
             data[2][ridx].forEach(function(el) {
+                //make all the parts of the table body (note: 10 possible items for display in plate map)
                 let td = document.createElement("td");
                 let div_label = document.createElement("div");
                 $(div_label).attr('data-index', formsetidx);
@@ -584,31 +569,33 @@ $(document).ready(function () {
                 $(div_time).attr('id', "time-"+formsetidx);
                 $(div_time).addClass('map-time plate-cells-time hidden');
 
-                //console.log(formsetidx)
-                //console.log(ridx)
-                //console.log(cidx)
+                let div_block_value = document.createElement("div");
+                $(div_block_value).attr('data-index', formsetidx);
+                $(div_block_value).attr('row-index', ridx);
+                $(div_block_value).attr('column-index', cidx);
+                $(div_block_value).attr('id', "block-value-"+formsetidx);
+                $(div_block_value).addClass('map-block-value plate-cells-block-value hidden');
 
                 //content of the element
                 if (aore === "adding") {
-                    // if adding, need a form for each well in the plate, make a form for each well based on size of plate
+                    // if adding, need a formset for each well in the plate (for the item and the item value tables)
                     //https://simpleit.rocks/python/django/dynamic-add-form-with-add-button-in-django-modelformset-template/
                     $('#formset').append(first_item_form.replace(/-0-/g, '-' + formsetidx + '-'));
                     $('#id_assayplatereadermapitem_set-TOTAL_FORMS').val(formsetidx + 1);
                     $('#value_formset').append(first_value_form.replace(/-0-/g, '-' + formsetidx + '-'));
                     $('#id_assayplatereadermapitemvalue_set-TOTAL_FORMS').val(formsetidx + 1);
 
+                    // since adding, all content is place holder
                     div_compound.appendChild(document.createTextNode("-"));
                     div_cell.appendChild(document.createTextNode("-"));
                     div_setting.appendChild(document.createTextNode("-"));
-
-                    div_matrix_item.appendChild(document.createTextNode("-"));
-                    div_well_use.appendChild(document.createTextNode("empty"));
                     div_label.appendChild(document.createTextNode(el));
-
+                    div_well_use.appendChild(document.createTextNode("empty"));
+                    div_matrix_item.appendChild(document.createTextNode("-"));
                     div_location.appendChild(document.createTextNode("-"));
-                    div_standard_value.appendChild(document.createTextNode("0"));
-
                     div_time.appendChild(document.createTextNode("0"));
+                    div_standard_value.appendChild(document.createTextNode("0"));
+                    div_block_value.appendChild(document.createTextNode("0"));
 
                     //this auto fills the fields that are needed to join the items and the items values tables
                     //the platemap id will be the same in both since they are two formsets to the main plate map table
@@ -617,14 +604,9 @@ $(document).ready(function () {
                     $('#id_assayplatereadermapitem_set-' + formsetidx + '-column_index').val(cidx);
                     $('#id_assayplatereadermapitem_set-' + formsetidx + '-plate_index').val(formsetidx);
                     $('#id_assayplatereadermapitem_set-' + formsetidx + '-name').val(el);
-
-                    $('#id_assayplatereadermapitemvalue_set-' + formsetidx + '-row_index').val(ridx);
-                    $('#id_assayplatereadermapitemvalue_set-' + formsetidx + '-column_index').val(cidx);
                     $('#id_assayplatereadermapitemvalue_set-' + formsetidx + '-plate_index').val(formsetidx);
-                    $('#id_assayplatereadermapitemvalue_set-' + formsetidx + '-name').val(el);
-
                 } else {
-                    // these have to be gotten to display text in the cell instead of the pk
+                    // these are needed to display text in the cell instead of the pk
                     let saved_matrix_item = $('#id_assayplatereadermapitem_set-' + formsetidx + '-matrix_item').val();
                     $('#id_ns_matrix_item').val(saved_matrix_item);
                     let saved_text_matrix_item = $('#id_ns_matrix_item').children("option:selected").text();
@@ -643,8 +625,9 @@ $(document).ready(function () {
                     div_location.appendChild(document.createTextNode(saved_text_location));
                     div_standard_value.appendChild(document.createTextNode($('#id_assayplatereadermapitem_set-' + formsetidx + '-standard-value').val()));
 
+                    // get from the correct value formset
+                    div_block_value.appendChild(document.createTextNode($('#id_assayplatereadermapitemvalue_set-' + formsetidx + '-block-value').val()));
                     div_time.appendChild(document.createTextNode($('#id_assayplatereadermapitemvalue_set-' + formsetidx + '-time').val()));
-
                 }
 
                 key_value_plate_index_row_index[formsetidx] = ridx;
@@ -653,45 +636,40 @@ $(document).ready(function () {
                 formsetidx = formsetidx + 1;
 
                 // put it all together - here is where the order matters
-                // the order here will be the order they show in the plate map
                 let tdbodycell = document.createElement("td");
                 // the order here will determine the order in the well plate
                 tdbodycell.appendChild(div_well_use);
                 tdbodycell.appendChild(div_matrix_item);
                 tdbodycell.appendChild(div_location);
                 tdbodycell.appendChild(div_time);
-
                 tdbodycell.appendChild(div_label);
                 tdbodycell.appendChild(div_standard_value);
-
+                tdbodycell.appendChild(div_block_value);
                 tdbodycell.appendChild(div_compound);
                 tdbodycell.appendChild(div_cell);
                 tdbodycell.appendChild(div_setting);
 
                 trbodyrow.appendChild(tdbodycell);
-
                 cidx = cidx + 1;
             });
-
             tbody.appendChild(trbodyrow);
             ridx = ridx + 1;
         });
-
         plate_table.appendChild(tbody);
         return plate_table
     }
 
     // what button was clicked in the plate map
     $(".apply-button").on("click", function(e){
+        global_plate_sample_change_time = document.getElementById('id_se_time').value;
+        global_plate_standard_value = document.getElementById('id_se_standard_value').value;
+        global_plate_increment_value = document.getElementById('id_se_increment_value').value;
         //let button_id = e.target.id;
         let my_this = $(this);
         let button_column_index = my_this.attr('column-index');
         let button_row_index = my_this.attr('row-index');
         let button_column_or_row = my_this.attr('column-or-row');
         let plate_index_list = [];
-        // console.log(button_column_or_row);
-        // console.log(button_column_index);
-        // console.log(button_row_index);
         // find the plate map index of matching column or row and send to the function for processing
         for ( var idx = 0, l = global_plate_size; idx < l; idx++ ) {
             //console.log(idx)
@@ -721,7 +699,9 @@ $(document).ready(function () {
         $('.ui-selected').children().each(function () {
             // send each selected cell of the table to the function for processing
             global_plate_sample_change_time = document.getElementById('id_se_time').value;
-            console.log(global_plate_sample_change_time)
+            global_plate_standard_value = document.getElementById('id_se_standard_value').value;
+            global_plate_increment_value = document.getElementById('id_se_increment_value').value;
+
             if ($(this).hasClass("map-well-use")) {
                 let idx = $(this).attr('data-index');
                 welluseChange(idx);
@@ -770,13 +750,13 @@ $(document).ready(function () {
         // standardize the increment by changing order of how selected
         if (global_plate_change_method === 'increment' && global_plate_increment_direction === 'right') {
             plate_index_list_ordered = plate_index_list.sort(function(a, b){return b-a});
-            console.log("dsc ", plate_index_list_ordered)
+            //console.log("dsc ", plate_index_list_ordered)
         } else {
             //save for reference....plate_index_list_ordered = plate_index_list.map(Number).sort(function(a, b){return a-b});
             plate_index_list_ordered = plate_index_list;
-            console.log("asc ", plate_index_list_ordered)
+            //console.log("asc ", plate_index_list_ordered)
         }
-        console.log("asc ", plate_index_list_ordered)
+        //console.log("asc ", plate_index_list_ordered)
 
         // reduce to * or +
         if (global_plate_change_method === 'increment') {
@@ -864,12 +844,12 @@ $(document).ready(function () {
         });
     }
 
+    // functions for the tooltips
     function escapeHtml(html) {
         return $('<div>').text(html).html();
     }
-
     function make_escaped_tooltip(title_text) {
-        var new_span = $('<div>').append($('<span>')
+        let new_span = $('<div>').append($('<span>')
             .attr('data-toggle', "tooltip")
             .attr('data-title', escapeHtml(title_text))
             .addClass("glyphicon glyphicon-question-sign pull-left")
@@ -877,7 +857,7 @@ $(document).ready(function () {
             .attr('data-placement', "bottom"));
         return new_span.html();
     }
-
+    // function to purge previous formsets when adding a page and changing plate size
     function removeFormsets() {
         // get rid of previous formsets before try to add more or the indexes get all messed up
         while ($('#formset').find('.inline').length > 0 ) {
@@ -885,45 +865,6 @@ $(document).ready(function () {
         }
         $('#id_assayplatereadermapitem_set-TOTAL_FORMS').val(0);
     }
-
     //keep for reference for now - adding a formset the original way from here:
     //https://simpleit.rocks/python/django/dynamic-add-form-with-add-button-in-django-modelformset-template/
 });
-
-
-
-
-/*sample=matrix item, standard, blank, empty; replicate=1,2,3..; location=sample location; time=sample time;*/
-/*name=A1, A2, A3; use=standard, sample, blank, empty; */
-/*hiding and check box color DARKER*/
-// .plate-matrix-item {background-color: yellow}
-// .plate-location {background-color: #d1cffa}
-// .plate-time {background-color: #b5fbb4}
-// .plate-well-use {background-color: WhiteSmoke }
-// .plate-label {background-image: linear-gradient(to bottom, #1e1e1e 0,#080800 100%);}
-// .plate-compound {background-image: linear-gradient(to bottom,#5bc0de 0,#2aabd2 100%);}
-// .plate-cell {background-image: linear-gradient(to bottom,#5cb85c 0,#419641 100%);}
-// .plate-setting {background-image: linear-gradient(to bottom, #f0ad4e 0, #eb9316 100%);}
-// .plate-standard-value {background-color: #fbb4bc;}
-//
-// /*color of things in the table (lighter colors)*/
-// .map-matrix-item {display: block; background-color: yellow; border-radius: 1px;
-//     padding:3px; margin:0px; border: 1px solid white}
-// .map-location {display: block; background-color:  #d1cffa; border-radius: 1px;
-//     padding:3px; margin:0px; border: 1px solid white}
-// .map-time {display: block; background-color: #b5fbb4; border-radius: 1px;
-//     padding:3px; margin:0px; border: 1px solid white}
-// .map-well-use {display: block; background-color: WhiteSmoke ; border-radius: 1px;
-//     padding:3px; margin:0px; border: 1px solid white}
-// .map-label {color: white; display: block; background-color: #080808;
-//     border-color: #080808;}
-// .map-compound {display: block; background-color: #d9edf7;
-//     border-color: #bce8f1;}
-// .map-cell{display: block; background-color: #dff0d8;
-//     border-color: #d6e9c6;}
-// .map-setting{display: block; background-color: #fcf8e3;
-//     border-color: #faebcc;}
-// .map-standard-value {display: block; background-color: #fbb4bc; border-radius: 1px;
-//     padding:3px; margin:0px; border: 1px solid white}
-// .check-mark-color {color: white}
-// .big-checkbox {padding-top:15px; padding-left:5px; width: 30px; height: 30px;}
