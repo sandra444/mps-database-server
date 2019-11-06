@@ -2319,6 +2319,10 @@ class AssayPlateReaderMapForm(BootstrapForm):
         self.study = kwargs.pop('study', None)
         self.user = kwargs.pop('user', None)
         super(AssayPlateReaderMapForm, self).__init__(*args, **kwargs)
+
+        if not self.study and self.instance.study:
+            self.study = self.instance.study
+
         my_instance = self.instance
         self.fields['device'].widget.attrs['class'] += ' no-selectize'
         self.fields['ns_file_block'].widget.attrs['class'] += ' no-selectize'

@@ -240,9 +240,12 @@ $(document).ready(function () {
     }
     function changeStudyAssay() {
         //$('#existing_study_assay').val(global_plate_study_assay);
-        console.log(global_plate_study_assay_text)
-        console.log(global_plate_study_assay)
-        $("#id_ns_method_target_unit").find('option[value=global_plate_study_assay]').attr('selected','selected')
+        console.log(global_plate_study_assay_text);
+        console.log(global_plate_study_assay);
+        // $("#id_ns_method_target_unit option").removeAttr('selected').filter('[value='+global_plate_study_assay+']').attr('selected', true);
+        // $("#id_se_method_target_unit").val
+
+        // $("#id_ns_method_target_unit").find('option[value=global_plate_study_assay]').attr('selected','selected');
         // let select_study_assay = document.getElementById("id_ns_method_target_unit");
         // console.log(select_study_assay.options.length)
         // for(let i = 0; i < select_study_assay.options.length; i++){
