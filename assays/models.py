@@ -1484,6 +1484,10 @@ class AssayDataFileUpload(FlaggableModel):
 # NEW MODELS, TO BE INTEGRATED FURTHER LATER
 class AssayTarget(LockableModel):
     """Describes what was sought by a given Assay"""
+
+    class Meta(object):
+        verbose_name = 'Target'
+
     name = models.CharField(
         max_length=512,
         unique=True,

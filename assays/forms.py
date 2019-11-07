@@ -30,6 +30,7 @@ from assays.models import (
     AssayReference,
     AssayStudyReference,
     AssayStudySetReference,
+    AssayTarget
 )
 from compounds.models import Compound, CompoundInstance, CompoundSupplier
 from microdevices.models import (
@@ -2271,3 +2272,13 @@ class AssayMatrixFormNew(SetupFormsMixin, SignOffMixin, BootstrapForm):
         self.fields['test_type'].widget.attrs['class'] += ' no-selectize test-type'
         # Bad
         self.fields['test_type'].widget.attrs['style'] = 'width:100px;'
+
+
+class AssayTargetForm(BootstrapForm):
+    class Meta(object):
+        model = AssayTarget
+        exclude = tracking
+
+        widgets = {
+            'description': forms.Textarea(attrs={'cols': 50, 'rows': 3}),
+        }

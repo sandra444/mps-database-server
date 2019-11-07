@@ -396,6 +396,9 @@ class FormHandlerMixin(object):
     formsets = ()
     is_update = False
 
+    # Default to generic_form template
+    template_name = 'generic_form.html'
+
     def __init__(self, *args, **kwargs):
         super(FormHandlerMixin, self).__init__(*args, **kwargs)
 
@@ -422,6 +425,11 @@ class FormHandlerMixin(object):
 
     def get_context_data(self, **kwargs):
         context = super(FormHandlerMixin, self).get_context_data(**kwargs)
+
+        # Add model name
+        context.update({
+            'model_verbose_name': self.model._meta.verbose_name
+        })
 
         for formset_name, formset_factory in self.formsets:
             data_for_factory = []

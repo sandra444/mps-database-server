@@ -46,7 +46,8 @@ from assays.views import (
     AssayReferenceDetail,
     AssayReferenceDelete,
     AssayStudyAddNew,
-    AssayMatrixNew
+    AssayMatrixNew,
+    AssayTargetAdd
 )
 import assays.ajax
 
@@ -161,6 +162,9 @@ urlpatterns = [
     url(r'^assays/assayreference/(?P<pk>[0-9]+)/$', AssayReferenceDetail.as_view(), name='assay-reference-detail'),
     url(r'^assays/assayreference/(?P<pk>[0-9]+)/update/$', AssayReferenceUpdate.as_view(), name='assay-reference-update'),
     url(r'^assays/assayreference/(?P<pk>[0-9]+)/delete/$', AssayReferenceDelete.as_view(), name='assay-reference-delete'),
+
+    # Target
+    url(r'^assays/assaytarget/add/$', AssayTargetAdd.as_view(), name='assay-target-add'),
 
     # Ajax
     url(r'^assays_ajax/$', assays.ajax.ajax),

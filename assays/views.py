@@ -30,7 +30,8 @@ from assays.models import (
     AssayDataPoint,
     AssayStudySupportingData,
     AssayStudySet,
-    AssayReference
+    AssayReference,
+    AssayTarget
 )
 from assays.forms import (
     AssayStudyConfigurationForm,
@@ -56,7 +57,8 @@ from assays.forms import (
     AssayStudySetForm,
     AssayReferenceForm,
     AssayStudySetReferenceFormSetFactory,
-    AssayMatrixFormNew
+    AssayMatrixFormNew,
+    AssayTargetForm
 )
 from microdevices.models import MicrophysiologyCenter
 from django import forms
@@ -2641,3 +2643,12 @@ class AssayMatrixNew(StudyGroupMixin, UpdateView):
             return redirect(self.object.get_post_submission_url())
         else:
             return self.render_to_response(self.get_context_data(form=form))
+
+
+class AssayTargetMixin(FormHandlerMixin):
+    model = AssayTarget
+    form_class = AssayTargetForm
+
+
+class AssayTargetAdd(OneGroupRequiredMixin, AssayTargetMixin, CreateView):
+    pass
