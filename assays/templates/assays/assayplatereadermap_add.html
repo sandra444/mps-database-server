@@ -61,22 +61,16 @@
                 {% endif %}
                 <br>
                 {% csrf_token %}
-                </h1>
                 {# need this in javascript #}
                 <div id="check_load" class="hidden">{{ page_called }}</div>
                 </h1>
             </div>
 
             <div class="row">
-                {# need these in javascript #}
-                <div class="hidden" id="ns_matrix_item">
-                    {{ assay_map_additional_info.ns_matrix_item }}
-                    {{ assay_map_additional_info.ns_location }}
-                </div>
-                {# need this in javascript #}
-                <div class="hidden" id="target_method_unit">
-                    {{ assay_map_additional_info.ns_method_target_unit }}
-                </div>
+{#                <div class="hidden" id="ns_matrix_item">#}
+{#                    {{ assay_map_additional_info.ns_matrix_item }}#}
+{#                    {{ assay_map_additional_info.ns_location }}#}
+{#                </div>#}
                 {# need this in javascript #}
                 <div id="existing_device_size" class="hidden">
                     {{ object.device }}
@@ -85,7 +79,7 @@
 
             {# global plate map edits #}
             <div>
-                <h4>
+
                 <br>
                 {% if add %}
                     <div class="row">
@@ -106,6 +100,9 @@
                     {# Study should be passed in backend - do not to the following!#}
                     {# {% include 'generic_field.html' with field=form.study label="Study" %}#}
                     {# <div class="hidden"><p>plate map id {{ object.id }}</p></div>#}
+                    {# {{ object.study_assay_id }} #}
+                    {# {{ object.study_assay }} #}
+                    {# {{ form.instance.study_assay }} #}
                 {% endif %}
 
                 <div class="row">
@@ -144,53 +141,30 @@
                 </div>
 
                 <div class="row">
-                    <div>
-                        {# need this in javascript #}
-                        <div id="existing_study_assay" >
-                            {{ object.study_assay_id }}
-                        </div>
-                        <div id="existing_study_assay_text" >
-                            {{ object.study_assay }}
-                        </div>
-                        <div>
-                            {{ form.instance.study_assay }}
-                        </div>
-                    </div>
                     <div class="col-md-8">
-                        <div class="xshow-add">
+                        <div>
                             {# this one must be correct on the save #}
                             {% include 'generic_field.html' with field=form.study_assay label="Standard"  %}
                         </div>
-                        <div class="xhide-add">
-                            {# this just allows selection, but would be nice to show the saved one in update #}
-                            {% include 'generic_field.html' with field=assay_map_additional_info.ns_method_target_unit label="Standard"  %}
-                            {% include 'generic_field.html' with field=assay_map_additional_info.se_method_target_unit label="Standard"  %}
-                        </div>
                     </div>
-                     <div class="col-md-1"><br>
-                         <h4>
+                     <div class="col-md-1">
                          <div><p id="standard_tooltip"></p>
                             <label for="standard_tooltip">&nbsp;</label>
                          </div>
-                         </h4>
                     </div>
                 </div>
-                </h4>
             </div>
         
             <div class="row">
-                <p>Hide these later</p>
+{#                <div  id="ns_file_block">#}
+{#                    {{ form.ns_file_block }}#}
+{#                </div>#}
+{#                <div class="hidden" id="dict_index_file_pk_block_pk">#}
+{#                    {{ form.dict_index_file_pk_block_pk }}#}
+{#                </div>#}
                 {# need this in javascript #}
-                <div id="number_value_formsets">
-                    {{ form.number_file_block_combos }}
-                </div>
-                {# need this in javascript #}
-                <div  id="ns_file_block">
-                    {{ form.ns_file_block }}
-                </div>
-                {# need this in javascript #}
-                <div  id="dict_index_file_pk_block_pk">
-                    {{ form.dict_index_file_pk_block_pk }}
+                <div class="hidden">
+                    {{ form.ns_file_pk_block_pk }}
                 </div>
             </div>  
 {#                    <div class="row">#}
@@ -201,11 +175,10 @@
 
             {% if add %}
             {% else %}
-                <h4>
-                <div class="select-value-set">
+                <div class="select-value-set hidden">
                     <div class="row">
                         <div class="col-md-8">
-                            {% include 'generic_field.html' with field=form.number_file_block_combos label="# File-Block"  %}
+                            {% include 'generic_field.html' with field=form.number_file_block_combos label="Count Used"  %}
                         </div>
                         <div class="col-md-1">
                             <div><p id="file_block_number_tooltip"></p>
@@ -215,7 +188,7 @@
                     </div>
                     <div class="row">
                         <div class="col-md-8">
-                            {% include 'generic_field.html' with field=form.se_file_block label="File-Block"  %}
+                            {% include 'generic_field.html' with field=form.se_file_block label="Showing File-Block"  %}
                         </div>
                         <div class="col-md-1">
                             <div><p id="file_block_tooltip"></p>
@@ -224,7 +197,6 @@
                         </div>
                     </div>
                 </div>
-                </h4>
              {% endif %}
 
             {# Optional things to show in the plate map #}
@@ -334,14 +306,12 @@
                                 {{ assay_map_additional_info.se_well_use }}
                             </div>
                             <div class="col-md-6">
-                                <h4>
                                 <div class="non-sample-section "><p id="well_use_tooltip"></p>
                                     <label for="well_use_tooltip">&nbsp;</label>
                                 </div>
                                 <div class="sample-section hidden"><p id="sample_tooltip"></p>
                                     <label for="sample_tooltip">&nbsp;</label>
                                 </div>
-                                </h4>
                             </div>
                         {% endif %}
                     </div>
@@ -370,11 +340,9 @@
                         {% if review %}
                         {% else %}
                             <div class="col-md-2 ">
-                            <h4>
                                 <div><p id="sample_matrix_item_tooltip"></p>
                                     <label for="sample_matrix_item_tooltip">&nbsp;</label>
                                 </div>
-                            </h4>
                             </div>
                         {%  endif %}
 
@@ -396,11 +364,9 @@
                         {% if review %}
                         {% else %}
                             <div class="col-md-2 ">
-                            <h4>
                                 <div><p id="sample_location_tooltip"></p>
                                     <label for="sample_location_tooltip">&nbsp;</label>
                                 </div>
-                            </h4>
                             </div>
                         {%  endif %}
 
@@ -422,11 +388,9 @@
                         {% if review %}
                         {% else %}
                             <div class="col-md-2 ">
-                            <h4>
                                 <div><p id="sample_time_tooltip"></p>
                                     <label for="sample_time_tooltip">&nbsp;</label>
                                 </div>
-                             </h4>
                             </div>
                         {%  endif %}
                     </div>
@@ -437,39 +401,39 @@
                         <div class="row">
                             <div class="sample-section hidden ">
                                 <div class="col-md-2">
-                                    <label >
-                                        Matrix Item
-                                    </label>
+{#                                    <label >#}
+{#                                        Matrix Item#}
+{#                                    </label>#}
                                    {{ assay_map_additional_info.se_matrix_item }}
                                 </div>
                                 <div class="col-md-2">
-                                    <div class="big-checkbox">
+                                    <div>
 {#                                        <label class="sample-section hidden"><input type="radio" name="sample_change" value="matrix_item"> Apply </label>#}
-                                        <input type="checkbox" name="change_matrix_item" value="matrix_item" checked />
+                                        <input class="big-checkbox" type="checkbox" name="change_matrix_item" value="matrix_item" checked />
                                     </div>
                                 </div>
                                 <div class="col-md-2 ">
-                                    <label >
-                                        Sample Location
-                                    </label>
+{#                                    <label >#}
+{#                                        Sample Location#}
+{#                                    </label>#}
                                     {{ assay_map_additional_info.se_location }}
                                 </div>
                                 <div class="col-md-2">
-                                    <div class="big-checkbox">
+                                    <div>
 {#                                        <label class="sample-section hidden"><input type="radio" name="sample_change" value="location"> Apply </label>#}
-                                        <input type="checkbox" name="change_location" value="matrix_location" checked />
+                                        <input class="big-checkbox" type="checkbox" name="change_location" value="matrix_location" checked />
                                     </div>
                                 </div>
                                 <div class="col-md-2">
-                                    <label >
-                                        Sample Time
-                                    </label>
+{#                                    <label >#}
+{#                                        Sample Time#}
+{#                                    </label>#}
                                     {{ assay_map_additional_info.se_time }}
                                 </div>
                                 <div class="col-md-2">
-                                    <div class="big-checkbox">
+                                    <div>
 {#                                        <label class="sample-section hidden"><input type="radio" name="sample_change" value="time"> Apply </label>#}
-                                        <input type="checkbox" name="change_time" value="matrix_time" checked />
+                                        <input class="big-checkbox" type="checkbox" name="change_time" value="matrix_time" checked />
                                     </div>
                                 </div>
                             </div>
@@ -540,9 +504,9 @@
                                     {{ assay_map_additional_info.se_increment_operation }}
                                 </div>
                                  {# need this in javascript #}
-                                <div class="hidden" id="ns_increment_operation">
-                                    {{ assay_map_additional_info.ns_increment_operation }}
-                                </div>
+{#                                <div class="hidden" id="ns_increment_operation">#}
+{#                                    {{ assay_map_additional_info.ns_increment_operation }}#}
+{#                                </div>#}
                             </div>
                             <div class="col-md-2">
                                 <div class=row">

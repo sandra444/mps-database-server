@@ -69,11 +69,9 @@
         {% endcomment %}
 
         <div>
-            <h3>
-                <div><p id="plate_map_index_tooltip"></p>
-                    <label for="plate_map_index_tooltip">Plate Map List &nbsp;</label>
-                </div>
-            </h3>
+            <div><p id="plate_map_index_tooltip"></p>
+                <label for="plate_map_index_tooltip">Plate Map List &nbsp;</label>
+            </div>
             <table id="assayplatereadermaps" class="display table table-striped table-hover" cellspacing="0" width="100%">
             <thead>
                 <tr>
@@ -82,7 +80,7 @@
                     <th>Size</th>
                     <th>Sample Time Unit</th>
                     <th>Plate Reader Unit</th>
-                    <th>Standard </th>
+{#                    <th>Standard </th>#}
                     <th>Description</th>
                 </tr>
             </thead>
@@ -100,7 +98,7 @@
                     <td>{{ plate.device }}</td>
                     <td>{{ plate.time_unit }}</td>
                     <td>{{ plate.plate_reader_unit }}</td>
-                    <td>{{ plate.study_assay }}</td>
+{#                    <td>{{ plate.study_assay }}</td>#}
                     <td>{{ plate.description }}</td>
 
                     {% comment %}

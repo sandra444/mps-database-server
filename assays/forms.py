@@ -2229,26 +2229,26 @@ class AssayPlateReadMapAdditionalInfoForm(forms.Form):
         self.fields['ns_matrix_item'].widget.attrs.update({'class': 'no-selectize'})
         self.fields['ns_location'].widget.attrs.update({'class': 'no-selectize'})
 
-        # for selection
-        my_filtered_mtu = AbstractClassAssayStudyAssay.objects.filter(
-            study_id=study_id
-        ).prefetch_related(
-            'target',
-            'method',
-            'unit',
-        )
-        self.fields['se_method_target_unit'].queryset = my_filtered_mtu
-        self.fields['ns_method_target_unit'].queryset = my_filtered_mtu
-        self.fields['ns_method_target_unit'].widget.attrs.update({'class': 'no-selectize'})
-
-    ns_method_target_unit = forms.ModelChoiceField(
-        queryset=AssayStudyAssay.objects.none(),
-        required=False,
-    )
-    se_method_target_unit = forms.ModelChoiceField(
-        queryset=AssayStudyAssay.objects.none(),
-        required=False,
-    )
+        # # for selection - moving to different place
+        # my_filtered_mtu = AbstractClassAssayStudyAssay.objects.filter(
+        #     study_id=study_id
+        # ).prefetch_related(
+        #     'target',
+        #     'method',
+        #     'unit',
+        # )
+        # self.fields['se_method_target_unit'].queryset = my_filtered_mtu
+        # self.fields['ns_method_target_unit'].queryset = my_filtered_mtu
+        # self.fields['ns_method_target_unit'].widget.attrs.update({'class': 'no-selectize'})
+    #
+    # ns_method_target_unit = forms.ModelChoiceField(
+    #     queryset=AssayStudyAssay.objects.none(),
+    #     required=False,
+    # )
+    # se_method_target_unit = forms.ModelChoiceField(
+    #     queryset=AssayStudyAssay.objects.none(),
+    #     required=False,
+    # )
 
     ns_matrix_item = forms.ModelChoiceField(
         queryset=AssayMatrixItem.objects.none(),
@@ -2313,6 +2313,7 @@ class AssayPlateReaderMapForm(BootstrapForm):
         dict_index_file_pk_block_pk = kwargs.pop('extra', 0)
         se_file_block = kwargs.pop('extra', 0)
         ns_file_block = kwargs.pop('extra', 0)
+        ns_file_pk_block_pk = kwargs.pop('extra', 0)
         #there will be a platemap, item, value set with NO file/block
         #this is the one that is copied during file upload
         number_file_block_combos = kwargs.pop('extra', 0)
@@ -2320,20 +2321,24 @@ class AssayPlateReaderMapForm(BootstrapForm):
         self.user = kwargs.pop('user', None)
         super(AssayPlateReaderMapForm, self).__init__(*args, **kwargs)
 
+        # need this because, remember, the plate map doesn't come WITH a study, must tell it which
+        # not having this caused blank study_assay in the update page (add page worked okay)
         if not self.study and self.instance.study:
             self.study = self.instance.study
 
         my_instance = self.instance
         self.fields['device'].widget.attrs['class'] += ' no-selectize'
         self.fields['ns_file_block'].widget.attrs['class'] += ' no-selectize'
+        self.fields['ns_file_pk_block_pk'].widget.attrs['class'] += ' no-selectize'
         self.fields['name'].initial = datetime.datetime.now().strftime ("%Y%m%d")+"-"+ datetime.datetime.now().strftime('%H:%M:%S')
         #self.fields['my_test'].initial = str(my_instance.id)
 
         #may need to revisit this later, do for not so ADD will work
         self.fields['se_file_block'].required = False
         self.fields['ns_file_block'].required = False
+        self.fields['ns_file_pk_block_pk'].required = False
         self.fields['my_test'].required = False
-        self.fields['dict_index_file_pk_block_pk'].required = False
+        #self.fields['dict_index_file_pk_block_pk'].required = False
         self.fields['number_file_block_combos'].required = False
 
         self.fields['study_assay'].queryset = AbstractClassAssayStudyAssay.objects.filter(
@@ -2343,7 +2348,8 @@ class AssayPlateReaderMapForm(BootstrapForm):
             'method',
             'unit',
         )
-        self.fields['study_assay'].widget.attrs['class'] += ' no-selectize'
+
+        #self.fields['study_assay'].widget.attrs['class'] += ' no-selectize'
 
         #############################
         #this is for the dropdown and should be parallel to the dict
@@ -2358,26 +2364,31 @@ class AssayPlateReaderMapForm(BootstrapForm):
         self.fields['number_file_block_combos'].initial = number_value_sets
 
         distinct_plate_map = []
-        distinct_plate_map_id = {}
+        #distinct_plate_map_id = {}
+        distinct_plate_map_pk = []
 
         #queryset should have one record for each value set that HAS a file-block associated to it
         i = 0
         for record in as_value_formset:
             pick_value = str(i)
             pick_string = record.assayplatereadermapdatafile.name + '-' + record.assayplatereadermapdatafileblock.name
+            pick_string_pk = str(record.assayplatereadermapdatafile.id) + '-' + str(record.assayplatereadermapdatafileblock.id)
             distinct_plate_map.append((pick_value, pick_string))
-            distinct_plate_map_id[i] = (record.assayplatereadermapdatafile.id, record.assayplatereadermapdatafileblock.id)
+            distinct_plate_map_pk.append((pick_value, pick_string_pk))
+            #distinct_plate_map_id[i] = (record.assayplatereadermapdatafile.id, record.assayplatereadermapdatafileblock.id)
+
             i = i+1
 
         self.fields['se_file_block'].choices = distinct_plate_map
         self.fields['ns_file_block'].choices = distinct_plate_map
+        self.fields['ns_file_pk_block_pk'].choices = distinct_plate_map_pk
 
         #test_choices = (('divide', 'Divide'), ('multiply', 'Multiply'), ('subtract', 'Subtract'), ('add', 'Add'))
         #test_choices = [('divide', 'Divide'), ('multiply', 'Multiply'), ('subtract', 'Subtract'), ('add', 'Add')]
         #self.fields['ns_file_block'].choices = test_choices
 
-        self.fields['my_test'].initial = distinct_plate_map_id
-        self.fields['dict_index_file_pk_block_pk'].initial = distinct_plate_map_id
+        self.fields['my_test'].initial = distinct_plate_map_pk
+        #self.fields['dict_index_file_pk_block_pk'].initial = distinct_plate_map_id
 
         if self.study:
             self.instance.study = self.study
@@ -2385,8 +2396,9 @@ class AssayPlateReaderMapForm(BootstrapForm):
 
     se_file_block = forms.ChoiceField()
     ns_file_block = forms.ChoiceField()
+    ns_file_pk_block_pk = forms.ChoiceField()
     my_test = forms.CharField(widget=forms.TextInput())
-    dict_index_file_pk_block_pk = forms.CharField(widget=forms.TextInput())
+    #dict_index_file_pk_block_pk = forms.CharField(widget=forms.TextInput())
     number_file_block_combos = forms.CharField(widget=forms.TextInput())
 
 
@@ -2458,6 +2470,8 @@ class AssayPlateReaderMapItemValueFormSet(BaseInlineFormSetForcedUniqueness):
         self.study = kwargs.pop('study', None)
         self.user = kwargs.pop('user', None)
         super(AssayPlateReaderMapItemValueFormSet, self).__init__(*args, **kwargs)
+        self.queryset = self.queryset.order_by('assayplatereadermapdatafile', 'assayplatereadermapdatafileblock')
+        #https://stackoverflow.com/questions/13387446/changing-the-display-order-of-forms-in-a-formset
 
         if not self.study:
             self.study = self.instance.study
