@@ -57,13 +57,20 @@ $(document).ready(function () {
         global_plate_block_pk = split_pk[1];
 
         // loop through and find the indexes of the ones that match the selected file and block
+        // make parallel arrays of the information needed for display in the plate
         midx = 0;
         global_plate_index_list_matches = [];
+        global_plate_time_matches = [];
+        global_plate_value_matches = [];
         //TODO, make parallel lists of the value and the time and just use those in plate below.......
         let my_file_v = "";
         let my_block_v = "";
         let my_file = -1;
         let my_block = -1;
+        let my_time_v = "";
+        let my_value_v = "";
+        let my_time = -1;
+        let my_value = -1;
         $('#value_formset').children().each(function(cfs) {
             //console.log("$(this) ")
             //console.log($(this));
@@ -74,8 +81,14 @@ $(document).ready(function () {
             my_block_v = "id_assayplatereadermapitemvalue_set-" + cfs + "-assayplatereadermapdatafileblock";
             my_file = $('#' + my_file_v).val();
             my_block = $('#' + my_block_v).val();
+            my_time_v = "id_assayplatereadermapitemvalue_set-" + cfs + "-time";
+            my_value_v = "id_assayplatereadermapitemvalue_set-" + cfs + "-value";
+            my_time = $('#' + my_time_v).val();
+            my_value = $('#' + my_value_v).val();
             if ( global_plate_file_pk == my_file && global_plate_block_pk == my_block ) {
                 global_plate_index_list_matches.push(cfs);
+                global_plate_time_matches.push(my_time);
+                global_plate_value_matches.push(my_value);
             }
             midx = midx + 1;
         });
@@ -610,25 +623,25 @@ $(document).ready(function () {
                 } else {
                     // these are needed to display text in the cell instead of the pk (in the plate map)
                     // if no files have been attached to the plate map, get the template one
+                    let saved_matrix_item = $('#id_assayplatereadermapitem_set-' + formsetidx + '-matrix_item').val();
+                    $('#id_ns_matrix_item').val(saved_matrix_item);
+                    let saved_text_matrix_item = $('#id_ns_matrix_item').children("option:selected").text();
+                    let saved_location = $('#id_assayplatereadermapitem_set-' + formsetidx + '-location').val();
+                    $('#id_ns_location').val(saved_location);
+                    let saved_text_location = $('#id_ns_location').children("option:selected").text();
+
+                    div_compound.appendChild(document.createTextNode($('#'+saved_matrix_item+'-compound-short').text()));
+                    div_cell.appendChild(document.createTextNode($('#'+saved_matrix_item+'-cell-short').text()));
+                    div_setting.appendChild(document.createTextNode($('#'+saved_matrix_item+'-setting-short').text()));
+
+                    div_matrix_item.appendChild(document.createTextNode(saved_text_matrix_item));
+                    div_well_use.appendChild(document.createTextNode($('#id_assayplatereadermapitem_set-' + formsetidx + '-well_use').val()));
+                    div_label.appendChild(document.createTextNode($('#id_assayplatereadermapitem_set-' + formsetidx + '-name').val()));
+
+                    div_location.appendChild(document.createTextNode(saved_text_location));
+                    div_standard_value.appendChild(document.createTextNode($('#id_assayplatereadermapitem_set-' + formsetidx + '-standard-value').val()));
+
                     if (global_plate_number_file_block_sets == 0) {
-                        let saved_matrix_item = $('#id_assayplatereadermapitem_set-' + formsetidx + '-matrix_item').val();
-                        $('#id_ns_matrix_item').val(saved_matrix_item);
-                        let saved_text_matrix_item = $('#id_ns_matrix_item').children("option:selected").text();
-                        let saved_location = $('#id_assayplatereadermapitem_set-' + formsetidx + '-location').val();
-                        $('#id_ns_location').val(saved_location);
-                        let saved_text_location = $('#id_ns_location').children("option:selected").text();
-
-                        div_compound.appendChild(document.createTextNode($('#'+saved_matrix_item+'-compound-short').text()));
-                        div_cell.appendChild(document.createTextNode($('#'+saved_matrix_item+'-cell-short').text()));
-                        div_setting.appendChild(document.createTextNode($('#'+saved_matrix_item+'-setting-short').text()));
-
-                        div_matrix_item.appendChild(document.createTextNode(saved_text_matrix_item));
-                        div_well_use.appendChild(document.createTextNode($('#id_assayplatereadermapitem_set-' + formsetidx + '-well_use').val()));
-                        div_label.appendChild(document.createTextNode($('#id_assayplatereadermapitem_set-' + formsetidx + '-name').val()));
-
-                        div_location.appendChild(document.createTextNode(saved_text_location));
-                        div_standard_value.appendChild(document.createTextNode($('#id_assayplatereadermapitem_set-' + formsetidx + '-standard-value').val()));
-
                         // get from the correct value formset
                         div_block_value.appendChild(document.createTextNode($('#id_assayplatereadermapitemvalue_set-' + formsetidx + '-block-value').val()));
                         div_time.appendChild(document.createTextNode($('#id_assayplatereadermapitemvalue_set-' + formsetidx + '-time').val()));
@@ -636,7 +649,11 @@ $(document).ready(function () {
                     } else {
                         // get the one the user selected by global_plate_index_list_matches
                         // remember, this loop is going through the plate map, by size, so, get the RIGHT one and skip the WRONG ones
-
+                        // TODO confirm that nulls are handled correctly in the push into the array
+                        div_block_value.appendChild(document.createTextNode(global_plate_time_matches[formsetidx]));
+                        div_time.appendChild(document.createTextNode(global_plate_value_matches[formsetidx]));
+                        $(div_time).attr('value-formset-index', global_plate_index_list_matches[formsetidx]);
+                        $(div_block_value).attr('value-formset-index', global_plate_index_list_matches[formsetidx]);
                     }
                 }
 
@@ -799,7 +816,7 @@ $(document).ready(function () {
                 if (global_plate_sample_change_matrix_item === true) {
                     $('#matrix_item-' + idx).text(global_plate_matrix_item_text);
                     $('#id_assayplatereadermapitem_set-' + idx + '-matrix_item').val(global_plate_matrix_item);
-                    $('#id_assayplatereadermapitemvalue_set-' + idx + '-matrix_item').val(global_plate_matrix_item);
+                    //$('#id_assayplatereadermapitemvalue_set-' + idx + '-matrix_item').val(global_plate_matrix_item);
 
                     // change the compound displayed in the table
                     $('#compound-' + idx).text($('#' + global_plate_matrix_item + '-compound-short').text());
@@ -821,6 +838,18 @@ $(document).ready(function () {
                 if (global_plate_well_use === 'sample') {
                     if (global_plate_sample_change_time === true) {
                         $('#time-' + idx).text(global_plate_time);
+
+
+                         //     global_plate_index_list_matches.push(cfs);
+                        //     global_plate_time_matches.push(my_time);
+                        //     global_plate_value_matches.push(my_value);
+
+                        //div_block_value.appendChild(document.createTextNode(global_plate_time_matches[formsetidx]));
+                        //div_time.appendChild(document.createTextNode(global_plate_value_matches[formsetidx]));
+                        //$(div_time).attr('value-formset-index', global_plate_index_list_matches[formsetidx]);
+                        //$(div_block_value).attr('value-formset-index', global_plate_index_list_matches[formsetidx]);
+                        // get the right one TODO
+
                         $('#id_assayplatereadermapitemvalue_set-' + idx + '-time').val(global_plate_time);
                     }
                 } else if (global_plate_well_use === 'standard') {
@@ -844,6 +873,24 @@ $(document).ready(function () {
                 if (global_plate_well_use === 'sample') {
                     if (global_plate_sample_change_time === true) {
                         $('#time-' + idx).text(incrementing_time_value);
+
+
+
+                         //     global_plate_index_list_matches.push(cfs);
+                        //     global_plate_time_matches.push(my_time);
+                        //     global_plate_value_matches.push(my_value);
+
+                        //div_block_value.appendChild(document.createTextNode(global_plate_time_matches[formsetidx]));
+                        //div_time.appendChild(document.createTextNode(global_plate_value_matches[formsetidx]));
+                        //$(div_time).attr('value-formset-index', global_plate_index_list_matches[formsetidx]);
+                        //$(div_block_value).attr('value-formset-index', global_plate_index_list_matches[formsetidx]);
+                        // get the right one TODO
+
+
+
+
+
+
                         $('#id_assayplatereadermapitemvalue_set-' + idx + '-time').val(incrementing_time_value);
                     }
                 } else if (global_plate_well_use === 'standard') {
