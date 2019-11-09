@@ -67,10 +67,11 @@
             </div>
 
             <div class="row">
-{#                <div class="hidden" id="ns_matrix_item">#}
-{#                    {{ assay_map_additional_info.ns_matrix_item }}#}
-{#                    {{ assay_map_additional_info.ns_location }}#}
-{#                </div>#}
+                {# need this in javascript #}
+                <div class="hidden" id="ns_matrix_item">
+                    {{ assay_map_additional_info.ns_matrix_item }}
+                    {{ assay_map_additional_info.ns_location }}
+                </div>
                 {# need this in javascript #}
                 <div id="existing_device_size" class="hidden">
                     {{ object.device }}

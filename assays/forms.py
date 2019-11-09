@@ -2223,8 +2223,8 @@ class AssayPlateReadMapAdditionalInfoForm(forms.Form):
         study_id = kwargs.pop('study_id', None)
         self.user = kwargs.pop('user', None)
         super(AssayPlateReadMapAdditionalInfoForm, self).__init__(*args, **kwargs)
-        self.fields['se_matrix_item'].queryset = AssayMatrixItem.objects.filter(study_id=study_id)
-        self.fields['ns_matrix_item'].queryset = AssayMatrixItem.objects.filter(study_id=study_id)
+        self.fields['se_matrix_item'].queryset = AssayMatrixItem.objects.filter(study_id=study_id).order_by('name',)
+        self.fields['ns_matrix_item'].queryset = AssayMatrixItem.objects.filter(study_id=study_id).order_by('name',)
         # self.fields['se_matrix_item'].queryset = AssayMatrixItem.objects.filter(study_id=293)
         self.fields['ns_matrix_item'].widget.attrs.update({'class': 'no-selectize'})
         self.fields['ns_location'].widget.attrs.update({'class': 'no-selectize'})
@@ -2420,7 +2420,7 @@ class AssayPlateReaderMapItemValueForm(forms.ModelForm):
         model = AssayPlateReaderMapItemValue
         #exclude = tracking + ('study', )
         fields = ['id', 'assayplatereadermapdatafile', 'assayplatereadermapdatafileblock', 'plate_index',
-                  'value', 'time']
+                  'value', 'time','well_use',]
 
 # class AssayPlateReaderMapOtherItemValueForm(forms.ModelForm):
 #     """Form for Assay Plate Reader Map Items """
@@ -2470,7 +2470,7 @@ class AssayPlateReaderMapItemValueFormSet(BaseInlineFormSetForcedUniqueness):
         self.study = kwargs.pop('study', None)
         self.user = kwargs.pop('user', None)
         super(AssayPlateReaderMapItemValueFormSet, self).__init__(*args, **kwargs)
-        self.queryset = self.queryset.order_by('assayplatereadermapdatafile', 'assayplatereadermapdatafileblock')
+        self.queryset = self.queryset.order_by('assayplatereadermapdatafile', 'assayplatereadermapdatafileblock', 'plate_index')
         #https://stackoverflow.com/questions/13387446/changing-the-display-order-of-forms-in-a-formset
 
         if not self.study:

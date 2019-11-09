@@ -2877,7 +2877,7 @@ class AssayPlateReaderMapItem(models.Model):
     )
     location = models.ForeignKey('AssaySampleLocation', null=True, blank=True, default=0, on_delete=models.CASCADE)
     #for standard, should be the standard concentration and associated unit put INTO the plate
-    standard_value = models.FloatField(null=True, blank=True)
+    standard_value = models.FloatField(default=0, null=True, blank=True)
     def __str__(self):
         return '{0}'.format(self.name)
     def get_absolute_url(self):
@@ -2902,15 +2902,15 @@ class AssayPlateReaderMapItemValue(models.Model):
     # column_index = models.IntegerField(default=999, blank=True)
     plate_index = models.IntegerField(default=999, blank=True)
     # matrix_item = models.ForeignKey(AssayMatrixItem, null=True, blank=True, on_delete=models.CASCADE)
-    # well_use = models.CharField(
-    #     verbose_name='Well Use',
-    #     max_length=8,
-    #     default='empty', blank=True,
-    #     choices=( ('sample', 'Sample'), ('standard', 'Standard'), ('blank', 'Blank'), ('empty', 'Empty/Unused') )
-    # )
+    well_use = models.CharField(
+        verbose_name='Well Use',
+        max_length=8,
+        default='empty', blank=True,
+        choices=( ('sample', 'Sample'), ('standard', 'Standard'), ('blank', 'Blank'), ('empty', 'Empty/Unused') )
+    )
     #raw value read from the plate for all wells in this plate
     value = models.FloatField(null=True, blank=True)
-    time = models.FloatField(default=0, blank=True)
+    time = models.FloatField(default=0, null=True, blank=True)
     caution_flag = models.CharField(max_length=255, default='', null=True, blank=True)
     excluded = models.BooleanField(default=False, null=True, blank=True)
     #replaced = models.BooleanField(default=False)
