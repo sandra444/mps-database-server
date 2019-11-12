@@ -3,7 +3,7 @@
 from django.db import models
 from django.contrib.auth.models import Group
 
-from mps.base.models import LockableModel, TrackableModel, FlaggableModel
+from mps.base.models import LockableModel, TrackableModel, FlaggableModel, FrontEndModel
 from django.core.validators import MaxValueValidator
 
 
@@ -45,10 +45,11 @@ class MicrophysiologyCenter(LockableModel):
         return self.name
 
 
-class Manufacturer(LockableModel):
+class Manufacturer(FrontEndModel, LockableModel):
     """Manufacturer gives details for a manufacturer of devices and/or componentry"""
     class Meta(object):
         ordering = ('name',)
+        verbose_name = 'Manufacturer'
 
     name = models.CharField(
         max_length=100,

@@ -2769,7 +2769,6 @@ class AssaySettingDetail(AssaySettingMixin, DetailView):
     pass
 
 
-# Should we bother making generic lists?
 class AssaySettingList(ListHandlerMixin, ListView):
     model = AssaySetting
 
@@ -2791,7 +2790,6 @@ class AssaySupplierDetail(DetailView):
     pass
 
 
-# Should we bother making generic lists?
 class AssaySupplierList(ListHandlerMixin, ListView):
     model = AssaySupplier
 
@@ -2825,12 +2823,14 @@ class AssayStudyComponents(TemplateView):
                     AssaySupplier.objects.first(),
                 ]
             ],
-            # 'model_components': [
-            #     get_component_display_for_model(x) for x in
-            #     [
-            #         apps.get_model(app_label='microdevices', model_name='').objects.first(),
-            #     ]
-            # ],
+            'model_components': [
+                get_component_display_for_model(x) for x in
+                [
+                    # Note that sample location is more accurately placed here
+                    AssaySampleLocation.objects.first(),
+                    apps.get_model(app_label='microdevices', model_name='manufacturer').objects.first(),
+                ]
+            ],
             'cell_components': [
                 get_component_display_for_model(x) for x in
                 [

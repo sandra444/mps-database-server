@@ -43,7 +43,7 @@ from microdevices.models import (
     OrganModel,
     OrganModelProtocol
 )
-from mps.forms import SignOffMixin, BootstrapForm
+from mps.forms import SignOffMixin, BootstrapForm, tracking
 import string
 from captcha.fields import CaptchaField
 
@@ -68,16 +68,16 @@ import ujson as json
 # TODO REFACTOR FK QUERYSETS TO AVOID N+1
 
 # These are all of the tracking fields
-tracking = (
-    'created_by',
-    'created_on',
-    'modified_on',
-    'modified_by',
-    'signed_off_by',
-    'signed_off_date',
-    'locked',
-    'restricted'
-)
+# tracking = (
+#     'created_by',
+#     'created_on',
+#     'modified_on',
+#     'modified_by',
+#     'signed_off_by',
+#     'signed_off_date',
+#     'locked',
+#     'restricted'
+# )
 # Excluding restricted is likewise useful
 restricted = ('restricted',)
 # Group
