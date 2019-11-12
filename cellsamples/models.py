@@ -4,7 +4,7 @@
 from django.db import models
 
 # Use our own model base classes instead of models.Model
-from mps.base.models import LockableModel, FlaggableModel
+from mps.base.models import LockableModel, FlaggableModel, FrontEndModel
 from django.contrib.auth.models import Group
 from django.urls import reverse
 
@@ -24,10 +24,6 @@ class Organ(LockableModel):
 
     def __str__(self):
         return '{}'.format(self.organ_name)
-
-    # TODO
-    def get_post_submission_url(self):
-        return reverse('')
 
 
 class CellType(LockableModel):
@@ -115,15 +111,22 @@ class CellSubtype(LockableModel):
         return reverse('cellsubtype_list')
 
 
-class Supplier(LockableModel):
+class Supplier(FrontEndModel, LockableModel):
     """Supplier gives information for institutions that distribute cell samples and related materials"""
     class Meta(object):
         ordering = ('name', )
+        verbose_name = 'Cell Supplier'
+
     name = models.CharField(
         max_length=255,
         unique=True,
         verbose_name='Name'
     )
+    # description = models.CharField(
+    #     max_length=2000,
+    #     blank=True,
+    #     verbose_name='Description'
+    # )
     phone = models.CharField(
         max_length=255,
         blank=True,
@@ -138,15 +141,13 @@ class Supplier(LockableModel):
     def __str__(self):
         return '{}'.format(self.name)
 
-    # TODO
-    def get_post_submission_url(self):
-        return reverse('')
 
-
-class Biosensor(LockableModel):
+class Biosensor(FrontEndModel, LockableModel):
     """Biosensor describes a biosensor used on cell samples"""
     class Meta(object):
         ordering = ('name', )
+        verbose_name = 'Cell Biosensor'
+
     name = models.CharField(
         max_length=255,
         unique=True,
@@ -175,10 +176,6 @@ class Biosensor(LockableModel):
 
     def __str__(self):
         return '{}'.format(self.name)
-
-    # TODO
-    def get_post_submission_url(self):
-        return reverse('')
 
 
 class CellSample(FlaggableModel):
