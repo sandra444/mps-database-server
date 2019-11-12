@@ -2747,9 +2747,9 @@ class AssaySampleLocationUpdate(CreatorOrSuperuserRequiredMixin, AssaySampleLoca
 
 
 # TODO: PERHAPS THIS SHOULD NOT BE HERE
-class AssaySampleLocationList(ListView):
+class AssaySampleLocationList(ListHandlerMixin, ListView):
     model = AssaySampleLocation
-    template_name = 'assays/assaylocation_list.html'
+    # template_name = 'assays/assaylocation_list.html'
 
 
 class AssaySettingMixin(FormHandlerMixin):
@@ -2821,6 +2821,7 @@ class AssayStudyComponents(TemplateView):
                     AssaySampleLocation.objects.first(),
                     AssaySetting.objects.first(),
                     AssaySupplier.objects.first(),
+                    AssayReference.objects.first(),
                 ]
             ],
             'model_components': [

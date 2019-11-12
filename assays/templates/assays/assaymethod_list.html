@@ -6,6 +6,7 @@
 {% endblock %}
 
 {% block breadcrumbs %}
+    <li><a href="{% url 'assays-studycomponents' %}">Study Components</a></li>
     <li class="active">Methods</li>
 {% endblock %}
 
@@ -25,7 +26,8 @@
             <table id="methods-table" class="table display" cellspacing="0" width="100%" hidden>
                 <thead>
                     <tr>
-                        <th>View Details</th>
+                        <th>View</th>
+                        <th>Edit</th>
                         <th>Method</th>
                         <th>Measurement Type</th>
                         <th>Supplier</th>
@@ -37,8 +39,9 @@
                 <tbody>
                 {% for method in object_list %}
                      <tr>
-                        <td><a class="btn btn-primary" title="View paired target/analytes." href="{{ method.id }}">View</a></td>
-                        <!--<td>{% if method.alt_name %}{{ method.alt_name }}{% else %}{{ method.name }}{% endif %}</td>-->
+                         <td><a class="btn btn-primary" title="View paired target/analytes." href="{{ method.get_absolute_url }}">View</a></td>
+                         <td><a class="btn btn-primary" title="View paired method/kits." href="{{ method.get_update_url }}">Edit</a></td>
+                        {# <td><a class="btn btn-primary" title="View paired target/analytes." href="{{ method.id }}">View</a></td> #}
                         <td>{{ method.name }}</td>
                         <td>{{ method.measurement_type }}</td>
                         <td>{{ method.supplier }}</td>

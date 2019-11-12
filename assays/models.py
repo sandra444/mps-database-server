@@ -3273,7 +3273,7 @@ class AssayStudySet(FlaggableModel):
         return self.name
 
 
-class AssayReference(FlaggableModel):
+class AssayReference(FrontEndModel, FlaggableModel):
 
     class Meta(object):
         verbose_name = 'Reference'
