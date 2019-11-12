@@ -8,7 +8,7 @@ from mps.settings import DEFAULT_FROM_EMAIL
 from django.template.loader import render_to_string
 
 # SHOULD BE IN ALL CAPS
-tracking = ('created_by', 'created_on', 'modified_on', 'modified_by', 'signed_off_by', 'signed_off_date', 'locked')
+tracking = ('created_by', 'created_on', 'modified_on', 'modified_by', 'signed_off_by', 'signed_off_date', 'locked', 'restricted')
 
 WIDGETS_TO_ADD_FORM_CONTROL_TO = {
     "<class 'django.forms.widgets.TextInput'>": True,
@@ -30,6 +30,9 @@ class BootstrapForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop('user', '')
         super(BootstrapForm, self).__init__(*args, **kwargs)
+
+         # Removes : as label suffix
+        self.label_suffix = ""
 
         for field in self.fields:
             widget_type = str(type(self.fields[field].widget))
@@ -54,6 +57,11 @@ class BootstrapForm(forms.ModelForm):
                     self.fields[field].widget.attrs['class'] += ' required'
                 else:
                     self.fields[field].widget.attrs['class'] = 'required'
+
+                # One way to do this
+                if self.fields[field].label:
+                    # Add asterisks to label
+                    self.fields[field].label += '*'
 
             # Not really a good idea to use "private" attributes...
             if hasattr(self.fields[field], '_queryset'):
