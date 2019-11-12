@@ -106,7 +106,7 @@ from mps.mixins import (
     CreatorOrSuperuserRequiredMixin,
     FormHandlerMixin,
     ListHandlerMixin,
-    CreatorOrAdminRequiredMixin
+    CreatorOrSuperuserRequiredMixin
 )
 
 from mps.base.models import save_forms_with_tracking
@@ -122,6 +122,8 @@ from django.template.loader import render_to_string, TemplateDoesNotExist
 
 from datetime import datetime, timedelta
 import pytz
+
+from django.apps import apps
 
 # TODO Refactor imports
 # TODO REFACTOR CERTAIN WHITTLING TO BE IN FORM AS OPPOSED TO VIEW
@@ -2583,7 +2585,7 @@ class AssayTargetAdd(OneGroupRequiredMixin, AssayTargetMixin, CreateView):
     pass
 
 
-class AssayTargetUpdate(CreatorOrAdminRequiredMixin, AssayTargetMixin, UpdateView):
+class AssayTargetUpdate(CreatorOrSuperuserRequiredMixin, AssayTargetMixin, UpdateView):
     pass
 
 
@@ -2626,7 +2628,7 @@ class AssayMethodAdd(OneGroupRequiredMixin, AssayMethodMixin, CreateView):
     pass
 
 
-class AssayMethodUpdate(CreatorOrAdminRequiredMixin, AssayMethodMixin, UpdateView):
+class AssayMethodUpdate(CreatorOrSuperuserRequiredMixin, AssayMethodMixin, UpdateView):
     pass
 
 
@@ -2690,7 +2692,7 @@ class PhysicalUnitsAdd(OneGroupRequiredMixin, PhysicalUnitsMixin, CreateView):
     pass
 
 
-class PhysicalUnitsUpdate(CreatorOrAdminRequiredMixin, PhysicalUnitsMixin, UpdateView):
+class PhysicalUnitsUpdate(CreatorOrSuperuserRequiredMixin, PhysicalUnitsMixin, UpdateView):
     pass
 
 
@@ -2719,7 +2721,7 @@ class AssayMeasurementTypeAdd(OneGroupRequiredMixin, AssayMeasurementTypeMixin, 
     pass
 
 
-class AssayMeasurementTypeUpdate(CreatorOrAdminRequiredMixin, AssayMeasurementTypeMixin, UpdateView):
+class AssayMeasurementTypeUpdate(CreatorOrSuperuserRequiredMixin, AssayMeasurementTypeMixin, UpdateView):
     pass
 
 
@@ -2740,7 +2742,7 @@ class AssaySampleLocationAdd(OneGroupRequiredMixin, AssaySampleLocationMixin, Cr
     pass
 
 
-class AssaySampleLocationUpdate(CreatorOrAdminRequiredMixin, AssaySampleLocationMixin, UpdateView):
+class AssaySampleLocationUpdate(CreatorOrSuperuserRequiredMixin, AssaySampleLocationMixin, UpdateView):
     pass
 
 
@@ -2759,7 +2761,7 @@ class AssaySettingAdd(OneGroupRequiredMixin, AssaySettingMixin, CreateView):
     pass
 
 
-class AssaySettingUpdate(CreatorOrAdminRequiredMixin, AssaySettingMixin, UpdateView):
+class AssaySettingUpdate(CreatorOrSuperuserRequiredMixin, AssaySettingMixin, UpdateView):
     pass
 
 
@@ -2781,7 +2783,7 @@ class AssaySupplierAdd(OneGroupRequiredMixin, AssaySupplierMixin, CreateView):
     pass
 
 
-class AssaySupplierUpdate(CreatorOrAdminRequiredMixin, AssaySupplierMixin, UpdateView):
+class AssaySupplierUpdate(CreatorOrSuperuserRequiredMixin, AssaySupplierMixin, UpdateView):
     pass
 
 
@@ -2797,6 +2799,7 @@ class AssaySupplierList(ListHandlerMixin, ListView):
 def get_component_display_for_model(model):
     return {
         'verbose_name': model._meta.verbose_name,
+        'verbose_name_plural': model._meta.verbose_name_plural,
         'list_url': model.get_list_url(),
         'add_url': model.get_add_url()
     }
@@ -2822,11 +2825,18 @@ class AssayStudyComponents(TemplateView):
                     AssaySupplier.objects.first(),
                 ]
             ],
-            'model_compnents': [
-
-            ],
-            'cell_compnents': [
-
+            # 'model_components': [
+            #     get_component_display_for_model(x) for x in
+            #     [
+            #         apps.get_model(app_label='microdevices', model_name='').objects.first(),
+            #     ]
+            # ],
+            'cell_components': [
+                get_component_display_for_model(x) for x in
+                [
+                    apps.get_model(app_label='cellsamples', model_name='biosensor').objects.first(),
+                    apps.get_model(app_label='cellsamples', model_name='supplier').objects.first(),
+                ]
             ],
         })
 

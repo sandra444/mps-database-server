@@ -189,6 +189,10 @@ class UnitType(LockableModel):
 class PhysicalUnits(FrontEndModel, LockableModel):
     """Measures of concentration and so on"""
 
+    class Meta(object):
+        verbose_name = 'Physical Unit'
+        ordering = ['unit_type', 'unit']
+
     # USE NAME IN LIEU OF UNIT (unit.unit is confusing and dumb)
     # name = models.CharField(max_length=255)
     unit = models.CharField(
@@ -234,11 +238,6 @@ class PhysicalUnits(FrontEndModel, LockableModel):
         ),
        verbose_name='Availability'
     )
-
-    # verbose_name_plural is used to avoid a double 's' on the model name
-    class Meta(object):
-        verbose_name_plural = 'Physical Units'
-        ordering = ['unit_type', 'unit']
 
     def __str__(self):
         return '{}'.format(self.unit)
