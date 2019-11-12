@@ -30,7 +30,11 @@ from assays.models import (
     AssayReference,
     AssayStudyReference,
     AssayStudySetReference,
-    AssayTarget
+    AssayTarget,
+    AssayMeasurementType,
+    AssayMethod,
+    AssaySetting,
+    AssaySupplier
 )
 from compounds.models import Compound, CompoundInstance, CompoundSupplier
 from microdevices.models import (
@@ -2277,6 +2281,66 @@ class AssayMatrixFormNew(SetupFormsMixin, SignOffMixin, BootstrapForm):
 class AssayTargetForm(BootstrapForm):
     class Meta(object):
         model = AssayTarget
+        exclude = tracking
+
+        widgets = {
+            'description': forms.Textarea(attrs={'cols': 50, 'rows': 3}),
+        }
+
+
+class AssayMethodForm(BootstrapForm):
+    class Meta(object):
+        model = AssayMethod
+        exclude = tracking
+
+        widgets = {
+            'description': forms.Textarea(attrs={'cols': 50, 'rows': 3}),
+        }
+
+
+class PhysicalUnitsForm(BootstrapForm):
+    class Meta(object):
+        model = PhysicalUnits
+        exclude = tracking
+
+        widgets = {
+            'description': forms.Textarea(attrs={'cols': 50, 'rows': 3}),
+        }
+
+
+class AssayMeasurementTypeForm(BootstrapForm):
+    class Meta(object):
+        model = AssayMeasurementType
+        exclude = tracking
+
+        widgets = {
+            'description': forms.Textarea(attrs={'cols': 50, 'rows': 3}),
+        }
+
+
+class AssaySampleLocationForm(BootstrapForm):
+    class Meta(object):
+        model = AssaySampleLocation
+        exclude = tracking
+
+        widgets = {
+            'description': forms.Textarea(attrs={'cols': 50, 'rows': 3}),
+        }
+
+
+class AssaySettingForm(BootstrapForm):
+    class Meta(object):
+        model = AssaySetting
+        exclude = tracking
+
+        widgets = {
+            'description': forms.Textarea(attrs={'cols': 50, 'rows': 3}),
+        }
+
+
+class AssaySupplierForm(BootstrapForm):
+    class Meta(object):
+        model = AssaySupplier
         exclude = tracking
 
         widgets = {

@@ -10,7 +10,8 @@ from microdevices.models import (
 from mps.base.models import (
     LockableModel,
     FlaggableModel,
-    FlaggableRestrictedModel
+    FlaggableRestrictedModel,
+    FrontEndModel
 )
 from django.contrib.auth.models import Group, User
 
@@ -185,7 +186,7 @@ class UnitType(LockableModel):
 
 
 # TODO THIS NEEDS TO BE REVISED (IDEALLY REPLACED WITH PHYSICALUNIT BELOW)
-class PhysicalUnits(LockableModel):
+class PhysicalUnits(FrontEndModel, LockableModel):
     """Measures of concentration and so on"""
 
     # USE NAME IN LIEU OF UNIT (unit.unit is confusing and dumb)
@@ -1482,7 +1483,7 @@ class AssayDataFileUpload(FlaggableModel):
 
 
 # NEW MODELS, TO BE INTEGRATED FURTHER LATER
-class AssayTarget(LockableModel):
+class AssayTarget(FrontEndModel, LockableModel):
     """Describes what was sought by a given Assay"""
 
     class Meta(object):
@@ -1531,8 +1532,12 @@ class AssaySubtarget(models.Model):
         return self.name
 
 
-class AssayMeasurementType(LockableModel):
+class AssayMeasurementType(FrontEndModel, LockableModel):
     """Describes what was measures with a given method"""
+
+    class Meta(object):
+        verbose_name = 'Measurement Type'
+
     name = models.CharField(
         max_length=512,
         unique=True,
@@ -1547,8 +1552,12 @@ class AssayMeasurementType(LockableModel):
         return self.name
 
 
-class AssaySupplier(LockableModel):
+class AssaySupplier(FrontEndModel, LockableModel):
     """Assay Supplier so we can track where kits came from"""
+
+    class Meta(object):
+        verbose_name = 'Assay Supplier'
+
     name = models.CharField(
         max_length=512,
         unique=True,
@@ -1563,9 +1572,13 @@ class AssaySupplier(LockableModel):
         return self.name
 
 
-class AssayMethod(LockableModel):
+class AssayMethod(FrontEndModel, LockableModel):
     """Describes how an assay was performed"""
     # We may want to modify this so that it is unique on name in combination with measurement type?
+
+    class Meta(object):
+        verbose_name = 'Method'
+
     name = models.CharField(
         max_length=512,
         unique=True,
@@ -1611,8 +1624,12 @@ class AssayMethod(LockableModel):
         return self.name
 
 
-class AssaySampleLocation(LockableModel):
+class AssaySampleLocation(FrontEndModel, LockableModel):
     """Describes a location for where a sample was acquired"""
+
+    class Meta(object):
+        verbose_name = 'MPS Model Location'
+
     name = models.CharField(
         max_length=512,
         unique=True,
@@ -2813,8 +2830,12 @@ class AssayStudySupportingData(models.Model):
 
 
 # TODO Probably should have a ControlledVocabularyMixin for defining name and description consistently
-class AssaySetting(LockableModel):
+class AssaySetting(FrontEndModel, LockableModel):
     """Defines a type of setting (flowrate etc.)"""
+
+    class Meta(object):
+        verbose_name = 'Setting'
+
     name = models.CharField(
         max_length=512,
         unique=True,
@@ -3254,6 +3275,10 @@ class AssayStudySet(FlaggableModel):
 
 
 class AssayReference(FlaggableModel):
+
+    class Meta(object):
+        verbose_name = 'Reference'
+
     pubmed_id = models.CharField(
         verbose_name='PubMed ID',
         max_length=40,
@@ -3366,6 +3391,7 @@ class AssayStudySetReference(models.Model):
     )
 
 
+# ADMIN ONLY
 class AssayCategory(FlaggableModel):
     """Describes a genre of assay"""
 
