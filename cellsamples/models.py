@@ -26,7 +26,7 @@ class Organ(LockableModel):
         return '{}'.format(self.organ_name)
 
 
-class CellType(LockableModel):
+class CellType(FrontEndModel, LockableModel):
     """CellType details a type (e.g. hepatocyte), a species, and an organ"""
     class Meta(object):
         verbose_name = 'Cell Type'
@@ -68,20 +68,15 @@ class CellType(LockableModel):
             self.organ
         )
 
-    def get_absolute_url(self):
-        return "/cellsamples/celltype/{}".format(self.id)
 
-    def get_post_submission_url(self):
-        return reverse('celltype_list')
-
-
-class CellSubtype(LockableModel):
+class CellSubtype(FrontEndModel, LockableModel):
     """CellSubtype details a subtype (e.g. a cell line)
 
     It is important to note that CellSubtypes without cell_type are "generic" and can be applied to any cell type
     """
     class Meta(object):
         ordering = ('cell_subtype', )
+        verbose_name = 'Cell Subtype'
 
     # Unsemantic name (should just be name)
     cell_subtype = models.CharField(
@@ -103,12 +98,6 @@ class CellSubtype(LockableModel):
 
     def __str__(self):
         return '{}'.format(self.cell_subtype)
-
-    def get_absolute_url(self):
-        return "/cellsamples/cellsubtype/{}".format(self.id)
-
-    def get_post_submission_url(self):
-        return reverse('cellsubtype_list')
 
 
 class Supplier(FrontEndModel, LockableModel):
@@ -178,7 +167,7 @@ class Biosensor(FrontEndModel, LockableModel):
         return '{}'.format(self.name)
 
 
-class CellSample(FlaggableModel):
+class CellSample(FrontEndModel, FlaggableModel):
     """A Cell Sample describes a particular selection of cells used for experiments"""
 
     class Meta(object):
@@ -357,9 +346,3 @@ class CellSample(FlaggableModel):
                 '',
                 str(self),
             ])
-
-    def get_absolute_url(self):
-        return "/cellsamples/cellsample/{}".format(self.id)
-
-    def get_post_submission_url(self):
-        return reverse('cellsample_list')
