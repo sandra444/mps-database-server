@@ -51,6 +51,7 @@ from assays.models import (
     AssayPlateReaderMapItem,
     AssayPlateReaderMapDataFile,
     AssayPlateReaderMapDataFileBlock,
+    #AssayPlateReaderMapDataFileLine,
     AssayPlateReaderMapItemValue,
 )
 from microdevices.models import MicrophysiologyCenter
@@ -1448,7 +1449,7 @@ admin.site.register(AssayPlateReaderMap, AssayPlateReaderMapAdmin)
 
 class AssayPlateReaderMapDataFileAdmin(ImportExportModelAdmin):
     model = AssayPlateReaderMapDataFileBlock
-    list_display = ('name', 'description', 'plate_reader_file_location')
+    list_display = ('name', 'description')
     search_fields = ('name', 'description')
 
 admin.site.register(AssayPlateReaderMapDataFile, AssayPlateReaderMapDataFileAdmin)
@@ -1460,8 +1461,3 @@ class AssayPlateReaderMapDataFileBlockAdmin(ImportExportModelAdmin):
 
 admin.site.register(AssayPlateReaderMapDataFileBlock, AssayPlateReaderMapDataFileBlockAdmin)
 
-#after done developing, remove this from admin so people don't corrupt parrallel files
-# class AssayPlateReaderMapItemValueAdmin(ImportExportModelAdmin):
-#     model = AssayPlateReaderMapItemValue
-#
-# admin.site.register(AssayPlateReaderMapItemValue, AssayPlateReaderMapItemValueAdmin)

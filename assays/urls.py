@@ -52,6 +52,11 @@ from assays.views import (
     AssayPlateReaderMapIndex,
     AssayPlateReaderMapView,
     AssayPlateReaderMapDelete,
+    AssayPlateReaderMapDataFileUpdate,
+    AssayPlateReaderMapDataFileAdd,
+    AssayPlateReaderMapDataFileIndex,
+    AssayPlateReaderMapDataFileView,
+    AssayPlateReaderMapDataFileDelete,
 )
 import assays.ajax
 
@@ -177,4 +182,10 @@ urlpatterns = [
     url(r'^assays/assayplatereadermap/(?P<pk>[0-9]+)/view/$', AssayPlateReaderMapView.as_view(), name='assayplatereadermap-view'),
     url(r'^assays/assayplatereadermap/(?P<pk>[0-9]+)/update/$', AssayPlateReaderMapUpdate.as_view(), name='assayplatereadermap-update'),
     url(r'^assays/assayplatereadermap/(?P<pk>[0-9]+)/delete/$', AssayPlateReaderMapDelete.as_view(), name='assayplatereadermap-delete'),
+
+    url(r'^assays/assaystudy/(?P<pk>[0-9]+)/assayplatereaderfile/$', AssayPlateReaderMapDataFileIndex.as_view(), name='assayplatereaderfile-index'),
+    url(r'^assays/assaystudy/(?P<study_id>[0-9]+)/assayplatereaderfile/add/$', AssayPlateReaderMapDataFileAdd.as_view(), name='assayplatereaderfile-add'),
+    url(r'^assays/assayplatereaderfile/(?P<pk>[0-9]+)/view/$', AssayPlateReaderMapDataFileView.as_view(), name='assayplatereaderfile-view'),
+    url(r'^assays/assayplatereaderfile/(?P<pk>[0-9]+)/update/$', AssayPlateReaderMapDataFileUpdate.as_view(), name='assayplatereaderfile-update'),
+    url(r'^assays/assayplatereaderfile/(?P<pk>[0-9]+)/delete/$', AssayPlateReaderMapDataFileDelete.as_view(), name='assayplatereaderfile-delete'),
 ]
