@@ -54,6 +54,9 @@
 
     {% include 'generic_field.html' with field=form.organ label="Organ*" %}
 
+    {% include 'generic_field.html' with field=form.device label="Organ*" %}
+
+    {% comment %}
     {% if form.device.errors %}
         {% for error in form.device.errors %}
             <div class="alert alert-danger" role="alert">
@@ -76,6 +79,7 @@
             </a>
         </div>
     </div>
+    {% endcomment %}
 
     {% include 'generic_field.html' with field=form.model_type label="Model Type*" %}
 
