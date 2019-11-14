@@ -1595,10 +1595,10 @@ class AssayStudyDataUploadForm(BootstrapForm):
         # test_file = None
 
         # TODO TODO TODO TODO TODO
-        if self.request and self.request.FILES and data.get('plate_reader_file'):
+        if self.request and self.request.FILES and data.get('bulk_file'):
             # Make sure that this isn't the current file
-            if not study.plate_reader_file or study.plate_reader_file != data.get('plate_reader_file'):
-                test_file = data.get('plate_reader_file', '')
+            if not study.bulk_file or study.bulk_file != data.get('bulk_file'):
+                test_file = data.get('bulk_file', '')
 
                 file_processor = AssayFileProcessor(test_file, study, self.request.user)
                 # Process the file
