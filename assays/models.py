@@ -509,7 +509,7 @@ class AssayPlateSetup(FlaggableRestrictedModel):
         return '/assays/assayplatesetup/{}/'.format(self.id)
 
     def get_post_submission_url(self):
-        return '/assays/{}/'.format(self.assay_run_id)
+        return '/assays/{}/'.format(self.assay_run_id_id)
 
     def get_clone_url(self):
         return '/assays/{0}/assayplatesetup/add?clone={1}'.format(self.assay_run_id_id, self.id)

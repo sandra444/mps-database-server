@@ -276,16 +276,18 @@ $(document).ready(function () {
     });
 
 
-    //to format the reference table - keep - although, do not plan to show table
+    //to format the reference table - keep if show table, else, do not need this formatting
     //note that the table is needed to pull setup information (using javascript) to show in plate map
-    $('#matrix_items_table').DataTable({
-        //"iDisplayLength": 25,
-        "paging": false,
-        "sDom": '<B<"row">lfrtip>',
-        fixedHeader: {headerOffset: 50},
-        responsive: true,
-        "order": [[2, "asc"]],
-    });
+    //NOTE: if show table as DataTable, matrix items that are not displayed are not accessible,
+    // TODO would need get access to them a different way (maybe ajax call)
+    // $('#matrix_items_table').DataTable({
+    //     //"iDisplayLength": 25,
+    //     "paging": false,
+    //     "sDom": '<B<"row">lfrtip>',
+    //     fixedHeader: {headerOffset: 50},
+    //     responsive: true,
+    //     "order": [[2, "asc"]],
+    // });
 
     // when loading, what and how to load the plate
     // if add page, start with empty table (plate), if existing, pull from formsets
