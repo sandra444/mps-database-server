@@ -63,7 +63,10 @@ class BootstrapForm(forms.ModelForm):
 
             # Crude way to indicate default
             if hasattr(self.fields[field], 'initial'):
-                self.fields[field].widget.attrs['data-default'] = self.fields[field].initial
+                if self.fields[field].initial:
+                    self.fields[field].widget.attrs['data-default'] = self.fields[field].initial
+                else:
+                    self.fields[field].widget.attrs['data-default'] = ''
 
 
 class SignOffMixin(BootstrapForm):
