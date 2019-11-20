@@ -1931,7 +1931,7 @@ def get_inter_study_reproducibility_report(group_count, inter_data, inter_level,
     )
 
 def intra_status_for_inter(study_data):
-    #Calculate and report the reproducibility index and status and other parameters
+    # Calculate and report the reproducibility index and status and other parameters
     # Select unique group rows by study, organ model,sample location, assay and unit
     # Drop null value rows
     study_data = pd.DataFrame(study_data)
@@ -1942,7 +1942,7 @@ def intra_status_for_inter(study_data):
 
     # create reproducibility report table
     reproducibility_results_table=study_data
-    header_list=study_data.columns.values.tolist()
+    header_list = study_data.columns.values.tolist()
     header_list.append('Reproducibility Status')
 
     # Define all columns of reproducibility report table
@@ -1950,13 +1950,13 @@ def intra_status_for_inter(study_data):
 
     # Define all columns of reproducibility report table
     reproducibility_results_table = reproducibility_results_table.reindex(columns = header_list)
-   # create replicate matrix for intra reproducibility analysis
-    icc_pivot = pd.pivot_table(study_data, values='Value', index='Time',columns=['Chip ID'], aggfunc=np.mean)
+    # create replicate matrix for intra reproducibility analysis
+    icc_pivot = pd.pivot_table(study_data, values='Value', index='Time', columns=['Chip ID'], aggfunc=np.mean)
     # Check all coulmns are redundent
     if icc_pivot.shape[1]>1 and all(icc_pivot.eq(icc_pivot.iloc[:, 0], axis=0).all(1)):
-        reproducibility_results_table.iloc[0, reproducibility_results_table.columns.get_loc('Reproducibility Status')] ='NA'
+        reproducibility_results_table.iloc[0, reproducibility_results_table.columns.get_loc('Reproducibility Status')] = 'NA'
     elif icc_pivot.shape[0]>1 and all(icc_pivot.eq(icc_pivot.iloc[0, :], axis=1).all(1)):
-        reproducibility_results_table.iloc[0, reproducibility_results_table.columns.get_loc('Reproducibility Status')] ='NA'
+        reproducibility_results_table.iloc[0, reproducibility_results_table.columns.get_loc('Reproducibility Status')] = 'NA'
     else:
         if icc_pivot.shape[0]>1 and icc_pivot.shape[1]>1:
             # Call a chip time series reproducibility index dataframe
@@ -1964,35 +1964,35 @@ def intra_status_for_inter(study_data):
             if pd.isnull(rep_index.iloc[0][0]) != True:
                 if rep_index.iloc[0][0] <= 15 and rep_index.iloc[0][0] >0:
                     if rep_index.iloc[0][0] <= 5:
-                        reproducibility_results_table.iloc[0, reproducibility_results_table.columns.get_loc('Reproducibility Status')] ='Excellent (CV)'
+                        reproducibility_results_table.iloc[0, reproducibility_results_table.columns.get_loc('Reproducibility Status')] = 'Excellent (CV)'
                     elif rep_index.iloc[0][1] >= 0.8:
-                        reproducibility_results_table.iloc[0, reproducibility_results_table.columns.get_loc('Reproducibility Status')] ='Excellent (ICC)'
+                        reproducibility_results_table.iloc[0, reproducibility_results_table.columns.get_loc('Reproducibility Status')] = 'Excellent (ICC)'
                     else:
-                        reproducibility_results_table.iloc[0, reproducibility_results_table.columns.get_loc('Reproducibility Status')] ='Acceptable (CV)'
+                        reproducibility_results_table.iloc[0, reproducibility_results_table.columns.get_loc('Reproducibility Status')] = 'Acceptable (CV)'
                 else:
                     if rep_index.iloc[0][1] >= 0.8:
-                        reproducibility_results_table.iloc[0, reproducibility_results_table.columns.get_loc('Reproducibility Status')] ='Excellent (ICC)'
+                        reproducibility_results_table.iloc[0, reproducibility_results_table.columns.get_loc('Reproducibility Status')] = 'Excellent (ICC)'
                     elif rep_index.iloc[0][1] >= 0.2:
-                        reproducibility_results_table.iloc[0, reproducibility_results_table.columns.get_loc('Reproducibility Status')] ='Acceptable (ICC)'
+                        reproducibility_results_table.iloc[0, reproducibility_results_table.columns.get_loc('Reproducibility Status')] = 'Acceptable (ICC)'
                     else:
-                        reproducibility_results_table.iloc[0, reproducibility_results_table.columns.get_loc('Reproducibility Status')] ='Poor (ICC)'
+                        reproducibility_results_table.iloc[0, reproducibility_results_table.columns.get_loc('Reproducibility Status')] = 'Poor (ICC)'
             else:
-                reproducibility_results_table.iloc[0, reproducibility_results_table.columns.get_loc('Reproducibility Status')] ='NA'
-        elif icc_pivot.shape[0]<2 and icc_pivot.shape[1]>1:
+                reproducibility_results_table.iloc[0, reproducibility_results_table.columns.get_loc('Reproducibility Status')] = 'NA'
+        elif icc_pivot.shape[0]<2 and icc_pivot.shape[1] > 1:
              # Call a single time reproducibility index dataframe
             rep_index=Single_Time_Reproducibility_Index(icc_pivot)
             if rep_index.iloc[0][0] <= 5 and rep_index.iloc[0][0] > 0:
-                reproducibility_results_table.iloc[0, reproducibility_results_table.columns.get_loc('Reproducibility Status')] ='Excellent (CV)'
+                reproducibility_results_table.iloc[0, reproducibility_results_table.columns.get_loc('Reproducibility Status')] = 'Excellent (CV)'
             elif rep_index.iloc[0][0] <= 15 and rep_index.iloc[0][0] > 5:
-                reproducibility_results_table.iloc[0, reproducibility_results_table.columns.get_loc('Reproducibility Status')] ='Acceptable (CV)'
+                reproducibility_results_table.iloc[0, reproducibility_results_table.columns.get_loc('Reproducibility Status')] = 'Acceptable (CV)'
             elif rep_index.iloc[0][0] > 15:
-                reproducibility_results_table.iloc[0, reproducibility_results_table.columns.get_loc('Reproducibility Status')] ='Poor (CV)'
+                reproducibility_results_table.iloc[0, reproducibility_results_table.columns.get_loc('Reproducibility Status')] = 'Poor (CV)'
             elif rep_index.iloc[0][0] < 0:
-                reproducibility_results_table.iloc[0, reproducibility_results_table.columns.get_loc('Reproducibility Status')] ='NA'
+                reproducibility_results_table.iloc[0, reproducibility_results_table.columns.get_loc('Reproducibility Status')] = 'NA'
             else:
-                reproducibility_results_table.iloc[0, reproducibility_results_table.columns.get_loc('Reproducibility Status')] ='NA'
+                reproducibility_results_table.iloc[0, reproducibility_results_table.columns.get_loc('Reproducibility Status')] = 'NA'
         else:
-            reproducibility_results_table.iloc[0, reproducibility_results_table.columns.get_loc('Reproducibility Status')] ='NA'
+            reproducibility_results_table.iloc[0, reproducibility_results_table.columns.get_loc('Reproducibility Status')] = 'NA'
 
     return reproducibility_results_table.loc[reproducibility_results_table.index[0], 'Reproducibility Status']
 
@@ -2395,7 +2395,7 @@ def pa_power_analysis_report(power_group_data, type='d', sig_level=0.05):
         # Loop every unique replicate group
         time_count = len(power_analysis_table)
 
-        #Redefine the result dataframe index
+        # Redefine the result dataframe index
         power_analysis_table.index = pd.RangeIndex(len(power_analysis_table.index))
 
         if study_unique_group.shape[0] != 2:
@@ -2608,29 +2608,29 @@ def two_sample_power_analysis(data, type, sig):
 
 
 def create_power_analysis_group_table(group_count, study_data):
-    #Calculate and report the reproducibility index and status and other parameters
-    #Select unique group rows by study, organ model,sample location, assay and unit
-    #Drop null value rows
+    # Calculate and report the reproducibility index and status and other parameters
+    # Select unique group rows by study, organ model,sample location, assay and unit
+    # Drop null value rows
     study_data = pd.DataFrame(study_data)
     study_data.columns = study_data.iloc[0]
     study_data = study_data.drop(study_data.index[0])
 
-    #Drop null value rows
+    # Drop null value rows
     study_data['Value'].replace('', np.nan, inplace=True)
     study_data = study_data.dropna(subset=['Value'])
     study_data['Value'] = study_data['Value'].astype(float)
-    #Define the Chip ID column to string type
+    # Define the Chip ID column to string type
     study_data[['Chip ID']] = study_data['Chip ID'].astype(str)
 
-    #Add Time (day) calculated from three time column
+    # Add Time (day) calculated from three time column
     study_data["Time"] = study_data['Time']/1440.0
     study_data["Time"] = study_data["Time"].apply(lambda x: round(x,2))
 
-    #Define the Chip ID column to string type
+    # Define the Chip ID column to string type
     study_data[['Chip ID']] = study_data[['Chip ID']].astype(str)
     chip_data = study_data.groupby(['Group', 'Chip ID', 'Time'], as_index=False)['Value'].mean()
 
-    #create reproducibility report table
+    # create reproducibility report table
     header_list=chip_data.columns.values.tolist()
     header_list.append('# of Chips/Wells')
     header_list.append('# of Time Points')
@@ -2646,9 +2646,9 @@ def create_power_analysis_group_table(group_count, study_data):
     for row in range(group_count):
 
         rep_matrix = chip_data[chip_data['Group'] == str(row + 1)]
-        icc_pivot = pd.pivot_table(rep_matrix, values='Value', index='Time',columns=['Chip ID'], aggfunc=np.mean)
+        icc_pivot = pd.pivot_table(rep_matrix, values='Value', index='Time', columns=['Chip ID'], aggfunc=np.mean)
 
-        group_id = str(row+1) #Define group ID
+        group_id = str(row+1)  # Define group ID
 
         group_rep_matrix = pd.DataFrame(index=[0], columns=header_list)
         power_analysis_group_table = power_analysis_group_table.append(group_rep_matrix, ignore_index=True)
@@ -2661,10 +2661,11 @@ def create_power_analysis_group_table(group_count, study_data):
 
     return power_analysis_group_table.to_dict('split')
 
+
 # One Sample Power Analysis
 def pa1_predict_sample_size_given_delta_and_power(delta, power, sig_level, sd):
     if power > 0 and power < 1:
-        pdata=FloatVector([delta, sd, power, sig_level])
+        pdata = FloatVector([delta, sd, power, sig_level])
 
         rstring = """
         function(pdata){
@@ -2749,13 +2750,15 @@ def pa1_predicted_delta_given_sample_size_and_power(sample_size, power, sig_leve
 def one_sample_power_analysis_calculation(sample_data, sig_level, differences, sample_size, power):
 
     # Calculate the standard deviation of sample data
-    sd=np.std(sample_data, ddof=1)
+    sd = np.std(sample_data, ddof=1)
     if np.isnan(differences) and np.isnan(power) and np.isnan(sample_size):
-        power_analysis_result='The differences,sample_size and power are null for all.'
+        power_analysis_result = {'error': ''}
     else:
+        print("1 - NOT EVERYTHING IS NULL")
         ##############Given Diffrences
         if ~np.isnan(differences):
             if np.isnan(power) and np.isnan(sample_size):
+                print("2 - DIFFERENCES W/O POWER + SAMPLE")
                 pw_columns = ['Sample Size', 'Power']
                 sample_size_array = np.arange(2, 101, 1)  # Sample size is up to 100
                 power_analysis_result = pd.DataFrame(index=range(len(sample_size_array)),columns=pw_columns)
@@ -2768,6 +2771,7 @@ def one_sample_power_analysis_calculation(sample_data, sig_level, differences, s
         #################### Given sample size
         if ~np.isnan(sample_size):
             if np.isnan(differences) and np.isnan(power):
+                print("3 - SAMPLE W/O DIFFERENCES + POWER")
                 pw_columns = ['Differences', 'Power']
                 power_array = np.arange(0, 1, 0.01)  # power is between 0 and 1
                 power_analysis_result = pd.DataFrame(index=range(len(power_array)), columns=pw_columns)
@@ -2781,6 +2785,7 @@ def one_sample_power_analysis_calculation(sample_data, sig_level, differences, s
         #################### Given power
         if ~np.isnan(power):
             if np.isnan(differences) and np.isnan(sample_size):
+                print("4 - POWER W/O DIFFERENCES + SAMPLE")
                 pw_columns = ['Sample Size', 'Differences']
                 sample_size_array = np.arange(2, 101, 1)  # power is between 0 and 1
                 power_analysis_result = pd.DataFrame(index=range(len(sample_size_array)), columns=pw_columns)
@@ -2793,20 +2798,40 @@ def one_sample_power_analysis_calculation(sample_data, sig_level, differences, s
 
         ####### Given power and sample size predict differences
         if (np.isnan(differences)) and (~np.isnan(power)) and (~np.isnan(sample_size)):
+            print("5 - POWER + SAMPLE W/O DIFFERENCES")
             power_analysis_result = pa1_predicted_delta_given_sample_size_and_power(sample_size, power, sig_level, sd)
 
         ####### Given differences and sample size predict power
         if (~np.isnan(differences)) and (np.isnan(power)) and (~np.isnan(sample_size)):
-            power_analysis_result=pa1_predicted_power_given_delta_and_sample_size(differences, sample_size, sig_level, sd)
+            print("6 - DIFFERENCES + SAMPLE W/O POWER")
+            power_analysis_result = pa1_predicted_power_given_delta_and_sample_size(differences, sample_size, sig_level, sd)
 
         ######## Given differences and power predict sample size
         if (~np.isnan(differences)) and (~np.isnan(power)) and (np.isnan(sample_size)):
+            print("7 - DIFFERENCES + POWER W/O SAMPLE")
+            print(differences, power, sig_level, sd)
             power_analysis_result = round(pa1_predict_sample_size_given_delta_and_power(differences, power, sig_level, sd))
 
-    return power_analysis_result
+    print("8 - DONE")
+    print(power_analysis_result)
+    try:
+        return power_analysis_result.astype(np.int32)
+    except:
+        return power_analysis_result
+    else:
+        return {'error': ''}
 
 
-def one_sample_power_analysis(one_sample_data, sig_level, one_sample_compound, one_sample_tp):
+def one_sample_power_analysis(one_sample_data,
+                              sig_level,
+                              one_sample_compound,
+                              one_sample_tp,
+                              os_diff,
+                              os_diff_percentage,
+                              os_sample_size,
+                              os_power
+                              ):
+
     # Load the summary data into the dataframe
     power_group_data = pd.DataFrame(
         one_sample_data,
@@ -2851,16 +2876,31 @@ def one_sample_power_analysis(one_sample_data, sig_level, one_sample_compound, o
         print('Less than 2 samples')
     else:
         ########################One Sample Power Analysis Parameter Setting   ###############################
-        opt_percent_change = 'No'  # set input option for differences
-
-        percent_change = 20  # percentage change from the sample population mean
-        if opt_percent_change == 'Yes':
-            differences = sample_mean*percent_change/100
+        if os_diff_percentage != '':
+            differences = float(sample_mean * percent_change / 100)
+        elif os_diff != '':
+            differences = float(os_diff)
         else:
-            differences = 800  # If you want to predict differences, set it to be np.NAN otherwise input the dirrences or percentage change from the mean
+            differences = np.NAN
 
-        sample_size = np.NAN  # If you want to predict sample size, set it to be np.NAN otherwise input your sample size
-        power = 0.7          # If you want to predict power, set it to be np.NAN otherwise input the power value between 0 and 1
+        if os_sample_size != '':
+            sample_size = float(os_sample_size)
+        else:
+            sample_size = np.NAN
 
+        if os_power != '':
+            power = float(os_power)
+        else:
+            power = np.NAN
+
+        print("INPUT\n", sample_data)
+        print("SIG\n", sig_level)
+        print("OS DIFF\n", differences)
+        print("OS SAMPLE SIZE\n", sample_size)
+        print("OS POWER\n", power)
         # Power analysis results will be returned by user's input
         power_analysis_result = one_sample_power_analysis_calculation(sample_data, sig_level, differences, sample_size, power)
+        if type(power_analysis_result) is not dict and type(power_analysis_result) is not float:
+            return power_analysis_result.to_dict('split')
+        else:
+            return power_analysis_result

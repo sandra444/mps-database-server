@@ -4005,10 +4005,33 @@ def fetch_one_sample_power_analysis_results(request):
     one_sample_compound = request.POST.get('one_sample_compound', '')
     sig = request.POST.get('sig', '')
     one_sample_tp = request.POST.get('one_sample_tp', '')
-    power_analysis_data = one_sample_power_analysis(power_analysis_input, float(sig), one_sample_compound, float(one_sample_tp))
+    os_diff = request.POST.get('os_diff', '')
+    os_diff_percentage = request.POST.get('os_diff_percentage', '')
+    os_sample_size = request.POST.get('os_sample_size', '')
+    os_power = request.POST.get('os_power', '')
+    print("INPUT", power_analysis_input)
+    print("COMPOUND", one_sample_compound)
+    print("SIG", sig)
+    print("OS TP", one_sample_tp)
+    print("OS DIFF", os_diff)
+    print("OS DIFF PERCENTAGE", os_diff_percentage)
+    print("OS SAMPLE SIZE", os_sample_size)
+    print("OS POWER", os_power)
+    power_analysis_data = one_sample_power_analysis(
+                            power_analysis_input,
+                            float(sig),
+                            one_sample_compound,
+                            float(one_sample_tp),
+                            os_diff,
+                            os_diff_percentage,
+                            os_sample_size,
+                            os_power
+                        )
 
     data = {}
     data['power_analysis_data'] = power_analysis_data
+
+    print(data)
 
     return HttpResponse(json.dumps(data), content_type='application/json')
 
