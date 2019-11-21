@@ -867,7 +867,7 @@ class AssayMatrixForm(SetupFormsMixin, SignOffMixin, BootstrapForm):
 
 
 class AssaySetupCompoundForm(ModelFormSplitTime):
-    compound = forms.ModelChoiceField(queryset=Compound.objects.all().order_by('name'), required=False)
+    compound = forms.CharField()
 
     class Meta(object):
         model = AssaySetupCompound
@@ -949,9 +949,9 @@ class AssaySetupCompoundFormSet(BaseModelFormSetForcedUniqueness):
         form = super(AssaySetupCompoundFormSet, self)._construct_form(i, **kwargs)
 
         # Text field (un-saved) for supplier
-        form.fields['supplier_text'] = forms.CharField(initial='N/A')
+        form.fields['supplier_text'] = forms.CharField(initial='N/A', required=False)
         # Text field (un-saved) for lot
-        form.fields['lot_text'] = forms.CharField(initial='N/A')
+        form.fields['lot_text'] = forms.CharField(initial='N/A', required=False)
         # Receipt date
         form.fields['receipt_date'] = forms.DateField(required=False)
 
