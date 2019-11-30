@@ -28,6 +28,9 @@ from .models import (
     attr_getter,
     tuple_attrgetter,
     get_split_times,
+    AssayPlateReaderMap,
+    AssayPlateReaderMapItem,
+    AssayPlateReaderMapItemValue,
 )
 from microdevices.models import (
     MicrophysiologyCenter,
@@ -75,6 +78,9 @@ from django.template.loader import render_to_string
 from mps.mixins import user_is_valid_study_viewer
 
 # from django.utils import timezone
+
+from django.db.models import Avg, Max, Min
+from django.db import connection
 
 import numpy as np
 from scipy.stats.mstats import gmean
@@ -4106,9 +4112,173 @@ def fetch_assay_study_matrix_for_platemap(request):
         data_to_return.append(data_fields)
 
     data.update({ 'mi_list': data_to_return, })
+    return HttpResponse(json.dumps(data), content_type="application/json")
+
+# plate map making the map from an existing platemap
+def fetch_assay_study_platemap_for_platemap(request):
+    this_study = request.POST.get('study', '0')
+    this_platemap = request.POST.get('platemap', '0')
+
+    if not this_platemap:
+        return HttpResponseServerError()
+
+    #it is critical to understand how this works
+    #item has one for each well on a plate
+    #value has one or more for each well on a plate, but should have the same number for each well on the plate
+    #the lowest pks in the value should match the first use of the platemap (with or without a file assigned to it)
+    #if the parallelism between item and value gets broken, none of this will work correctly
+    # this is one option but could be easily broken and need to join the querysets at the end
+    # use this to get the number of wells in the plate
+    # this_queryset_item = AssayPlateReaderMapItem.objects.filter(
+    #     study_id=this_study
+    # ).filter(
+    #     assayplatereadermap_id=this_platemap
+    # ).prefetch_related(
+    #     'assayplatereadermap',
+    # ).order_by('plate_index', 'pk', )
+    # this_plate_size = len(this_queryset_item)
+    # print(this_queryset_item.query)
+    # this_queryset_item_value = AssayPlateReaderMapItemValue.objects.filter(
+    #     study_id=this_study
+    # ).filter(
+    #     assayplatereadermap_id=this_platemap
+    # ).order_by('plate_index', 'pk', )[:this_plate_size)]
+    # print(this_queryset_item_value.query)
+    # https://stackoverflow.com/questions/15291506/sql-query-to-select-distinct-row-with-minimum-value
+
+    # must be in the imports above: from django.db import connection
+    # cursor = connection.cursor()
+    # cursor.execute("...")
+    # row = cursor.fetchall()
+
+    # use raw sql instead...more robust
+    # get the set of platemap indexs that were added first (first making the plate map, get that value set)
+    my_where = ''
+    my_where = my_where + '(select min(id) as min_id '
+    my_where = my_where + 'from assays_assayplatereadermapitemvalue '
+    my_where = my_where + 'where assayplatereadermap_id = ' + this_platemap + ' '
+    my_where = my_where + 'group by assayplatereadermap_id, plate_index) '
+    # cursor = connection.cursor()
+    # cursor.execute(my_where)
+    # min_queryset_ish = cursor.fetchall()
+    # for each in min_queryset_ish:
+    #     print(each)
+
+    list_of_map_fields = ['name', 'description', 'device', 'time_unit', 'plate_reader_unit_id', 'volume_unit', 'cell_count', 'study_assay_id']
+    list_of_item_fields = ['well_name', 'matrix_item_id', 'well_use', 'location_id', 'standard_value', 'dilution_factor', 'collection_volume', 'collection_time']
+    list_of_value_fields = ['plate_index', 'time']
+    list_fields = list_of_map_fields + list_of_item_fields + list_of_value_fields
+
+    # table aliass were not working as expected in joins
+    my_select = ""
+    my_select = my_select + "select "
+    my_select = my_select + "assays_assayplatereadermap." + list_of_map_fields[0] + ", "
+    my_select = my_select + "assays_assayplatereadermap." + list_of_map_fields[1] + ", "
+    my_select = my_select + "assays_assayplatereadermap." + list_of_map_fields[2] + ", "
+    my_select = my_select + "assays_assayplatereadermap." + list_of_map_fields[3] + ", "
+    my_select = my_select + "assays_assayplatereadermap." + list_of_map_fields[4] + ", "
+    my_select = my_select + "assays_assayplatereadermap." + list_of_map_fields[5] + ", "
+    my_select = my_select + "assays_assayplatereadermap." + list_of_map_fields[6] + ", "
+    my_select = my_select + "assays_assayplatereadermap." + list_of_map_fields[7] + ", "
+    my_select = my_select + "assays_assayplatereadermapitem.name as " + list_of_item_fields[0] + ", "
+    my_select = my_select + "assays_assayplatereadermapitem." + list_of_item_fields[1] + ", "
+    my_select = my_select + "assays_assayplatereadermapitem." + list_of_item_fields[2] + ", "
+    my_select = my_select + "assays_assayplatereadermapitem." + list_of_item_fields[3] + ", "
+    my_select = my_select + "assays_assayplatereadermapitem." + list_of_item_fields[4] + ", "
+    my_select = my_select + "assays_assayplatereadermapitem." + list_of_item_fields[5] + ", "
+    my_select = my_select + "assays_assayplatereadermapitem." + list_of_item_fields[6] + ", "
+    my_select = my_select + "assays_assayplatereadermapitem." + list_of_item_fields[7] + ", "
+    my_select = my_select + "assays_assayplatereadermapitemvalue." + list_of_value_fields[0] + ", "
+    my_select = my_select + "assays_assayplatereadermapitemvalue." + list_of_value_fields[1] + " "
+    my_select = my_select + "from assays_assayplatereadermapitemvalue "
+    my_select = my_select + "inner join assays_assayplatereadermapitem "
+    my_select = my_select + "on assays_assayplatereadermapitemvalue.assayplatereadermap_id = assays_assayplatereadermapitem.assayplatereadermap_id "
+    my_select = my_select + "and assays_assayplatereadermapitemvalue.plate_index = assays_assayplatereadermapitem.plate_index "
+    my_select = my_select + "inner join assays_assayplatereadermap "
+    my_select = my_select + "on assays_assayplatereadermapitemvalue.assayplatereadermap_id = assays_assayplatereadermap.id "
+    my_select = my_select + "where assays_assayplatereadermapitemvalue.id in " + my_where + " "
+    my_select = my_select + "order by assays_assayplatereadermapitemvalue.plate_index "
+    cursor = connection.cursor()
+    cursor.execute(my_select)
+    tupleset = cursor.fetchall()
+    # for each in tupleset:
+    #     print(each)
+
+    data = {}
+    data_to_return = []
+
+    for tup in tupleset:
+        #print(tup)
+        data_fields = {}
+        idx = 0
+        for ff in list_fields:
+            data_fields[list_fields[idx]] = tup[idx]
+            idx = idx + 1
+
+        #print(data_fields)
+        data_to_return.append(data_fields)
+        data.update({ 'platemap_info': data_to_return, })
 
     return HttpResponse(json.dumps(data),
                         content_type="application/json")
+
+#Plate Reader Upload Data File
+def fetch_upload_plate_reader_data_file(request):
+    """Validates a bulk file and returns either errors or a preview of the data entered
+    Receives the following from POST:
+    study -- the study to acquire readeroutputs from
+    """
+    #TODO - get this sending the right info back
+    #following examples
+    study = request.POST.get('study', '0')
+    this_study = AssayStudy.objects.get(pk=int(study))
+    #print(study)
+    #print(this_study)
+    #print(studies)
+    form = AssayPlateReaderMapDataFileAddForm(request.POST, request.FILES, request=request, study=this_study)
+
+    data = {}
+    #data_to_return = ["something"]
+    #data.update({ 'this_data': [this_study, "something"], })
+    data.update({'this_data': [222, "something"], })
+    #data.update({ 'mi_list': data_to_return, })
+
+    return HttpResponse(json.dumps(data),
+                        content_type="application/json")
+    #
+    #
+    #
+    # if form.is_valid():
+    #     form_data = form.cleaned_data
+    #
+    #     preview_data = form_data.get('preview_data')
+    #     new_data_points = preview_data.get('readeroutput_data')
+    #     readeroutput_data = get_plate_reader_data_preview()
+    #
+    #     # readeroutput_data = get_plate_reader_data_preview(
+    #     #     new_data_points,
+    #     #     study=this_study,
+    #     #     new_data=True,
+    #     #     criteria=json.loads(request.POST.get('criteria', '{}'))
+    #     # )
+    #
+    #     data = {
+    #         'readeroutput_data': readeroutput_data,
+    #     }
+    #
+    #     return HttpResponse(json.dumps(data),
+    #                         content_type="application/json")
+    #
+    # else:
+    #     errors = ''
+    #     if form.errors.get('__all__'):
+    #         errors += form.errors.get('__all__').as_text()
+    #     data = {
+    #         'errors': errors
+    #     }
+    #     return HttpResponse(json.dumps(data),
+    #                         content_type='application/json')
+
 
 
 # TODO TODO TODO
@@ -4173,6 +4343,12 @@ switch = {
     },
     'fetch_assay_study_matrix_for_platemap': {
         'call': fetch_assay_study_matrix_for_platemap
+    },
+    'fetch_assay_study_platemap_for_platemap': {
+        'call': fetch_assay_study_platemap_for_platemap
+    },
+    'fetch_upload_plate_reader_data_file': {
+        'call': fetch_upload_plate_reader_data_file
     },
 
 }

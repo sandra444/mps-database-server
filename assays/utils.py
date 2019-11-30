@@ -2868,6 +2868,8 @@ def one_sample_power_analysis(one_sample_data, sig_level, one_sample_compound, o
 
 
 ##### Plate reader map file upload - in process
+
+##### Plate reader map file upload
 class PlateReaderMapDataFileAdd:
     """Upload Plate Reader Assay file"""
     def __init__(self, current_file, study, user, current_data_file_upload=None, save=False):
@@ -2889,20 +2891,98 @@ class PlateReaderMapDataFileAdd:
         }
         self.errors = []
 
-    #def process_data(self, data_list, sheet=''):
-
-
-    def process_csv_file(self):
-        data_reader = unicode_csv_reader(self.current_file, delimiter=',')
-        data_list = data_reader
-
-    def process_file(self):
-        # Save the data upload if necessary (ostensibly save should only run after validation)
-        if self.save:
-            self.data_file_upload.save()
-
-        self.current_file.seek(0, 0)
-        try:
-            self.process_excel_file()
-        except xlrd.XLRDError:
-            self.process_csv_file()
+    # def process_data(self, data_list, sheet=''):
+    #     """Validates CSV Uploads for Chip Readouts"""
+    #     # A query list to execute to save chip data
+    #     query_list = []
+    #     # A list of readout data for preview
+    #     readout_data = []
+    #     number_of_total_duplicates = 0
+    #
+    #     current_data = {}
+    #
+    #     # Read headers going onward
+    #     for line in data_list[starting_index:]:
+    #         # Some lines may not be long enough (have sufficient commas), ignore such lines
+    #         # Some lines may be empty or incomplete, ignore these as well
+    #         # TODO TODO TODO
+    #         # if not self.valid_data_row(line, header_indices):
+    #         #     continue
+    #
+    #         if not any(line[:18]):
+    #             continue
+    #
+    #         # matrix_item_name = line[header_indices.get('CHIP ID')]
+    #         #
+    #         # assay_plate_id = line[header_indices.get('ASSAY PLATE ID')]
+    #         # assay_well_id = line[header_indices.get('ASSAY WELL ID')]
+    #
+    #             # Add to current_data
+    #             current_data.setdefault(
+    #                 (
+    #                     matrix_item_id,
+    #                     assay_plate_id,
+    #                     assay_well_id,
+    #                     study_assay_id,
+    #                     sample_location_id,
+    #                     time,
+    #                     replicate,
+    #                     # ADD VALUE!
+    #                     subtarget.name,
+    #                     # value
+    #                 ), []
+    #             ).append(1)
+    #
+    #     # If errors
+    #     if self.errors:
+    #         self.errors = list(set(self.errors))
+    #         raise forms.ValidationError(self.errors)
+    #     # If there wasn't anything
+    #     elif len(query_list) < 1 and len(readout_data) < 1 and not number_of_total_duplicates:
+    #         raise forms.ValidationError(
+    #             'This file does not contain any valid data. Please make sure every row has values in required columns.'
+    #         )
+    #     elif len(query_list) < 1 and len(readout_data) < 1 and number_of_total_duplicates:
+    #         raise forms.ValidationError(
+    #             'This file contains only duplicate data. Please make sure this is the correct file.'
+    #         )
+    #
+    #     # TODO TODO TODO TODO
+    #     # If the intention is to save
+    #     elif self.save:
+    #         # # Connect to the database
+    #         # cursor = connection.cursor()
+    #         # # The generic query
+    #         # # TODO TODO TODO TODO
+    #         # query = ''' INSERT INTO "assays_assaydatapoint"
+    #         #           ("study_id", "matrix_item_id", "cross_reference", "assay_plate_id", "assay_well_id", "study_assay_id", "subtarget_id", "sample_location_id", "value", "time", "caution_flag", "excluded", "notes", "replicate", "update_number", "data_file_upload_id", "replaced")
+    #         #           VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)'''
+    #         #
+    #         # cursor.executemany(query, query_list)
+    #         # transaction.commit()
+    #         # cursor.close()
+    #
+    # def process_csv_file(self):
+    #     data_reader = unicode_csv_reader(self.current_file, delimiter=',')
+    #     data_list = data_reader
+    #
+    #     # # Check if header is valid
+    #     # valid_header = self.get_and_validate_header(data_list)
+    #     #
+    #     # if valid_header:
+    #     #     self.process_data(data_list)
+    #     #
+    #     # # IF NOT VALID, THROW ERROR
+    #     # else:
+    #     #     raise forms.ValidationError('The file is not formatted correctly. Please check the header of the file.')
+    #
+    # def process_file(self):
+    #     # Save the data upload if necessary (ostensibly save should only run after validation)
+    #     if self.save:
+    #         self.data_file_upload.save()
+    #
+    #     self.current_file.seek(0, 0)
+    #     try:
+    #         self.process_excel_file()
+    #     except xlrd.XLRDError:
+    #         self.process_csv_file()

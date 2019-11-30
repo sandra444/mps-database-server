@@ -51,7 +51,6 @@ from assays.models import (
     AssayPlateReaderMapItem,
     AssayPlateReaderMapDataFile,
     AssayPlateReaderMapDataFileBlock,
-    #AssayPlateReaderMapDataFileLine,
     AssayPlateReaderMapItemValue,
 )
 from microdevices.models import MicrophysiologyCenter
@@ -1456,7 +1455,7 @@ admin.site.register(AssayPlateReaderMapDataFile, AssayPlateReaderMapDataFileAdmi
 
 class AssayPlateReaderMapDataFileBlockAdmin(ImportExportModelAdmin):
     model = AssayPlateReaderMapDataFileBlock
-    list_display = ('name', 'description', 'assayplatereadermap', 'assayplatereadermapdatafile', 'data_block', 'processing_set')
+    list_display = ('name', 'description', 'assayplatereadermap', 'assayplatereadermapdatafile', 'data_block', 'assayplatereadermapdataprocessing')
     search_fields = ('name', 'description')
 
 admin.site.register(AssayPlateReaderMapDataFileBlock, AssayPlateReaderMapDataFileBlockAdmin)

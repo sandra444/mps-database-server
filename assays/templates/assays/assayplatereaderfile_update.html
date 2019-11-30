@@ -1,0 +1,218 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block load_js %}
+    <script src="{% static "assays/assayplatereaderfile_add.js" %}"></script>
+{% endblock %}
+
+
+{% block breadcrumbs %}
+    <li><a href="/assays/assaystudy/">Studies</a>
+    <li><a href="{{ form.instance.study.get_absolute_url }}">{{ form.instance.study }}</a></li>
+    {% if object %}
+        <li><a href="{% url 'assayplatereaderfile-index' object.study.id %}">Assay Plate Reader Files</a>
+    {% else %}
+        <li><a href="{% url 'assayplatereaderfile-index' form.instance.study_id %}">Assay Plate Reader Files</a>
+    {% endif %}
+    <li class="active">
+        {% if object %}
+            <em>{{ object }}</em>
+        {% else %}
+            Add
+        {% endif %}
+    </li>
+{% endblock %}
+
+{% block content %}
+    <form class="form-horizontal" method="post" enctype="multipart/form-data">
+        <div class="padded-bottom">
+            {# Title of page #}
+            <div class="well">
+                <h1 class="text-center">
+                    <em><b>Assay Plate Reader File
+                    {% if update %}
+                        Update
+                    {% else %}
+                        {% if review %}
+                            Review
+                        {% else %}
+                            Add
+                        {% endif %}
+                    {% endif %}
+                    </b></em>
+                </h1>
+                {% csrf_token %}
+                {# need this in javascript #}
+                <div id="check_load" class="hidden">{{ page_called }}</div>
+            </div>
+
+            <div>
+                {# need this in javascript #}
+                <div class="hidden" id="this_study_id">
+                    {{ form.instance.study_id }}
+                </div>
+            </div>
+
+            {# global plate file edits #}
+            <div>
+                <div class="row">
+                    <div class="col-md-8">
+                        {% include 'generic_field.html' with field=form.name label="Name"  %}
+                    </div>
+                    <div class="col-md-4">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-8">
+                        {% include 'generic_field.html' with field=form.description label="Description" %}
+                    </div>
+                    <div class="col-md-4">
+                    </div>
+                </div>
+            </div>
+
+
+            {% if add %}
+                <div class="row">
+                    <div class="col-md-8">
+                        <label for="plate_reader_file" class="col-sm-2 control-label">File</label>
+                        <div class="col-sm-10">
+                            <input type="file" name="plate_reader_file" class="btn btn-primary btn-lg" id="id_plate_reader_file">
+                        </div>
+                    </div>
+                    <div class="col-md-1">
+                        <div><p id="file_upload_tooltip"></p>
+                            <label for="file_upload_tooltip">&nbsp;</label>
+                        </div>
+                    </div>
+                </div>
+            {% else %}
+                <div class="select-value-set hidden">
+                    <div class="row">
+                        <div class="col-md-8">
+                            {% include 'generic_field.html' with field=form.number_blocks label="Count Blocks"  %}
+                        </div>
+{#                        <div class="col-md-1">#}
+{#                            <div><p id="file_block_number_tooltip"></p>#}
+{#                                <label for="file_block_number_tooltip">&nbsp;</label>#}
+{#                            </div>#}
+{#                        </div>#}
+                    </div>
+                    <div class="row">
+{#                       TODO Maybe figure out how to shade the lines selected as data blocks#}
+                        <div class="col-md-8">
+                            {% include 'generic_field.html' with field=form.se_block label="Data Block"  %}
+                        </div>
+{#                        <div class="col-md-1">#}
+{#                            <div><p id="file_block_tooltip"></p>#}
+{#                                <label for="file_block_tooltip">&nbsp;</label>#}
+{#                            </div>#}
+{#                        </div>#}
+                    </div>
+                </div>
+             {% endif %}
+
+            <div>
+                {# Code copied from study data upload#}
+                <legend>Upload Data From Plate Reader Output File</legend>
+
+                {% if form.errors %}
+                    {% for error in form.plate_reader_file.errors %}
+                        <div class="alert alert-danger" role="alert">
+                            <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                            <span class="sr-only">Error:</span>
+                            {{ error }}
+                        </div>
+                    {% endfor %}
+                    {% for error in form.non_field_errors %}
+                        <div class="alert alert-danger" role="alert">
+                            <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                            <span class="sr-only">Error:</span>
+                            {{ error }}
+                        </div>
+                    {% endfor %}
+                    <div class="form-group has-error">
+                {% else %}
+                    <div class="form-group">
+                {% endif %}
+
+            </div>
+
+            <div>
+                {% if review %}
+                {% else %}
+                    {% include "submit.html" with flag="y" creator=object.created_by.id %}
+                {% endif %}
+            </div>
+
+            {% include 'errors.html' %}
+
+            {% comment %}
+            <h6>tracking begin</h6>
+            {% include 'tracking.html' %}
+            <h6>tracking end</h6>
+            {% endcomment %}
+
+{#            When loading file, if there are more than one data block, add a formset and fill it will a block number, check it with the user, see if can shade the data blocks#}
+
+            {# need this (mangement_form) or form will not save   #}
+            {{ formset.management_form }}
+            <div >
+                <div class="no-selectize">
+                    {# this is the main formset (plate and plate itmes)  #}
+                    <h3>FormSet </h3>
+                    <div id="formset">
+                        {% for form in formset %}
+                            {# No ID for now #}
+    {#                        <div id="{{ form.prefix }}" class="inline no-selectize">#}
+                            <div class="inline no-selectize">
+                            {{ form }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            {{ line_formset.management_form }}
+            <div >
+                <div class="no-selectize">
+                    <h3>line_formset </h3>
+                    <div id="line_formset">
+                        {% for form in line_formset %}
+                            <div class="inline no-selectize">
+                                {{ form }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            {# these are the ones that show to user when they submit if there are errors  #}
+            <div>
+                {% if formset.errors %}
+                    {% for field, error in formset.errors.items %}
+                        <div class="alert alert-danger" role="alert">
+                            <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                            <span class="sr-only">Error:</span>
+                            {{ error }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+                <br>
+            </div>
+
+            <div class="hidden">
+                <h2>For Development Testing</h2>
+                {#Use for error checking#}
+                For testing<br>
+                form.errors<br>
+                {{ form.errors }}<br>
+                formset.errors<br>
+                {{ formset.errors }}<br>
+                line_formset.errors<br>
+                {{ line_formset.errors }}<br>
+            </div>
+        </div>
+
+    </form>
+{% endblock %}

@@ -2806,9 +2806,10 @@ class AssayPlateReaderMap(FlaggableModel):
         default=24, blank=True,
         choices=( (24, '24 Well Plate'), (96, '96 Well Plate'), (384, '384 Well Plate') )
     )
+    #sample time and collection time unit
     time_unit = models.CharField(
         max_length=8,
-        default='day', blank=True,
+        default='day', null=True, blank=True,
         choices=( ('day', 'Day'), ('hour', 'Hour'), ('minute', 'Minute') )
     )
     plate_reader_unit = models.ForeignKey(
@@ -2816,6 +2817,12 @@ class AssayPlateReaderMap(FlaggableModel):
         null=True, blank=True,
         on_delete=models.CASCADE
     )
+    volume_unit = models.CharField(
+        max_length=2,
+        default='mL', null=True, blank=True,
+        choices=( ('mL', 'mL'), ('µL', 'µL'), ('nL', 'nL') )
+    )
+    cell_count = models.FloatField(null=True, blank=True)
     study_assay = models.ForeignKey('assays.AssayStudyAssay', null=True, blank=True, on_delete=models.CASCADE)
     def __str__(self):
         return '{0}'.format(self.name)
@@ -2837,7 +2844,8 @@ class AssayPlateReaderMapDataFile(models.Model):
             ('study', 'plate_reader_file'),
         ]
     study = models.ForeignKey(AssayStudy, blank=True, on_delete=models.CASCADE)
-    name = models.CharField(verbose_name='File Name', max_length=255, blank=True)
+    # Can be removed?
+    name = models.CharField(verbose_name='File Name', max_length=255, blank=True, null=True)
     description = models.CharField(max_length=2000, blank=True, default='')
     plate_reader_file = models.FileField(
         upload_to=upload_plate_reader_file_location,
@@ -2853,6 +2861,61 @@ class AssayPlateReaderMapDataFile(models.Model):
     def get_delete_url(self):
         return '{}delete/'.format(self.get_absolute_url())
 
+class AssayPlateReaderMapDataProcessing(models.Model):
+    class Meta(object):
+        verbose_name = 'Assay Plate Reader Processing'
+        unique_together = [
+            ('study', 'name'),
+        ]
+
+    study = models.ForeignKey(AssayStudy, blank=True, on_delete=models.CASCADE)
+    name = models.CharField(verbose_name='File Name', max_length=255, blank=True)
+    description = models.CharField(max_length=2000, blank=True, default='')
+    #need all the metadata about processing
+    # blank = models.CharField(
+    #     verbose_name='Blank Handling',
+    #     max_length=20,
+    #     default='subtract', blank=True,
+    #     choices=( ('subtract', 'Subtract Average'), ('ignore', 'Ignore Blanks') )
+    # )
+    # calibration = models.CharField(
+    #     verbose_name='Calibration Handling',
+    #     max_length=20,
+    #     default='calibrate', blank=True,
+    #     choices=( ('calibrate', ''), ('skip', 'Skip Calibration') )
+    # )
+    # flag = models.CharField(
+    #     verbose_name='Flag Handling',
+    #     max_length=20,
+    #     default='subtract', blank=True,
+    #     choices=( ('subtract', 'Subtract Average'), ('ignore', 'Ignore Blanks') )
+    # )
+
+    # status_calibration
+    # status_annotate
+    # status_submit
+
+    # All processing options specified
+    # calibration done or not needed
+    # file/block assigned a plate map
+    # file/block assigned a processing group
+    # all data in a processing set are processed together (standards and blanks apply to all)
+    # is data complete (unit to unit, calibration done, whats R-sqared, calibration curve, max and min...there will be more here lots to QC)
+    # Submitted to Main Study
+    #     Automatically add an "E" Caution Flag when sample is outside of calibration range?
+    #     Automatically add a "J" Caution Flag when predicted sample is > 0 and < minimum non - zero standard?
+    #     Automatically add an "F" Caution Flag and an "X" Exclude when, due to the selection of the fitting equation,
+    #     a sample 's fitted response could not be calculated?
+
+    def __str__(self):
+        return '{0}'.format(self.name)
+    def get_absolute_url(self):
+        return '/assays/assayplatereaderdataprocessing/{}/'.format(self.id)
+    def get_post_submission_url(self):
+        return '/assays/assaystudy/{}/assayplatereaderdataprocessing/'.format(self.study_id)
+    def get_delete_url(self):
+        return '{}delete/'.format(self.get_absolute_url())
+
 class AssayPlateReaderMapDataFileBlock(models.Model):
     class Meta(object):
         verbose_name = 'Assay Plate Reader Data Block'
@@ -2861,12 +2924,11 @@ class AssayPlateReaderMapDataFileBlock(models.Model):
         ]
     study = models.ForeignKey(AssayStudy, blank=True, on_delete=models.CASCADE)
     assayplatereadermap = models.ForeignKey(AssayPlateReaderMap, on_delete=models.CASCADE)
-    assayplatereadermapdatafile = models.ForeignKey('AssayPlateReaderMapDataFile', null=True, blank=True, on_delete=models.CASCADE)
+    assayplatereadermapdatafile = models.ForeignKey(AssayPlateReaderMapDataFile, null=True, blank=True, on_delete=models.CASCADE)
     name = models.CharField(verbose_name='Block Name', max_length=255, blank=True)
     description = models.CharField(max_length=2000, blank=True, default='')
     data_block = models.IntegerField(default=1, null=True)
-    # this will be a link later - when get to the processing part of the app
-    processing_set = models.IntegerField(null=True)
+    assayplatereadermapdataprocessing = models.ForeignKey(AssayPlateReaderMapDataProcessing, null=True, blank=True, on_delete=models.CASCADE)
     def __str__(self):
         return '{0}'.format(self.name)
 
@@ -2892,6 +2954,9 @@ class AssayPlateReaderMapItem(models.Model):
     location = models.ForeignKey('AssaySampleLocation', null=True, blank=True, default=0, on_delete=models.CASCADE)
     # should be the standard concentration input (associated unit should be in the plate map model)
     standard_value = models.FloatField(default=0, null=True, blank=True)
+    dilution_factor = models.FloatField(default=1, null=True, blank=True)
+    collection_volume = models.FloatField(default=0, null=True, blank=True)
+    collection_time = models.FloatField(default=0, null=True, blank=True)
     def __str__(self):
         return '{0}'.format(self.name)
     def get_absolute_url(self):
@@ -2909,8 +2974,8 @@ class AssayPlateReaderMapItemValue(models.Model):
         ]
     study = models.ForeignKey(AssayStudy, blank=True, on_delete=models.CASCADE)
     assayplatereadermap = models.ForeignKey(AssayPlateReaderMap, on_delete=models.CASCADE)
-    assayplatereadermapdatafile = models.ForeignKey('AssayPlateReaderMapDataFile', null=True, blank=True, on_delete=models.CASCADE)
-    assayplatereadermapdatafileblock = models.ForeignKey('AssayPlateReaderMapDataFileBlock', null=True, blank=True, on_delete=models.CASCADE)
+    assayplatereadermapdatafile = models.ForeignKey(AssayPlateReaderMapDataFile, null=True, blank=True, on_delete=models.CASCADE)
+    assayplatereadermapdatafileblock = models.ForeignKey(AssayPlateReaderMapDataFileBlock, null=True, blank=True, on_delete=models.CASCADE)
     plate_index = models.IntegerField(default=999, blank=True)
     well_use = models.CharField(
         verbose_name='Well Use',
@@ -2919,7 +2984,11 @@ class AssayPlateReaderMapItemValue(models.Model):
         choices=( ('sample', 'Sample'), ('standard', 'Standard'), ('blank', 'Blank'), ('empty', 'Empty/Unused') )
     )
     #raw value read from the plate for all wells in this plate
-    value = models.FloatField(null=True, blank=True)
+    raw_value = models.FloatField(null=True, blank=True)
+    #adjusted input value (ie input_value - average of blanks)
+    adjusted_value = models.FloatField(null=True, blank=True)
+    #calibrated value
+    fitted_value = models.FloatField(null=True, blank=True)
     time = models.FloatField(default=0, null=True, blank=True)
     caution_flag = models.CharField(max_length=255, default='', null=True, blank=True)
     excluded = models.BooleanField(default=False, null=True, blank=True)
@@ -2935,5 +3004,4 @@ class AssayPlateReaderMapItemValue(models.Model):
     def get_delete_url(self):
         return '{}delete/'.format(self.get_absolute_url())
 
-#TODO need a model for the status of the processing (where in the loading, calibration, and processing)
 ##### END ASSAY PLATE MAP SECTION
