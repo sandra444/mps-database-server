@@ -2,6 +2,7 @@
 {% load static %}
 
 {% block breadcrumbs %}
+    <li><a href="{% url 'assays-studycomponents' %}">Study Components</a></li>
     <li><a href="/microdevices/model">MPS Models</a></li>
     <li class="active">
         {% if object %}
@@ -44,16 +45,19 @@
 
     <legend>MPS Model</legend>
 
-    {% include 'generic_field.html' with field=form.name label="Model Name*" %}
+    {% include 'generic_field.html' with field=form.name %}
 
-    {% include 'generic_field.html' with field=form.alt_name label="Alternative Name" %}
+    {% include 'generic_field.html' with field=form.alt_name %}
 
-    {% include 'generic_field.html' with field=form.center label="Center*" %}
+    {% include 'generic_field.html' with field=form.center %}
 
-    {% include 'generic_field.html' with field=form.base_model label="Base Model" %}
+    {% include 'generic_field.html' with field=form.base_model %}
 
-    {% include 'generic_field.html' with field=form.organ label="Organ*" %}
+    {% include 'generic_field.html' with field=form.organ %}
 
+    {% include 'generic_field.html' with field=form.device %}
+
+    {% comment %}
     {% if form.device.errors %}
         {% for error in form.device.errors %}
             <div class="alert alert-danger" role="alert">
@@ -76,6 +80,7 @@
             </a>
         </div>
     </div>
+    {% endcomment %}
 
     {% include 'generic_field.html' with field=form.model_type label="Model Type*" %}
 
@@ -173,10 +178,7 @@
     <legend>Cell Types</legend>
 
     {# Add new #}
-    <a class="popup-link" data-href="/cellsamples/celltype/add?popup=1" data-window-name="celltype">
-        <span class="glyphicon glyphicon-plus text-success" aria-hidden="true"></span>
-        Create New Cell Type
-    </a>
+    {% include 'generic_popup_link.html' with field=cell_formset.0.cell_type %}
     <br>
     <br>
 
@@ -280,7 +282,7 @@
                     <td>{{ protocol.protocol_file }}</td>
                     {% if protocol.id.value %}
                     <td>
-                        <a href="{% url 'protocol-update' protocol.id.value %}" class="btn btn-primary">Edit</a>
+                        <a href="{% url 'microdevices-organmodelprotocol-update' protocol.id.value %}" class="btn btn-primary">Edit</a>
                     </td>
                     {% else %}
                     <td></td>

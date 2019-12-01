@@ -8,7 +8,7 @@ from mps.settings import DEFAULT_FROM_EMAIL
 from django.template.loader import render_to_string
 
 # SHOULD BE IN ALL CAPS
-tracking = ('created_by', 'created_on', 'modified_on', 'modified_by', 'signed_off_by', 'signed_off_date', 'locked')
+tracking = ('created_by', 'created_on', 'modified_on', 'modified_by', 'signed_off_by', 'signed_off_date', 'locked', 'restricted')
 
 WIDGETS_TO_ADD_FORM_CONTROL_TO = {
     "<class 'django.forms.widgets.TextInput'>": True,
@@ -30,6 +30,9 @@ class BootstrapForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop('user', '')
         super(BootstrapForm, self).__init__(*args, **kwargs)
+
+         # Removes : as label suffix
+        self.label_suffix = ""
 
         for field in self.fields:
             widget_type = str(type(self.fields[field].widget))
@@ -55,11 +58,35 @@ class BootstrapForm(forms.ModelForm):
                 else:
                     self.fields[field].widget.attrs['class'] = 'required'
 
+                # One way to do this
+                if self.fields[field].label:
+                    # Add asterisks to label
+                    self.fields[field].label += '*'
+
             # Not really a good idea to use "private" attributes...
+            # A lot of stuff, I should just make a widget or something
             if hasattr(self.fields[field], '_queryset'):
                 if hasattr(self.fields[field]._queryset, 'model'):
-                    self.fields[field].widget.attrs['data-app'] = self.fields[field]._queryset.model._meta.app_label
-                    self.fields[field].widget.attrs['data-model'] = self.fields[field]._queryset.model._meta.object_name
+                    # Usually one would use a hyphen rather than an underscore
+                    # self.fields[field].widget.attrs['data-app'] = self.fields[field]._queryset.model._meta.app_label
+                    self.fields[field].widget.attrs['data_app'] = self.fields[field]._queryset.model._meta.app_label
+
+                    # self.fields[field].widget.attrs['data-model'] = self.fields[field]._queryset.model._meta.object_name
+                    self.fields[field].widget.attrs['data_model'] = self.fields[field]._queryset.model._meta.object_name
+
+                    self.fields[field].widget.attrs['data_verbose_name'] = self.fields[field]._queryset.model._meta.verbose_name
+
+                    # DUMB
+                    # self.fields[field].widget.attrs['data_add_url'] = reverse(
+                    #     '{}-{}-add'.format(
+                    #         self.fields[field]._queryset.model._meta.app_label,
+                    #         self.fields[field]._queryset.model._meta.model_name,
+                    #     )
+                    # )
+
+                    # Possibly dumber
+                    if hasattr(self.fields[field]._queryset.model, 'get_add_url_manager'):
+                        self.fields[field].widget.attrs['data_add_url'] = self.fields[field]._queryset.model.get_add_url_manager()
 
             # Crude way to indicate default
             if hasattr(self.fields[field], 'initial'):

@@ -72,7 +72,7 @@
                                 <li title="" class="divider"></li>
                                 <li title="" class="dropdown-header">Model Components</li>
                                 <li title="Index of microdevices, along with their manufacturer and version/catalog number"><a href="/microdevices/device">View Microdevices</a></li>
-                                <li title="Index of possible compartments within represented microdevices"><a href="/assays/locations/">View Microdevice Locations</a></li>
+                                <li title="Index of possible compartments within represented microdevices"><a href="/assays/location/">View Microdevice Locations</a></li>
                                 <li title="" class="divider"></li>
                                 <li title="" class="dropdown-header">Requires Permission</li>
                                 <li title="Add a new MPS model for use in studies"><a href="/microdevices/model/add/">Add MPS Model</a></li>
@@ -166,10 +166,11 @@
                                 {# <li title="Index of configurations for linking chips (for integrated studies)"><a href="/assays/studyconfiguration/">View Integrated Study Configurations</a></li> #}
                                 <li title="" class="divider"></li>
                                 <li title="" class="dropdown-header">Study Components</li>
-                                <li title="Index of target/analytes and their occurrences within visible studies"><a href="/assays/targets/">View Target/Analytes</a></li>
-                                <li title="Index of method/kits and their occurrences within visible studies"><a href="/assays/methods/">View Method/Kits</a></li>
-                                <li title="Index of PubMed references"><a href="/assays/assayreference/">View References</a></li>
-                                <li title="Index of physical measurement units"><a href="/assays/units/">View Measurement Units</a></li>
+                                <li title="View study components"><a href="{% url 'assays-studycomponents' %}">Study Components</a></li>
+                                {# <li title="Index of target/analytes and their occurrences within visible studies"><a href="/assays/target/">View Target/Analytes</a></li> #}
+                                {# <li title="Index of method/kits and their occurrences within visible studies"><a href="/assays/method/">View Method/Kits</a></li> #}
+                                {# <li title="Index of PubMed references"><a href="/assays/assayreference/">View References</a></li> #}
+                                {# <li title="Index of physical measurement units"><a href="/assays/unit/">View Measurement Units</a></li> #}
                       {#          <li class="divider"></li>#}
                       {#          <li><a href="/assays/assaychipsetup/">View Setups</a></li>#}
                       {#          <li><a href="/assays/assaychipreadout/">View Readouts</a></li>#}
@@ -177,7 +178,7 @@
                                 <li title="" class="divider"></li>
                                 <li title="" class="dropdown-header">Requires Permission</li>
                                 <li title="Add a study to subsequently populate with assay data"><a href="/assays/assaystudy/add/">Add Study</a></li>
-                                <li title="Add a study set"><a href="/assays/assaystudyset/add/">Create Shared Study Set</a></li>
+                                <li title="Add a study set"><a href="/assays/assaystudyset/add/">Add Study Set</a></li>
                                 {# <li title="Add a new definition for how chips are linked together (for integrated studies)"><a href="/assays/studyconfiguration/add/">Add Integrated Study Configuration</a></li> #}
                             </ul>
                         </div>
