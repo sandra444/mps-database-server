@@ -2349,7 +2349,7 @@ class AssayMethodForm(BootstrapForm):
 class PhysicalUnitsForm(BootstrapForm):
     class Meta(object):
         model = PhysicalUnits
-        exclude = tracking
+        exclude = tracking + ('availability',)
 
         widgets = {
             'description': forms.Textarea(attrs={'cols': 50, 'rows': 3}),
