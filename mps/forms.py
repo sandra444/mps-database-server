@@ -15,7 +15,8 @@ WIDGETS_TO_ADD_FORM_CONTROL_TO = {
     "<class 'django.forms.widgets.Textarea'>": True,
     "<class 'django.forms.widgets.DateInput'>": True,
     "<class 'django.forms.widgets.Select'>": True,
-    "<class 'django.forms.widgets.NumberInput'>": True
+    "<class 'django.forms.widgets.NumberInput'>": True,
+    "<class 'django.forms.widgets.URLInput'>": True,
 }
 
 DATE_INPUT_WIDGET = "<class 'django.forms.widgets.DateInput'>"
