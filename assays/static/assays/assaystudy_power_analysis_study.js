@@ -566,13 +566,10 @@ $(document).ready(function () {
             var one_sample_data = JSON.parse(JSON.stringify(pass_to_power_analysis_dict[current_group][compound_only]));
             var the_goods = [];
             var mean, std;
-            console.log(one_sample_data);
             remove_col(one_sample_data, 0);
             remove_col(one_sample_data, 1);
             remove_col(one_sample_data, 1);
             for (var x = 0; x < one_sample_data.length; x++) {
-                console.log(one_sample_data[x][0])
-                console.log(one_sample_time_point * 1440)
                 if (one_sample_data[x][0] === one_sample_time_point * 1440) {
                     the_goods.push(one_sample_data[x][1]);
                 }
@@ -580,8 +577,8 @@ $(document).ready(function () {
             mean = the_goods.reduce((a,b) => a+b)/(the_goods.length);
             std = Math.sqrt(the_goods.map(x => Math.pow(x-mean,2)).reduce((a,b) => a+b)/(the_goods.length));
             $('#summary-sample-number').text(the_goods.length);
-            $('#summary-mean').text(mean.toFixed(5));
-            $('#summary-std').text(std.toFixed(5));
+            $('#summary-mean').text(mean.toFixed(3));
+            $('#summary-std').text(std.toFixed(3));
         } else {
             $('.one-sample-time-point-checkbox').each(function() {
                 if ($(this).attr('disabled')) {
@@ -593,6 +590,10 @@ $(document).ready(function () {
             $('#summary-sample-number').html('&nbsp;');
             $('#summary-mean').html('&nbsp;');
             $('#summary-std').html('&nbsp;');
+            $('#one-sample-diff').val('');
+            $('#one-sample-percent').val('');
+            $('#one-sample-size').val('');
+            $('#one-sample-power').val('0.8');
         }
     });
 
@@ -965,6 +966,20 @@ $(document).ready(function () {
         one_sample_time_points_table_container.hide();
         $(one_sample_power_analysis_container).hide();
 
+        // Clear One Sample Input Fields
+        $('#power-analysis-button').attr('disabled', true);
+        $('#summary-time').html('&nbsp;');
+        $('#summary-sample-number').html('&nbsp;');
+        $('#summary-mean').html('&nbsp;');
+        $('#summary-std').html('&nbsp;');
+        $('#one-sample-diff').val('');
+        $('#one-sample-percent').val('');
+        $('#one-sample-size').val('');
+        $('#one-sample-power').val('0.8');
+
+        // Hide One Sample Field Warning
+        $('#os-field-warning').hide();
+
         // Adjust spacing of options
         $("#power-analysis-options").removeClass("col-sm-offset-6");
 
@@ -1017,22 +1032,6 @@ $(document).ready(function () {
 
     // Manage input to significance level input
     document.querySelector('#sig-level').addEventListener("keypress", function (e) {
-        if (e.key.length === 1 && e.key !== '.' && isNaN(e.key) && !e.ctrlKey && isNaN(e.key) && !e.metaKey || e.key === '.' && e.target.value.toString().indexOf('.') > -1) {
-            e.preventDefault();
-        }
-    });
-
-    // Handle changes to one sample power level input
-    $('#one-sample-power').change(function() {
-        one_sample_power = $('#one-sample-power').val();
-        if (one_sample_power >= 1 || one_sample_power === 0) {
-            one_sample_power = 1;
-            $('#one-sample-power').val('0.8');
-        }
-    });
-
-    // Manage input to one sample power level input
-    document.querySelector('#one-sample-power').addEventListener("keypress", function (e) {
         if (e.key.length === 1 && e.key !== '.' && isNaN(e.key) && !e.ctrlKey && isNaN(e.key) && !e.metaKey || e.key === '.' && e.target.value.toString().indexOf('.') > -1) {
             e.preventDefault();
         }
@@ -1168,12 +1167,55 @@ $(document).ready(function () {
         one_sample_time_points_table.columns.adjust();
     }
 
-    $('#one-sample-diff').focus(function() {
-        $('#one-sample-percent').val('');
+    //TODO OS DIFFS
+    $('#one-sample-diff').blur(function() {
+        var mean = $('#summary-mean').text();
+        var diff = $('#one-sample-diff').val();
+        if ($.isNumeric(diff)) {
+            $('#one-sample-percent').val((diff / mean * 100).toFixed(3));
+        } else {
+            $('#one-sample-percent').val('');
+            $('#one-sample-diff').val('');
+        }
     });
 
-    $('#one-sample-percent').focus(function() {
-        $('#one-sample-diff').val('');
+    $('#one-sample-percent').blur(function() {
+        var mean = $('#summary-mean').text();
+        var perc = $('#one-sample-percent').val();
+        if ($.isNumeric(perc)) {
+            $('#one-sample-diff').val((mean * (perc * .01)).toFixed(3));
+        } else {
+            $('#one-sample-percent').val('');
+            $('#one-sample-diff').val('');
+        }
+    });
+
+    $('#one-sample-size').blur(function() {
+        if (!$.isNumeric($('#one-sample-size').val())) {
+            $('#one-sample-size').val('');
+        }
+    });
+
+    // Handle changes to one sample power level input
+    $('#one-sample-power').change(function() {
+        one_sample_power = $('#one-sample-power').val();
+        if (one_sample_power >= 1 || one_sample_power === 0) {
+            one_sample_power = 1;
+            $('#one-sample-power').val('0.8');
+        }
+    });
+
+    $('#one-sample-power').blur(function() {
+        if (!$.isNumeric($('#one-sample-power').val())) {
+            $('#one-sample-power').val('');
+        }
+    });
+
+    // Manage input to one sample power level input
+    document.querySelector('#one-sample-power').addEventListener("keypress", function (e) {
+        if (e.key.length === 1 && e.key !== '.' && isNaN(e.key) && !e.ctrlKey && isNaN(e.key) && !e.metaKey || e.key === '.' && e.target.value.toString().indexOf('.') > -1) {
+            e.preventDefault();
+        }
     });
 
     function fetch_two_sample_power_analysis_results() {
@@ -1261,9 +1303,15 @@ $(document).ready(function () {
         var current_group = $('.power-analysis-group-checkbox:visible').first().attr('data-power-analysis-group');
         var compound_only = $('.power-analysis-compounds-checkbox:visible').first().attr('data-power-analysis-compound');
         var os_diff = $('#one-sample-diff').val();
-        var os_diff_percentage = $('#one-sample-percent').val();
         var os_sample_size = $('#one-sample-size').val();
         var os_power = $('#one-sample-power').val();
+
+        if ((os_power === '' && os_sample_size === '' && os_diff === '') || (os_power !== '' && os_sample_size !== '' && os_diff !== '')) {
+            $('#os-field-warning').show();
+            return;
+        } else {
+            $('#os-field-warning').hide();
+        }
 
         empty_graph_containers();
 
@@ -1284,7 +1332,6 @@ $(document).ready(function () {
                         sig: significance_level,
                         one_sample_tp: one_sample_time_point,
                         os_diff: os_diff,
-                        os_diff_percentage: os_diff_percentage,
                         os_sample_size: os_sample_size,
                         os_power: os_power
                     },
@@ -1295,85 +1342,104 @@ $(document).ready(function () {
                 // Stop spinner
                 window.spinner.stop();
 
-                console.log(data);
-
                 if (data.power_analysis_data.error) {
-                    console.log("\n\nERROR\n\n")
+                    console.log(data.power_analysis_data.error)
                 }
+                else if (Object.keys(data.power_analysis_data).length == 1) {
+                    if ("Differences" in data.power_analysis_data) {
+                        if (data.power_analysis_data.Differences == null) {
 
-                power_analysis_one_sample_container_selector.attr('hidden', false);
-
-                console.log(data.power_analysis_data.data);
-                console.log(data.power_analysis_data.columns);
-                data.power_analysis_data.data.unshift([data.power_analysis_data.columns[0], data.power_analysis_data.columns[1]]);
-
-                var one_sample_chart_data = data.power_analysis_data.data;
-
-                console.log(one_sample_chart_data)
-
-                var title = ['Differences', 'Sample Size', 'Power'];
-                title = title.filter(e => e !== data.power_analysis_data.columns[0] && e !== data.power_analysis_data.columns[1]);
-
-                console.log(title)
-
-                var one_sample_multi_graph_options = {
-                    title: title,
-                    interpolateNulls: true,
-                    titleTextStyle: {
-                        fontSize: 18,
-                        bold: true,
-                        underline: true
-                    },
-                    legend: {
-                        title: 'Time (Days)',
-                        position: 'top',
-                        maxLines: 5,
-                        textStyle: {
-                            bold: true
+                        } else {
+                            data.power_analysis_data.Differences = data.power_analysis_data.Differences.toFixed(3)
                         }
-                    },
-                    hAxis: {
-                        // Begins empty
-                        title: data.power_analysis_data.columns[0],
-                        textStyle: {
-                            bold: true
-                        },
-                        titleTextStyle: {
-                            fontSize: 14,
-                            bold: true,
-                            italic: false
-                        },
-                        minValue: 0,
-                        scaleType: 'mirrorLog'
-                    },
-                    vAxis: {
-                        title: data.power_analysis_data.columns[1],
-                        format: '',
-                        textStyle: {
-                            bold: true
-                        },
-                        titleTextStyle: {
-                            fontSize: 14,
-                            bold: true,
-                            italic: false
-                        },
-                        // This doesn't seem to interfere with displaying negative values
-                        minValue: 0,
-                        viewWindowMode: 'explicit'
-                    },
-                    pointSize: 0,
-                    'chartArea': {
-                        'width': '90%',
-                        'height': '65%'
-                    },
-                    'height': 400,
-                    // Individual point tooltips, not aggregate
-                    focusTarget: 'datum',
-                };
+                        $(one_sample_multi_graph).html('<div class="well text-center"><br><br><br><h3>Differences</h3><br><h4>'+data.power_analysis_data.Differences+'</h4><br><br><br></div>');
+                    }
+                    else if ("Sample Size" in data.power_analysis_data) {
+                        if (data.power_analysis_data["Sample Size"] == null) {
 
-                one_sample_chart_data = google.visualization.arrayToDataTable(one_sample_chart_data);
-                one_sample_graph = new google.visualization.LineChart(one_sample_multi_graph);
-                one_sample_graph.draw(one_sample_chart_data, one_sample_multi_graph_options);
+                        } else {
+                            data.power_analysis_data['Sample Size'] = data.power_analysis_data['Sample Size'].toFixed(3)
+                        }
+                        $(one_sample_multi_graph).html('<div class="well text-center"><br><br><br><h3>Sample Size</h3><br><h4>'+data.power_analysis_data['Sample Size']+'</h4><br><br><br></div>');
+                    }
+                    else if ("Power" in data.power_analysis_data) {
+                        if (data.power_analysis_data.Power == null) {
+
+                        } else {
+                            data.power_analysis_data.Power = data.power_analysis_data.Power.toFixed(3)
+                        }
+                        $(one_sample_multi_graph).html('<div class="well text-center"><br><br><br><h3>Power</h3><br><h4>'+data.power_analysis_data.Power+'</h4><br><br><br></div>');
+                    }
+                }
+                else {
+                    power_analysis_one_sample_container_selector.attr('hidden', false);
+
+                    data.power_analysis_data.data.unshift([data.power_analysis_data.columns[0], data.power_analysis_data.columns[1]]);
+
+                    var one_sample_chart_data = data.power_analysis_data.data;
+
+                    var title = ['Differences', 'Sample Size', 'Power'];
+                    title = title.filter(e => e !== data.power_analysis_data.columns[0] && e !== data.power_analysis_data.columns[1]);
+
+                    var one_sample_multi_graph_options = {
+                        title: title,
+                        interpolateNulls: true,
+                        titleTextStyle: {
+                            fontSize: 18,
+                            bold: true,
+                            underline: true
+                        },
+                        legend: {
+                            title: 'Time (Days)',
+                            position: 'top',
+                            maxLines: 5,
+                            textStyle: {
+                                bold: true
+                            }
+                        },
+                        hAxis: {
+                            // Begins empty
+                            title: data.power_analysis_data.columns[0],
+                            textStyle: {
+                                bold: true
+                            },
+                            titleTextStyle: {
+                                fontSize: 14,
+                                bold: true,
+                                italic: false
+                            },
+                            minValue: 0,
+                            scaleType: 'mirrorLog'
+                        },
+                        vAxis: {
+                            title: data.power_analysis_data.columns[1],
+                            format: '',
+                            textStyle: {
+                                bold: true
+                            },
+                            titleTextStyle: {
+                                fontSize: 14,
+                                bold: true,
+                                italic: false
+                            },
+                            // This doesn't seem to interfere with displaying negative values
+                            minValue: 0,
+                            viewWindowMode: 'explicit'
+                        },
+                        pointSize: 0,
+                        'chartArea': {
+                            'width': '90%',
+                            'height': '65%'
+                        },
+                        'height': 400,
+                        // Individual point tooltips, not aggregate
+                        focusTarget: 'datum',
+                    };
+
+                    one_sample_chart_data = google.visualization.arrayToDataTable(one_sample_chart_data);
+                    one_sample_graph = new google.visualization.LineChart(one_sample_multi_graph);
+                    one_sample_graph.draw(one_sample_chart_data, one_sample_multi_graph_options);
+                }
             })
             .fail(function(xhr, errmsg, err) {
                 // Stop spinner

@@ -31,9 +31,9 @@ import scipy.interpolate as sp
 import scipy.stats as stats
 from scipy.interpolate import CubicSpline
 from scipy import integrate
+from scipy.stats import ttest_ind
 from sympy import gamma
-import rpy2.robjects as robjects
-from rpy2.robjects import FloatVector
+from statsmodels.stats.power import (tt_solve_power, TTestIndPower)
 
 import csv
 import codecs
@@ -2023,28 +2023,15 @@ def pa_effect_size(x, y, type='d'):
 
 
 def pa_predicted_sample_size(power, es_value, sig_level=0.05):
-    if power > 0 and power < 1:
-        pdata = robjects.FloatVector([power, es_value, sig_level])
-
-        rstring = """
-        function(pdata){
-        library(pwr)
-        pp <- try(pwr.t.test(n = , d =pdata[2], sig.level =pdata[3], power =pdata[1] ,
-                type = "two.sample",alternative = "two.sided"),silent = TRUE)
-              if (!inherits(pp,"try-error")){
-                sample_size<-pp$n}
-              else
-                sample_size<-0
-        sample_size
-        }
-        """
-        rfunc = robjects.r(rstring)
-        r_result = rfunc(pdata)
-        pr = tuple(r_result)
-        sample_size = pr[0]
-        if sample_size != 0:
-            sample_size = sample_size
-        else:
+    if power > 0 and power < 1 and abs(es_value) > 0:
+        analysis = TTestIndPower()
+        try:
+            result = analysis.solve_power(effect_size=es_value, power=power, nobs1=None, ratio=1.0, alpha=sig_level)
+            if np.isscalar(result):
+                sample_size = result
+            else:
+                sample_size = np.NAN
+        except:
             sample_size = np.NAN
     else:
         sample_size = np.NAN
@@ -2052,28 +2039,12 @@ def pa_predicted_sample_size(power, es_value, sig_level=0.05):
 
 
 def pa_predicted_power(sample_size, es_value, sig_level=0.05):
-    if sig_level > 0 and sig_level < 1:
-        pdata = robjects.FloatVector([sample_size, es_value, sig_level])
-
-        rstring = """
-        function(pdata){
-        library(pwr)
-        pp <- try(pwr.t.test(n = pdata[1], d =pdata[2], sig.level =pdata[3], power = ,
-                type = "two.sample",alternative = "two.sided"),silent = TRUE)
-              if (!inherits(pp,"try-error")){
-                power_value<-pp$power}
-              else
-                power_value<-0
-        power_value
-        }
-        """
-        rfunc = robjects.r(rstring)
-        r_result = rfunc(pdata)
-        pr = tuple(r_result)
-        power_value = pr[0]
-        if power_value != 0:
-            power_value = power_value
-        else:
+    if sig_level > 0 and sig_level < 1 and abs(es_value) > 0:
+        analysis = TTestIndPower()
+        try:
+            result = analysis.solve_power(effect_size=es_value, power=None, nobs1=sample_size, ratio=1.0, alpha=sig_level)
+            power_value = result
+        except:
             power_value = np.NAN
     else:
         power_value = np.NAN
@@ -2081,28 +2052,12 @@ def pa_predicted_power(sample_size, es_value, sig_level=0.05):
 
 
 def pa_predicted_significance_level(sample_size, es_value, power=0.8):
-    if power > 0 and power < 1:
-        pdata = robjects.FloatVector([sample_size, es_value, power])
-
-        rstring = """
-        function(pdata){
-        library(pwr)
-        pp <- try(pwr.t.test(n = pdata[1], d =pdata[2], sig.level = NULL, power = pdata[3],
-                type = "two.sample",alternative = "two.sided"),silent = TRUE)
-              if (!inherits(pp,"try-error")){
-                sig_level<-pp$sig.level}
-              else
-                sig_level<-0
-        sig_level
-        }
-        """
-        rfunc = robjects.r(rstring)
-        r_result = rfunc(pdata)
-        pr = tuple(r_result)
-        sig_level = pr[0]
-        if sig_level != 0:
-            sig_level = sig_level
-        else:
+    if power > 0 and power < 1 and abs(es_value) > 0:
+        analysis = TTestIndPower()
+        try:
+            result = analysis.solve_power(effect_size=es_value, power=power, nobs1=sample_size, ratio=1.0, alpha=None)
+            sig_level = result
+        except:
             sig_level = np.NAN
     else:
         sig_level = np.NAN
@@ -2110,28 +2065,12 @@ def pa_predicted_significance_level(sample_size, es_value, power=0.8):
 
 
 def pa_power_one_sample_size(n, es_value, sig_level=0.05):
-    if n > 1:
-        pdata = robjects.FloatVector([n, es_value, sig_level])
-
-        rstring = """
-        function(pdata){
-        library('pwr')
-        pp <- try(pwr.t.test(n =pdata[1], d =pdata[2], sig.level =pdata[3], power = ,
-                type = "two.sample",alternative = "two.sided"),silent = TRUE)
-              if (!inherits(pp,"try-error")){
-                power_v<-pp$power}
-              else
-                power_v<-0
-        power_v
-        }
-        """
-        rfunc = robjects.r(rstring)
-        r_result = rfunc(pdata)
-        pr = tuple(r_result)
-        power_v = pr[0]
-        if power_v != 0:
-            power_value = power_v
-        else:
+    if n > 1 and abs(es_value) > 0:
+        analysis = TTestIndPower()
+        try:
+            result = analysis.solve_power(effect_size=es_value, power=None, nobs1=n, ratio=1.0, alpha=sig_level)
+            power_value = result
+        except:
             power_value = np.NAN
     else:
         power_value = np.NAN
@@ -2140,50 +2079,26 @@ def pa_power_one_sample_size(n, es_value, sig_level=0.05):
 
 def pa_power_two_sample_size(n1, n2, es_value, sig_level=0.05):
     if n1 > 1 and n2 > 1 and n1 != n2:
-        pdata = robjects.FloatVector([n1, n2, es_value, sig_level])
-        rstring = """
-        function(pdata){
-        library(pwr)
-        pp <- try(pwr.t2n.test(n1=pdata[1], n2=pdata[2], d=pdata[3],sig.level = pdata[4],
-                               power = , alternative = "two.sided"),silent = TRUE)
-              if (!inherits(pp,"try-error")){
-                power_v<-pp$power}
-              else
-                power_v<-0
-        power_v
-        }
-        """
-        rfunc = robjects.r(rstring)
-        r_result = rfunc(pdata)
-        pr = tuple(r_result)
-        power_v = pr[0]
-        if power_v != 0:
-            power_value = power_v
-        else:
+        analysis = TTestIndPower()
+        try:
+            ratio = n2 / n1
+            result = analysis.solve_power(effect_size=es_value, power=None, nobs1=n1, ratio=ratio, alpha=sig_level)
+            power_value = result
+        except:
             power_value = np.NAN
     elif n1 == n2 and n1 > 1:
-        power_value = pa_power_one_sample_size(n1, es_value, sig_level)
+        power_value = pa_Power_One_Sample_Size(n1, es_value)
     else:
-        power_value = power_v
+        power_value = np.NAN
     return power_value
 
 
 def pa_t_test(x, y):
-    if (x.std() == 0.0 or y.std() == 0.0):
-        p_value = None
-    else:
-        xp = robjects.FloatVector(x)
-        yp = robjects.FloatVector(y)
-        rstring = """
-        function(x,y){
-        t_pvalue<-t.test(x,y)$p.value
-        t_pvalue
-        }
-        """
-        rfunc = robjects.r(rstring)
-        r_result = rfunc(xp, yp)
-        pr = tuple(r_result)
-        p_value = pr[0]
+    try:
+        result = ttest_ind(x, y, equal_var=False)
+        p_value = result[1]
+    except:
+        p_value = np.NAN
     return p_value
 
 
@@ -2390,8 +2305,7 @@ def pa_power_analysis_report(power_group_data, type='d', sig_level=0.05):
         header_list.append('Sample Size')
 
         # Define all columns of power analysis report table
-        power_analysis_table = power_analysis_table.reindex(
-            columns=header_list)
+        power_analysis_table = power_analysis_table.reindex(columns=header_list)
         # Loop every unique replicate group
         time_count = len(power_analysis_table)
 
@@ -2439,8 +2353,10 @@ def pa_power_analysis_report(power_group_data, type='d', sig_level=0.05):
                     itime,
                     power_analysis_table.columns.get_loc('P Value')
                 ] = p_value
-
-                power_analysis_table.iloc[itime, power_analysis_table.columns.get_loc('Sample Size')] = sample_size
+                power_analysis_table.iloc[
+                    itime,
+                    power_analysis_table.columns.get_loc('Sample Size')
+                ] = sample_size
 
     return power_analysis_table
 
@@ -2664,26 +2580,11 @@ def create_power_analysis_group_table(group_count, study_data):
 
 # One Sample Power Analysis
 def pa1_predict_sample_size_given_delta_and_power(delta, power, sig_level, sd):
-    if power > 0 and power < 1:
-        pdata = FloatVector([delta, sd, power, sig_level])
-
-        rstring = """
-        function(pdata){
-        pp <- try(power.t.test(n = NULL, delta =pdata[1], sd=pdata[2],sig.level =pdata[4], power =pdata[3] ,
-                type = "one.sample",alternative = "two.sided"),silent = TRUE)
-              if (!inherits(pp,"try-error")){
-                sample_size<-pp$n}
-              else
-                sample_size<-0
-        sample_size
-        }
-        """
-        rfunc = robjects.r(rstring)
-        r_result = rfunc(pdata)
-        pr = tuple(r_result)
-        sample_size = pr[0]
-        if sample_size != 0:
-            sample_size = sample_size
+    if power > 0 and power < 1 and delta > 0 and sd != 0:
+        es_value = delta/sd
+        result = tt_solve_power(effect_size=es_value, nobs=None, alpha=sig_level, power=power, alternative='two-sided')
+        if np.isscalar(result):
+            sample_size = result
         else:
             sample_size = np.NAN
     else:
@@ -2692,26 +2593,11 @@ def pa1_predict_sample_size_given_delta_and_power(delta, power, sig_level, sd):
 
 
 def pa1_predicted_power_given_delta_and_sample_size(delta, sample_size, sig_level, sd):
-    if sig_level > 0 and sig_level < 1:
-        pdata = FloatVector([delta, sd, sample_size, sig_level])
-
-        rstring = """
-        function(pdata){
-        pp <- try(power.t.test(n = pdata[3], delta =pdata[1], sd=pdata[2],sig.level =pdata[4], power = NULL,
-                type = "one.sample",alternative = "two.sided"),silent = TRUE)
-              if (!inherits(pp,"try-error")){
-                power_value<-pp$power}
-              else
-                power_value<-0
-        power_value
-        }
-        """
-        rfunc = robjects.r(rstring)
-        r_result = rfunc(pdata)
-        pr = tuple(r_result)
-        power_value = pr[0]
-        if power_value != 0:
-            power_value = power_value
+    if sig_level > 0 and sig_level < 1 and delta > 0 and sd != 0:
+        es_value = delta/sd
+        result = tt_solve_power(effect_size=es_value, nobs=sample_size, alpha=sig_level, power=None, alternative='two-sided')
+        if np.isscalar(result):
+            power_value = result
         else:
             power_value = np.NAN
     else:
@@ -2720,26 +2606,10 @@ def pa1_predicted_power_given_delta_and_sample_size(delta, sample_size, sig_leve
 
 
 def pa1_predicted_delta_given_sample_size_and_power(sample_size, power, sig_level, sd):
-    if power > 0 and power < 1:
-        pdata = FloatVector([sd, sample_size, power, sig_level])
-
-        rstring = """
-        function(pdata){
-        pp <- try(power.t.test(n = pdata[2], delta = NULL, sd=pdata[1],sig.level =pdata[4], power = pdata[3],
-                type = "one.sample",alternative = "two.sided"),silent = TRUE)
-              if (!inherits(pp,"try-error")){
-                delta<-pp$delta}
-              else
-                delta<-0
-        delta
-        }
-        """
-        rfunc = robjects.r(rstring)
-        r_result = rfunc(pdata)
-        pr = tuple(r_result)
-        delta = pr[0]
-        if delta != 0:
-            delta = delta
+    if power > 0 and power < 1 and sample_size > 0 and sd != 0:
+        result = tt_solve_power(effect_size=None, nobs=sample_size, alpha=sig_level, power=power, alternative='two-sided')
+        if np.isscalar(result):
+            delta = result * sd
         else:
             delta = np.NAN
     else:
@@ -2748,30 +2618,28 @@ def pa1_predicted_delta_given_sample_size_and_power(sample_size, power, sig_leve
 
 
 def one_sample_power_analysis_calculation(sample_data, sig_level, differences, sample_size, power):
-
     # Calculate the standard deviation of sample data
     sd = np.std(sample_data, ddof=1)
+    if sd == 0:
+        power_analysis_result = {'THE SAMPLE DATA ARE CONSTANT': ''}
     if np.isnan(differences) and np.isnan(power) and np.isnan(sample_size):
         power_analysis_result = {'error': ''}
     else:
-        print("1 - NOT EVERYTHING IS NULL")
-        ##############Given Diffrences
+        # Given Diffrences
         if ~np.isnan(differences):
             if np.isnan(power) and np.isnan(sample_size):
-                print("2 - DIFFERENCES W/O POWER + SAMPLE")
                 pw_columns = ['Sample Size', 'Power']
                 sample_size_array = np.arange(2, 101, 1)  # Sample size is up to 100
-                power_analysis_result = pd.DataFrame(index=range(len(sample_size_array)),columns=pw_columns)
+                power_analysis_result = pd.DataFrame(index=range(len(sample_size_array)), columns=pw_columns)
                 for i_size in range(len(sample_size_array)):
                     sample_size_loc=sample_size_array[i_size]
                     power_value = pa1_predicted_power_given_delta_and_sample_size(differences, sample_size_loc, sig_level, sd)
                     power_analysis_result.iloc[i_size, 0] = sample_size_loc
                     power_analysis_result.iloc[i_size, 1] = power_value
 
-        #################### Given sample size
+        # Given sample size
         if ~np.isnan(sample_size):
             if np.isnan(differences) and np.isnan(power):
-                print("3 - SAMPLE W/O DIFFERENCES + POWER")
                 pw_columns = ['Differences', 'Power']
                 power_array = np.arange(0, 1, 0.01)  # power is between 0 and 1
                 power_analysis_result = pd.DataFrame(index=range(len(power_array)), columns=pw_columns)
@@ -2782,10 +2650,9 @@ def one_sample_power_analysis_calculation(sample_data, sig_level, differences, s
                         power_analysis_result.iloc[i_size, 0] = differences_value
                     power_analysis_result.iloc[i_size, 1] = power_loc
 
-        #################### Given power
+        # Given power
         if ~np.isnan(power):
             if np.isnan(differences) and np.isnan(sample_size):
-                print("4 - POWER W/O DIFFERENCES + SAMPLE")
                 pw_columns = ['Sample Size', 'Differences']
                 sample_size_array = np.arange(2, 101, 1)  # power is between 0 and 1
                 power_analysis_result = pd.DataFrame(index=range(len(sample_size_array)), columns=pw_columns)
@@ -2796,24 +2663,19 @@ def one_sample_power_analysis_calculation(sample_data, sig_level, differences, s
                         power_analysis_result.iloc[i_size, 1] = differences_value
                     power_analysis_result.iloc[i_size, 0] = sample_size_loc
 
-        ####### Given power and sample size predict differences
+        # Given power and sample size predict differences
         if (np.isnan(differences)) and (~np.isnan(power)) and (~np.isnan(sample_size)):
-            print("5 - POWER + SAMPLE W/O DIFFERENCES")
-            power_analysis_result = pa1_predicted_delta_given_sample_size_and_power(sample_size, power, sig_level, sd)
+            power_analysis_result = {'Differences': pa1_predicted_delta_given_sample_size_and_power(sample_size, power, sig_level, sd)}
 
-        ####### Given differences and sample size predict power
+        # Given differences and sample size predict power
         if (~np.isnan(differences)) and (np.isnan(power)) and (~np.isnan(sample_size)):
-            print("6 - DIFFERENCES + SAMPLE W/O POWER")
-            power_analysis_result = pa1_predicted_power_given_delta_and_sample_size(differences, sample_size, sig_level, sd)
+            power_analysis_result = {'Power': pa1_predicted_power_given_delta_and_sample_size(differences, sample_size, sig_level, sd)}
 
-        ######## Given differences and power predict sample size
+        # Given differences and power predict sample size
         if (~np.isnan(differences)) and (~np.isnan(power)) and (np.isnan(sample_size)):
-            print("7 - DIFFERENCES + POWER W/O SAMPLE")
-            print(differences, power, sig_level, sd)
-            power_analysis_result = round(pa1_predict_sample_size_given_delta_and_power(differences, power, sig_level, sd))
-
-    print("8 - DONE")
-    print(power_analysis_result)
+            power_analysis_result = {'Sample Size': pa1_predict_sample_size_given_delta_and_power(differences, power, sig_level, sd)}
+            if np.isnan(power_analysis_result['Sample Size']):
+                power_analysis_result['Sample Size'] = None
     try:
         return power_analysis_result.astype(np.int32)
     except:
@@ -2893,11 +2755,6 @@ def one_sample_power_analysis(one_sample_data,
         else:
             power = np.NAN
 
-        print("INPUT\n", sample_data)
-        print("SIG\n", sig_level)
-        print("OS DIFF\n", differences)
-        print("OS SAMPLE SIZE\n", sample_size)
-        print("OS POWER\n", power)
         # Power analysis results will be returned by user's input
         power_analysis_result = one_sample_power_analysis_calculation(sample_data, sig_level, differences, sample_size, power)
         if type(power_analysis_result) is not dict and type(power_analysis_result) is not float:
