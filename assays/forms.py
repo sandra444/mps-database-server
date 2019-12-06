@@ -833,16 +833,27 @@ class AssayMatrixForm(SetupFormsMixin, SignOffMixin, BootstrapForm):
 
     ### INCREMENTER
     compound_concentration_increment = forms.FloatField(required=False, initial=1)
-    compound_concentration_increment_type = forms.ChoiceField(choices=(
-        ('/', 'Divide'),
-        ('*', 'Multiply'),
-        ('+', 'Add'),
-        ('-', 'Subtract')
-    ), required=False)
-    compound_concentration_increment_direction = forms.ChoiceField(choices=(
-        ('lrd', 'Left to Right and Down'),
-        ('rlu', 'Right to Left and Up')
-    ), required=False)
+    compound_concentration_increment_type = forms.ChoiceField(
+        choices=(
+            ('/', 'Divide'),
+            ('*', 'Multiply'),
+            ('+', 'Add'),
+            ('-', 'Subtract')
+        ),
+        required=False
+    )
+    compound_concentration_increment_direction = forms.ChoiceField(
+        choices=(
+            ('lr', 'Left to Right'),
+            ('d', 'Down'),
+            ('rl', 'Right to Left'),
+            ('u', 'Up'),
+            ('lrd', 'Left to Right and Down'),
+            ('rlu', 'Right to Left and Up')
+        ),
+        required=False,
+        initial='lr'
+    )
 
     # Options for deletion
     delete_option = forms.ChoiceField(
