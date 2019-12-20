@@ -31,6 +31,7 @@ from .models import (
     AssayPlateReaderMap,
     AssayPlateReaderMapItem,
     AssayPlateReaderMapItemValue,
+    AssayPlateReaderMapDataFile,
 )
 from microdevices.models import (
     MicrophysiologyCenter,
@@ -62,7 +63,9 @@ from .utils import (
     intra_status_for_inter,
     two_sample_power_analysis,
     one_sample_power_analysis,
-    create_power_analysis_group_table
+    create_power_analysis_group_table,
+    review_plate_reader_data_file_format,
+    get_the_plate_layout_info_for_assay_plate_map
 )
 
 import csv
@@ -4081,9 +4084,43 @@ def get_pubmed_reference_data(request):
         content_type="application/json"
     )
 
+# sck - assay plate map - fetch information about plate layout by size
+def fetch_information_for_plate_map_layout(request):
+    """Getting the information on how to layout a plate map based on plate size"""
 
-# plate map making the map from an existing matrix
+    plate_size = request.POST.get('plate_size', '0')
+    print("ajax plate size: ", plate_size)
+
+    if not plate_size:
+        return HttpResponseServerError()
+
+    # this function is in utils.py
+    layout_info = get_the_plate_layout_info_for_assay_plate_map(plate_size)
+
+    # return from utils.py => [col_labels, row_labels, row_contents]
+    col_labels = layout_info[0]
+    row_labels = layout_info[1]
+    row_contents = layout_info[2]
+
+    data = {}
+    data_to_return = []
+
+    data_fields = {
+        'col_labels': col_labels,
+        'row_labels': row_labels,
+        'row_contents': row_contents,
+    }
+    data_to_return.append(data_fields)
+
+    data.update({'packed_lists': data_to_return, })
+    return HttpResponse(json.dumps(data), content_type="application/json")
+
+
+# sck - assay plate map - start a plate map from an existing study matrix
 def fetch_assay_study_matrix_for_platemap(request):
+    """
+    Start an assay plate map from an existing study matrix.
+    """
     this_study = request.POST.get('study', '0')
     this_matrix = request.POST.get('matrix', '0')
 
@@ -4092,7 +4129,6 @@ def fetch_assay_study_matrix_for_platemap(request):
 
     data = {}
     data_to_return = []
-    #data.update({ 'mi_list': [this_study, this_matrix], })
 
     this_queryset = AssayMatrixItem.objects.filter(
         study_id=this_study
@@ -4111,174 +4147,216 @@ def fetch_assay_study_matrix_for_platemap(request):
         }
         data_to_return.append(data_fields)
 
-    data.update({ 'mi_list': data_to_return, })
+    data.update({'mi_list': data_to_return, })
     return HttpResponse(json.dumps(data), content_type="application/json")
 
-# plate map making the map from an existing platemap
+
+# sck - assay plate map - start a plate map from an existing study plate map
 def fetch_assay_study_platemap_for_platemap(request):
+    """
+    Start an assay plate map from an existing plate map.
+    """
     this_study = request.POST.get('study', '0')
     this_platemap = request.POST.get('platemap', '0')
 
+    # if not plate map was sent here, for some reason, or, if the platemap got corrupted and was non-numeric, exit
     if not this_platemap:
         return HttpResponseServerError()
+    elif not this_platemap.isnumeric():
+        return HttpResponseServerError()
 
-    #it is critical to understand how this works
-    #item has one for each well on a plate
-    #value has one or more for each well on a plate, but should have the same number for each well on the plate
-    #the lowest pks in the value should match the first use of the platemap (with or without a file assigned to it)
-    #if the parallelism between item and value gets broken, none of this will work correctly
-    # this is one option but could be easily broken and need to join the querysets at the end
-    # use this to get the number of wells in the plate
-    # this_queryset_item = AssayPlateReaderMapItem.objects.filter(
-    #     study_id=this_study
-    # ).filter(
-    #     assayplatereadermap_id=this_platemap
-    # ).prefetch_related(
-    #     'assayplatereadermap',
-    # ).order_by('plate_index', 'pk', )
-    # this_plate_size = len(this_queryset_item)
-    # print(this_queryset_item.query)
-    # this_queryset_item_value = AssayPlateReaderMapItemValue.objects.filter(
-    #     study_id=this_study
-    # ).filter(
-    #     assayplatereadermap_id=this_platemap
-    # ).order_by('plate_index', 'pk', )[:this_plate_size)]
-    # print(this_queryset_item_value.query)
-    # https://stackoverflow.com/questions/15291506/sql-query-to-select-distinct-row-with-minimum-value
+    this_queryset = AssayPlateReaderMapItem.objects.filter(
+        study_id=this_study
+    ).filter(
+        assayplatereadermap_id=this_platemap
+    ).prefetch_related(
+        'assayplatereadermap',
+    ).order_by('plate_index', 'pk', )
 
-    # must be in the imports above: from django.db import connection
-    # cursor = connection.cursor()
-    # cursor.execute("...")
-    # row = cursor.fetchall()
-
-    # use raw sql instead...more robust
-    # get the set of platemap indexs that were added first (first making the plate map, get that value set)
-    my_where = ''
-    my_where = my_where + '(select min(id) as min_id '
-    my_where = my_where + 'from assays_assayplatereadermapitemvalue '
-    my_where = my_where + 'where assayplatereadermap_id = ' + this_platemap + ' '
-    my_where = my_where + 'group by assayplatereadermap_id, plate_index) '
-    # cursor = connection.cursor()
-    # cursor.execute(my_where)
-    # min_queryset_ish = cursor.fetchall()
-    # for each in min_queryset_ish:
-    #     print(each)
-
-    list_of_map_fields = ['name', 'description', 'device', 'time_unit', 'plate_reader_unit_id', 'volume_unit', 'cell_count', 'study_assay_id']
-    list_of_item_fields = ['well_name', 'matrix_item_id', 'well_use', 'location_id', 'standard_value', 'dilution_factor', 'collection_volume', 'collection_time']
-    list_of_value_fields = ['plate_index', 'time']
-    list_fields = list_of_map_fields + list_of_item_fields + list_of_value_fields
-
-    # table aliass were not working as expected in joins
-    my_select = ""
-    my_select = my_select + "select "
-    my_select = my_select + "assays_assayplatereadermap." + list_of_map_fields[0] + ", "
-    my_select = my_select + "assays_assayplatereadermap." + list_of_map_fields[1] + ", "
-    my_select = my_select + "assays_assayplatereadermap." + list_of_map_fields[2] + ", "
-    my_select = my_select + "assays_assayplatereadermap." + list_of_map_fields[3] + ", "
-    my_select = my_select + "assays_assayplatereadermap." + list_of_map_fields[4] + ", "
-    my_select = my_select + "assays_assayplatereadermap." + list_of_map_fields[5] + ", "
-    my_select = my_select + "assays_assayplatereadermap." + list_of_map_fields[6] + ", "
-    my_select = my_select + "assays_assayplatereadermap." + list_of_map_fields[7] + ", "
-    my_select = my_select + "assays_assayplatereadermapitem.name as " + list_of_item_fields[0] + ", "
-    my_select = my_select + "assays_assayplatereadermapitem." + list_of_item_fields[1] + ", "
-    my_select = my_select + "assays_assayplatereadermapitem." + list_of_item_fields[2] + ", "
-    my_select = my_select + "assays_assayplatereadermapitem." + list_of_item_fields[3] + ", "
-    my_select = my_select + "assays_assayplatereadermapitem." + list_of_item_fields[4] + ", "
-    my_select = my_select + "assays_assayplatereadermapitem." + list_of_item_fields[5] + ", "
-    my_select = my_select + "assays_assayplatereadermapitem." + list_of_item_fields[6] + ", "
-    my_select = my_select + "assays_assayplatereadermapitem." + list_of_item_fields[7] + ", "
-    my_select = my_select + "assays_assayplatereadermapitemvalue." + list_of_value_fields[0] + ", "
-    my_select = my_select + "assays_assayplatereadermapitemvalue." + list_of_value_fields[1] + " "
-    my_select = my_select + "from assays_assayplatereadermapitemvalue "
-    my_select = my_select + "inner join assays_assayplatereadermapitem "
-    my_select = my_select + "on assays_assayplatereadermapitemvalue.assayplatereadermap_id = assays_assayplatereadermapitem.assayplatereadermap_id "
-    my_select = my_select + "and assays_assayplatereadermapitemvalue.plate_index = assays_assayplatereadermapitem.plate_index "
-    my_select = my_select + "inner join assays_assayplatereadermap "
-    my_select = my_select + "on assays_assayplatereadermapitemvalue.assayplatereadermap_id = assays_assayplatereadermap.id "
-    my_select = my_select + "where assays_assayplatereadermapitemvalue.id in " + my_where + " "
-    my_select = my_select + "order by assays_assayplatereadermapitemvalue.plate_index "
-    cursor = connection.cursor()
-    cursor.execute(my_select)
-    tupleset = cursor.fetchall()
-    # for each in tupleset:
-    #     print(each)
+    this_platemap = AssayPlateReaderMap.objects.filter(
+        id=this_platemap
+    )
 
     data = {}
     data_to_return = []
 
-    for tup in tupleset:
-        #print(tup)
-        data_fields = {}
-        idx = 0
-        for ff in list_fields:
-            data_fields[list_fields[idx]] = tup[idx]
-            idx = idx + 1
+    # may want to just send the plate map info once. quickest for now, but sends same info more than needed.
+    for map in this_platemap:
+        map_name = map.name
+        map_description = map.description
+        map_device = map.device
+        map_time_unit = map.time_unit
+        map_volume_unit = map.volume_unit
+        map_cell_count = map.cell_count
+        map_study_assay_id = map.study_assay_id
 
-        #print(data_fields)
+    for each in this_queryset:
+        # print(each)
+        # fields = each.__dict__
+        # for field, value in fields.items():
+        #     print(field, value)
+        data_fields = {
+            'name': map_name,
+            'description': map_description,
+            'device': map_device,
+            'time_unit': map_time_unit,
+            'volume_unit': map_volume_unit,
+            'cell_count': map_cell_count,
+            'study_assay_id': map_study_assay_id,
+            'well_name': each.name,
+            'matrix_item_id': each.matrix_item_id,
+            'well_use': each.well_use,
+            'location_id': each.location_id,
+            'default_time': each.default_time,
+            'standard_value': each.standard_value,
+            'dilution_factor': each.dilution_factor,
+            'collection_volume': each.collection_volume,
+            'collection_time': each.collection_time
+        }
+
         data_to_return.append(data_fields)
-        data.update({ 'platemap_info': data_to_return, })
+        data.update({'platemap_info': data_to_return, })
 
     return HttpResponse(json.dumps(data),
                         content_type="application/json")
 
-#Plate Reader Upload Data File
-def fetch_upload_plate_reader_data_file(request):
-    """Validates a bulk file and returns either errors or a preview of the data entered
-    Receives the following from POST:
-    study -- the study to acquire readeroutputs from
+
+# sck - Assay Plate Reader Upload Data File (for the UPDATE file form)
+def fetch_review_plate_reader_data_file(request):
     """
-    #TODO - get this sending the right info back
-    #following examples
-    study = request.POST.get('study', '0')
-    this_study = AssayStudy.objects.get(pk=int(study))
-    #print(study)
-    #print(this_study)
-    #print(studies)
-    form = AssayPlateReaderMapDataFileAddForm(request.POST, request.FILES, request=request, study=this_study)
+    Assay PLATE READER FILE UPDATE pull information when viewing or updating and existing plate map.
+    """
+    this_file_id = request.POST.get('this_file_id', '0')
+
+    this_file_format_selected = request.POST.get('this_file_format_selected', '0')
+    file_delimiter = request.POST.get('file_delimiter', '0')
+    form_plate_size = request.POST.get('form_plate_size', '0')
+    form_number_blocks = request.POST.get('form_number_blocks', '0')
+    form_number_blank_columns = request.POST.get('form_number_blank_columns', '0')
+    set_delimiter = request.POST.get('set_delimiter', '0')
+    set_plate_size = request.POST.get('set_plate_size', '0')
+    set_number_blocks = request.POST.get('set_number_blocks', '0')
+    set_number_blank_columns = request.POST.get('set_number_blocks', '0')
+
+    if not this_file_id:
+        return HttpResponseServerError()
+
+    set_dict = {}
+    set_dict.update({'file_delimiter': file_delimiter})
+    set_dict.update({'form_plate_size': form_plate_size})
+    set_dict.update({'form_number_blocks': form_number_blocks})
+    set_dict.update({'form_number_blank_columns': form_number_blank_columns})
+
+    set_dict.update({'set_delimiter': set_delimiter})
+    set_dict.update({'set_plate_size': set_plate_size})
+    set_dict.update({'set_number_blocks': set_number_blocks})
+    set_dict.update({'set_number_blank_columns': set_number_blank_columns})
+
+    set_dict.update({'this_file_format_selected': this_file_format_selected})
+
+    this_queryset = AssayPlateReaderMapDataFile.objects.get(
+        id=this_file_id
+    )
+
+    # using .read() used bytes, so changed to open()
+    # my_file_object = this_queryset.plate_reader_file.read().decode('utf-8')
+    # my_file_object = this_queryset.plate_reader_file.read()
+    my_file_object = this_queryset.plate_reader_file.open()
+
+    # this function is in utils.py
+    file_info = review_plate_reader_data_file_format(my_file_object, set_dict)
 
     data = {}
-    #data_to_return = ["something"]
-    #data.update({ 'this_data': [this_study, "something"], })
-    data.update({'this_data': [222, "something"], })
-    #data.update({ 'mi_list': data_to_return, })
+    data_fields = {}
+    data_to_return = []
+    idx = 1
+    # file_info is a list with a dictionary FOR EACH BLOCK (with the fields)
+    for each in file_info:
+        # print(each)
+        data_fields = {
+            'data_block': idx,
+            'data_block_metadata': str(idx),
+            'line_start': each.get('line_start'),
+            'line_end': each.get('line_end'),
+            'delimited_start': each.get('delimited_start'),
+            'delimited_end': each.get('delimited_end'),
+            'block_delimiter': each.get('block_delimiter'),
+            'plate_size': each.get('plate_size'),
+            'message': each.get('message'),
+            'calculated_number_of_blocks': each.get('calculated_number_of_blocks'),
+            # 'calculated_number_of_blank_columns': each.get('calculated_number_of_blank_columns'),
+        }
+        data_to_return.append(data_fields)
+        idx = idx + 1
+
+    data.update({'file_block_info': data_to_return, })
+    return HttpResponse(json.dumps(data), content_type="application/json")
+
+
+# sck - Assay Plate Reader Update Data File Blocks - Selected Plate Size
+def fetch_plate_reader_data_block_plate_map_size(request):
+    """
+        Assay PLATE READER FILE UPDATE return plate size of selected plate map.
+    """
+
+    platemap_id_stringify = request.POST.get('platemap_id_stringify', '0')
+    # print("platemap_id_stringify ", platemap_id_stringify)
+
+    if not platemap_id_stringify:
+        return HttpResponseServerError()
+
+    # print(platemap_id_stringify)
+    # print(type(platemap_id_stringify))
+    # print(len(platemap_id_stringify))
+    platemap_id_stringify1 = platemap_id_stringify[1:]
+    platemap_id_stringify2 = platemap_id_stringify1[:-1]
+    # print(platemap_id_stringify2)
+    platemap_id_list = platemap_id_stringify2.split(",")
+    # print(platemap_id_list)
+    # print(len(platemap_id_list))
+
+    data = {}
+    data_to_return = []
+
+    for this_platemap in platemap_id_list:
+        # print("this_platemap ", this_platemap)
+        # print(len(this_platemap))
+
+        if this_platemap == '""':
+            # print("if")
+            map_device = ""
+            map_time_unit = ""
+            my_id = ""
+            # print(my_id)
+        else:
+            # print('else')
+            a = this_platemap[1:]
+            b = a[:-1]
+            my_id = int(b)
+            # print(my_id)
+            match_platemap = AssayPlateReaderMap.objects.filter(
+                id=my_id
+            )
+            # is only one in queryset
+            for each in match_platemap:
+                map_device = each.device
+                map_time_unit = each.time_unit
+
+        map_device = map_device
+        map_time_unit = map_time_unit
+
+        data_fields = {
+            'device': map_device,
+            'time_unit': map_time_unit,
+        }
+        data_to_return.append(data_fields)
+
+    data.update({'platemap_size_and_unit': data_to_return, })
+
+    # print(data)
 
     return HttpResponse(json.dumps(data),
                         content_type="application/json")
-    #
-    #
-    #
-    # if form.is_valid():
-    #     form_data = form.cleaned_data
-    #
-    #     preview_data = form_data.get('preview_data')
-    #     new_data_points = preview_data.get('readeroutput_data')
-    #     readeroutput_data = get_plate_reader_data_preview()
-    #
-    #     # readeroutput_data = get_plate_reader_data_preview(
-    #     #     new_data_points,
-    #     #     study=this_study,
-    #     #     new_data=True,
-    #     #     criteria=json.loads(request.POST.get('criteria', '{}'))
-    #     # )
-    #
-    #     data = {
-    #         'readeroutput_data': readeroutput_data,
-    #     }
-    #
-    #     return HttpResponse(json.dumps(data),
-    #                         content_type="application/json")
-    #
-    # else:
-    #     errors = ''
-    #     if form.errors.get('__all__'):
-    #         errors += form.errors.get('__all__').as_text()
-    #     data = {
-    #         'errors': errors
-    #     }
-    #     return HttpResponse(json.dumps(data),
-    #                         content_type='application/json')
-
 
 
 # TODO TODO TODO
@@ -4347,8 +4425,14 @@ switch = {
     'fetch_assay_study_platemap_for_platemap': {
         'call': fetch_assay_study_platemap_for_platemap
     },
-    'fetch_upload_plate_reader_data_file': {
-        'call': fetch_upload_plate_reader_data_file
+    'fetch_information_for_plate_map_layout': {
+        'call': fetch_information_for_plate_map_layout
+    },
+    'fetch_review_plate_reader_data_file': {
+        'call': fetch_review_plate_reader_data_file
+    },
+    'fetch_plate_reader_data_block_plate_map_size': {
+        'call': fetch_plate_reader_data_block_plate_map_size
     },
 
 }

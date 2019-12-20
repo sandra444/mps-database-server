@@ -6,14 +6,28 @@ from .models import (
     TIME_CONVERSIONS,
     AssayDataPoint,
     AssayDataFileUpload,
-    AssayPlateReaderMapDataFile,
     AssaySubtarget,
     AssayMatrixItem,
     AssayStudyAssay,
     # AssayImage,
     # AssayImageSetting
     AssayStudy,
-    AssayStudyStakeholder
+    AssayStudyStakeholder,
+    AssayPlateReaderMap,
+    AssayPlateReaderMapItem,
+    AssayPlateReaderMapItemValue,
+    AssayPlateReaderMapDataFile,
+    AssayPlateReaderMapDataFileBlock,
+    assay_plate_reader_map_info_row_labels_384,
+    assay_plate_reader_map_info_col_labels_384,
+    assay_plate_reader_map_info_row_labels_24,
+    assay_plate_reader_map_info_col_labels_24,
+    assay_plate_reader_map_info_row_labels_96,
+    assay_plate_reader_map_info_col_labels_96,
+    assay_plate_reader_map_info_row_contents_24,
+    assay_plate_reader_map_info_row_contents_96,
+    assay_plate_reader_map_info_row_contents_384,
+
 )
 
 from mps.templatetags.custom_filters import VIEWER_SUFFIX, ADMIN_SUFFIX
@@ -25,6 +39,7 @@ from django.conf import settings
 import string
 import codecs
 import io
+from statistics import mean, mode
 
 import pandas as pd
 import numpy as np
@@ -35,6 +50,8 @@ from scipy import integrate
 from sympy import gamma
 import rpy2.robjects as robjects
 from rpy2.robjects import FloatVector
+from collections import Counter
+import operator
 
 import csv
 import codecs
@@ -2867,122 +2884,346 @@ def one_sample_power_analysis(one_sample_data, sig_level, one_sample_compound, o
         power_analysis_result = one_sample_power_analysis_calculation(sample_data, sig_level, differences, sample_size, power)
 
 
-##### Plate reader map file upload - in process
+# sck - assay plate reader analysis of data when defining data blocks (for the UPDATE file form)
+def review_plate_reader_data_file_format(my_file_object, set_dict):
+    # TODO-sck work to make this more generic (variables with file and column sizes, etc.....)
+    # update to the rules
 
-##### Plate reader map file upload
-class PlateReaderMapDataFileAdd:
-    """Upload Plate Reader Assay file"""
-    def __init__(self, current_file, study, user, current_data_file_upload=None, save=False):
-        self.current_file = current_file
-        self.user = user
-        if save:
-            self.data_file_upload = AssayPlateReaderMapDataFile(
-                file_location=current_file.url,
-                created_by=user,
-                modified_by=user,
-                study=study
-            )
+    # TODO-sck build for more control by this_file_format_selected
+
+    file_format_selected = set_dict.get('this_file_format_selected')
+    file_delimiter = set_dict.get('file_delimiter')
+    form_plate_size = int(set_dict.get('form_plate_size'))
+    form_number_blocks = int(set_dict.get('form_number_blocks'))
+    form_number_blank_columns = int(set_dict.get('form_number_blank_columns'))
+    set_delimiter = set_dict.get('set_delimiter')
+    set_plate_size = set_dict.get('set_plate_size')
+    set_number_blocks = set_dict.get('set_number_blocks')
+    set_number_blank_columns = set_dict.get('set_number_blocks')
+
+    # print('file_delimiter: ', file_delimiter)
+    # print('form_plate_size: ', form_plate_size)
+    # print('form_number_blocks:', form_number_blocks)
+    # print('set_delimiter: ', set_delimiter)
+    # print('set_plate_size: ', set_plate_size)
+    # print('set_number_blocks: ', set_number_blocks)
+
+    # print(my_file_object)
+    # these files should be relatively small or would not make multiple copies
+    # if the user specified the delimiter, this would not all be needed
+    # but we are assuming that most users will let the computer determine the delimiter
+    lines_in_list = []
+    lines_comma_list = []
+    lines_tab_list = []
+    lines_space_list = []
+    length_comma_list = []
+    length_tab_list = []
+    length_space_list = []
+    # read the first line
+    each_line = my_file_object.readline()
+    lines_in_list.append(each_line)
+    this_comma = each_line.decode("utf-8", "replace").split(',')
+    this_tab = each_line.decode("utf-8", "replace").split('\t')
+    this_space = each_line.decode("utf-8", "replace").split(' ')
+    lines_comma_list.append(this_comma)
+    lines_tab_list.append(this_tab)
+    lines_space_list.append(this_space)
+    length_comma_list.append(len(this_comma))
+    length_tab_list.append(len(this_tab))
+    length_space_list.append(len(this_space))
+    # If the file is not empty keep reading one line at a time, till the file is empty
+    while each_line:
+        each_line = my_file_object.readline()
+        lines_in_list.append(each_line)
+        this_comma = each_line.decode("utf-8", "replace").split(',')
+        this_tab = each_line.decode("utf-8", "replace").split('\t')
+        this_space = each_line.decode("utf-8", "replace").split(' ')
+        lines_comma_list.append(this_comma)
+        lines_tab_list.append(this_tab)
+        lines_space_list.append(this_space)
+        length_comma_list.append(len(this_comma))
+        length_tab_list.append(len(this_tab))
+        length_space_list.append(len(this_space))
+    # print(lines_in_list)
+    # print(lines_comma_list)
+    # print(lines_tab_list)
+    # print(lines_space_list)
+
+    mean_comma = int(mean(length_comma_list))
+    mean_tab = int(mean(length_tab_list))
+    mean_space = int(mean(length_space_list))
+
+    # print('mean_comma: ', mean_comma)
+    # print('mean_tab: ', mean_tab)
+    # print('mean_space: ', mean_space)
+
+    # if the user decided to set the delimiter in the special options
+    if set_delimiter == 'true':
+        if file_delimiter == 'comma':
+            block_delimiter = "comma"
+            file_list = lines_comma_list
+            file_length_list = length_comma_list
+            mean_len = mean_comma
+        elif file_delimiter == 'tab':
+            block_delimiter = "tab"
+            file_list = lines_tab_list
+            file_length_list = length_tab_list
+            mean_len = mean_tab
         else:
-            self.data_file_upload = AssayPlateReaderMapDataFile()
-        self.study = study
-        self.save = save
-        self.preview_data = {
-            'readout_data': [],
-        }
-        self.errors = []
+            # likely space delimited file
+            block_delimiter = "space"
+            file_list = lines_space_list
+            file_length_list = length_space_list
+            mean_len = mean_space
+    else:
+        if mean_comma > mean_tab and mean_comma > mean_space:
+            # likely a comma delimited file
+            block_delimiter = "comma"
+            file_list = lines_comma_list
+            file_length_list = length_comma_list
+            mean_len = mean_comma
+        elif mean_tab > mean_space and mean_tab > mean_comma:
+            # likely a tab delimited file
+            block_delimiter = "tab"
+            file_list = lines_tab_list
+            file_length_list = length_tab_list
+            mean_len = mean_tab
+        else:
+            # likely space delimited file
+            block_delimiter = "space"
+            file_list = lines_space_list
+            file_length_list = length_space_list
+            mean_len = mean_space
 
-    # def process_data(self, data_list, sheet=''):
-    #     """Validates CSV Uploads for Chip Readouts"""
-    #     # A query list to execute to save chip data
-    #     query_list = []
-    #     # A list of readout data for preview
-    #     readout_data = []
-    #     number_of_total_duplicates = 0
-    #
-    #     current_data = {}
-    #
-    #     # Read headers going onward
-    #     for line in data_list[starting_index:]:
-    #         # Some lines may not be long enough (have sufficient commas), ignore such lines
-    #         # Some lines may be empty or incomplete, ignore these as well
-    #         # TODO TODO TODO
-    #         # if not self.valid_data_row(line, header_indices):
-    #         #     continue
-    #
-    #         if not any(line[:18]):
-    #             continue
-    #
-    #         # matrix_item_name = line[header_indices.get('CHIP ID')]
-    #         #
-    #         # assay_plate_id = line[header_indices.get('ASSAY PLATE ID')]
-    #         # assay_well_id = line[header_indices.get('ASSAY WELL ID')]
-    #
-    #             # Add to current_data
-    #             current_data.setdefault(
-    #                 (
-    #                     matrix_item_id,
-    #                     assay_plate_id,
-    #                     assay_well_id,
-    #                     study_assay_id,
-    #                     sample_location_id,
-    #                     time,
-    #                     replicate,
-    #                     # ADD VALUE!
-    #                     subtarget.name,
-    #                     # value
-    #                 ), []
-    #             ).append(1)
-    #
-    #     # If errors
-    #     if self.errors:
-    #         self.errors = list(set(self.errors))
-    #         raise forms.ValidationError(self.errors)
-    #     # If there wasn't anything
-    #     elif len(query_list) < 1 and len(readout_data) < 1 and not number_of_total_duplicates:
-    #         raise forms.ValidationError(
-    #             'This file does not contain any valid data. Please make sure every row has values in required columns.'
-    #         )
-    #     elif len(query_list) < 1 and len(readout_data) < 1 and number_of_total_duplicates:
-    #         raise forms.ValidationError(
-    #             'This file contains only duplicate data. Please make sure this is the correct file.'
-    #         )
-    #
-    #     # TODO TODO TODO TODO
-    #     # If the intention is to save
-    #     elif self.save:
-    #         # # Connect to the database
-    #         # cursor = connection.cursor()
-    #         # # The generic query
-    #         # # TODO TODO TODO TODO
-    #         # query = ''' INSERT INTO "assays_assaydatapoint"
-    #         #           ("study_id", "matrix_item_id", "cross_reference", "assay_plate_id", "assay_well_id", "study_assay_id", "subtarget_id", "sample_location_id", "value", "time", "caution_flag", "excluded", "notes", "replicate", "update_number", "data_file_upload_id", "replaced")
-    #         #           VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)'''
-    #         #
-    #         # cursor.executemany(query, query_list)
-    #         # transaction.commit()
-    #         # cursor.close()
-    #
-    # def process_csv_file(self):
-    #     data_reader = unicode_csv_reader(self.current_file, delimiter=',')
-    #     data_list = data_reader
-    #
-    #     # # Check if header is valid
-    #     # valid_header = self.get_and_validate_header(data_list)
-    #     #
-    #     # if valid_header:
-    #     #     self.process_data(data_list)
-    #     #
-    #     # # IF NOT VALID, THROW ERROR
-    #     # else:
-    #     #     raise forms.ValidationError('The file is not formatted correctly. Please check the header of the file.')
-    #
-    # def process_file(self):
-    #     # Save the data upload if necessary (ostensibly save should only run after validation)
-    #     if self.save:
-    #         self.data_file_upload.save()
-    #
-    #     self.current_file.seek(0, 0)
-    #     try:
-    #         self.process_excel_file()
-    #     except xlrd.XLRDError:
-    #         self.process_csv_file()
+    # print('file_list: ',file_list)
+    # print('file_length_list: ',file_length_list)
+    # print('mean_len: ',mean_len)
+
+    # Now that the file type is known, go through the appropriate list
+    # for this code, keep in indexes (0 - ?), but for formset, use indexes + 1
+    # working with  file_list and file_length_list and mean_len
+
+    if set_number_blank_columns == 'true':
+        delimited_start = form_number_blank_columns
+    else:
+        lead_empty_list = []
+        for this in file_list:
+            iex = 0
+            my_counter = 0
+            while iex < len(this):
+                if this[iex] == '':
+                    my_counter = my_counter + 1
+                    iex = iex + 1
+                else:
+                    iex = iex + len(this)
+            lead_empty_list.append(my_counter)
+        # print(lead_empty_list)
+        try:
+            delimited_start = mode(lead_empty_list)
+        except:
+            stats = Counter(lead_empty_list)
+            my_maxes = [key for m in [max(stats.values())] for key,val in stats.items() if val == m]
+            delimited_start = my_maxes[0]
+
+    # find mode of length of line
+    # print(file_length_list)
+    try:
+        mode_file_length_list = mode(file_length_list)
+    except:
+        stats = Counter(file_length_list)
+        my_maxes = [key for m in [max(stats.values())] for key,val in stats.items() if val == m]
+        mode_file_length_list = my_maxes[-1]
+
+    max_number_columns = mode_file_length_list - delimited_start
+
+    # look to see if there are tagged blank lines ~blank
+    end_block_indexes = []
+    fits = 0
+    for each in file_list:
+        # print(each[0])
+        if each[0].lower() == '~blank':
+            end_block_indexes.append(fits)
+        fits = fits + 1
+
+    if len(end_block_indexes) > 0:
+        pass
+    else:
+        bin_list = []
+        for this_len in file_length_list:
+            if this_len > mean_len:
+                bin_list.append('blockish')
+            elif this_len < mean_len/2.:
+                bin_list.append('empty')
+            else:
+                bin_list.append('unknown')
+        # print(bin_list)
+
+        # how many blocks? look for empty lines that have content above and below
+        end_block_indexes_inverse = []
+        # go from bottom up, first line (index 0)
+        idx = len(bin_list) - 1
+        while idx >= 1:
+            this = bin_list[idx]
+            if this == 'empty':
+                if bin_list[idx-1] == 'blockish' or bin_list[idx-1] == 'unknown':
+                    end_block_indexes_inverse.append(idx-1)
+            idx = idx - 1
+
+        # print("end_block_indexes_inverse: ", end_block_indexes_inverse)
+        end_block_indexes = sorted(end_block_indexes_inverse)
+        # print("end_blocks_index: ", end_block_indexes)
+
+    plate_size = 0
+    if set_plate_size == 'true':
+        plate_size = form_plate_size
+        # print(plate_size)
+    else:
+        # auto detect plate size - infer likely plate size from number of columns
+        if len(end_block_indexes) <= 1:
+            estimated_block_rows_from_blank_lines = len(lines_in_list)
+            # print('estimated_block_rows_from_blank_lines <= 1: ', estimated_block_rows_from_blank_lines)
+        else:
+            estimated_block_rows_from_blank_lines = mean(np.subtract(end_block_indexes[1:], end_block_indexes[:-1]))
+            # print('estimated_block_rows_from_blank_lines not <= 1: ', estimated_block_rows_from_blank_lines)
+        estimated_block_count = len(end_block_indexes)
+        total_number_lines_in_file = len(file_list)
+        estimated_block_rows_total_file_length = int(total_number_lines_in_file / estimated_block_count)
+
+        # print(estimated_block_rows_from_blank_lines)
+        # print(estimated_block_count)
+        # print(total_number_lines_in_file)
+        # print(estimated_block_rows_total_file_length)
+
+        if max_number_columns < 12:
+            plate_size = 24
+        elif max_number_columns < 24:
+            if estimated_block_rows_from_blank_lines < 8:
+                plate_size = 24
+            elif estimated_block_rows_from_blank_lines < 16:
+                plate_size = 96
+            else:
+                plate_size = 384
+        else:
+            plate_size = 384
+
+    if plate_size == 24:
+        plate_rows = 4
+        plate_columns = 6
+    elif plate_size == 96:
+        plate_rows = 8
+        plate_columns = 12
+    else:
+        # plate_size = 384
+        plate_rows = 16
+        plate_columns = 24
+
+    # print('plate_size: ', plate_size)
+    # print('plate_rows: ', plate_rows)
+
+    # need to know the plate size to find the top of the blocks and right column
+    delimited_end = plate_columns + delimited_start - 1
+    start_block_indexes = [a - plate_rows + 1 for a in end_block_indexes]
+
+    calculated_number_of_blocks = len(start_block_indexes)
+
+    if set_number_blocks:
+        if form_number_blocks == calculated_number_of_blocks:
+            message = ""
+        else:
+            message = "The calculated number of blocks and the number of blocks set were not the same. The block information will need to be manually set to work correctly."
+
+    # print("start block indexes: ", start_block_indexes)
+    # print("end_block_indexes: ", end_block_indexes)
+
+
+
+    # find this if needed
+    data_block_metadata = ""
+
+
+    # may want to just send the repeated info once. quickest for now, but sends extra.
+    file_list_of_dicts = []
+    # for each block, make a dictionary
+    idx = 0
+    for each in start_block_indexes:
+        # print('each: ', each)
+        block_dict = {}
+        # print(start_block_indexes[idx])
+        # print(end_block_indexes[idx])
+        block_dict.update({'data_block_metadata': data_block_metadata})
+        block_dict.update({'block_delimiter': block_delimiter})
+        block_dict.update({'delimited_start': delimited_start})
+        block_dict.update({'delimited_end': delimited_end})
+        block_dict.update({'plate_size': plate_size})
+        block_dict.update({'line_start': start_block_indexes[idx]})
+        block_dict.update({'line_end': end_block_indexes[idx]})
+        block_dict.update({'message': message})
+        block_dict.update({'calculated_number_of_blocks': calculated_number_of_blocks})
+        # block_dict.update({'calculated_number_of_blank_columns': calculated_number_of_blank_columns})
+        idx = idx + 1
+
+        # add the dictionary to the list
+        file_list_of_dicts.append(block_dict)
+
+    return file_list_of_dicts
+
+def add_update_plate_reader_data_map_item_values(pk_for_file, block_data_list_of_dicts):
+    # TODO-sck need to build this
+
+
+    # has it been saved before
+    # if not, save it
+    #     is there a blank value set to update
+    #         if so, update it
+    #         if not, copy a value set
+    #           then update it
+
+
+    # if so, has it been changed
+    #  if so, upate it
+
+
+    # THIS IS WHAT WILL COME OVER
+    # PK FOR FILE  103
+    # DICT:
+    # <QuerySet [
+    #      {'id': 107, 'study_id': 293, 'assayplatereadermap_id': None, 'assayplatereadermapdatafile_id': 103, 'assayplatereadermapdataprocessing_id': None, 'data_block': 3, 'data_block_metadata': '', 'line_start': 32, 'line_end': 35, 'delimited_start': 29, 'delimited_end': 35, 'over_write_sample_time': None},
+    #            {'id': 105, 'study_id': 293, 'assayplatereadermap_id': 43, 'assayplatereadermapdatafile_id': 103, 'assayplatereadermapdataprocessing_id': None, 'data_block': 1, 'data_block_metadata': '', 'line_start': 8, 'line_end': 11, 'delimited_start': 29, 'delimited_end': 35, 'over_write_sample_time': None},
+    #            {'id': 106, 'study_id': 293, 'assayplatereadermap_id': 43, 'assayplatereadermapdatafile_id': 103, 'assayplatereadermapdataprocessing_id': None, 'data_block': 2, 'data_block_metadata': '', 'line_start': 20, 'line_end': 23, 'delimited_start': 29, 'delimited_end': 35, 'over_write_sample_time': None}
+    #  ]>
+
+
+
+    # each formset has an associated indicator of
+    # form_changed_something_in_block - previously saved but something changed so redo value pull
+    # form_first_save - not previously save, do the value pull
+
+    #  need to pass in the status - as in, first save or edit previous save
+    # if first save, will need to look for empyy values, then
+    #   wait...since doing lukes way, may not need value set at first, only a item set...think about this...
+    # probably still easier to make a set when first save...thing about
+
+
+    return pk_for_file
+
+def get_the_plate_layout_info_for_assay_plate_map(plate_size):
+    # print("utils plate size: ", plate_size)
+    plate_size = int(plate_size)
+
+    if plate_size == 24:
+        # print("if 24 utils plate size: ", plate_size)
+        row_labels = assay_plate_reader_map_info_row_labels_24
+        col_labels = assay_plate_reader_map_info_col_labels_24
+        row_contents = assay_plate_reader_map_info_row_contents_24
+    elif plate_size == 96:
+        # print("if 96 utils plate size: ", plate_size)
+        row_labels = assay_plate_reader_map_info_row_labels_96
+        col_labels = assay_plate_reader_map_info_col_labels_96
+        row_contents = assay_plate_reader_map_info_row_contents_96
+    else:
+        # print("if 384 utils plate size: ", plate_size)
+        row_labels = assay_plate_reader_map_info_row_labels_384
+        col_labels = assay_plate_reader_map_info_col_labels_384
+        row_contents = assay_plate_reader_map_info_row_contents_384
+
+    return [col_labels, row_labels, row_contents]

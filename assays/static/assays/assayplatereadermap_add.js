@@ -31,31 +31,35 @@ $(document).ready(function () {
     let global_plate_study_id = parseInt(document.getElementById ("this_study_id").innerText.trim());
     // set global variables that could cause errors (no form defaults)
     let global_plate_number_file_block_sets = 0;
-    try { global_plate_number_file_block_sets = document.getElementById("id_number_file_block_combos").value;
+    try { global_plate_number_file_block_sets = document.getElementById("id_form_number_file_block_combos").value;
     } catch(err) { }
     let global_plate_standard_value = 0;
-    try { global_plate_standard_value = document.getElementById('id_se_standard_value').value;
+    try { global_plate_standard_value = document.getElementById('id_form_number_standard_value').value;
     } catch(err) { }
     let global_plate_increment_value = 1;
-    try { global_plate_increment_value = document.getElementById('id_se_increment_value').value;
+    try { global_plate_increment_value = document.getElementById('id_form_number_increment_value').value;
     } catch(err) { }
     let global_plate_time_value = 0;
-    try { global_plate_time_value = document.getElementById('id_se_time').value;
+    try { global_plate_time_value = document.getElementById('id_form_number_time').value;
+    } catch(err) { }
+    let global_plate_default_time_value = 0;
+    try { global_plate_default_time_value = document.getElementById('id_form_number_default_time').value;
     } catch(err) { }
     let global_plate_dilution_factor = 1;
-    try { global_plate_dilution_factor = document.getElementById('id_se_dilution_factor').value;
+    try { global_plate_dilution_factor = document.getElementById('id_form_number_dilution_factor').value;
     } catch(err) { }
     let global_plate_collection_volume = 0;
-    try { global_plate_collection_volume = document.getElementById('id_se_collection_volume').value;
+    try { global_plate_collection_volume = document.getElementById('id_form_number_collection_volume').value;
     } catch(err) { }
     let global_plate_collection_time = 0;
-    try { global_plate_collection_time = document.getElementById('id_se_collection_time').value;
+    try { global_plate_collection_time = document.getElementById('id_form_number_collection_time').value;
     } catch(err) { }
     // lists to use to show/hide content in plate map based on the fancy check boxes
     // NOTE: this uses two parallel lists - the MUST be correctly parallel!
     let global_plate_show_hide_fancy_checkbox_selector = [
         '#show_matrix_item',
         '#show_time',
+        '#show_default_time',
         '#show_location',
         '#show_standard_value',
         '#show_well_use',
@@ -71,6 +75,7 @@ $(document).ready(function () {
     let global_plate_show_hide_fancy_checkbox_class = [
         '.plate-cells-matrix-item',
         '.plate-cells-time',
+        '.plate-cells-default-time',
         '.plate-cells-location',
         '.plate-cells-standard-value',
         '.plate-cells-well-use',
@@ -83,22 +88,22 @@ $(document).ready(function () {
         '.plate-cells-collection-time',
         '.plate-cells-block-raw-value',
     ];
-    // get the copy of the empty formset and value formset (the "extra" in the forms.py)
-    // come in add an update/view page
+    // when load page get the copy of the empty formset and value formset (the "extra" in the forms.py)
+    // in this, working with inlines - to see other option, see the assay plate file update
     let global_plate_first_item_form = $('#formset').find('.inline').first()[0].outerHTML;
     let global_plate_first_value_form = $('#value_formset').find('.inline').first()[0].outerHTML;
     // END SECTION TO SET GLOBAL VARIABLES
 
     // START SECTION FOR LOADING
-    // don't worry about the extra in the update or view page since it won't be populated or saved
-    // after copied to global variable, delete the extra formset from the add page so it is not saved during submit
+    // don't worry about the extra formset in the update or view page since it won't be populated or saved
+    // but, when on add pate, after copied to global variable, delete the extra formset so it is not saved during submit
     if ($('#formset').find('.inline').length === 1 && $("#check_load").html() === 'add') {
         $('#formset').find('.inline').first().remove();
     }
     if ($('#value_formset').find('.inline').length === 1 && $("#check_load").html() === 'add') {
         $('#value_formset').find('.inline').first().remove();
     }
-    // NOTE: adding these here made 2x forms, so moved it back to where had it before
+    // NOTE: adding the following code here made 2x forms, so moved it back to the loop
     // $('#id_assayplatereadermapitem_set-TOTAL_FORMS').val(global_plate_size);
     //}).trigger('change');
 
@@ -106,9 +111,8 @@ $(document).ready(function () {
     // if add page, START with empty table (plate), if existing, pull from formsets
     if ($("#check_load").html() === 'add') {
         $('.show-when-add').removeClass('hidden');
-        global_plate_size = 24;
-        plateLabels();
-        buildPlate("on_load_add");
+        global_plate_size = 96;
+        plateLabels("on_load_add");
     } else {
         $('.show-when-add').addClass('hidden');
         try {
@@ -116,8 +120,7 @@ $(document).ready(function () {
         } catch(err) {
             global_plate_size = $("#id_device").val();
         }
-        plateLabels();
-        buildPlate("on_load_update_or_view");
+        plateLabels("on_load_update_or_view");
     }
     // find the value set for an existing plate map with file/blocks assigned
     if ($("#check_load").html() !== 'add' && global_plate_number_file_block_sets > 0) {
@@ -127,15 +130,15 @@ $(document).ready(function () {
 
     // START SECTION THAT SETS TOOLTIPS
     // set lists for the tooltips
-    // just add in parallel if need more tooltips
+    // just add in parallel if need more tooltips - must be parallel!
     let global_plate_tooltip_selector = [
           '#matrix_select_tooltip'
         , '#plate_select_tooltip'
         , '#platemap_select_tooltip'
         , '#sample_time_unit_tooltip'
+        , '#sample_default_time_unit_tooltip'
         , '#collection_volume_unit_tooltip'
         , '#well_use_tooltip'
-        , '#plate_reader_unit_tooltip'
         , '#plate_cell_count_tooltip'
         , '#sample_time_tooltip'
         , '#sample_location_tooltip'
@@ -150,13 +153,13 @@ $(document).ready(function () {
         , '#collection_time_tooltip'
     ,];
     let global_plate_tooltip_text = [
-          "STARTing from an existing study matrix is helpful if the experiment was conducted in a plate based model and that same plate was used to perform a plate reader assay."
+          "Starting from an existing study matrix is helpful if the experiment was conducted in a plate based model and that same plate was used to perform a plate reader assay."
         , "Build the plate map by selecting study matrix items and placing them in the plate."
-        , "If adding a plate map and STARTing from an existing plate map, if the plate map has been assigned to a file/block, select the File/Block with the desired sample times. Values from uploaded files will not be obtained."
+        , "If adding a plate map and starting from an existing plate map, if the plate map has been assigned to a file/block, select the File/Block with the desired sample times. Values from uploaded files will not be obtained."
         , "This time unit applies to all sample times and sample collection times for the whole assay plate map."
+        , "This sample time will be used if no over-writing sample time is input during file upload."
         , "This unit applies to the sample collection volume. It is required when normalizing."
         , "For blank and empty wells, select the well use and drag on plate. For samples and standards, make requested selections then drag on plate."
-        , "Typically something like RFU, unless internal calibration."
         , "Count of cells that are relevant to the assay."
         , "Check box to make change when drag/apply. Sample times can be added now or later. Plate with mixed sample times must be added in the plate map."
         , "Check box to make change when drag/apply. Select the location in the model, if applicable, from which the effluent was collected."
@@ -220,53 +223,46 @@ $(document).ready(function () {
         global_plate_location_text = $(this).children("option:selected").text();
         global_plate_location = $(this).val();
     });
-    $("#id_se_time").mouseout(function() {
+    $("#id_form_number_time").mouseout(function() {
         global_plate_time_value = $(this).val();
     });
-    $("#id_se_standard_value").mouseout(function() {
+    $("#id_form_number_default_time").mouseout(function() {
+        global_plate_time_value = $(this).val();
+    });
+    $("#id_form_number_standard_value").mouseout(function() {
         global_plate_standard_value = $(this).val();
     });
-    $("#id_se_dilution_factor").mouseout(function() {
+    $("#id_form_number_dilution_factor").mouseout(function() {
         global_plate_dilution_factor = $(this).val();
     });
-    $("#id_se_collection_volume").mouseout(function() {
+    $("#id_form_number_collection_volume").mouseout(function() {
         global_plate_collection_volume = $(this).val();
     });
-    $("#id_se_collection_time").mouseout(function() {
+    $("#id_form_number_collection_time").mouseout(function() {
         global_plate_collection_time = $(this).val();
     });
-    $("#id_se_increment_value").mouseout(function() {
+    $("#id_form_number_increment_value").mouseout(function() {
         global_plate_increment_value = $(this).val();
     });
     $("#id_se_increment_operation").change(function() {
         global_plate_increment_operation = $(this).val();
     });
     // controlling more of what shows and does not shows on page (options to change) based on selected to apply
+
+    // this option is for when the well use was in a dropdown
     $("#id_se_well_use").change(function() {
         global_plate_well_use = $(this).val();
-        $("input[name=change_method][value=copy]").prop( "checked", true );
-        global_plate_change_method = 'copy';
-        if (global_plate_change_method === 'increment') {
-            $('.increment-section').removeClass('hidden');
-        } else {
-            $('.increment-section').addClass('hidden');
-        }
-        // hide all, then unhide what want to show
-        $('.sample-section').addClass('hidden');
-        $('.standard-section').addClass('hidden');
-        $('.drag-option-section').addClass('hidden');
-        if (global_plate_well_use === 'sample') {
-            $('.sample-section').removeClass('hidden');
-            $('.drag-option-section').removeClass('hidden');
-        } else if (global_plate_well_use === 'standard') {
-            $('.standard-section').removeClass('hidden');
-            $('.drag-option-section').removeClass('hidden');
-            $('#show_standard_value').prop('checked', true);
-        }
+        flexibleWellUse()
     });
+    // this option is for when the well use is radio buttons
+    $("input[type='radio'][name='change_well_use']").click(function() {
+        global_plate_well_use = $(this).val();
+        flexibleWellUse()
+    });
+
     // set the global or other variables for the selections if file_block change
     // NOTE: this is the file block for THIS plate map (not if selecting from a different plate map)
-    // TODO - check this after get file upload working
+    // TODO-sck - check this after get file upload working
     $("#id_se_file_block").change(function() {
         // this element should not show on an add page because no files will be associated with it
         global_plate_file_block_index = $(this).val();
@@ -280,13 +276,13 @@ $(document).ready(function () {
     });
     //change what is shown in the plate map
     $("input[type='checkbox']").change(function() {
-        let this_attr_id = $(this).attr('id');
+        let this_attr_id = $(this).prop('id');
         let this_attr_id_plus = "#" + this_attr_id;
         let my_idx = global_plate_show_hide_fancy_checkbox_selector.indexOf(this_attr_id_plus);
         // another option:  if ($("input[type='checkbox'][name='change_location']").prop('checked') === true) {
         if ($(this_attr_id_plus).is(':checked')) {
             $(global_plate_show_hide_fancy_checkbox_class[my_idx]).removeClass('hidden');
-            // hides what was just checked (turned on) if not relavant to the well based on well use
+            // hides what was just checked (turned on) if not applicable to the well based on well use
             changeShowInPlate('changed_check_box');
         } else {
             $(global_plate_show_hide_fancy_checkbox_class[my_idx]).addClass('hidden');
@@ -307,23 +303,24 @@ $(document).ready(function () {
     // when one of the "Apply" buttons is clicked in the plate map
     // NOTE - next line did not work as expected so used the document on
     // $(".apply-button").on("click", function(){
+
     $(document).on('click','.apply-button',function() {
         // get the plate_indexes of the selected wells in the plate map table
         let plate_index_list = [];
         // let button_id = e.target.id;
         let my_this = $(this);
-        let button_column_index = my_this.attr('column-index');
-        let button_row_index = my_this.attr('row-index');
-        let button_column_or_row = my_this.attr('column-or-row');
+        let button_column_index = my_this.prop('column-index');
+        let button_row_index = my_this.prop('row-index');
+        let button_column_or_row = my_this.prop('column-or-row');
         // find the plate map index of matching column or row (which button was click) and send to the function for processing
         for ( var idx = 0, ls = global_plate_size; idx < ls; idx++ ) {
             if (button_column_or_row === 'column') {
-                if ($('#well_use-' + idx).attr('column-index') == button_column_index) {
+                if ($('#well_use-' + idx).prop('column-index') == button_column_index) {
                     welluseChange(idx);
                     plate_index_list.push(idx);
                 }
             } else {
-                if ($('#well_use-' + idx).attr('row-index') == button_row_index) {
+                if ($('#well_use-' + idx).prop('row-index') == button_row_index) {
                     welluseChange(idx);
                     plate_index_list.push(idx);
                 }
@@ -344,7 +341,7 @@ $(document).ready(function () {
             // send each selected cell of the table to the function for processing
             // console.log("this: ",$(this))
             if ($(this).hasClass("map-well-use")) {
-                let idx = $(this).attr('data-index');
+                let idx = $(this).prop('data-index');
                 welluseChange(idx);
                 plate_index_list.push(idx);
             }
@@ -366,6 +363,7 @@ $(document).ready(function () {
         } catch(err) {
             global_plate_size = $("#id_device").val();
         }
+        console.log("changed device what size is plate: ", global_plate_size)
         // only fire on change plate size IF the selection is a_plate, otherwise, the fire will happen twice
         if (global_plate_start_map === 'a_plate') {
             // clear the matrix and exising platemap selections incase go back and repick the same one
@@ -373,8 +371,7 @@ $(document).ready(function () {
             $("#id_se_platemap").selectize()[0].selectize.setValue();
             //$("#id_device").selectize()[0].selectize.setValue(global_plate_size);
             removeFormsets();
-            plateLabels();
-            buildPlate("changed_device");
+            plateLabels("changed_device");
         }
         // else, just wanted the plate size update for later use, don't fire the rebuild plate!
     });
@@ -406,14 +403,13 @@ $(document).ready(function () {
                     // Need to set the form fields too, including size - unlike a plate and a matrix
                     setFormFieldsPlatemap();
                     removeFormsets();
-                    plateLabels();
-                    buildPlate("changed_platemap");
+                    plateLabels("changed_platemap");
                 },
                 // error callback
                 error: function (xhr, errmsg, err) {
                     window.spinner.stop();
                     // $("#test_me1").text("error happened");
-                    alert('An error has occurred, please try a different matrix, plate map, or start from an empty plate.');
+                    alert('An error has occurred, try closing the file to upload (if it is open) or, try a different matrix, plate map, or start from an empty plate.');
                     console.log(xhr.status + ": " + xhr.responseText);
                 }
             });
@@ -421,7 +417,7 @@ $(document).ready(function () {
     });
     let process_data_platemap = function (json, exist) {
         let platemap_info = json.platemap_info;
-        // console.log(platemap_info)
+        console.log(platemap_info)
         // these are the same as the ones in the ajax file
         global_plate_iplatemap_dictionary = platemap_info;
         // console.log(global_plate_iplatemap_dictionary[2].name, " ", global_plate_iplatemap_dictionary[2].device)
@@ -434,19 +430,31 @@ $(document).ready(function () {
         global_plate_size = pm_device;
     };
     function setFormFieldsPlatemap() {
-        // list_of_map_fields = ['name', 'description', 'device', 'time_unit', 'plate_reader_unit_id', 'volume_unit', 'cell_count', 'study_assay_id']
+        //TODO what if the selectized fields were null in the platemap copying from...fix.....
+        // list_of_map_fields = ['name', 'description', 'device', 'time_unit', 'volume_unit', 'cell_count', 'study_assay_id']
         $('#id_name').val($('#id_name').val() + " - starting from " + global_plate_iplatemap_dictionary[0].name);
         $('#id_description').val(global_plate_iplatemap_dictionary[0].description);
         $('#id_cell_count').val(global_plate_iplatemap_dictionary[0].cell_count);
         // these do not work like fields that are not selectized
         let pm_time_unit = global_plate_iplatemap_dictionary[0].time_unit;
-        let pm_plate_reader_unit = global_plate_iplatemap_dictionary[0].plate_reader_unit_id;
         let pm_volume_unit = global_plate_iplatemap_dictionary[0].volume_unit;
         let pm_study_assay = global_plate_iplatemap_dictionary[0].study_assay_id;
-        $("#id_time_unit").selectize()[0].selectize.setValue(pm_time_unit);
-        $("#id_plate_reader_unit").selectize()[0].selectize.setValue(pm_plate_reader_unit);
-        $("#id_volume_unit").selectize()[0].selectize.setValue(pm_volume_unit);
-        $("#id_study_assay").selectize()[0].selectize.setValue(pm_study_assay);
+        try {
+            $("#id_time_unit").selectize()[0].selectize.setValue(pm_time_unit);
+        } catch(err) {
+            $("#id_time_unit").removeProp('selected');
+        };
+
+        try {
+            $("#id_volume_unit").selectize()[0].selectize.setValue(pm_volume_unit);
+        } catch(err) {
+            $("#id_volume_unit").removeProp('selected');
+        }
+        try {
+            $("#id_study_assay").selectize()[0].selectize.setValue(pm_study_assay);
+        } catch(err) {
+            $("#id_study_assay").removeProp('selected');
+        }
     }
     // END - SECTION FOR ADD PAGE - START FROM AN EXISTING PLATEMAP (CROSSING PLATEMAPS)
 
@@ -497,8 +505,7 @@ $(document).ready(function () {
                 let exist = true;
                 process_data_matrix(json, exist);
                 removeFormsets();
-                plateLabels();
-                buildPlate("changed_matrix");
+                plateLabels("changed_matrix");
             },
             // error callback
             error: function (xhr, errmsg, err) {
@@ -538,6 +545,30 @@ $(document).ready(function () {
     // END END - SECTION FOR CHANGING PLATEMAP FOR ADD PAGE BASED ON SELECTED "STARTING" PLACE
 
     // START - ADDITIONAL FUNCTION SECTION
+    // make a function to handle changing well use not matte how it is done
+    // do this because there has been changing of the mind on dropdown, radio buttons, or ???
+    function flexibleWellUse(){
+        $("input[name=change_method][value=copy]").prop( "checked", true );
+        global_plate_change_method = 'copy';
+        if (global_plate_change_method === 'increment') {
+            $('.increment-section').removeClass('hidden');
+        } else {
+            $('.increment-section').addClass('hidden');
+        }
+        // hide all, then unhide what want to show
+        $('.sample-section').addClass('hidden');
+        $('.standard-section').addClass('hidden');
+        $('.drag-option-section').addClass('hidden');
+        if (global_plate_well_use === 'sample') {
+            $('.sample-section').removeClass('hidden');
+            $('.drag-option-section').removeClass('hidden');
+        } else if (global_plate_well_use === 'standard') {
+            $('.standard-section').removeClass('hidden');
+            $('.drag-option-section').removeClass('hidden');
+            $('#show_standard_value').prop('checked', true);
+        }
+    }
+
     // this uses the fancy check boxes to set what is visible on the plate map
     // when first draws plate, uses defaults, for subsequent draws, finds what is checked and redisplays them
     function setFancyCheckBoxes(where_called) {
@@ -545,21 +576,38 @@ $(document).ready(function () {
         let x_show_cell_list = [];
 
         if (global_plate_when_called_checkboxes === "set_to_defaults") {
-            // get the default check boxes to show
-            x_show_fancy_list = [
-                '#show_matrix_item',
-                '#show_time',
-                '#show_location',
-                '#show_standard_value',
-                '#show_well_use',
+            if (global_plate_number_file_block_sets === 0) {
+                // get the default check boxes to show
+                x_show_fancy_list = [
+                    '#show_matrix_item',
+                    '#show_default_time',
+                    '#show_location',
+                    '#show_standard_value',
+                    '#show_well_use',
                 ];
-            x_show_cell_list = [
-                '.plate-cells-matrix-item',
-                '.plate-cells-time',
-                '.plate-cells-location',
-                '.plate-cells-standard-value',
-                '.plate-cells-well-use',
+                x_show_cell_list = [
+                    '.plate-cells-matrix-item',
+                    '.plate-cells-default-time',
+                    '.plate-cells-location',
+                    '.plate-cells-standard-value',
+                    '.plate-cells-well-use',
                 ];
+            } else {
+                x_show_fancy_list = [
+                    '#show_matrix_item',
+                    '#show_time',
+                    '#show_location',
+                    '#show_standard_value',
+                    '#show_well_use',
+                ];
+                x_show_cell_list = [
+                    '.plate-cells-matrix-item',
+                    '.plate-cells-time',
+                    '.plate-cells-location',
+                    '.plate-cells-standard-value',
+                    '.plate-cells-well-use',
+                ];
+            }
         } else {
             // find what is currently checked and load them into parallel arrays
             let all_idx = 0;
@@ -656,12 +704,13 @@ $(document).ready(function () {
                 $('#collection_volume-' + idx).addClass('hidden');
                 $('#collection_time-' + idx).addClass('hidden');
                 $('#show_block_raw_value-' + idx).addClass('hidden');
+                $('#default_time-' + idx).addClass('hidden');
             }
             if (my_well_use === 'blank') {
                 $('#standard_value-' + idx).addClass('hidden');
             } else if (my_well_use === 'empty') {
                 $('#standard_value-' + idx).addClass('hidden');
-                $('#time-' + idx).addClass('hidden');
+                $('#well_use-' + idx).addClass('hidden');
             } else if (my_well_use === 'sample') {
                 $('#standard_value-' + idx).addClass('hidden');
             } else {
@@ -675,62 +724,50 @@ $(document).ready(function () {
     }; 
     // Makes the well labels to use in building the plate map (based on the plate size)
     // this is called when page is loaded and when START is changed (plate size, matrix, platemap)
-    function plateLabels() {
-        // console.log("just in plateLabels size ", global_plate_size)
-        let size = global_plate_size;
-        let row_labels = [];
-        let col_labels = [];
-        let row_contents = [];
-        // NOTE that this arrangement will be first is when 0 for both row and column
-        let row_labels_all = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P'];
-        let col_labels_all = ['1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20','21','22','23','24'];
-        if (size == 24) {
-            row_labels = row_labels_all.slice(0,4); //['A','B','C','D'];
-            col_labels = col_labels_all.slice(0,6); //['1','2','3','4','5','6'];
-            row_contents = [
-["A1", "A2", "A3", "A4", "A5", "A6"],
-["B1", "B2", "B3", "B4", "B5", "B6"],
-["C1", "C2", "C3", "C4", "C5", "C6"],
-["D1", "D2", "D3", "D4", "D5", "D6"]
-                ];
-        } else if (size == 96) {
-            row_labels = row_labels_all.slice(0,8); //['A','B','C','D','E','F','G','H'];
-            col_labels = col_labels_all.slice(0,12); //['1','2','3','4','5','6','7','8','9','10','11','12'];
-            row_contents = [
-["A1", "A2", "A3", "A4", "A5", "A6", "A7", "A8", "A9", "A10", "A11", "A12"],
-["B1", "B2", "B3", "B4", "B5", "B6", "B7", "B8", "B9", "B10", "B11", "B12"],
-["C1", "C2", "C3", "C4", "C5", "C6", "C7", "C8", "C9", "C10", "C11", "C12"],
-["D1", "D2", "D3", "D4", "D5", "D6", "D7", "D8", "D9", "D10", "D11", "D12"],
-["E1", "E2", "E3", "E4", "E5", "E6", "E7", "E8", "E9", "E10", "E11", "E12"],
-["F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8", "F9", "F10", "F11", "F12"],
-["G1", "G2", "G3", "G4", "G5", "G6", "G7", "G8", "G9", "G10", "G11", "G12"],
-["H1", "H2", "H3", "H4", "H5", "H6", "H7", "H8", "H9", "H10", "H11", "H12"]
-                    ];
-        } else {
-            //'384'
-            row_labels = row_labels_all;
-            col_labels = col_labels_all;
-            row_contents = [
-["A1", "A2", "A3", "A4", "A5", "A6", "A7", "A8", "A9", "A10", "A11", "A12", "A13", "A14", "A15", "A16", "A17", "A18", "A19", "A20", "A21", "A22", "A23", "A24"],
-["B1", "B2", "B3", "B4", "B5", "B6", "B7", "B8", "B9", "B10", "B11", "B12", "B13", "B14", "B15", "B16", "B17", "B18", "B19", "B20", "B21", "B22", "B23", "B24"],
-["C1", "C2", "C3", "C4", "C5", "C6", "C7", "C8", "C9", "C10", "C11", "C12", "C13", "C14", "C15", "C16", "C17", "C18", "C19", "C20", "C21", "C22", "C23", "C24"],
-["D1", "D2", "D3", "D4", "D5", "D6", "D7", "D8", "D9", "D10", "D11", "D12", "D13", "D14", "D15", "D16", "D17", "D18", "D19", "D20", "D21", "D22", "D23", "D24"],
-["E1", "E2", "E3", "E4", "E5", "E6", "E7", "E8", "E9", "E10", "E11", "E12", "E13", "E14", "E15", "E16", "E17", "E18", "E19", "E20", "E21", "E22", "E23", "E24"],
-["F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8", "F9", "F10", "F11", "F12", "F13", "F14", "F15", "F16", "F17", "F18", "F19", "F20", "F21", "F22", "F23", "F24"],
-["G1", "G2", "G3", "G4", "G5", "G6", "G7", "G8", "G9", "G10", "G11", "G12", "G13", "G14", "G15", "G16", "G17", "G18", "G19", "G20", "G21", "G22", "G23", "G24"],
-["H1", "H2", "H3", "H4", "H5", "H6", "H7", "H8", "H9", "H10", "H11", "H12", "G13", "H14", "H15", "H16", "H17", "H18", "H19", "H20", "H21", "H22", "H23", "H24"],
-["I1", "I2", "I3", "I4", "I5", "I6", "I7", "I8", "I9", "I10", "I11", "I12", "I13", "I14", "I15", "I16", "I17", "I18", "I19", "I20", "I21", "I22", "I23", "I24"],
-["J1", "J2", "J3", "J4", "J5", "J6", "J7", "J8", "J9", "J10", "J11", "J12", "J13", "J14", "J15", "J16", "J17", "J18", "J19", "J20", "J21", "J22", "J23", "J24"],
-["K1", "K2", "K3", "K4", "K5", "K6", "K7", "K8", "K9", "K10", "K11", "K12", "K13", "K14", "K15", "K16", "K17", "K18", "K19", "K20", "K21", "K22", "K23", "C24"],
-["L1", "L2", "L3", "L4", "L5", "L6", "L7", "L8", "L9", "L10", "L11", "L12", "L13", "L14", "L15", "L16", "L17", "L18", "L19", "L20", "L21", "L22", "L23", "L24"],
-["M1", "M2", "M3", "M4", "M5", "M6", "M7", "M8", "M9", "M10", "M11", "M12", "M13", "M14", "M15", "M16", "M17", "M18", "M19", "M20", "M21", "M22", "M23", "M24"],
-["N1", "N2", "N3", "N4", "N5", "N6", "N7", "N8", "N9", "N10", "N11", "N12", "N13", "N14", "N15", "N16", "N17", "N18", "N19", "N20", "N21", "N22", "N23", "N24"],
-["O1", "O2", "O3", "O4", "O5", "O6", "O7", "O8", "O9", "O10", "O11", "O12", "O13", "O14", "O15", "O16", "O17", "O18", "O19", "O20", "O21", "O22", "O23", "O24"],
-["P1", "P2", "P3", "P4", "P5", "P6", "P7", "P8", "P9", "P10", "P11", "P12", "G13", "P14", "P15", "P16", "P17", "P18", "P19", "P20", "P21", "P22", "P23", "P24"]
-                    ];
-        }
-        global_plate_data_packed = [col_labels, row_labels, row_contents];
+    function plateLabels(aore) {
+        console.log("plate size before call ajax: ",global_plate_size)
+        let data = {
+                call: 'fetch_information_for_plate_map_layout',
+                plate_size: global_plate_size,
+                csrfmiddlewaretoken: window.COOKIES.csrfmiddlewaretoken
+            }
+        window.spinner.spin(document.getElementById("spinner"));
+        $.ajax({
+            url: "/assays_ajax/",
+            type: "POST",
+            dataType: "json",
+            data: data,
+            success: function (json) {
+                window.spinner.stop();
+                let exist = true;
+                packPlateLayout(json, exist);
+                buildPlate(aore);
+            },
+            // error callback
+            error: function (xhr, errmsg, err) {
+                window.spinner.stop();
+                alert('An error has occurred, please try a different matrix, plate map, or start from an empty plate.');
+                console.log(xhr.status + ": " + xhr.responseText);
+            }
+        });
     }
+    let packPlateLayout = function (json, exist) {
+        let packed_lists = json.packed_lists;
+
+        // console.log(packed_lists)
+
+        let row_labels = packed_lists[0].row_labels;
+        let col_labels = packed_lists[0].col_labels;
+        let row_contents = packed_lists[0].row_contents;
+
+        // console.log(row_labels)
+        // console.log(col_labels)
+        // console.log(row_contents)
+
+        // NOTE that this arrangement will be first is when 0 for both row and column
+        global_plate_data_packed = [col_labels, row_labels, row_contents];
+    };
+
     // This is the guts of the STARTING plate building function
     // It has conditions, based on where the function was called from, which determine the content of the STARTING plate map
     function buildPlate(aore) {
@@ -785,95 +822,109 @@ $(document).ready(function () {
                 // make all the parts of the table body (NOTE: 10 possible items for display in plate map)
                 let td = document.createElement("td");
                 let div_label = document.createElement("div");
-                $(div_label).attr('data-index', formsetidx);
-                $(div_label).attr('row-index', ridx);
-                $(div_label).attr('column-index', cidx);
-                $(div_label).attr('id', "label-"+formsetidx);
+                $(div_label).prop('data-index', formsetidx);
+                $(div_label).prop('row-index', ridx);
+                $(div_label).prop('column-index', cidx);
+                $(div_label).prop('id', "label-"+formsetidx);
                 $(div_label).addClass('map-label plate-cells-label hidden');
                 // for coloring, for hiding, START with hidden
 
                 let div_location = document.createElement("div");
-                $(div_location).attr('data-index', formsetidx);
-                $(div_location).attr('row-index', ridx);
-                $(div_location).attr('column-index', cidx);
-                $(div_location).attr('id', "location-"+formsetidx);
+                $(div_location).prop('data-index', formsetidx);
+                $(div_location).prop('row-index', ridx);
+                $(div_location).prop('column-index', cidx);
+                $(div_location).prop('id', "location-"+formsetidx);
                 $(div_location).addClass('map-location plate-cells-location hidden');
 
                 let div_matrix_item = document.createElement("div");
-                $(div_matrix_item).attr('data-index', formsetidx);
-                $(div_matrix_item).attr('row-index', ridx);
-                $(div_matrix_item).attr('column-index', cidx);
-                $(div_matrix_item).attr('id', "matrix_item-"+formsetidx);
+                $(div_matrix_item).prop('data-index', formsetidx);
+                $(div_matrix_item).prop('row-index', ridx);
+                $(div_matrix_item).prop('column-index', cidx);
+                $(div_matrix_item).prop('id', "matrix_item-"+formsetidx);
                 $(div_matrix_item).addClass('map-matrix-item plate-cells-matrix-item hidden');
 
                 let div_dilution_factor = document.createElement("div");
-                $(div_dilution_factor).attr('data-index', formsetidx);
-                $(div_dilution_factor).attr('row-index', ridx);
-                $(div_dilution_factor).attr('column-index', cidx);
-                $(div_dilution_factor).attr('id', "dilution_factor-"+formsetidx);
+                $(div_dilution_factor).prop('data-index', formsetidx);
+                $(div_dilution_factor).prop('row-index', ridx);
+                $(div_dilution_factor).prop('column-index', cidx);
+                $(div_dilution_factor).prop('id', "dilution_factor-"+formsetidx);
                 $(div_dilution_factor).addClass('map-dilution-factor plate-cells-dilution-factor hidden');
 
                 let div_collection_volume = document.createElement("div");
-                $(div_collection_volume).attr('data-index', formsetidx);
-                $(div_collection_volume).attr('row-index', ridx);
-                $(div_collection_volume).attr('column-index', cidx);
-                $(div_collection_volume).attr('id', "collection_volume-"+formsetidx);
+                $(div_collection_volume).prop('data-index', formsetidx);
+                $(div_collection_volume).prop('row-index', ridx);
+                $(div_collection_volume).prop('column-index', cidx);
+                $(div_collection_volume).prop('id', "collection_volume-"+formsetidx);
                 $(div_collection_volume).addClass('map-collection-volume plate-cells-collection-volume hidden');
 
                 let div_collection_time = document.createElement("div");
-                $(div_collection_time).attr('data-index', formsetidx);
-                $(div_collection_time).attr('row-index', ridx);
-                $(div_collection_time).attr('column-index', cidx);
-                $(div_collection_time).attr('id', "collection_time-"+formsetidx);
+                $(div_collection_time).prop('data-index', formsetidx);
+                $(div_collection_time).prop('row-index', ridx);
+                $(div_collection_time).prop('column-index', cidx);
+                $(div_collection_time).prop('id', "collection_time-"+formsetidx);
                 $(div_collection_time).addClass('map-collection-time plate-cells-collection-time hidden');
 
+                let div_collection_default_time = document.createElement("div");
+                $(div_collection_default_time).prop('data-index', formsetidx);
+                $(div_collection_default_time).prop('row-index', ridx);
+                $(div_collection_default_time).prop('column-index', cidx);
+                $(div_collection_default_time).prop('id', "collection_time-"+formsetidx);
+                $(div_collection_default_time).addClass('map-collection-default-time plate-cells-collection-default-time hidden');
+
                 let div_well_use = document.createElement("div");
-                $(div_well_use).attr('data-index', formsetidx);
-                $(div_well_use).attr('row-index', ridx);
-                $(div_well_use).attr('column-index', cidx);
-                $(div_well_use).attr('id', "well_use-"+formsetidx);
+                $(div_well_use).prop('data-index', formsetidx);
+                $(div_well_use).prop('row-index', ridx);
+                $(div_well_use).prop('column-index', cidx);
+                $(div_well_use).prop('id', "well_use-"+formsetidx);
                 $(div_well_use).addClass('map-well-use plate-cells-well-use hidden');
 
                 let div_compound = document.createElement("div");
-                $(div_compound).attr('data-index', formsetidx);
-                $(div_compound).attr('row-index', ridx);
-                $(div_compound).attr('column-index', cidx);
-                $(div_compound).attr('id', "compound-"+formsetidx);
+                $(div_compound).prop('data-index', formsetidx);
+                $(div_compound).prop('row-index', ridx);
+                $(div_compound).prop('column-index', cidx);
+                $(div_compound).prop('id', "compound-"+formsetidx);
                 $(div_compound).addClass('map-compound plate-cells-compound hidden');
 
                 let div_cell = document.createElement("div");
-                $(div_cell).attr('data-index', formsetidx);
-                $(div_cell).attr('row-index', ridx);
-                $(div_cell).attr('column-index', cidx);
-                $(div_cell).attr('id', "cell-"+formsetidx);
+                $(div_cell).prop('data-index', formsetidx);
+                $(div_cell).prop('row-index', ridx);
+                $(div_cell).prop('column-index', cidx);
+                $(div_cell).prop('id', "cell-"+formsetidx);
                 $(div_cell).addClass('map-cell plate-cells-cell hidden');
 
                 let div_setting = document.createElement("div");
-                $(div_setting).attr('data-index', formsetidx);
-                $(div_setting).attr('row-index', ridx);
-                $(div_setting).attr('column-index', cidx);
-                $(div_setting).attr('id', "setting-"+formsetidx);
+                $(div_setting).prop('data-index', formsetidx);
+                $(div_setting).prop('row-index', ridx);
+                $(div_setting).prop('column-index', cidx);
+                $(div_setting).prop('id', "setting-"+formsetidx);
                 $(div_setting).addClass('map-setting plate-cells-setting hidden');
 
                 let div_standard_value = document.createElement("div");
-                $(div_standard_value).attr('data-index', formsetidx);
-                $(div_standard_value).attr('row-index', ridx);
-                $(div_standard_value).attr('column-index', cidx);
-                $(div_standard_value).attr('id', "standard_value-"+formsetidx);
+                $(div_standard_value).prop('data-index', formsetidx);
+                $(div_standard_value).prop('row-index', ridx);
+                $(div_standard_value).prop('column-index', cidx);
+                $(div_standard_value).prop('id', "standard_value-"+formsetidx);
                 $(div_standard_value).addClass('map-standard-value plate-cells-standard-value hidden');
 
                 let div_time = document.createElement("div");
-                $(div_time).attr('data-index', formsetidx);
-                $(div_time).attr('row-index', ridx);
-                $(div_time).attr('column-index', cidx);
-                $(div_time).attr('id', "time-"+formsetidx);
+                $(div_time).prop('data-index', formsetidx);
+                $(div_time).prop('row-index', ridx);
+                $(div_time).prop('column-index', cidx);
+                $(div_time).prop('id', "time-"+formsetidx);
                 $(div_time).addClass('map-time plate-cells-time hidden');
 
+                let div_default_time = document.createElement("div");
+                $(div_default_time).prop('data-index', formsetidx);
+                $(div_default_time).prop('row-index', ridx);
+                $(div_default_time).prop('column-index', cidx);
+                $(div_default_time).prop('id', "default_time-"+formsetidx);
+                $(div_default_time).addClass('map-default-time plate-cells-default-time hidden');
+
                 let div_block_raw_value = document.createElement("div");
-                $(div_block_raw_value).attr('data-index', formsetidx);
-                $(div_block_raw_value).attr('row-index', ridx);
-                $(div_block_raw_value).attr('column-index', cidx);
-                $(div_block_raw_value).attr('id', "block_raw_value-"+formsetidx);
+                $(div_block_raw_value).prop('data-index', formsetidx);
+                $(div_block_raw_value).prop('row-index', ridx);
+                $(div_block_raw_value).prop('column-index', cidx);
+                $(div_block_raw_value).prop('id', "block_raw_value-"+formsetidx);
                 $(div_block_raw_value).addClass('map-block-raw-value plate-cells-block-raw-value hidden');
                 // TODO make sure to add/copy over the file related stuff after get the import working
 
@@ -905,6 +956,7 @@ $(document).ready(function () {
                     div_collection_time.appendChild(document.createTextNode("0"));
                     div_standard_value.appendChild(document.createTextNode("0"));
                     div_time.appendChild(document.createTextNode("0"));
+                    div_default_time.appendChild(document.createTextNode("0"));
                     div_block_raw_value.appendChild(document.createTextNode("0"));
                 } else if (aore === "changed_platemap") {
                     // pull from AN existing plate map, but not THIS one, as a STARTing place (add)
@@ -912,16 +964,34 @@ $(document).ready(function () {
                     // console.log(global_plate_iplatemap_dictionary[2].name, " ", global_plate_iplatemap_dictionary[2].plate_index)
                     //list_of_item_fields = ['well_name', 'matrix_item_id', 'well_use', 'location_id', 'standard_value', 'dilution_factor', 'collection_volume', 'collection_time']
                     //list_of_value_fields = ['plate_index', 'time']
-                    let platemap_location = global_plate_iplatemap_dictionary[formsetidx].location;
+                    let platemap_location = 0;
+                    try {
+                        platemap_location = global_plate_iplatemap_dictionary[formsetidx].location_id;
+                    } catch(err) { }
                     $('#id_assayplatereadermapitem_set-' + formsetidx + '-location').val(platemap_location);
                     let saved_location = $('#id_assayplatereadermapitem_set-' + formsetidx + '-location').val();
                     $('#id_ns_location').val(saved_location);
                     let saved_text_location = $('#id_ns_location').children("option:selected").text();
                     div_location.appendChild(document.createTextNode(saved_text_location));
-                    div_dilution_factor.appendChild(document.createTextNode(global_plate_iplatemap_dictionary[formsetidx].dilution_factor));
-                    div_collection_volume.appendChild(document.createTextNode(global_plate_iplatemap_dictionary[formsetidx].collection_volume));
-                    div_collection_time.appendChild(document.createTextNode(global_plate_iplatemap_dictionary[formsetidx].collection_time));
-                    let this_standard_value = global_plate_iplatemap_dictionary[formsetidx].standard_value;
+                    try {
+                        div_dilution_factor.appendChild(document.createTextNode(global_plate_iplatemap_dictionary[formsetidx].dilution_factor));
+                    } catch(err) {
+                        div_dilution_factor.appendChild(document.createTextNode(1));
+                    }
+                    try {
+                        div_collection_volume.appendChild(document.createTextNode(global_plate_iplatemap_dictionary[formsetidx].collection_volume));
+                    } catch(err) {
+                        div_collection_volume.appendChild(document.createTextNode(0));
+                    }
+                    try {
+                        div_collection_time.appendChild(document.createTextNode(global_plate_iplatemap_dictionary[formsetidx].collection_time));
+                    } catch(err) {
+                        div_collection_time.appendChild(document.createTextNode(0));
+                    }
+                    let this_standard_value = 0;
+                    try {
+                        this_standard_value = global_plate_iplatemap_dictionary[formsetidx].standard_value;
+                    } catch(err) {}
                     if (this_standard_value <= 0.00001) {
                         div_standard_value.appendChild(document.createTextNode(this_standard_value.toExponential(4)));
                     } else if (this_standard_value <= 0.0001) {
@@ -936,9 +1006,15 @@ $(document).ready(function () {
                         div_standard_value.appendChild(document.createTextNode(this_standard_value.toFixed(2)));
                     }
                     //div_standard_value.appendChild(document.createTextNode(global_plate_iplatemap_dictionary[formsetidx].standard_value));
-                    div_time.appendChild(document.createTextNode(global_plate_iplatemap_dictionary[formsetidx].time));
+
+                    try {
+                        div_default_time.appendChild(document.createTextNode(global_plate_iplatemap_dictionary[formsetidx].default_time));;
+                    } catch(err) {
+                        div_default_time.appendChild(document.createTextNode(0));
+                    }
                     // raw value to 0, do not get raw value from other platemap
                     div_block_raw_value.appendChild(document.createTextNode("0"));
+                    div_time.appendChild(document.createTextNode("0"));
                 } else {
                     // aore = "on_load_update_or_view" or "update_changed_file_block"
                     if (aore === "on_load_update_or_view") {
@@ -951,6 +1027,7 @@ $(document).ready(function () {
                         div_dilution_factor.appendChild(document.createTextNode($('#id_assayplatereadermapitem_set-' + formsetidx + '-dilution_factor').val()));
                         div_collection_volume.appendChild(document.createTextNode($('#id_assayplatereadermapitem_set-' + formsetidx + '-collection_volume').val()));
                         div_collection_time.appendChild(document.createTextNode($('#id_assayplatereadermapitem_set-' + formsetidx + '-collection_time').val()));
+                        div_default_time.appendChild(document.createTextNode($('#id_assayplatereadermapitem_set-' + formsetidx + '-default_time').val()));
                         div_standard_value.appendChild(document.createTextNode($('#id_assayplatereadermapitem_set-' + formsetidx + '-standard_value').val()));
                     }
                     if (aore === "on_load_update_or_view" || global_plate_number_file_block_sets == 0) {
@@ -961,12 +1038,14 @@ $(document).ready(function () {
                         // TODO sck confirm that nulls are handled correctly in the push into the array after get upload working
                         // these will only work correctly if all the plate maps have the plate size # of sets with the correct plate_index in each
                         div_time.appendChild(document.createTextNode(global_plate_time_matches[formsetidx]));
+                        div_default_time.appendChild(document.createTextNode(global_plate_time_matches[formsetidx]));
                         div_block_raw_value.appendChild(document.createTextNode(global_plate_block_raw_value_matches[formsetidx]));
-                        $(div_time).attr('value-formset-index', global_plate_index_list_matches[formsetidx]);
-                        $(div_block_raw_value).attr('value-formset-index', global_plate_index_list_matches[formsetidx]);
+                        $(div_time).prop('value-formset-index', global_plate_index_list_matches[formsetidx]);
+                        $(div_default_time).prop('value-formset-index', global_plate_index_list_matches[formsetidx]);
+                        $(div_block_raw_value).prop('value-formset-index', global_plate_index_list_matches[formsetidx]);
                     }
                 }
-                // handling the matrix item and well use HERE
+                // handling the matrix item and well use HERE (well changed if formsets in the welluseChange function
                 if (aore === "on_load_add" || aore === "changed_device" || aore === "changed_matrix") {
                     if (aore === "changed_matrix") {
                         //"a_matrix"
@@ -1051,6 +1130,7 @@ $(document).ready(function () {
                 tdbodycell.appendChild(div_well_use);
                 tdbodycell.appendChild(div_block_raw_value);
                 tdbodycell.appendChild(div_time);
+                tdbodycell.appendChild(div_default_time);
                 tdbodycell.appendChild(div_dilution_factor);
                 tdbodycell.appendChild(div_matrix_item);
                 tdbodycell.appendChild(div_location);
@@ -1080,12 +1160,15 @@ $(document).ready(function () {
         // and added when the plate map table was created
         let my_value_formset_index =  idx;
         if (global_plate_number_file_block_sets > 0) {
-            my_value_formset_index = $('#time-' + idx).attr('value-formset-index');
+            my_value_formset_index = $('#time-' + idx).prop('value-formset-index');
             // TODO forset for raw???
         }
         $('#well_use-' + idx).text(global_plate_well_use);
         $('#id_assayplatereadermapitem_set-' + idx + '-well_use').val(global_plate_well_use);
-        $('#id_assayplatereadermapitemvalue_set-' + my_value_formset_index + 'well_use').val(global_plate_well_use);
+        $('#id_assayplatereadermapitemvalue_set-' + my_value_formset_index + '-well_use').val(global_plate_well_use);
+        //  id_assayplatereadermapitemvalue_set-0-well_use
+        // console.log("global_plate_well_use ",global_plate_well_use)
+        // console.log("my_value_formset_index ", my_value_formset_index)
 
         if (global_plate_well_use === 'blank' || global_plate_well_use === 'empty' || global_plate_well_use === 'standard') {
             // reset other fields for user
@@ -1108,12 +1191,12 @@ $(document).ready(function () {
             $('#id_assayplatereadermapitem_set-' + idx + '-collection_time').val("0");
 
             // console.log(global_plate_number_file_block_sets)
-            // console.log($('#time-' + idx).attr('value-formset-index'))
+            // console.log($('#time-' + idx).prop('value-formset-index'))
             // console.log("value formset index: ",my_value_formset_index)
 
-            $('#time-' + idx).text("0");
-            $('#id_assayplatereadermapitemvalue_set-' + my_value_formset_index + '-time').val("0");
-            //raw value should be left alone since any one could have a raw value
+            $('#default_time-' + idx).text("0");
+            $('#id_assayplatereadermapitem_set-' + idx + '-default_time').val("0");
+            //raw value and time (not default time) should be left alone since any one could have a raw value and time
         }
         if (global_plate_well_use === 'blank' || global_plate_well_use === 'empty' || global_plate_well_use === 'sample') {
             // reset other fields for user
@@ -1136,28 +1219,28 @@ $(document).ready(function () {
         // brings a list of plate_indexes to change and changes each well in the list
         // set here to make sure to avoid race errors
         // one way of getting the values
-        global_plate_time_value = document.getElementById('id_se_time').value;
-        global_plate_dilution_factor = document.getElementById('id_se_dilution_factor').value;
-        global_plate_collection_volume = document.getElementById('id_se_collection_volume').value;
-        global_plate_collection_time = document.getElementById('id_se_collection_time').value;
-        global_plate_increment_value = document.getElementById('id_se_increment_value').value;
-        global_plate_standard_value = document.getElementById('id_se_standard_value').value;
+        global_plate_default_time_value = document.getElementById('id_form_number_default_time').value;
+        global_plate_dilution_factor = document.getElementById('id_form_number_dilution_factor').value;
+        global_plate_collection_volume = document.getElementById('id_form_number_collection_volume').value;
+        global_plate_collection_time = document.getElementById('id_form_number_collection_time').value;
+        global_plate_increment_value = document.getElementById('id_form_number_increment_value').value;
+        global_plate_standard_value = document.getElementById('id_form_number_standard_value').value;
         // another way of getting the values, but this locked the input boxes :O
-        // global_plate_time_value = $("#id_se_time").selectize()[0].selectize.items[0];
-        // global_plate_dilution_factor = $("#id_se_dilution_factor").selectize()[0].selectize.items[0];
-        // global_plate_collection_volume = $("#id_se_collection_volume").selectize()[0].selectize.items[0];
-        // global_plate_collection_time = $("#id_se_collection_time").selectize()[0].selectize.items[0];
-        // global_plate_increment_value = $("#id_se_increment_value").selectize()[0].selectize.items[0];
-        // global_plate_standard_value = $("#id_se_standard_value").selectize()[0].selectize.items[0];
-        let incrementing_time_value = parseFloat(global_plate_time_value);
+        // global_plate_*time_value = $("#id_se_*time").selectize()[0].selectize.items[0];
+        // global_plate_dilution_factor = $("#id_form_number_dilution_factor").selectize()[0].selectize.items[0];
+        // global_plate_collection_volume = $("#id_form_number_collection_volume").selectize()[0].selectize.items[0];
+        // global_plate_collection_time = $("#id_form_number_collection_time").selectize()[0].selectize.items[0];
+        // global_plate_increment_value = $("#id_form_number_increment_value").selectize()[0].selectize.items[0];
+        // global_plate_standard_value = $("#id_form_number_standard_value").selectize()[0].selectize.items[0];
+        let incrementing_default_time_value = parseFloat(global_plate_default_time_value);
         let incrementing_standard_value = parseFloat(global_plate_standard_value);
-        // console.log("global_plate_time_value", global_plate_time_value)
+        // console.log("global_plate_*time_value", global_plate_*time_value)
         // console.log("global_plate_increment_value", global_plate_increment_value)
         // console.log("global_plate_dilution_factor", global_plate_dilution_factor)
         // console.log("global_plate_collection_volume", global_plate_collection_volume)
         // console.log("global_plate_collection_time", global_plate_collection_time)
         // console.log("global_plate_standard_value", global_plate_standard_value)
-        // console.log("incrementing_time_value", incrementing_time_value)
+        // console.log("incrementing_default_time_value", incrementing_default_time_value)
         // console.log("incrementing_standard_value", incrementing_standard_value)
 
         let this_operation = global_plate_increment_operation;
@@ -1198,7 +1281,8 @@ $(document).ready(function () {
             // do for things that can ONLY copy (not increment)
             let my_value_formset_index2 = idx;
             if (global_plate_number_file_block_sets > 0) {
-                my_value_formset_index2 = $('#time-' + idx).attr('value-formset-index');
+                // time and raw value will have a different index since they are in the itemvalue table, not the item table
+                my_value_formset_index2 = $('#time-' + idx).prop('value-formset-index');
                 // TODO formset for raw??
                 // TODO get the right raw value from the right value formset showing in the plate
             }
@@ -1240,9 +1324,10 @@ $(document).ready(function () {
                 // copy selected by user
                 // console.log(global_plate_well_use)
                 if (global_plate_well_use === 'sample') {
-                    if ($("input[type='checkbox'][name='change_time']").prop('checked') === true) {
-                        $('#time-' + idx).text(global_plate_time_value);
-                        $('#id_assayplatereadermapitemvalue_set-' + my_value_formset_index2 + '-time').val(global_plate_time_value);
+                    // default time is in the item table
+                    if ($("input[type='checkbox'][name='change_default_time']").prop('checked') === true) {
+                        $('#default_time-' + idx).text(global_plate_default_time_value);
+                        $('#id_assayplatereadermapitem_set-' + idx + '-default_time').val(global_plate_default_time_value);
                     }
                 } else if (global_plate_well_use === 'standard') {
                         $('#standard_value-' + idx).text(global_plate_standard_value);
@@ -1256,16 +1341,16 @@ $(document).ready(function () {
                 // let this_inc_value = adjusted to match
                 // thought need to do something different with dragging, but this should work like the matrix
                 if (this_operation === "*") {
-                    incrementing_time_value = incrementing_time_value * adjusted_inc_value;
+                    incrementing_default_time_value = incrementing_default_time_value * adjusted_inc_value;
                     incrementing_standard_value = incrementing_standard_value * adjusted_inc_value;
                 } else {
-                    incrementing_time_value = incrementing_time_value + adjusted_inc_value;
+                    incrementing_default_time_value = incrementing_default_time_value + adjusted_inc_value;
                     incrementing_standard_value = incrementing_standard_value + adjusted_inc_value;
                 }
                 if (global_plate_well_use === 'sample') {
-                    if ($("input[type='checkbox'][name='change_time']").prop('checked') === true) {
-                        $('#time-' + idx).text(incrementing_time_value);
-                        $('#id_assayplatereadermapitemvalue_set-' + my_value_formset_index2 + '-time').val(incrementing_time_value);
+                    if ($("input[type='checkbox'][name='change_default_time']").prop('checked') === true) {
+                        $('#default_time-' + idx).text(incrementing_default_time_value);
+                        $('#id_assayplatereadermapitem_set-' + idx + '-default_time').val(incrementing_default_time_value);
                     }
                 } else if (global_plate_well_use === 'standard') {
                     // console.log(incrementing_standard_value)
@@ -1311,11 +1396,11 @@ $(document).ready(function () {
     }
     function make_escaped_tooltip(title_text) {
         let new_span = $('<div>').append($('<span>')
-            .attr('data-toggle', "tooltip")
-            .attr('data-title', escapeHtml(title_text))
+            .prop('data-toggle', "tooltip")
+            .prop('data-title', escapeHtml(title_text))
             .addClass("glyphicon glyphicon-question-sign")
-            .attr('aria-hidden', "true")
-            .attr('data-placement', "bottom"));
+            .prop('aria-hidden', "true")
+            .prop('data-placement', "bottom"));
         return new_span.html();
     }
     // END - ADDITIONAL FUNCTION SECTION

@@ -5,122 +5,104 @@
     <script src="{% static "assays/assayplatereaderfile_add.js" %}"></script>
 {% endblock %}
 
-
+{# only the add page uses this template, so do not have to make conditional #}
 {% block breadcrumbs %}
     <li><a href="/assays/assaystudy/">Studies</a>
     <li><a href="{{ form.instance.study.get_absolute_url }}">{{ form.instance.study }}</a></li>
-    {% if object %}
-        <li><a href="{% url 'assayplatereaderfile-index' object.study.id %}">Assay Plate Reader Files</a>
-    {% else %}
-        <li><a href="{% url 'assayplatereaderfile-index' form.instance.study_id %}">Assay Plate Reader Files</a>
-    {% endif %}
+    <li><a href="{% url 'assayplatereaderfile-index' form.instance.study_id %}">Assay Plate Reader Files</a>
     <li class="active">
-        {% if object %}
-            <em>{{ object }}</em>
-        {% else %}
-            Add
-        {% endif %}
+        Add
     </li>
 {% endblock %}
 
-{#{% block fluid-content %}#}
-{#    <form enctype="multipart/form-data" class="form-horizontal" method="post" >#}
-
+{# only the add page uses this template, so do not have to make conditional #}
 {% block content %}
     <form class="form-horizontal" method="post" enctype="multipart/form-data">
-
         <div class="padded-bottom">
-            {# Title of page #}
+            {# title - structure of templates - HANDY #}
             <div class="well">
                 <h1 class="text-center">
-                    <em><b>Assay Plate Reader Data File
-                    {% if update %}
-                        Update
-                    {% else %}
-                        {% if review %}
-                            Review
-                        {% else %}
-                            Add
-                        {% endif %}
-                    {% endif %}
-                    </b></em><br><br>
-                {% if update %}
-                    <em>{{ object }}</em>
-                {% else %}
-                    {% if review %}
-                        <em>{{ object }}</em>
-                    {% else %}
-                        New File Upload
-                    {% endif %}
-                {% endif %}
-
-                {# need this in javascript #}
-                <div id="check_load" class="hidden">{{ page_called }}</div>
+                    <em><b>
+                    Add Assay Plate Reader Plate Map Data File
+                    </b></em>
+                    <br>
+                    <br>
+                    to Study {{ form.instance.study }}
+                    <br>
+                {% csrf_token %}
                 </h1>
             </div>
 
-            <div class="row">
+            {# pass to js file #}
+            <div>
+                {# need this in javascript to pass to ajax #}
                 <div class="hidden" id="this_study_id" >
-                    {% if object %}
-                        {{ object.study.id }}
-                    {% else %}
-                        {{form.instance.study_id}}
-                    {% endif %}
+                    {{form.instance.study_id}}
                 </div>
-{#                <div id = "test_me1"></div>#}
-{#                <div id = "test_me2"></div>#}
-             </div>
+            </div>
 
-            <h1>
-                Upload Data File for <em>{{ object }}</em>
-            <br>
-            {% csrf_token %}
-        {#        <button id="submit" type="submit" class="btn btn-primary">Submit</button>#}
-            </h1>
+            {# main #}
+            <div>
+                <legend>Data File Upload</legend>
 
-            {% include "submit.html" %}
-
-            {% include 'errors.html' %}
-
-            <legend>Data File Upload</legend>
-
-            {% if form.errors %}
-                {% for error in form.plate_reader_file.errors %}
-                    <div class="alert alert-danger" role="alert">
-                        <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
-                        <span class="sr-only">Error:</span>
-                        {{ error }}
-                    </div>
-                {% endfor %}
-                {% for error in form.non_field_errors %}
-                    <div class="alert alert-danger" role="alert">
-                        <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
-                        <span class="sr-only">Error:</span>
-                        {{ error }}
-                    </div>
-                {% endfor %}
-            <div class="form-group has-error">
-            {% else %}
-            <div class="form-group">
-            {% endif %}
                 <label for="plate_reader_file" class="col-sm-2 control-label">Upload File</label>
                 <div class="col-sm-10">
                     <input type="file" name="plate_reader_file" class="btn btn-primary btn-lg" id="id_plate_reader_file">
                 </div>
             </div>
 
-            <div class="hidden">
-                <h2>For Development Testing</h2>
-                {#Use for error checking#}
-                For testing<br>
-                form.errors<br>
-                {{ form.errors }}<br>
-                formset.errors<br>
-                {{ formset.errors }}<br>
-                value_formset.errors<br>
-                {{ value_formset.errors }}<br>
+            {# error handling #}
+            <div>
+                {% if form.errors %}
+                    <h2>List of Errors (form)</h2>
+                    {% for error in form.plate_reader_file.errors %}
+                        <div class="alert alert-danger" role="alert">
+                            <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                            <span class="sr-only">Error:</span>
+                            {{ error }}
+                        </div>
+                    {% endfor %}
+                    {% for error in form.non_field_errors %}
+                        <div class="alert alert-danger" role="alert">
+                            <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                            <span class="sr-only">Error:</span>
+                            {{ error }}
+                        </div>
+                    {% endfor %}
+                    <div class="form-group has-error">
+                {% else %}
+                    <div class="form-group">
+                {% endif %}
+                {% if form.errors %}
+                    </div>
+                {% else %}
+                    </div>
+                {% endif %}
             </div>
+
+            {# include error and submit #}
+            <div>
+                <div>
+                    {% if not review %}
+                        {% include "submit.html" with flag="y" creator=object.created_by.id %}
+                    {% endif %}
+                </div>
+
+                {% include 'errors.html' %}
+
+                {% comment %}            <h6>tracking begin</h6>
+                {% include 'tracking.html' %}
+                <h6>tracking end</h6>{% endcomment %}
+            </div>
+
         </div>
+
+{#        <div class="hidden">#}
+{#            <h2>For Development Testing</h2>#}
+{#            For testing<br>#}
+{#            form.errors<br>#}
+{#            {{ form.errors }}<br>#}
+{#        </div>#}
 
     </form>
 {% endblock %}

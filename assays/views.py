@@ -37,6 +37,7 @@ from assays.models import (
     AssayPlateReaderMapItemValue,
     AssayPlateReaderMapDataFile,
     AssayPlateReaderMapDataFileBlock,
+
 )
 from assays.forms import (
     AssayStudyConfigurationForm,
@@ -68,7 +69,12 @@ from assays.forms import (
     AssayPlateReaderMapItemValueFormSetFactory,
     AssayPlateReadMapAdditionalInfoForm,
     AssayPlateReaderMapDataFileAddForm,
+    AssayPlateReaderMapDataFileForm,
+    AssayPlateReaderMapDataFileBlockFormSetFactory,
+    AbstractClassAssayStudyAssay,
+
 )
+
 from microdevices.models import MicrophysiologyCenter
 from django import forms
 
@@ -76,8 +82,9 @@ from django import forms
 from assays.ajax import get_data_as_csv, fetch_data_points_from_filters
 from assays.utils import (
     AssayFileProcessor,
-    PlateReaderMapDataFileAdd,
-    get_user_accessible_studies
+    get_user_accessible_studies,
+    add_update_plate_reader_data_map_item_values
+
 )
 
 from django.forms.models import inlineformset_factory
@@ -117,8 +124,12 @@ from mps.settings import MEDIA_ROOT
 
 from django.template.loader import render_to_string, TemplateDoesNotExist
 
+from django.db.models import Count
 from datetime import datetime, timedelta
+import xlrd
 import pytz
+
+from django.db import connection
 
 # TODO Refactor imports
 # TODO REFACTOR CERTAIN WHITTLING TO BE IN FORM AS OPPOSED TO VIEW
@@ -2523,15 +2534,17 @@ class AssayMatrixNew(StudyGroupMixin, UpdateView):
             return self.render_to_response(self.get_context_data(form=form))
 
 
-##### ASSAY PLATE MAP START
+#####
+# sck - ASSAY PLATE MAP START
 
-##### Plate map list, add, update, view and delete section
+# Plate map list, add, update, view and delete section
 class AssayPlateReaderMapIndex(StudyViewerMixin, DetailView):
     """Assay plate map"""
     model = AssayStudy
     context_object_name = 'assayplatereadermap_index'
     template_name = 'assays/assayplatereadermap_index.html'
 
+    # For permission mixin
     def get_object(self, queryset=None):
         self.study = super(AssayPlateReaderMapIndex, self).get_object()
         return self.study
@@ -2539,45 +2552,49 @@ class AssayPlateReaderMapIndex(StudyViewerMixin, DetailView):
     def get_context_data(self, **kwargs):
         context = super(AssayPlateReaderMapIndex, self).get_context_data(**kwargs)
 
+        # get maps
         assayplatereadermaps = AssayPlateReaderMap.objects.filter(
             study=self.object.id
         ).prefetch_related(
             'assayplatereadermapitem_set',
-            #'created_by',
         )
+        # find block count per map id
+        file_block_count = AssayPlateReaderMapDataFileBlock.objects.filter(
+            study=self.object.id
+        ).values('assayplatereadermap').annotate(
+            blocks=Count('assayplatereadermap')
+        )
+        # get block count to a dictionary (the iterator is for single use of the query - optional)
+        file_block_count_dict = {}
+        # for each in file_block_count.iterator():
+        for each in file_block_count:
+            file_block_count_dict.update({each.get('assayplatereadermap'): each.get('blocks')})
+        # put the count of the blocks into the queryset of files (this is very HANDY)
+        for file in assayplatereadermaps:
+            file.block_count = file_block_count_dict.get(int(file.id))
+            # print(file.id, " ",file.description, " ", file.block_count)
+        for file in assayplatereadermaps:
+            my_tmu = str(file.study_assay)
+            my_tmu_list = my_tmu.split("~@|")
+            if len(my_tmu_list) > 2:
+                file.new_study_assay = "TARGET: "+my_tmu_list[1]+"  METHOD: "+my_tmu_list[2]+"  ("+my_tmu_list[3]+")"
+            else:
+                file.new_study_assay = file.study_assay
+
         context['assayplatereadermaps'] = assayplatereadermaps
 
-        assayplatereadermapitems = AssayPlateReaderMapItem.objects.filter(
-            assayplatereadermap__in=assayplatereadermaps
-        )
-
-        context['assayplatereaderitems'] = assayplatereadermapitems
-        #####
-        context['index'] = True
-        context['page_called'] = 'index'
-        #####
-
-        # #followed example in other part of code...dictionary and list of lists of same information
-        # keep for now in case go back to something like this
-        # distinct_base_plate_map = {}
-        # reduce_distinct_base_name = []
-        #
-        # for record in assayplatereadermaps:
-        #     distinct_base_plate_map[(record.base_name, record.device, record.plate_use, record.study_assay)] = distinct_base_plate_map.setdefault(
-        #         (record.base_name, record.device, record.plate_use, record.study_assay), 0
-        #     ) + 1
-        #
-        # for current_tuple, count in distinct_base_plate_map.items():
-        #     reduce_distinct_base_name.append([current_tuple[0], current_tuple[1], current_tuple[2], current_tuple[3], count])
-        #
-        # context['distinct_base_plate_map'] = distinct_base_plate_map
-        # context['reduce_distinct_base_name'] = reduce_distinct_base_name
+        # not using this right now, but KEEP here for now in case need to add to the index page
+        # assayplatereadermapitems = AssayPlateReaderMapItem.objects.filter(
+        #     assayplatereadermap__in=assayplatereadermaps
+        # )
+        # context['assayplatereaderitems'] = assayplatereadermapitems
 
         return context
 
 
 class AssayPlateReaderMapAdd(StudyGroupMixin, CreateView):
     """Assay plate map add"""
+
     model = AssayPlateReaderMap
     template_name = 'assays/assayplatereadermap_add.html'
     form_class = AssayPlateReaderMapForm
@@ -2598,11 +2615,12 @@ class AssayPlateReaderMapAdd(StudyGroupMixin, CreateView):
         context['add'] = True
         context['page_called'] = 'add'
         #####
-        #passing the study_id to the form to get back the matrix items list for this study
-        context['assay_map_additional_info'] = AssayPlateReadMapAdditionalInfoForm(study_id=self.kwargs['study_id'])
 
+        # pass the study_id to ADDITIONAL form as call it
+        context['assay_map_additional_info'] = AssayPlateReadMapAdditionalInfoForm(study_id=self.kwargs['study_id'])
         study = get_object_or_404(AssayStudy, pk=self.kwargs['study_id'])
-        # the items (one for each well in the plate)
+
+        # get the items (one for each well in the plate)
         if 'formset' not in context:
             if self.request.POST:
                 context['formset'] = AssayPlateReaderMapItemFormSetFactory(
@@ -2615,13 +2633,13 @@ class AssayPlateReaderMapAdd(StudyGroupMixin, CreateView):
                     study=study,
                     user=self.request.user
                 )
-        # the values (0 to many for each item)
+        # get the values (0 to many for each item)
         if 'value_formset' not in context:
             if self.request.POST:
                 context['value_formset'] = AssayPlateReaderMapItemValueFormSetFactory(
-                        self.request.POST,
-                        study=study,
-                        user=self.request.user
+                    self.request.POST,
+                    study=study,
+                    user=self.request.user
                 )
             else:
                 context['value_formset'] = AssayPlateReaderMapItemValueFormSetFactory(
@@ -2629,6 +2647,9 @@ class AssayPlateReaderMapAdd(StudyGroupMixin, CreateView):
                     user=self.request.user
                 )
 
+        # this sends the info needed for display of setup info in the plate map
+        # this function used by add, update, and edit
+        # note to sck - sending || lists
         return_list = get_matrix_items_with_setup(self.kwargs['study_id'])
         matrix_items_in_study = return_list[0]
         matrix_list_size = return_list[1]
@@ -2656,14 +2677,41 @@ class AssayPlateReaderMapAdd(StudyGroupMixin, CreateView):
         for formset in formsets:
             if not formset.is_valid():
                 formsets_are_valid = False
+
         if form.is_valid() and formsets_are_valid:
             save_forms_with_tracking(self, form, formset=formsets, update=False)
+
+            # ONLY NEED if ADD - START
+            # because the instances of the item do not yet exist, the pk from item can not be added to value on save
+            # so, in the ADD, formsets are saved, add the pk of the item table to the value table
+            # note that, these protect from a break in || between plate_index in item and item value
+            # specify where null so it ONLY happens to the first time adding
+            # This could perhaps be avoided by nesting forms....
+            this_platemap_id = form.instance.id
+            v = 'assays_assayplatereadermapitemvalue'
+            i = 'assays_assayplatereadermapitem'
+            c1 = 'assayplatereadermapitem_id'
+            c2 = 'id'
+            c3 = 'assayplatereadermap_id'
+            w1 = 'plate_index'
+            mysql = ""
+            mysql = mysql + "UPDATE " + v + " "
+            mysql = mysql + "SET " + c1 + " = " + i + "." + c2 + " "
+            mysql = mysql + "FROM " + i + " "
+            mysql = mysql + "WHERE " + i + "." + w1 + "=" + v + "." + w1 + " "
+            mysql = mysql + "AND " + v + "." + c3 + "=" + str(this_platemap_id) + " "
+            mysql = mysql + "AND " + v + "." + c1 + " is null"
+            # print(mysql)
+            cursor = connection.cursor()
+            cursor.execute(mysql)
+            # ONLY NEED if ADD - END
+
             return redirect(self.object.get_post_submission_url())
         else:
-            # watch if copy to update (note bottom is view and update)
+            # return this for ADD
             return self.render_to_response(self.get_context_data(form=form))
-            #return self.render_to_response(self.get_context_data(form=form, formset=formset))
-
+            # return this for UPDATE or VIEW
+            # return self.render_to_response(self.get_context_data(form=form, formset=formset))
 
 class AssayPlateReaderMapUpdate(StudyGroupMixin, UpdateView):
     """Assay plate map update"""
@@ -2715,8 +2763,14 @@ class AssayPlateReaderMapUpdate(StudyGroupMixin, UpdateView):
         return context
 
     def form_valid(self, form):
-        formset = AssayPlateReaderMapItemFormSetFactory(self.request.POST, instance=self.object)
-        value_formset = AssayPlateReaderMapItemValueFormSetFactory(self.request.POST, instance=self.object)
+        formset = AssayPlateReaderMapItemFormSetFactory(
+            self.request.POST,
+            instance=self.object
+        )
+        value_formset = AssayPlateReaderMapItemValueFormSetFactory(
+            self.request.POST,
+            instance=self.object
+        )
 
         formsets = [formset, value_formset, ]
         formsets_are_valid = True
@@ -2781,22 +2835,7 @@ class AssayPlateReaderMapView(StudyGroupMixin, UpdateView):
         context['matrix_list_pk'] = matrix_list_pk
         return context
 
-    def form_valid(self, form):
-        formset = AssayPlateReaderMapItemFormSetFactory(self.request.POST, instance=self.object)
-        value_formset = AssayPlateReaderMapItemValueFormSetFactory(self.request.POST, instance=self.object)
-
-        formsets = [formset, value_formset, ]
-        formsets_are_valid = True
-
-        for formset in formsets:
-            if not formset.is_valid():
-                formsets_are_valid = False
-
-        if form.is_valid() and formset.is_valid():
-            save_forms_with_tracking(self, form, formset=formsets, update=True)
-            return redirect(self.object.get_post_submission_url())
-        else:
-            return self.render_to_response(self.get_context_data(form=form, formset=formset))
+    # no processing of form since view does not allow saving changes
 
 
 class AssayPlateReaderMapDelete(StudyViewerMixin, DeleteView):
@@ -2804,7 +2843,6 @@ class AssayPlateReaderMapDelete(StudyViewerMixin, DeleteView):
     template_name = 'assays/assayplatereadermap_delete.html'
 
     def get_success_url(self):
-        # goes to the M&I list (main study) page.... returns self.object.study.get_absolute_url()
         return self.object.get_post_submission_url()
 
 # function used in plate reader app (add, view, and update) to get associated matrix item setup for display
@@ -2812,10 +2850,7 @@ def get_matrix_items_with_setup(study_id):
     matrix_items_with_setup = AssayMatrixItem.objects.filter(
         study_id=study_id
     ).prefetch_related(
-        #    'device',
-        #    'created_by',
         'matrix',
-        #    'organ_model',
         'assaysetupcompound_set__compound_instance__compound',
         'assaysetupcompound_set__concentration_unit',
         'assaysetupcompound_set__addition_location',
@@ -2829,34 +2864,13 @@ def get_matrix_items_with_setup(study_id):
         'assaysetupsetting_set__addition_location',
     ).order_by('matrix__name', 'name',)
 
-    # distinct_matrix = {}
-    # reduce_distinct_matrix = []
-    #
-    # for record in matrix_items_with_setup:
-    #     distinct_matrix[(record.matrix.id, record.matrix, record.matrix.number_of_rows, record.matrix.number_of_columns)] = distinct_matrix.setdefault(
-    #         (record.matrix.id, record.matrix, record.matrix.number_of_rows, record.matrix.number_of_columns), 0
-    #     ) + 1
-    #
-    # for current_tuple, count in distinct_matrix.items():
-    #     reduce_distinct_matrix.append([current_tuple[0], current_tuple[1], current_tuple[2], current_tuple[3], count])
-
-    # distinct_matrix = {}
-    # reduce_distinct_matrix = []
-    #
-    # for record in matrix_items_with_setup:
-    #     distinct_matrix[(record.matrix.id, record.matrix.name, record.matrix.number_of_rows, record.matrix.number_of_columns, record.id, record.name, record.row_index, record.column_index)] = distinct_matrix.setdefault(
-    #         (record.matrix.id, record.matrix.name, record.matrix.number_of_rows, record.matrix.number_of_columns, record.id, record.name, record.row_index, record.column_index), 0
-    #     ) + 1
-    #
-    # for current_tuple, count in distinct_matrix.items():
-    #     reduce_distinct_matrix.append([current_tuple[0], current_tuple[1], current_tuple[2], current_tuple[3], current_tuple[4], current_tuple[5], current_tuple[6], current_tuple[7] ])
-
     matrix_list_for_size = AssayMatrix.objects.filter(
             study_id=study_id
         ).order_by('name',)
 
     matrix_list_size = []
     matrix_list_pk = []
+    #  HARDCODED plate map size
     for record in matrix_list_for_size:
         if record.number_of_rows <= 4 and record.number_of_columns <= 6:
             matrix_list_size.append(24)
@@ -2870,9 +2884,12 @@ def get_matrix_items_with_setup(study_id):
 
     return matrix_items_with_setup, matrix_list_size, matrix_list_pk
 
-##### Plate reader file list, add, update, view and delete section
+
+#####
+# START Plate reader file list, add, update, view and delete section
 class AssayPlateReaderMapDataFileIndex(StudyViewerMixin, DetailView):
     """Assay plate reader file"""
+
     model = AssayStudy
     context_object_name = 'assayplatereaderfile_index'
     template_name = 'assays/assayplatereaderfile_index.html'
@@ -2884,166 +2901,266 @@ class AssayPlateReaderMapDataFileIndex(StudyViewerMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super(AssayPlateReaderMapDataFileIndex, self).get_context_data(**kwargs)
-        context['index'] = True
-        context['page_called'] = 'index'
 
+        # get files
         assayplatereadermapdatafiles = AssayPlateReaderMapDataFile.objects.filter(
             study=self.object.id
-        ).prefetch_related(
-            'assayplatereaderassayfileblock_set',
         )
-        context['assayplatereaderdatafile'] = assayplatereadermapdatafiles
-
-        assayplatereadermapdatafileblocks = AssayPlateReaderMapDataFileBlock.objects.filter(
-            assayplatereadermapdatafile__in=assayplatereadermapdatafiles
+        # find block count per file id
+        file_block_count = AssayPlateReaderMapDataFileBlock.objects.filter(
+            study=self.object.id
+        ).values('assayplatereadermapdatafile').annotate(
+            blocks=Count('assayplatereadermapdatafile')
         )
+        # get data block count to a dictionary
+        file_block_count_dict = {}
+        for each in file_block_count.iterator():
+            file_block_count_dict.update({each.get('assayplatereadermapdatafile'): each.get('blocks')})
+        # put the count of the blocks into the queryset of files (this is very HANDY)
+        for file in assayplatereadermapdatafiles:
+            file.block_count = file_block_count_dict.get(int(file.id))
+            # print(file.id, " ",file.description, " ", file.block_count)
+        # get and put short file name into queryset
+        for file in assayplatereadermapdatafiles:
+            file.name_short = os.path.basename(str(file.plate_reader_file))
 
-        context['assayplatereadermapdatafiles'] = assayplatereadermapdatafileblocks
-
-        # TODO sck modify to get the list or count of the file data blocks to show in the table
-        # use something like this:
-        #
-        # distinct_base_plate_map = {}
-        # reduce_distinct_base_name = []
-        #
-        # for record in assayplatereadermaps:
-        #     distinct_base_plate_map[(record.base_name, record.device, record.plate_use, record.study_assay)] = distinct_base_plate_map.setdefault(
-        #         (record.base_name, record.device, record.plate_use, record.study_assay), 0
-        #     ) + 1
-        #
-        # for current_tuple, count in distinct_base_plate_map.items():
-        #     reduce_distinct_base_name.append([current_tuple[0], current_tuple[1], current_tuple[2], current_tuple[3], count])
-        #
-        # context['distinct_base_plate_map'] = distinct_base_plate_map
-        # context['reduce_distinct_base_name'] = reduce_distinct_base_name
-
+        context['assayplatereadermapdatafiles'] = assayplatereadermapdatafiles
         return context
 
-# TODO sck build these
-class AssayPlateReaderMapDataFileUpdate(StudyGroupMixin, UpdateView):
-    model = AssayPlateReaderMapDataFile
-    template_name = 'assays/assayplatereaderfile_update.html'
 
 class AssayPlateReaderMapDataFileView(StudyGroupMixin, UpdateView):
+    """Assay Plate Reader File View"""
     model = AssayPlateReaderMapDataFile
-    template_name = 'assays/assayplatereaderfile_view.html'
+    template_name = 'assays/assayplatereaderfile_update.html'
+    form_class = AssayPlateReaderMapDataFileForm
+
+    def get_context_data(self, **kwargs):
+        context = super(AssayPlateReaderMapDataFileView, self).get_context_data(**kwargs)
+        #####
+        context['view'] = True
+        context['page_called'] = 'view'
+        #####
+
+        if 'formset' not in context:
+            if self.request.POST:
+                context['formset'] = AssayPlateReaderMapDataFileBlockFormSetFactory(
+                        self.request.POST,
+                        instance=self.object,
+                        user=self.request.user
+                )
+            else:
+                context['formset'] = AssayPlateReaderMapDataFileBlockFormSetFactory(
+                    instance=self.object,
+                    user=self.request.user
+                )
+
+        # find block count per file id
+        file_block_count = AssayPlateReaderMapDataFileBlock.objects.filter(
+            assayplatereadermapdatafile=self.object.id
+        )
+        number_of_blocks = len(file_block_count)
+        if number_of_blocks == 0:
+            context['no_saved_blocks'] = True
+        return context
+
+    # no processing of form since view does not allow saving changes
+
 
 class AssayPlateReaderMapDataFileDelete(StudyViewerMixin, DeleteView):
     model = AssayPlateReaderMapDataFile
     template_name = 'assays/assayplatereaderfile_delete.html'
 
-#class AssayStudyDataUpload(ObjectGroupRequiredMixin, UpdateView):
-#class AssayPlateReaderMapDataFileAdd(StudyGroupMixin, CreateView):
+    def get_success_url(self):
+        return self.object.get_post_submission_url()
+
+
+# Adding a file to the filefield on the add page
 class AssayPlateReaderMapDataFileAdd(StudyGroupMixin, CreateView):
-    """Upload an plate reader data file"""
+    """Upload an plate reader data file add"""
+
     model = AssayPlateReaderMapDataFile
     template_name = 'assays/assayplatereaderfile_add.html'
     form_class = AssayPlateReaderMapDataFileAddForm
 
-    #In add, do not need in update - some other differences due to no forms
+    # used in ADD, not in UPDATE - check carefully if copy
     def get_form(self, form_class=None):
         form_class = self.get_form_class()
         study = get_object_or_404(AssayStudy, pk=self.kwargs['study_id'])
 
-        # If POST
         if self.request.method == 'POST':
             return form_class(self.request.POST, self.request.FILES, study=study)
-        # If GET
         else:
             return form_class(study=study)
 
     def get_context_data(self, **kwargs):
         context = super(AssayPlateReaderMapDataFileAdd, self).get_context_data(**kwargs)
-        ##############################
+        #####
         context['add'] = True
-        context['page_called'] = 'add'
-
-    #
-    # def get_form(self, form_class=None):
-    #     form_class = self.get_form_class()
-    #     # If POST
-    #     if self.request.method == 'POST':
-    #         return form_class(self.request.POST, self.request.FILES, request=self.request, instance=self.get_object())
-    #     # If GET
-    #     else:
-    #         return form_class(instance=self.get_object())
-
-
-        # # TODO TODO TODO
-        # context['version'] = len(os.listdir(MEDIA_ROOT + '/excel_templates/'))
-
-        #context['data_file_uploads'] = get_data_file_uploads(study=self.object)
-
-        #
-        # if self.request.POST:
-        #     if 'supporting_data_formset' not in context:
-        #         context['supporting_data_formset'] = AssayStudySupportingDataFormSetFactory(self.request.POST, self.request.FILES, instance=self.object)
-        # else:
-        #     context['supporting_data_formset'] = AssayStudySupportingDataFormSetFactory(instance=self.object)
-
-        #context['update'] = True
+        #####
+        study = get_object_or_404(AssayStudy, pk=self.kwargs['study_id'])
 
         return context
 
-    #def form_valid(self, form):
-        # supporting_data_formset = AssayStudySupportingDataFormSetFactory(
-        #     self.request.POST,
-        #     self.request.FILES,
-        #     instance=self.object
-        # )
-        #
-        # if form.is_valid() and supporting_data_formset.is_valid():
-        #     data = form.cleaned_data
-        #     overwrite_option = data.get('overwrite_option')
-        #
-        #     study_id = str(self.object.id)
-        #
-        #     # Add user to Study's modified by
-        #     # TODO
-        #     if self.request and self.request.FILES and data.get('bulk_file', ''):
-        #         # Be positive it is not just processing the same file again
-        #         if not self.object.bulk_file or self.object.bulk_file != data.get('bulk_file'):
-        #             self.object.bulk_file = data.get('bulk_file')
-        #             self.object.modified_by = self.request.user
-        #             self.object.save()
-        #
-        #             file_processor = AssayFileProcessor(self.object.bulk_file, self.object, self.request.user, save=True)
-        #             # Process the file
-        #             file_processor.process_file()
-        #             # parse_file_and_save(self.object.bulk_file, self.object.modified_by, study_id, overwrite_option, 'Bulk', form=None)
-        #
-        #     # Only check if user is qualified editor
-        #     if is_group_editor(self.request.user, self.object.group.name):
-        #         # Contrived save for supporting data
-        #         save_forms_with_tracking(
-        #             self,
-        #             None,
-        #             formset=[supporting_data_formset],
-        #             update=True
-        #         )
-        #
-        #         # Contrived method for marking data
-        #         for key, value in list(form.data.items()):
-        #             if key.startswith('data_upload_'):
-        #                 current_id = key.replace('data_upload_', '', 1)
-        #                 current_value = value
-        #
-        #                 if current_value == 'false':
-        #                     current_value = False
-        #
-        #                 if current_value:
-        #                     data_file_upload = AssayDataFileUpload.objects.filter(study_id=self.object.id, id=current_id)
-        #                     if data_file_upload:
-        #                         data_points_to_replace = AssayDataPoint.objects.filter(data_file_upload__in=data_file_upload).exclude(replaced=True)
-        #                         data_points_to_replace.update(replaced=True)
-
-         #   return redirect(self.object.get_absolute_url())
-        #else:
-        #    return self.render_to_response(self.get_context_data(form=form))
 
     def form_valid(self, form):
-        if form.is_valid():
-            return redirect(self.object.get_absolute_url())
-        else:
-            return self.render_to_response(self.get_context_data(form=form))
+        study_id = self.kwargs['study_id']
+        study = get_object_or_404(AssayStudy, pk=self.kwargs['study_id'])
 
+        if form.is_valid():
+            data = form.cleaned_data
+            # https://stackoverflow.com/questions/11796383/django-set-the-upload-to-in-the-view
+            model_instance = form.save(commit=False)
+            model_instance.plate_reader_file.field.upload_to = 'assay_plate_map/' + str(study_id)
+            # this is what map uses, but not work for this since one field only
+            # save_forms_with_tracking(self, form, update=False)
+            self.object = form.save()
+            return redirect(self.object.get_post_add_submission_url())
+        else:
+            # return this for ADD
+            return self.render_to_response(self.get_context_data(form=form))
+            # return this for UPDATE or VIEW
+            # return self.render_to_response(self.get_context_data(form=form, formset=formset))
+
+
+# the user is routed here after adding the file by a get_post_add_submission_url in the models.py
+class AssayPlateReaderMapDataFileUpdate(StudyGroupMixin, UpdateView):
+    """Assay Plate Reader File Update"""
+    model = AssayPlateReaderMapDataFile
+    template_name = 'assays/assayplatereaderfile_update.html'
+    form_class = AssayPlateReaderMapDataFileForm
+
+    def get_context_data(self, **kwargs):
+        context = super(AssayPlateReaderMapDataFileUpdate, self).get_context_data(**kwargs)
+        #####
+        context['update'] = True
+        context['page_called'] = 'update'
+        #####
+
+        if 'formset' not in context:
+            if self.request.POST:
+                context['formset'] = AssayPlateReaderMapDataFileBlockFormSetFactory(
+                        self.request.POST,
+                        instance=self.object,
+                        user=self.request.user
+                )
+            else:
+                context['formset'] = AssayPlateReaderMapDataFileBlockFormSetFactory(
+                    instance=self.object,
+                    user=self.request.user
+                )
+
+        # find block count per file id
+        file_block_count = AssayPlateReaderMapDataFileBlock.objects.filter(
+            assayplatereadermapdatafile=self.object.id
+        )
+        number_of_blocks = len(file_block_count)
+        if number_of_blocks == 0:
+            context['no_saved_blocks'] = True
+
+        return context
+
+    def form_valid(self, form):
+
+        pk_for_file = self.object
+
+        formset = AssayPlateReaderMapDataFileBlockFormSetFactory(
+            self.request.POST,
+            instance=self.object
+        )
+        # print("form: ", form)
+        # print("SELF.OBJECT - self.object: ", self.object)
+
+        formsets = [formset, ]
+        formsets_are_valid = True
+
+        for formset in formsets:
+            # this executes for EACH formset, but hard to read data
+            # print("FORMSET IN FORMSETS: ", formset)
+            if not formset.is_valid():
+                formsets_are_valid = False
+
+        if form.is_valid() and formsets_are_valid:
+
+            instance = form.save(commit=False)
+            # example of what can be done here - HANDY
+            # this executes ONCE - if need for each formset - put in forms.py
+            # password = form.cleaned_data.get(‘password’)
+            # instance.set_password(password)
+            # can do this BEFORE instance.save(), after, they are none
+            data_block = form.cleaned_data.get('data_block')
+            line_start = form.cleaned_data.get('line_start')
+            print("data_block ", data_block)
+
+            instance.save()
+            formset.save()
+
+            #####
+            # # this would work for all but the pk of the data block table, so do not use it
+            # for each in formset:
+            #     data_block = each.cleaned_data.get('data_block')
+            #     if data_block < 999:
+            #         pk_id = each.cleaned_data.get('id')
+            #         assayplatereadermap = each.cleaned_data.get('assayplatereadermap')
+            #         data_block_metadata = each.cleaned_data.get('data_block_metadata')
+            #         over_write_sample_time = each.cleaned_data.get('over_write_sample_time')
+            #         line_start = each.cleaned_data.get('line_start')
+            #         line_end = each.cleaned_data.get('line_end')
+            #         delimited_start = each.cleaned_data.get('delimited_start')
+            #         delimited_end = each.cleaned_data.get('delimited_end')
+            #
+            #         block_data_dict['assayplatereadermapdatafile'] = pk_for_file
+            #         block_data_dict['assayplatereadermap'] = assayplatereadermap
+            #         block_data_dict['over_write_sample_time'] = over_write_sample_time
+            #         block_data_dict['line_start'] = line_start
+            #         block_data_dict['line_end'] = line_end
+            #         block_data_dict['delimited_start'] = delimited_start
+            #         block_data_dict['delimited_end'] = delimited_end
+            #
+            #         block_data_list_of_dicts.append(block_data_dict)
+            #
+            #####
+
+            # .values makes a dictionary! saves some steps - HANDY
+            block_dict = AssayPlateReaderMapDataFileBlock.objects.filter(
+                assayplatereadermapdatafile=pk_for_file
+            ).prefetch_related(
+                'assayplatereadermap',
+                'assayplatereadermapdatafile',
+            ).values()
+
+            # print('PK FOR FILE ', pk_for_file)
+            # print('DICT:')
+            # print(block_dict)
+
+            # this function is in utils.py
+            #   build this
+            add_update_map_item_values = add_update_plate_reader_data_map_item_values(pk_for_file, block_dict)
+
+            # some other methods...KEEP for reference for now
+            # save_forms_with_tracking(self, form, formset=formsets, update=True)
+            # form.save()
+            # formset.save()
+
+            # One for each field in the form - HANDY
+            # countis=0
+            # for each in form:
+            #     print("FORM ", countis)
+            #     print(each)
+            #     countis=countis+1
+
+            # One for each SAVED (no extra) formset, but hard to parse - HANDY
+            # countss=0
+            # for each in formset:
+            #     print("FORMSET: ", countss)
+            #     print(each)
+            #     # print(each.data_block)  --  gives error, cannot get this way
+            #     countss=countss+1
+
+            # print("form and formset valid")
+            return redirect(self.object.get_post_submission_url())
+        else:
+            # print("form or formset NOT valid")
+            return self.render_to_response(self.get_context_data(form=form, formset=formset))
+
+# END Plate reader file list, add, update, view and delete section
+#####

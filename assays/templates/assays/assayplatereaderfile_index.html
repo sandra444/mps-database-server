@@ -13,9 +13,9 @@
 {% endblock %}
 
 {% block content %}
+
     {% include 'tracking.html' with study_submit='true' %}
 
-    {# Title of page #}
     <div class="padded-bottom">
         <div class="well">
             <h1 class="text-center">
@@ -28,48 +28,48 @@
             <h2>
                 {# Hide setup add buttons if the study is marked reviewed #}
                 {% if user|is_group_editor:object.group.name and not object.signed_off_by %}
-                <div>
-                    <a href="{% url 'assayplatereaderfile-add' object.id %}" class="btn btn-success" role="button">Add File</a>
-                </div>
+                    {% if not review %}
+                    <div>
+                        <a href="{% url 'assayplatereaderfile-add' object.id %}" class="btn btn-success" role="button">Add File</a>
+                    </div>
+                        {% endif %}
                 {% endif %}
             </h2>
         </div>
-
 
         {% if assayplatereadermapdatafiles %}
         <div>
             <div><p id="plate_file_index_tooltip"></p>
                 <label for="plate_file_index_tooltip">Plate Reader File List &nbsp;</label>
             </div>
+
             <table id="assayplatereaderfiles" class="display table table-striped table-hover" cellspacing="0" width="100%">
             <thead>
                 <tr>
                     <th>View or Edit</th>
-                    <th>Name</th>
+                    <th>File</th>
+                    <th>Link to View File</th>
                     <th>Description</th>
-{#                    <th>File Location</th>#}
+                    <th>Data Block Count</th>
                 </tr>
             </thead>
             <tbody>
-            {% for plate in assayplatereadermapdatafiles %}
+            {% for file in assayplatereadermapdatafiles %}
                 <tr>
                     <td class="no-wrap">
-                            <a class="btn btn-primary" href="{% url 'assayplatereaderfile-view' plate.id  %}">View </a>
-                            {% if not object.signed_off_by %}
-                                <a class="btn btn-primary" href="{% url 'assayplatereaderfile-update' plate.id  %}">Edit </a>
-                            {% endif %}
+                            <a class="btn btn-primary" href="{% url 'assayplatereaderfile-view' file.id  %}">View </a>
+{#                            {% if not object.signed_off_by %}#}
+                                <a class="btn btn-primary" href="{% url 'assayplatereaderfile-update' file.id  %}">Edit </a>
+{#                            {% endif %}#}
                     </td>
-                    <td>{{ plate.name }}</td>
-                    <td>{{ plate.description }}</td>
-{#                    <td>{{ plate.plate_reader_file_location }}</td>#}
-
-                    {% comment keep in case want to add field with list of data blocks%}
+                    <td>{{ file.name_short }}</td>
                     <td>
-                        {% for apmitem in plate.assayplatereadermapitem_set.all|dictsort:"name" %}
-                            {{ apmitem.name }}-{{ apmitem.matrix_item }};
-                        {% endfor %}
+                        <a target="_blank" href="/media/{{ file.plate_reader_file }}">
+                            {{ file.plate_reader_file }}
+                        </a>
                     </td>
-                    {% endcomment %}
+                    <td>{{ file.description }}</td>
+                    <td>{{ file.block_count }}</td>
                 </tr>
             {% endfor %}
             </tbody>

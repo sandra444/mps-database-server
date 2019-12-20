@@ -2,10 +2,13 @@
 {% load static %}
 
 {% block load_js %}
-    <script src="{% static "assays/assayplatereaderfile_add.js" %}"></script>
+    <script src="{% static "assays/assayplatereaderfile_update.js" %}"></script>
+    {# need for on/off switches#}
+    <link href="https://gitcdn.github.io/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css" rel="stylesheet">
+    <script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
 {% endblock %}
 
-
+{# update and reveiw use this template #}
 {% block breadcrumbs %}
     <li><a href="/assays/assaystudy/">Studies</a>
     <li><a href="{{ form.instance.study.get_absolute_url }}">{{ form.instance.study }}</a></li>
@@ -15,109 +18,584 @@
         <li><a href="{% url 'assayplatereaderfile-index' form.instance.study_id %}">Assay Plate Reader Files</a>
     {% endif %}
     <li class="active">
-        {% if object %}
-            <em>{{ object }}</em>
-        {% else %}
-            Add
-        {% endif %}
+        <em>{{ object }}</em>
     </li>
 {% endblock %}
 
 {% block content %}
     <form class="form-horizontal" method="post" enctype="multipart/form-data">
         <div class="padded-bottom">
-            {# Title of page #}
+            {# title #}
             <div class="well">
                 <h1 class="text-center">
-                    <em><b>Assay Plate Reader File
+                    <em><b>
                     {% if update %}
                         Update
                     {% else %}
-                        {% if review %}
-                            Review
-                        {% else %}
-                            Add
-                        {% endif %}
+                        Review
                     {% endif %}
-                    </b></em>
-                </h1>
+                    Assay Plate Reader Plate File/Block
+                    </b></em><br><br>
+                    File:
+                    <em>{{ form.form_filename_only.value }} </em>
+                    {# Show form field as text HANDY  #}
+                    {# name {{ form.form_filename_only.name }} #}
+                    {# value {{ form.form_filename_only.value }} #}
+                    <br>
                 {% csrf_token %}
-                {# need this in javascript #}
-                <div id="check_load" class="hidden">{{ page_called }}</div>
+                </h1>
             </div>
 
+            {# pass to js file #}
             <div>
                 {# need this in javascript #}
-                <div class="hidden" id="this_study_id">
-                    {{ form.instance.study_id }}
+                <div class="hidden" id="this_file_id">
+                    {{ object.id }}
                 </div>
             </div>
 
+            {# main #}
             {# global plate file edits #}
             <div>
-                <div class="row">
-                    <div class="col-md-8">
-                        {% include 'generic_field.html' with field=form.name label="Name"  %}
+                <div class="container">
+
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="plate-map-page-field-labels">
+                                <div>
+                                    <div>
+                                        <label>Click the Link to See the File</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="plate-map-page-field-contents">
+                                <a target="_blank" href="/media/{{ form.plate_reader_file.value }}">
+                                <b>{{ form.plate_reader_file.value }}</b>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                        </div>
                     </div>
-                    <div class="col-md-4">
+
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="plate-map-page-field-labels">
+                                <div>
+                                    <div><p id="file_description_tooltip"></p>
+                                        <label for="file_description_tooltip">File Description &nbsp;</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="plate-map-page-field-contents">
+                                {{ form.description }}
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                        </div>
                     </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-8">
-                        {% include 'generic_field.html' with field=form.description label="Description" %}
-                    </div>
-                    <div class="col-md-4">
-                    </div>
+
+                    {% if not review %}
+                        {% if no_saved_blocks  %}
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <div class="plate-map-page-field-labels">
+                                        <div>
+                                            <div><p id="file_file_format_select_tooltip"></p>
+                                                <label for="file_file_format_select_tooltip">File Format &nbsp;</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="plate-map-page-field-contents">
+                                        {{ form.se_file_format_select }}
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <div class="plate-map-page-field-labels">
+                                        <div>
+                                            <div><p id="file_overwrite_sample_time_tooltip"></p>
+                                                <label for="file_overwrite_sample_time_tooltip">What is Overwrite Sample Time &nbsp;</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <p>If needed, enter an overwrite sample time for each block.</p>
+                                </div>
+                                <div class="col-md-3">
+                                </div>
+                            </div>
+
+                        {% endif %}
+                    {% endif %}
                 </div>
             </div>
+            <br>
 
-
-            {% if add %}
-                <div class="row">
-                    <div class="col-md-8">
-                        <label for="plate_reader_file" class="col-sm-2 control-label">File</label>
-                        <div class="col-sm-10">
-                            <input type="file" name="plate_reader_file" class="btn btn-primary btn-lg" id="id_plate_reader_file">
-                        </div>
-                    </div>
-                    <div class="col-md-1">
-                        <div><p id="file_upload_tooltip"></p>
-                            <label for="file_upload_tooltip">&nbsp;</label>
-                        </div>
-                    </div>
-                </div>
-            {% else %}
-                <div class="select-value-set hidden">
-                    <div class="row">
-                        <div class="col-md-8">
-                            {% include 'generic_field.html' with field=form.number_blocks label="Count Blocks"  %}
-                        </div>
-{#                        <div class="col-md-1">#}
-{#                            <div><p id="file_block_number_tooltip"></p>#}
-{#                                <label for="file_block_number_tooltip">&nbsp;</label>#}
-{#                            </div>#}
-{#                        </div>#}
-                    </div>
-                    <div class="row">
-{#                       TODO Maybe figure out how to shade the lines selected as data blocks#}
-                        <div class="col-md-8">
-                            {% include 'generic_field.html' with field=form.se_block label="Data Block"  %}
-                        </div>
-{#                        <div class="col-md-1">#}
-{#                            <div><p id="file_block_tooltip"></p>#}
-{#                                <label for="file_block_tooltip">&nbsp;</label>#}
-{#                            </div>#}
-{#                        </div>#}
-                    </div>
-                </div>
-             {% endif %}
-
+            {# main continued #}
+            {# auto detect section - only exist if update and js controls if auto detect selected #}
             <div>
-                {# Code copied from study data upload#}
-                <legend>Upload Data From Plate Reader Output File</legend>
+                {% if update %}
+                    {% if no_saved_blocks  %}
+                        <div class="auto-detect-section hidden">
+                            <div class="container">
 
+                                {# this section is button to control showing the rest #}
+                                <div class="row">
+                                    <div class="col-md-3">
+                                    </div>
+                                    <div class="col-md-5">
+                                        <button type="button" class="btn btn-primary" id="reviewButtonHelp">Show/Hide Auto Detect - Rules and Options </button>
+                                    </div>
+                                    <div class="col-md-4">
+                                    </div>
+                                </div>
+                                {# what gets toggled with button above - so auto section looks "simple" unless clicked #}
+                                <div id="auto_detect_help_section" class="toggle-display-none" >
+                                    <div class="row">
+                                        <div class="col-md-1">
+                                        </div>
+                                        <div class="col-md-11">
+                                            <div>
+                                                <br>
+                                                <legend>Rules for Using the Auto Detect of File Blocks</legend>
+                                                    <li>Files must be comma delimited (CSV), tab delimited (TSV), or space delimited text files. </li>
+                                                    <li>Data must be in blocks in the same dimensions as the plate size.</li>
+                                                    <li>One plate size per file.</li>
+                                                    <li>Best results can be achieved by setting the plate size and the column offset in the GUI (later - labeling column headers (1, 2, 3, etc.))</li>
+                                                    <li>Blocks must be vertical (above/below), not horizontal (side-by-side) UNLESS blocks have column headers (1, 2, 3, etc.)</li>
+                                                    <li>Spreadsheet files can be saved as CSV or TSV for upload (the blank line under each block must be labeled <i>~blank</i>) and/or have column headers (1, 2, 3, etc.) </li>
+                                                    <li>Do not use a CSV file if field contents contain commas (use TSV).</li>
+                                                    <li>Data blocks must be separated by a blank line and/or have column headers (1, 2, 3, etc.) </li>
+                                                    <li>A blank line can be labeled with <i>~blank</i> in the first column or can be auto detected as having less than half the number of delimiters as other lines.</li>
+                                                    <li>More than one blank line can be between data blocks, but the block is considered to end one line above the first blank line. </li>
+                                                    <li>The auto detected locations can be edited prior to submission/upload.</li>
+                                                    <li>The number of data blocks is used to check the auto detect and a message will be shown if there is a discrepancy.</li>
+                                                    <h3>Looking for 1, 2, 3 is still in development, for now, use blank lines and vertically stack.</h3>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-1">
+                                        </div>
+                                        <div class="col-md-11">
+                                            <div>
+                                                <h3><i>Optional - Try setting # Columns to ignore and/or Delimiter to improve results.</i></h3>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <hr>
+                                    {# set to sections so user can tune the auto select #}
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <div class="plate-map-page-field-labels">
+                                                <div>
+                                                    <div><p id="file_plate_size_tooltip"></p>
+                                                        <label for="file_plate_size_tooltip">Plate Size Used in File &nbsp;</label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <div class="checkbox">
+                                                <label>
+                                                   <input id="set_plate_size" type="checkbox" data-toggle="toggle">
+                                                    Set to:
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="plate-map-page-field-contents">
+                                                {{form.se_form_plate_size}}
+                                            </div>
+                                        </div>
+                                        <div class="col-md-1">
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <div class="plate-map-page-field-labels">
+                                                <div>
+                                                    <div><p id="file_number_blank_columns_tooltip"></p>
+                                                        <label for="file_number_blank_columns_tooltip">Number Columns to Ignore (on Left) &nbsp;</label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <div class="checkbox">
+                                                <label>
+                                                    <input id="set_number_blank_columns" type="checkbox" data-toggle="toggle">
+                                                    Set to:
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="plate-map-page-field-contents">
+                                                {{form.form_number_blank_columns}}
+                                            </div>
+                                        </div>
+                                        <div class="col-md-1">
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <div class="plate-map-page-field-labels">
+                                                <div>
+                                                    <div><p id="file_file_delimiter_tooltip"></p>
+                                                        <label for="file_file_delimiter_tooltip">File Delimiter &nbsp;</label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <div class="checkbox">
+                                                <label>
+                                                    <input id="set_delimiter" type="checkbox" data-toggle="toggle">
+                                                    Set to:
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="plate-map-page-field-contents">
+                                                {{form.file_delimiter}}
+                                            </div>
+                                        </div>
+                                        <div class="col-md-1">
+                                        </div>
+                                    </div>
+                                    <hr>
+
+                                    <div class="row">
+                                        <div class="col-md-1">
+                                        </div>
+                                        <div class="col-md-11">
+                                            <div>
+                                                <h3><i>Optional - If setting above did not work, set to get the correct # file blocks.</i></h3>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <div class="plate-map-page-field-labels">
+                                                <div>
+                                                    <div><p id="file_number_data_blocks_tooltip"></p>
+                                                        <label for="file_number_data_blocks_tooltip">Number of Data Blocks in File &nbsp;</label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <div class="checkbox">
+                                                <label>
+                                                    <input id="set_number_blocks" type="checkbox" data-toggle="toggle">
+                                                    Set to:
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="plate-map-page-field-contents">
+                                                {{form.form_number_blocks}}
+                                            </div>
+                                        </div>
+                                        <div class="col-md-1">
+                                        </div>
+                                    </div>
+                                </div>
+                                <br>
+
+                                {# this section is button to make the auto detect execute #}
+                                <div>
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                        </div>
+                                        <div class="col-md-5">
+                                            <button type="button" class="btn btn-primary" id="reviewDataButton">Click to Run Auto Detect to Find File Blocks</button>
+                                        </div>
+                                        <div class="col-md-4">
+                                        </div>
+                                    </div>
+                                    <br>
+                                </div>
+
+                            </div>
+                        </div>
+                    {% endif %}
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <h3><em>About Adding a Plate Map to the Data Block</em></h3>
+                                <h4>The block information may be saved with or without a plate map so that file upload could be performed prior to plate map creation.</h4>
+                                <h4>A plate map must be selected and submitted for data to be uploaded to the plate map.</h4>
+                            </div>
+                        </div>
+                    <br>
+                    </div>
+                {% endif %}
+            </div>
+
+            {% if not no_saved_blocks %}
+                {% if update %}
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <h3><em>This block information has already been <b>submitted</b>. </em></h3>
+                                <h4>The plate size and number of blocks cannot be edited after submission.</h4>
+                                <h4>The information in each block section (including adding a plate map) may be edited manually. </h4>
+                                <h4>To make changes to plate size or number of blocks, delete this file and add it again.</h4>
+                            </div>
+                        </div>
+                    <br>
+                    </div>
+                {% endif %}
+            {% endif %}
+
+            {# main continued #}
+            {# display the auto detected (or set) plate size so user will see it would selecting plate maps #}
+            {% if update %}
+                <div class="plate-file-block-well">
+                    <div class="container">
+
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="plate-map-page-field-labels2">
+                                    <div>
+                                        <label><em>Plate Size Selected for File</em></label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-1">
+                                <div class="plate-map-page-field-contents ">
+                                    {{ form.upload_plate_size }}
+                                </div>
+                            </div>
+                            <div class="col-md-8"></div>
+                       </div>
+
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="plate-map-page-field-labels2">
+                                </div>
+                            </div>
+                            <div class="col-md-5">
+                                <div class="plate-map-page-field-contents ">
+                                    <div>
+                                        <button type="button" class="btn btn-primary" id="runQualityControl">Optional (Highly Recommended) - Pre-Submission QC </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            {% endif %}
+
+            {# main continued #}
+            {# this is the main formset section - there should be one form2 for each formset #}
+            {# note: while convention may be to use form in formset, this caused a conflict when wanting to display an actual form field in this section #}
+            {# to avoid this, form2 was used - HANDY #}
+
+            {# need the following line (with correct formset name) for each formset wish to save on submit - HANDY   #}
+            {{ formset.management_form }}
+
+            {# show for each form2 #}
+            {# to see how to use the formset as inlines, see the platemap template  #}
+            <div>
+                {% for form2 in formset %}
+                    {# need a parent class of the loop for selection in javascript - the class name does not matter #}
+                    <div class="the-parent">
+                        {# need this id for  javascript #}
+                        <div id="id_formset_{{ forloop.counter }}" class="form2-row formset">
+
+{#                            {{  form2 }}#}
+
+                            {# style each form2 in a well #}
+                            <div class="plate-file-block-well">
+                                <div class="container">
+                                    {# since not using the inline form2, must have this so id will be saved in form valid of previously saved - HANDY #}
+                                    <div class="hidden">
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                {{ form2.id }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {# Will use formset save to know if need to add and/or correct saved data #}
+                                    <div class="hidden">
+                                        <div class="row">
+                                            <div class="col-md-12">
+{#                                                changed in block (0 or 1) #}
+                                                {{ form2.form_changed_something_in_block }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="plate-map-page-field-labels2">
+                                                <div>
+                                                    <label><h3><em>Data Block {{ form2.data_block }}</em></h3></label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            {# this is how to show the box to let the user check to delete - HANDY #}
+                                            {# need this in javascript #}
+                                            <div class="hidden">
+                                                {{ form2.DELETE }}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <div class="plate-map-page-field-labels2">
+                                                <div>
+                                                    <label>Plate Map to Use for Block*</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div id="id_platemap_{{ forloop.counter }}" class="get-plate-map-changed plate-map-page-field-contents required">
+                                                {{ form2.assayplatereadermap }}
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3"></div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <div class="plate-map-page-field-labels2">
+                                                <div>
+                                                    <label>Data Block Metadata</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="get-plate-map-changed plate-map-page-field-contents">
+                                                {{ form2.data_block_metadata }}
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3"></div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <div class="plate-map-page-field-labels2">
+                                                <div>
+                                                    <label>Overwrite Sample Time</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="plate-map-page-field-contents ">
+                                                {{ form2.over_write_sample_time }}
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="plate-map-page-field-contents ">
+                                                <div>
+                                                    {{ form2.form_selected_plate_map_time_unit }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <br>
+
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <div class="plate-map-page-field-labels2">
+                                                <div>
+                                                    <label>Start Line Number for this Block* </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="plate-map-page-field-contents required">
+                                                {{ form2.line_start }}
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3"></div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <div class="plate-map-page-field-labels2">
+                                                <div>
+                                                    <label>End Line Number for this Block* </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="plate-map-page-field-contents required">
+                                                {{ form2.line_end }}
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3"></div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <div class="plate-map-page-field-labels2">
+                                                <div>
+                                                    <label>First Column of this Block* </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="plate-map-page-field-contents required">
+                                                {{ form2.delimited_start }}
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3"></div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <div class="plate-map-page-field-labels2">
+                                                <div>
+                                                    <label>Last Column of this Block* </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="plate-map-page-field-contents required">
+                                                {{ form2.delimited_end }}
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3"></div>
+                                    </div>
+                                </div>
+
+                            <br>
+                            </div>
+
+                        <br>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+
+            {# error handling #}
+            <div>
+                {% include 'errors.html' %}
                 {% if form.errors %}
-                    {% for error in form.plate_reader_file.errors %}
+                    <h2>List of Errors (form)</h2>
+                    {% for error in form.errors %}
                         <div class="alert alert-danger" role="alert">
                             <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
                             <span class="sr-only">Error:</span>
@@ -136,82 +614,45 @@
                     <div class="form-group">
                 {% endif %}
 
-            </div>
-
-            <div>
-                {% if review %}
+                {# close the divs #}
+                {% if form.errors %}
+                    </div>
                 {% else %}
-                    {% include "submit.html" with flag="y" creator=object.created_by.id %}
+                    </div>
                 {% endif %}
             </div>
 
-            {% include 'errors.html' %}
-
-            {% comment %}
-            <h6>tracking begin</h6>
-            {% include 'tracking.html' %}
-            <h6>tracking end</h6>
-            {% endcomment %}
-
-{#            When loading file, if there are more than one data block, add a formset and fill it will a block number, check it with the user, see if can shade the data blocks#}
-
-            {# need this (mangement_form) or form will not save   #}
-            {{ formset.management_form }}
-            <div >
-                <div class="no-selectize">
-                    {# this is the main formset (plate and plate itmes)  #}
-                    <h3>FormSet </h3>
-                    <div id="formset">
-                        {% for form in formset %}
-                            {# No ID for now #}
-    {#                        <div id="{{ form.prefix }}" class="inline no-selectize">#}
-                            <div class="inline no-selectize">
-                            {{ form }}
-                            </div>
-                        {% endfor %}
-                    </div>
-                </div>
-            </div>
-
-            {{ line_formset.management_form }}
-            <div >
-                <div class="no-selectize">
-                    <h3>line_formset </h3>
-                    <div id="line_formset">
-                        {% for form in line_formset %}
-                            <div class="inline no-selectize">
-                                {{ form }}
-                            </div>
-                        {% endfor %}
-                    </div>
-                </div>
-            </div>
-
-            {# these are the ones that show to user when they submit if there are errors  #}
+            {# sck formset error display - changed from lb general formset errors #}
             <div>
                 {% if formset.errors %}
-                    {% for field, error in formset.errors.items %}
-                        <div class="alert alert-danger" role="alert">
+                    <h2>List of Errors (formset)</h2>
+                    {% for dict in formset.errors %}
+                        {% for error in dict.values %}
+                            <div class="alert alert-danger" role="alert">
                             <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
                             <span class="sr-only">Error:</span>
-                            {{ error }}
-                        </div>
+                                {{ error }}
+                            </div>
+                        {% endfor %}
                     {% endfor %}
                 {% endif %}
-                <br>
             </div>
+        </div>
 
-            <div class="hidden">
-                <h2>For Development Testing</h2>
-                {#Use for error checking#}
-                For testing<br>
-                form.errors<br>
-                {{ form.errors }}<br>
-                formset.errors<br>
-                {{ formset.errors }}<br>
-                line_formset.errors<br>
-                {{ line_formset.errors }}<br>
-            </div>
+{#        <div>#}
+{#            <h2>For Development Testing</h2>#}
+{#            <h3>form.errors</h3>#}
+{#                {{ form.errors }}#}
+{#            <h3>formset.errors</h3>#}
+{#                {{ formset.errors }}#}
+{#            {{ formset.non_form_errors }}#}
+{#        </div>#}
+
+        {# include submit #}
+        <div>
+            {% if update %}
+                {% include "submit.html" with flag="y" creator=object.created_by.id %}
+            {% endif %}
         </div>
 
     </form>

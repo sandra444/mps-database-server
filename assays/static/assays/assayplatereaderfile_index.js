@@ -1,6 +1,6 @@
 $(document).ready(function() {
 
-    let global_plate_file_index_tooltip = "Click to upload a plate reader file and add it to the study.";
+    let global_plate_file_index_tooltip = "After a study has been setup in the database (and chips added to the study), and an assay plate map has been created and saved, a file can be upload and associated to a plate map. Uploading a data file and associated its data to a plate map is the second step in using the assay plate reader upload and calibration feature.";
     $('#plate_file_index_tooltip').next().html($('#plate_file_index_tooltip').next().html() + make_escaped_tooltip(global_plate_file_index_tooltip));
 
     //to format the table - keep
@@ -12,6 +12,10 @@ $(document).ready(function() {
         "order": [[2, "asc"]],
     });
 
+    // activates Bootstrap tooltips, must be AFTER tooltips are created - keep
+    $('[data-toggle="tooltip"]').tooltip({container:"body", html: true});
+
+    // tool tip functions
     function escapeHtml(html) {
         return $('<div>').text(html).html();
     }
@@ -25,5 +29,4 @@ $(document).ready(function() {
             .attr('data-placement', "bottom"));
         return new_span.html();
     }
-
 });
