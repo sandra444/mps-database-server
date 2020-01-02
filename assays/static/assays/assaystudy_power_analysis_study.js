@@ -419,6 +419,7 @@ $(document).ready(function () {
         $(power_analysis_p_value_graph).empty();
         $(power_analysis_power_graph).empty();
         $(power_analysis_sample_size_graph).empty();
+        $(one_sample_multi_graph).empty();
         $('#time-points-table_wrapper').hide();
         $('#error-container').hide();
         avg_val_graph_check();
@@ -575,7 +576,7 @@ $(document).ready(function () {
                 }
             }
             mean = the_goods.reduce((a,b) => a+b)/(the_goods.length);
-            std = Math.sqrt(the_goods.map(x => Math.pow(x-mean,2)).reduce((a,b) => a+b)/(the_goods.length));
+            std = Math.sqrt(the_goods.map(x => Math.pow(x-mean,2)).reduce((a,b) => a+b)/(the_goods.length-1));
             $('#summary-sample-number').text(the_goods.length);
             $('#summary-mean').text(mean.toFixed(3));
             $('#summary-std').text(std.toFixed(3));
@@ -1199,9 +1200,9 @@ $(document).ready(function () {
     // Handle changes to one sample power level input
     $('#one-sample-power').change(function() {
         one_sample_power = $('#one-sample-power').val();
-        if (one_sample_power >= 1 || one_sample_power === 0) {
-            one_sample_power = 1;
-            $('#one-sample-power').val('0.8');
+        if (one_sample_power >= 1 || one_sample_power <= 0) {
+            //one_sample_power = 0.8;
+            $('#one-sample-power').val('');
         }
     });
 
@@ -1249,6 +1250,8 @@ $(document).ready(function () {
             .done(function(data) {
                 // Stop spinner
                 window.spinner.stop();
+
+                console.log(data);
 
                 power_analysis_two_sample_container_selector.show();
                 $('#time-points-table_wrapper').show();
@@ -1306,11 +1309,22 @@ $(document).ready(function () {
         var os_sample_size = $('#one-sample-size').val();
         var os_power = $('#one-sample-power').val();
 
-        if ((os_power === '' && os_sample_size === '' && os_diff === '') || (os_power !== '' && os_sample_size !== '' && os_diff !== '')) {
+        if ( (os_power === '' && os_sample_size === '' && os_diff === '') || (os_power !== '' && os_sample_size !== '' && os_diff !== '')) {
             $('#os-field-warning').show();
+            $('#os-field-warning-sample-size').hide();
+            empty_graph_containers();
             return;
         } else {
             $('#os-field-warning').hide();
+        }
+
+        if ((os_power === '' && os_sample_size !== '' && os_sample_size <2 && os_diff !== '') || (os_power !== '' && os_sample_size !== '' && os_sample_size <2 && os_diff === '') || (os_power === '' && os_sample_size <2 && os_diff === '')){
+            $('#os-field-warning-sample-size').show();
+            $('#os-field-warning').hide();
+            empty_graph_containers();
+            return;
+        } else {
+            $('#os-field-warning-sample-size').hide();
         }
 
         empty_graph_containers();
@@ -1341,6 +1355,8 @@ $(document).ready(function () {
             .done(function(data) {
                 // Stop spinner
                 window.spinner.stop();
+
+                console.log(data);
 
                 if (data.power_analysis_data.error) {
                     console.log(data.power_analysis_data.error)
@@ -1409,7 +1425,7 @@ $(document).ready(function () {
                                 italic: false
                             },
                             minValue: 0,
-                            scaleType: 'mirrorLog'
+                            //scaleType: 'mirrorLog'
                         },
                         vAxis: {
                             title: data.power_analysis_data.columns[1],
