@@ -89,6 +89,7 @@ from assays.views import (
     AssayPlateReaderMapDataFileIndex,
     AssayPlateReaderMapDataFileView,
     AssayPlateReaderMapDataFileDelete,
+    AssayStudyTemplate,
 )
 import assays.ajax
 
@@ -110,6 +111,9 @@ urlpatterns = [
     url(r'^assays/assaystudy/(?P<pk>[0-9]+)/data/$', AssayStudyData.as_view(), name='assays-assaystudy-data'),
     # # Bulk Readout Upload for Studies
     url(r'^assays/assaystudy/(?P<pk>[0-9]+)/upload/$', AssayStudyDataUpload.as_view(), name='assays-assaystudy-upload'),
+
+    # Template for upload
+    url(r'^assays/assaystudy/(?P<pk>[0-9]+)/upload/template/$', AssayStudyTemplate.as_view(), name='assays-assaystudy-upload-template'),
 
     url(r'^assays/assaystudy/(?P<pk>[0-9]+)/sign_off/$', AssayStudySignOff.as_view(), name='assays-assaystudy-sign-off'),
 
