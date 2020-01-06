@@ -1307,7 +1307,7 @@ $(document).ready(function () {
         var os_sample_size = $('#one-sample-size').val();
         var os_power = $('#one-sample-power').val();
 
-        if ( (os_power === '' && os_sample_size === '' && os_diff === '') || (os_power !== '' && os_sample_size !== '' && os_diff !== '')) {
+        if ((os_power === '' && os_sample_size === '' && os_diff === '') || (os_power !== '' && os_sample_size !== '' && os_diff !== '')) {
             $('#os-field-warning').show();
             $('#os-field-warning-sample-size').hide();
             empty_graph_containers();
