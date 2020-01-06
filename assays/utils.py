@@ -2676,7 +2676,6 @@ def one_sample_power_analysis_calculation(sample_data, sig_level, differences, s
             power_analysis_result = {'Sample Size': pa1_predict_sample_size_given_delta_and_power(differences, power, sig_level, sd)}
             if np.isnan(power_analysis_result['Sample Size']):
                 power_analysis_result['Sample Size'] = None
-    #print(power_analysis_result)
     try:
         return power_analysis_result.astype(np.float32)
     except:
@@ -2706,8 +2705,6 @@ def one_sample_power_analysis(one_sample_data,
     )
 
     power_group_data = power_group_data.dropna(subset=['Value'])
-
-    #print(power_group_data)
 
     # number of unique compounds
     compound_group = power_group_data[["Compound Treatment(s)"]]

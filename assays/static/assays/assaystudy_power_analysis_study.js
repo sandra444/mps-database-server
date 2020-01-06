@@ -1251,8 +1251,6 @@ $(document).ready(function () {
                 // Stop spinner
                 window.spinner.stop();
 
-                console.log(data);
-
                 power_analysis_two_sample_container_selector.show();
                 $('#time-points-table_wrapper').show();
                 remove_col(data.power_analysis_data.power_results_report, 0);
@@ -1355,8 +1353,6 @@ $(document).ready(function () {
             .done(function(data) {
                 // Stop spinner
                 window.spinner.stop();
-
-                console.log(data);
 
                 if (data.power_analysis_data.error) {
                     console.log(data.power_analysis_data.error)
