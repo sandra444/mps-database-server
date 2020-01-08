@@ -125,7 +125,7 @@ $(document).ready(function () {
     // START SECTION THAT SETS TOOLTIPS
     // set lists for the tooltips
     // just add in para||el if need more tooltips
-    let global_plate_tooltip_selector = [
+    let global_file_tooltip_selector = [
           '#file_description_tooltip'
         , '#file_plate_size_tooltip'
         , '#file_file_delimiter_tooltip'
@@ -135,7 +135,7 @@ $(document).ready(function () {
         , '#file_number_blank_columns_tooltip'
         ,
     ,];
-    let global_plate_tooltip_text = [
+    let global_file_tooltip_text = [
           "Description for the file (optional)."
         , "Select one if using the auto detect file block feature. Best results will come from selecting the size plate used in the plate reader."
         , "This can be set by the user or auto detected."
@@ -146,8 +146,8 @@ $(document).ready(function () {
         ,
     ,];
     // set the tooltips
-    $.each(global_plate_tooltip_selector, function (index, show_box) {
-        $(show_box).next().html($(show_box).next().html() + make_escaped_tooltip(global_plate_tooltip_text[index]));
+    $.each(global_file_tooltip_selector, function (index, show_box) {
+        $(show_box).next().html($(show_box).next().html() + make_escaped_tooltip(global_file_tooltip_text[index]));
     });
     // END SECTION THAT SETS TOOLTIPS
 

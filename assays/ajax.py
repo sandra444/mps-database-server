@@ -4084,12 +4084,14 @@ def get_pubmed_reference_data(request):
         content_type="application/json"
     )
 
+
 # sck - assay plate map - fetch information about plate layout by size
 def fetch_information_for_plate_map_layout(request):
-    """Getting the information on how to layout a plate map based on plate size"""
+    """
+    Assay Plate Map All - Getting the information on how to layout a plate map based on plate size (calls utility).
+    """
 
     plate_size = request.POST.get('plate_size', '0')
-    print("ajax plate size: ", plate_size)
 
     if not plate_size:
         return HttpResponseServerError()
@@ -4119,8 +4121,9 @@ def fetch_information_for_plate_map_layout(request):
 # sck - assay plate map - start a plate map from an existing study matrix
 def fetch_assay_study_matrix_for_platemap(request):
     """
-    Start an assay plate map from an existing study matrix.
+    Assay Plate Map Add - Start an assay plate map from an existing study matrix.
     """
+
     this_study = request.POST.get('study', '0')
     this_matrix = request.POST.get('matrix', '0')
 
@@ -4154,8 +4157,9 @@ def fetch_assay_study_matrix_for_platemap(request):
 # sck - assay plate map - start a plate map from an existing study plate map
 def fetch_assay_study_platemap_for_platemap(request):
     """
-    Start an assay plate map from an existing plate map.
+    Assay Plate Map Add - Start an assay plate map from an existing plate map.
     """
+
     this_study = request.POST.get('study', '0')
     this_platemap = request.POST.get('platemap', '0')
 
@@ -4181,14 +4185,14 @@ def fetch_assay_study_platemap_for_platemap(request):
     data_to_return = []
 
     # may want to just send the plate map info once. quickest for now, but sends same info more than needed.
-    for map in this_platemap:
-        map_name = map.name
-        map_description = map.description
-        map_device = map.device
-        map_time_unit = map.time_unit
-        map_volume_unit = map.volume_unit
-        map_cell_count = map.cell_count
-        map_study_assay_id = map.study_assay_id
+    for my_map in this_platemap:
+        map_name = my_map.name
+        map_description = my_map.description
+        map_device = my_map.device
+        map_time_unit = my_map.time_unit
+        map_volume_unit = my_map.volume_unit
+        map_cell_count = my_map.cell_count
+        map_study_assay_id = my_map.study_assay_id
 
     for each in this_queryset:
         # print(each)
@@ -4224,8 +4228,9 @@ def fetch_assay_study_platemap_for_platemap(request):
 # sck - Assay Plate Reader Upload Data File (for the UPDATE file form)
 def fetch_review_plate_reader_data_file(request):
     """
-    Assay PLATE READER FILE UPDATE pull information when viewing or updating and existing plate map.
+    Assay PLATE READER FILE UPDATE pull information when viewing or updating and existing plate map FILE (calls utility).
     """
+
     this_file_id = request.POST.get('this_file_id', '0')
 
     this_file_format_selected = request.POST.get('this_file_format_selected', '0')

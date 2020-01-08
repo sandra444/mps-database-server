@@ -83,7 +83,7 @@ from assays.ajax import get_data_as_csv, fetch_data_points_from_filters
 from assays.utils import (
     AssayFileProcessor,
     get_user_accessible_studies,
-    add_update_plate_reader_data_map_item_values
+    add_update_plate_reader_data_map_item_values_from_file
 
 )
 
@@ -3001,7 +3001,6 @@ class AssayPlateReaderMapDataFileAdd(StudyGroupMixin, CreateView):
 
         return context
 
-
     def form_valid(self, form):
         study_id = self.kwargs['study_id']
         study = get_object_or_404(AssayStudy, pk=self.kwargs['study_id'])
@@ -3134,7 +3133,7 @@ class AssayPlateReaderMapDataFileUpdate(StudyGroupMixin, UpdateView):
 
             # this function is in utils.py
             #   build this
-            add_update_map_item_values = add_update_plate_reader_data_map_item_values(pk_for_file, block_dict)
+            add_update_map_item_values = add_update_plate_reader_data_map_item_values_from_file(pk_for_file, block_dict)
 
             # some other methods...KEEP for reference for now
             # save_forms_with_tracking(self, form, formset=formsets, update=True)

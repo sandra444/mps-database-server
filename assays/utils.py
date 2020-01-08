@@ -2884,8 +2884,39 @@ def one_sample_power_analysis(one_sample_data, sig_level, one_sample_compound, o
         power_analysis_result = one_sample_power_analysis_calculation(sample_data, sig_level, differences, sample_size, power)
 
 
+# sck - assay plate map - fetch information about plate layout by size
+def get_the_plate_layout_info_for_assay_plate_map(plate_size):
+    """
+    Getting the information on how to layout a plate map based on plate size (utility).
+    """
+
+    plate_size = int(plate_size)
+
+    if plate_size == 24:
+        # print("if 24 utils plate size: ", plate_size)
+        row_labels = assay_plate_reader_map_info_row_labels_24
+        col_labels = assay_plate_reader_map_info_col_labels_24
+        row_contents = assay_plate_reader_map_info_row_contents_24
+    elif plate_size == 96:
+        # print("if 96 utils plate size: ", plate_size)
+        row_labels = assay_plate_reader_map_info_row_labels_96
+        col_labels = assay_plate_reader_map_info_col_labels_96
+        row_contents = assay_plate_reader_map_info_row_contents_96
+    else:
+        # print("if 384 utils plate size: ", plate_size)
+        row_labels = assay_plate_reader_map_info_row_labels_384
+        col_labels = assay_plate_reader_map_info_col_labels_384
+        row_contents = assay_plate_reader_map_info_row_contents_384
+
+    return [col_labels, row_labels, row_contents]
+
+
 # sck - assay plate reader analysis of data when defining data blocks (for the UPDATE file form)
 def review_plate_reader_data_file_format(my_file_object, set_dict):
+    """
+    Assay PLATE READER FILE UPDATE pull information when viewing or updating and existing plate map FILE (utility).
+    """
+
     # TODO-sck work to make this more generic (variables with file and column sizes, etc.....)
     # update to the rules
 
@@ -3167,7 +3198,8 @@ def review_plate_reader_data_file_format(my_file_object, set_dict):
 
     return file_list_of_dicts
 
-def add_update_plate_reader_data_map_item_values(pk_for_file, block_data_list_of_dicts):
+
+def add_update_plate_reader_data_map_item_values_from_file(pk_for_file, block_data_list_of_dicts):
     # TODO-sck need to build this
 
 
@@ -3205,25 +3237,3 @@ def add_update_plate_reader_data_map_item_values(pk_for_file, block_data_list_of
 
 
     return pk_for_file
-
-def get_the_plate_layout_info_for_assay_plate_map(plate_size):
-    # print("utils plate size: ", plate_size)
-    plate_size = int(plate_size)
-
-    if plate_size == 24:
-        # print("if 24 utils plate size: ", plate_size)
-        row_labels = assay_plate_reader_map_info_row_labels_24
-        col_labels = assay_plate_reader_map_info_col_labels_24
-        row_contents = assay_plate_reader_map_info_row_contents_24
-    elif plate_size == 96:
-        # print("if 96 utils plate size: ", plate_size)
-        row_labels = assay_plate_reader_map_info_row_labels_96
-        col_labels = assay_plate_reader_map_info_col_labels_96
-        row_contents = assay_plate_reader_map_info_row_contents_96
-    else:
-        # print("if 384 utils plate size: ", plate_size)
-        row_labels = assay_plate_reader_map_info_row_labels_384
-        col_labels = assay_plate_reader_map_info_col_labels_384
-        row_contents = assay_plate_reader_map_info_row_contents_384
-
-    return [col_labels, row_labels, row_contents]
