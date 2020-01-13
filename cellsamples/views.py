@@ -32,26 +32,29 @@ class CellSampleMixin(FormHandlerMixin):
     form_class = CellSampleForm
 
 
-class CellSampleAdd(SpecificGroupRequiredMixin, CellSampleMixin, CreateView):
-    required_group_name = 'Add Cell Samples Front'
+class CellSampleAdd(OneGroupRequiredMixin, CellSampleMixin, CreateView):
+    # required_group_name = 'Add Cell Samples Front'
+    pass
 
 
-class CellSampleUpdate(CellSampleMixin, UpdateView):
-    required_group_name = 'Change Cell Samples Front'
+class CellSampleUpdate(SuperuserRequiredMixin, UpdateView):
+    # required_group_name = 'Change Cell Samples Front'
+    pass
 
-    @method_decorator(login_required)
-    @method_decorator(user_passes_test(user_is_active))
-    def dispatch(self, *args, **kwargs):
-        """Special dispatch for Cell Sample
-
-        Rejects users that lack either the Change Cell Samples group or the Cell Sample's bound group
-        """
-        self.object = self.get_object()
-        if not has_group(self.request.user, self.required_group_name):
-            return PermissionDenied(self.request, 'Contact an administrator if you would like to gain permission')
-        if not is_group_editor(self.request.user, self.object.group.name):
-            return PermissionDenied(self.request, 'You must be a member of the group ' + str(self.object.group))
-        return super(CellSampleUpdate, self).dispatch(*args, **kwargs)
+    # For the moment, superusers only
+    # @method_decorator(login_required)
+    # @method_decorator(user_passes_test(user_is_active))
+    # def dispatch(self, *args, **kwargs):
+    #     """Special dispatch for Cell Sample
+    #
+    #     Rejects users that lack either the Change Cell Samples group or the Cell Sample's bound group
+    #     """
+    #     self.object = self.get_object()
+    #     # if not has_group(self.request.user, self.required_group_name):
+    #     #     return PermissionDenied(self.request, 'Contact an administrator if you would like to gain permission')
+    #     if not is_group_editor(self.request.user, self.object.group.name):
+    #         return PermissionDenied(self.request, 'You must be a member of the group ' + str(self.object.group))
+    #     return super(CellSampleUpdate, self).dispatch(*args, **kwargs)
 
 
 class CellSampleList(LoginRequiredMixin, ListView):
@@ -75,12 +78,14 @@ class CellTypeMixin(FormHandlerMixin):
     form_class = CellTypeForm
 
 
-class CellTypeAdd(SpecificGroupRequiredMixin, CellTypeMixin, CreateView):
-    required_group_name = 'Add Cell Samples Front'
+class CellTypeAdd(OneGroupRequiredMixin, CellTypeMixin, CreateView):
+    # required_group_name = 'Add Cell Samples Front'
+    pass
 
 
-class CellTypeUpdate(SpecificGroupRequiredMixin, CellTypeMixin, UpdateView):
-    required_group_name = 'Change Cell Samples Front'
+class CellTypeUpdate(SuperuserRequiredMixin, CellTypeMixin, UpdateView):
+    # required_group_name = 'Change Cell Samples Front'
+    pass
 
 
 class CellTypeList(ListView):
@@ -99,12 +104,14 @@ class CellSubtypeMixin(FormHandlerMixin):
     form_class = CellSubtypeForm
 
 
-class CellSubtypeAdd(SpecificGroupRequiredMixin, CellSubtypeMixin, CreateView):
-    required_group_name = 'Add Cell Samples Front'
+class CellSubtypeAdd(OneGroupRequiredMixin, CellSubtypeMixin, CreateView):
+    # required_group_name = 'Add Cell Samples Front'
+    pass
 
 
-class CellSubtypeUpdate(SpecificGroupRequiredMixin, CellSubtypeMixin, UpdateView):
-    required_group_name = 'Change Cell Samples Front'
+class CellSubtypeUpdate(SuperuserRequiredMixin, CellSubtypeMixin, UpdateView):
+    # required_group_name = 'Change Cell Samples Front'
+    pass
 
 
 class CellSubtypeList(ListView):
