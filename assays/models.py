@@ -2816,8 +2816,9 @@ assay_plate_reader_file_delimiter_choices = [
     ('tab', 'tab')
 ]
 # PI indicated only need to build for these three sizes
-# general treatment of sizes here, but some size hardcoding...search for 24, 96, or 384
-assay_plate_reader_plate_size_choices = [
+# general treatment of sizes here, but some size HARDCODing throughout...search for 24, 96, or 384
+assay_plate_reader_map_info_plate_size_choices_list = [24, 96, 384]
+assay_plate_reader_map_info_plate_size_choices = [
     (24, '24 Well Plate'),
     (96, '96 Well Plate'),
     (384, '384 Well Plate')
@@ -2872,6 +2873,12 @@ assay_plate_reader_map_info_row_contents_384 = [
 ["O1", "O2", "O3", "O4", "O5", "O6", "O7", "O8", "O9", "O10", "O11", "O12", "O13", "O14", "O15", "O16", "O17", "O18", "O19", "O20", "O21", "O22", "O23", "O24"],
 ["P1", "P2", "P3", "P4", "P5", "P6", "P7", "P8", "P9", "P10", "P11", "P12", "P13", "P14", "P15", "P16", "P17", "P18", "P19", "P20", "P21", "P22", "P23", "P24"]
 ]
+assay_plate_reader_map_info_shape_col_dict = {24: len(assay_plate_reader_map_info_row_contents_24[0]),
+                                              96: len(assay_plate_reader_map_info_row_contents_96[0]),
+                                              384: len(assay_plate_reader_map_info_row_contents_384[0])}
+assay_plate_reader_map_info_shape_row_dict = {24: len(assay_plate_reader_map_info_row_contents_24),
+                                              96: len(assay_plate_reader_map_info_row_contents_96),
+                                              384: len(assay_plate_reader_map_info_row_contents_384)}
 
 
 class AssayPlateReaderMap(FlaggableModel):
@@ -2899,7 +2906,7 @@ class AssayPlateReaderMap(FlaggableModel):
     device = models.IntegerField(
         default=96,
         blank=True,
-        choices=assay_plate_reader_plate_size_choices
+        choices=assay_plate_reader_map_info_plate_size_choices
     )
     # default and file sample time and collection time unit
     time_unit = models.CharField(
@@ -2983,7 +2990,7 @@ class AssayPlateReaderMapDataFile(models.Model):
     upload_plate_size = models.IntegerField(
         blank=True,
         null=True,
-        choices=assay_plate_reader_plate_size_choices
+        choices=assay_plate_reader_map_info_plate_size_choices
     )
 
     def __str__(self):

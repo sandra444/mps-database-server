@@ -62,6 +62,7 @@ $(document).ready(function () {
 
     // deal with the extra formset - find which it is when there is more than the extra
     if (global_file_formset_count > 1) {
+        showOverwriteSampleTimeInfo();
         global_file_plate_form_plate_size = $('#id_upload_plate_size').val();
         // when do form manual validation (clean) on existing, if there is a clean error
         // the extra formset kicks into being a valid formset and it will ADDed table during save
@@ -101,6 +102,10 @@ $(document).ready(function () {
         // this is the condition where there are no saved blocks yet
         // hide the extra formset - it will be cloned, so, do not selectize the platemap or cloning will NOT work
        $('#id_formset_' + global_file_extra_formset_number).addClass('hidden');
+    }
+
+    function showOverwriteSampleTimeInfo() {
+        $('#overwrite_sample_time_row').removeClass('hidden');
     }
 
     // apply styles to formsets
@@ -172,6 +177,7 @@ $(document).ready(function () {
         // console.log($(this).context.id)
         let formset_id = $(this).context.id;
         let block_number = formset_id.substring(11, );
+        // form_changed_something_in_block - not really using this to change what is removed/added during submit..may add later??
         let block_number_id = "#id_assayplatereadermapdatafileblock_set-" + String(block_number-1) + "-form_changed_something_in_block";
         // console.log("changed in block: ",block_number_id)
         // 1 for something changed in the block, 0 for nothing changed in the block
@@ -182,52 +188,71 @@ $(document).ready(function () {
     $("#id_se_file_format_select").change(function() {
         // console.log($(this))
         global_file_file_format_select = $(this).val();
+        if (global_file_file_format_select > 0) {
+            showOverwriteSampleTimeInfo()
+        }
         let myt = $(this).text();
         // console.log("picked file format ",myt)
         // HARDCODED PLATE SIZE OPTION
         //     (0,    'Select a File Format'),
         //     (9999, 'Full Auto Detect (Some Rules Apply)'),
         //     (1, 'Softmax Pro 5.3 (Molecular Devices M5 Series)'),
-        //     (2, 'Wallac EnVision Manager Version 1.12 (EnVision)'),      
-        //TODO fix this
-        // Important: the name of the file format needs to contain the plate size or will need to change this
-        if (myt.includes("(24)") || myt.includes("(96)") || myt.includes("(384)")) {
-            if(myt.includes("(24)")) {
-                global_file_plate_form_plate_size = 24;
-            } else if (myt.includes("(96)")) {
-                global_file_plate_form_plate_size = 96;
-            } else if (myt.includes("(384)")) {
-                global_file_plate_form_plate_size = 384;
-            }
-            // the toggle class is set in an auto created div class above the switch
-            // get div where the class is set
-            $("#set_plate_size").closest('div').removeClass('off');
-            $("#set_plate_size").prop('checked', true);
-            global_file_set_plate_size = $("#set_plate_size").prop('checked');
-            // console.log("set ",global_file_set_plate_size)
-            // $("#id_se_form_plate_size").selectize()[0].selectize.setValue(global_file_plate_form_plate_size);
-            
-            // will need an auto call to the function after develop this
-            
-        } else {
-            // the full auto detect with no plate size - make = 24 but do NOT set
-            $("#set_plate_size").closest('div').addClass('off');
-            $("#set_plate_size").prop('checked', false);
-            global_file_set_plate_size = $("#set_plate_size").prop('checked');
-            // console.log("not set ",global_file_set_plate_size)
-            global_file_plate_form_plate_size = 24;
-            $("#id_se_form_plate_size").selectize()[0].selectize.setValue(global_file_plate_form_plate_size);
-        }
+        //     (2, 'Wallac EnVision Manager Version 1.12 (EnVision)'),
 
-        $("#id_upload_plate_size").val(global_file_plate_form_plate_size);
+        // What can be set in advance? Really, nothing
+        // if (global_file_file_format_select === 1 || global_file_file_format_select === 2) {
+        //     // tab delimited
+        //     global_file_plate_file_delimiter = 'tab';
+        //     $("#id_file_delimiter").selectize()[0].selectize.setValue(global_file_plate_file_delimiter);
+        //
+        //     $("#set_delimiter").closest('div').removeClass('off');
+        //     $("#set_delimiter").prop('checked', true);
+        //     global_file_set_delimiter = $("#set_delimiter").prop('checked');
+        // } else if (global_file_file_format_select === 9999) {
+        //
+        // } else {
+        //
+        // }
 
-        // console.log("plate size ",global_file_set_plate_size)
-        // console.log("file select ", global_file_file_format_select)
+        // Important: this was designed with the assumption that the name of the file would contain the plate size o
+        // if (myt.includes("(24)") || myt.includes("(96)") || myt.includes("(384)")) {
+        //     if(myt.includes("(24)")) {
+        //         global_file_plate_form_plate_size = 24;
+        //     } else if (myt.includes("(96)")) {
+        //         global_file_plate_form_plate_size = 96;
+        //     } else if (myt.includes("(384)")) {
+        //         global_file_plate_form_plate_size = 384;
+        //     }
+        //     // the toggle class is set in an auto created div class above the switch
+        //     // get div where the class is set
+        //     $("#set_plate_size").closest('div').removeClass('off');
+        //     $("#set_plate_size").prop('checked', true);
+        //     global_file_set_plate_size = $("#set_plate_size").prop('checked');
+        //     // console.log("set ",global_file_set_plate_size)
+        //     // $("#id_se_form_plate_size").selectize()[0].selectize.setValue(global_file_plate_form_plate_size);
+        //
+        //     // will need an auto call to the function after develop this
+        //
+        // } else {
+        //     // the full auto detect with no plate size - make = 24 but do NOT set
+        //     $("#set_plate_size").closest('div').addClass('off');
+        //     $("#set_plate_size").prop('checked', false);
+        //     global_file_set_plate_size = $("#set_plate_size").prop('checked');
+        //     // console.log("not set ",global_file_set_plate_size)
+        //     global_file_plate_form_plate_size = 24;
+        //     $("#id_se_form_plate_size").selectize()[0].selectize.setValue(global_file_plate_form_plate_size);
+        // }
+        // $("#id_upload_plate_size").val(global_file_plate_form_plate_size);
+
         // make sure the size of the list is such that on an auto method is > 9000
         if (global_file_file_format_select > 9000) {
             $('.auto-detect-section').removeClass('hidden');
+        } else if (global_file_file_format_select == 0) {
+            //don't do anything
         } else {
             $('.auto-detect-section').addClass('hidden');
+            // call the script immediately since not using full auto
+            reviewPlateReaderFile();
         }
     });
 
@@ -372,6 +397,7 @@ $(document).ready(function () {
 
         this_data_block = parseInt(this_data_block);
         this_plate_map_size = parseInt(this_plate_map_size);
+        // these come in as indexes of the file, not line numbers
         this_line_start = parseInt(this_line_start);
         this_line_end = parseInt(this_line_end);
         this_delimited_start = parseInt(this_delimited_start);
@@ -635,10 +661,10 @@ $(document).ready(function () {
             let dstart = '#id_assayplatereadermapdatafileblock_set-' + idx + '-delimited_start';
             let dend = '#id_assayplatereadermapdatafileblock_set-' + idx + '-delimited_end';
             // What comes back from the ajax call?
-            // The indexes of the top and bottom lines, and the first and last column for each block
-
             $(dblock).val(global_file_iblock_data_block[idx]);
             $(dblockmetadata).val(global_file_iblock_data_block_metadata[idx]);
+            // The INDEXES of the top and bottom lines, and the first and last column for each block
+            // add 1 to get the line or column number
             $(lstart).val(global_file_iblock_line_start[idx]+1);
             $(lend).val(global_file_iblock_line_end[idx]+1);
             $(dstart).val(global_file_iblock_delimited_start[idx]+1);

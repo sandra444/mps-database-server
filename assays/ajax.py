@@ -4085,6 +4085,52 @@ def get_pubmed_reference_data(request):
     )
 
 
+# sck - assay plate map - fetch information about matrix item setup
+def fetch_information_for_plate_map_matrix_item_setup(request):
+    """
+    Assay Plate Map - Getting the information for matrix item setup to display in plate map when clicked.
+    """
+
+    study_id = request.POST.get('study', '0')
+
+    if not study_id:
+        return HttpResponseServerError()
+
+    matrix_items = AssayMatrixItem.objects.filter(
+        study_id=study_id
+    # ).prefetch_related(
+    #     'matrix',
+    # ).order_by('matrix__name', 'name',
+    )
+
+    # for matrix_item in matrix_items:
+    #     print(matrix_item)
+    #     print(matrix_item.id)
+    #     print(matrix_item.name)
+    #     print(matrix_item.assaysetupcompound_set)
+    #     print(matrix_item.assaysetupcell_set)
+    #     print(matrix_item.assaysetupsetting_set)
+    #     print(matrix_item.stringify_compounds())
+    #     print(matrix_item.stringify_cells())
+    #     print(matrix_item.stringify_settings())
+    #     print(matrix_item.matrix.name)
+
+    data = {}
+    data_to_return = []
+
+    for each in matrix_items:
+        data_fields = {
+            'matrix_item_id': each.id,
+            'compound': each.stringify_compounds(),
+            'cell': each.stringify_cells(),
+            'setting': each.stringify_settings(),
+        }
+        data_to_return.append(data_fields)
+
+    data.update({'mi_list': data_to_return, })
+    return HttpResponse(json.dumps(data), content_type="application/json")
+
+
 # sck - assay plate map - fetch information about plate layout by size
 def fetch_information_for_plate_map_layout(request):
     """
@@ -4280,14 +4326,16 @@ def fetch_review_plate_reader_data_file(request):
         # print(each)
         data_fields = {
             'data_block': idx,
-            'data_block_metadata': str(idx),
+            'data_block_metadata': each.get('data_block_metadata'),
+
             'line_start': each.get('line_start'),
             'line_end': each.get('line_end'),
+
             'delimited_start': each.get('delimited_start'),
             'delimited_end': each.get('delimited_end'),
+
             'block_delimiter': each.get('block_delimiter'),
             'plate_size': each.get('plate_size'),
-            'message': each.get('message'),
             'calculated_number_of_blocks': each.get('calculated_number_of_blocks'),
             # 'calculated_number_of_blank_columns': each.get('calculated_number_of_blank_columns'),
         }
@@ -4439,7 +4487,9 @@ switch = {
     'fetch_plate_reader_data_block_plate_map_size': {
         'call': fetch_plate_reader_data_block_plate_map_size
     },
-
+    'fetch_information_for_plate_map_matrix_item_setup': {
+        'call': fetch_information_for_plate_map_matrix_item_setup
+    },
 }
 
 

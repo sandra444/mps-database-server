@@ -1,7 +1,12 @@
 {% extends "base.html" %}
 {% load static %}
 
+{#{% block content %}#}
+{#<p>loaded</p>#}
+{#{% endblock %}#}
+
 {# this template for add, update, and review all in one - need all conditionals to be accommidated #}
+
 {% block load_js %}
     <script src="{% static "assays/assayplatereadermap_add.js" %}"></script>
 {% endblock %}
@@ -42,7 +47,7 @@
                     Assay Plate Map
                     </b></em><br><br>
                     {% if not add %}
-                        {# {{ object.device }} #}
+                         {{ object.device }}
                         Well Plate Map: <em>{{ object }}</em>
                     {% else %}
                         to Study {{ form.instance.study }}
@@ -58,9 +63,9 @@
                 <div>
                     {{ assay_map_additional_info.ns_matrix_item }}
                     {{ assay_map_additional_info.ns_location }}
-                    {{ form.ns_file_pk_block_pk }}
+                    {{ form.form_number_file_block_combos }}
                 </div>
-                {# need this in javascript - add, update, and view all use this template #}
+                {# need this in javascript #}
                 <div id="check_load">
                     {{ page_called }}
                 </div>
@@ -72,7 +77,7 @@
                 <div id="matrix_list_pk">
                     {{ matrix_list_pk }}
                 </div>
-                {# need this in javascript to pass to ajax #}
+                {# need this in javascript pass to ajax#}
                 <div id="this_study_id">
                     {% if object %}
                         {{ object.study.id }}
@@ -80,7 +85,7 @@
                         {{form.instance.study_id}}
                     {% endif %}
                 </div>
-             </div>
+            </div>
 
             {# global plate map edits #}
             <div>
@@ -89,7 +94,7 @@
 
                         <div class="row">
                             <div class="col-md-3">
-                                <div class="plate-map-page-field-labels">
+                                <div class="plate-map-page-field-labels-small">
                                     <div><p></p>
                                         <label><i>Start From</i></label>
                                     </div>
@@ -114,13 +119,13 @@
                             <div class="pick-a-plate">
                                 <div class="row">
                                     <div class="col-md-3">
-                                        <div class="plate-map-page-field-labels">
+                                        <div class="plate-map-page-field-labels-small">
                                             <div><p id="plate_select_tooltip"></p>
                                                 <label for="plate_select_tooltip">Starting Plate Format* &nbsp;</label>
                                             </div>
                                         </div>
                                     </div>
-                                    {#  this is id_device and it is used in drawing the plate map for all drawing options #}
+                                    {# this is id_device and it is used in drawing the plate map for all drawing options #}
                                     <div class="col-md-6">
                                         <div class="plate-map-page-field-contents required">
                                             {{ form.device }}
@@ -139,7 +144,7 @@
                             <div class="pick-a-platemap hidden">
                                 <div class="row">
                                     <div class="col-md-3">
-                                         <div class="plate-map-page-field-labels">
+                                         <div class="plate-map-page-field-labels-small">
                                             <div><p id="platemap_select_tooltip"></p>
                                                 <label for="platemap_select_tooltip">Starting Plate Map* &nbsp;</label>
                                             </div>
@@ -156,7 +161,7 @@
                             <div class="pick-a-matrix hidden">
                                 <div class="row">
                                     <div class="col-md-3">
-                                        <div class="plate-map-page-field-labels">
+                                        <div class="plate-map-page-field-labels-small">
                                             <div><p id="matrix_select_tooltip"></p>
                                                 <label for="matrix_select_tooltip">Starting Study Matrix* &nbsp;</label>
                                             </div>
@@ -179,7 +184,7 @@
                         {# <br><b>study</b> <h4 id="object_study">{{ object.study }}</h4>#}
                         {# <br><b>study id </b> <h4 id="object_study">{{ object.study.id }}</h4>#}
                         {# <br><b>form name</b> {% include 'generic_field.html' with field=form.name label="Map Name"  %}#}
-
+                        {##}
                         {# This takes FOREVER (HANDY) if queryset is not passed (dropdowns often need prefetches) #}
                         {# Study should be passed in backend - do not to the following!#}
                         {# {% include 'generic_field.html' with field=form.study label="Study" %}#}
@@ -192,7 +197,7 @@
 
                 {% if not add %}
                     {# if not add and this plate map is in use by a file block #}
-                    {% if form.form_number_file_block_combos > 0 %}
+                    {% if form.form_number_file_block_combos.value > 0 %}
                         {# the form_number_file_block_combos is based on the AssayPlateReaderMapItemValue #}
                         {# not on the AssayPlateReaderMapDataFileBlock #}
                         {# if everything works correctly, they should match, but, values may be added AFTER file is added #}
@@ -201,22 +206,22 @@
                             <div class="select-value-set">
                                 <div class="row">
                                     <div class="col-md-3">
-                                        <div class="plate-map-page-field-labels">
+                                        <div class="plate-map-page-field-labels-small">
                                             <div><p id="number_file_block_tooltip"></p>
                                                 <label for="number_file_block_tooltip"># File/Blocks &nbsp;</label>
                                             </div>
                                         </div>
                                     </div>
                                     <div class="col-md-6">
-                                        <div class="plate-map-page-field-contents required">
-                                            {{ form.form_number_file_block_combos }}
+                                        <div class="plate-map-page-field-contents">
+                                            {{ form.form_number_file_block_combos.value }}
                                         </div>
                                     </div>
                                     <div class="col-md-3"></div>
                                 </div>
                                 <div class="row">
                                     <div class="col-md-3">
-                                        <div class="plate-map-page-field-labels">
+                                        <div class="plate-map-page-field-labels-small">
                                             <div><p id="file_block_tooltip"></p>
                                                 <label for="file_block_tooltip">File/Blocks &nbsp;</label>
                                             </div>
@@ -224,7 +229,8 @@
                                     </div>
                                     <div class="col-md-6">
                                         <div class="plate-map-page-field-contents required">
-                                            {{ form.se_file_block }}
+                                            {{ form.se_block_select_string }}
+                                            <div class="hidden">{{ form.ns_block_select_pk }}</div>
                                         </div>
                                     </div>
                                     <div class="col-md-3"></div>
@@ -237,7 +243,7 @@
                 <div class="container">
                     <div class="row">
                         <div class="col-md-3">
-                            <div class="plate-map-page-field-labels">
+                            <div class="plate-map-page-field-labels-small">
                                 <div><p id="map_name_tooltip"></p>
                                     <label for="map_name_tooltip">Map Name* &nbsp;</label>
                                 </div>
@@ -252,7 +258,7 @@
                     </div>
                     <div class="row">
                         <div class="col-md-3">
-                            <div class="plate-map-page-field-labels">
+                            <div class="plate-map-page-field-labels-small">
                                 <div><p></p>
                                     <label>Description (optional)</label>
                                 </div>
@@ -267,7 +273,7 @@
                     </div>
                     <div class="row">
                         <div class="col-md-3">
-                            <div class="plate-map-page-field-labels">
+                            <div class="plate-map-page-field-labels-small">
                                 <div><p id="sample_time_unit_tooltip"></p>
                                     <label for="sample_time_unit_tooltip">Time Unit* &nbsp;</label>
                                 </div>
@@ -282,7 +288,7 @@
                     </div>
                     <div class="row">
                         <div class="col-md-3">
-                            <div class="plate-map-page-field-labels">
+                            <div class="plate-map-page-field-labels-small">
                                 <div><p id="plate_cell_count_tooltip"></p>
                                     <label for="plate_cell_count_tooltip"># Cells &nbsp;</label>
                                 </div>
@@ -297,7 +303,7 @@
                     </div>
                     <div class="row">
                         <div class="col-md-3">
-                            <div class="plate-map-page-field-labels">
+                            <div class="plate-map-page-field-labels-small">
                                 <div><p id="collection_volume_unit_tooltip"></p>
                                     <label for="collection_volume_unit_tooltip">Volume Unit &nbsp;</label>
                                 </div>
@@ -312,7 +318,7 @@
                     </div>
                     <div class="row">
                         <div class="col-md-3">
-                            <div class="plate-map-page-field-labels">
+                            <div class="plate-map-page-field-labels-small">
                                 <div><p id="standard_tooltip"></p>
                                     <label for="standard_tooltip">Assay Standard* &nbsp;</label>
                                 </div>
@@ -334,7 +340,7 @@
                 <div class="container">
                     <div class="row">
                         <div class="col-md-3">
-                            <div class="plate-map-page-field-labels">
+                            <div class="plate-map-page-field-labels-small">
                                 <div>
                                     <div><p id="well_use_tooltip"></p>
                                         <label for="well_use_tooltip">Well Content to Add/Edit &nbsp;</label>
@@ -343,7 +349,7 @@
                             </div>
                         </div>
 
-                    {# Lines for the drop down version#}
+                        {# Lines for the drop down version#}
 {#                        <div class="col-md-2">#}
 {#                            <div class="plate-map-page-field-contents">#}
 {#                                {{ assay_map_additional_info.se_well_use }}#}
@@ -351,11 +357,8 @@
 {#                        </div>#}
 {#                        <div class="col-md-7">#}
 {#                        </div>#}
-{#                    </div>#}
 
-                    {# Lines for the radio button version#}
-{#                    </div>#}
-{#                    <div class="row">#}
+                        {# Lines for the radio button version#}
                         <div class="col-md-6">
                             <div class="plate-map-page-radio-contents">
                                 <label><input type="radio" class="plate-map-bigger-radio" name="change_well_use" value="sample"><h3 class="plate-map-radio-spacing plate-map-no-wrap">Sample</h3></label>
@@ -374,9 +377,7 @@
 
             {# Working on the Samples #}
             <div>
-                {% if review %}
-                    <br>
-                {% else %}
+                {% if not review %}
                     {# rows of select boxes used to edit  #}
                     <div class="container">
                         <div class="sample-section hidden">
@@ -397,23 +398,19 @@
                                         <label for="sample_location_tooltip">Assay Sample Location &nbsp;</label>
                                     </div>
                                 </div>
+
                                 <div class="col-md-3">
                                      <div><p id="sample_default_time_tooltip"></p>
-                                        <label for="sample_default_time_tooltip">Assay Default Sample Time &nbsp;</label>
+                                         <label for="sample_default_time_tooltip">Assay Default Sample Time &nbsp;</label>
                                     </div>
                                 </div>
 
                                 <div class="col-md-3">
                                     <div><p id="sample_time_tooltip"></p>
-                                        {% if form.form_number_file_block_combos > 0 %}
-                                            <label for="sample_time_tooltip">Sample Time (saved with file) &nbsp;</label>
-                                        {% else %}
-                                            <label for="sample_time_tooltip">Assay Sample Time (default) &nbsp;</label>
-                                        {% endif %}
+                                        <label for="sample_time_tooltip">Sample Time (saved with file) &nbsp;</label>
                                     </div>
                                 </div>
-                                <div class="col-md-3">
-                                </div>
+
                             </div>
                             <div class="row">
                                 <div class="col-md-2 plate-map-page-field-contents">
@@ -436,28 +433,35 @@
                                     </div>
                                 </div>
 
-                                {% if form.form_number_file_block_combos > 0 %}
-                                    <div class="col-md-2 plate-map-page-field-contents">
-                                        {{ assay_map_additional_info.form_number_time }}
-                                    </div>
-                                    <div class="col-md-1">
-                                        <div>
-                                            {#  <label class="sample-section hidden"><input type="radio" name="sample_change" value="time"> Apply </label>#}
-                                            <input id="checkbox_time" class="big-checkbox plate-map-check-box" type="checkbox" name="change_time" value="time" checked />
-                                        </div>
-                                    </div>
-                                {% else %}
-                                    <div class="col-md-2 plate-map-page-field-contents">
+
+{#                            add back and build functionality to change sample time after file block add if requested by users#}
+                                <div class="col-md-2 plate-map-page-field-contents">
+                                    {% if form.form_number_file_block_combos.value < 1 %}
                                         {{ assay_map_additional_info.form_number_default_time }}
+                                    {% else %}
+                                        <p>Edit not currently allowed.</p>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-1">
+                                    <div>
+                                        {#  <label class="sample-section hidden"><input type="radio" name="sample_change" value="default_time"> Apply </label> #}
+                                    {% if form.form_number_file_block_combos.value < 1 %}
+                                        <input id="checkbox_default_time" class="big-checkbox plate-map-check-box" type="checkbox" name="change_default_time" value="default_time" checked />
+                                    {% endif %}
                                     </div>
-                                    <div class="col-md-1">
-                                        <div>
-                                            {#  <label class="sample-section hidden"><input type="radio" name="sample_change" value="default_time"> Apply </label>#}
-                                            <input id="checkbox_default_time" class="big-checkbox plate-map-check-box" type="checkbox" name="change_default_time" value="default_time" checked />
-                                        </div>
+                                </div>
+
+                                <div class="col-md-2 plate-map-page-field-contents">
+                                    <p>Edit not currently allowed.</p>
+{#                                    {{ assay_map_additional_info.form_number_time }}#}
+                                </div>
+                                <div class="col-md-1">
+                                    <div>
+                                        {#  <label class="sample-section hidden"><input type="radio" name="sample_change" value="time"> Apply </label>#}
+                                        {% if form.form_number_file_block_combos.value > 0 %}
+{#                                            <input id="checkbox_time" class="big-checkbox plate-map-check-box" type="checkbox" name="change_time" value="time" />#}
+                                        {% endif %}
                                     </div>
-                                {% endif %}
-                                <div class="col-md-3">
                                 </div>
 
                             </div>
@@ -523,9 +527,7 @@
             {# Working on the Standards #}
             <div>
                 {# rows of select boxes used to edit #}
-                {% if review %}
-                    <br>
-                {% else %}
+                {% if not review %}
                     <div class="container">
                         <div class="standard-section hidden">
                             <div class="row">
@@ -561,7 +563,7 @@
                     <br>
                     <div class="container">
                         <div class="row">
-{#                        <legend>Options for Drag/Apply in Plate Map</legend>#}
+                        {# <legend>Options for Drag/Apply in Plate Map</legend>#}
                         <div class="col-md-4">
                             <div class=row">
                                 <label>Plate Map Drag and Apply Action</label>
@@ -625,11 +627,11 @@
 
             {# {{  formset }} is the wells in the map   #}
             <div>
-{#                <legend>Plate Map</legend>#}
+                {#  <legend>Plate Map</legend>#}
                 {#  table of well plate              #}
                 <div class="col-md-12">
                     <table class="table table-bordered table-inverse" id="plate_table">
-                        {#  note that the table is made in javascript                  #}
+                        {#  note that the table is made in javascript #}
                     </table>
                 </div>
             </div>
@@ -640,8 +642,8 @@
             <div>
                 <div class="container">
                     <div class="row">
-{#                        <div class="col-md-3">#}
-{#                        </div>#}
+                        <div class="col-md-3">
+                        </div>
                         <div class="col-md-6">
                             <button type="button" class="btn btn-primary" id="checkboxButton">Show/Hide Customized Plate Map Display Options</button>
                         </div>
@@ -697,37 +699,37 @@
                                                         </label>
                                                     </div>
                                                 </div>
-                                                {% if form.form_number_file_block_combos > 0 %}
-                                                    <div class="select-value-set">
-                                                        <div class="fancy-checkbox table-filter padded-bottom" align="left">
-                                                            <input class="visibility-checkbox" type="checkbox" name="show_time" id="show_time" value=".time_start"/>
-                                                            <div class="btn-group">
-                                                                <label for="show_time" class="btn plate-time extra-tall-glyphicon">
-                                                                    <span class="glyphicon glyphicon-ok"></span>
-                                                                    <span> </span>
-                                                                </label>
-                                                                <label for="show_time" class="btn btn-default active">
-                                                                    File Sample Time
-                                                                </label>
-                                                            </div>
+
+                                                <div class="select-value-set">
+                                                    <div class="fancy-checkbox table-filter padded-bottom" align="left">
+                                                        <input class="visibility-checkbox" type="checkbox" name="show_default_time" id="show_default_time" value=".default_time_start"/>
+                                                        <div class="btn-group">
+                                                            <label for="show_default_time" class="btn plate-default-time extra-tall-glyphicon">
+                                                                <span class="glyphicon glyphicon-ok"></span>
+                                                                <span> </span>
+                                                            </label>
+                                                            <label for="show_default_time" class="btn btn-default active">
+                                                                Plate Map Default Sample Time
+                                                            </label>
                                                         </div>
                                                     </div>
-                                                {% else %}
-                                                    <div>
-                                                        <div class="fancy-checkbox table-filter padded-bottom" align="left">
-                                                            <input class="visibility-checkbox" type="checkbox" name="show_default_time" id="show_default_time" value=".default_time_start"/>
-                                                            <div class="btn-group">
-                                                                <label for="show_time" class="btn plate-default-time extra-tall-glyphicon">
-                                                                    <span class="glyphicon glyphicon-ok"></span>
-                                                                    <span> </span>
-                                                                </label>
-                                                                <label for="show_default_time" class="btn btn-default active">
-                                                                    Plate Map Sample Time
-                                                                </label>
-                                                            </div>
+                                                </div>
+
+                                                <div>
+                                                    <div class="fancy-checkbox table-filter padded-bottom" align="left">
+                                                        <input class="visibility-checkbox" type="checkbox" name="show_time" id="show_time" value=".time_start"/>
+                                                        <div class="btn-group">
+                                                            <label for="show_time" class="btn plate-time extra-tall-glyphicon">
+                                                                <span class="glyphicon glyphicon-ok"></span>
+                                                                <span> </span>
+                                                            </label>
+                                                            <label for="show_time" class="btn btn-default active">
+                                                                File Sample Time (Review Only)
+                                                            </label>
                                                         </div>
                                                     </div>
-                                                {% endif %}
+                                                </div>
+
                                             </td>
                                             <td>
                                                 <div class="fancy-checkbox table-filter padded-bottom" align="left">
@@ -835,22 +837,21 @@
                                                     </div>
                                                 </div>
 
-                                                {% if form.form_number_file_block_combos > 0 %}
-                                                    <div class="select-value-set">
-                                                        <div class="fancy-checkbox table-filter padded-bottom" align="left">
-                                                            <input class="visibility-checkbox" type="checkbox" name="show_block_raw_value" id="show_block_raw_value" value=".block_value_start">
-                                                            <div class="btn-group">
-                                                                <label for="show_block_raw_value" class="btn plate-block-raw-value extra-tall-glyphicon">
-                                                                    <span class="glyphicon glyphicon-ok check-mark-color"></span>
-                                                                    <span> </span>
-                                                                </label>
-                                                                <label for="show_block_raw_value" class="btn btn-default active">
-                                                                    Raw Value
-                                                                </label>
-                                                            </div>
+                                                <div class="select-value-set">
+                                                    <div class="fancy-checkbox table-filter padded-bottom" align="left">
+                                                        <input class="visibility-checkbox" type="checkbox" name="show_block_raw_value" id="show_block_raw_value" value=".block_value_start">
+                                                        <div class="btn-group">
+                                                            <label for="show_block_raw_value" class="btn plate-block-raw-value extra-tall-glyphicon">
+                                                                <span class="glyphicon glyphicon-ok check-mark-color"></span>
+                                                                <span> </span>
+                                                            </label>
+                                                            <label for="show_block_raw_value" class="btn btn-default active">
+                                                                Raw Value (Review Only)
+                                                            </label>
                                                         </div>
                                                     </div>
-                                                {% endif %}
+                                                </div>
+
                                             </td>
                                         </tr>
                                     </thead>
@@ -859,7 +860,7 @@
                         </div>
                     </div>
                 </div>
-        {% comment if want to add any of the other fields to display in the plate map....%}
+                                {% comment if want to add any of the other fields to display in the plate map....%}
                                     <div class="fancy-checkbox table-filter padded-bottom" align="left">
                                         <input class="visibility-checkbox" type="checkbox" name="show_compound" id="show_compound" value=".compound_start">
                                         <div class="btn-group">
@@ -873,78 +874,82 @@
                                         </div>
                                     </div>
                                 {% endcomment %}
-
             </div>
+
 
             {# This is the information that explains how the plate map is split into pieces #}
             {% include 'assaystudy_assayplatemap_help.html' %}
 
 
-            {# reference table of chip setup FEEDS the setup (compounds, cells, settings) info in the PLATE MAP KEEP#}
-            {# Could have done this a different way, it is working and there is not time to revisit at the moment #}
-            <div class="hidden">
-                <div class="row">
-                    <legend>For Reference - Chips in the Study</legend>
-                    {% if matrix_items_in_study|length > 0 %}
-                        <div class="padded-bottom">
+
+
+            {# reference table of chip setup USED TO feed the setup (compounds, cells, settings) but not anymore #}
+            {# went a completely different way with this, but keep it here in case users ask for the table back, which, would need to populate in the views if they do.. #}
+{#            <div class="">#}
+{#                <div class="row">#}
+{#                    <legend>For Reference - Chips in the Study</legend>#}
+{#                    {% if matrix_items_in_study|length > 0 %}#}
+{#                        <div class="padded-bottom">#}
 {#                            <table id="matrix_items_table" class="table table-striped table-bordered dataTable">#}
-                            {#  If the table paginates, rows not on the page are not accessible, so, do not use the class that pagenates  #}
-                            <table id="matrix_items_table" class="table table-striped table-bordered dataTable">
-                                <thead>
-                                    <tr role="row">
-                                        <th>Name</th>
-                                        <th>Compound</th>
-                                        <th>Compound Short</th>
-                                        <th>Cell</th>
-                                        <th>Cell Short</th>
-                                        <th>Setting</th>
-                                        <th>Setting Short</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for item in matrix_items_in_study %}
-                                        <tr {{ item.id }}>
-                                            <td>{{ item.name }}</td>
-                                            <td id="cp{{ item.id }}-compound">{{ item.stringify_compounds|linebreaksbr }}</td>
-                                            <td id="cp{{ item.id }}-compound-short">
-                                                {%  if item.assaysetupcompound_set.all|length > 0 %}
-                                                    {% for x in item.assaysetupcompound_set.all %}
-                                                        {{ x.compound_instance.compound }} ({{ x.concentration }} {{ x.concentration_unit }})<br>
-                                                    {% endfor %}
-                                                {% else %}
-                                                    -none-
-                                                {% endif %}
-                                            </td>
-                                            <td id="cl{{ item.id }}-cell">{{ item.stringify_cells|linebreaksbr }}</td>
-                                            <td id="cl{{ item.id }}-cell-short">
-                                                {%  if item.assaysetupcell_set.all|length > 0 %}
-                                                    {% for x in item.assaysetupcell_set.all %}
-                                                        {{ x.cell_sample.cell_type }} ({{ x.density }} {{ x.density_unit }})<br>
-                                                    {% endfor %}
-                                                {% else %}
-                                                    -none-
-                                                {% endif %}
-                                            </td>
-                                            <td id="st{{ item.id }}-setting">{{ item.stringify_settings|linebreaksbr }}</td>
-                                            <td id="st{{ item.id }}-setting-short">
-                                                {%  if item.assaysetupsetting_set.all|length > 0 %}
-                                                    {% for x in item.assaysetupsetting_set.all %}
-                                                        {{ x.setting }} ({{ x.value }} {{ x.unit }})<br>
-                                                    {% endfor %}
-                                                {% else %}
-                                                    -none-
-                                                {% endif %}
-                                            </td>
-                                        </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                    {% else %}
-                        <p>Not items have been setup in the study. Need to do that first.</p>
-                    {% endif %}
-                </div>
-            </div>
+{#                              If the table paginates, rows not on the page are not accessible, so, do not use the class that pagenates#}
+{#                            <table id="matrix_items_table" class="table table-striped table-bordered dataTable">#}
+{#                                <thead>#}
+{#                                    <tr role="row">#}
+{#                                        <th>Name</th>#}
+{#                                        <th>Compound</th>#}
+{#                                        <th>Compound Short</th>#}
+{#                                        <th>Cell</th>#}
+{#                                        <th>Cell Short</th>#}
+{#                                        <th>Setting</th>#}
+{#                                        <th>Setting Short</th>#}
+{#                                    </tr>#}
+{#                                </thead>#}
+{#                                <tbody>#}
+{#                                    {% for item in matrix_items_in_study %}#}
+{#                                        <tr {{ item.id }}>#}
+{#                                            <td>{{ item.name }}</td>#}
+{#                                            <td id="cp{{ item.id }}-compound">{{ item.stringify_compounds|linebreaksbr }}</td>#}
+{#                                            <td id="cp{{ item.id }}-compound-short">#}
+{#                                                {%  if item.assaysetupcompound_set.all|length > 0 %}#}
+{#                                                    {% for x in item.assaysetupcompound_set.all %}#}
+{#                                                        {{ x.compound_instance.compound }} ({{ x.concentration }} {{ x.concentration_unit }})<br>#}
+{#                                                    {% endfor %}#}
+{#                                                {% else %}#}
+{#                                                    -none-#}
+{#                                                {% endif %}#}
+{#                                            </td>#}
+{#                                            <td id="cl{{ item.id }}-cell">{{ item.stringify_cells|linebreaksbr }}</td>#}
+{#                                            <td id="cl{{ item.id }}-cell-short">#}
+{#                                                {%  if item.assaysetupcell_set.all|length > 0 %}#}
+{#                                                    {% for x in item.assaysetupcell_set.all %}#}
+{#                                                        {{ x.cell_sample.cell_type }} ({{ x.density }} {{ x.density_unit }})<br>#}
+{#                                                    {% endfor %}#}
+{#                                                {% else %}#}
+{#                                                    -none-#}
+{#                                                {% endif %}#}
+{#                                            </td>#}
+{#                                            <td id="st{{ item.id }}-setting">{{ item.stringify_settings|linebreaksbr }}</td>#}
+{#                                            <td id="st{{ item.id }}-setting-short">#}
+{#                                                {%  if item.assaysetupsetting_set.all|length > 0 %}#}
+{#                                                    {% for x in item.assaysetupsetting_set.all %}#}
+{#                                                        {{ x.setting }} ({{ x.value }} {{ x.unit }})<br>#}
+{#                                                    {% endfor %}#}
+{#                                                {% else %}#}
+{#                                                    -none-#}
+{#                                                {% endif %}#}
+{#                                            </td>#}
+{#                                        </tr>#}
+{#                                    {% endfor %}#}
+{#                                </tbody>#}
+{#                            </table>#}
+{#                        </div>#}
+{#                    {% else %}#}
+{#                        <p>Not items have been setup in the study. Need to do that first.</p>#}
+{#                    {% endif %}#}
+{#                </div>#}
+{#            </div>#}
+
+
 
             <div>
                 <div>
@@ -955,12 +960,13 @@
 
                 {% include 'errors.html' %}
 
-                {% comment %}            <h6>tracking begin</h6>
+                {% comment %}  <h6>tracking begin</h6>
                 {% include 'tracking.html' %}
                 <h6>tracking end</h6>{% endcomment %}
             </div>
 
             {# changes are made to the formsets and then saved   #}
+    {# !!!!! when these are commented out, the form loads fast, not sure if issue with form or with js that happens when loads  #}
             {# need this (mangement_form) or form will not save   #}
             {{ formset.management_form }}
             <div class="hidden">
@@ -969,7 +975,7 @@
                     <h3>FormSet </h3>
                     <div id="formset">
                         {% for form in formset %}
-{#                            --{{ form.id }}--#}
+{#                           do not uncomment or get dups --{{ form.id }}--#}
                             {# No ID tag for now #}
     {#                        <div id="{{ form.prefix }}" class="inline no-selectize">#}
                             <div class="inline no-selectize">
@@ -985,7 +991,7 @@
                     <h3>value_formset </h3>
                     <div id="value_formset">
                         {% for vform in value_formset %}
-{#                            --{{ vform.id }}--#}
+{#                          do not uncomment or get dups  --{{ vform.id }}--#}
                             <div class="inline no-selectize">
                                 {{ vform }}
                             </div>
