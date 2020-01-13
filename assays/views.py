@@ -5,7 +5,7 @@ from django.views.generic import (
     DetailView,
     UpdateView,
     TemplateView,
-    DeleteView
+    DeleteView,
 )
 from django.http import HttpResponse
 from cellsamples.models import CellSample
@@ -45,6 +45,7 @@ from assays.forms import (
     AssayStudySupportingDataFormSetFactory,
     AssayStudyAssayFormSetFactory,
     AssayStudyReferenceFormSetFactory,
+    AssayStudyDeleteForm,
     AssayMatrixForm,
     AssayMatrixItemFullForm,
     AssayMatrixItemFormSetFactory,
@@ -106,7 +107,7 @@ from mps.mixins import (
     CreatorOrSuperuserRequiredMixin,
     FormHandlerMixin,
     ListHandlerMixin,
-    CreatorOrSuperuserRequiredMixin
+    SuperuserRequiredMixin
 )
 
 from mps.base.models import save_forms_with_tracking
@@ -1173,11 +1174,47 @@ class AssayStudyDataUpload(ObjectGroupRequiredMixin, UpdateView):
             return self.render_to_response(self.get_context_data(form=form))
 
 
-class AssayStudyDelete(DeletionMixin, DeleteView):
-    """Delete a Setup"""
+class AssayStudyDelete(DeletionMixin, UpdateView):
+    """Soft Delete a Study"""
     model = AssayStudy
     template_name = 'assays/assaystudy_delete.html'
     success_url = '/assays/assaystudy/'
+    form_class = AssayStudyDeleteForm
+
+    # For DeletionMixin
+    ignore_propagation = True
+
+    # Shouldn't trigger emails
+    def form_valid(self, form):
+        # Check permissions again
+        if is_group_editor(self.request.user, self.object.group.name):
+            # Change the group
+            # CONTRIVED
+            self.object.modified_by = self.request.user
+            # Change group to hide
+            self.object.group_id = 21
+            # Remove sign off
+            self.object.signed_off_by = None
+            # Restrict
+            self.object.restricted = True
+            # REMOVE COLLABORATOR GROUPS
+            self.object.collaborator_groups.clear()
+
+            tz = pytz.timezone('US/Eastern')
+
+            # Note deletion in study (crude)
+            self.object.description = 'Deleted by {} on {}\n{}'.format(
+                self.request.user,
+                datetime.now(tz),
+                self.object.description
+            )
+
+            self.object.name = 'DELETED-{}'.format(self.object.name)
+            self.object.flagged = True
+
+            self.object.save()
+
+        return redirect(self.success_url)
 
 
 def get_cell_samples_for_selection(user, setups=None):
@@ -1550,6 +1587,9 @@ class AssayMatrixDelete(DeletionMixin, DeleteView):
     model = AssayMatrix
     template_name = 'assays/assaymatrix_delete.html'
 
+    # Allow deletes regardless of dependencies
+    ignore_propagation = True
+
     def get_success_url(self):
         return self.object.study.get_absolute_url()
 
@@ -1678,6 +1718,9 @@ class AssayMatrixItemDelete(DeletionMixin, DeleteView):
     """Delete a Setup"""
     model = AssayMatrixItem
     template_name = 'assays/assaymatrixitem_delete.html'
+
+    # Allow deletes regardless of dependencies
+    ignore_propagation = True
 
     def get_success_url(self):
         return self.object.study.get_absolute_url()
@@ -2017,7 +2060,7 @@ class AssayStudySetUpdate(CreatorOrSuperuserRequiredMixin, AssayStudySetMixin, U
 #
 #
 # # TODO REFACTOR
-# class AssayStudySetUpdate(CreatorOrSuperuserRequiredMixin, UpdateView):
+# class AssayStudySetUpdate(SuperuserRequiredMixin, UpdateView):
 #     model = AssayStudySet
 #     template_name = 'assays/assaystudyset_add.html'
 #     form_class = AssayStudySetForm
@@ -2351,7 +2394,7 @@ class AssayReferenceDetail(DetailView):
     template_name = 'assays/assayreference_detail.html'
 
 
-# class AssayReferenceUpdate(CreatorOrSuperuserRequiredMixin, UpdateView):
+# class AssayReferenceUpdate(SuperuserRequiredMixin, UpdateView):
 #     model = AssayReference
 #     template_name = 'assays/assayreference_add.html'
 #     form_class = AssayReferenceForm
@@ -2555,7 +2598,7 @@ class AssayTargetAdd(OneGroupRequiredMixin, AssayTargetMixin, CreateView):
     pass
 
 
-class AssayTargetUpdate(CreatorOrSuperuserRequiredMixin, AssayTargetMixin, UpdateView):
+class AssayTargetUpdate(SuperuserRequiredMixin, AssayTargetMixin, UpdateView):
     pass
 
 
@@ -2598,7 +2641,7 @@ class AssayMethodAdd(OneGroupRequiredMixin, AssayMethodMixin, CreateView):
     pass
 
 
-class AssayMethodUpdate(CreatorOrSuperuserRequiredMixin, AssayMethodMixin, UpdateView):
+class AssayMethodUpdate(SuperuserRequiredMixin, AssayMethodMixin, UpdateView):
     pass
 
 
@@ -2662,7 +2705,7 @@ class PhysicalUnitsAdd(OneGroupRequiredMixin, PhysicalUnitsMixin, CreateView):
     pass
 
 
-class PhysicalUnitsUpdate(CreatorOrSuperuserRequiredMixin, PhysicalUnitsMixin, UpdateView):
+class PhysicalUnitsUpdate(SuperuserRequiredMixin, PhysicalUnitsMixin, UpdateView):
     pass
 
 
@@ -2691,7 +2734,7 @@ class AssayMeasurementTypeAdd(OneGroupRequiredMixin, AssayMeasurementTypeMixin, 
     pass
 
 
-class AssayMeasurementTypeUpdate(CreatorOrSuperuserRequiredMixin, AssayMeasurementTypeMixin, UpdateView):
+class AssayMeasurementTypeUpdate(SuperuserRequiredMixin, AssayMeasurementTypeMixin, UpdateView):
     pass
 
 
@@ -2712,7 +2755,7 @@ class AssaySampleLocationAdd(OneGroupRequiredMixin, AssaySampleLocationMixin, Cr
     pass
 
 
-class AssaySampleLocationUpdate(CreatorOrSuperuserRequiredMixin, AssaySampleLocationMixin, UpdateView):
+class AssaySampleLocationUpdate(SuperuserRequiredMixin, AssaySampleLocationMixin, UpdateView):
     pass
 
 
@@ -2731,7 +2774,7 @@ class AssaySettingAdd(OneGroupRequiredMixin, AssaySettingMixin, CreateView):
     pass
 
 
-class AssaySettingUpdate(CreatorOrSuperuserRequiredMixin, AssaySettingMixin, UpdateView):
+class AssaySettingUpdate(SuperuserRequiredMixin, AssaySettingMixin, UpdateView):
     pass
 
 
@@ -2752,7 +2795,7 @@ class AssaySupplierAdd(OneGroupRequiredMixin, AssaySupplierMixin, CreateView):
     pass
 
 
-class AssaySupplierUpdate(CreatorOrSuperuserRequiredMixin, AssaySupplierMixin, UpdateView):
+class AssaySupplierUpdate(SuperuserRequiredMixin, AssaySupplierMixin, UpdateView):
     pass
 
 

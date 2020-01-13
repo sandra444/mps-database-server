@@ -38,7 +38,8 @@ from mps.mixins import (
     OneGroupRequiredMixin,
     CreatorOrSuperuserRequiredMixin,
     ListHandlerMixin,
-    DetailHandlerMixin
+    DetailHandlerMixin,
+    SuperuserRequiredMixin
 )
 from mps.base.models import save_forms_with_tracking
 from django.contrib.auth.decorators import login_required, user_passes_test
@@ -275,7 +276,7 @@ class ManufacturerAdd(OneGroupRequiredMixin, ManufacturerMixin, CreateView):
     pass
 
 
-class ManufacturerUpdate(CreatorOrSuperuserRequiredMixin, ManufacturerMixin, UpdateView):
+class ManufacturerUpdate(SuperuserRequiredMixin, ManufacturerMixin, UpdateView):
     pass
 
 
