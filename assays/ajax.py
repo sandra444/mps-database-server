@@ -4411,6 +4411,42 @@ def fetch_plate_reader_data_block_plate_map_size(request):
     return HttpResponse(json.dumps(data),
                         content_type="application/json")
 
+# sck - assay plate map - Get raw value and time for display in existing plate map with file block attached.
+def fetch_information_for_value_set_of_plate_map_for_data_block(request):
+    """
+    Assay Plate Map Update or View with Data File Block - Get raw value and time for display in existing plate map with file block attached.
+    """
+
+    this_data_file_block = request.POST.get('pk_data_block', '0')
+    this_platemap = request.POST.get('pk_platemap', '0')
+    # print(this_data_file_block)
+    # print(this_platemap)
+    if not this_data_file_block:
+        return HttpResponseServerError()
+    elif not this_data_file_block.isnumeric():
+        return HttpResponseServerError()
+
+    this_queryset = AssayPlateReaderMapItemValue.objects.filter(
+        assayplatereadermapdatafileblock_id=this_data_file_block
+    ).filter(
+        assayplatereadermap_id=this_platemap
+    ).order_by('plate_index', )
+
+    data = {}
+    data_to_return = []
+
+    for each in this_queryset:
+        # print(each)
+        data_fields = {
+            'time': each.time,
+            'raw_value': each.raw_value,
+        }
+        # make sure to order by the plate_index
+        data_to_return.append(data_fields)
+        data.update({'block_data': data_to_return, })
+    # print(data)
+    return HttpResponse(json.dumps(data),
+                        content_type="application/json")
 
 # TODO TODO TODO
 switch = {
@@ -4489,6 +4525,9 @@ switch = {
     },
     'fetch_information_for_plate_map_matrix_item_setup': {
         'call': fetch_information_for_plate_map_matrix_item_setup
+    },
+    'fetch_information_for_value_set_of_plate_map_for_data_block': {
+        'call': fetch_information_for_value_set_of_plate_map_for_data_block
     },
 }
 

@@ -66,6 +66,10 @@
                     {{ form.form_number_file_block_combos }}
                 </div>
                 {# need this in javascript #}
+                <div id="this_platemap_id">
+                    {{ object.id }}
+                </div>
+                {# need this in javascript #}
                 <div id="check_load">
                     {{ page_called }}
                 </div>
@@ -188,7 +192,7 @@
                         {# This takes FOREVER (HANDY) if queryset is not passed (dropdowns often need prefetches) #}
                         {# Study should be passed in backend - do not to the following!#}
                         {# {% include 'generic_field.html' with field=form.study label="Study" %}#}
-                        {# <div class="hidden"><p>plate map id {{ object.id }}</p></div>#}
+
                         {# {{ object.study_assay_id }} #}
                         {# {{ object.study_assay }} #}
                         {# {{ form.instance.study_assay }} #}
@@ -407,7 +411,7 @@
 
                                 <div class="col-md-3">
                                     <div><p id="sample_time_tooltip"></p>
-                                        <label for="sample_time_tooltip">Sample Time (saved with file) &nbsp;</label>
+{#                                        <label for="sample_time_tooltip">Sample Time (saved with file) &nbsp;</label>#}
                                     </div>
                                 </div>
 
@@ -452,7 +456,7 @@
                                 </div>
 
                                 <div class="col-md-2 plate-map-page-field-contents">
-                                    <p>Edit not currently allowed.</p>
+{#                                    <p>Edit not currently allowed.</p>#}
 {#                                    {{ assay_map_additional_info.form_number_time }}#}
                                 </div>
                                 <div class="col-md-1">
@@ -966,7 +970,6 @@
             </div>
 
             {# changes are made to the formsets and then saved   #}
-    {# !!!!! when these are commented out, the form loads fast, not sure if issue with form or with js that happens when loads  #}
             {# need this (mangement_form) or form will not save   #}
             {{ formset.management_form }}
             <div class="hidden">
@@ -985,6 +988,7 @@
                     </div>
                 </div>
             </div>
+
             {{ value_formset.management_form }}
             <div class="hidden">
                 <div class="no-selectize">
@@ -1012,6 +1016,7 @@
                     {% endfor %}
                 {% endif %}
                 <br>
+
                 {# this is not tested as of 20200107  #}
                 {% if value_formset.errors %}
                     {% for field, error in value_formset.errors.items %}

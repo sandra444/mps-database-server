@@ -3206,6 +3206,7 @@ def review_plate_reader_data_file_format(my_file_object, set_dict):
         max_number_of_rows_labeled_blank = 8888
         for each in file_list:
             if each[0].lower() == '~blank':
+                # print("fits: ", fits)
                 max_number_of_rows_labeled_blank = fits - 2
                 break
             fits = fits + 1
@@ -3363,7 +3364,7 @@ def review_plate_reader_data_file_format(my_file_object, set_dict):
         for each in file_list:
             # print(each[0])
             if each[0].lower() == '~blank':
-                end_block_indexes.append(fits)
+                end_block_indexes.append(fits-1)
             fits = fits + 1
 
         if len(end_block_indexes) > 0:

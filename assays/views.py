@@ -2687,6 +2687,7 @@ class AssayPlateReaderMapAdd(StudyGroupMixin, CreateView):
             instance=form.instance,
             study=study
         )
+        # this is the add page, so yes, we want to call the value_formset
         value_formset = AssayPlateReaderMapItemValueFormSetFactory(
             self.request.POST,
             instance=form.instance,
@@ -2764,19 +2765,32 @@ class AssayPlateReaderMapUpdate(StudyGroupMixin, UpdateView):
                     instance=self.object,
                     user=self.request.user
                 )
-        # print("calling value formset")
-        if 'value_formset' not in context:
-            if self.request.POST:
-                context['value_formset'] = AssayPlateReaderMapItemValueFormSetFactory(
-                        self.request.POST,
+
+        # adding 20200113
+        value_formsets_include_template = AssayPlateReaderMapItemValue.objects.filter(
+            assayplatereadermap=self.object
+        ).filter(
+            plate_index=0
+        )
+        # one is the empty set (no file/block attached) - the template value set
+        if len(value_formsets_include_template) == 1:
+
+            if 'value_formset' not in context:
+                if self.request.POST:
+                    context['value_formset'] = AssayPlateReaderMapItemValueFormSetFactory(
+                            self.request.POST,
+                            instance=self.object,
+                            user=self.request.user
+                    )
+                else:
+                    context['value_formset'] = AssayPlateReaderMapItemValueFormSetFactory(
                         instance=self.object,
                         user=self.request.user
-                )
-            else:
-                context['value_formset'] = AssayPlateReaderMapItemValueFormSetFactory(
-                    instance=self.object,
-                    user=self.request.user
-                )
+                    )
+        else:
+            context['value_formset'] = "None"
+        # end update fo 20200113
+
         # print("back")
         # move to ajax for performance reasons
         # return_list = get_matrix_item_information_for_plate_map(self.object.study_id)
@@ -2804,12 +2818,26 @@ class AssayPlateReaderMapUpdate(StudyGroupMixin, UpdateView):
             self.request.POST,
             instance=self.object
         )
-        value_formset = AssayPlateReaderMapItemValueFormSetFactory(
-            self.request.POST,
-            instance=self.object
+
+        # adding 20200113
+        value_formsets_include_template = AssayPlateReaderMapItemValue.objects.filter(
+            assayplatereadermap=self.object
+        ).filter(
+            plate_index=0
         )
-        formsets = [formset, value_formset, ]
-        formsets_are_valid = True
+        # one is the empty set (no file/block attached) - the template value set
+        if len(value_formsets_include_template) == 1:
+
+            value_formset = AssayPlateReaderMapItemValueFormSetFactory(
+                self.request.POST,
+                instance=self.object
+            )
+            formsets = [formset, value_formset, ]
+            formsets_are_valid = True
+        else:
+            formsets = [formset, ]
+            formsets_are_valid = True
+        # end update fo 20200113
 
         for formset in formsets:
             if not formset.is_valid():
@@ -2836,9 +2864,6 @@ class AssayPlateReaderMapView(StudyGroupMixin, UpdateView):
         #####
         context['assay_map_additional_info'] = AssayPlateReadMapAdditionalInfoForm(study_id=self.object.study_id)
 
-        #     todo-sck change this so that, if there is a value set that has the file filed in, the ones with the null file do not get sent to the plate map
-        #  do it in the review view also
-
         if 'formset' not in context:
             if self.request.POST:
                 context['formset'] = AssayPlateReaderMapItemFormSetFactory(
@@ -2852,18 +2877,30 @@ class AssayPlateReaderMapView(StudyGroupMixin, UpdateView):
                     user=self.request.user
                 )
 
-        if 'value_formset' not in context:
-            if self.request.POST:
-                context['value_formset'] = AssayPlateReaderMapItemValueFormSetFactory(
-                        self.request.POST,
+        # adding/changed 20200113
+        value_formsets_include_template = AssayPlateReaderMapItemValue.objects.filter(
+            assayplatereadermap=self.object
+        ).filter(
+            plate_index=0
+        )
+        # one is the empty set (no file/block attached) - the template value set
+        if len(value_formsets_include_template) == 1:
+
+            if 'value_formset' not in context:
+                if self.request.POST:
+                    context['value_formset'] = AssayPlateReaderMapItemValueFormSetFactory(
+                            self.request.POST,
+                            instance=self.object,
+                            user=self.request.user
+                    )
+                else:
+                    context['value_formset'] = AssayPlateReaderMapItemValueFormSetFactory(
                         instance=self.object,
                         user=self.request.user
-                )
-            else:
-                context['value_formset'] = AssayPlateReaderMapItemValueFormSetFactory(
-                    instance=self.object,
-                    user=self.request.user
-                )
+                    )
+        else:
+            context['value_formset'] = "None"
+        # end update fo 20200113
 
         # move to ajax for performance reasons
         # return_list = get_matrix_item_information_for_plate_map(self.object.study_id)
