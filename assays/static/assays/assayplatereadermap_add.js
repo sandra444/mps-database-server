@@ -905,14 +905,15 @@ $(document).ready(function () {
                 $('#collection_volume-' + idx).addClass('hidden');
                 $('#collection_time-' + idx).addClass('hidden');
                 $('#show_block_raw_value-' + idx).addClass('hidden');
-                // TODO-sck CHECK THIS after get data in
-                $('#default_time-' + idx).addClass('hidden');
-                $('#time-' + idx).addClass('hidden');
+                // $('#default_time-' + idx).addClass('hidden');
+                // $('#time-' + idx).addClass('hidden');
             }
             if (my_well_use === 'blank') {
                 $('#standard_value-' + idx).addClass('hidden');
             } else if (my_well_use === 'empty') {
                 $('#standard_value-' + idx).addClass('hidden');
+                $('#default_time-' + idx).addClass('hidden');
+                $('#time-' + idx).addClass('hidden');
                 // $('#well_use-' + idx).addClass('hidden');
             } else if (my_well_use === 'sample') {
                 $('#standard_value-' + idx).addClass('hidden');
@@ -1382,13 +1383,16 @@ $(document).ready(function () {
     // this is called for each well that is "apply" buttoned or "drag" ed over
     // empties the things that are NOT part of the selected well use for this well in the plate map
     function welluseChange(idx) {
+        let my_value_formset_index = idx;
+
+        // on 20200114 changed the logic and do not need the value formset to be different than the item formset
         // if add page or page where no file/block has been assigned, my_value_index = idx,
         // get index of entire value set from the attribute that was found in findValueSet
         // and added when the plate map table was created
-        let my_value_formset_index = idx;
-        if (global_plate_number_file_block_sets > 0) {
-            my_value_formset_index = $('#time-' + idx).prop('value-formset-index');
-        }
+        // if (global_plate_number_file_block_sets > 0) {
+        //     my_value_formset_index = $('#time-' + idx).prop('value-formset-index');
+        // }
+
         $('#well_use-' + idx).text(global_plate_well_use);
         $('#id_assayplatereadermapitem_set-' + idx + '-well_use').val(global_plate_well_use);
         $('#id_assayplatereadermapitemvalue_set-' + my_value_formset_index + '-well_use').val(global_plate_well_use);
