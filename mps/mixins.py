@@ -355,6 +355,25 @@ class DeletionMixin(object):
                         can_be_deleted = False
                         break
 
+        # Gets rather specific... REFACTOR
+        # Check if there are data points, forbid if yes
+        if study and getattr(self.object, 'assaydatapoint_set', None):
+            if self.object.assaydatapoint_set.count() > 0:
+                return PermissionDenied(
+                    self.request,
+                    'Data Points depend on this, so it cannot be deleted.'
+                    ' Either delete the linked Data Points or contact a Database Administrator if you would like to delete this.'
+                )
+        elif study and getattr(self.object, 'assaymatrixitem_set', None):
+            # Inefficient
+            for matrix_item in self.object.assaymatrixitem_set.all():
+                if matrix_item.assaydatapoint_set.count() > 0:
+                    return PermissionDenied(
+                        self.request,
+                        'Data Points depend on this, so it cannot be deleted.'
+                        ' Either delete the linked Data Points or contact a Database Administrator if you would like to delete this.'
+                    )
+
         if not can_be_deleted:
             return PermissionDenied(
                 self.request,
