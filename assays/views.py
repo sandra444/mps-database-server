@@ -3175,3 +3175,7 @@ def get_current_upload_template(request):
     response['Content-Disposition'] = 'attachment;filename="MPSUploadTemplate.xlsx"'
 
     return response
+
+
+class PBPKFilterView(TemplateView):
+    template_name = 'assays/assay_pbpk_filter.html'
