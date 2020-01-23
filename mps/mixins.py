@@ -484,6 +484,10 @@ class FormHandlerMixin(object):
 
         return kwargs
 
+    def pre_save_processing(self, form):
+        """For if there needs to be extra processing before a save"""
+        pass
+
     def extra_form_processing(self):
         """For if there needs to be extra processing after a save"""
         pass
@@ -564,6 +568,9 @@ class FormHandlerMixin(object):
                 all_formsets_valid = False
 
         if form.is_valid() and all_formsets_valid:
+            # May or may not do anything
+            self.pre_save_processing(form)
+
             save_forms_with_tracking(self, form, formset=all_formsets, update=self.is_update)
 
             # May or may not do anything

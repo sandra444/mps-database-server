@@ -78,7 +78,8 @@ from django import forms
 from assays.ajax import get_data_as_csv, fetch_data_points_from_filters
 from assays.utils import (
     AssayFileProcessor,
-    get_user_accessible_studies
+    get_user_accessible_studies,
+    modify_templates
 )
 
 from django.forms.models import inlineformset_factory
@@ -2584,6 +2585,21 @@ class AssayTargetMixin(FormHandlerMixin):
     model = AssayTarget
     form_class = AssayTargetForm
 
+    templates_need_to_be_modified = False
+
+    def pre_save_processing(self, form):
+        """For dealing with new targets/changing names"""
+        # Modify templates immediately if new
+        if not self.object or not self.object.id:
+            self.templates_need_to_be_modified = True
+        elif self.object.name != form.cleaned_data.get('name', ''):
+            self.templates_need_to_be_modified = True
+        elif self.object.short_name != form.cleaned_data.get('short_name', ''):
+            self.templates_need_to_be_modified = True
+
+    def extra_form_processing(self):
+        if self.templates_need_to_be_modified:
+            modify_templates()
 
 class AssayTargetAdd(OneGroupRequiredMixin, AssayTargetMixin, CreateView):
     pass
@@ -2626,6 +2642,20 @@ class AssayTargetDetail(DetailView):
 class AssayMethodMixin(FormHandlerMixin):
     model = AssayMethod
     form_class = AssayMethodForm
+
+    templates_need_to_be_modified = False
+
+    def pre_save_processing(self, form):
+        """For dealing with new targets/changing names"""
+        # Modify templates immediately if new
+        if not self.object or not self.object.id:
+            self.templates_need_to_be_modified = True
+        elif self.object.name != form.cleaned_data.get('name', ''):
+            self.templates_need_to_be_modified = True
+
+    def extra_form_processing(self):
+        if self.templates_need_to_be_modified:
+            modify_templates()
 
 
 class AssayMethodAdd(OneGroupRequiredMixin, AssayMethodMixin, CreateView):
@@ -2691,6 +2721,20 @@ class PhysicalUnitsMixin(FormHandlerMixin):
     model = PhysicalUnits
     form_class = PhysicalUnitsForm
 
+    templates_need_to_be_modified = False
+
+    def pre_save_processing(self, form):
+        """For dealing with new targets/changing names"""
+        # Modify templates immediately if new
+        if not self.object or not self.object.id:
+            self.templates_need_to_be_modified = True
+        elif self.object.name != form.cleaned_data.get('name', ''):
+            self.templates_need_to_be_modified = True
+
+    def extra_form_processing(self):
+        if self.templates_need_to_be_modified:
+            modify_templates()
+
 
 class PhysicalUnitsAdd(OneGroupRequiredMixin, PhysicalUnitsMixin, CreateView):
     pass
@@ -2740,6 +2784,20 @@ class AssayMeasurementTypeList(ListHandlerMixin, ListView):
 class AssaySampleLocationMixin(FormHandlerMixin):
     model = AssaySampleLocation
     form_class = AssaySampleLocationForm
+
+    templates_need_to_be_modified = False
+
+    def pre_save_processing(self, form):
+        """For dealing with new targets/changing names"""
+        # Modify templates immediately if new
+        if not self.object or not self.object.id:
+            self.templates_need_to_be_modified = True
+        elif self.object.name != form.cleaned_data.get('name', ''):
+            self.templates_need_to_be_modified = True
+
+    def extra_form_processing(self):
+        if self.templates_need_to_be_modified:
+            modify_templates()
 
 
 class AssaySampleLocationAdd(OneGroupRequiredMixin, AssaySampleLocationMixin, CreateView):
