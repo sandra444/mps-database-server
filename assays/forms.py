@@ -2318,7 +2318,7 @@ class AssayPlateReadMapAdditionalInfoForm(forms.Form):
     form_number_collection_time.widget.attrs.update({'class': 'form-control'})
     form_number_increment_value = forms.DecimalField(
         required=False,
-        initial=0,
+        initial=1,
     )
     form_number_increment_value.widget.attrs.update({'class': 'form-control'})
 
@@ -2337,6 +2337,7 @@ class AssayPlateReaderMapForm(BootstrapForm):
             'study_assay',
             'time_unit',
             'volume_unit',
+            'standard_unit',
             'cell_count',
         ]
         widgets = {
@@ -2390,10 +2391,12 @@ class AssayPlateReaderMapForm(BootstrapForm):
             'assayplatereadermapdatafileblock__id',
             'plate_index',
         )
-        #
+
         distinct_plate_map_with_select_string = []
         distinct_plate_map_with_block_pk = []
         number_filed_combos = len(as_value_formset_with_file_block)
+
+        # print("print number of filed combos-forms.py: ", number_filed_combos)
 
         # queryset should have one record for each value SET that HAS a file-block associated to it
         # make a choice list/field for the file-block combos for this plate map
@@ -2717,10 +2720,10 @@ class AssayPlateReaderMapDataFileBlockForm(forms.ModelForm):
                                                    # 'style': 'border-color: transparent;',
                                                    'style': 'background-color: transparent;',
                                                    }),
-            'line_start': forms.NumberInput(attrs={'class': 'form-control'}),
-            'line_end': forms.NumberInput(attrs={'class': 'form-control'}),
-            'delimited_start': forms.NumberInput(attrs={'class': 'form-control'}),
-            'delimited_end': forms.NumberInput(attrs={'class': 'form-control'}),
+            'line_start': forms.NumberInput(attrs={'class': 'form-control required'}),
+            'line_end': forms.NumberInput(attrs={'class': 'form-control required'}),
+            'delimited_start': forms.NumberInput(attrs={'class': 'form-control required'}),
+            'delimited_end': forms.NumberInput(attrs={'class': 'form-control required'}),
             'over_write_sample_time': forms.NumberInput(attrs={'class': 'form-control'}),
             'data_block_metadata': forms.Textarea(attrs={'cols': 80, 'rows': 1, 'class': 'form-control'}),
         }
@@ -2730,9 +2733,11 @@ class AssayPlateReaderMapDataFileBlockForm(forms.ModelForm):
         self.study = kwargs.pop('study', None)
         self.user = kwargs.pop('user', None)
         super(AssayPlateReaderMapDataFileBlockForm, self).__init__(*args, **kwargs)
+
         # this made the dropdown behave when copied with the formset!
         # SUPER IMPORTANT and HANDY when need to copy formsets with dropdowns - if have selectized, it is a big mess
-        self.fields['assayplatereadermap'].widget.attrs.update({'class': ' no-selectize'})
+        self.fields['assayplatereadermap'].widget.attrs.update({'class': ' no-selectize required'})
+
 
     # move to the java script...it will be better for the user
     # def clean(self):
@@ -2769,6 +2774,21 @@ class AssayPlateReaderMapDataFileBlockForm(forms.ModelForm):
 
 # formsets
 class AssayPlateReaderMapFileBlockFormSet(BaseInlineFormSetForcedUniqueness):
+    custom_fields_for_limiting_list = (
+        'assayplatereadermap',
+    )
+
+    # tried putting this in the Form, but had some issues
+    # print(self.fields['assayplatereadermap'].queryset)
+    # #
+    # # next line makes it work
+    # self.study = 293
+    # print(self.study)
+    # self.fields['assayplatereadermap'].queryset = AssayPlateReaderMap.objects.filter(
+    #     study_id=self.study
+    # )
+    #
+    # # print(self.fields['assayplatereadermap'].queryset)
 
     def __init__(self, *args, **kwargs):
         # Get the study
@@ -2781,10 +2801,11 @@ class AssayPlateReaderMapFileBlockFormSet(BaseInlineFormSetForcedUniqueness):
 
         idx = 0
         for formset in self.forms:
-            # print(idx, " forms.py AssayPlateReaderMapFileBlockFormSet ")
-            # print(formset)
-            # for field in self.custom_fields:
-            #     form.fields[field] = field
+            for field in self.custom_fields_for_limiting_list:
+                formset.fields[field].queryset = AssayPlateReaderMap.objects.filter(
+                    study_id=self.study
+                    # study_id=293
+                )
             if self.study:
                 formset.instance.study = self.study
             if formset.instance.pk:

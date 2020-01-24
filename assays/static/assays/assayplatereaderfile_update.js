@@ -123,7 +123,8 @@ $(document).ready(function () {
         index_css = index_css + 1;
     }
     // apply style, tried other ways, this worked best
-    document.getElementById('id_upload_plate_size').style.borderStyle = 'none';
+    try {document.getElementById('id_upload_plate_size').style.borderStyle = 'none';}
+    catch (err) {}
 
     // END SECTION FOR LOADING
 
@@ -214,7 +215,7 @@ $(document).ready(function () {
         //
         // }
 
-        // Important: this was designed with the assumption that the name of the file would contain the plate size o
+        // Important: this was originally designed with the assumption that the name of the file would contain the plate size o
         // if (myt.includes("(24)") || myt.includes("(96)") || myt.includes("(384)")) {
         //     if(myt.includes("(24)")) {
         //         global_file_plate_form_plate_size = 24;

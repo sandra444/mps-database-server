@@ -39,6 +39,7 @@ from assays.models import (
     AssayPlateReaderMapDataFileBlock,
     assay_plate_reader_map_info_shape_col_dict,
     assay_plate_reader_map_info_shape_row_dict,
+    assay_plate_reader_map_info_plate_size_choices,
     assay_plate_reader_map_info_plate_size_choices_list,
 )
 from assays.forms import (
@@ -74,7 +75,6 @@ from assays.forms import (
     AssayPlateReaderMapDataFileForm,
     AssayPlateReaderMapDataFileBlockFormSetFactory,
     AbstractClassAssayStudyAssay,
-
 )
 
 from microdevices.models import MicrophysiologyCenter
@@ -2564,32 +2564,97 @@ class AssayPlateReaderMapIndex(StudyViewerMixin, DetailView):
         ).prefetch_related(
             'assayplatereadermapitem_set',
         )
+        # print(assayplatereadermaps)
+
         # find block count per map id
         file_block_count = AssayPlateReaderMapDataFileBlock.objects.filter(
             study=self.object.id
+        ).exclude(
+            assayplatereadermap__exact=None
         ).values('assayplatereadermap').annotate(
             blocks=Count('assayplatereadermap')
         )
+        # print(file_block_count)
 
-        # todo-sck check this, the count may not be right.....
         # get block count to a dictionary (the iterator is for single use of the query - optional)
         file_block_count_dict = {}
         # for each in file_block_count.iterator():
+        # b = 0
         for each in file_block_count:
-            # print(each.get('assayplatereadermap'))
-            # print(each.get('blocks'))
+            # print("B ", b)
+            # print("map ", each.get('assayplatereadermap'))
+            # print("block ", each.get('blocks'))
             file_block_count_dict.update({each.get('assayplatereadermap'): each.get('blocks')})
-        # put the count of the blocks into the queryset of files (this is very HANDY)
+            # b = b + 1
+
+        # put the count of the blocks into the queryset of platemaps (this is very HANDY)
         for file in assayplatereadermaps:
             file.block_count = file_block_count_dict.get(int(file.id))
-            # print(file.id, " ",file.description, " ", file.block_count)
+            # print("block added to queryset: ", file.id, " ",file.description, " ", file.block_count)
+
+        # file count per map id
+        file_file = AssayPlateReaderMapDataFileBlock.objects.filter(
+            study=self.object.id
+        ).exclude(
+            assayplatereadermap__exact=None
+        ).order_by('assayplatereadermap', 'assayplatereadermapdatafile')
+        # print(file_file)
+
+        file_count_dict = {}
+        # get the first file so do not need to include in loop
+        for each in file_file[:1]:
+            previous_map = each.assayplatereadermap.id
+            previous_file = each.assayplatereadermapdatafile.id
+            me_map = each.assayplatereadermap.id
+            me_file = each.assayplatereadermapdatafile.id
+
+
+        files_this_map = 1
+        # counter = 1
+        # iterate without first
+        for each in file_file[1:]:
+            # print("C ", counter)
+            me_map = each.assayplatereadermap.id
+            me_file = each.assayplatereadermapdatafile.id
+
+            # print("previous_map ", previous_map)
+            # print("me_map ", me_map)
+            # print("previous_file ", previous_file)
+            # print("me_file ", me_file)
+
+            if previous_map == me_map and previous_file != me_file:
+                # same map, different file
+                files_this_map = files_this_map + 1
+                # print("files same map ", files_this_map)
+            elif previous_map != me_map:
+                # different map - do not care if same or different file
+                files_this_map = 1
+                # print("files reset ", files_this_map)
+            else:
+                # both same, nothing to do
+                pass
+
+            # remember, since a dict, will just keep replacing the count for each add plate map
+            file_count_dict.update({me_map: files_this_map})
+            previous_map = me_map
+            previous_file = me_file
+            # counter = counter + 1
+
+        # print("dict: ", file_count_dict)
+
+        for file in assayplatereadermaps:
+            file.file_count = file_count_dict.get(int(file.id))
+            # print(file.id, " ", file.description, " ", file.file_count)
+
         for file in assayplatereadermaps:
             my_tmu = str(file.study_assay)
             my_tmu_list = my_tmu.split("~@|")
             if len(my_tmu_list) > 2:
-                file.new_study_assay = "TARGET: "+my_tmu_list[1]+"  METHOD: "+my_tmu_list[2]+"  ("+my_tmu_list[3]+")"
+                file.new_study_assay = "TARGET: "+my_tmu_list[1]+"  METHOD: "+my_tmu_list[2]+"  UNIT: "+my_tmu_list[3]
             else:
                 file.new_study_assay = file.study_assay
+
+        # print(assayplatereadermaps)
 
         context['assayplatereadermaps'] = assayplatereadermaps
 
@@ -2675,9 +2740,10 @@ class AssayPlateReaderMapAdd(StudyGroupMixin, CreateView):
         # context['matrix_list_size'] = matrix_list_size
         # context['matrix_list_pk'] = matrix_list_pk
 
-        return_list = get_matrix_item_information_for_plate_map(study_id=self.kwargs['study_id'])
-        context['matrix_list_size'] = return_list[0]
-        context['matrix_list_pk'] = return_list[1]
+        # return_list = get_matrix_item_information_for_plate_map(study_id=self.kwargs['study_id'])
+        # context['matrix_list_size'] = return_list[0]
+        # context['matrix_list_pk'] = return_list[1]
+        # context['matrix_column_size'] = return_list[2]
         return context
 
     def form_valid(self, form):
@@ -2807,9 +2873,10 @@ class AssayPlateReaderMapUpdate(StudyGroupMixin, UpdateView):
         # print(len(context['value_formset']))
 
         # print("calling matrix return")
-        return_list = get_matrix_item_information_for_plate_map(self.object.study_id)
-        context['matrix_list_size'] = return_list[0]
-        context['matrix_list_pk'] = return_list[1]
+        # return_list = get_matrix_item_information_for_plate_map(self.object.study_id)
+        # context['matrix_list_size'] = return_list[0]
+        # context['matrix_list_pk'] = return_list[1]
+        # context['matrix_column_size'] = return_list[2]
         # print("returning context map update")
         return context
 
@@ -2911,9 +2978,10 @@ class AssayPlateReaderMapView(StudyGroupMixin, UpdateView):
         # context['matrix_list_size'] = matrix_list_size
         # context['matrix_list_pk'] = matrix_list_pk
 
-        return_list = get_matrix_item_information_for_plate_map(self.object.study_id)
-        context['matrix_list_size'] = return_list[0]
-        context['matrix_list_pk'] = return_list[1]
+        # return_list = get_matrix_item_information_for_plate_map(self.object.study_id)
+        # context['matrix_list_size'] = return_list[0]
+        # context['matrix_list_pk'] = return_list[1]
+        # context['matrix_column_size'] = return_list[2]
         return context
 
     # no processing of form since view does not allow saving changes
@@ -2954,6 +3022,7 @@ def get_matrix_item_information_for_plate_map(study_id):
 
     matrix_list_size = []
     matrix_list_pk = []
+    matrix_column_size = []
 
     # #  HARDCODED plate map size
     # for record in matrix_list_for_size:
@@ -2985,14 +3054,16 @@ def get_matrix_item_information_for_plate_map(study_id):
             if record.number_of_rows <= row_size and record.number_of_columns <= col_size:
                 my_size = this_size
                 my_record_id = record.id
+                my_col_size = col_size
                 break
 
         matrix_list_size.append(my_size)
         matrix_list_pk.append(my_record_id)
+        matrix_column_size.append(my_col_size)
     # END replacing the hardcoded stuff above
 
     # return matrix_items_with_setup, matrix_list_size, matrix_list_pk
-    return matrix_list_size, matrix_list_pk
+    return matrix_list_size, matrix_list_pk, matrix_column_size
 
 
 #####
@@ -3258,15 +3329,15 @@ class AssayPlateReaderMapDataFileUpdate(StudyGroupMixin, UpdateView):
             # One for each field in the form - HANDY
             # countis=0
             # for each in form:
-            #     print("FORM ", countis)
-            #     print(each)
+            #     .print("FORM ", countis)
+            #     .print(each)
             #     countis=countis+1
 
             # One for each SAVED (no extra) formset, but hard to parse - HANDY
             # countss=0
             # for each in formset:
-            #     print("FORMSET: ", countss)
-            #     print(each)
+            #     .print("FORMSET: ", countss)
+            #     .print(each)
             #     # print(each.data_block)  --  gives error, cannot get this way
             #     countss=countss+1
 
