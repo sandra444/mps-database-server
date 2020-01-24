@@ -28,6 +28,7 @@ class FeedbackResource(resources.ModelResource):
 class FeedbackAdmin(ImportExportModelAdmin):
     list_display = [
         '__str__',
+        'created',
         'type',
         'status',
         # 'duplicate',
