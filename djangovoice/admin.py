@@ -14,6 +14,7 @@ class FeedbackResource(resources.ModelResource):
         model = Feedback
         fields = (
             'title',
+            'created',
             'type__title',
             'status__title',
             # 'duplicate',
