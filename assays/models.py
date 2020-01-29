@@ -2930,6 +2930,12 @@ class AssayPlateReaderMap(FlaggableModel):
         blank=True,
         on_delete=models.CASCADE
     )
+    standard_unit = models.ForeignKey(
+        PhysicalUnits,
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE
+    )
 
     def __str__(self):
         # return '{0}'.format(self.name)
