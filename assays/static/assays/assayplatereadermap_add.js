@@ -27,26 +27,26 @@ $(document).ready(function () {
         ,];
     let global_plate_tooltip_text = [
           "Starting from an existing study matrix is helpful if the experiment was conducted in a plate based model and that same plate was used to perform a plate reader assay."
-        , "Build the plate map by selecting study matrix items and placing them in the plate."
-        , "If adding a plate map and starting from an existing plate map, if the plate map has been assigned to a file/block, select the File/Block with the desired sample times. Values from uploaded files will not be obtained."
+        , "Build the assay plate map by selecting study matrix items and placing them in the plate."
+        , "When starting from an existing assay plate map, if the assay plate map selected has been assigned to a file/block, values from uploaded files will not be obtained."
         , "This time unit applies to all sample times and sample collection times for the whole assay plate map."
         , "This unit applies to the sample collection volume. It is required when normalizing."
-        , "For blank and empty wells, select the well use and drag on plate. For samples and standards, make requested selections then drag on plate. Use Copy to copy sections of the plate map to other wells in the plate."
+        , "For blank and empty wells, select the well use and drag on plate. For samples and standards, make requested selections then drag on plate. Use Copy to copy sections of the assay plate map to other wells in the plate."
         , "Count of cells that are relevant to the assay."
-        , "Check box to make change when drag/apply. Currently cannot be edited here. Was obtained during file upload."
-        , "Check box to make change when drag/apply. Plate with mixed sample times must be added in the plate map. This sample time will be used if no over-writing sample time is input during file upload."
-        , "Check box to make change when drag/apply. Select the location in the model, if applicable, from which the effluent was collected."
+        , "Currently cannot be edited here. Was obtained during file upload."
+        , "Check box to make change when drag/apply. Plate with mixed sample times must be added in the assay plate map. This sample time will be used if no over-writing sample time is provided during file upload."
+        , "Check box to make change when drag/apply. Select the sample location in the model, if applicable, from which the effluent was collected. Use the backspace button to clear selection."
         , "Check box to make change when drag/apply. Select the name of the matrix item (chip or well in a plate) associated to the sample. Use the backspace button to clear selection."
-        , "Select the target/method/unit associated to this plate map. Use the backspace button to clear selection. "
-        , "If a standard is used in the plate map, the unit of the standard is required. "
-        , "The standard value should be in the unit given in the Assay Standard selection. Standard Method/Target/Unit should be added to the study during study set up. "
-        , "The dilution factor should be provided for each well in the plate map. "
-        , "Changes made to the plate map (including sample location and standard concentration) will apply to all uses of the plate map (all file/blocks). Changes made to the sample time will apply only a specific file/block."
-        , "The number of file/blocks this plate map has been assigned to."
+        , "Select the target/method/unit associated to this assay plate map. Use the backspace button to clear selection. "
+        , "If a standard is used in the assay plate map, the unit of the standard is required. "
+        , "The standard value should be in the unit given in the Standard Unit. "
+        , "The dilution factor should be provided for each well in the assay plate map. "
+        , "Changes made to the assay plate map (including sample location and standard concentration) will apply to all uses of the assay plate map."
+        , "The number of data blocks this assay plate map has been assigned to."
         , "Date and time are the default. The map name may be updated by the data provider."
-        , "Volume of efflux collected. Required for normalization."
-        , "Time over which the efflux was collected. Required for normalization."
-        , "The plate map information above can be edited, but not the well information. If there is an error in the well information, make a new plate map. Start with this plate map and make the correction. Then, go to the file and replace the plate map with the new one and submit. Then, delete this plate map."
+        , "Volume of sample efflux collected. Required for normalization."
+        , "Time over which the sample efflux was collected. Required for normalization."
+        , "The assay plate map information above can be edited, but not the well information. If there is an error in the well information, make a new assay plate map. Start with this assay plate map and make the correction. Then, go to the file and replace the assay plate map with the new one and submit. Then, delete this assay plate map."
         ,];
     // set the tooltips
     $.each(global_plate_tooltip_selector, function (index, show_box) {
@@ -159,7 +159,7 @@ $(document).ready(function () {
     let global_plate_mems_block_raw_value = [];
 
     // these are for holding what returned from an ajax call to get the info that matches the selected
-    // data block when one or more data blocks have been assigned to the plate map
+    // data block when one or more data blocks have been assigned to the assay assay plate map
     let global_plate_block_plate_index_list_imatches = [];
     let global_plate_block_time_imatches = [];
     let global_plate_block_raw_value_imatches = [];
@@ -175,7 +175,7 @@ $(document).ready(function () {
     let global_plate_isetup_long_cell = [];
     let global_plate_isetup_long_setting = [];
 
-    // lists to use to show/hide content in plate map based on the fancy check boxes
+    // lists to use to show/hide content in assay plate map based on the fancy check boxes
     // NOTE: this uses two parallel lists - the MUST be correctly parallel!
     let global_plate_show_hide_fancy_checkbox_selector = [
         '#show_matrix_item',
@@ -262,14 +262,14 @@ $(document).ready(function () {
     // END SECTION TO SET GLOBAL VARIABLES plus some
 
     // START - SECTION FOR CHANGES ON PAGE that have to keep track of to change on page display
-    // toggle to hide/show the customized show in plate map fancy check boxes (what will and won't show in plate)
+    // toggle to hide/show the customized show in assay plate map fancy check boxes (what will and won't show in plate)
     $("#checkboxButton").click(function () {
         $("#platemap_checkbox_section").toggle();
     });
     // class show/hide and also what is checked/unchecked based on radio button of starting option
     $("input[type='radio'][name='start_map']").click(function () {
         global_plate_start_map = $(this).val();
-        // console.log("where starting from when making plate map: ", global_plate_start_map)
+        // console.log("where starting from when making assay plate map: ", global_plate_start_map)
         $('.pick-a-matrix').addClass('hidden');
         $('.pick-a-platemap').addClass('hidden');
         $('.pick-a-plate').addClass('hidden');
@@ -314,13 +314,13 @@ $(document).ready(function () {
     });
 
     // set the global or other variables for the selections if file_block change
-    // NOTE: this is the file block for THIS plate map
-    // (not if selecting to start from a different plate map)
+    // NOTE: this is the file block for THIS assay plate map
+    // (not if selecting to start from a different assay plate map)
     $("#id_se_block_select_string").change(function () {
         findValueSetInsteadOfValueFormsetPackPlateLabelsBuildPlate_ajax("update_or_view_change_block")
     });
 
-    //change what is shown in the plate map if changed a fancy check box selection
+    //change what is shown in the assay plate map if changed a fancy check box selection
     $("input[type='checkbox']").change(function () {
         // limit to checkboxes that are part of the fancy check box selections
         // (not the check boxes that get check for what gets changed when click apply or drag)
@@ -389,7 +389,7 @@ $(document).ready(function () {
     });
     // END - SECTION FOR CHANGING PLATEMAP FOR ADD PAGE BASED ON SELECTED "STARTING" PLACE  
 
-    // START - secondary changes to plate map (Apply and Drag)
+    // START - secondary changes to assay plate map (Apply and Drag)
     // these get a plate_index_list of wells to change and sends to do the changes
     // NOTE - next line did not work as expected so used the document on HANDY
     // $(".apply-button").on("click", function(){
@@ -403,7 +403,7 @@ $(document).ready(function () {
     function selectableDragOnPlateMaster() {
         callChangeSelectedByDragOnPlate()
     }  
-    // END - secondary changes to plate map (Apply and Drag)      
+    // END - secondary changes to assay plate map (Apply and Drag)
 
     // START - ADDITIONAL FUNCTION SECTION
     function startFromAnEmptyPlate(){
@@ -445,7 +445,7 @@ $(document).ready(function () {
                 error: function (xhr, errmsg, err) {
                     window.spinner.stop();
                     // $("#test_me1").text("error happened");
-                    alert('An error has occurred, try a different matrix, plate map, or start from an empty plate.');
+                    alert('An error has occurred, try a different matrix, assay plate map, or start from an empty plate.');
                     console.log(xhr.status + ": " + xhr.responseText);
                 }
             });
@@ -543,7 +543,7 @@ $(document).ready(function () {
                 error: function (xhr, errmsg, err) {
                     window.spinner.stop();
                     // $("#test_me1").text("error happened");
-                    alert('An error has occurred, please try a different matrix, plate map, or start from an empty plate.');
+                    alert('An error has occurred, please try a different matrix, assay plate map, or start from an empty plate.');
                     console.log(xhr.status + ": " + xhr.responseText);
                 }
             });
@@ -596,10 +596,10 @@ $(document).ready(function () {
         } else {
             // this is limited to either one column or one row 
             // if make an Apply to All, don't send 
-            // get the plate_indexes of the selected wells in the plate map table
+            // get the plate_indexes of the selected wells in the assay plate map table
             let plate_index_list = [];
             // what button was pushed (what column, what row, a column or row header)
-            // find the plate map index of matching column or row (which button was click)
+            // find the assay plate map index of matching column or row (which button was click)
             let button_column_index = apply_button_that_was_clicked.attr('column-index');
             let button_row_index = apply_button_that_was_clicked.attr('row-index');
             let button_column_or_row = apply_button_that_was_clicked.attr('column-or-row');
@@ -607,7 +607,7 @@ $(document).ready(function () {
             // console.log(button_row_index)
             // console.log(button_column_or_row)
             // console.log("plate size: ", global_plate_size)
-            // and send the plate map indexes to the function for processing
+            // and send the assay plate map indexes to the function for processing
             for (var idx = 0, ls = global_plate_size; idx < ls; idx++) {
                 // console.log($('#well_use-' + idx).attr('column-index'))
                 if (button_column_or_row === 'column') {
@@ -638,8 +638,8 @@ $(document).ready(function () {
             alert('Copy/Paste will not work without a selected section to copy. Use Copy and drag.');
         } else {
             // load the lists based on what is dragged over
-            // the plate_indexes of the selected cells in the plate map table
-            // children of each cell of the plate map table that is selected
+            // the plate_indexes of the selected cells in the assay plate map table
+            // children of each cell of the assay plate map table that is selected
             // what cells were selected in the GUI
             let plate_index_list = [];
             let plate_indexes_rows = [];
@@ -691,7 +691,7 @@ $(document).ready(function () {
             $("#checkbox_collection_volume").prop("checked", true);
             $("#checkbox_collection_time").prop("checked", true);
 
-            // the plate map index list is the pastes drag index
+            // the assay plate map index list is the pastes drag index
             // console.log("plate index list before load: ", plate_index_list)
             loadPlatemapIndexAndOtherReplacementInfo(plate_index_list);
             // console.log("plate index list after load: ", plate_index_list)
@@ -872,8 +872,8 @@ $(document).ready(function () {
             // this should be for sample, standard, blank, or empty
 
             // (copys should not come here and pastes is above)
-            // Guts of loading for changing the plate map with drag or apply for sample, standard, blank, empty
-            // this executes for a list of wells/cells in the plate map table (selected with drag or Apply button)
+            // Guts of loading for changing the assay plate map with drag or apply for sample, standard, blank, empty
+            // this executes for a list of wells/cells in the assay plate map table (selected with drag or Apply button)
             // in these cases, all should be replaced with the selected thing
             // EXCEPT when INCREMENT is used
 
@@ -943,7 +943,7 @@ $(document).ready(function () {
                 // need one for EACH of the wells in the index list
                 global_plate_mems_well_use.push(global_plate_well_use);
 
-                // current residing in the formsets (text from the plate map)
+                // current residing in the formsets (text from the assay plate map)
                 let c_standard_value =         $('#id_assayplatereadermapitem_set-' + formset_number + '-standard_value').val();
                 let c_matrix_item =            $('#id_assayplatereadermapitem_set-' + formset_number + '-matrix_item').val();
                 let c_matrix_item_text =       $('#matrix_item-' + formset_number).text();
@@ -1280,7 +1280,7 @@ $(document).ready(function () {
 
     // make a function to handle changing well use not matte how it is done
     // do this because there has been changing of the mind on dropdown, radio buttons, or ???
-    // remember - copy is the copy vrs increment and copys is the copy section of plate map
+    // remember - copy is the copy vrs increment and copys is the copy section of assay plate map
     function changePageSectionShownWhenChangeRadioWellUse() {
         // called when the well use is changed
         $("input[name=change_method][value=copy]").prop("checked", true);
@@ -1318,7 +1318,7 @@ $(document).ready(function () {
         }
     }
 
-    // this uses the fancy check boxes to set what fields of the formset are visible on the plate map
+    // this uses the fancy check boxes to set what fields of the formset are visible on the assay plate map
     // when first draws plate, uses defaults, 
     // for subsequent draws, finds what is checked and redisplays them
     function setFancyCheckBoxesLoopOverFancyCheckboxClass(plate_index_list, build_or_change) {
@@ -1341,7 +1341,7 @@ $(document).ready(function () {
                 '.plate-cells-well-use',
             ];
         } else if (build_or_change === "build") {
-            // Build was from plate map or study matrix and they could have changed well use, get the defaults
+            // Build was from assay plate map or study matrix and they could have changed well use, get the defaults
             // leave it as true - call_hide_by_welluse = true;
             if (global_plate_number_file_block_sets < 1) {
                 // get the default check boxes to show
@@ -1432,7 +1432,7 @@ $(document).ready(function () {
     }
 
     function findValueSetInsteadOfValueFormsetPackPlateLabelsBuildPlate_ajax(called_from) {
-        // only get here if one or more data blocks have been attached to the plate map
+        // only get here if one or more data blocks have been attached to the assay plate map
         // get the selected index of the pk of the selected data block
         // get index of the selection box
         let local_block_index = 0;
@@ -1477,7 +1477,7 @@ $(document).ready(function () {
             // error callback
             error: function (xhr, errmsg, err) {
                 window.spinner.stop();
-                alert('An error has occurred, please try a different matrix, plate map, or start from an empty plate.');
+                alert('An error has occurred, please try a different matrix, assay plate map, or start from an empty plate.');
                 console.log(xhr.status + ": " + xhr.responseText);
             }
         });
@@ -1513,7 +1513,7 @@ $(document).ready(function () {
 
         let my_well_use = "";
         // console.log("called well use show in plate from ", where_called_from)
-        // go to each cell in plate map and hide non relevant fields
+        // go to each cell in assay plate map and hide non relevant fields
 
         for (var idx = 0, ls = global_plate_size; idx < ls; idx++) {
             // plate_index_list.forEach(function (idx) {
@@ -1551,7 +1551,7 @@ $(document).ready(function () {
         // console.log("leaving setWhatHidden")
     }
 
-    // Makes the well labels to use in building the plate map (based on the plate size)
+    // Makes the well labels to use in building the assay plate map (based on the plate size)
     // this is called when page is loaded and when START is changed (plate size, matrix, platemap)
     function packPlateLabelsAndBuildOrChangePlate_ajax() {        
         // console.log("plate size before call ajax: ",global_plate_size)
@@ -1586,7 +1586,7 @@ $(document).ready(function () {
             // error callback
             error: function (xhr, errmsg, err) {
                 window.spinner.stop();
-                alert('An error has occurred, please try a different matrix, plate map, or start from an empty plate.');
+                alert('An error has occurred, please try a different matrix, assay plate map, or start from an empty plate.');
                 console.log(xhr.status + ": " + xhr.responseText);
             }
         });
@@ -1646,7 +1646,7 @@ $(document).ready(function () {
     };
     // post processing from ajax call
     // This is the guts of the STARTING plate building function
-    // It has conditions, based on where the function was called from, which determine the content of the STARTING plate map
+    // It has conditions, based on where the function was called from, which determine the content of the STARTING assay plate map
     function buildPlate(local_plate_data_packed) {
         // console.log("global_plate_isetup_matrix_item_id
         // console.log(global_plate_isetup_matrix_item_id
@@ -1733,7 +1733,7 @@ $(document).ready(function () {
                 $(div_location).attr('row-index', ridx);
                 $(div_location).attr('column-index', cidx);
                 $(div_location).attr('id', "location-" + formsetidx);
-                $(div_location).attr('title', "Location");
+                $(div_location).attr('title', "Sample Location");
                 $(div_location).addClass('map-location plate-cells-location hidden');
 
                 let div_matrix_item = document.createElement("div");
@@ -1757,7 +1757,7 @@ $(document).ready(function () {
                 $(div_collection_volume).attr('row-index', ridx);
                 $(div_collection_volume).attr('column-index', cidx);
                 $(div_collection_volume).attr('id', "collection_volume-" + formsetidx);
-                $(div_collection_volume).attr('title', "Collection Volume");
+                $(div_collection_volume).attr('title', "Sample Efflux Volume");
                 $(div_collection_volume).addClass('map-collection-volume plate-cells-collection-volume hidden');
 
                 let div_collection_time = document.createElement("div");
@@ -1765,7 +1765,7 @@ $(document).ready(function () {
                 $(div_collection_time).attr('row-index', ridx);
                 $(div_collection_time).attr('column-index', cidx);
                 $(div_collection_time).attr('id', "collection_time-" + formsetidx);
-                $(div_collection_time).attr('title', "Collection Time");
+                $(div_collection_time).attr('title', "Sample Efflux Time");
                 $(div_collection_time).addClass('map-collection-time plate-cells-collection-time hidden');
 
                 let div_well_use = document.createElement("div");
@@ -1773,7 +1773,7 @@ $(document).ready(function () {
                 $(div_well_use).attr('row-index', ridx);
                 $(div_well_use).attr('column-index', cidx);
                 $(div_well_use).attr('id', "well_use-" + formsetidx);
-                $(div_well_use).attr('title', "Well Use");
+                $(div_well_use).attr('title', "Well Content");
                 $(div_well_use).addClass('map-well-use plate-cells-well-use hidden');
 
                 let div_compound = document.createElement("div");
@@ -1802,7 +1802,7 @@ $(document).ready(function () {
                 $(div_standard_value).attr('row-index', ridx);
                 $(div_standard_value).attr('column-index', cidx);
                 $(div_standard_value).attr('id', "standard_value-" + formsetidx);
-                $(div_standard_value).attr('title', "Standard");
+                $(div_standard_value).attr('title', "Standard Value");
                 $(div_standard_value).addClass('map-standard-value plate-cells-standard-value hidden');
 
                 let div_default_time = document.createElement("div");
@@ -1846,7 +1846,7 @@ $(document).ready(function () {
                         $('#id_assayplatereadermapitemvalue_set-TOTAL_FORMS').val(formsetidx + 1);
                     }
                     // this auto fills the fields that are needed to join the items and the items values tables
-                    // the platemap id will be the same in both since they are two formsets to the main plate map table
+                    // the platemap id will be the same in both since they are two formsets to the main assay plate map table
                     // these (item and associated values) MUST stay parallel or problems WILL happen
                     $('#id_assayplatereadermapitem_set-' + formsetidx + '-row_index').val(ridx);
                     $('#id_assayplatereadermapitem_set-' + formsetidx + '-column_index').val(cidx);
@@ -1949,7 +1949,7 @@ $(document).ready(function () {
                 }
                 // else, the map was previously saved and we are not changing the formsets
 
-                // fill content in plate map during the build
+                // fill content in assay plate map during the build
                 // which happens on load (add, view, update) and when starting point changed
                 div_well_use.appendChild(document.createTextNode(ret_well_use));
                 div_standard_value.appendChild(document.createTextNode(ret_standard_value));
@@ -2017,7 +2017,7 @@ $(document).ready(function () {
         global_plate_copys_cell = [];
         global_plate_copys_setting = [];
 
-        // load the plate map values/text for the setup info into variables
+        // load the assay plate map values/text for the setup info into variables
         plate_index_list.forEach(function (idx) {
             global_plate_copys_plate_index.push(idx);
             global_plate_copys_well_use.push($('#well_use-' + idx).text());
@@ -2193,7 +2193,7 @@ $(document).ready(function () {
         return formatted_number;
     }
 
-    // function to purge previous formsets before adding new ones when redrawing a plate map - keep
+    // function to purge previous formsets before adding new ones when redrawing a assay plate map - keep
     function addPageRemoveFormsetsBeforeBuildPlate() {
         // get rid of previous formsets before try to add more or the indexes get all messed up
         while ($('#formset').find('.inline').length > 0) {
@@ -2239,7 +2239,7 @@ $(document).ready(function () {
 
 // START - STUFF FOR REFERENCE
 // used to format the reference table - keep if show table, else, do not need this formatting
-// NOTE that the table is needed to pull setup information (using javascript) to show in plate map
+// NOTE that the table is needed to pull setup information (using javascript) to show in assay plate map
 // NOTE: if show table as DataTable, matrix items that are not displayed are not accessible,
 // $('#matrix_items_table').DataTable({
 //  //"iDisplayLength": 25,

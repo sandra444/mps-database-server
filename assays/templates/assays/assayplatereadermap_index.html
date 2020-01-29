@@ -19,7 +19,7 @@
     <div class="padded-bottom">
         <div class="well">
             <h1 class="text-center">
-                <em><b>Assay Plate Reader Map List</b></em>
+                <em><b>Assay Plate Map List</b></em>
                 <br>
                 <br>
                 Study: {{ object }}
@@ -34,7 +34,7 @@
                         {% if user|is_group_editor:object.group.name and not object.signed_off_by %}
                             {% if not review %}
                             <div>
-                                <a href="{% url 'assayplatereadermap-add' object.id %}" class="btn btn-success" role="button">Add Map</a>
+                                <a href="{% url 'assayplatereadermap-add' object.id %}" class="btn btn-success" role="button">Add Plate Map</a>
                             </div>
                             {%  endif %}
                         {% endif %}
@@ -52,13 +52,13 @@
         {% if assayplatereadermaps %}
             <div>
                 <div><p id="plate_map_index_tooltip"></p>
-                    <label for="plate_map_index_tooltip">Plate Map List &nbsp;</label>
+                    <label for="plate_map_index_tooltip">Assay Plate Map List &nbsp;</label>
                 </div>
                 <table id="assayplatereadermaps" class="display table table-striped table-hover" cellspacing="0" width="100%">
                 <thead>
                     <tr>
                         <th>View or Edit</th>
-                        <th>Plate Map Name</th>
+                        <th>Assay Plate Map Name</th>
                         <th>Plate Size</th>
                         <th>Standard Unit</th>
                         <th>Target, Method, Unit</th>

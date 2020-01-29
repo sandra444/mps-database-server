@@ -145,7 +145,7 @@ $(document).ready(function () {
           "Description for the file (optional)."
         , "Select one if using the auto detect file block feature. Best results will come from selecting the size plate used in the plate reader."
         , "This can be set by the user or auto detected."
-        , "If a value is provided, this sample time will be used for this whole data block (sample times in the selected plate map will be overwritten with this value)."
+        , "If a value is provided, this sample time will be used for this whole data block (sample times in the selected assay plate map will be overwritten with this value)."
         , "The number of blocks of data in the file."
         , "Selecting a specific format will ONLY work the follow follows that format - exactly."
         , "Set the number of blank columns to the left of the data block."
@@ -215,7 +215,7 @@ $(document).ready(function () {
         //
         // }
 
-        // Important: this was originally designed with the assumption that the name of the file would contain the plate size o
+        // Important: this was designed with the assumption that the name of the file would contain the plate size o
         // if (myt.includes("(24)") || myt.includes("(96)") || myt.includes("(384)")) {
         //     if(myt.includes("(24)")) {
         //         global_file_plate_form_plate_size = 24;
@@ -360,7 +360,7 @@ $(document).ready(function () {
                     alert(qc_item + ' \n');
                 });
             } else {
-                alert('The plate map selected for this block does not match the plate size selected with the file format (or determined using the auto detect). Select a plate map of matching size.\n');
+                alert('The assay plate map selected for this block does not match the plate size selected with the file format (or determined using the auto detect). Select an assay plate map of matching size.\n');
                 // invalid plate selected, clear the selection, find
                 let myid_plus_option = "#" + global_file_plate_map_changed_id + " option"
                 // clear a selections - HANDY
@@ -550,7 +550,7 @@ $(document).ready(function () {
             // pass
         } else {
             // (set_number_blocks == True && calculated_number_of_blocks != global_file_plate_form_number_blocks)
-            alert('The number of blocks specified does not match the number detected. Try specifying the plate size and check to make sure the file follows the rules. If the auto reader still will not return the desired block locations, specify the number of blocks and perform auto detect, then fill in the information for each block manually.\n');
+            alert('The number of blocks specified does not match the number detected. Try specifying the plate size and check to make sure the file follows the rules. If the auto reader still will not return the desired block sampels, specify the number of blocks and perform auto detect, then fill in the information for each block manually.\n');
             // console.log(calculated_number_of_blocks)
             // console.log(global_file_plate_form_number_blocks)
             add_blocks = global_file_plate_form_number_blocks - calculated_number_of_blocks;

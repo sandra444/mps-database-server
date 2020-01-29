@@ -15,9 +15,9 @@
     <li><a href="/assays/assaystudy/">Studies</a>
     <li><a href="{{ form.instance.study.get_absolute_url }}">{{ form.instance.study }}</a></li>
     {% if object %}
-        <li><a href="{% url 'assayplatereadermap-index' object.study.id %}">Assay Plate Reader Maps</a>
+        <li><a href="{% url 'assayplatereadermap-index' object.study.id %}">Assay Plate Maps</a>
     {% else %}
-        <li><a href="{% url 'assayplatereadermap-index' form.instance.study_id %}">Assay Plate Reader Maps</a>
+        <li><a href="{% url 'assayplatereadermap-index' form.instance.study_id %}">Assay Plate Maps</a>
     {% endif %}
     <li class="active">
         {% if object %}
@@ -48,7 +48,8 @@
                     </b></em><br><br>
                     {% if not add %}
 {#                         {{ object.device }}#}
-                        Well Plate Map: <em>{{ object }}</em>
+{#                        Assay Plate Map: #}
+                        <em>{{ object }}</em>
                     {% else %}
                         to Study {{ form.instance.study }}
                     {% endif %}
@@ -142,7 +143,7 @@
                                     <div class="col-md-3">
                                          <div class="plate-map-page-field-labels-small">
                                             <div><p id="platemap_select_tooltip"></p>
-                                                <label for="platemap_select_tooltip">Starting Plate Map* &nbsp;</label>
+                                                <label for="platemap_select_tooltip">Starting Assay Plate Map* &nbsp;</label>
                                             </div>
                                         </div>
                                     </div>
@@ -427,18 +428,18 @@
                                 <div class="row">
                                     <div class="col-md-3">
                                         <div><p id="sample_matrix_item_tooltip"></p>
-                                            <label for="sample_matrix_item_tooltip">Study Matrix Item &nbsp;</label>
+                                            <label for="sample_matrix_item_tooltip">Matrix Item &nbsp;</label>
                                         </div>
                                     </div>
                                     <div class="col-md-3">
                                         <div><p id="sample_location_tooltip"></p>
-                                            <label for="sample_location_tooltip">Assay Sample Location &nbsp;</label>
+                                            <label for="sample_location_tooltip">Sample Location &nbsp;</label>
                                         </div>
                                     </div>
 
                                     <div class="col-md-3">
                                          <div><p id="sample_default_time_tooltip"></p>
-                                             <label for="sample_default_time_tooltip">Assay Default Sample Time &nbsp;</label>
+                                             <label for="sample_default_time_tooltip">Default Sample Time &nbsp;</label>
                                         </div>
                                     </div>
 
@@ -508,17 +509,17 @@
                                 <div class="row">
                                     <div class="col-md-3">
                                         <div><p id="dilution_factor_tooltip"></p>
-                                            <label for="dilution_factor_tooltip">Sample Dilution Factor &nbsp;</label>
+                                            <label for="dilution_factor_tooltip">Dilution Factor &nbsp;</label>
                                         </div>
                                     </div>
                                     <div class="col-md-3">
                                         <div><p id="collection_volume_tooltip"></p>
-                                            <label for="collection_volume_tooltip">Efflux Collected Volume &nbsp;</label>
+                                            <label for="collection_volume_tooltip">Sample Efflux Collected Volume &nbsp;</label>
                                         </div>
                                     </div>
                                     <div class="col-md-3">
                                         <div><p id="collection_time_tooltip"></p>
-                                            <label for="collection_time_tooltip">Efflux Collection Time &nbsp;</label>
+                                            <label for="collection_time_tooltip">Sample Efflux Collection Time &nbsp;</label>
                                         </div>
                                     </div>
                                     <div class="col-md-3">
@@ -676,10 +677,10 @@
                         <br>
                         <div class="container">
                             <div class="row">
-                            {# <legend>Options for Drag/Apply in Plate Map</legend>#}
+                        {# <legend>Options for Drag/Apply in Assay Assay Plate Map</legend>#}
                             <div class="col-md-4">
                                 <div class=row">
-                                    <label>Plate Map Drag and Apply Action</label>
+                                    <label>Assay Plate Map Drag and Apply Action</label>
                                 </div>
                                 <div class=row">
                                     <input type="radio" name="change_method" value="copy" checked> Copy Value
@@ -741,7 +742,7 @@
                 <div>
                     <div class="col-md-12">
                         <div><p id="platemap_locked_tooltip"></p>
-                            <label for="platemap_locked_tooltip"><i>Data have been attached to this plate map. Well content is locked.</i> &nbsp;</label>
+                            <label for="platemap_locked_tooltip"><i>Data have been attached to this assay plate map. Well content is locked.</i> &nbsp;</label>
                         </div>
                     </div>
                 </div>
@@ -767,7 +768,7 @@
                         <div class="col-md-3">
                         </div>
                         <div class="col-md-6">
-                            <button type="button" class="btn btn-primary" id="checkboxButton">Show/Hide Customized Plate Map Display Options</button>
+                            <button type="button" class="btn btn-primary" id="checkboxButton">Show/Hide Customized Assay Plate Map Display Options</button>
                         </div>
                         <div class="col-md-6">
                         </div>
@@ -831,7 +832,7 @@
                                                                 <span> </span>
                                                             </label>
                                                             <label for="show_default_time" class="btn btn-default active">
-                                                                Plate Map Default Sample Time
+                                                                Default Sample Time
                                                             </label>
                                                         </div>
                                                     </div>
@@ -915,7 +916,7 @@
                                                             <span> </span>
                                                         </label>
                                                         <label for="show_label" class="btn btn-default active">
-                                                          Label
+                                                          Well Label
                                                         </label>
                                                     </div>
                                                 </div>
@@ -928,7 +929,7 @@
                                                             <span> </span>
                                                         </label>
                                                         <label for="show_compound" class="btn btn-default active">
-                                                            Compound
+                                                            Compound(s)
                                                         </label>
                                                     </div>
                                                 </div>
@@ -941,7 +942,7 @@
                                                             <span> </span>
                                                         </label>
                                                         <label for="show_cell" class="btn btn-default active">
-                                                            Cells
+                                                            Cell(s)
                                                         </label>
                                                     </div>
                                                 </div>
@@ -954,7 +955,7 @@
                                                             <span> </span>
                                                         </label>
                                                         <label for="show_setting" class="btn btn-default active">
-                                                            Settings
+                                                            Setting(s)
                                                         </label>
                                                     </div>
                                                 </div>
