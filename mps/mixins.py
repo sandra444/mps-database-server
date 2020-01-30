@@ -423,7 +423,7 @@ class CreatorAndNotInUseMixin(object):
             return PermissionDenied(
                 self.request,
                 'Other entries depend on this, so it cannot be modified.'
-                ' Either delete the linked entries (if they belong to you) or contact a Database Administrator if you would like to delete it.'
+                ' Either delete the linked entries (if they belong to you) or contact a Database Administrator if you would like to modify it.'
             )
 
         return super(CreatorAndNotInUseMixin, self).dispatch(*args, **kwargs)
