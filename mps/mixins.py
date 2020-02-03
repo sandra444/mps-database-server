@@ -312,6 +312,10 @@ class StudyDeletionMixin(object):
     @method_decorator(login_required)
     @method_decorator(user_passes_test(user_is_active))
     def dispatch(self, *args, **kwargs):
+        # Superusers always have access
+        if self.request.user.is_authenticated and self.request.user.is_superuser:
+            return super(StudyDeletionMixin, self).dispatch(*args, **kwargs)
+
         self.object = self.get_object()
 
         group = getattr(self.object, 'group', None)
