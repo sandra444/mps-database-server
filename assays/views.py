@@ -2728,7 +2728,9 @@ class PhysicalUnitsMixin(FormHandlerMixin):
         # Modify templates immediately if new
         if not self.object or not self.object.id:
             self.templates_need_to_be_modified = True
-        elif self.object.name != form.cleaned_data.get('name', ''):
+        # NOTE THIS DOES NOT USE NAME
+        # elif self.object.name != form.cleaned_data.get('name', ''):
+        elif self.object.unit != form.cleaned_data.get('unit', ''):
             self.templates_need_to_be_modified = True
 
     def extra_form_processing(self):
