@@ -1841,6 +1841,42 @@ class AssayStudy(FlaggableModel):
         verbose_name='MPS Model Version'
     )
 
+    # For PBPK
+    # PLEASE NOTE THAT WE LIKELY WILL NEED TO REFACTOR STUDY TYPES
+    # Study types for pbpk
+    pbpk_steady_state = models.BooleanField(
+        default=False,
+        # verbose_name='PBPK Steady State'
+        # verbose_name='Constant Infusion'
+        verbose_name='Continuous Infusion'
+    )
+    pbpk_bolus = models.BooleanField(
+        default=False,
+        # verbose_name='PBPK Bolus'
+        # verbose_name='Single Bolus'
+        verbose_name='Bolus'
+    )
+
+    # Estimate of PBPK relevant cells
+    # Require int
+    number_of_relevant_cells = models.IntegerField(
+        null=True,
+        blank=True,
+        verbose_name='Number of PK Relevant Cells per MPS Model'
+    )
+    # Relevant PBPK volume
+    total_device_volume = models.FloatField(
+        null=True,
+        blank=True,
+        verbose_name='Total Device Volume (μL)'
+    )
+    # Relevant PBPK flow rate
+    flow_rate = models.FloatField(
+        null=True,
+        blank=True,
+        verbose_name='Flow Rate (μL/hour)'
+    )
+
     # TODO
     # def get_study_types_string(self):
     #     study_types = '-'.join(
@@ -1919,9 +1955,11 @@ class AssayStudy(FlaggableModel):
             current_types.append('DM')
         if self.cell_characterization:
             current_types.append('CC')
+        if self.pbpk_steady_state or self.pbpk_bolus:
+            current_types.append('PK')
         return '-'.join(current_types)
 
-    # TODO
+    # TODO REVISE REVISE
     def __str__(self):
         first_center = self.group.microphysiologycenter_set.first()
         if first_center:
