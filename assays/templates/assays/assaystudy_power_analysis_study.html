@@ -35,7 +35,32 @@
 
     {% include 'assays/sidebar_extras.html' %}
 
-    <h3>Select a Set of Data for Power Analysis</h3>
+    <div class="well">
+        <div id="intro-text">
+            This statistical power analysis interface allows one to estimate the probability that a statistic test will find a significant difference between two different groups of data, such as the control and compound treatment data (two-sample power analysis), or a significance from one treatment group (one-sample power analysis).
+            <br><br>
+            <ol>
+                <li>
+                    For the two-sample power analysis method, there are four available ways to calculate effect size:
+                    <ul>
+                        <li>Cohen's Effect Size d : Mean of difference divided by the square root of pooled variance.</li>
+                        <li>Glass's Effect Size ∆ : Mean of difference divided by standard deviation of the "control" group.</li>
+                        <li>Hedge's Effect Size g : Mean of difference divided by unbiased estimate of standard deviation for two treatment groups.</li>
+                        <li>Hedge's Effect Size g*: Hedge's g normalized by gamma function of sample size n.</li>
+                    </ul>
+                </li>
+                <br>
+                <li>
+                    For the one-sample power analysis method, the effect size is defined to be the expected difference from the sample mean divided by the standard deviation. Given significance level (α), one of the parameters power, sample size, or difference can be estimated given the other two. Otherwise, a graph of potential values for two can be derived when given the third.
+                </li>
+            </ol>
+        </div>
+        <div class="text-center">
+            <button id="toggle-intro-text" class="btn btn-primary">Show/Hide Introduction</button>
+        </div>
+    </div>
+
+    <h3>Select a Dataset for Power Analysis</h3>
     <table id='group-table' class="display table-bordered" width="100%">
 
     </table>
@@ -44,14 +69,30 @@
     <div id="data_group_selections" hidden>
     </div>
 
-    <hr>
-
     <div id='compounds-table-container' hidden>
         <div id="values-vs-time-graph">
 
         </div>
         <br>
-        <h3>Select Two Compounds for Power Analysis</h3>
+        <hr>
+        <br>
+        <div class="row">
+            <div class="col-xs-12 col-lg-6 text-center well">
+                <h3>Please Select Either One Sample or Two Sample Power Analysis</h3>
+                <div class="row">
+                    <div class="col-lg-offset-3 col-xs-12 col-lg-3">
+                        <input type="radio" id="one-sample" class="big-checkbox" name="sample-num" value="one-sample" style="display: inline-block;">
+                        <label for="one-sample" style="display: inline-block;">&nbsp;&nbsp;&nbsp;One Sample </label>
+                    </div>
+                    <div class="col-xs-12 col-lg-3">
+                        <input type="radio" id="two-sample" class="big-checkbox" name="sample-num" value="two-sample" style="display: inline-block;" checked>
+                        <label for="two-sample" style="display: inline-block;">&nbsp;&nbsp;&nbsp;Two Sample </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <br>
+        <h3>Select Treatment(s) for Power Analysis</h3>
         <table id='compounds-table' class="display table-bordered">
 
         </table>
@@ -64,7 +105,7 @@
             </div>
         </div>
         <div class="row">
-            <div class="col-sm-12 ml-4 col-lg-2 col-lg-offset-4">
+            <div id="power-analysis-method-container" class="col-sm-12 ml-4 col-lg-2 col-lg-offset-4">
                 <div id="power-analysis-method" class="well" style="margin-top: 75px">
                     <label>Effect Size Methods</label><br>
                     <input type="radio" id="pam-cohen-d" name="pam" value="d" checked>
@@ -76,28 +117,29 @@
                     <input type="radio" id="pam-hedge-gstar" name="pam" value="gs">
                     <label for="pam-hedge-gstar">Hedges' g* </label>
                 </div>
-                <!-- <table id='one-sample-time-points-table' class="display table-bordered" hidden> -->
-
-                <!-- </table> -->
             </div>
-            <div id="power-analysis-options" class="col-sm-12 col-lg-2 text-center" style="margin-top: 55px;">
-                <!-- <input type="radio" id="one-sample" name="sample-num" value="one-sample">
-                <label for="one-sample">One Sample </label>
-                <br> -->
-                <input type="radio" id="two-sample" name="sample-num" value="two-sample" checked hidden>
-                <label for="two-sample" hidden>Two Sample </label>
+            <br><br>
+            <div id='one-sample-time-points-table-container' class="col-sm-12 col-lg-6" hidden>
+                <h3>Select Time Point for Single Sample Power Analysis</h3>
+                <h3>Afterwards, Examine the Interface Below</h3>
+                <table id='one-sample-time-points-table' class="display table-bordered">
+
+                </table>
+            </div>
+            <div id="power-analysis-options" class="col-sm-12 col-lg-4 text-center">
                 <br><br>
                 <label for="sig-level">Significance Level (α)</label><br>
                 <input id="sig-level" type="text" name="sig-level" size="5" value="0.05" style="margin: 10px 0px 0px 20px;">
                 <span></span>
                 <br><br>
-                <button id="power-analysis-button" class="btn btn-lg btn-primary" disabled>Run Analysis</button>
+                <button id="power-analysis-button" class="btn btn-lg btn-primary" title="Please ensure that all selections have been made before running Power Analysis." disabled>Run Analysis</button>
             </div>
         </div>
     </div>
+    <hr>
     <div id='error-container' hidden>
         <div class="alert alert-danger text-center" role="alert">
-            <h1><span class="glyphicon glyphicon-warning-sign" aria-hidden="true"></span><br>Power Analysis Cannot be Completed on This Dataset</h1>
+            <h1><span class="glyphicon glyphicon-warning-sign" aria-hidden="true"></span><br><span id="error-text"></span></h1>
         </div>
     </div>
     <div id='two-sample-power-analysis-container' hidden>
@@ -130,24 +172,24 @@
             </div>
         </div>
     </div>
-    <!-- <div id='one-sample-power-analysis-container' hidden>
-        <div class="row">
-            <div class="col-xs-4">
+    <div id='one-sample-power-analysis-container' hidden>
+        <div class="row padded-bottom">
+            <div class="col-sm-4">
                 <table id='one-sample-summary-table' class="display table table-bordered table-condensed">
                     <thead>
                         <tr>
                             <th>Time (day)</th>
-                            <th>Number of Samples</th>
+                            <th># of Samples</th>
                             <th>Mean</th>
                             <th>Standard Deviation</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr>
-                            <td id="summary-time">&nbsp;</td>
-                            <td id="summary-sample-number">&nbsp;</td>
-                            <td id="summary-mean">&nbsp;</td>
-                            <td id="summary-std">&nbsp;</td>
+                            <td id="summary-time" style="white-space: nowrap">&nbsp;</td>
+                            <td id="summary-sample-number" style="white-space: nowrap">&nbsp;</td>
+                            <td id="summary-mean" style="white-space: nowrap">&nbsp;</td>
+                            <td id="summary-std" style="white-space: nowrap">&nbsp;</td>
                         </tr>
                     </tbody>
                 </table>
@@ -156,45 +198,53 @@
                 <table id='one-sample-power-analysis-report' class="display table table-bordered table-condensed">
                     <thead>
                         <tr>
-                            <th>Differences</th>
-                            <th>% Change (from mean)</th>
+                            <th>#</th>
+                            <th style="white-space: nowrap">Difference (from mean)</th>
+                            <th>OR</th>
+                            <th style="white-space: nowrap">% Change (from mean)</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr>
-                            <td><input id="one-sample-diff" type="text" style="display:table-cell; width:100%"></td>
-                            <td><input id="one-sample-percent" type="text" style="display:table-cell; width:100%"></td>
+                            <td>1</td>
+                            <td><input id="one-sample-diff" type="number" style="display:table-cell; width:100%"></td>
+                            <td></td>
+                            <td><input id="one-sample-percent" type="number" style="display:table-cell; width:100%"></td>
                         </tr>
                     </tbody>
                     <thead>
                         <tr>
+                            <td></td>
                             <th>Sample Size</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr>
-                            <td><input id="one-sample-size" type="text" style="display:table-cell; width:100%"></td>
+                            <td>2</td>
+                            <td><input id="one-sample-size" type="number" style="display:table-cell; width:100%"></td>
                         </tr>
                     </tbody>
                     <thead>
                         <tr>
+                            <td></td>
                             <th>Power</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr>
-                            <td><input id="one-sample-power" type="text" value="0.8" style="display:table-cell; width:100%"></td>
+                            <td>3</td>
+                            <td><input id="one-sample-power" type="number" value="0.8" style="display:table-cell; width:100%"></td>
                         </tr>
                     </tbody>
                 </table>
             </div>
-            <div class="col-xs-8">
+            <div class="col-sm-8">
                 <div id="one-sample-multi-graph">
 
                 </div>
             </div>
         </div>
-    </div> -->
+    </div>
 
     {# Just a spacer (and yes, inline styles are ugly)#}
     <div style="padding-bottom: 250px;"></div>
