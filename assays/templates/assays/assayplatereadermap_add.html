@@ -1140,36 +1140,39 @@
                 </div>
             {% endif %}
 
-{#        THE PROCESSING DATA SECTION #}
-            <div>
+            {#        THE PROCESSING DATA SECTION #}
+            {% if form.form_number_file_block_combos.value > 0 %}
                 <div>
-                    <label>Process the Data for the File Block</label>
-                    <p>NONE OF THIS WORKS YET...JUST PROPOSING WHERE TO PUT IT</p>
+                    <div>
+                        <label>Process the Data for the File Block</label>
+                        <p>NONE OF THIS WORKS YET...JUST PROPOSING WHERE TO PUT IT</p>
+                    </div>
+                    <p>Pick Data Block with Standards (show if no standards on plate) with option Do Not Calibrate</p>
+                    <p>show graph of standard points and samples fitted to a default curve</p>
+                    <p>show list of curve options and other options (min, max)</p>
+                    <p>would it be worth it, instead of showing values in purple, show as heat map?</p>
                 </div>
-                <p>Pick Data Block with Standards (show if no standards on plate) with option Do Not Calibrate</p>
-                <p>show graph of standard points and samples fitted to a default curve</p>
-                <p>show list of curve options and other options (min, max)</p>
-                <p>would it be worth it, instead of showing values in purple, show as heat map?</p>
-            </div>
+            {% endif %}
 
-{#        THE EXPORT DATA SECTION #}
-            <div>
+            {#        THE EXPORT DATA SECTION #}
+            {% if form.form_number_file_block_combos.value > 0 %}
                 <div>
-                    <br>
-                    <label>Exporting Data to MIF-C</label>
-                    <p>Data for each block can be exported to a MIF-C file, then uploaded into the study following
-                    the same protocol used for data prepared outside of this plate reader tool.
-                    If desired, caution flags can be added and data points marked for exclusion in the MIF-C file
-                    prior to upload.</p>
+                    <div>
+                        <br>
+                        <label>Exporting Data to MIF-C</label>
+                        <p>Data for each block can be exported to a MIF-C file, then uploaded into the study following
+                        the same protocol used for data prepared outside of this plate reader tool.
+                        If desired, caution flags can be added and data points marked for exclusion in the MIF-C file
+                        prior to upload.</p>
+                    </div>
+
+                    <div >
+                        <p></p>
+                        <button type="button" class="btn btn-primary" id="exportToMIFCButton">Export to MIF-C</button>
+                    </div>
+
                 </div>
-
-                <div >
-                    <p></p>
-                    <button type="button" class="btn btn-primary" id="exportToMIFCButton">Export to MIF-C</button>
-                </div>
-
-            </div>
-
+            {% endif %}
 
             {# these are the ones that show to user  #}
             <div>

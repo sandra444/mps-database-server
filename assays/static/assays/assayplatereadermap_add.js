@@ -1,4 +1,78 @@
 $(document).ready(function () {
+
+    //color ramp options
+    global_color_ramp_light_to_medium_purple = [
+        '#F9F6FB',
+        '#f2e6ff',
+        '#e6ccff',
+        '#d9b3ff',
+        '#cc99ff',
+        '#bf80ff',
+        '#b366ff',
+        // '#a64dff',
+        // '#9933ff',
+        // '#8c1aff',
+        // '#8000ff',
+    ];
+
+    global_color_ramp_light_to_dark_red = [
+                '#F8F8F8',
+        '#FFEBEE',
+        '#FFCDD2',
+        '#EF9A9A',
+        '#E57373',
+        '#EF5350',
+        '#F44336',
+        '#E53935',
+        '#D32F2F',
+        '#C62828',
+        '#B71C1C',
+    ];
+
+    global_color_ramp_light_to_dark_indigo = [
+                '#F8F8F8',
+        '#E8EAF6',
+        '#C5CAE9',
+        '#9FA8DA',
+        '#7986CB',
+        '#5C6BC0',
+        '#3F51B5',
+        '#3949AB',
+        '#303F9F',
+        '#283593',
+        '#1A237E',
+    ];
+
+    global_color_ramp_light_to_dark_dark_orange = [
+                '#F8F8F8',
+        '#FBE9E7',
+        '#FFCCBC',
+        '#FFAB91',
+        '#FF8A65',
+        '#FF7043',
+        '#FF5722',
+        '#F4511E',
+        '#E64A19',
+        '#D84315',
+        '#BF360C',
+    ];
+
+    global_color_ramp_light_to_dark_orange = [
+                '#F8F8F8',
+        '#FFF3E0',
+        '#FFE0B2',
+        '#FFCC80',
+        '#FFB74D',
+        '#FFA726',
+        '#FF9800',
+        '#FB8C00',
+        '#F57C00',
+        '#EF6C00',
+        '#E65100',
+    ];
+
+    global_color_ramp_use_this_ramp = global_color_ramp_light_to_medium_purple;
+
     // START SECTION THAT SETS TOOLTIPS - and some variables
     // make lists for the tooltips
     // just add in parallel if need more tooltips - must be para||el!
@@ -163,6 +237,7 @@ $(document).ready(function () {
     let global_plate_block_plate_index_list_imatches = [];
     let global_plate_block_time_imatches = [];
     let global_plate_block_raw_value_imatches = [];
+    let global_plate_block_raw_value_imatches_bin_index = [];
 
     // make the para||el lists of the matrix id, compound, cell, setting setup info
     // instead of sending from back end and needing a doc id for each
@@ -1499,6 +1574,7 @@ $(document).ready(function () {
             call: 'fetch_information_for_value_set_of_plate_map_for_data_block',
             pk_data_block: local_plate_block_pk,
             pk_platemap: global_plate_this_platemap_id,
+            num_colors: global_color_ramp_use_this_ramp.length,
             csrfmiddlewaretoken: window.COOKIES.csrfmiddlewaretoken
         };
         window.spinner.spin(document.getElementById("spinner"));
@@ -1534,13 +1610,16 @@ $(document).ready(function () {
         global_plate_block_plate_index_list_imatches = [];
         global_plate_block_time_imatches = [];
         global_plate_block_raw_value_imatches = [];
+        global_plate_block_raw_value_imatches_bin_index = [];
 
         $.each(block_data, function (index, each) {
             // console.log("each ", each)
             global_plate_block_plate_index_list_imatches.push(index);
             global_plate_block_time_imatches.push(each.time);
             global_plate_block_raw_value_imatches.push(each.raw_value);
+            global_plate_block_raw_value_imatches_bin_index.push(each.bin_index);
         });
+
 
         // console.log(global_plate_block_plate_index_list_imatches)
         // console.log(global_plate_block_time_imatches)
@@ -1561,6 +1640,7 @@ $(document).ready(function () {
         // go to each cell in assay plate map and hide non relevant fields
 
         for (var idx = 0, ls = global_plate_size; idx < ls; idx++) {
+            setHeatMapColorOfRawValue(idx);
             // plate_index_list.forEach(function (idx) {
             // note, cannot use the mems well use because it is not a complete list for the study matrix start
             // my_well_use =  $('#id_assayplatereadermapitem_set-' + idx + '-well_use').val();
@@ -2205,6 +2285,14 @@ $(document).ready(function () {
         }
     }
 
+    function setHeatMapColorOfRawValue(formsetidx) {
+        let this_color = global_color_ramp_use_this_ramp[global_plate_block_raw_value_imatches_bin_index[formsetidx]];
+        // console.log(formsetidx)
+        // console.log(this_color)
+        let this_element = 'block_raw_value-' + formsetidx;
+        document.getElementById(this_element).style.backgroundColor = this_color;
+    }
+
     // general function to find selected radio button
     function displayRadioButtonSelectedValue(elementName) {
         var ele = document.getElementsByName(elementName);
@@ -2373,3 +2461,5 @@ $(document).ready(function () {
 // $('#value_formset').children().each(function(cfs) {
 //  my_block_raw_value_v = "id_assayplatereadermapitemvalue_set-" + cfs + "-raw_value";
 //  }
+
+
