@@ -2406,6 +2406,8 @@ class AssayTargetForm(BootstrapForm):
             self.fields['category'].initial = (
                 self.initial_categories
             )
+        else:
+            self.initial_categories = AssayCategory.objects.none()
 
         # Sort the methods
         # Would it be better to have this applied to all method queries?
@@ -2454,6 +2456,8 @@ class AssayMethodForm(BootstrapForm):
             self.fields['target'].initial = (
                 self.initial_targets
             )
+        else:
+            self.initial_targets = AssayTarget.objects.none()
 
     def save(self, commit=True):
         new_method = super(AssayMethodForm, self).save(commit)
