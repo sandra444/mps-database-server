@@ -66,7 +66,8 @@ from assays.views import (
     AssayMeasurementTypeAdd,
     AssayMeasurementTypeUpdate,
     AssayMeasurementTypeList,
-    AssayStudyComponents
+    AssayStudyComponents,
+    get_current_upload_template
 )
 import assays.ajax
 
@@ -211,6 +212,9 @@ urlpatterns = [
 
     # Should this be here?
     url(r'^studycomponents/$', AssayStudyComponents.as_view(), name='assays-studycomponents'),
+
+    # Get the current upload template
+    url(r'^assays/current_upload_template/$', get_current_upload_template, name='assays-currentuploadtemplate'),
 
     # Ajax
     url(r'^assays_ajax/$', assays.ajax.ajax),

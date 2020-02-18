@@ -18,7 +18,7 @@ from assays.utils import (
     # modify_qc_status_chip,
     # modify_qc_status_plate,
     DEFAULT_CSV_HEADER,
-    modify_templates
+    # modify_templates
 )
 # TODO SPAGHETTI CODE
 # from django.http import HttpResponseRedirect
@@ -192,10 +192,6 @@ class PhysicalUnitsAdmin(LockableAdmin):
 
         obj.save()
 
-        # If this is a readout unit, modify the templates
-        if 'readout' in obj.availability:
-            modify_templates()
-
 
 admin.site.register(PhysicalUnits, PhysicalUnitsAdmin)
 
@@ -308,22 +304,11 @@ class AssayTargetAdmin(LockableAdmin):
     )
 
     def save_model(self, request, obj, form, change):
-        template_change = False
-
         # Strip the name and short name
         form.instance.name = form.instance.name.strip()
         form.instance.short_name = form.instance.short_name.strip()
         obj.name = obj.name.strip()
         obj.short_name = obj.short_name.strip()
-
-        # Check whether template needs to change
-        # Change if assay name has changed or it is new
-        if obj.pk is not None:
-            original = AssayTarget.objects.get(pk=obj.pk)
-            if original.name != obj.name:
-                template_change = True
-        else:
-            template_change = True
 
         if change:
             obj.modified_by = request.user
@@ -332,8 +317,6 @@ class AssayTargetAdmin(LockableAdmin):
 
         obj.save()
 
-        if template_change:
-            modify_templates()
 
 admin.site.register(AssayTarget, AssayTargetAdmin)
 
@@ -379,20 +362,9 @@ class AssaySampleLocationAdmin(LockableAdmin):
     )
 
     def save_model(self, request, obj, form, change):
-        template_change = False
-
         # Strip the name
         form.instance.name = form.instance.name.strip()
         obj.name = obj.name.strip()
-
-        # Check whether template needs to change
-        # Change if assay name has changed or it is new
-        if obj.pk is not None:
-            original = AssaySampleLocation.objects.get(pk=obj.pk)
-            if original.name != obj.name:
-                template_change = True
-        else:
-            template_change = True
 
         if change:
             obj.modified_by = request.user
@@ -400,9 +372,6 @@ class AssaySampleLocationAdmin(LockableAdmin):
             obj.modified_by = obj.created_by = request.user
 
         obj.save()
-
-        if template_change:
-            modify_templates()
 
 admin.site.register(AssaySampleLocation, AssaySampleLocationAdmin)
 
@@ -556,20 +525,9 @@ class AssayMethodAdmin(LockableAdmin):
     )
 
     def save_model(self, request, obj, form, change):
-        template_change = False
-
         # Strip the name
         form.instance.name = form.instance.name.strip()
         obj.name = obj.name.strip()
-
-        # Check whether template needs to change
-        # Change if assay name has changed or it is new
-        if obj.pk is not None:
-            original = AssayMethod.objects.get(pk=obj.pk)
-            if original.name != obj.name:
-                template_change = True
-        else:
-            template_change = True
 
         if change:
             obj.modified_by = request.user
@@ -577,9 +535,6 @@ class AssayMethodAdmin(LockableAdmin):
             obj.modified_by = obj.created_by = request.user
 
         obj.save()
-
-        if template_change:
-            modify_templates()
 
 admin.site.register(AssayMethod, AssayMethodAdmin)
 
