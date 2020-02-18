@@ -2930,21 +2930,29 @@ def get_the_plate_layout_info_for_assay_plate_map(plate_size):
 # function to make a list of file line, file line length (need in more than one place, so put in function)
 def sub_function_inside_utils_plate_reader_map_file_by_line_del(my_file_object, file_delimiter):
     # print("into this with delimiter ", file_delimiter)
-    # lines_in_list = []
+
     lines_delimiter_list = []
     length_delimiter_list = []
-    # read the first line
+
+    # make sure at the top of the file
+    my_file_object.seek(0)
+
+    # read the FIRST line
     each_line = my_file_object.readline()
-    # lines_in_list.append(each_line)
+
     if file_delimiter == 'comma':
         this_delimiter = each_line.decode("utf-8", "replace").split(',')
     elif file_delimiter == 'tab':
         this_delimiter = each_line.decode("utf-8", "replace").split('\t')
     else:
         this_delimiter = each_line.decode("utf-8", "replace").split(' ')
-    # print(this_delimiter)
+
+    # print("first line: ", this_delimiter)
+
+    # append the FIRST line
     lines_delimiter_list.append(this_delimiter)
     length_delimiter_list.append(len(this_delimiter))
+
     # If the file is not empty, keep reading one line at a time, till the file is empty
     while each_line:
         each_line = my_file_object.readline()
@@ -2955,15 +2963,17 @@ def sub_function_inside_utils_plate_reader_map_file_by_line_del(my_file_object, 
             this_delimiter = each_line.decode("utf-8", "replace").split('\t')
         else:
             this_delimiter = each_line.decode("utf-8", "replace").split(' ')
-        # print("d ", file_delimiter)
-        # print(this_delimiter)
+
+        # print("this line: ", this_delimiter)
+
+        # append each line to the list
         lines_delimiter_list.append(this_delimiter)
         length_delimiter_list.append(len(this_delimiter))
-    file_list = lines_delimiter_list
-    file_length_list = length_delimiter_list
-    # print("file_list ", file_list)
-    # print("file_length_list ", file_length_list)
-    return file_list, file_length_list
+
+        # print("lines_delimiter_list")
+        # print(lines_delimiter_list)
+
+    return lines_delimiter_list, length_delimiter_list
 
 
 # sck - assay plate reader analysis of data when defining data blocks (for the UPDATE file form)
@@ -2974,7 +2984,7 @@ def review_plate_reader_data_file_format(my_file_object, set_dict):
     # there is rampant plate size and shape HARDCODing in this function!!
     # todo-sck go back and steamline sizes when have a chance
     # it is highly customized to specific file formats with an auto detect option
-    # currenty, the auto detect works okay if the rules are followed but ONLY for VERTICALLY stacked blocks
+    # currently, the auto detect works okay if the rules are followed but ONLY for VERTICALLY stacked blocks
     # the customized to each file format work for vertical and/or side-by-side blocks
 
     # get passed IN (from ajax) info into variables
@@ -2985,60 +2995,50 @@ def review_plate_reader_data_file_format(my_file_object, set_dict):
     form_number_blank_columns = int(set_dict.get('form_number_blank_columns'))
     form_number_blank_rows = int(set_dict.get('form_number_blank_rows'))
 
+    set_format = set_dict.get('set_format')
     set_delimiter = set_dict.get('set_delimiter')
     set_plate_size = set_dict.get('set_plate_size')
-    number_plate_lines = set_dict.get('set_plate_lines')
-    number_plate_columns = set_dict.get('set_plate_columns')
     set_number_blocks = set_dict.get('set_number_blocks')
     set_number_blank_columns = set_dict.get('set_number_blank_columns')
     set_number_blank_rows = set_dict.get('set_number_blank_rows')
 
-    print("just inside")
-    print('set_delimiter: ', set_delimiter)
-    print('file_delimiter: ', file_delimiter)
-    print('set_plate_size: ', set_plate_size)
-    print('form_plate_size: ', form_plate_size)
-    print('set_number_blocks: ', set_number_blocks)
-    print('form_number_blocks:', form_number_blocks)
-    print('set_plate_columns: ', set_number_blank_columns)
-    print('form_number_blank_columns:', form_number_blank_columns)
-    print('file object ', my_file_object)
+    # print("just inside")
+    # print('set_format: ', set_format)
+    # print('set_delimiter: ', set_delimiter)
+    # print('file_delimiter: ', file_delimiter)
+    # print('set_plate_size: ', set_plate_size)
+    # print('form_plate_size: ', form_plate_size)
+    # print('set_number_blocks: ', set_number_blocks)
+    # print('form_number_blocks:', form_number_blocks)
+    # print('set_plate_columns: ', set_number_blank_columns)
+    # print('form_number_blank_columns:', form_number_blank_columns)
+    # print('file object ', my_file_object)
 
-    # choices = (
-    #     (0, 'COMPUTER BEST GUESS - No format selected'),
-    #     (1, 'Softmax Pro 5.3 Molecular Devices M5 - requested by UPDDI Director of Operations'),
-    #     (96, 'One 96 plate (8 lines by 12 columns) starting at line 1 column 1 (CSV) - requested by Larry V.'),
-    #     (384, 'One 384 plate (16 lines by 24 columns) starting at line 1 column 1 (CSV) - requested by Larry V.'),
-    #     # (2, 'Wallac EnVision Manager Version 1.12 (EnVision)'),
-    #     (9999, 'USER CUSTOMIZED by Presetting Format Information (for advanced users)'),
-    # )
-
-    plate_size = form_plate_size
-    block_delimiter = file_delimiter
-    delimited_start = form_number_blank_columns
-    start_block_line_first_index = form_number_blank_rows
-    calculated_number_of_blocks = 0
-
-    # 1 - Get the list of lines in the file using the file delimiter (find the file delimter if not known)
+    # Get the list of lines in the file using the file delimiter (find the file delimiter if not known)
+    # print('file_list: ', file_list) = list of lines in the file parsed by the delimiter
+    # print('file_length_list: ',file_length_list) = number of found columns in the line
+    # print('mean_len: ',mean_len) = the mean of the found columns in the whole file
     if set_delimiter == 'true':
-        block_delimiter = file_delimiter
-        returned_from_file_by_line = sub_function_inside_utils_plate_reader_map_file_by_line_del(my_file_object, block_delimiter)
+        returned_from_file_by_line = sub_function_inside_utils_plate_reader_map_file_by_line_del(
+            my_file_object, file_delimiter)
         file_list = returned_from_file_by_line[0]
         file_length_list = returned_from_file_by_line[1]
         mean_len = int(mean(file_length_list))
     else:
         # delimiter is unknown - find it
         # load all options then find the right one based on repeat number of delimiters
-        block_delimiter = 'comma'
-        returned_from_file_by_line_comma = sub_function_inside_utils_plate_reader_map_file_by_line_del(my_file_object, block_delimiter)
+        returned_from_file_by_line_comma = sub_function_inside_utils_plate_reader_map_file_by_line_del(
+            my_file_object, 'comma')
         lines_comma_list = returned_from_file_by_line_comma[0]
         length_comma_list = returned_from_file_by_line_comma[1]
-        block_delimiter = 'tab'
-        returned_from_file_by_line_tab = sub_function_inside_utils_plate_reader_map_file_by_line_del(my_file_object, block_delimiter)
+
+        returned_from_file_by_line_tab = sub_function_inside_utils_plate_reader_map_file_by_line_del(
+            my_file_object, 'tab')
         lines_tab_list = returned_from_file_by_line_tab[0]
         length_tab_list = returned_from_file_by_line_tab[1]
-        block_delimiter = 'space'
-        returned_from_file_by_line_space = sub_function_inside_utils_plate_reader_map_file_by_line_del(my_file_object, block_delimiter)
+
+        returned_from_file_by_line_space = sub_function_inside_utils_plate_reader_map_file_by_line_del(
+            my_file_object, 'space')
         lines_space_list = returned_from_file_by_line_space[0]
         length_space_list = returned_from_file_by_line_space[1]
 
@@ -3047,143 +3047,147 @@ def review_plate_reader_data_file_format(my_file_object, set_dict):
         mean_tab = int(mean(length_tab_list))
         mean_space = int(mean(length_space_list))
 
+        # print("mean_comma = ", int(mean(length_comma_list)))
+        # print("mean_tab = ", int(mean(length_tab_list)))
+        # print("mean_space = ", int(mean(length_space_list)))
+
         if mean_comma > mean_tab and mean_comma > mean_space:
-            # likely a comma delimited file
-            block_delimiter = "comma"
+            # print("likely a comma delimited file")
+            file_delimiter = "comma"
             file_list = lines_comma_list
             file_length_list = length_comma_list
             mean_len = mean_comma
         elif mean_tab > mean_space and mean_tab > mean_comma:
-            # likely a tab delimited file
-            block_delimiter = "tab"
+            # print("likely a tab delimited file")
+            file_delimiter = "tab"
             file_list = lines_tab_list
             file_length_list = length_tab_list
             mean_len = mean_tab
         else:
-            # likely space delimited file
-            block_delimiter = "space"
+            # print("likely a space delimited file")
+            file_delimiter = "space"
             file_list = lines_space_list
             file_length_list = length_space_list
             mean_len = mean_space
 
     # print("file_delimiter ", file_delimiter)
-    #
     # print('file_list: ', file_list)
-    # print('file_length_list: ',file_length_list)
-    # print('mean_len: ',mean_len)
+    # print('file_length_list: ', file_length_list)
+    # print('mean_len: ', mean_len)
 
-    # Now that the file delimiter is known, go through the appropriate list
-    # for this code, keep in indexes (0 - ?), but for formset, use indexes + 1
-    # From now on in this script, work with file_list and file_length_list and mean_len
+    # Now that the file delimiter is known, work with the appropriate file_list
+    # For this code, work with indexes (0 - ?), but for formset (in the html), display the indexes + 1
 
-    # NEW FORMATS - edit here if new options need to be added that are NOT implicit in the file format
-    # in this case, the set number of empty columns will override the file format number
-    if set_number_blank_columns == 'true':
-        pass
-    else:
-        # look for 3 in first 10 columns
-        # if found, look for 2 and 1
-        # if not found, just set it = 0
-        delimited_start = 0
-        break_out_for_loop = 'no'
-        for this in file_list:
-            # print('this', this)
-            iex = 0
-            while iex < len(this):
-                # print('this[iex]', this[iex])
-                if this[iex] == '3':
-                    # print('this[iex]-1', this[iex-1])
-                    # print('this[iex]-2', this[iex - 2])
-                    if this[iex-1] == '2' and this[iex-2] == '1':
-                        delimited_start = iex - 2
-                        # print('delimited_start ', delimited_start)
-                        break_out_for_loop = 'yes'
-                        # break out of while loop
-                        break
-                iex = iex + 1
-            if break_out_for_loop == 'yes':
-                break
+    # make a list of the line numbers and corresponding column numbers (starting with 0)
+    # of the lines with 1, 2, 3 and associated columns where the 1, 2, 3 was found
+    find_potential_indexes = sub_function_inside_utils_plate_reader_map_file_find_potential_indexes(file_list, file_length_list, mean_len)
+    rows_idx_with_1_2_3 = find_potential_indexes[0]
+    cols_idx_with_1_of_1_2_3 = find_potential_indexes[1]
+    rows_idx_with_blank_or_end = find_potential_indexes[2]
+    rows_that_are_empty_all = find_potential_indexes[3]
+    rows_that_are_empty_first_if_series = find_potential_indexes[4]
 
-
-    # NEW FORMATS - edit here if new options need to be added - must be customized to the file format
-    # in this case, the set plate size will override the file format number
+    # Next, get the plate size
+    # NEW FORMATS - edit here if new options need to be added where the plate size can be extracted directly from the file
     # assumes only ONE plate size in a file!
-    if set_plate_size == 'true':
-        pass
-    elif file_format_selected == 1:
+    if set_format == 'true' and file_format_selected == 1:
+        # 1 is currently the SoftMax pro formats that Mike C gave to SCK
         # possible locations of the plate size using file format 1 are two places, see if can find
         #  row 1 (starting at 0) and column 19 (starting at 0)
         t2 = int(file_list[1][19])
         #  row 2 (starting at 0) and column 18 (starting at 0)
         s2 = int(file_list[1][18])
-        # print("t2 ", t2)
-        # print("s2 ", s2)
         if t2 in assay_plate_reader_map_info_plate_size_choices_list:
-            plate_size = t2
-            # print("it2 ", t2)
+            form_plate_size = t2
         if s2 in assay_plate_reader_map_info_plate_size_choices_list:
-            plate_size = s2
-            # print("is2 ", s2)
+            form_plate_size = s2
+    elif set_plate_size == 'true':
+        # user set the plate size
+        form_plate_size = form_plate_size
     else:
-        plate_size = sub_function_inside_utils_plate_reader_map_file_by_line_plate_size_unk(file_list, file_length_list, delimited_start)
+        # use other provided info to guess the plate size
+        # the last resort is the one that assumes vertical stacking
+        form_plate_size = sub_function_inside_utils_plate_reader_map_file_guess_plate_size(
+            file_list, file_length_list, form_number_blank_columns, set_number_blank_columns, 
+            rows_idx_with_1_2_3, cols_idx_with_1_of_1_2_3, rows_idx_with_blank_or_end, rows_that_are_empty_first_if_series
+            )
 
-    # HAVE or GUESSED Plate size, HARDCODED rows and columns of data in block are there
-    if plate_size == 24:
+    # get the dimensions of the block based on plate size
+    # Know or have GUESSED Plate size, HARDCODED rows and columns of data in block are there
+    if form_plate_size == 24:
         plate_rows = 4
         plate_columns = 6
-    elif plate_size == 96:
+    elif form_plate_size == 96:
         plate_rows = 8
         plate_columns = 12
     else:
-        # plate_size = 384
+        # form_plate_size = 384
         plate_rows = 16
         plate_columns = 24
 
-    # print('plate_size: ', plate_size)
+    # print('form_plate_size: ', form_plate_size)
     # print('plate_rows: ', plate_rows)
 
-    # NEW FORMATS - edit here if new options need to be added - must be customized to the file format
-    if set_number_blocks == 'true' \
-            and form_number_blocks == 1 \
-            and set_number_blank_columns == 'true'\
-            and set_number_blank_rows == 'true':
+    # find the blocks
+    # NEW FORMATS - edit here if new options need to be added where the plate size can be extracted directly from the file
+    if set_format == 'true' and file_format_selected == 1:
+        # need special finder because not all the blocks have 123 headers
+        lists_needed = sub_function_inside_utils_plate_reader_map_file_find_blocks_format_is_1(
+                file_list, file_length_list, form_number_blank_columns, set_number_blank_columns,
+                rows_idx_with_1_2_3, cols_idx_with_1_of_1_2_3, rows_idx_with_blank_or_end, rows_that_are_empty_first_if_series
+            )
 
+        start_block_line_indexes = lists_needed[0]
+        start_block_delimiter_indexes = lists_needed[1]
+        data_block_metadata = lists_needed[2]
+
+    else:
+        # need to get the best guess
+        lists_needed = sub_function_inside_utils_plate_reader_map_file_best_guess_block_detect(
+            file_list,
+            plate_rows, plate_columns,
+            form_plate_size, set_plate_size,
+            form_number_blank_columns, set_number_blank_columns,
+            form_number_blank_rows, set_number_blank_rows,
+            form_number_blocks, set_number_blocks,
+            rows_idx_with_1_2_3, cols_idx_with_1_of_1_2_3, rows_idx_with_blank_or_end, rows_that_are_empty_first_if_series
+            )
+
+        start_block_line_indexes = lists_needed[0]
+        start_block_delimiter_indexes = lists_needed[1]
+        data_block_metadata = lists_needed[2]
+
+    if len(start_block_line_indexes) == 0:
         start_block_line_indexes = [form_number_blank_rows]
         start_block_delimiter_indexes = [form_number_blank_columns]
-        data_block_metadata = ["Single Data Block"]
-    if file_format_selected == 1:
-        lists_needed = sub_function_inside_utils_plate_reader_map_file_by_line_1(file_list)
-        start_block_line_indexes = lists_needed[0]
-        start_block_delimiter_indexes = lists_needed[1]
-        data_block_metadata = lists_needed[2]
-    else:
-        # here here     # here here do something with blank rows - start_block_line_first_index
-        lists_needed = sub_function_inside_utils_plate_reader_map_file_by_line_unk(file_list, file_length_list, mean_len, plate_rows, delimited_start)
-        start_block_line_indexes = lists_needed[0]
-        start_block_delimiter_indexes = lists_needed[1]
-        data_block_metadata = lists_needed[2]
+        data_block_metadata = ["could not detect the blocks automatically"]
 
-    print("start_block_line_indexes: ", start_block_line_indexes)
-    print("start_block_delimiter_indexes: ", start_block_delimiter_indexes)
-    print("data_block_metadata ", data_block_metadata)
-
+    # print("start_block_line_indexes: ", start_block_line_indexes)
+    # print("start_block_delimiter_indexes: ", start_block_delimiter_indexes)
+    # print("data_block_metadata ", data_block_metadata)
+    # print("rows_idx_with_1_2_3: ", rows_idx_with_1_2_3)
+    # print("cols_idx_with_1_of_1_2_3: ", cols_idx_with_1_of_1_2_3)
+    # print("rows_idx_with_blank_or_end ", rows_idx_with_blank_or_end)
+    # print("rows_that_are_empty_first_if_series ", rows_that_are_empty_first_if_series)
 
     # COLLECT INFO TO SEND BACK TO AJAX CALL
     # may want to just send the repeated info once. quickest for now, but sends extra.
     calculated_number_of_blocks = len(start_block_line_indexes)*len(start_block_delimiter_indexes)
-    print('calculated_number_of_blocks ', calculated_number_of_blocks)
     file_list_of_dicts = []
     # for each block (follow along the start_block_line_indexes), make a dictionary
     idx = 0
     for each_line in start_block_line_indexes:
         # find for each start and plate size
         for each_delimiter in start_block_delimiter_indexes:
+
+            # when temperature was in the metadata, the degress was an odd symbol, so, regex it out
             try:
+                # if metadata list exists
                 this_block_metadata_a = data_block_metadata[idx]
-                this_block_metadata   = re.sub('[^A-Za-z0-9\s.]+', '', this_block_metadata_a)
+                this_block_metadata   = re.sub('[^A-Za-z0-9\s.:()]+', '', this_block_metadata_a)
             except:
                 this_block_metadata = ""
-            print(this_block_metadata)
+
             block_dict = {}
             # print("each_line ", each_line)
             # print("each_delimiter ", each_delimiter)
@@ -3194,8 +3198,8 @@ def review_plate_reader_data_file_format(my_file_object, set_dict):
             block_dict.update({'delimited_end': each_delimiter + plate_columns - 1})
             block_dict.update({'number_blank_columns': each_delimiter})
             block_dict.update({'number_blank_rows': each_line})
-            block_dict.update({'block_delimiter': block_delimiter})
-            block_dict.update({'plate_size': plate_size})
+            block_dict.update({'block_delimiter': file_delimiter})
+            block_dict.update({'plate_size': form_plate_size})
             block_dict.update({'plate_lines': plate_rows})
             block_dict.update({'plate_columns': plate_columns})
             block_dict.update({'calculated_number_of_blocks': calculated_number_of_blocks})
@@ -3204,13 +3208,68 @@ def review_plate_reader_data_file_format(my_file_object, set_dict):
             file_list_of_dicts.append(block_dict)
         idx = idx + 1
 
-    print('file_list_of_dicts')
-    print(file_list_of_dicts)
+    # print('file_list_of_dicts')
+    # print(file_list_of_dicts)
     return file_list_of_dicts
 
-def sub_function_inside_utils_plate_reader_map_file_by_line_1(file_list):
+def sub_function_inside_utils_plate_reader_map_file_find_potential_indexes(file_list, file_length_list, mean_len):
+    rows_with_1_2_3 = []
+    cols_with_1_of_1_2_3 = []
+    rows_with_blank_or_end = []
+    rows_that_are_empty_all = []
+    rows_that_are_empty_first_if_series = []
+
+    irow = 0
+    for this in file_list:
+        icol = 0
+        while icol < len(this):
+            if (icol == 0):
+                # print("icol: ", icol)
+                if (this[icol].strip().lower() == "~blank" or this[icol].strip().lower() == "~end"):
+                    # print("this[icol].lower()")
+                    # print(this[icol].lower())
+                    rows_with_blank_or_end.append(irow)
+            if (this[icol].strip() == '3'):
+                if this[icol-1].strip() == '2' and this[icol-2].strip() == '1':
+                    rows_with_1_2_3.append(irow)
+                    cols_with_1_of_1_2_3.append(icol-2)
+
+            icol = icol + 1
+        irow = irow + 1
+
+    irow = 0
+    for this_len in file_length_list:
+        if this_len < mean_len / 5.:
+            rows_that_are_empty_all.append(irow)
+        irow = irow + 1
+
+    irow = 0
+    for this in rows_that_are_empty_all:
+        if irow > 0:
+            if rows_that_are_empty_all[irow] == rows_that_are_empty_all[irow-1] + 1:
+                pass
+            else:
+                if (irow > 5):
+                    rows_that_are_empty_first_if_series.append(rows_that_are_empty_all[irow])
+        else:
+            if (irow > 5):
+                rows_that_are_empty_first_if_series.append(rows_that_are_empty_all[irow])
+        irow = irow + 1
+
+    return [rows_with_1_2_3,
+            cols_with_1_of_1_2_3,
+            rows_with_blank_or_end,
+            rows_that_are_empty_all,
+            rows_that_are_empty_first_if_series]
+
+
+def sub_function_inside_utils_plate_reader_map_file_find_blocks_format_is_1(
+    file_list, file_length_list, form_number_blank_columns, set_number_blank_columns,
+    rows_idx_with_1_2_3, cols_idx_with_1_of_1_2_3, rows_idx_with_blank_or_end, rows_that_are_empty_first_if_series
+    ):
+
     start_block_line_indexes = []
-    start_block_delimiter_indexes = []
+    start_block_delimiter_indexes = sorted(set(cols_idx_with_1_of_1_2_3))
     data_block_metadata = []
     mpc = ""
     tlc = ""
@@ -3218,29 +3277,10 @@ def sub_function_inside_utils_plate_reader_map_file_by_line_1(file_list):
     wlc = ""
     wvc = ""
 
-    # can have blocks going from to the right, but assumes the same line numbers as in the first set
     i_count = 0
     i_metadata_count = 0
     while i_count < len(file_list):
         this_line = file_list[i_count]
-
-        # where are the 1's in the third row (where i_count = 2)
-        if i_count == 2:
-            j_count = 0
-            list_of_columns = []
-            while j_count < len(this_line):
-                element1 = this_line[j_count].strip()
-                # if not null
-                if len(element1) > 0:
-                    try:
-                        # try convert to integer
-                        my_column_label = int(element1)
-                        # if a 1, add the location (column index) to the list
-                        if my_column_label == 1:
-                            start_block_delimiter_indexes.append(j_count)
-                    except ValueError:
-                        pass
-                j_count = j_count + 1
 
         # Is column B of this line a value temperature - these are the top line of block
         # is the line null and are we on, at least, the 3rd row
@@ -3271,7 +3311,7 @@ def sub_function_inside_utils_plate_reader_map_file_by_line_1(file_list):
 
             if a_temperature == 'yes':
                 i_metadata_count = i_metadata_count + 1
-                # save to list of line indexes
+                # save to list of line indexes (actually using the existance of meta data to identify the block location)
                 start_block_line_indexes.append(i_count)
                 # is it the first time seeing the metadata, if yes, assume it is complete and store it and append it
                 if i_metadata_count == 1:
@@ -3301,86 +3341,91 @@ def sub_function_inside_utils_plate_reader_map_file_by_line_1(file_list):
         i_count = i_count + 1
     return start_block_line_indexes, start_block_delimiter_indexes, data_block_metadata
 
-def sub_function_inside_utils_plate_reader_map_file_by_line_unk(file_list, file_length_list, mean_len, plate_rows, delimited_start):
+
+def sub_function_inside_utils_plate_reader_map_file_best_guess_block_detect(
+        file_list,
+        plate_rows, plate_columns,
+        form_plate_size, set_plate_size,
+        form_number_blank_columns, set_number_blank_columns,
+        form_number_blank_rows, set_number_blank_rows,
+        form_number_blocks, set_number_blocks,
+        rows_idx_with_1_2_3, cols_idx_with_1_of_1_2_3, rows_idx_with_blank_or_end, rows_that_are_empty_first_if_series
+        ):
+
+    # this function has not been robustly tested
+
     start_block_line_indexes = []
     start_block_delimiter_indexes = []
     data_block_metadata = []
-    # this is a bit convoluted because it was designed with assumptions that ended up not being true :o
-    # need to revisit at some point, but low priority as PI wants to focus on specific file formats
-    # if revise, do it based on user requests for different rules/assumptions
-    # as it is, if it works for the file, it will only work for stacked (vertical) blocks and ignores side-by-side blocks
 
-    # look to see if there are tagged blank lines ~blank
-    end_block_indexes = []
-    fits = 0
-    for each in file_list:
-        # print(each[0])
-        if each[0].lower() == '~blank':
-            end_block_indexes.append(fits - 1)
-        fits = fits + 1
+    if set_number_blank_columns == 'true' and \
+         form_number_blank_columns == 123:
 
-    if len(end_block_indexes) > 0:
-        pass
+        start_block_line_indexes = sorted(set(rows_idx_with_1_2_3))
+        start_block_delimiter_indexes = sorted(set(cols_idx_with_1_of_1_2_3))
+        data_block_metadata = [None] * (len(start_block_line_indexes) * len(start_block_delimiter_indexes))
+
+    elif set_number_blocks == 'true' and form_number_blocks == 1 and \
+         set_number_blank_columns == 'true' and \
+         form_number_blank_columns != 123 and \
+         set_number_blank_rows == 'true' and \
+         form_number_blank_rows != 444:
+
+        start_block_line_indexes = [form_number_blank_rows]
+        start_block_delimiter_indexes = [form_number_blank_columns]
+        data_block_metadata = ["Single Data Block"]
+
+    elif set_number_blank_columns == 'true' and \
+        form_number_blank_columns != 123 and \
+        set_number_blank_rows == 'true' and \
+        form_number_blank_rows != 444:
+
+        start_block_line_indexes = form_number_blank_rows
+        start_block_delimiter_indexes = form_number_blank_columns
+        data_block_metadata = [None] * (len(start_block_line_indexes) * len(start_block_delimiter_indexes))
+
+    elif set_number_blank_columns == 'true' and \
+            form_number_blank_columns != 123 and \
+            set_number_blank_rows == 'true' and \
+            form_number_blank_rows == 444:
+
+        # start_block_line_indexes = [x - plate_rows+1 for x in rows_idx_with_blank_or_end]
+        start_block_line_indexes = [x - plate_rows for x in rows_idx_with_blank_or_end]
+        start_block_delimiter_indexes = [form_number_blank_columns] * len(start_block_line_indexes)
+        data_block_metadata = [None] * (len(start_block_line_indexes) * len(start_block_delimiter_indexes))
+
+    elif len(cols_idx_with_1_of_1_2_3) > 0:
+        start_block_line_indexes = sorted(set(rows_idx_with_1_2_3))
+        start_block_delimiter_indexes = sorted(set(cols_idx_with_1_of_1_2_3))
+        data_block_metadata = [None] * (len(start_block_line_indexes) * len(start_block_delimiter_indexes))
+
+    elif len(rows_idx_with_blank_or_end) > 0:
+        start_block_line_indexes = [x - plate_rows for x in rows_idx_with_blank_or_end]
+        start_block_delimiter_indexes = [form_number_blank_columns] * len(start_block_line_indexes)
+        data_block_metadata = [None] * (len(start_block_line_indexes) * len(start_block_delimiter_indexes))
+
     else:
-        bin_list = []
-        for this_len in file_length_list:
-            if this_len > mean_len:
-                bin_list.append('blockish')
-            elif this_len < mean_len / 2.:
-                bin_list.append('empty')
-            else:
-                bin_list.append('unknown')
-        # print(bin_list)
-
-        # how many blocks? look for empty lines that have content above and below
-        end_block_indexes_inverse = []
-        # go from bottom up, first line (index 0)
-        idx = len(bin_list) - 1
-        while idx >= 1:
-            this = bin_list[idx]
-            if this == 'empty':
-                if bin_list[idx - 1] == 'blockish' or bin_list[idx - 1] == 'unknown':
-                    end_block_indexes_inverse.append(idx - 1)
-            idx = idx - 1
-
-        # print("end_block_indexes_inverse: ", end_block_indexes_inverse)
-        end_block_indexes = sorted(end_block_indexes_inverse)
-        # print("end_blocks_index: ", end_block_indexes)
-
-    # auto detect plate size - infer likely plate size from number of columns
-    if len(end_block_indexes) <= 1:
-        estimated_block_rows_from_blank_lines = len(file_list)
-        # print('estimated_block_rows_from_blank_lines <= 1: ', estimated_block_rows_from_blank_lines)
-    else:
-        estimated_block_rows_from_blank_lines = mean(np.subtract(end_block_indexes[1:], end_block_indexes[:-1]))
-        # print('estimated_block_rows_from_blank_lines not <= 1: ', estimated_block_rows_from_blank_lines)
-    estimated_block_count = len(end_block_indexes)
-    total_number_lines_in_file = len(file_list)
-    if estimated_block_count == 0:
-        estimated_block_rows_total_file_length = 1
-    else:
-        estimated_block_rows_total_file_length = int(total_number_lines_in_file / estimated_block_count)
-
-    # print(estimated_block_rows_from_blank_lines)
-    # print(estimated_block_count)
-    # print(total_number_lines_in_file)
-    # print(estimated_block_rows_total_file_length)
-
-    start_block_line_indexes = [a - plate_rows + 1 for a in end_block_indexes]
-    # again, this only works for vertically stacked blocks
-    start_block_delimiter_indexes = [delimited_start]
-    data_block_metadata = ["" for a in end_block_indexes]
+        start_block_line_indexes = [form_number_blank_rows]
+        start_block_delimiter_indexes = [form_number_blank_columns]
+        data_block_metadata = ["no block information available"]
 
     return start_block_line_indexes, start_block_delimiter_indexes, data_block_metadata
 
 
-def sub_function_inside_utils_plate_reader_map_file_by_line_plate_size_unk(file_list, file_length_list, delimited_start):
-    # print("file_length_list ", file_length_list)
+def sub_function_inside_utils_plate_reader_map_file_guess_plate_size(
+        file_list, file_length_list, form_number_blank_columns, set_number_blank_columns, 
+        rows_idx_with_1_2_3, cols_idx_with_1_of_1_2_3, rows_idx_with_blank_or_end, rows_that_are_empty_first_if_series):
 
-    # find information about the number of used columns in the file
+    # function NOT robustly tested.....
 
-    # find mode of length of line
-    # this is based on assumption of vertical stacking and will not work for side-by-side stacking!
+    estimate_number_rows_by_123xtag = 0
+    estimate_number_columns_by_123xtag = 0
+    estimate_number_rows_to_first_tagged_blank = 0
+    estimate_number_rows_by_empty_top = 0
+    estimate_number_columns_by_length = 0
+
+    # find mode of length of line (number fields)
+    # this is based on assumption of vertical stacking and will not work for side-by-side stacking
     try:
         mode_file_length_list = mode(file_length_list)
     except:
@@ -3388,56 +3433,59 @@ def sub_function_inside_utils_plate_reader_map_file_by_line_plate_size_unk(file_
         my_maxes = [key for m in [max(stats.values())] for key, val in stats.items() if val == m]
         mode_file_length_list = my_maxes[-1]
 
-    # print("mode_file_length_list ", mode_file_length_list)
-    # print("delimited_start ", delimited_start)
-
     # if vertically stacked, the max number of columns is the most used and we can infer something about the plate size
-    max_number_columns = mode_file_length_list - delimited_start
+    estimate_number_columns_by_length = mode_file_length_list
 
-    # find information about the number of used rows in the first block of data
+    if len(rows_idx_with_blank_or_end) > 0:
+        estimate_number_rows_to_first_tagged_blank = rows_idx_with_blank_or_end[0]
 
-    # look to see if there are tagged blank line and find the first one ~blank
-    fits = 0
-    max_number_of_rows_labeled_blank = 8888
-    for each in file_list:
-        if each[0].lower() == '~blank':
-            # print("fits: ", fits)
-            max_number_of_rows_labeled_blank = fits - 2
-            break
-        fits = fits + 1
+    set_123 = sorted(set(rows_idx_with_blank_or_end))
+    if len(set_123) > 1:
+        estimate_number_rows_by_123xtag = set_123[1] - set_123[0]
 
-    # look to see if is a blank line (length of 1 or less) and find the first one after 5
-    fits = 0
-    max_number_of_rows_blank = 8888
-    for each in file_list:
-        if fits > 5 and len(each) < 2:
-            max_number_of_rows_blank = fits
-            break
-        fits = fits + 1
+    if len(cols_idx_with_1_of_1_2_3) > 1:
+        estimate_number_columns_by_123xtag = cols_idx_with_1_of_1_2_3[1] - cols_idx_with_1_of_1_2_3[0]
 
-    # print(max_number_columns)
-    # print(max_number_of_rows_labeled_blank)
-    # print(max_number_of_rows_blank)
+    if len(rows_that_are_empty_first_if_series) > 0:
+        estimate_number_rows_by_empty_top = rows_that_are_empty_first_if_series[0]
+
+    if set_number_blank_columns == 'true' and form_number_blank_columns == 123 and estimate_number_columns_by_123xtag > 0:
+        max_number_columns = estimate_number_columns_by_123xtag
+        go_by = "cols"
+    elif estimate_number_rows_by_123xtag > 0:
+        max_number_of_rows = estimate_number_rows_by_123xtag
+        go_by = "rows"
+    elif estimate_number_rows_to_first_tagged_blank > 0:
+        max_number_of_rows = estimate_number_rows_to_first_tagged_blank
+        go_by = "rows"
+    elif estimate_number_rows_by_empty_top > 0:
+        max_number_of_rows = estimate_number_rows_by_empty_top
+        go_by = "rows"
+    else:
+        # only works for vertically stacked
+        max_number_columns = estimate_number_columns_by_length
+        go_by = "cols"
 
     # todo-sck go back and streamline for all sizes in models
     # HARDCODED sizes
-    if max_number_columns < 12:
-        plate_size = 24
-    elif max_number_columns < 24:
-        if max_number_of_rows_labeled_blank < 8 or max_number_of_rows_blank < 8:
+    if go_by == "cols":
+        if max_number_columns < 12:
             plate_size = 24
-        elif max_number_of_rows_labeled_blank < 16 or max_number_of_rows_blank < 16:
+        elif max_number_columns < 24:
             plate_size = 96
         else:
             plate_size = 384
-    elif max_number_of_rows_labeled_blank < 8 or max_number_of_rows_blank < 8:
-        plate_size = 24
-    elif max_number_of_rows_labeled_blank < 16 or max_number_of_rows_blank < 16:
-        plate_size = 96
     else:
-        plate_size = 384
+        if max_number_of_rows < 8:
+                plate_size = 24
+        elif max_number_of_rows < 16:
+            plate_size = 96
+        else:
+            plate_size = 384
+
     return plate_size
 
+# sck adds the plate data to the map item table when file form submitted
 def add_update_plate_reader_data_map_item_values_from_file(
         pk_for_file,
         block_dict):
@@ -3523,7 +3571,8 @@ def add_update_plate_reader_data_map_item_values_from_file(
             )
             my_file_object = this_queryset.plate_reader_file.open()
             # this function is in utils.py
-            returned_from_file_by_line = sub_function_inside_utils_plate_reader_map_file_by_line_del(my_file_object, file_delimiter)
+            returned_from_file_by_line = sub_function_inside_utils_plate_reader_map_file_by_line_del(
+                my_file_object, file_delimiter)
             file_list = returned_from_file_by_line[0]
             # print('file_list')
             # print(file_list)
@@ -3538,7 +3587,7 @@ def add_update_plate_reader_data_map_item_values_from_file(
             for irow in range(i_ls, i_le+1):
                 # print("irow ",irow, "   ", file_list[irow])
                 for icol in range(i_ds, i_de+1):
-                    print("irow ",irow,"   icol ", icol)
+                    # print("irow ",irow,"   icol ", icol)
                     this_raw_value_a = file_list[irow][icol]
                     try:
                         this_raw_value = float(this_raw_value_a)

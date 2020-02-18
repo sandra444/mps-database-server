@@ -21,6 +21,7 @@ $(document).ready(function () {
     let global_file_set_number_blocks = false;
     let global_file_set_number_blank_columns = false;
     let global_file_set_number_blank_rows = false;
+    let global_file_set_format = false;
 
     let global_file_file_format_select = 0;
 
@@ -58,10 +59,13 @@ $(document).ready(function () {
     }
 
 
-    // set a default different than in the forms.py as per PI request - but do it here so easy to change again
+    // set a default different than in the forms.py as per PI request - but do it here so easy to change again in future
+    // keep in mind it is not on the web page if the page is not editable
     global_file_file_format_select = 1;
-    $("#id_se_file_format_select").selectize()[0].selectize.setValue(global_file_file_format_select);
-    setTheSetFieldsBasedOnSelectedFileFormat();
+    try {
+        $("#id_se_file_format_select").selectize()[0].selectize.setValue(global_file_file_format_select);
+        setTheSetFieldsBasedOnSelectedFileFormat();
+    } catch (err) {}
 
      // END SECTION TO SET MOST GLOBAL VARIABLES
 
@@ -172,9 +176,12 @@ $(document).ready(function () {
         // (9999, 'USER CUSTOMIZED by Presetting Format Information (for advanced users)'),
         // )
 
+        let send_this_message = "No additional knowledge about this format is embedded in the block detection algorithm.";
+
         switch(parseInt(global_file_file_format_select)) {
             case 0:
                 // best guesses, nothing gets set
+                $("#set_format").closest('div').addClass('off');
                 $("#set_delimiter").closest('div').addClass('off');
                 $("#set_plate_size").closest('div').addClass('off');
                 $("#set_number_blocks").closest('div').addClass('off');
@@ -182,19 +189,13 @@ $(document).ready(function () {
                 $("#set_number_blank_rows").closest('div').addClass('off');
                 break;
             case 1:
-                // do we want to set for this case..if not comment out
+                // do we want to set for this case
+                $("#set_format").closest('div').removeClass('off');
                 $("#set_delimiter").closest('div').removeClass('off');
                 $("#set_plate_size").closest('div').addClass('off');
                 $("#set_number_blocks").closest('div').addClass('off');
                 $("#set_number_blank_columns").closest('div').addClass('off');
                 $("#set_number_blank_rows").closest('div').addClass('off');
-
-                // load currents into memory
-                global_file_set_delimiter = $("#set_delimiter").prop('checked');
-                global_file_set_plate_size = $("#set_plate_size").prop('checked');
-                global_file_set_number_blocks = $("#set_number_blocks").prop('checked');
-                global_file_set_number_blank_columns = $("#set_number_blank_columns").prop('checked');
-                global_file_set_number_blank_rows = $("#set_number_blank_rows").prop('checked');
 
                 // when setting, use this value, comment out if not using
                 global_file_setting_box_delimiter = "tab";
@@ -203,28 +204,16 @@ $(document).ready(function () {
                 global_file_setting_box_form_number_blank_columns = 3;
                 global_file_setting_box_form_number_blank_rows = 4;
 
-                // put what is in memory into the setting box
-                $("#id_file_delimiter").selectize()[0].selectize.setValue(global_file_setting_box_delimiter);
-                $("#id_se_form_plate_size").selectize()[0].selectize.setValue(global_file_setting_box_form_plate_size);
-                $("#id_form_number_blocks").val(global_file_setting_box_form_number_blocks);
-                $("#id_form_number_blank_columns").val(global_file_setting_box_form_number_blank_columns);
-                $("#id_form_number_blank_rows").val(global_file_setting_box_form_number_blank_rows);
-
+                send_this_message = "This file format has knowledge of where to look in the file for: the plate size, the header information and content, and the metadata embedded in the block detection algorithm.";
                 break;
             case 10:
-                // do we want to set for this case..if not comment out
-                $("#set_delimiter").closest('div').removeClass('off');
+                // do we want to set for this case
+                $("#set_format").closest('div').addClass('off');
+                $("#set_delimiter").closest('div').addClass('off');
                 $("#set_plate_size").closest('div').addClass('off');
                 $("#set_number_blocks").closest('div').removeClass('off');
                 $("#set_number_blank_columns").closest('div').removeClass('off');
                 $("#set_number_blank_rows").closest('div').removeClass('off');
-
-                // load currents into memory
-                global_file_set_delimiter = $("#set_delimiter").prop('checked');
-                global_file_set_plate_size = $("#set_plate_size").prop('checked');
-                global_file_set_number_blocks = $("#set_number_blocks").prop('checked');
-                global_file_set_number_blank_columns = $("#set_number_blank_columns").prop('checked');
-                global_file_set_number_blank_rows = $("#set_number_blank_rows").prop('checked');
 
                 // when setting, use this value, comment out if not using
                 global_file_setting_box_delimiter = "comma";
@@ -232,17 +221,11 @@ $(document).ready(function () {
                 global_file_setting_box_form_number_blocks = 1;
                 global_file_setting_box_form_number_blank_columns = 1;
                 global_file_setting_box_form_number_blank_rows = 1;
-
-                // put what is in memory into the setting box
-                $("#id_file_delimiter").selectize()[0].selectize.setValue(global_file_setting_box_delimiter);
-                $("#id_se_form_plate_size").selectize()[0].selectize.setValue(global_file_setting_box_form_plate_size);
-                $("#id_form_number_blocks").val(global_file_setting_box_form_number_blocks);
-                $("#id_form_number_blank_columns").val(global_file_setting_box_form_number_blank_columns);
-                $("#id_form_number_blank_rows").val(global_file_setting_box_form_number_blank_rows);
-
                 break;
             case 9999:
-                // not changes to what the user sets
+                // do we want to set for this case
+                global_file_set_format = $("#set_format").prop('checked');
+                $("#set_format").closest('div').addClass('off');
                 $("#set_delimiter").closest('div').addClass('off');
                 $("#set_plate_size").closest('div').addClass('off');
                 $("#set_number_blocks").closest('div').addClass('off');
@@ -251,7 +234,7 @@ $(document).ready(function () {
 
                 // force the settings ON if they are OFF
                 let mystyle = $('#auto_detect_settings_section').css('display');
-                console.log("mystyle: ", mystyle)
+                // console.log("mystyle: ", mystyle)
                 if (mystyle == "none") {
                     $("#auto_detect_settings_section").toggle();
                 }
@@ -259,6 +242,48 @@ $(document).ready(function () {
             default:
             // no changes to what is set
         }
+        // load all the set buttons for true/false
+        if ($("#set_format").closest('div').hasClass('off')) {
+            global_file_set_format = false;
+        } else {
+            global_file_set_format = true;
+        }
+        if ($("#set_delimiter").closest('div').hasClass('off')) {
+            global_file_set_delimiter = false;
+        } else {
+            global_file_set_delimiter = true;
+        }
+        if ($("#set_plate_size").closest('div').hasClass('off')) {
+            global_file_set_plate_size = false;
+        } else {
+            global_file_set_plate_size = true;
+        }
+        if ($("#set_number_blocks").closest('div').hasClass('off')) {
+            global_file_set_number_blocks = false;
+        } else {
+            global_file_set_number_blocks = true;
+        }
+        if ($("#set_number_blank_columns").closest('div').hasClass('off')) {
+            global_file_set_number_blank_columns = false;
+        } else {
+            global_file_set_number_blank_columns = true;
+        }
+        if ($("#set_number_blank_rows").closest('div').hasClass('off')) {
+            global_file_set_number_blank_rows = false;
+        } else {
+            global_file_set_number_blank_rows = true;
+        }
+
+        try {
+            // put what is in memory into the setting box - only on html page if still editable
+            $("#id_file_delimiter").selectize()[0].selectize.setValue(global_file_setting_box_delimiter);
+            $("#id_se_form_plate_size").selectize()[0].selectize.setValue(global_file_setting_box_form_plate_size);
+            $("#id_form_number_blocks").val(global_file_setting_box_form_number_blocks);
+            $("#id_form_number_blank_columns").val(global_file_setting_box_form_number_blank_columns);
+            $("#id_form_number_blank_rows").val(global_file_setting_box_form_number_blank_rows);
+        } catch (err) {}
+
+        document.getElementById('format_selected_annotation').innerHTML = send_this_message;
     }
 
     // apply styles/formatting to formsets - JSCSS
@@ -300,17 +325,19 @@ $(document).ready(function () {
         , "#file_file_format_select_tooltip"
         , '#file_number_blank_columns_tooltip'
         , '#file_number_blank_rows_tooltip'
+        , '#file_use_format_specific_info_tooltip',
         ,
     ,];
     let global_file_tooltip_text = [
-          "Description for the file (optional)."
-        , "Select one if using the auto detect file block feature. Best results will come from selecting the size plate used in the plate reader."
-        , "This can be set by the user or auto detected."
+          "Description for the file is optional, but can be helpful if there are many files in the study."
+        , "If the plate size is known, set this to On and select the size plate used in the plate reader."
+        , "If the delimiter is known, set this to On and select the correct delimiter."
         , "If a value is provided, this sample time will be used for this whole data block (sample times in the selected assay plate map will be overwritten with this value)."
-        , "The number of blocks of data in the file."
+        , "The number of blocks of data in the file. If this is set to On, this number of data blocks will be avaiable for editing."
         , "Selecting a specific format will yield the best results IF the file follows that format - exactly."
-        , "Set the number of blank columns to the left of the data block."
-        , "Set the number of header rows above of the data block. Use 123 to look for column headers of 1, 2, 3 etc."
+        , "Set the number of blank columns to the left of the data block. Use 123 to look for column headers of 1, 2, 3 etc. throughout the file. It is always assumed that a data block starts the line below headers of 1, 2, 3 etc. and, when using 123, all ~blank/~end line tags are ignored."
+        , "Set the number of header rows above of the data block. If 123 is used for the number of blank columns, it will also be used to find the first set of data blocks and the number provided here will be ignored, even if set On."
+        , "Some formats have additional information embedded in the block detection algorithm. If set to On, this information is used in detecting data blocks."
         ,
     ,];
     // set the tooltips
@@ -601,20 +628,49 @@ $(document).ready(function () {
         }
         catch(err) { global_file_setting_box_form_number_blank_rows = $("#id_form_number_blank_rows").selectize()[0].selectize.items[0];
         }
-        global_file_set_delimiter = $("#set_delimiter").prop('checked');
-        global_file_set_plate_size = $("#set_plate_size").prop('checked');
-        global_file_set_number_blocks = $("#set_number_blocks").prop('checked');
-        global_file_set_number_blank_columns = $("#set_number_blank_columns").prop('checked');
-        global_file_set_number_blank_rows = $("#set_number_blank_rows").prop('checked');
+
+        // check all the set buttons for true/false
+        if ($("#set_format").closest('div').hasClass('off')) {
+            global_file_set_format = false;
+        } else {
+            global_file_set_format = true;
+        }
+        if ($("#set_delimiter").closest('div').hasClass('off')) {
+            global_file_set_delimiter = false;
+        } else {
+            global_file_set_delimiter = true;
+        }
+        if ($("#set_plate_size").closest('div').hasClass('off')) {
+            global_file_set_plate_size = false;
+        } else {
+            global_file_set_plate_size = true;
+        }
+        if ($("#set_number_blocks").closest('div').hasClass('off')) {
+            global_file_set_number_blocks = false;
+        } else {
+            global_file_set_number_blocks = true;
+        }
+        if ($("#set_number_blank_columns").closest('div').hasClass('off')) {
+            global_file_set_number_blank_columns = false;
+        } else {
+            global_file_set_number_blank_columns = true;
+        }
+        if ($("#set_number_blank_rows").closest('div').hasClass('off')) {
+            global_file_set_number_blank_rows = false;
+        } else {
+            global_file_set_number_blank_rows = true;
+        }
 
         // console.log(global_file_plate_this_file_id)
         // console.log(global_file_setting_box_delimiter)
         // console.log(global_file_setting_box_form_plate_size)
         // console.log(global_file_setting_box_form_number_blocks)
+        // console.log(global_file_set_format)
         // console.log(global_file_set_delimiter)
         // console.log(global_file_set_plate_size)
         // console.log(global_file_set_number_blocks)
         // console.log(global_file_set_number_blank_columns)
+        // console.log(global_file_set_number_blank_rows)
 
         var data = {
             call: 'fetch_review_plate_reader_data_file',
@@ -626,9 +682,8 @@ $(document).ready(function () {
             form_number_blank_columns: global_file_setting_box_form_number_blank_columns,
             form_number_blank_rows: global_file_setting_box_form_number_blank_rows,
             set_delimiter: global_file_set_delimiter,
+            set_format: global_file_set_format,
             set_plate_size: global_file_set_plate_size,
-            number_plate_lines: global_file_selected_a_plate_map_with_number_lines_by_plate_size,
-            number_plate_columns: global_file_selected_a_plate_map_with_number_columns_by_plate_size,
             set_number_blocks: global_file_set_number_blocks,
             set_number_blank_columns: global_file_set_number_blank_columns,
             set_number_blank_rows: global_file_set_number_blank_rows,
@@ -661,7 +716,7 @@ $(document).ready(function () {
             error: function (xhr, errmsg, err) {
                 // Stop spinner
                 window.spinner.stop();
-                alert('An unknown error has occurred. \n');
+                alert('An unknown error has occurred. Try a different file format. \n');
                 console.log(xhr.status + ": " + xhr.responseText);
             }
         });
@@ -672,8 +727,14 @@ $(document).ready(function () {
         // console.log(file_block_info)
         // note this method if needed $("#id_device").selectize()[0].selectize.setValue(pm_device);
         let add_blocks = 0;
+        let calculated_number_of_blocks = 0;
         // get info that is the same for all out of the first dictionary
-        let calculated_number_of_blocks = file_block_info[0][('calculated_number_of_blocks')];
+        try {
+            calculated_number_of_blocks = file_block_info[0][('calculated_number_of_blocks')];
+        } catch (err) {
+            calculated_number_of_blocks = 0;
+            alert('Error SCK0001-AJAX CALL RETURNED EMPTY has occurred. Notify a database administrator that you have received this error \n');
+        }
 
         if (global_file_set_plate_size == false) {
             // make the plate size show what was identified
@@ -704,7 +765,12 @@ $(document).ready(function () {
             // pass
         } else {
             // (set_number_blocks == True && calculated_number_of_blocks != global_file_setting_box_form_number_blocks)
-            alert('The number of blocks specified does not match the number detected. Try specifying the plate size and check to make sure the file follows the rules. If the auto reader still will not return the desired block sampels, specify the number of blocks and perform auto detect, then fill in the information for each block manually.\n');
+            let mymessage = "The number of blocks specified does not match the number detected." ;
+            mymessage = mymessage + " The set number of blocks will be used.";
+            mymessage = mymessage + " Try setting the plate size and/or some of the other settings";
+            mymessage = mymessage + " to get better performance from the block detect algorithm or";
+            mymessage = mymessage + " manually edit the block information as needed. \n";
+            alert(mymessage);
             // console.log(calculated_number_of_blocks)
             // console.log(global_file_setting_box_form_number_blocks)
             add_blocks = global_file_setting_box_form_number_blocks - calculated_number_of_blocks;
@@ -751,7 +817,7 @@ $(document).ready(function () {
             for ( var idx = 0, ls = add_blocks; idx < ls; idx++ ) {
                 // console.log("each block", idx)
                 global_file_iblock_data_block.push(data_block);
-                global_file_iblock_data_block_metadata.push(data_block_metadata);
+                global_file_iblock_data_block_metadata.push(0);
                 global_file_iblock_delimited_start.push(0);
                 global_file_iblock_delimited_end.push(0);
                 global_file_iblock_line_start.push(0);

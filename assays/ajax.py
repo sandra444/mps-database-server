@@ -4359,6 +4359,7 @@ def fetch_review_plate_reader_data_file(request):
     form_number_blank_rows = request.POST.get('form_number_blank_rows', '0')
 
     set_delimiter = request.POST.get('set_delimiter', '0')
+    set_format = request.POST.get('set_format', '0')
     set_plate_size = request.POST.get('set_plate_size', '0')
     number_plate_lines = request.POST.get('number_plate_lines', '0')
     number_plate_columns = request.POST.get('number_plate_columns', '0')
@@ -4377,9 +4378,8 @@ def fetch_review_plate_reader_data_file(request):
     set_dict.update({'form_number_blank_columns': form_number_blank_columns})
     set_dict.update({'form_number_blank_rows': form_number_blank_rows})
     set_dict.update({'set_delimiter': set_delimiter})
+    set_dict.update({'set_format': set_format})
     set_dict.update({'set_plate_size': set_plate_size})
-    set_dict.update({'number_plate_lines': number_plate_lines})
-    set_dict.update({'number_plate_columns': number_plate_columns})
     set_dict.update({'set_number_blocks': set_number_blocks})
     set_dict.update({'set_number_blank_columns': set_number_blank_columns})
     set_dict.update({'set_number_blank_rows': set_number_blank_rows})

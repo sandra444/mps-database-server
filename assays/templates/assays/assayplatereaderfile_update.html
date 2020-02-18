@@ -145,10 +145,10 @@
                                             </div>
                                         </div>
                                         <div class="col-md-1">
-                                            <button type="button" class="btn btn-primary" id="reviewSettings">Show/Hide Settings</button>
+                                            <button type="button" class="btn btn-primary plate-file-button-spacer" id="reviewSettings">Show/Hide Settings</button>
                                         </div>
                                         <div class="col-md-1">
-                                            <button type="button" class="btn btn-primary" id="reviewTips">Show/Hide Tips</button>
+                                            <button type="button" class="btn btn-primary plate-file-button-spacer" id="reviewTips">Show/Hide Tips</button>
                                         </div>
                                     </div>
                                 </div>
@@ -162,22 +162,16 @@
                                         <div class="col-md-11">
                                             <div>
                                                 <br>
-                                                <legend>No Format Selected - Assumptions</legend>
-                                                <p></p>
-                                                    <li>Files are comma separated/delimited (CSV), tab separated/delimited (TSV), or space separated/delimited text files. </li>
-                                                    <li>CSV files do not contain commas in their data fields (use TSV).</li>
-                                                    <li>There is only one plate size per file.</li>
-                                                    <li>Data blocks are in the same dimensions as the plate size.</li>
-                                                    <li>Data blocks are stacked vertically (above/below), not horizontal (side-by-side). </li>
-                                                    <li>Data blocks are separated by a blank line (best results are obtained when the blank line is tagged <i>~blank</i> or <i>~end</i> in the first column.</li>
-                                                    <li>A data block is considered to end one line above the tagged blank line (or the first blank line if there is more than one). </li>
-                                                <br>
-                                                <legend>Customize by Setting Format Information</legend>
-                                                <p>If computer returned incorrect results on first run, turn ON the set to and enter the correct format information, the redetect the blocks. Currently only works for vertically stacked data blocks (not side-by-side). </p>
-                                                    <li>Set the plate size for better performance.</li>
-                                                    <li>Set the number columns to ignore (or label the data block headers with 1, 2, 3, etc.)</li>
-                                                    <li>Set the file delimiter.</li>
-                                                    <li>As a last resort, set the number of data blocks (will likely require manual editing of the block information).</li>
+                                                <legend>Tips and Underlying Assumptions </legend>
+                                                <li>Files are comma separated/delimited (CSV), tab separated/delimited (TSV), or space separated/delimited text files. </li>
+                                                <li>CSV files do not contain commas in their data fields (if they do, use TSV).</li>
+                                                <li>There is one plate size per file (i.e. all data blocks are the same size).</li>
+                                                <li>Data blocks are in the same dimensions as the plate (e.g., a 96 well plate is 8 rows by 12 columns).</li>
+                                                <li>Data blocks are separated by a blank line (best results are obtained when the blank line is tagged <i>~blank</i> or <i>~end</i> in the first column of the file) or the plate size is specified and # Columns to Ignore is set to '123'.</li>
+                                                <li>If blank lines are used to locate data blocks, a data block is considered to end one line above the tagged blank line (or the first blank line, if there is more than one). </li>
+                                                <li>Unless plate size is set and # Columns to Ignore is set to '123', or a specific file format has been programmed to detect side-by-side data blocks, only the left most set of data blocks will be detected (additional blocks located to the right will be ignored). </li>
+                                                <li>Select the File Format most like the data file and click to detect file blocks. If incorrect results are returned on the first run, click to Show Settings, set some of the format information manually (and turn On the corresponding Set slider), then click to Redetect blocks. </li>
+                                                <li>Setting the number of data blocks well return the specified number of blocks. The block information can be edited manually after detection.</li>
                                             </div>
                                         </div>
                                     </div>
@@ -208,14 +202,21 @@
                                                 </label>
                                             </div>
                                         </div>
-                                        <div class="col-md-3">
+                                        <div class="col-md-2">
                                             <div>
                                                 <label>
-                                                    Set to:
+                                                    Setting
                                                 </label>
                                             </div>
                                         </div>
                                         <div class="col-md-5">
+                                            <div>
+                                                <label>
+                                                    Helpful Information for Advanced Users
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-1">
                                         </div>
                                     </div>
 
@@ -236,12 +237,12 @@
                                                 </label>
                                             </div>
                                         </div>
-                                        <div class="col-md-3">
+                                        <div class="col-md-2">
                                             <div class="plate-map-page-field-contents-medium">
                                                 {{form.form_number_blocks}}
                                             </div>
                                         </div>
-                                        <div class="col-md-5">
+                                        <div class="col-md-6">
                                         </div>
                                     </div>
 
@@ -262,12 +263,15 @@
                                                 </label>
                                             </div>
                                         </div>
-                                        <div class="col-md-3">
+                                        <div class="col-md-2">
                                             <div class="plate-map-page-field-contents-medium">
                                                 {{form.se_form_plate_size}}
                                             </div>
                                         </div>
                                         <div class="col-md-5">
+{#                                            <p>For accurate detection of all data blocks, label all columns of all data blocks with 1, 2, 3 etc., set the # Columns to Ignore to '123', and set the correct plate size.</p>#}
+                                        </div>
+                                        <div class="col-md-1">
                                         </div>
                                     </div>
 
@@ -288,13 +292,15 @@
                                                 </label>
                                             </div>
                                         </div>
-                                        <div class="col-md-3">
+                                        <div class="col-md-2">
                                             <div class="plate-map-page-field-contents-medium">
                                                 {{form.form_number_blank_columns}}
                                             </div>
                                         </div>
                                         <div class="col-md-5">
-                                            <p>(Set to On and enter 123 to search for column headers of 1, 2, 3 etc. instead of setting # unused columns.)</p>
+                                            <p>To use column headers (1, 2, 3 etc.) to identify data blocks, set this On and to '123'. This is the recommended method.</p>
+                                        </div>
+                                        <div class="col-md-1">
                                         </div>
                                     </div>
 
@@ -315,12 +321,15 @@
                                                 </label>
                                             </div>
                                         </div>
-                                        <div class="col-md-3">
+                                        <div class="col-md-2">
                                             <div class="plate-map-page-field-contents-medium">
                                                 {{form.form_number_blank_rows}}
                                             </div>
                                         </div>
                                         <div class="col-md-5">
+                                            <p>To use tags of ~blank or ~end to identify the line under the data blocks, set this On and to '444'.</p>
+                                        </div>
+                                        <div class="col-md-1">
                                         </div>
                                     </div>
 
@@ -341,15 +350,44 @@
                                                 </label>
                                             </div>
                                         </div>
-                                        <div class="col-md-3">
+                                        <div class="col-md-2">
                                             <div class="plate-map-page-field-contents-medium">
                                                 {{form.file_delimiter}}
                                             </div>
                                         </div>
-                                        <div class="col-md-5">
+                                        <div class="col-md-6">
                                         </div>
                                     </div>
 
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <div class="plate-map-page-field-labels-small">
+                                                <div>
+                                                    <div><p id="file_use_format_specific_info_tooltip"></p>
+                                                        <label for="file_use_format_specific_info_tooltip">Use File Specific Info &nbsp;</label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-1">
+                                            <div class="checkbox">
+                                                <label>
+                                                    <input id="set_format" type="checkbox" data-toggle="toggle">
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2">
+                                        </div>
+                                        <div class="col-md-5">
+                                            <div class="checkbox">
+                                                <p id="format_selected_annotation">
+                                                    Some formats use additional knowledge about the file when detecting data blocks.
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-1">
+                                        </div>
+                                    </div>
 
 {#                                    <hr>#}
 
