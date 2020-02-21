@@ -3015,29 +3015,33 @@ class AssayPlateReaderMapDataFile(models.Model):
         return '{}delete/'.format(self.get_absolute_url())
 
 # TODO-sck build this in phase 3
-class AssayPlateReaderMapDataProcessing(models.Model):
-    """Main data processing status and tracking for plate reader data processing."""
+# This table was planned for use with processing BATCHES. May need it later if decide to store info in tables
+# this table was added, but was removed 20200220 when decided not doing it this way
+# class AssayPlateReaderMapDataProcessing(models.Model):
+#     """Main data processing status and tracking for plate reader data processing."""
+#
+#     class Meta(object):
+#         verbose_name = 'Assay Plate Reader Processing'
+#         unique_together = [
+#             ('study', 'name'),
+#         ]
+#
+#     study = models.ForeignKey(
+#         AssayStudy,
+#         blank=True,
+#         on_delete=models.CASCADE
+#     )
+#     name = models.CharField(
+#         max_length=255,
+#         blank=True
+#     )
+#     description = models.CharField(
+#         max_length=2000,
+#         blank=True,
+#         default=''
+#     )
 
-    class Meta(object):
-        verbose_name = 'Assay Plate Reader Processing'
-        unique_together = [
-            ('study', 'name'),
-        ]
-
-    study = models.ForeignKey(
-        AssayStudy,
-        blank=True,
-        on_delete=models.CASCADE
-    )
-    name = models.CharField(
-        max_length=255,
-        blank=True
-    )
-    description = models.CharField(
-        max_length=2000,
-        blank=True,
-        default=''
-    )
+    # NEVER ADDED
     # plate_reader_unit = models.ForeignKey(
     #     'assays.PhysicalUnits',
     #     null=True,
@@ -3077,17 +3081,17 @@ class AssayPlateReaderMapDataProcessing(models.Model):
     #     Automatically add an "F" Caution Flag and an "X" Exclude when, due to the selection of the fitting equation,
     #     a sample 's fitted response could not be calculated?
 
-    def __str__(self):
-        return '{0}'.format(self.name)
-
-    def get_absolute_url(self):
-        return '/assays/assayplatereaderdataprocessing/{}/'.format(self.id)
-
-    def get_post_submission_url(self):
-        return '/assays/assaystudy/{}/assayplatereaderdataprocessing/'.format(self.study_id)
-
-    def get_delete_url(self):
-        return '{}delete/'.format(self.get_absolute_url())
+    # def __str__(self):
+    #     return '{0}'.format(self.name)
+    #
+    # def get_absolute_url(self):
+    #     return '/assays/assayplatereaderdataprocessing/{}/'.format(self.id)
+    #
+    # def get_post_submission_url(self):
+    #     return '/assays/assaystudy/{}/assayplatereaderdataprocessing/'.format(self.study_id)
+    #
+    # def get_delete_url(self):
+    #     return '{}delete/'.format(self.get_absolute_url())
 
 
 class AssayPlateReaderMapDataFileBlock(models.Model):
@@ -3118,11 +3122,18 @@ class AssayPlateReaderMapDataFileBlock(models.Model):
         blank=True,
         on_delete=models.CASCADE
     )
-    assayplatereadermapdataprocessing = models.ForeignKey(
-        AssayPlateReaderMapDataProcessing,
-        null=True,
+    # assayplatereadermapdataprocessing = models.ForeignKey(
+    #     AssayPlateReaderMapDataProcessing,
+    #     null=True,
+    #     blank=True,
+    #     on_delete=models.CASCADE)
+
+    data_processing_parsable = models.CharField(
+        max_length=2000,
         blank=True,
-        on_delete=models.CASCADE)
+        default=''
+    )
+
     data_block = models.IntegerField(
         default=999,
         null=True
