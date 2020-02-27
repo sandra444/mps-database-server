@@ -1092,7 +1092,7 @@ $(document).ready(function () {
 
     let processDataLoadFileListOnLoad = function (json, exist) {
         global_file_iblock_file_list = json.file_list;
-        console.log(global_file_iblock_file_list)
+        //console.log(global_file_iblock_file_list)
 
         // do it here or will get race errors
         for (var fidx = 1, fidxds = global_file_formset_count; fidx < fidxds; fidx++) {
@@ -1172,9 +1172,9 @@ $(document).ready(function () {
 
         if (continue_if_true == 'true') {
             for (var ridx = i_lstart, rls = i_lend; ridx <= rls; ridx++) {
-                console.log("ridx: ", ridx)
-                console.log("global_file_iblock_file_list[ridx]")
-                console.log(global_file_iblock_file_list[ridx])
+                // console.log("ridx: ", ridx)
+                // console.log("global_file_iblock_file_list[ridx]")
+                // console.log(global_file_iblock_file_list[ridx])
 
                 let my_line_list = [];
                 try {
