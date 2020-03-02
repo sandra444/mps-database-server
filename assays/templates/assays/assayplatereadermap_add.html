@@ -240,6 +240,7 @@
                                     <div class="col-md-9">
                                         <div class="plate-map-page-field-contents-medium required">
                                             {{ form.se_block_select_string }}
+{#                                            yes, using this for now#}
                                             <div class="hidden">{{ form.ns_block_select_pk }}</div>
                                         </div>
                                     </div>
@@ -1288,8 +1289,8 @@
                                         </div>
                                         <div class="col-md-9">
                                             <div class="plate-map-page-field-contents-medium">
-                                                {{ form.se_block_select_standard_string }}
-                                                <div class="hidden">{{ form.ns_block_select_standard_pk }}</div>
+{#                                                got rid of this {{ form.se_block_select_standard_string }}#}
+                                                {{ form.ns_block_select_standard_string }}
                                             </div>
                                         </div>
                                     </div>
@@ -1348,10 +1349,6 @@
                                         <tr>
                                             <td>R squared</td>
                                             <td id="calibration-rsquared"></td>
-                                        </tr>
-                                        <tr>
-                                            <td>Multiplier String</td>
-                                            <td id="calibration-multiplier-string"></td>
                                         </tr>
                                     </table>
 
@@ -1425,10 +1422,10 @@
                             <h2>Sending Data to the Study Summary</h2>
 
                             <div class="row">
-                                <div class="col-md-5">
+                                <div class="col-md-7">
                                     <div class="plate-map-page-field-labels-medium">
                                         <div>
-                                            <label>FYI: Set to use a Multiplier (Raw to Processed)</label>
+                                            <label>FYI: Set to use a multiplier (calibrated to processed or raw to processed)</label>
                                         </div>
                                     </div>
                                 </div>
@@ -1437,7 +1434,22 @@
                                         {{ assay_map_additional_info.form_data_processing_multiplier }}
                                     </div>
                                 </div>
-                                <div class="col-md-6"></div>
+                                <div class="col-md-4"></div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-2">
+                                    <div class="plate-map-page-field-labels-medium">
+                                        <div>
+                                            <label>FYI: Multiplier Details</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-10">
+                                    <div class="plate-map-page-field-contents-small">
+                                        <p id="calibration-multiplier-string"></p>
+                                    </div>
+                                </div>
                             </div>
 
                             <div class="row">

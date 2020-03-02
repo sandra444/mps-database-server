@@ -4706,18 +4706,11 @@ def fetch_information_for_study_platemap_standard_file_blocks(request):
     # print(distinct_plate_map_with_select_standard_string)
     # print(distinct_plate_map_with_block_standard_pk)
 
-    data = {}
-    data_to_return = []
-    data_fields = {
-        'time': 5,
-        'raw_value': 5,
-        'bin_index': 1,
-    }
-    data_to_return.append(data_fields)
-
     data.update({'block_data': data_to_return, })
+    # print(data)
     return HttpResponse(json.dumps(data),
                         content_type="application/json")
+
 
 # TODO TODO TODO
 switch = {

@@ -149,7 +149,7 @@ $(document).ready(function () {
 
         , "The molecular weight of the standard is needed in cases were the standard unit is in moles and the unit in the target, method, unit is a mass unit."
         , "If the standard concentration is given on a per well basis, and the unit in the target, method, unit is a mass or molar unit, the assay plate well volume must be added here."
-        , "In cases where no calibration is being performed or when standards to be used for calibration are in a different block of data, the appropriate selection should be made here."
+        , "In cases where no calibration is being performed or when standards to be used for calibration are in a different block of data, the appropriate selection should be made here. When standards are taken from another data block, the raw values are taken from selected data block. The units and other associated values must be specified in THIS plate map (at the top of the page). "
         , "Points that are marked for exclusion are available for use in the study summary if the appropriate selections are made by the user, but they are hidden by default."
         , "This plate map has not standards. To calibrate, a block of data with the standards must be selected.."
         ,];
@@ -400,6 +400,10 @@ $(document).ready(function () {
 
     // global variables for the calibration
     let global_calibrate_file_blocks_with_standards_loaded = false;
+    let my_run_counter = 0;
+    let global_calibrate_borrowed_index = [];
+    let global_calibrate_borrowed_block_pk = [];
+    let global_calibrate_borrowed_block = [];
 
     // on CHANGE calibration on change events
     
@@ -410,25 +414,34 @@ $(document).ready(function () {
     
     // changed the standard file block selection option
     $("input[type='radio'][name='standard_pick']").click(function () {
-        makeTheCalibrationDecisions()
-    });
-
-    // run QC before try to send data
-    $("#prelimQC").click(function () {
-        makeTheCalibrationDecisions()
+        makeTheCalibrationDecisions();
     });
 
     // clicked to draw
     $("#drawCurveButton").click(function () {
-        makeTheCalibrationDecisions()
-        drawTheCalibrationCurve();
+        makeTheCalibrationDecisions();
+        doCalibrationAndCurveFitting();
     });
 
+    // change the file block for the standards
+    $("#id_ns_block_select_standard_string").change(function () {
+        // what is the file block pk that matches the user selection?
+        let block_pk = global_calibrate_borrowed_block.indexOf($("#id_ns_block_select_standard_string").val());
+        getTheStandardsFromThisFileBlock(block_pk);
+    });
+
+
     // calibration FUNCTIONS
+
+    // currently, this is only called by the refresh button
+    function doCalibrationAndCurveFitting() {
+        my_run_counter = my_run_counter+1;
+        console.log("my run counter of cal dec: ", my_run_counter)
+        drawTheCalibrationCurve();
+    }
     
     function makeTheCalibrationDecisions() {
         theSuiteOfCalibrationChecks();
-
         // what calibration method is currently selected
         let calmethod = "";
         try {
@@ -451,25 +464,11 @@ $(document).ready(function () {
                 $('.plate_map_options_standards_blocks').removeClass('hidden');
             }
             changedRadioShowStandardsBlockSelectionCheckDropdown();
+            let returnedMultiplier = dataProcessingFindTheMultiplier();
+            $("#id_form_data_processing_multiplier").val() == returnedMultiplier;
 
         }
-        //
-        //
-        // visibilityMWandWellVolume()
-        //
-        // //fillTheAssayInfoForTheCurve(calmethod);
-        //
-        // preliminaryQC();
-        //dataProcessingFindTheMultiplier();
-        //
-
-
     }
-
-    function doCalibrationAndCurveFitting() {
-        drawTheCalibrationCurve();
-    }
-
 
     // deal with populating and showing the file block standard picker
     function changedRadioShowStandardsBlockSelectionCheckDropdown() {
@@ -490,16 +489,158 @@ $(document).ready(function () {
         } else {
             $('.pick-standard-file-block').addClass('hidden');
         }
+    }
 
-    //    https://stackoverflow.com/questions/39139490/how-do-i-add-a-class-to-a-selectize-option-dynamically
+    function loadTheFileBlocksWithStandardsDropdown(){
+        //populate the dropdown with the file block options with file blocks in this study that have standards
+        let data = {
+            call: 'fetch_information_for_study_platemap_standard_file_blocks',
+            study: global_plate_study_id,
+            csrfmiddlewaretoken: window.COOKIES.csrfmiddlewaretoken
+        };
+        window.spinner.spin(document.getElementById("spinner"));
+        $.ajax({
+            url: "/assays_ajax/",
+            type: "POST",
+            dataType: "json",
+            data: data,
+            success: function (json) {
+                window.spinner.stop();
+                if (json.errors) {
+                    // Display errors
+                    alert(json.errors);
+                }
+                else {
+                    let exist = true;
+                    processFindBlocksWithStandards(json, exist);
+                }
+            },
+            // error callback
+            error: function (xhr, errmsg, err) {
+                window.spinner.stop();
+                alert('An error has occurred (finding data blocks with standards), please try a different matrix, assay plate map, or start from an empty plate.');
+                console.log(xhr.status + ": " + xhr.responseText);
+            }
+        });
+    }
+    // post processing from ajax call
+    let processFindBlocksWithStandards = function (json, exist) {
+        let block_data = json.block_data;
+
+        // console.log("db ",block_data)
+
+        global_calibrate_borrowed_index = [];
+        global_calibrate_borrowed_block_pk = [];
+        global_calibrate_borrowed_block = [];
+
+        // index = 0;
+        // for (var key in block_data) {
+        //     console.log("key " + key + " has value " + block_data[key]);
+        //     index = index + 1;
+        // }
+
+        $.each(block_data, function (index, each) {
+            // console.log("key ",Object.keys(each)[0]);
+            // console.log("value ",Object.values(each)[0]);
+            global_calibrate_borrowed_index.push(index);
+            global_calibrate_borrowed_block_pk.push(Object.keys(each)[0]);
+            global_calibrate_borrowed_block.push(Object.values(each)[0]);
+        });
+
+        $("#id_ns_block_select_standard_string").find('option').remove();
+        for(i=0; i < global_calibrate_borrowed_block.length; i++){
+            $("#id_ns_block_select_standard_string").append('<option value="'
+                +global_calibrate_borrowed_block[i]+'">'
+                +global_calibrate_borrowed_block[i]+'</option>');
+        }
+
+        let block_pk = global_calibrate_borrowed_block.indexOf($("#id_ns_block_select_standard_string").val());
+        getTheStandardsFromThisFileBlock(block_pk);
+
+        // https://www.caveofprogramming.com/guest-posts/introduction-to-jquery-populating-creating-dynamic-dropdowns.html
+        // var CARS = new Array("Ford","Honda","Toyota","Suzuki");
+        //     $("#dropdown").find('option').remove();
+        //     for(i=0; i < CARS .length; i++){
+        //         $("#dropdown").append('<option value="'+CARS [i]+'">'+CARS [i]+'</option>');
+        //      }
+
+    };
+
+    function getTheStandardsFromThisFileBlock(block_pk){
+        // need to get, from the file block with this pk
+        // well content of standards and associated
+        // concentration
+        // raw value
+
+ //
+ //        AssayPlateReaderMapDataFileBlock - pk = id
+ //        assayplatereadermap = models.ForeignKey(
+ //        AssayPlateReaderMap,
+ //        null=True,
+ //        blank=True,
+ //        on_delete=models.CASCADE
+ //    )
+
+
+ // class AssayPlateReaderMapItem(models.Model):
+
+ //    plate_index = models.IntegerField(
+ //        default=999,
+ //        blank=True
+ //    )
+ //    well_use = models.CharField(
+ //        verbose_name='Well Use',
+ //        max_length=8,
+ //        default='empty',
+ //        blank=True,
+ //        choices=assay_plate_reader_well_use_choices
+ //    )
+ //    # should be the standard concentration input (associated unit should be in the plate map model)
+ //    standard_value = models.FloatField(
+ //        default=0,
+ //        null=True,
+ //        blank=True
+ //    )
+
+
+ //
+ //        AssayPlateReaderMapItemValue
+
+ //    assayplatereadermapdatafileblock = models.ForeignKey(
+ //        AssayPlateReaderMapDataFileBlock,
+ //        null=True,
+ //        blank=True,
+ //        on_delete=models.CASCADE
+ //    )
+ //    assayplatereadermapitem = models.ForeignKey(
+ //        AssayPlateReaderMapItem,
+ //        null=True,
+ //        blank=True,
+ //        on_delete=models.CASCADE
+ //    )
+ //    plate_index = models.IntegerField(
+ //        default=999,
+ //        blank=True
+ //    )
+ //    well_use = models.CharField(
+ //        verbose_name='Well Use',
+ //        max_length=8,
+ //        default='empty',
+ //        blank=True,
+ //        choices=assay_plate_reader_well_use_choices
+ //    )
+ //    # raw value read from the plate for all wells in this plate
+ //    raw_value = models.FloatField(
+ //        null=True,
+ //        blank=True
+ //    )
+
+
+
     }
 
     // somewhat general function for unit conversion
     function dataProcessingFindTheMultiplier(){
-        // let global_calibrate_thisUnit - target assay unit - where we are heading
-        // let global_floater_standard_unit  - where we came from
-        // let global_calibrate_thisVolumeUnit - if we are normalizing
-
         let calmethod = "";
         try {
             calmethod = $("#id_se_form_calibration_curve").selectize()[0].selectize.items[0];
@@ -510,21 +651,14 @@ $(document).ready(function () {
         //easy cases
         if (calmethod == 'no_calibration'){
             $("#id_form_data_processing_multiplier").val(1);
-        } else if (global_floater_standard_unit == global_calibrate_thisUnit) {
+        } else if (global_floater_standard_unit == global_floater_unit) {
             $("#id_form_data_processing_multiplier").val(1);
         } else {
             alert("conversion not built yet...using 1 for now\n")
         }
     }
 
-    function loadTheFileBlocksWithStandardsDropdown(){
-        //function getAllTheFileBlocksThatHaveStandards() {
-        // does the selected file block have standards
 
-        // if not, make ajax call to
-        // // fetch_information_for_study_platemap_standard_file_blocks
-        //populate the dropdown with the file block options fo rother satndards.
-    }
 
 
     // Get what is needed for the calibration/processing
@@ -2956,3 +3090,4 @@ $(document).ready(function () {
 // document.getElementById("MyElement").className.replace
 // ( /(?:^|\s)MyClass(?!\S)/g , '' )
 // /* Code wrapped for readability - above is all one statement */
+// //    https://stackoverflow.com/questions/39139490/how-do-i-add-a-class-to-a-selectize-option-dynamically

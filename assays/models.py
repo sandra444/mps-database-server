@@ -3320,47 +3320,51 @@ class AssayPlateReaderMapItemValue(models.Model):
         null=True,
         blank=True
     )
-    # adjusted input value (ie input_value - average of blanks)
-    adjusted_value = models.FloatField(
-        null=True,
-        blank=True
-    )
-    # calibrated value
-    fitted_value = models.FloatField(
-        null=True,
-        blank=True
-    )
     time = models.FloatField(
         default=0,
         null=True,
         blank=True
     )
-    caution_flag = models.CharField(
-        max_length=255,
-        default='',
-        null=True,
-        blank=True
-    )
-    excluded = models.BooleanField(
-        default=False,
-        null=True,
-        blank=True
-    )
-    replaced = models.BooleanField(
-        default=False
-    )
-    notes = models.CharField(
-        max_length=255,
-        default='',
-        null=True,
-        blank=True
-    )
-    replicate = models.CharField(
-        max_length=255,
-        default='',
-        null=True,
-        blank=True
-    )
+
+
+    # not using these right now - only sending calculated values to MIF-C
+    # # adjusted input value (ie input_value - average of blanks)
+    # adjusted_value = models.FloatField(
+    #     null=True,
+    #     blank=True
+    # )
+    # # calibrated value
+    # fitted_value = models.FloatField(
+    #     null=True,
+    #     blank=True
+    # )
+    #
+    # caution_flag = models.CharField(
+    #     max_length=255,
+    #     default='',
+    #     null=True,
+    #     blank=True
+    # )
+    # excluded = models.BooleanField(
+    #     default=False,
+    #     null=True,
+    #     blank=True
+    # )
+    # replaced = models.BooleanField(
+    #     default=False
+    # )
+    # notes = models.CharField(
+    #     max_length=255,
+    #     default='',
+    #     null=True,
+    #     blank=True
+    # )
+    # replicate = models.CharField(
+    #     max_length=255,
+    #     default='',
+    #     null=True,
+    #     blank=True
+    # )
 
     def __str__(self):
         return '{0}'.format(self.id)

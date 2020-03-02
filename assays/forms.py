@@ -2475,11 +2475,14 @@ class AssayPlateReaderMapForm(BootstrapForm):
         self.fields['ns_block_select_pk'].widget.attrs.update({'class': 'no-selectize'})
         self.fields['ns_block_select_pk'].choices = distinct_plate_map_with_block_pk
 
-        self.fields['se_block_select_standard_string'].required = False
-        # self.fields['se_block_select_standard_string'].widget.attrs['class'] += ' required'
+        self.fields['ns_block_select_standard_string'].required = False
+        self.fields['ns_block_select_standard_string'].widget.attrs.update({'class': 'no-selectize'})
+        self.fields['ns_block_select_standard_string'].widget.attrs['class'] += ' form-control'
+
+        # not using these right now - some function moved around
+        # self.fields['se_block_select_standard_pk'].required = False
+        # self.fields['se_block_select_standard_pk'].widget.attrs['class'] += ' required'
         # self.fields['se_block_select_standard_string'].choices = distinct_plate_map_with_select_standard_string
-        self.fields['ns_block_select_standard_pk'].required = False
-        self.fields['ns_block_select_standard_pk'].widget.attrs.update({'class': 'no-selectize'})
         # self.fields['ns_block_select_standard_pk'].choices = distinct_plate_map_with_block_standard_pk
 
     # these raw data
@@ -2488,8 +2491,9 @@ class AssayPlateReaderMapForm(BootstrapForm):
     ns_block_select_pk = forms.ChoiceField()
 
     # these for standard - they get filled, if needed, in an ajax call
-    se_block_select_standard_string = forms.ChoiceField()
-    ns_block_select_standard_pk = forms.ChoiceField()
+    ns_block_select_standard_string = forms.ChoiceField()
+    # se_block_select_standard_string = forms.ChoiceField()
+    # ns_block_select_standard_pk = forms.ChoiceField()
     # END section to deal with raw data showing in the plate map after file assignment and deal with standard in a different file block
 
     # print("MAIN FORM")
