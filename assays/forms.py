@@ -134,6 +134,8 @@ class ModelFormSplitTime(BootstrapForm):
                         'style': 'width:75px;'
                     })
                 )
+                # Set default
+                self.fields['addition_time_' + time_unit].widget.attrs['data-default'] = 0
             if self.fields.get('duration', None):
                 self.fields['duration_' + time_unit] = forms.FloatField(
                     initial=0,
@@ -142,6 +144,8 @@ class ModelFormSplitTime(BootstrapForm):
                         'style': 'width:75px;'
                     })
                 )
+                # Set default
+                self.fields['duration_' + time_unit].widget.attrs['data-default'] = 0
 
         # Fill additional time
         if self.fields.get('addition_time', None):
