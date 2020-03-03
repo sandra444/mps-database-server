@@ -25,6 +25,13 @@ from django.views.generic import UpdateView
 
 import urllib
 
+from django.contrib.admin.models import LogEntry, ADDITION, CHANGE
+
+from django.contrib.admin.utils import (
+    construct_change_message
+)
+
+from django.contrib.contenttypes.models import ContentType
 
 # Unsemantic! Breaks PEP! BAD!
 def PermissionDenied(request, message, log_in_link=True):
@@ -463,7 +470,60 @@ class SuperuserRequiredMixin(object):
         return super(SuperuserRequiredMixin, self).dispatch(*args, **kwargs)
 
 
-class FormHandlerMixin(object):
+class HistoryMixin(object):
+    def get_context_data(self, **kwargs):
+        context = super(HistoryMixin, self).get_context_data(**kwargs)
+
+        object_id = self.kwargs.get('pk', 0)
+
+        if object_id:
+            context.update({
+                'history': LogEntry.objects.filter(
+                    object_id=object_id,
+                    content_type_id=ContentType.objects.get_for_model(self.model, for_concrete_model=False).pk,
+                ).prefetch_related(
+                    'user'
+                )
+            })
+
+        return context
+
+    # Kind of odd that these shadow the keyword object?
+    def log_addition(self, request, object, message):
+        """
+        Log that an object has been successfully added.
+
+        The default implementation creates an admin LogEntry object.
+        """
+        return LogEntry.objects.log_action(
+            user_id=request.user.pk,
+            content_type_id=ContentType.objects.get_for_model(object, for_concrete_model=False).pk,
+            object_id=object.pk,
+            object_repr=str(object),
+            action_flag=ADDITION,
+            change_message=message,
+        )
+
+    def log_change(self, request, object, message):
+        """
+        Log that an object has been successfully changed.
+
+        The default implementation creates an admin LogEntry object.
+        """
+        return LogEntry.objects.log_action(
+            user_id=request.user.pk,
+            content_type_id=ContentType.objects.get_for_model(object, for_concrete_model=False).pk,
+            object_id=object.pk,
+            object_repr=str(object),
+            action_flag=CHANGE,
+            change_message=message,
+        )
+
+    def construct_change_message(self, form, formsets, add=False):
+        return construct_change_message(form, formsets, add)
+
+
+class FormHandlerMixin(HistoryMixin):
     """Mixin for handling forms, whether they have formsets and/or are popups"""
     formsets = ()
     is_update = False
@@ -495,7 +555,7 @@ class FormHandlerMixin(object):
         """For if there needs to be extra processing before a save"""
         pass
 
-    def extra_form_processing(self):
+    def extra_form_processing(self, form):
         """For if there needs to be extra processing after a save"""
         pass
 
@@ -575,13 +635,27 @@ class FormHandlerMixin(object):
                 all_formsets_valid = False
 
         if form.is_valid() and all_formsets_valid:
-            # May or may not do anything
+            # FOR GETTING new_objects ATTRIBUTE
+            form.save(commit=False)
+            for formset in all_formsets:
+                formset.save(commit=False)
+
+            # The tricky thing about this is that it makes changing stuff for matrices quite unpleasant...
+            # Then again, do we need to robustly track the precise changes? Would be verbose
+            change_message = self.construct_change_message(form, all_formsets, not self.is_update)
+
+            # May or may not be implemented
             self.pre_save_processing(form)
 
             save_forms_with_tracking(self, form, formset=all_formsets, update=self.is_update)
 
-            # May or may not do anything
-            self.extra_form_processing()
+            # May or may not be implemented
+            self.extra_form_processing(form)
+
+            if not self.is_update:
+                self.log_addition(self.request, self.object, change_message)
+            else:
+                self.log_change(self.request, self.object, change_message)
 
             if is_popup:
                 if self.object.id:
