@@ -2226,7 +2226,8 @@ class AbstractClassAssayStudyAssay(AssayStudyAssay):
         proxy = True
 
     def __str__(self):
-        return 'TARGET: {0}  METHOD: {1}  UNIT: {2}'.format(self.target, self.method, self.unit)
+        # return 'TARGET: {0}  METHOD: {1}  UNIT: {2}'.format(self.target, self.method, self.unit)
+        return '{2}  --- TARGET: {0} by METHOD: {1}'.format(self.target, self.method, self.unit)
 
 
 # Get info to populate pick lists; no qc needed on this form, just to use on webpage to allow user selections
@@ -2416,8 +2417,8 @@ class AssayPlateReaderMapForm(BootstrapForm):
         )
         self.fields['study_assay'].widget.attrs['class'] += ' required'
         # the selectize was causing so many PROBLEMS with turning to required in JS, I turned it off this field!
-        self.fields['volume_unit'].widget.attrs.update({'class': 'no-selectize'})
-        self.fields['volume_unit'].widget.attrs['class'] += ' form-control'
+        # self.fields['volume_unit'].widget.attrs.update({'class': 'no-selectize'})
+        # self.fields['volume_unit'].widget.attrs['class'] += ' form-control'
         self.fields['standard_molecular_weight'].widget.attrs['class'] += ' form-control'
 
         ######
@@ -2475,13 +2476,14 @@ class AssayPlateReaderMapForm(BootstrapForm):
         self.fields['ns_block_select_pk'].widget.attrs.update({'class': 'no-selectize'})
         self.fields['ns_block_select_pk'].choices = distinct_plate_map_with_block_pk
 
-        self.fields['ns_block_select_standard_string'].required = False
-        self.fields['ns_block_select_standard_string'].widget.attrs.update({'class': 'no-selectize'})
-        self.fields['ns_block_select_standard_string'].widget.attrs['class'] += ' form-control'
+        # self.fields['ns_block_select_standard_string'].required = False
+        # self.fields['ns_block_select_standard_string'].widget.attrs.update({'class': 'no-selectize'})
+        # self.fields['ns_block_select_standard_string'].widget.attrs['class'] += ' form-control'
 
         # not using these right now - some function moved around
         # self.fields['se_block_select_standard_pk'].required = False
-        # self.fields['se_block_select_standard_pk'].widget.attrs['class'] += ' required'
+        self.fields['se_block_select_standard_string'].required = False
+        self.fields['se_block_select_standard_string'].widget.attrs['class'] += ' required'
         # self.fields['se_block_select_standard_string'].choices = distinct_plate_map_with_select_standard_string
         # self.fields['ns_block_select_standard_pk'].choices = distinct_plate_map_with_block_standard_pk
 
@@ -2491,8 +2493,8 @@ class AssayPlateReaderMapForm(BootstrapForm):
     ns_block_select_pk = forms.ChoiceField()
 
     # these for standard - they get filled, if needed, in an ajax call
-    ns_block_select_standard_string = forms.ChoiceField()
-    # se_block_select_standard_string = forms.ChoiceField()
+    # ns_block_select_standard_string = forms.ChoiceField()
+    se_block_select_standard_string = forms.ChoiceField()
     # ns_block_select_standard_pk = forms.ChoiceField()
     # END section to deal with raw data showing in the plate map after file assignment and deal with standard in a different file block
 
@@ -2818,7 +2820,7 @@ class AssayPlateReaderMapDataFileBlockForm(forms.ModelForm):
         # this made the dropdown behave when copied with the formset!
         # SUPER IMPORTANT and HANDY when need to copy formsets with dropdowns - if have selectized, it is a big mess
         self.fields['assayplatereadermap'].widget.attrs.update({'class': ' no-selectize required'})
-
+        # self.fields['form_marked_to_make_mifc'].initial = True
 
     # move to the java script...it will be better for the user
     # def clean(self):
@@ -2852,6 +2854,7 @@ class AssayPlateReaderMapDataFileBlockForm(forms.ModelForm):
     form_selected_plate_map_time_unit = forms.CharField(
         required=False,
     )
+    # form_marked_to_make_mifc = forms.BooleanField()
 
 # formsets
 class AssayPlateReaderMapFileBlockFormSet(BaseInlineFormSetForcedUniqueness):
