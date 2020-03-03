@@ -2421,11 +2421,11 @@ class AssayTargetForm(BootstrapForm):
                 for current_category in self.cleaned_data.get('category', None):
                     current_category.targets.add(self.instance)
 
-                # Permit removals for the moment
-                # Crude removal
-                for initial_category in self.initial_categories:
-                    if initial_category not in self.cleaned_data.get('category', None):
-                        initial_category.targets.remove(self.instance)
+            # Permit removals for the moment
+            # Crude removal
+            for initial_category in self.initial_categories:
+                if initial_category not in self.cleaned_data.get('category', None):
+                    initial_category.targets.remove(self.instance)
 
         return new_target
 
