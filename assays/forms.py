@@ -2434,8 +2434,8 @@ class AssayMethodForm(BootstrapForm):
     # For adding to category m2m
     target = forms.ModelMultipleChoiceField(
         queryset=AssayTarget.objects.all().order_by('name'),
-        # Needs to be required, methods need a target to be used
-        # required=False
+        # No longer required to prevent circularity with Target
+        required=False
     )
 
     class Meta(object):
