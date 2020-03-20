@@ -17,18 +17,18 @@
 
 {% block fluid-content %}
     <div class="row padded-row text-center padded-bottom large-padding-top">
-        <a href="/assays/assaystudy_data_plots/?" type="button" class="btn btn-xlarge btn-primary text-center submit-button" id="charts_submit">
+        <!-- <a href="/assays/assaystudy_data_plots/?" type="button" class="btn btn-xlarge btn-primary text-center submit-button" id="charts_submit">
             <span class="glyphicon glyphicon glyphicon-stats" aria-hidden="true"></span>
             Show Plots
-        </a>
-        <a href="/assays/assay_interstudy_reproducibility/?" type="button" class="btn btn-xlarge btn-primary text-center submit-button" id="repro_submit">
+        </a> -->
+        <a href="/assays/pbpk/?" type="button" class="btn btn-xlarge btn-primary text-center submit-button" id="repro_submit">
             <span class="glyphicon glyphicon glyphicon-random" aria-hidden="true"></span>
             Show PBPK
         </a>
-        <a href="/assays/data_from_filters/?" type="button" class="btn btn-xlarge btn-info text-center submit-button" id="download_submit">
+        <!-- <a href="/assays/data_from_filters/?" type="button" class="btn btn-xlarge btn-info text-center submit-button" id="download_submit">
             <span class="glyphicon glyphicon glyphicon-download-alt" aria-hidden="true"></span>
             Download
-        </a>
+        </a> -->
     </div>
 
     <div id="filter">
@@ -43,8 +43,6 @@
                 <a data-target-id="filter_organ_models" class="btn btn-primary filter-select-all">Select All</a>
                 <a data-target-id="filter_organ_models" class="btn btn-danger filter-deselect-all">Deselect All</a>
             </div>
-
-{#            <table id="id_study__matrix_item__organmodel_id__in" class="table table-striped table-hover">#}
             <table id="filter_organ_models" class="table table-striped table-hover filter-table">
                 <thead>
                     <tr>
@@ -62,8 +60,6 @@
                 <a data-target-id="filter_groups" class="btn btn-primary filter-select-all">Select All</a>
                 <a data-target-id="filter_groups" class="btn btn-danger filter-deselect-all">Deselect All</a>
             </div>
-
-{#            <table id="id_study__group_id__in" class="table table-striped table-hover">#}
             <table id="filter_groups" class="table table-striped table-hover filter-table">
                 <thead>
                     <tr>
@@ -77,20 +73,17 @@
             </table>
         </div>
     </div>
-
     <div class="row padded-bottom">
         <div class="col-md-6">
             <div class="padded-bottom">
-                <a data-target-id="filter_targets" class="btn btn-primary filter-select-all">Select All</a>
-                <a data-target-id="filter_targets" class="btn btn-danger filter-deselect-all">Deselect All</a>
+                <a data-target-id="filter_compounds" class="btn btn-primary filter-select-all">Select All</a>
+                <a data-target-id="filter_compounds" class="btn btn-danger filter-deselect-all">Deselect All</a>
             </div>
-
-{#            <table id="id_study_assay__target" class="table table-striped table-hover">#}
-            <table id="filter_targets" class="table table-striped table-hover filter-table">
+            <table id="filter_compounds" class="table table-striped table-hover filter-table">
                 <thead>
                     <tr>
                         <th>Select</th>
-                        <th>Target/Analyte</th>
+                        <th>Compound</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -100,16 +93,14 @@
         </div>
         <div class="col-md-6">
             <div class="padded-bottom">
-                <a data-target-id="filter_compounds" class="btn btn-primary filter-select-all">Select All</a>
-                <a data-target-id="filter_compounds" class="btn btn-danger filter-deselect-all">Deselect All</a>
+                <a data-target-id="filter_studies" class="btn btn-primary filter-select-all">Select All</a>
+                <a data-target-id="filter_studies" class="btn btn-danger filter-deselect-all">Deselect All</a>
             </div>
-
-{#            <table id="id_study_assay__target" class="table table-striped table-hover">#}
-            <table id="filter_compounds" class="table table-striped table-hover filter-table">
+            <table id="filter_studies" class="table table-striped table-hover filter-table">
                 <thead>
                     <tr>
                         <th>Select</th>
-                        <th>Compound</th>
+                        <th>Study</th>
                     </tr>
                 </thead>
                 <tbody>

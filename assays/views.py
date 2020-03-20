@@ -3179,3 +3179,7 @@ def get_current_upload_template(request):
 
 class PBPKFilterView(TemplateView):
     template_name = 'assays/assay_pbpk_filter.html'
+
+
+class PBPKView(TemplateView):
+    template_name = 'assays/assay_pbpk.html'
