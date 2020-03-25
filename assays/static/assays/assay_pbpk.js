@@ -554,8 +554,10 @@ $(document).ready(function () {
         update_chart();
     });
 
-    $("input[name='cell-profile']").change(function() {
+    $("input[name=cell-profile]:radio").change(function() {
+        console.log("CELL PROFILE CHANGED 1");
         update_chart();
+        console.log("CELL PROFILE CHANGED 2");
     });
 
     function numberWithCommas(x) {
