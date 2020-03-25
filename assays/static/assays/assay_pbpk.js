@@ -479,7 +479,6 @@ $(document).ready(function () {
             $('#cell-free-checkbox').attr("checked", false);
         } else {
             $('#cell-free-checkbox').attr("disabled", false);
-            $('#cell-free-checkbox').attr("checked", true);
         }
 
         cell_profiles_table = '<tr><th class="text-center">&nbsp;Select&nbsp;</th><th class="text-center">&nbsp;Cells&nbsp;</th></tr>';
@@ -575,6 +574,11 @@ $(document).ready(function () {
             document.getElementById("spinner")
         );
 
+        var compound_pk_data = JSON.stringify(chart_data[group_num], function(key, value) {return (value == null) ? "0" : value});
+        for (var x=1; x<compound_pk_data.length; x++) {
+            compound_pk_data[x][0] *= 60;
+        }
+
         $.ajax(
             "/assays_ajax/",
             {
@@ -592,7 +596,7 @@ $(document).ready(function () {
                     cells_per_tissue_g: $('#species-organ-tissue').val().replace(/\,/g,''),
                     total_organ_weight_g: $('#species-total-organ-weight').val().replace(/\,/g,''),
                     compound_conc: $('#experiment-compound').val().split(" ")[$('#experiment-compound').val().split(" ").length - 3],
-                    compound_pk_data: JSON.stringify(chart_data[group_num], function(key, value) {return (value == null) ? "0" : value})
+                    compound_pk_data: compound_pk_data
                 },
                 type: 'POST',
             }
@@ -610,10 +614,15 @@ $(document).ready(function () {
                 $('#clearance-error-container').show();
             } else {
                 pbpk_intrinsic_clearance = data.clearance;
-                $('#input-icl').val(pbpk_intrinsic_clearance.toFixed(3))
+                $('#input-icl').val(numberWithCommas(pbpk_intrinsic_clearance.toFixed(3)));
 
                 if (pk_type == 'Bolus') {
-                    make_chart("", 'Avg Recovered Compound (µM)', $('#pk-summary-graph')[0], JSON.parse(JSON.stringify(chart_data[group_num])), 400);
+                    var bolus_data = JSON.parse(JSON.stringify(chart_data[group_num]));
+                    bolus_data[0][0] = "Time (Minutes)";
+                    for (var x=1; x<bolus_data.length; x++) {
+                        bolus_data[x][0] *= 60;
+                    }
+                    make_chart("", 'Avg Recovered Compound (µM)', $('#pk-summary-graph')[0], JSON.parse(JSON.stringify(bolus_data)), 400);
                 } else {
                     var clearance_table_data = data.clearance_data.data;
                     clearance_table_data.unshift(data.clearance_data.columns);
@@ -873,19 +882,19 @@ $(document).ready(function () {
             } else {
                 $('#calculated-pk-container').show();
 
-                $('#pk-param-vdss').val(data.calculated_pk_parameters['VDss (L)'][0].toFixed(3));
-                $('#pk-param-ke').val(data.calculated_pk_parameters['Ke(1/h)'][0].toFixed(3));
-                $('#pk-param-half-life-3-confirmed').val(data.calculated_pk_parameters['Elimination half-life'][0].toFixed(3));
-                $('#pk-param-auc').val(data.calculated_pk_parameters['AUC'][0].toFixed(3));
-                $('#pk-single-mmax').val(data.dosing_data[0].toFixed(3));
-                $('#pk-single-cmax').val(data.dosing_data[1].toFixed(3));
-                $('#pk-single-tmax').val(data.dosing_data[2].toFixed(3));
-                $('#pk-multi-mss').val(data.dosing_data[3].toFixed(3));
-                $('#pk-multi-css').val(data.dosing_data[4].toFixed(3));
-                $('#pk-multi-tmax').val(data.dosing_data[5].toFixed(3));
-                $('#pk-desired-dose').val(data.dosing_data[6].toFixed(3));
-                $('#pk-desired-50').val(data.dosing_data[7].toFixed(3));
-                $('#pk-desired-90').val(data.dosing_data[8].toFixed(3));
+                $('#pk-param-vdss').val(numberWithCommas(data.calculated_pk_parameters['VDss (L)'][0].toFixed(3)));
+                $('#pk-param-ke').val(numberWithCommas(data.calculated_pk_parameters['Ke(1/h)'][0].toFixed(3)));
+                $('#pk-param-half-life-3-confirmed').val(numberWithCommas(data.calculated_pk_parameters['Elimination half-life'][0].toFixed(3)));
+                $('#pk-param-auc').val(numberWithCommas(data.calculated_pk_parameters['AUC'][0].toFixed(3)));
+                $('#pk-single-mmax').val(numberWithCommas(data.dosing_data[0].toFixed(3)));
+                $('#pk-single-cmax').val(numberWithCommas(data.dosing_data[1].toFixed(3)));
+                $('#pk-single-tmax').val(numberWithCommas(data.dosing_data[2].toFixed(3)));
+                $('#pk-multi-mss').val(numberWithCommas(data.dosing_data[3].toFixed(3)));
+                $('#pk-multi-css').val(numberWithCommas(data.dosing_data[4].toFixed(3)));
+                $('#pk-multi-tmax').val(numberWithCommas(data.dosing_data[5].toFixed(3)));
+                $('#pk-desired-dose').val(numberWithCommas(data.dosing_data[6].toFixed(3)));
+                $('#pk-desired-50').val(numberWithCommas(data.dosing_data[7].toFixed(3)));
+                $('#pk-desired-90').val(numberWithCommas(data.dosing_data[8].toFixed(3)));
 
                 prediction_plot_data = JSON.parse(JSON.stringify(data.prediction_plot_table));
                 make_dosing_plot(prediction_plot_data, 300)
@@ -1069,13 +1078,28 @@ $(document).ready(function () {
         // Handle Selected Cell Profile
         var cell_text = $("input[name='cell-profile']:checked").parent().next().text().replace(/[\x00-\x1F\x7F-\x9F]/g, "");
         $.each(data[0], function(index, current_string) {
-            if (current_string.replace(/[\x00-\x1F\x7F-\x9F]/g, "").slice(0, -1) != cell_text.slice(0, -1) && current_string != "Time" && !current_string.includes("No Cell Samples")) {
+            if (current_string.replace(/[\x00-\x1F\x7F-\x9F]/g, "").slice(0, -1) != cell_text.slice(0, -1) && current_string != "Time" && !current_string.includes("No Cell Samples") && current_string != "Time (Minutes)" && current_string.indexOf("~@i")===-1) {
                 remove_col(data, index);
                 remove_col(data, index);
                 remove_col(data, index);
                 return false;
             }
         });
+
+        var time_unit = "Hours";
+        var trendlines = '';
+        var title = assay;
+        if (data[0].indexOf("Time (Minutes)") > -1) {
+            time_unit = "Minutes";
+            trendlines = {
+                0: {
+                    type: 'linear',
+                    visibleInLegend: false,
+                    pointsVisible: false
+                }
+            }
+            title = 'Predicted Intrinsic Clearance (ml/min) = ' + pbpk_intrinsic_clearance.toFixed(3);
+        }
 
         // Aliases
         var assay_data = JSON.parse(JSON.stringify(data));
@@ -1093,7 +1117,8 @@ $(document).ready(function () {
 
         options = {
             // TOO SPECIFIC, OBVIOUSLY
-            // title: assay,
+            title: title,
+            trendlines: trendlines,
             interpolateNulls: true,
             tooltip: {
                 isHtml: true
@@ -1114,7 +1139,7 @@ $(document).ready(function () {
             },
             hAxis: {
                 // Begins empty
-                title: 'Time (Hours)',
+                title: 'Time ('+time_unit+')',
                 textStyle: {
                     bold: true
                 },
@@ -1224,7 +1249,7 @@ $(document).ready(function () {
 
         // Tack on change
         // TODO CHANGE THE TITLE
-        options.title = assay;
+        options.title = title;
         // TODO GET THE UNIT IN QUESTION
         options.vAxis.title = unit;
 
