@@ -360,6 +360,7 @@ $(document).ready(function () {
         $('#pk-summary-graph').empty();
         $('#pk-clearance-graph').empty();
         $('#continuous-infusion-table').empty();
+        $('#predict-dosing-container').hide();
     }
 
     function generate_pbpk(pk_type) {
@@ -554,10 +555,8 @@ $(document).ready(function () {
         update_chart();
     });
 
-    $("input[name=cell-profile]:radio").change(function() {
-        console.log("CELL PROFILE CHANGED 1");
+    $(document).on("click", "input[name='cell-profile']", function() {
         update_chart();
-        console.log("CELL PROFILE CHANGED 2");
     });
 
     function numberWithCommas(x) {
@@ -959,6 +958,7 @@ $(document).ready(function () {
 
     function update_chart() {
         // Summary Graph
+        clear_clearance();
         make_chart(row_info[3], 'Avg Recovered Compound (μM)', $('#summary-graph')[0], JSON.parse(JSON.stringify(chart_data[group_num])), 400);
     }
 
@@ -1079,19 +1079,26 @@ $(document).ready(function () {
 
         // Handle Selected Cell Profile
         var cell_text = $("input[name='cell-profile']:checked").parent().next().text().replace(/[\x00-\x1F\x7F-\x9F]/g, "");
-        $.each(data[0], function(index, current_string) {
-            if (current_string.replace(/[\x00-\x1F\x7F-\x9F]/g, "").slice(0, -1) != cell_text.slice(0, -1) && current_string != "Time" && !current_string.includes("No Cell Samples") && current_string != "Time (Minutes)" && current_string.indexOf("~@i")===-1) {
-                remove_col(data, index);
-                remove_col(data, index);
-                remove_col(data, index);
-                return false;
-            }
-        });
+        var loop = true;
+        while (loop) {
+            loop = false;
+            $.each(data[0], function(index, current_string) {
+                if (current_string.replace(/[\x00-\x1F\x7F-\x9F]/g, "").slice(0, -1) != cell_text.slice(0, -1) && current_string != "Time" && !current_string.includes("No Cell Samples") && current_string != "Time (Minutes)" && current_string.indexOf("~@i")===-1) {
+                    remove_col(data, index);
+                    remove_col(data, index);
+                    remove_col(data, index);
+                    loop = true;
+                    return false;
+                }
+            });
+        }
 
         var time_unit = "Hours";
         var trendlines = '';
         var title = assay;
+        var yaxis = '';
         if (data[0].indexOf("Time (Minutes)") > -1) {
+            yaxis = "log"
             time_unit = "Minutes";
             trendlines = {
                 0: {
@@ -1155,7 +1162,7 @@ $(document).ready(function () {
                 title: '',
                 // If < 1000 and > 0.001 don't use scientific! (absolute value)
                 // y_axis_label_type
-                format: '',
+                scaleType: yaxis,
                 textStyle: {
                     bold: true
                 },
