@@ -3786,11 +3786,12 @@ def plate_reader_data_file_process_data(set_dict):
     if form_blank_handling in ['subtract', 'subtractstandard', 'subtractsample', 'ignore']:
         yes_to_continue = 'yes'
 
-    # print("radio_replicate_handling_average_or_not_0 ", radio_replicate_handling_average_or_not_0)
-    # print("radio_standard_option_use_or_not ", radio_standard_option_use_or_not)
-    # print("form_calibration_curve ", form_calibration_curve)
-    # print("if form_blank_handling ", form_blank_handling)
-    # print("yes_to_continue ", yes_to_continue)
+    print("*** check some content coming into the utils.py")
+    print("radio_replicate_handling_average_or_not_0 ", radio_replicate_handling_average_or_not_0)
+    print("radio_standard_option_use_or_not ", radio_standard_option_use_or_not)
+    print("form_calibration_curve ", form_calibration_curve)
+    print("if form_blank_handling ", form_blank_handling)
+    print("yes_to_continue ", yes_to_continue)
 
     # set defaults
     sample_blank_average = 0
@@ -3807,7 +3808,7 @@ def plate_reader_data_file_process_data(set_dict):
     sendmessage = ""
     yes_to_calibrate = 'yes'
 
-    # print("yes_to_continue ", yes_to_continue)
+    print("yes_to_continue ", yes_to_continue)
 
     if yes_to_continue == 'yes':
 
@@ -4291,8 +4292,8 @@ def plate_reader_data_file_process_data(set_dict):
             # add the dictionary to the list
             list_of_dicts_of_each_sample_row.append(this_row)
 
-        # print('list_of_dicts_of_each_sample_row')
-        # print(list_of_dicts_of_each_sample_row)
+        print('***list_of_dicts_of_each_sample_row going back to ajax')
+        print(list_of_dicts_of_each_sample_row)
 
     else:
         sendmessage = "An unacceptable valid value was sent to the SQL string."

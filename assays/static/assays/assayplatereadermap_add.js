@@ -692,9 +692,9 @@ $(document).ready(function () {
             form_blank_handling = $("#id_se_form_blank_handling").val();
         }
 
-        // console.log('global_floater_target  ',    global_floater_target)
-        // console.log('global_floater_method  ',    global_floater_method)
-        // console.log('global_floater_unit  ',      global_floater_unit )
+        console.log('global_floater_target  ',    global_floater_target)
+        console.log('global_floater_method  ',    global_floater_method)
+        console.log('global_floater_unit  ',      global_floater_unit )
 
         let data = {
             call: 'fetch_data_processing_for_plate_map_integration',
@@ -784,6 +784,14 @@ $(document).ready(function () {
         buildTableOfProcessedData_ajax(list_of_dicts_of_each_sample_row);
         buildTableOfStandardsDataPoints_ajax(list_of_dicts_of_each_standard_row_points);
         buildTableOfStandardsDataCurve_ajax(list_of_dicts_of_each_standard_row_curve);
+
+        console.log("##in js back from ajax");
+        console.log("##list_of_dicts_of_each_sample_row");
+        console.log(list_of_dicts_of_each_sample_row);
+        console.log("##list_of_dicts_of_each_standard_row_points");
+        console.log(list_of_dicts_of_each_standard_row_points);
+        console.log("##list_of_dicts_of_each_standard_row_curve");
+        console.log(list_of_dicts_of_each_standard_row_curve);
 
         drawCalibrationCurve();
         $('#refresh_needed_indicator').text('done');
