@@ -4878,11 +4878,6 @@ def fetch_pbpk_dosing_results(request):
         ['Plasma', 2.968, 0.945, 0.0035, 0.00225]
     ]
 
-    cl_ml_min = request.POST.get('cl_ml_min')
-    for x in cl_ml_min:
-        print(x)
-    print(float(cl_ml_min))
-
     dosing_results = calculate_pk_parameters(
         float(request.POST.get('cl_ml_min')),
         usansky_sinko_volume_data,

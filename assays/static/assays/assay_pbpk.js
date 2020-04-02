@@ -843,7 +843,7 @@ $(document).ready(function () {
                     chart = new google.visualization.LineChart($('#pk-clearance-graph')[0]);
                     chart.draw(data, options);
                 }
-                
+
                 window.spinner.spin(
                     document.getElementById("spinner")
                 );
@@ -927,80 +927,6 @@ $(document).ready(function () {
             console.log(xhr.status + ": " + xhr.responseText);
         });
         console.log("Done with Clearance Prediction.")
-
-        window.spinner.spin(
-            document.getElementById("spinner")
-        );
-
-        $.ajax(
-            "/assays_ajax/",
-            {
-                data: {
-                    call: 'fetch_pbpk_dosing_results',
-                    csrfmiddlewaretoken: window.COOKIES.csrfmiddlewaretoken,
-                    cl_ml_min: pbpk_intrinsic_clearance,
-                    body_mass: $('#species-body-mass').val(),
-                    MW: $('#compound-mw').val(),
-                    logD: $('#compound-logd').val(),
-                    pKa: $('#compound-pka').val(),
-                    fu: $('#compound-fu').val(),
-                    Vp: $('#species-vp').val(),
-                    VE: $('#species-ve').val(),
-                    REI: $('#species-rei').val(),
-                    VR: $('#species-vr').val(),
-                    ASR: $('#species-asr').val(),
-                    Ki: $('#species-ki').val(),
-                    Ka: $('#input-ka').val(),
-                    Fa: $('#input-fa').val(),
-                    dose_mg: $('#input-plasma-dose').val(),
-                    dose_interval: $('#input-plasma-dose-interval').val(),
-                    desired_Cp: $('#input-dosing-cp').val(),
-                    desired_dose_interval: $('#input-dosing-interval').val(),
-                    estimated_fraction_absorbed: $('#input-dosing-absorbed').val(),
-                    prediction_time_length: 1000
-                },
-                type: 'POST',
-            }
-        )
-        .done(function(data) {
-            console.log(data);
-            // Stop spinner
-            window.spinner.stop();
-
-            if ("error" in data) {
-                $('#pbpk-error-text').text(data.error);
-                $('#pbpk-error-container').show();
-            } else {
-                $('#calculated-pk-container').show();
-
-                $('#pk-param-vdss').val(numberWithCommas(data.calculated_pk_parameters['VDss (L)'][0].toFixed(3)));
-                $('#pk-param-ke').val(numberWithCommas(data.calculated_pk_parameters['Ke(1/h)'][0].toFixed(3)));
-                $('#pk-param-half-life-3-confirmed').val(numberWithCommas(data.calculated_pk_parameters['Elimination half-life'][0].toFixed(3)));
-                $('#pk-param-auc').val(numberWithCommas(data.calculated_pk_parameters['AUC'][0].toFixed(3)));
-                $('#pk-single-mmax').val(numberWithCommas(data.dosing_data[0].toFixed(3)));
-                $('#pk-single-cmax').val(numberWithCommas(data.dosing_data[1].toFixed(3)));
-                $('#pk-single-tmax').val(numberWithCommas(data.dosing_data[2].toFixed(3)));
-                $('#pk-multi-mss').val(numberWithCommas(data.dosing_data[3].toFixed(3)));
-                $('#pk-multi-css').val(numberWithCommas(data.dosing_data[4].toFixed(3)));
-                $('#pk-multi-tmax').val(numberWithCommas(data.dosing_data[5].toFixed(3)));
-                $('#pk-desired-dose').val(numberWithCommas(data.dosing_data[6].toFixed(3)));
-                $('#pk-desired-50').val(numberWithCommas(data.dosing_data[7].toFixed(3)));
-                $('#pk-desired-90').val(numberWithCommas(data.dosing_data[8].toFixed(3)));
-
-                prediction_plot_data = JSON.parse(JSON.stringify(data.prediction_plot_table));
-                make_dosing_plot(prediction_plot_data, 300)
-                $('#dosing-slider').slider("value", 300);
-                $('#dosing-slider-handle').text("300");
-            }
-        })
-        .fail(function(xhr, errmsg, err) {
-            // Stop spinner
-            window.spinner.stop();
-
-            alert('Error retrieving Dosing Prediction.');
-            console.log(xhr.status + ": " + xhr.responseText);
-        });
-        console.log("Done with Dosing Prediction.")
     })
 
     function isNumber(obj) {
