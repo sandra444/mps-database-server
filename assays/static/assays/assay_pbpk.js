@@ -372,11 +372,15 @@ $(document).ready(function () {
             $("#experiment-flow-rate").parent().parent().hide();
             $('#continuous-infusion-table').hide();
             $("#toggle-continuous-infusion-table").hide();
+            $("#start-time-label").text("Calculation Start Time");
+            $("#end-time-label").text("Calculation End Time");
         } else {
             $("#experiment-total-vol").parent().parent().hide();
             $("#experiment-flow-rate").parent().parent().show();
             $('#continuous-infusion-table').show();
             $("#toggle-continuous-infusion-table").show();
+            $("#start-time-label").text("Steady State Start Time");
+            $("#end-time-label").text("Steady State End Time");
         }
 
         // Populate Experiment Parameters Table.
