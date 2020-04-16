@@ -26,6 +26,9 @@ import django.forms as forms
 from mps.utils import *
 
 import datetime
+# THIS WILL ONLY BE USED FOR PROTOTYPE
+from django.contrib.postgres.fields import JSONField
+
 
 # These are here to avoid potentially messy imports, may change later
 def attr_getter(item, attributes):
@@ -1854,6 +1857,9 @@ class AssayStudy(FlaggableModel):
     #         sorted([study_type.code for study_type in self.study_types.all()])
     #     )
     #     return study_types
+
+    # THIS IS ONLY FOR THE PROTOTYPE
+    series_data = JSONField(default=dict, blank=True)
 
     # TODO INEFFICIENT BUT SHOULD WORK
     def stakeholder_approval_needed(self):
