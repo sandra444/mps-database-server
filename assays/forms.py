@@ -688,6 +688,10 @@ class AssayStudyGroupForm(SetupFormsMixin, SignOffMixin, BootstrapForm):
         initial='',
         required=False
     )
+    group_name = forms.CharField(
+        initial='',
+        required=False
+    )
     organ_model = forms.ModelChoiceField(
         queryset=OrganModel.objects.all().order_by('name'),
         required=False,
@@ -715,6 +719,7 @@ class AssayStudyGroupForm(SetupFormsMixin, SignOffMixin, BootstrapForm):
             'test_type',
             'organ_model',
             'organ_model_full',
+            'group_name',
             # TEMP!
             'organ_model_protocol',
             'organ_model_protocol_full',
