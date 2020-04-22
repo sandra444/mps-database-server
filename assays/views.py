@@ -2849,6 +2849,7 @@ class PhysicalUnitsList(ListView):
     def get_queryset(self):
         queryset = PhysicalUnits.objects.all().prefetch_related(
             'unit_type',
+            'base_unit'
         )
 
         return queryset
