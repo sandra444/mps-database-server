@@ -2059,6 +2059,10 @@ class AssayMatrix(FlaggableModel):
         verbose_name='Notes'
     )
 
+    # TEMPORARY: FOR PROTOTYPE SCHEMA
+    # REMOVE ASAP
+    # plate_data = JSONField(default=dict, blank=True)
+
     def __str__(self):
         return '{0}'.format(self.name)
 
