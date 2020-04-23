@@ -1212,8 +1212,9 @@ class AssayStudyChipForm(SignOffMixin, BootstrapForm):
     class Meta(object):
         model = AssayStudy
         # Since we are splitting into multiple forms, includes are safer
-        exclude = '__all__'
-
+        fields = (
+            'series_data',
+        )
 
 # OLD TO BE REMOVED
 # class AssayStudyPlateForm(SignOffMixin, BootstrapForm):
