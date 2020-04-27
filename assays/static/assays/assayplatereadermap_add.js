@@ -454,7 +454,7 @@ $(document).ready(function () {
     let global_lol_standards_points_for_table = [];
     let global_lol_standards_average_points_for_table = [];
 
-    let global_blank_handling_option = $("#id_se_form_blank_handling").selectize()[0].selectize.items[0];
+    let global_blank_handling_option = "";
 
     $('input[name=radio_replicate_handling_average_or_not][value=average]').prop('checked',true);
     $('input[name=radio_standard_option_use_or_not][value=no_calibration]').prop('checked',true);
@@ -463,6 +463,11 @@ $(document).ready(function () {
 
     let global_calibrate_calibration_curve_method = 'select_one';
     if (global_plate_number_file_block_sets > 0) {
+        try {
+            global_blank_handling_option = $("#id_se_form_blank_handling").selectize()[0].selectize.items[0];
+        } catch (err) {
+            global_blank_handling_option = $("#id_se_form_blank_handling").val();
+        }
         try {
             global_calibrate_calibration_curve_method = $("#id_se_form_calibration_curve").selectize()[0].selectize.items[0];
         } catch (err) {
@@ -885,7 +890,7 @@ $(document).ready(function () {
         //['Standard Concentration', 'Fitted Curve', 'Standard Response', 'Sample Response'],
         // for samples, need fitted value (19) as the X and the adjusted raw (15) as the Y
         //[0.0, null, null, .05]
-        // 19                15
+        // 19                15<=that should have been 18, changed on 20200426
 
         // column_table_headers
         let lol_processed = [];
@@ -1812,7 +1817,7 @@ $(document).ready(function () {
 
     // controlling more of what shows and does not show on page (options to change) based on selected to apply
     // this option is for when the well use was in a dropdown - not currently using, but keep in case change back
-    // $("#id_se_well_use").change(function () {
+    // $("#id_se_main_well_use").change(function () {
     //     global_plate_well_use = $(this).val();
     //     changePageSectionShownWhenChangeRadioWellUse()
     // });
@@ -2217,6 +2222,7 @@ $(document).ready(function () {
             $("#checkbox_collection_time").prop("checked", false);
         } else {
             // this is when well use is blank, empty, standard, or sample
+            // here here
             if (
                 global_plate_well_use === "blank" ||
                 global_plate_well_use === "empty" ||
@@ -2536,6 +2542,7 @@ $(document).ready(function () {
                         c_time = c_default_time;
                     }
 
+                    //here here if change blank logic
                     if (global_plate_well_use === 'standard') {
                         c_standard_value = this_standard_value;
                     }  else {
@@ -2576,6 +2583,7 @@ $(document).ready(function () {
                         c_standard_value = d_standard_value;
 
                     } else if (global_plate_well_use === 'standard') {
+                        //here here if change blank logic
                         if (global_plate_increment_operation === 'divide') {
                             incremented_standard_value = this_standard_value / my_delta;
                         } else if (global_plate_increment_operation === 'multiply') {
@@ -2827,6 +2835,7 @@ $(document).ready(function () {
         //     $('.increment-section').addClass('hidden');
         // }
         // hide all, then unhide what want to show
+        // here here if we change blank logic
         $('.sample-section').addClass('hidden');
         $('.standard-section').addClass('hidden');
         $('.empty-section').addClass('hidden');
@@ -3075,6 +3084,7 @@ $(document).ready(function () {
             // my_well_use =  $('#id_assayplatereadermapitem_set-' + idx + '-well_use').val();
             my_well_use = document.getElementById('well_use-' + idx).innerText;
             // console.log("index  ", idx, "  well use inside loop -", my_well_use, "-")
+            // here here if we change blank logic
             if (my_well_use === 'blank' || my_well_use === 'empty' || my_well_use === 'standard') {
                 $('#matrix_item-' + idx).addClass('hidden');
                 $('#location-' + idx).addClass('hidden');
@@ -3958,6 +3968,7 @@ $(document).ready(function () {
 
     };
 
+    // here here if change blank logic
     function countWellsThatAreStandards(){
         let mycount = 0;
         global_plate_mems_well_use.forEach(function(item, index) {
