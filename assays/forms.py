@@ -37,7 +37,8 @@ from assays.models import (
     AssayPlateReaderMapDataFile,
     AssayPlateReaderMapDataFileBlock,
     assay_plate_reader_time_unit_choices,
-    assay_plate_reader_well_use_choices,
+    assay_plate_reader_main_well_use_choices,
+    assay_plate_reader_blank_well_use_choices,
     assay_plate_reader_map_info_plate_size_choices,
     assay_plate_reader_volume_unit_choices,
     assay_plate_reader_file_delimiter_choices,
@@ -2270,8 +2271,11 @@ class AssayPlateReadMapAdditionalInfoForm(forms.Form):
         queryset=AssayPlateReaderMap.objects.none(),
         required=False,
     )
-    se_well_use = forms.ChoiceField(
-        choices=assay_plate_reader_well_use_choices
+    se_main_well_use = forms.ChoiceField(
+        choices=assay_plate_reader_main_well_use_choices
+    )
+    se_blank_well_use = forms.ChoiceField(
+        choices=assay_plate_reader_blank_well_use_choices
     )
     se_time_unit = forms.ChoiceField(
         choices=assay_plate_reader_time_unit_choices
