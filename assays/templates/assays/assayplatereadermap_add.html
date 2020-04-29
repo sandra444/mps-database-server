@@ -1592,21 +1592,31 @@
                                     </div>
                                 </div>
                                 <div class="row">
-
-                                    <div class="col-md-6">
-                                        <h3 class="hidden" id="ave_standard_points_table_title">Standard Points (Average)</h3>
+                                    <div class="col-md-7">
+                                        <h3 class="hidden" id="ave_standard_points_table_title">Standards (Averages Used for Fitting)</h3>
                                             <div class="hidden" id="div_for_standard_averages_table">
                                             {#  note that the table (including the table tag) is made in javascript #}
                                             </div>
                                     </div>
-                                    <div class="col-md-6">
-                                        <h3 class="hidden" id="all_standard_points_table_title">Standard Points (All)</h3>
-                                        <div class="hidden" id="div_for_standards_table">
-                                        {#  note that the table (including the table tag) is made in javascript #}
+                                    <div class="col-md-5">
+                                    </div>
+                                </div>
+                                <br>
+
+{#                              This was primarily for QC, but it could be unhidden in the console if needed#}
+                                <div class="hidden">
+                                    <div class="row">
+                                        <div class="col-md-7">
+                                            <h3 class="hidden" id="all_standard_points_table_title">Standard Points (Fitted)</h3>
+                                            <div class="hidden" id="div_for_standards_table">
+                                            {#  note that the table (including the table tag) is made in javascript #}
+                                            </div>
+                                        </div>
+                                        <div class="col-md-5">
                                         </div>
                                     </div>
-
                                 </div>
+
                                 <div class="row">
                                     <div class="col-md-12">
                                         <div class="plate-map-page-field-contents-medium">
@@ -1631,6 +1641,33 @@
                         <div class="plate-calibration-or-processing-yes hidden">
                             <br>
                             <h2>Processed Sample Data</h2>
+
+                                <div class="">
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <div class="plate-map-page-field-labels-small">
+                                                <div><p id="plate_replicate_handling_tooltip"></p>
+                                                    <label for="plate_replicate_handling_tooltip">Replicate Handling &nbsp;</label>
+                                                </div>
+                                            </div>
+                                            <p>This doesn't work yet.</p>
+                                        </div>
+                                        <div class="col-md-9">
+                                            <div class="plate-map-page-radio-contents">
+    {#                                            comment{{ form.radio_replicate_handling_average_or_not }}#}
+    {#                                            comment<label><input type="radio" name="replicates" value="average" checked>  <b class="plate-map-radio-spacing">Send the Average of the Replicates to the Study Summary</b> </label>#}
+    {#                                            comment<label><input type="radio" name="replicates" value="each">  <b class="plate-map-radio-spacing">Send Each Replicate's Value to the Study Summary</b> </label>#}
+                                                {% for radio in form.radio_replicate_handling_average_or_not %}
+                                                    {{ radio.tag }}
+                                                    <label for="value_{{ forloop.counter0 }}"><b class="plate-map-radio-spacing">{{ radio.choice_label }}</b></label>
+                                                    <br>
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <br>
+                                </div>
+
                                 <div class="row">
                                     <div class="col-md-12">
                                         <div id="div_for_processed_samples_table">
@@ -1653,40 +1690,32 @@
 
 
                         {# Send to main study #}
-                        <div class="plate-calibration-or-processing-yes hidden">
-                            <br>
-                            <h2>Sending Data to the Study Summary</h2>
-                            <p>Automated sending of data to the study summary is in development. For now, download the table above by clicking the 'CSV' button, then upload it as a MIF-C file. </p>
 
-                            <div class="hidden">
+{#                        <div>#}
+{#                            {{  form.form_make_mifc_on_submit }}#}
+{#                            <label for="form_make_mifc_on_submit" class="plate-map-radio-spacing">Send this Sample Data to Study Summary on Submit</label>#}
+{#                        </div>#}
+
+                        <div>
+                            <div class="plate-calibration-or-processing-yes hidden">
+                                <br>
+                                <h2>Sending Data to the Study Summary</h2>
                                 <div class="row">
                                     <div class="col-md-3">
                                         <div class="plate-map-page-field-labels-small">
-                                            <div><p id="plate_replicate_handling_tooltip"></p>
-                                                <label for="plate_replicate_handling_tooltip">Replicate Handling &nbsp;</label>
+                                            <div><p id="submit_to_study_summary_tooltip"></p>
+                                                <label for="submit_to_study_summary_tooltip">Send to Study Summary &nbsp;</label>
                                             </div>
                                         </div>
                                     </div>
                                     <div class="col-md-9">
-                                        <div class="plate-map-page-radio-contents">
-{#                                            comment{{ form.radio_replicate_handling_average_or_not }}#}
-{#                                            comment<label><input type="radio" name="replicates" value="average" checked>  <b class="plate-map-radio-spacing">Send the Average of the Replicates to the Study Summary</b> </label>#}
-{#                                            comment<label><input type="radio" name="replicates" value="each">  <b class="plate-map-radio-spacing">Send Each Replicate's Value to the Study Summary</b> </label>#}
-                                            {% for radio in form.radio_replicate_handling_average_or_not %}
-                                                {{ radio.tag }}
-                                                <label for="value_{{ forloop.counter0 }}"><b class="plate-map-radio-spacing">{{ radio.choice_label }}</b></label>
-                                                <br>
-                                            {% endfor %}
+                                        <div class="plate-map-page-field-contents-medium">
+                                            {{  form.form_make_mifc_on_submit }}
                                         </div>
                                     </div>
                                 </div>
-
-                                <div>
-                                    {{  form.form_make_mifc_on_submit }}
-                                    <label for="form_make_mifc_on_submit" class="plate-map-radio-spacing">Send this Sample Data to Study Summary on Submit</label>
-                                </div>
+                                <p>This doesn't work yet.</p>
                             </div>
-
                         </div>
 
                     {% endif %}

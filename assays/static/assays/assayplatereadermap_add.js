@@ -40,13 +40,17 @@ $(document).ready(function () {
         'Multiplier',
         'Value',
         'Value Unit',
-
         'Replicate',
+
         'Caution Flag',
         'Exclude',
         'Notes',
         'Processing Details',
+
+        'Omit From Average',
     ];
+
+    //READY TO START ON EXPORT
 
      //color ramp options for heatmap of raw data
     global_color_ramp_light_to_medium_purple = [
@@ -126,7 +130,7 @@ $(document).ready(function () {
     // make lists for the tooltips
     // just add in parallel if need more tooltips - must be para||el!
     let global_plate_tooltip_selector = [
-        '#matrix_select_tooltip'
+          '#matrix_select_tooltip'
         , '#plate_select_tooltip'
         , '#platemap_select_tooltip'
         , '#sample_time_unit_tooltip'
@@ -164,9 +168,10 @@ $(document).ready(function () {
 
         , '#plate_map_multiplier_for_processing'
         , '#copys_pastes_tooltip'
+        , '#submit_to_study_summary_tooltip'
         ,];
     let global_plate_tooltip_text = [
-        "Starting from an Existing Study Matrix is helpful if the experiment was conducted in a plate based model and that same plate was used to perform a plate reader assay. Another popular use of this method is to start here and select Starting Study Matrix, then copy the matrix items from that plate (using the Copy feature), then change to Start From a Blank Assay Plate Map, select the desired plate size, then paste that matrix items on to the plate."
+          "Starting from an Existing Study Matrix is helpful if the experiment was conducted in a plate based model and that same plate was used to perform a plate reader assay. Another popular use of this method is to start here and select Starting Study Matrix, then copy the matrix items from that plate (using the Copy feature), then change to Start From a Blank Assay Plate Map, select the desired plate size, then paste that matrix items on to the plate."
         , "Build the assay plate map starting from a blank assay plate. Select study matrix items and place them in the plate using the tools provided. Recommended shortcut: start from an Existing Study Matrix instead, then copy the matrix items from that plate (using the Copy feature), then change to Start From a Blank Assay Plate Map, select the desired plate size, then paste that matrix items on to the plate."
         , "When starting from an Existing Assay Plate Map, plate reader data uploaded and associated to the selected plate map will NOT be copied to the new plate map (i.e. if the assay plate map selected has been attached to a file/block, values from uploaded files will not be copied to the new plate map)."
         , "This time unit applies to all sample times and sample collection times (efflux collection duration times) for the whole assay plate map."
@@ -204,6 +209,7 @@ $(document).ready(function () {
 
         , "If calibrating, this is the multiplier that will be applied to the calibrated values. If not calibrating, this is the multiplier that will be applied to the raw values. Click to show the details for more information about how this multiplier was obtained."
         , "Use Copy to copy sections of the assay plate map to other wells in the plate. A popular method of using this feature is to start from an Existing Study Matrix, then copy the matrix items from that plate, change to Start From a Blank Assay Plate Map, select the desired plate size, then paste that matrix items on the plate. "
+        , "To make these data available in the Study Summary, check the box and click the Submit button. "
 
         ,];
     // load-function
@@ -456,9 +462,9 @@ $(document).ready(function () {
 
     let global_blank_handling_option = "";
 
-    $('input[name=radio_replicate_handling_average_or_not][value=average]').prop('checked',true);
+    $('input[name=radio_replicate_handling_average_or_not][value=each]').prop('checked',true);
+    let global_calibrate_radio_replicate_handling_average_or_not_0 = 'each';
     $('input[name=radio_standard_option_use_or_not][value=no_calibration]').prop('checked',true);
-    let global_calibrate_radio_replicate_handling_average_or_not_0 = 'average';
     let global_calibrate_radio_standard_option_use_or_not = 'no_calibration';
 
     let global_calibrate_calibration_curve_method = 'select_one';
@@ -528,6 +534,26 @@ $(document).ready(function () {
 
 
     // on CHANGE calibration on change events
+    // change the notes or checkboxes in the table, update in the formset
+    $(document).on('change', '.user-notes', function (t) {
+        //HANDY - get the id of this in a datatable
+        // does not work => console.log($(this).id)
+        // use instead console.log(t.target.id)
+        let myPI = t.target.id.substring(8);
+        $('#id_assayplatereadermapitem_set-' + myPI + '-form_user_entered_notes').val($(this).val());
+    });
+
+    $(document).on('click', '.user-omit-average', function (t) {
+        let myPI = t.target.id.substring(7);
+        let myTF = true;
+        if($(this).prop("checked") == false) {
+            myTF = false;
+        } else {
+            myTF = true;
+        }
+        $('#id_assayplatereadermapitem_set-' + myPI + '-form_user_entered_omit_from_average').prop('checked', myTF)
+    });
+
     // blank handling, based on selections, change what shows in the box
     $("input[type='radio'][name='radio_standards_blank_handling']").click(function () {
         setBlankHandling();
@@ -648,7 +674,7 @@ $(document).ready(function () {
         //this will trigger the change event for recalibrating
         $("#id_se_form_calibration_curve").selectize()[0].selectize.setValue(global_calibrate_calibration_curve_method);
         global_calibration_multiplier = $("#id_form_data_processing_multiplier").val();
-        console.log(global_calibration_multiplier)
+        //console.log(global_calibration_multiplier)
     });
 
     // change the calibration method
@@ -738,8 +764,7 @@ $(document).ready(function () {
                 }
             }
         }
-    };
-
+    }
 
     function changesThatAffectCalibrationPlusCallCalibrate(called_from, other_info) {
         // changesThatAffectCalibrationPlusCallCalibrate('change_curve', 'standards are on this plate');
@@ -946,6 +971,10 @@ $(document).ready(function () {
     function buildTheProcessedDataTable_ajax(lol_processed) {
         // so that the DataTable will work, make the whole table each time so can destroy it and bring it back
 
+        alert('Developers Note: do not forget to clean out the form fields of the notes and omit check boxes OR fill them in the table depending on WHAT the TEAM decides they want to do.');
+
+
+
         // HANDY delete child node
         var elem = document.getElementById('div_for_processed_samples_table');
         elem.removeChild(elem.childNodes[0]);
@@ -975,13 +1004,13 @@ $(document).ready(function () {
 
         var tableBody = document.createElement('TBODY');
         var rowcounter = 0;
+        var each_plate_index = 0;
         $.each(lol_processed, function (ir, row) {
             // console.log("rowcounter ", rowcounter)
             // console.log("--row ", row)
             var tr = document.createElement('TR');
             $(tr).attr('row-index', rowcounter);
             tableBody.appendChild(tr);
-
 
             var colcounter = 0;
             let myCellContentWithCommas = "";
@@ -1002,10 +1031,41 @@ $(document).ready(function () {
                 }
                 //else leave the myCellContent as it was
 
-                td.appendChild(document.createTextNode(myCellContent));
+                // save the plate index for adding the checkbox and notes
+                // for user input
+                if (colcounter == 0) {
+                    each_plate_index = myCellContent;
+                }
+                // add an input box for the notes field - it should be empty
+                // all programmatic notes when into column 31 (send message)
+                // this will just overwrite the previous notes, which should be a blank space from utils.py
+                if (colcounter == 30) {
+                    // add text input box to column 30
+                    myCellContent = document.createElement('input');
+                    myCellContent.type = 'text';
+                    myCellContent.id = 'notesPI-'+each_plate_index;
+                    myCellContent.name = 'notesPI-'+each_plate_index;
+                    myCellContent.value = 'notesPI-'+each_plate_index;
+                    myCellContent.className = 'user-notes';
+                    td.appendChild(myCellContent);
+                } else {
+                    td.appendChild(document.createTextNode(myCellContent));
+                }
                 tr.appendChild(td);
                 colcounter = colcounter+1;
             });
+
+            // add the checkbox as the last column 32
+            var td = document.createElement('TD');
+            $(td).attr('col-index', colcounter);
+            var myCellContent = document.createElement('input');
+            myCellContent.type = 'checkbox';
+            myCellContent.id = 'omitPI-'+each_plate_index;
+            myCellContent.name = 'omitPI';
+            myCellContent.value = 'unchecked';
+            myCellContent.className = 'user-omit-average';
+            td.appendChild(myCellContent);
+            tr.appendChild(td);
 
             rowcounter = rowcounter+1
         });
@@ -1050,11 +1110,12 @@ $(document).ready(function () {
             {"targets": [  25], "visible": true, },
             {"targets": [  26], "visible": true, },
 
-                {"targets": [  27], "visible": false, },
+            {"targets": [  27], "visible": true, },
             {"targets": [  28], "visible": true, },
-            {"targets": [  29], "visible": true, },
+                {"targets": [  29], "visible": false, },
                 {"targets": [  30], "visible": false, },
-                {"targets": [  31], "visible": false, }
+                {"targets": [  31], "visible": false, },
+            {"targets": [  32], "visible": true, },
             ];
         // console.log("Before " , table_column_defs)
         // console.log("global_calibrate_radio_standard_option_use_or_not " , global_calibrate_radio_standard_option_use_or_not)
@@ -1652,13 +1713,14 @@ $(document).ready(function () {
     } catch (err) { // this is not on the page, skip it
     }
 
-    if (global_plate_number_file_block_sets > 0) {
-        try {
-            // set a default
-            document.getElementById("id_radio_replicate_handling_average_or_not_0").checked = true;
-        } catch (err) { // this is not on the page, skip it
-        }
-    }
+    // should not need this - see around line 450ish
+    // if (global_plate_number_file_block_sets > 0) {
+    //     try {
+    //         // set a default
+    //         document.getElementById("id_radio_replicate_handling_average_or_not_0").checked = true;
+    //     } catch (err) { // this is not on the page, skip it
+    //     }
+    // }
 
     // CALIBRATE SECTION IS ABOVE (EXCEPT SOME FUNCTIONS ARE BELOW)
 
@@ -1832,6 +1894,7 @@ $(document).ready(function () {
     $("input[type='checkbox']").change(function () {
         // limit to checkboxes that are part of the fancy check box selections
         // (not the check boxes that get check for what gets changed when click apply or drag)
+        // console.log("this fired")
         let data_group = $(this).attr('data-group')
         if (data_group === "fancy-checkbox") {
             let this_attr_id = $(this).attr('id');
@@ -4212,3 +4275,7 @@ $(document).ready(function () {
 //     for(i=0; i < CARS .length; i++){
 //         $("#dropdown").append('<option value="'+CARS [i]+'">'+CARS [i]+'</option>');
 //      }
+
+
+// https://datatables.net/reference/option/drawCallback
+// Also, helpfully, https://datatables.net/reference/option/preDrawCallback
