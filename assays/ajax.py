@@ -4299,8 +4299,8 @@ def fetch_assay_study_platemap_for_platemap(request):
             'volume_unit': this_map.volume_unit,
             'cell_count': this_map.cell_count,
             'study_assay_id': this_map.study_assay_id,
-            # 'standard_unit': this_map.standard_unit.unit,
-            'standard_unit': this_map.standard_unit.id,
+            'standard_unit': this_map.standard_unit.unit,
+            # 'standard_unit': this_map.standard_unit.id,
             'platemap_id': this_platemap,
         }
         platemap_data_to_return.append(data_fields)
