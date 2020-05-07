@@ -1,60 +1,22 @@
 $(document).ready(function () {
 
-    // Load core chart package
+    /**
+     * Load what is needed to run google charts.
+    */
     google.charts.load('current', {'packages': ['corechart']});
 
+    /**
+     * Global counter that is used for testing.
+    */
     let global_counter = 0;
 
-    // These must be parallel! The second set is the column headers for the table (MIF-C file)
-    // the first set is the order returning from the ajax call
-    // look in the utils.py for the list that must match this in order! WATCH CAREFUL!
-    let column_table_headers = [
-        'Plate_Index',
-        'Chip ID',
-        'Matrix Item ID',
-        'Cross Reference',
-
-        'Assay Plate ID',
-        'Assay Well ID',
-        'Well Use',
-
-        'Day',
-        'Hour',
-        'Minute',
-
-        'Target/Analyte',
-        'Subtarget',
-        'Method/Kit',
-        'Sample Location',
-        'Sample Location ID',
-
-        'Raw Value',
-        'Measurement Unit',
-        'Average Sample Blanks',
-        'Adjusted Raw',
-        'Fitted Value',
-
-        'Dilution Factor',
-        'Sample Volume',
-        'Sample Volume Unit',
-        'Duration Sample Collection (days)',
-
-        'Multiplier',
-        'Value',
-        'Value Unit',
-        'Replicate',
-
-        'Caution Flag',
-        'Exclude',
-        'Notes',
-        'Processing Details',
-
-        'Omit From Average',
-    ];
-
-    //READY TO START ON EXPORT
-
-     //color ramp options for heatmap of raw data
+    /**
+     * Color Ramps
+     * These variables are optional color ramps.
+     * Only one is selected for use in this code.
+     * The rest are here for reference since it took a while to build them.
+     * HANDY - color ramps
+    */
     global_color_ramp_light_to_medium_purple = [
         '#F9F6FB',
         '#f2e6ff',
@@ -125,12 +87,16 @@ $(document).ready(function () {
         '#E65100',
     ];
 
-    // pick the color ramp to use for the raw data values in the plate map
+    /**
+     * Select the color ramp to use for raw values in the plate map.
+     * This makes it easy to change color ramps, should a change be requested.
+    */
     global_color_ramp_use_this_ramp = global_color_ramp_light_to_medium_purple;
 
-    // START SECTION THAT SETS TOOLTIPS - and some variables
-    // make lists for the tooltips
-    // just add in parallel if need more tooltips - must be para||el!
+    /**
+     * The tooltip section. This variable holds a list of the tool tip DOM ids.
+     * This list must be parallel to the list of tool tips.
+    */
     let global_plate_tooltip_selector = [
           '#matrix_select_tooltip'
         , '#plate_select_tooltip'
@@ -172,6 +138,11 @@ $(document).ready(function () {
         , '#copys_pastes_tooltip'
         , '#submit_to_study_summary_tooltip'
         ,];
+
+    /**
+     * The tooltip section. This variable holds a list of the tool tip DOM strings (titles).
+     * This list must be parallel to the list of tool tip DOM ids.
+    */
     let global_plate_tooltip_text = [
           "Starting from an Existing Study Matrix is helpful if the experiment was conducted in a plate based model and that same plate was used to perform a plate reader assay. Another popular use of this method is to start here and select Starting Study Matrix, then copy the matrix items from that plate (using the Copy feature), then change to Start From a Blank Assay Plate Map, select the desired plate size, then paste that matrix items on to the plate."
         , "Build the assay plate map starting from a blank assay plate. Select study matrix items and place them in the plate using the tools provided. Recommended shortcut: start from an Existing Study Matrix instead, then copy the matrix items from that plate (using the Copy feature), then change to Start From a Blank Assay Plate Map, select the desired plate size, then paste that matrix items on to the plate."
@@ -211,20 +182,25 @@ $(document).ready(function () {
 
         , "If calibrating, this is the multiplier that will be applied to the calibrated values. If not calibrating, this is the multiplier that will be applied to the raw values. Click to show the details for more information about how this multiplier was obtained."
         , "Use Copy to copy sections of the assay plate map to other wells in the plate. A popular method of using this feature is to start from an Existing Study Matrix, then copy the matrix items from that plate, change to Start From a Blank Assay Plate Map, select the desired plate size, then paste that matrix items on the plate. "
-        , "To make these data available in the Study Summary, check the box and click the Submit button. If replicates are present, the average of unchecked replicates will be sent to the Study Summary."
+        , "To make these data available in the Study Summary, check the box and click the Submit button. If these data have already been sent to the Study Summary, it is recommended that these data be removed from the study prior to resubmitting them (remove associated data file on the Upload Data File page).  If replicates are present, the average of unchecked replicates will be sent to the Study Summary."
 
         ,];
-    // load-function
-    // set the tooltips
+
+    /**
+     * Function to set the tool tips.
+     * NOTE: this replaces a bunch of these
+     * let global_plate_map_name_tooltip = "Date and time are the default. The map name may be updated by the data provider.";
+     * $('#map_name_tooltip').next().html($('#map_name_tooltip').next().html() + make_escaped_tooltip(global_plate_map_name_tooltip));
+    */
     $.each(global_plate_tooltip_selector, function (index, show_box) {
         $(show_box).next().html($(show_box).next().html() + make_escaped_tooltip(global_plate_tooltip_text[index]));
     });
-    // NOTE: this replaces a bunch of these
-    // let global_plate_map_name_tooltip = "Date and time are the default. The map name may be updated by the data provider.";
-    // $('#map_name_tooltip').next().html($('#map_name_tooltip').next().html() + make_escaped_tooltip(global_plate_map_name_tooltip));
-    // END SECTION THAT SETS TOOLTIPS
 
-
+    /**
+     * Next section of code sets a bunch of global variables.
+     * First, those needed for the add/edit, then, those needed for the calibrate part.
+     * A page can be edited until a data block is attached to the plate map, then it becomes a calibrate page.
+    */
     // START SECTION TO SET GLOBAL VARIABLES plus some logic when needed
 
     let global_plate_check_page_call = $("#check_load").html().trim();
@@ -435,8 +411,8 @@ $(document).ready(function () {
     let global_floater_molecular_weight = "";
     let global_floater_time_unit = "";
     let global_showhide_samples = "hide_samples";
-    let global_checkbox_platemap_index_working = 0;
-    let global_notes_platemap_index_working = 1;
+    let global_checkbox_platemap_index_working_notes = 0;
+    let global_checkbox_platemap_index_working_omits = 0;
 
     // END SECTION TO SET GLOBAL VARIABLES plus some
 
@@ -457,16 +433,17 @@ $(document).ready(function () {
     let global_calibrate_borrowed_metadata_block = [];
 
     let global_counter_to_check_calibration_runs = 1;
-    let global_lol_samples = [];
+    let global_lol_samples_for_graph_each = [];
+    let global_lol_samples_for_graph_average = [];
     let global_lol_standards_points = [];
     let global_lol_standards_ave_points = [];
     let global_lol_standards_curve = [];
-    let global_lol_standards_points_for_table = [];
-    let global_lol_standards_average_points_for_table = [];
 
     let global_list_sample_with_caution_flags = [];
-    let global_list_plate_holding_user_omits = []
-    let global_list_plate_holding_user_notes = []
+    let global_list_plate_holding_user_omits = [];
+    let global_list_plate_holding_user_notes = [];
+    let global_list_plate_holding_user_omits_string = "";
+    let global_list_plate_holding_user_notes_string = "";
 
     let global_blank_handling_option = "";
 
@@ -474,6 +451,226 @@ $(document).ready(function () {
     let global_calibrate_radio_replicate_handling_average_or_not_0 = 'each';
     $('input[name=radio_standard_option_use_or_not][value=no_calibration]').prop('checked',true);
     let global_calibrate_radio_standard_option_use_or_not = 'no_calibration';
+
+    let global_utils_integers = ['plate_index','matrix_item_id','location_id', 'replicate'];
+    let global_utils_strings = ['matrix_item_name', 'cross_reference', 'well_name', 'well_use',
+    'target', 'subtarget', 'method', 'location_name', 'standard_unit', 'volume_unit', 'unit',
+    'caution_flag', 'exclude', 'notes', 'sendmessage'];
+
+     /**
+     * Object/Dictionary of crossrefences between the utily.py dict and column headers
+     * Column headers needed for Each and Average table.
+     * column_table_headers is a list of headers to be used for the samples table.
+     * Column headers are for the table (MIF-C file) in cases where they are MIF-C file fields.
+     * Look in the utils.py for the keys.
+    */
+    let utils_key_column_header = {}
+    utils_key_column_header['plate_index'] = 'Plate Index';
+    utils_key_column_header['matrix_item_name'] = 'Chip ID';
+    utils_key_column_header['matrix_item_id'] = 'Matrix Item ID';
+    utils_key_column_header['cross_reference'] = 'Cross Reference';
+    utils_key_column_header['plate_name'] = 'Assay Plate ID';
+    utils_key_column_header['well_name'] = 'Assay Well ID';
+    utils_key_column_header['well_use'] = 'Well Use';
+    utils_key_column_header['day'] = 'Day';
+    utils_key_column_header['hour'] = 'Hour';
+    utils_key_column_header['minute'] = 'Minute';
+    utils_key_column_header['target'] = 'Target/Analyte';
+    utils_key_column_header['subtarget'] = 'Subtarget';
+    utils_key_column_header['method'] = 'Method/Kit';
+    utils_key_column_header['location_name'] = 'Sample Location';
+    utils_key_column_header['location_id'] = 'Sample Location ID';
+    utils_key_column_header['raw_value'] = 'Raw Value';
+    utils_key_column_header['standard_unit'] = 'Measurement Unit';
+    utils_key_column_header['average_blank'] = 'Average Sample Blanks';
+    utils_key_column_header['adjusted_raw'] = 'Adjusted Raw';
+    utils_key_column_header['fitted_value'] = 'Fitted Value';
+    utils_key_column_header['dilution_factor'] = 'Dilution Factor';
+    utils_key_column_header['collection_volume'] = 'Sample Volume';
+    utils_key_column_header['volume_unit'] = 'Sample Volume Unit';
+    utils_key_column_header['collection_time'] = 'Duration Sample Collection (days)';
+    utils_key_column_header['multiplier'] = 'Multiplier';
+    utils_key_column_header['processed_value'] = 'Value';
+    utils_key_column_header['unit'] = 'Value Unit';
+    utils_key_column_header['replicate'] = 'Replicate';
+    utils_key_column_header['caution_flag'] = 'Caution Flag';
+    utils_key_column_header['exclude'] = 'Exclude';
+    utils_key_column_header['notes'] = 'Notes';
+    utils_key_column_header['sendmessage'] = 'Processing Details';
+    utils_key_column_header['omits'] = 'Omit From Average';
+    utils_key_column_header['Concentration']               = 'Concentration (Added)';
+    utils_key_column_header['Fitted Concentration']        = 'Concentration (Fitted)';
+    utils_key_column_header['Adjusted Observed Signal']    = 'Signal (Adjusted)';
+    utils_key_column_header['Observed Signal']             = 'Signal';
+    utils_key_column_header['Fitted Signal']               = 'Signal (Fitted)';
+    utils_key_column_header['Predicted Signal']            = 'Signal (Predicted)';
+    // let testThis = findTheUtilsKeyFromMIFCHeader('Omit from Average');
+    // console.log("1: ",testThis)
+    // console.log("2: ",utils_key_column_header['omits'])
+    // console.log("3: ",utils_key_column_header.omits)
+     /**
+     * Function to get the key for a value in the utils_key_column_header object/dictionary
+      * @param thisHeader is the MIF-C head want to find the utils match for
+    */
+    function findTheUtilsKeyFromMIFCHeader(thisHeader) {
+        let myKey='';
+        for(key in utils_key_column_header) {
+            var value = utils_key_column_header[key];
+            if (value === thisHeader) {
+                myKey = key;
+                break;
+            }
+        }
+        return myKey
+    }
+
+    let column_table_headers_each = [
+        'Plate Index',
+        'Chip ID',
+        'Matrix Item ID',
+        'Cross Reference',
+        'Assay Plate ID',
+
+        'Assay Well ID',
+        'Well Use',
+        'Day',
+        'Hour',
+        'Minute',
+
+        'Target/Analyte',
+        'Subtarget',
+        'Method/Kit',
+        'Sample Location',
+        'Sample Location ID',
+
+        'Raw Value',
+        'Measurement Unit',
+        'Average Sample Blanks',
+        'Adjusted Raw',
+        'Fitted Value',
+
+        'Dilution Factor',
+        'Sample Volume',
+        'Sample Volume Unit',
+        'Duration Sample Collection (days)',
+        'Multiplier',
+
+        'Value',
+        'Value Unit',
+        'Replicate',
+        'Caution Flag',
+        'Exclude',
+
+        'Notes',
+        'Processing Details', 
+        'Omit From Average',
+    ];
+     /**
+     * These are the plate where the data table order is set.
+      * This order should match the order of the column headers.
+    */
+    let global_table_column_defs_each = [
+        // target is the column number starting from 0 (order based on table creation)
+        // true is default, could just comment out these lines, but that makes harder to edit them
+        // NOTE: these numbers rely on the order of the arrays - WATCH-CAREFUL
+        {"targets": [0], "visible": false,},
+        {"targets": [1], "visible": true,},
+        {"targets": [2], "visible": false,},
+        {"targets": [3], "visible": false,},
+        {"targets": [4], "visible": false,},
+
+        {"targets": [5], "visible": true,},
+        {"targets": [6], "visible": false,},
+        {"targets": [7], "visible": true,},
+        {"targets": [8], "visible": false,},
+        {"targets": [9], "visible": false,},
+
+        {"targets": [10], "visible": false,},
+        {"targets": [11], "visible": false,},
+        {"targets": [12], "visible": false,},
+        {"targets": [13], "visible": false,},
+        {"targets": [14], "visible": false,},
+
+        {"targets": [15], "visible": true,},
+        {"targets": [16], "visible": false,},
+        {"targets": [17], "visible": false,},
+        {"targets": [18], "visible": true,},
+        {"targets": [19], "visible": true,},
+
+        {"targets": [20], "visible": false,},
+        {"targets": [21], "visible": false,},
+        {"targets": [22], "visible": false,},
+        {"targets": [23], "visible": false,},
+        {"targets": [24], "visible": true,},
+
+        {"targets": [25], "visible": true,},
+        {"targets": [26], "visible": false,},
+        {"targets": [27], "visible": true,},
+        {"targets": [28], "visible": true,},
+        {"targets": [29], "visible": false,},
+
+        {"targets": [30], "visible": true,},
+        {"targets": [31], "visible": false,},
+        {"targets": [32], "visible": true,},
+
+        {responsivePriority: 1, targets: 1},
+        {responsivePriority: 2, targets: 5},
+        {responsivePriority: 3, targets: 28},
+        {responsivePriority: 4, targets: 30},
+        {responsivePriority: 5, targets: 27},
+        {responsivePriority: 6, targets: 32},
+        //may need the following later - if pursue sorting on these fields
+        //https://datatables.net/reference/option/columns.orderDataType
+        //https://datatables.net/reference/option/columns.responsivePriority
+        //{ "orderDataType": "dom-text", "targets": [ 30 ] },
+        //{ "orderDataType": "dom-checkbox", "targets": [ 32 ] },
+    ];
+    let column_table_headers_average = [
+        'Chip ID',
+        'Cross Reference',
+        'Assay Plate ID',
+        'Assay Well ID',
+        'Day',
+
+        'Hour',
+        'Minute',
+        'Target/Analyte',
+        'Subtarget',
+        'Method/Kit',
+
+        'Sample Location',
+        'Value',
+        'Value Unit',
+        'Replicate',
+        'Caution Flag',
+
+        'Exclude',
+        'Notes',
+        'Processing Details',
+    ];
+    let global_table_column_defs_average = [
+        {"targets": [0], "visible": true,},
+        {"targets": [1], "visible": false,},
+        {"targets": [2], "visible": false,},
+        {"targets": [3], "visible": true,},
+        {"targets": [4], "visible": true,},
+
+        {"targets": [5], "visible": true,},
+        {"targets": [6], "visible": true,},
+        {"targets": [7], "visible": false,},
+        {"targets": [8], "visible": false,},
+        {"targets": [9], "visible": false,},
+
+        {"targets": [10], "visible": true,},
+        {"targets": [11], "visible": true,},
+        {"targets": [12], "visible": false,},
+        {"targets": [13], "visible": true,},
+        {"targets": [14], "visible": true,},
+
+        {"targets": [15], "visible": false,},
+        {"targets": [16], "visible": true,},
+        {"targets": [17], "visible": false,},
+    ];
 
     let global_calibrate_calibration_curve_method = 'select_one';
     if (global_plate_number_file_block_sets > 0) {
@@ -498,8 +695,17 @@ $(document).ready(function () {
     // load-function
     if (global_plate_number_file_block_sets > 0) {
         findThePkForTheSelectedString("#id_se_block_select_string", "id_ns_block_select_pk");
+        loadPlatesIndexNotesAndOmitsToMemoryFromFormFields('page_load');
+        clearTheOmitAndNoteFieldsBeforeRecalibration('page_load');
     }
 
+    /**
+     * This if an on load function that assists in loading the starting global variables.
+     * When in calibrate mode, there is an option to select which data block the user wants to work with.
+     * This is based on the assumption that they may have assigned more than one file block to a platemap.
+     * In this case, the string is selected, and an associated PK is extracted.
+     * These are loaded into global variables for use throughout the script.
+    */
     function findThePkForTheSelectedString(thisStringElement, thisPkElement) {
         // get the selected index of the pk of the selected data block (0 to # file/blocks-1) and get index of the selection box = 0, 1, 2, 3...
         if (global_calibrate_block_select_string_is_block_working_with_string) {
@@ -516,13 +722,15 @@ $(document).ready(function () {
         global_calibrate_block_select_string_is_block_working_with_pk = parseInt(document.getElementById(thisPkElement).selectedOptions[0].text);
     }
 
-    // load-function
-    // when the page is loaded, get the what and how to load/build the plate
-    // if add page:
-    // start with and empty plate, and pull from formset and value formset
-    // if existing:
-    // if file/block is attached, pull from formset and data pass in
-    // if file/block is not attached, pull from formset and value formset
+    /**
+     * Calling page load function, depending on what page is wanted.
+     * when the page is loaded, get the what and how to load/build the plate
+     * if add page:
+     * start with and empty plate, and pull from formset and value formset
+     * if existing:
+     * if file/block is attached, pull from formset and data pass in
+     * if file/block is not attached, pull from formset and value formset
+    */
     if (global_plate_check_page_call === 'add') {
         $('.show-when-add').removeClass('hidden');
         global_plate_add_or_edit_etc = "add_first_load_starting_from_empty_plate";
@@ -540,73 +748,109 @@ $(document).ready(function () {
         }
     }
 
-    // on CHANGE calibration on change events
-    // change the notes or checkboxes in the table, update in the formset
-    $(document).on('change', '.user-notes', function (t) {
-        //HANDY - get the id of this in a datatable
-        // does not work => console.log($(this).id)
-        // use instead console.log(t.target.id)
-        global_notes_platemap_index_working = t.target.id.substring(8);
-        let inMyFormFieldNow = $('#id_assayplatereadermapitem_set-' + global_notes_platemap_index_working + '-form_user_entered_notes').val();
-        //console.log("notes -",inMyFormFieldNow,"-")
-
-        let thisCellSelector = "#notesPI_"+global_notes_platemap_index_working;
-        let thisRowIndex = $(this).attr('row-index');
-
-        //sampleDataTable.data()[thisRowIndex][30] = sampleDataTable.data()[thisRowIndex][30];
-
-        $('#id_assayplatereadermapitem_set-' + global_notes_platemap_index_working + '-form_user_entered_notes').val($(this).val());
+    /**
+     * On change - post data processing option to show/hide calibration details
+    */
+    $("#showHideStandardsTableButton").click(function () {
+        // console.log("sh ", global_showhide_samples)
+        if ($('#div_for_standards_table').hasClass('hidden')) {
+            $('#div_for_standards_table').removeClass('hidden');
+            $('#div_for_standard_averages_table').removeClass('hidden');
+            $('#all_standard_points_table_title').removeClass('hidden');
+            $('#ave_standard_points_table_title').removeClass('hidden');
+        } else {
+            $('#div_for_standards_table').addClass('hidden');
+            $('#div_for_standard_averages_table').addClass('hidden');
+            $('#all_standard_points_table_title').addClass('hidden');
+            $('#ave_standard_points_table_title').addClass('hidden');
+        }
     });
 
-    $(document).on('change', '.user-omit-average', function (t) {
-        global_checkbox_platemap_index_working = t.target.id.substring(7);
-        //console.log("global_checkbox_platemap_index_working ",global_checkbox_platemap_index_working)
-
-        let thisCautionFlag = "#caution_flag_"+global_checkbox_platemap_index_working;
-        let myTF = true;
-        //console.log("on change fired...")
-
-        global_counter = global_counter + 1;
-        //console.log("global_counter ",global_counter)
+    /**
+     * On change - post data processing option to show/hide samples on the graph
+     * because some thought it was too confusing to see the samples on the graph
+    */
+    $("#showHideSamplesOnGraphButton").click(function () {
+        // console.log("sh ", global_showhide_samples)
+        if (global_showhide_samples == "hide_samples") {
+            global_showhide_samples = "show_samples";
+            drawCalibrationCurve();
+        } else {
+            global_showhide_samples = "hide_samples";
+            drawCalibrationCurve();
+        }
+    });
+    /**
+     * On change a notes input text area.
+     * When changed, a formset field must also be updated. Based on class of textarea notes fields.
+    */
+    // HANDY - if something is dynamically generated on the page, MUST have the $(document) before
+    $(document).on('change', '.each_notes', function (t) {
+        //HANDY - get the id of this in a datatable
+        //console.log("change text field: ",t.target.id)
+        // use instead console.log(t.target.id)
+        // the ids are: each_text_notes_20 and contain the plate map index
+        global_checkbox_platemap_index_working_notes = t.target.id.substring(16);
+        let inMyFormFieldNow = $('#id_assayplatereadermapitem_set-' + global_checkbox_platemap_index_working_notes
+            + '-form_user_entered_notes').val();
 
         let thisRowIndex = $(this).attr('row-index');
-        //console.log("thisRowIndex ",thisRowIndex)
+        //the following is something Luke suggested for managing dataTable, but went a different direction
+        //sampleDataTable.data()[thisRowIndex][30] = sampleDataTable.data()[thisRowIndex][30];
 
-        //console.log("change ", $(this).prop("checked"))
-        //console.log(sampleDataTable.data()[1][5])
+        $('#id_assayplatereadermapitem_set-' + global_checkbox_platemap_index_working_notes
+            + '-form_user_entered_notes').val($(this).val());
 
+        // if notes are changed and there is a toggle between average and each, need to reprocess data
+        changeMadeToOmitsOrNotesChangeReplicateHandling();
+    });
+
+    /**
+     * On change omits average checkbox.
+     * When changed, a formset field must also be updated. Change is based on the class of the omits check boxes.
+    */
+    $(document).on('change', '.each_omits', function (t) {
+        //checkbox ids: each_box_omits_20
+        global_checkbox_platemap_index_working_omits = t.target.id.substring(15);
+        // console.log("change box ",global_checkbox_platemap_index_working_omits)
+
+        //what is the caution flag on the same row as the checkbox that was changed
+        let thisCautionFlag = "#each_caution_flag_"+global_checkbox_platemap_index_working_omits;
+        let thisCautionFlagLength = $(thisCautionFlag).text().trim().length;
+        //what is the row index of this table
+        let thisRowIndex = $(this).attr('row-index');
+
+        //if changed to unchecked
         if($(this).prop("checked") == false) {
+            //the following is something Luke suggested for managing dataTable, but went a different direction
             //sampleDataTable.data()[thisRowIndex][32] = sampleDataTable.data()[thisRowIndex][32].replace(' checked="checked">', '>');
-            myTF = false;
-            if ($(thisCautionFlag).text().trim().length > 0) {
-                // when omit was checked, but the user unchecks it, make them add a note
-                forceTheUserToEnterANote(global_checkbox_platemap_index_working);
+
+            $('#id_assayplatereadermapitem_set-' + global_checkbox_platemap_index_working_omits
+                + '-form_user_entered_omit_from_average').prop('checked', false)
+
+            if (thisCautionFlagLength > 0) {
+                // when omit with a caution flag is unchecked, make them add a note
+                forceTheUserToEnterANote(global_checkbox_platemap_index_working_omits);
             }
         } else {
             //sampleDataTable.data()[thisRowIndex][32] = sampleDataTable.data()[thisRowIndex][32].replace('>', ' checked="checked">');
-            myTF = true;
-            //the box got returned to checked, clear the note
-            if ($(thisCautionFlag).text().trim().length > 0) {
-                $('#notesPI-'+global_checkbox_platemap_index_working).val("");
-                $('#id_assayplatereadermapitem_set-' + global_checkbox_platemap_index_working + '-form_user_entered_notes').val("");
+
+            //checkbox was rechecked, clear the note
+            if (thisCautionFlagLength > 0) {
+                $('#each_text_notes_'+global_checkbox_platemap_index_working_omits).val("");
+                //do not need here since the notes change will trigger and take care of it
+                //$('#id_assayplatereadermapitem_set-' + global_checkbox_platemap_index_working_omits + '-form_user_entered_notes').val("");
             }
+            $('#id_assayplatereadermapitem_set-' + global_checkbox_platemap_index_working_omits
+                + '-form_user_entered_omit_from_average').prop('checked', true)
         }
-        $('#id_assayplatereadermapitem_set-' + global_checkbox_platemap_index_working + '-form_user_entered_omit_from_average').prop('checked', myTF)
+        changeMadeToOmitsOrNotesChangeReplicateHandling();
     });
 
-    // $(document).on('change', '.user-omit-average', function (t) {
-    //     global_counter = global_counter + 1;
-    //     console.log("global_counter ",global_counter)
-    //      let thisRowIndex = $(this).attr('row-index');
-    //      console.log("change ", $(this).prop("checked"))
-    //      //console.log(sampleDataTable.data()[1][5])
-    //      if($(this).prop("checked") == false) {
-    //          sampleDataTable.data()[thisRowIndex][32] = sampleDataTable.data()[thisRowIndex][32].replace(' checked="checked">', '>');
-    //      } else {
-    //          sampleDataTable.data()[thisRowIndex][32] = sampleDataTable.data()[thisRowIndex][32].replace('>', ' checked="checked">');
-    //      }
-    // });
-
+    /**
+     * Function to force the user to enter a user note.
+     * Opens a dialogue that is stored in the html but also put into a variable.
+    */
     //https://stackoverflow.com/questions/34709715/how-to-launch-a-jquery-dialog-based-on-dropdown-selection
     function forceTheUserToEnterANote() {
         dialog_element.removeClass('hidden');
@@ -615,12 +859,16 @@ $(document).ready(function () {
         // this can happen before the dialog, so do not put stuff here
     }
 
+    /**
+     * Put a dialogue into a variable.
+     * When dialogue gets opened, indicate how to open and what to do when button clicked.
+    */
     var dialog_element = $('#dialog_element');
     dialog_element.dialog({
         //autoOpen: false,
         // Height and width here
-        height:350,
-        width:800,
+        height:260,
+        width:470,
         //closeOnEscape: true,
         // If you want it to blot out the rest of the screen
         modal: true,
@@ -628,13 +876,13 @@ $(document).ready(function () {
         open: function (event, ui) {
             $('#dialog_element').css('overflow', 'hidden');
         },
-        title: "Please select the reason for using a sample that is out of bounds.",
+        title: "Select reason for using sample:",
         // Each entry in this Object makes a new button
         buttons: {
             Apply: function() {
                 // console.log("selectable val " + $("#selectable").val());
                 let hold_note = $("#selectable").val();
-                // console.log("hold note ",hold_note)
+                //console.log("hold note ",hold_note)
                 $("#hold_note_val").val(hold_note);
                 fillTheNote();
                 $(this).dialog('close');
@@ -645,25 +893,31 @@ $(document).ready(function () {
        }
     });
 
+    /**
+     * Function to fill a field by DOM id.
+     * This is part of the user note filling functions.
+    */
     function fillTheNote() {
         //this should fire after a user changes a checked Omit From Average to unchecked
-        //console.log("global_checkbox_platemap_index_working ",global_checkbox_platemap_index_working)
-        //these also need changed in the html!!!!
+        //IF CHANGE the text of these, these also need changed in the html!!!!
         let note0 = "Close to calibration range"
         let note1 = "Preferred to include"
         let note2 = "Other/Unspecified"
         if ($("#hold_note_val").val() == 0) {
-            $('#notesPI-' + global_checkbox_platemap_index_working).val(note0);
-            $('#id_assayplatereadermapitem_set-' + global_checkbox_platemap_index_working + '-form_user_entered_notes').val(note0);
+            $('#each_text_notes_' + global_checkbox_platemap_index_working_omits).val(note0);
         } else if ($("#hold_note_val").val() == 1) {
-            $('#notesPI-' + global_checkbox_platemap_index_working).val(note1);
-            $('#id_assayplatereadermapitem_set-' + global_checkbox_platemap_index_working + '-form_user_entered_notes').val(note1);
+            $('#each_text_notes_' + global_checkbox_platemap_index_working_omits).val(note1);
         } else {
-            $('#notesPI-' + global_checkbox_platemap_index_working).val(note2);
-            $('#id_assayplatereadermapitem_set-' + global_checkbox_platemap_index_working + '-form_user_entered_notes').val(note2);
+            $('#each_text_notes_' + global_checkbox_platemap_index_working_omits).val(note2);
         }
+        $('#id_assayplatereadermapitem_set-' + global_checkbox_platemap_index_working_omits
+            + '-form_user_entered_notes').val($('#each_text_notes_'
+            + global_checkbox_platemap_index_working_omits).val());
     }
 
+    /**
+     * Click events for changing of how to handle blanks.
+    */
     // blank handling, based on selections, change what shows in the box
     $("input[type='radio'][name='radio_standards_blank_handling']").click(function () {
         setBlankHandling();
@@ -672,6 +926,20 @@ $(document).ready(function () {
         setBlankHandling();
     });
 
+    /**
+     * Change event for the blank handling, what was a dropdown but is not controlled
+     * by the user selecting radio buttons that are NOT bound to a form.
+     * This former dropdown IS bound to a form field for use in the utils.py
+    */
+    $("#id_se_form_blank_handling").change(function () {
+        changedTheCalibrationCurveAndOtherChangesThatMightCauseRunCalibrate('change_blank_handling');
+    });
+
+    /**
+     * Function that is called when changing the blanks handling radio buttons.
+     * These buttons are NOT bound to a form, and they change an underlying field
+     * that was originally a dropdown selection.
+    */
     function setBlankHandling() {
         let blankOption = 'ignore';
         let standards = $('input[name=radio_standards_blank_handling]:checked').val();
@@ -716,23 +984,85 @@ $(document).ready(function () {
         $("#id_se_form_blank_handling").selectize()[0].selectize.setValue(global_blank_handling_option);
     }
 
+    // on 20200507 hid the toggle radio button to show both average and each at the same time
+    // when did this, needed to flip the choice with a click button and when a change was made
+    $("#flipToAverageButton").click(function () {
+        tweakingWithTheReplicateAverageHandling('average', 'average_button');
+    });
+    /**
+     * Click events for toggling between each or average for display in the sample table
+     * right now, this is hidden, but leave the logic incase turn the toggle back to the user
+     * if do that, will need to modify some
+    */
     $("input[type='radio'][name='radio_replicate_handling_average_or_not']").click(function () {
-        global_calibrate_radio_replicate_handling_average_or_not_0 = $(this).val();
-        loadPlatesIndexNotesAndOmits()
-        changedTheCalibrationCurveAndOtherChangesThatMightCauseRunCalibrate('change_average');
+        //console.log("The refresh button does or does not trigger this: ") NO it does NOT
+        tweakingWithTheReplicateAverageHandling($(this).val(), 'radio_change');
     });
 
+    function changeMadeToOmitsOrNotesChangeReplicateHandling() {
+        $('#refresh_needed_indicator').text('need');
+        tweakingWithTheReplicateAverageHandling('each', 'flip_each');
+    }
+    
+    function tweakingWithTheReplicateAverageHandling(average_or_each, when_called){
+        // console.log("average_or_each ",average_or_each)
+        // console.log("when_called ",when_called)
+        if (average_or_each === 'average'){
+            $('input[name=radio_replicate_handling_average_or_not][value=average]').prop('checked',true);
+        } else {
+            $('input[name=radio_replicate_handling_average_or_not][value=each]').prop('checked', true);
+        }
+        global_calibrate_radio_replicate_handling_average_or_not_0 = average_or_each;
+
+        // only call reprocessing if something the user changed notes or omit boxes
+        if ($('#refresh_needed_indicator').text() === 'need' && average_or_each === 'average') {
+            changedTheCalibrationCurveAndOtherChangesThatMightCauseRunCalibrate('change_average');
+            $('.recalculate-averages-button').addClass('hidden');
+        } else {
+            if (when_called === 'flip_each') {
+                $('.for-processed-samples-table-average').addClass('hidden');
+                $('.recalculate-averages-button').removeClass('hidden');
+            } else {
+                changeVisibilityOfSampleEachAndAverage();
+            }
+        }
+    }
+    // may want to change this if the toggle is shown to user again
+    // right now, they are both shown until the user changes a note or omit, then average is hidden
+    // if change these, need to change the classes in the html of the title for the average table
+    function changeVisibilityOfSampleEachAndAverage() {
+        if (global_calibrate_radio_replicate_handling_average_or_not_0 === 'average') {
+            $('.for-processed-samples-table-average').removeClass('hidden');
+            $('.for-processed-samples-table-each').removeClass('hidden');
+        } else {
+            $('.for-processed-samples-table-average').removeClass('hidden');
+            $('.for-processed-samples-table-each').removeClass('hidden');
+        }
+    }
+
+    /**
+     * Change event for minimum bound of calibration curve
+    */
     $("#id_form_min_standard").change(function () {
         changedTheCalibrationCurveAndOtherChangesThatMightCauseRunCalibrate('change_min');
     });
+
+    /**
+     * Change event for maximum bound of calibration curve
+    */
     $("#id_form_max_standard").change(function () {
         changedTheCalibrationCurveAndOtherChangesThatMightCauseRunCalibrate('change_max');
     });
-    $("#id_se_form_blank_handling").change(function () {
-        changedTheCalibrationCurveAndOtherChangesThatMightCauseRunCalibrate('change_blank_handling');
-    });
 
-    // changed the borrowed standard file block selection option - this is only possible if calibration HAS been selected
+    /**
+     * Click event - when there are no standards on a plate and the user wants to calibrate
+     * they need to borrow standards from another plate or change to no calibrate.
+     * This is the change event for the user to pick a plate to borrow form or
+     * overwrite previous choices with no calibrate.
+     * The user will only see this set of radio buttons if they have picked a calibration method
+     * but there are no standards on the plate.
+     *
+    */
     $("input[type='radio'][name='radio_standard_option_use_or_not']").click(function () {
         global_calibrate_radio_standard_option_use_or_not = $(this).val();
 
@@ -758,7 +1088,12 @@ $(document).ready(function () {
         changedTheCalibrationCurveAndOtherChangesThatMightCauseRunCalibrate('change_standard_option_button');
     });
 
-    // change the file block for the standards
+    /**
+     * Change event - when there are no standards on a plate and the user wants to calibrate
+     * they need to borrow standards from another plate.
+     * When they change the plate to borrow from, this is triggered.
+     * Note: this only shows on the page under the conditions where they are selecting a plate to borrow standards.
+    */
     $("#id_se_block_standard_borrow_string").change(function () {
 
         try {
@@ -779,8 +1114,11 @@ $(document).ready(function () {
         changedTheCalibrationCurveAndOtherChangesThatMightCauseRunCalibrate('change_standard_pk_and_string');
     });
 
-    // if the user changes the multiplier, make the change to no_calibration
-    // every change above this on the page that will affect this turns it back to Select One so the user HAS to select
+    /**
+     * Change event - the data processing mulitipler
+     * If the user changes the muliplier manually (which should only be a last resort)
+     * Trigger the change of calibration to select_one so the user will have to pick again.
+    */
     $("#id_form_data_processing_multiplier").change(function () {
         global_calibrate_calibration_curve_method = 'select_one';
         //this will trigger the change event for recalibrating
@@ -789,15 +1127,36 @@ $(document).ready(function () {
         //console.log(global_calibration_multiplier)
     });
 
-    // change the calibration method
-    // every change above this on the page that will affect this turns it back to Select One so the user HAS to select
+    /**
+     * Change event - user changed the calibration method.
+     * Trigger the change of calibration to select_one so the user will have to pick again.
+     */
     $("#id_se_form_calibration_curve").change(function () {
         global_calibrate_calibration_curve_method_prev = global_calibrate_calibration_curve_method;
         global_calibrate_calibration_curve_method = $("#id_se_form_calibration_curve").selectize()[0].selectize.items[0];
         changedTheCalibrationCurveAndOtherChangesThatMightCauseRunCalibrate('change_curve');
     });
 
+    /**
+     * Function is called from many places where reprocessing of the data are required.
+     * @param called_from indicates what triggered the need for the reprocessing
+     * This function is a gateway to if calibration happens or not and also
+     * changes the page (show/hide) based on user selections and if calibration will continue.
+     * If situation is correct, data will be processed, else, it will not.
+     * Note that, we are are using a DOM element to help in tracking $('#refresh_needed_indicator')
+     *
+    */
     function changedTheCalibrationCurveAndOtherChangesThatMightCauseRunCalibrate(called_from) {
+        loadPlatesIndexNotesAndOmitsToMemoryFromFormFields(called_from);
+        clearTheOmitAndNoteFieldsBeforeRecalibration(called_from);
+
+        //if this is called from anywhere EXCEPT change_average, then toggle needs to be each
+        if (called_from != 'change_average') {
+            if (global_calibrate_radio_replicate_handling_average_or_not_0 === 'average') {
+                $('input[name=radio_replicate_handling_average_or_not][value=each]').prop('checked', true);
+                global_calibrate_radio_replicate_handling_average_or_not_0 = 'each';
+            }
+        }
 
         if (global_calibrate_calibration_curve_method == 'select_one') {
             $('.plate-calibration-or-processing-yes').addClass('hidden');
@@ -838,6 +1197,7 @@ $(document).ready(function () {
                 $('.plate-calibration-or-processing-yes').removeClass('hidden');
                 $('.plate-calibration-yes').removeClass('hidden');
                 $('.plate-calibration-guts-yes').removeClass('hidden');
+                changeVisibilityOfSampleEachAndAverage();
 
                 if (global_plate_well_use_count_of_standards_this_platemap == 0) {
                     // calibration method was selected but there are not standards on the plate
@@ -858,6 +1218,7 @@ $(document).ready(function () {
                             changesThatAffectCalibrationPlusCallCalibrate(called_from, 'borrow pk is selected');
                             $('.plate-calibration-curve-yes').removeClass('hidden');
                             $('.plate-calibration-curve-guts-yes').removeClass('hidden');
+                            changeVisibilityOfSampleEachAndAverage();
 
                         } else {
                             // user needs to pick a borrow pk
@@ -873,42 +1234,87 @@ $(document).ready(function () {
                     changesThatAffectCalibrationPlusCallCalibrate(called_from, 'standards are on this plate');
                     $('.plate-calibration-curve-yes').removeClass('hidden');
                     $('.plate-calibration-curve-guts-yes').removeClass('hidden');
+                    changeVisibilityOfSampleEachAndAverage();
                 }
             }
         }
     }
 
+    /**
+     * Function is called from many places where reprocessing of the data are required.
+     * @param called_from indicates what triggered the need for the reprocessing
+     * @param other_info contains additional info that may be needed later, but is not currently used
+     * This function is a place where, if other_info becomes
+     * part of the page logic, it can be dealt with.
+     *
+    */
     function changesThatAffectCalibrationPlusCallCalibrate(called_from, other_info) {
-        // changesThatAffectCalibrationPlusCallCalibrate('change_curve', 'standards are on this plate');
         // if get here, should have everything needed and the $('#refresh_needed_indicator').text('need');
         goAheadWithCalibrationAndOrProcessing(called_from);
     }
 
+    /**
+     * Function that will load the to global lists that run in parallel to the plate map index list.
+     * These hold the current user added notes and user omit check boxes.
+     * When submitted, these will be part of form fields, but, when sending to an ajax call
+     * after toggling between replicate handling of average and each, need these in memory variable.
+    */
+    function loadPlatesIndexNotesAndOmitsToMemoryFromFormFields(called_from) {
+        // when called from python, these will be form fields, but, when calling in page, need memory variables
+        global_list_plate_holding_user_omits_string = "";
+        global_list_plate_holding_user_notes_string = "";
+        for(i = 0; i < global_plate_size; i++) {
+            let formFieldUserNotes = $('#id_assayplatereadermapitem_set-' + i + '-form_user_entered_notes').val();
+            global_list_plate_holding_user_notes.push(formFieldUserNotes);
+            let formFieldUserOmitsIsChecked = $('#id_assayplatereadermapitem_set-' + i + '-form_user_entered_omit_from_average').is(':checked');
+            global_list_plate_holding_user_omits.push(formFieldUserOmitsIsChecked);
+
+            if (i == 0) {
+                global_list_plate_holding_user_notes_string = formFieldUserNotes;
+                global_list_plate_holding_user_omits_string = formFieldUserOmitsIsChecked;
+            } else {
+                global_list_plate_holding_user_notes_string = global_list_plate_holding_user_notes_string + "|" + formFieldUserNotes;
+                global_list_plate_holding_user_omits_string = global_list_plate_holding_user_omits_string + "|" + formFieldUserOmitsIsChecked;
+            }
+        }
+    }
+
+    /**
+     * Function is called to empty the form field of user entered omit and notes.
+     * Called on load and with recalibration. Must be saved when toggle average/each for replicate handling.
+     * @param called_from indicates what triggered the need for the reprocessing
+    */
     function clearTheOmitAndNoteFieldsBeforeRecalibration(called_from) {
-        // since getting ready to recalibrate from the facebook page, clear the form fields of notes and omit boxes
+        // since getting ready to recalibrate from the page, clear the form fields of notes and omit boxes
         for(i = 0; i < global_plate_size; i++) {
             $('#id_assayplatereadermapitem_set-' + i + '-form_user_entered_notes').val("");
             $('#id_assayplatereadermapitem_set-' + i + '-form_user_entered_omit_from_average').prop('checked', false)
         }
     }    
     
-    function loadPlatesIndexNotesAndOmits() {
-        // when called from python, these will be form fields, but, when calling in page, need memory variables
-        for(i = 0; i < global_plate_size; i++) {
-            global_list_plate_holding_user_notes.push($('#id_assayplatereadermapitem_set-' + i + '-form_user_entered_notes').text());
-            global_list_plate_holding_user_omits.push($('#id_assayplatereadermapitem_set-' + i + '-form_user_entered_omit_from_average').is(':checked'));
-        }
-    }
-
-    // calibration FUNCTIONS
+    /**
+     * Function is called to move forward with calibration/data processing
+     * @param called_from indicates what triggered the need for the reprocessing
+    */
     function goAheadWithCalibrationAndOrProcessing(called_from) {
         // console.log("goAheadWithCalibrationAndOrProcessing called_from: ", called_from)
         //console.log("counter ", global_counter_to_check_calibration_runs)
-        clearTheOmitAndNoteFieldsBeforeRecalibration(called_from)
         global_counter_to_check_calibration_runs=global_counter_to_check_calibration_runs + 1;
         packProcessedData(called_from);
     }
 
+    /**
+     * packProcessedData
+     * Function is an ajax call for processing/calibrating data.
+     * Many changes in page logic will end up here.
+     * @param called_from assists the code in knowing what triggered the call
+     * this will be important for know what the could should do and return
+     * In addition to being called from different events on this page,
+     * the function in the utils.py program will also be called from the Submit
+     * if the checkbox to send data to the Study Summary is checked.
+     * So, it is very important to send and receive the info to enable dual use of the
+     * function in utils.py.
+    */
     // Get what is needed for the calibration/processing
     function packProcessedData(called_from) {
         // console.log("packProcessedData")
@@ -926,7 +1332,7 @@ $(document).ready(function () {
 
         let data = {
             call: 'fetch_data_processing_for_plate_map_integration',
-            called_from: 'called_from',
+            called_from: called_from,
             study: global_plate_study_id,
             pk_platemap: global_plate_this_platemap_id,
             pk_data_block: global_calibrate_block_select_string_is_block_working_with_pk,
@@ -947,8 +1353,9 @@ $(document).ready(function () {
             method: global_floater_method,
             time_unit: global_floater_time_unit,
             volume_unit: global_floater_volume_unit,
-            user_notes: global_list_plate_holding_user_notes,
-            user_omits: global_list_plate_holding_user_omits,
+            user_notes: global_list_plate_holding_user_notes_string,
+            user_omits: global_list_plate_holding_user_omits_string,
+            plate_size: global_plate_size,
             csrfmiddlewaretoken: window.COOKIES.csrfmiddlewaretoken
         };
         window.spinner.spin(document.getElementById("spinner"));
@@ -974,24 +1381,28 @@ $(document).ready(function () {
                 alert('An error has occurred (finding processed data). Could be caused by many errors or by injection of invalid values. Try a different calibration method. If the problem persists, contact the database admins.');
                 console.log(xhr.status + ": " + xhr.responseText);
                 global_calibrate_calibration_curve_method = 'select_one';
-                //this will trigger the change event for recalibrating
+                //this will trigger the change event for recalibrating - want that if there was an error so the page does not sit on previous results
                 $("#id_se_form_calibration_curve").selectize()[0].selectize.setValue(global_calibrate_calibration_curve_method);
             }
         });
     }
     // post processing from ajax call
+    /**
+     * packProcessedData's post ajax processing
+     * Sets up to make several tables using the data that was returned from processing.
+     * Calls several other functions.
+    */
     let packProcessedDataSection = function (json, exist) {
-        //here here todo return when average was selected..need to complete deal with
+        // console.log("back from processing")
         let sendmessage = json.sendmessage;
         // console.log(sendmessage)
         $("#id_form_data_parsable_message").val(sendmessage);
 
-        let list_of_dicts_of_each_sample_row = json.list_of_dicts_of_each_sample_row;
+        let list_of_dicts_of_each_sample_row_each = json.list_of_dicts_of_each_sample_row_each;
+        let list_of_dicts_of_each_sample_row_average = json.list_of_dicts_of_each_sample_row_average;
         let list_of_dicts_of_each_standard_row_points = json.list_of_dicts_of_each_standard_row_points;
         let list_of_dicts_of_each_standard_row_ave_points = json.list_of_dicts_of_each_standard_row_ave_points;
         let list_of_dicts_of_each_standard_row_curve = json.list_of_dicts_of_each_standard_row_curve;
-
-        //console.log(list_of_dicts_of_each_standard_row_points);
 
         let dict_of_curve_info = json.dict_of_curve_info;
         // console.log('dict_of_curve_info ', dict_of_curve_info)
@@ -1020,114 +1431,145 @@ $(document).ready(function () {
         $("#id_form_calibration_parameter_4_value").val(dict_of_parameter_values.p4);
         $("#id_form_calibration_parameter_5_value").val(dict_of_parameter_values.p5);
 
-        buildTableOfProcessedData_ajax(list_of_dicts_of_each_sample_row);
-        buildTableOfStandardsDataPoints_ajax(list_of_dicts_of_each_standard_row_points);
-        buildTableOfStandardsDataAvePoints_ajax(list_of_dicts_of_each_standard_row_ave_points);
-        buildTableOfStandardsDataCurve_ajax(list_of_dicts_of_each_standard_row_curve);
+        prepGraphInfoOfStandardsDataCurve_ajax(list_of_dicts_of_each_standard_row_curve);
+
+        prepGraphInfoOfProcessedDataEach_ajax(list_of_dicts_of_each_sample_row_each);
+        buildADataTable_ajax(
+            list_of_dicts_of_each_sample_row_each,
+            'processed_samples_table_each',
+            column_table_headers_each,
+            'each',
+            global_table_column_defs_each);
+
+        // console.log('list_of_dicts_of_each_sample_row_average')
+        // console.log(list_of_dicts_of_each_sample_row_average)
+
+        prepGraphInfoOfProcessedDataAverage_ajax(list_of_dicts_of_each_sample_row_average);
+        buildADataTable_ajax(
+            list_of_dicts_of_each_sample_row_average,
+            'processed_samples_table_average',
+            column_table_headers_average,
+            'average',
+            global_table_column_defs_average);
+
+        prepForGraphOfStandardsDataAvePoints_ajax(list_of_dicts_of_each_standard_row_ave_points);
+        buildADataTable_ajax(
+            list_of_dicts_of_each_standard_row_ave_points,
+            'standard_averages_table',
+            ["Concentration (Added)", "Signal", "Signal (Adjusted)", "Signal (Fitted)"],
+            'standards',
+            []);
+        
+        prepForGraphOfStandardsDataPoints_ajax(list_of_dicts_of_each_standard_row_points)
+        buildADataTable_ajax(
+            list_of_dicts_of_each_standard_row_points,
+            'standards_table',
+            ["Concentration (Added)", "Signal", "Signal (Adjusted)", "Concentration (Fitted)"],
+            'standards',
+            []);
 
         // console.log("##in js back from ajax");
-        // console.log("##list_of_dicts_of_each_sample_row");
-        // console.log(list_of_dicts_of_each_sample_row);
+        // console.log("##list_of_dicts_of_each_sample_row_each");
+        // console.log(list_of_dicts_of_each_sample_row_each);
+        // console.log("##list_of_dicts_of_each_sample_row_average");
+        // console.log(list_of_dicts_of_each_sample_row_average);
         // console.log("##list_of_dicts_of_each_standard_row_ave_points");
         // console.log(list_of_dicts_of_each_standard_row_ave_points);
         // console.log("##list_of_dicts_of_each_standard_row_points");
         // console.log(list_of_dicts_of_each_standard_row_points);
         // console.log("##list_of_dicts_of_each_standard_row_curve");
         // console.log(list_of_dicts_of_each_standard_row_curve);
-
         drawCalibrationCurve();
         $('#refresh_needed_indicator').text('done');
+
     };
-
-    function buildTableOfProcessedData_ajax(list_of_dicts_of_each_sample_row) {
-        //also storing what needed for calibration curve in memory
-        global_lol_samples = [];
-
-        //['Standard Concentration', 'Fitted Curve', 'Standard Response', 'Sample Response'],
-        // for samples, need fitted value (19) as the X and the adjusted raw (15) as the Y
-        //[0.0, null, null, .05]
-        // 19                15<=that should have been 18, changed on 20200426
-
-        // column_table_headers
-        let lol_processed = [];
-        // TRICKY - keep these all parallel with each other and with the utils.py call or problems will result!
-
-        let showthisalert = false;
-
-        //console.log('list_of_dicts_of_each_sample_row ', list_of_dicts_of_each_sample_row)
-        $.each(list_of_dicts_of_each_sample_row, function (index, each) {
-            let thisline = [];
-            let myconcentration = 0;
-            let myresponse = 0;
-            let counterEachItemInThisRow = 0;
-            // console.log("each ", each)
-            $.each(each, function (indexi, eachi) {
-                thisline.push(eachi);
-                //console.log("each ", eachi)
-                // console.log("counterEachItemInThisRow ", counterEachItemInThisRow)
-
-                // CAREFUL WATCH if change order, these will be wrong...
-                if (counterEachItemInThisRow == 19) {
-                    myconcentration = eachi;
-                    if (myconcentration == null){
-                        if (showthisalert == false) {
-                            alert('One or more of your raw values was null. This will cause errors and/or odd behavior on this page.');
-                            showthisalert = true;
-                        }
-                    }
-                    // console.log(myconcentration)
-                };
-                if (counterEachItemInThisRow == 18) {
-                    myresponse = eachi;
-                    // console.log(myresponse)
-                };
-                
-                //console.log("eachi: ", eachi)
-
-                //console.log("each.plate_index ", each.plate_index)
-                //console.log("each[eachi] ", each[eachi])
-                // HANDY get each. variable name use each[variable name]
-                counterEachItemInThisRow = counterEachItemInThisRow + 1;
-            });
-            lol_processed.push(thisline);
-            //console.log("thisline ", thisline)
-            global_lol_samples.push([parseFloat(myconcentration), null, null, null, parseFloat(myresponse)]);
-        });
-        
-        //todo get a different list to pack the graph...later
-
-        buildTheProcessedDataTable_ajax(lol_processed);
-
-    }
-
-    function updateTheFormFieldCheckBoxes() {
-        //here here WILL need to change this to include all updates when coming back so toggle average each works correctly
-        // console.log('global_list_sample_with_caution_flags ', global_list_sample_with_caution_flags)
-        $.each(global_list_sample_with_caution_flags, function (index, each) {
-            // console.log("each ", each)
-            //  id_assayplatereadermapitem_set-    78      -form_user_entered_omit_from_average
-            $('#id_assayplatereadermapitem_set-' + each + '-form_user_entered_omit_from_average').prop('checked', true);
+    /**
+     * part of packProcessedData's post ajax processing
+     * prepares data to build the samples table and points for graph
+    */
+    function prepGraphInfoOfProcessedDataEach_ajax(list_of_dicts_of_each_sample_row_each) {
+        global_lol_samples_for_graph_each = [];
+        $.each(list_of_dicts_of_each_sample_row_each, function (index, eachrow) {
+            let adjusted_raw = eachrow['adjusted_raw'];
+            let fitted_value = eachrow['fitted_value'];
+            global_lol_samples_for_graph_each.push([parseFloat(fitted_value), null, null, null, parseFloat(adjusted_raw)]);
         });
     }
+    /**
+     * part of packProcessedData's post ajax processing
+     * prepares data to build the samples table and points for graph
+    */
+    function prepGraphInfoOfProcessedDataAverage_ajax(list_of_dicts_of_each_sample_row_average) {
+        global_lol_samples_for_graph_average = [];
+        $.each(list_of_dicts_of_each_sample_row_average, function (index, eachrow) {
+            let adjusted_raw = eachrow['adjusted_raw'];
+            let fitted_value = eachrow['fitted_value'];
+            global_lol_samples_for_graph_average.push([parseFloat(fitted_value), null, null, null, parseFloat(adjusted_raw)]);
+        });
+    }
+    /**
+     * part of packProcessedData's post ajax processing
+     * prepares data to build the standard curve
+    */
+    function prepGraphInfoOfStandardsDataCurve_ajax(list_of_dicts_of_each_standard_row_curve) {
+        global_lol_standards_curve = [];
+        $.each(list_of_dicts_of_each_standard_row_curve, function (index, eachrow) {
+            let myconcentration = eachrow['Concentration']
+            let mypredictedresponse = eachrow['Predicted Signal']
+            global_lol_standards_curve.push([parseFloat(myconcentration), parseFloat(mypredictedresponse), null, null, null]);
+        });
+    }
+    /**
+     * part of packProcessedData's post ajax processing
+     * prepares data to build the standard average point table and points for graph
+    */
+    function prepForGraphOfStandardsDataAvePoints_ajax(list_of_dicts_of_each_standard_row_ave_points) {
+        global_lol_standards_ave_points = [];
+        $.each(list_of_dicts_of_each_standard_row_ave_points, function (index, eachrow) {
+            let myconcentration = eachrow['Concentration'];
+            let myadjustedresponse = eachrow['Adjusted Observed Signal'];
+            let myobservedresponse = eachrow['Observed Signal'];
+            let myfitted = eachrow['Fitted Signal'];
+            global_lol_standards_ave_points.push([parseFloat(myconcentration), null, parseFloat(myadjustedresponse), null, null]);
+        });
+    }
+    /**
+     * part of packProcessedData's post ajax processing
+     * prepares data to build the standard data points table and points for graph
+    */
+    function prepForGraphOfStandardsDataPoints_ajax(list_of_dicts_of_each_standard_row_points) {
+        global_lol_standards_points = [];
+        $.each(list_of_dicts_of_each_standard_row_points, function (index, eachrow) {
+            let myconcentration = eachrow['Concentration'];
+            let myadjustedresponse = eachrow['Adjusted Observed Signal'];
+            let myobservedresponse = eachrow['Observed Signal'];
+            let myfitted = eachrow['Fitted Concentration'];
+            global_lol_standards_points.push([parseFloat(myconcentration), null, null, parseFloat(myadjustedresponse), null]);
+        });
+    }
+   
+    /**
+     * part of packProcessedData's post ajax processing
+     * builds the samples table
+     * For this (dataTable) to work, the table must be destroyed before it can be rebuilt.
+     * There are two primary conditions, controlled by a toggle:
+     * display the average or display each (global_calibrate_radio_replicate_handling_average_or_not_0)
+    */
+    function buildADataTable_ajax(
+        lol_processed,
+        thisTableName,
+        column_table_headers,
+        each_or_average,
+        global_table_column_defs)
 
-    function buildTheProcessedDataTable_ajax(lol_processed) {
-        // so that the DataTable will work, make the whole table each time so can destroy it and bring it back
-        //here here todo !!!!!
-        //alert('Developers Note: do not forget to clean out the form fields of the notes and omit check boxes OR fill them in the table depending on WHAT the TEAM decides they want to do.');
-
-        // here here todo - need to send the omit check boxes AND the notes
-        // need to determine what changed...if Average to Replicate, do not clear the check box and notes,
-        // else clear the notes and boxes
-
-
-
+        {
         // HANDY delete child node
-        var elem = document.getElementById('div_for_processed_samples_table');
+        var elem = document.getElementById('div_for_'+thisTableName);
         elem.removeChild(elem.childNodes[0]);
 
-        var myTableDiv = document.getElementById("div_for_processed_samples_table");
+        var myTableDiv = document.getElementById("div_for_"+thisTableName);
         var myTable = document.createElement('TABLE');
-        $(myTable).attr('id', 'processed_samples_table');
+        $(myTable).attr('id', thisTableName);
         $(myTable).attr('cellspacing', '0');
         $(myTable).attr('width', '100%');
         $(myTable).addClass('display table table-striped table-hover');
@@ -1138,500 +1580,136 @@ $(document).ready(function () {
 
         tableHead.appendChild(tr);
         var hcolcounter = 0;
+
         $.each(column_table_headers, function (index, header) {
-            //console.log("header ", header)
             var th = document.createElement('TH');
             $(th).attr('hcol-index', hcolcounter);
             th.appendChild(document.createTextNode(header));
             tr.appendChild(th);
-            hcolcounter = hcolcounter+1;
+            hcolcounter = hcolcounter + 1;
         });
+
         myTable.appendChild(tableHead);
 
         var tableBody = document.createElement('TBODY');
         var rowcounter = 0;
         var each_plate_index = 0;
-        var row_caution_flag = "";
+
         $.each(lol_processed, function (ir, row) {
-            // reset for each row
-            row_caution_flag = "";
             // console.log("rowcounter ", rowcounter)
             // console.log("--row ", row)
+
             var tr = document.createElement('TR');
             $(tr).attr('row-index', rowcounter);
             tableBody.appendChild(tr);
 
-            var colcounter = 0;
-            let myCellContentWithCommas = "";
-            $.each(row, function (ii, col) {
+            let colcounter = 0;
+            let myCellContentWithCommas = '';
+            let myCellContent = '';
+
+            $.each(column_table_headers, function (ii, col) {
+                let each_plate_index = row['plate_index'];
+                let myUtilsName = findTheUtilsKeyFromMIFCHeader(col);
+                let passedIn = row[myUtilsName];
                 // console.log("colcounter ", colcounter)
                 // console.log("--col ", col)
+                // console.log("--myUtilsName ", myUtilsName)
+                // console.log("--passedIn ", passedIn)
+
                 var td = document.createElement('TD');
                 $(td).attr('col-index', colcounter);
-                let myCellContent = col.toString().trim();
-                if (ii == 28) {
-                   $(td).attr('id', "caution_flag_"+each_plate_index);
-                   row_caution_flag = myCellContent.trim();
-                }
-                if (myCellContent.length == 0) {
-                    myCellContent = " ";
-                } else if (ii == 7  || ii == 8  || ii == 9  ||
-                        ii == 15 || ii == 17 || ii == 18 || ii == 19 ||
-                        ii == 24 || ii == 25)
-                {
-                    myCellContent = generalFormatNumber(parseFloat(col));
-                    myCellContent = thousands_separators(myCellContent);
-                }
-                //else leave the myCellContent as it was
+                $(td).attr('row-index', rowcounter);
+                $(td).attr('id', each_or_average + '_' + myUtilsName+'_'+each_plate_index);
 
-                // save the plate index for adding the checkbox and notes
-                // for user input
-                if (colcounter == 0) {
-                    each_plate_index = myCellContent;
-                }
-                // add an input box for the notes field - it should be empty
-                // all programmatic notes when into column 31 (send message)
-                // this will just overwrite the previous notes, which should be a blank space from utils.py
-                if (colcounter == 30) {
-                    // add text input box to column 30
-                    //myCellContent = document.createElement('input');
+                if (myUtilsName == 'notes' && each_or_average == 'each') {
+                    passedIn = passedIn.toString().trim();
+                    // if the reprocessing was called, we want an empty text box
+                    // reprocessing is NOT called if just a toggle back to each is selected
                     myCellContent = document.createElement('textarea');
-                    ////myCellContent.type = 'text';
-                    myCellContent.id = 'notesPI-'+each_plate_index;
-                    myCellContent.name = 'n-notesPI-'+each_plate_index;
-                    //todo here here get the notes when toggle is each and average
-                    // myCellContent.value = 'testing--'+each_plate_index;
-                    myCellContent.className = 'user-notes';
+                    $(myCellContent).attr('row-index', rowcounter);
+                    $(myCellContent).attr('id', each_or_average + '_text_' + myUtilsName+'_'+each_plate_index);
+                    $(myCellContent).attr('name', myUtilsName+'_'+each_plate_index);
+                    $(myCellContent).attr('class', each_or_average + '_' + myUtilsName);
+                    $(myCellContent).val(passedIn);
                     td.appendChild(myCellContent);
-                    $(myCellContent).attr("row-index",rowcounter)
+                } else if (myUtilsName == 'omits') {
+                    // console.log("passedIn ",passedIn)
+                    var myCellContent = document.createElement('input');
+                    myCellContent.type = 'checkbox';
+                    $(myCellContent).attr('row-index', rowcounter);
+                    $(myCellContent).attr('id', each_or_average + '_box_' + myUtilsName+'_'+each_plate_index);
+                    $(myCellContent).attr('name', myUtilsName+'_'+each_plate_index);
+                    $(myCellContent).attr('class', each_or_average + '_' + myUtilsName);
+                    if (passedIn == 'true') {
+                        // console.log("ready to check")
+                        $(myCellContent).attr('checked', 'checked');
+                        $('#id_assayplatereadermapitem_set-' + each_plate_index
+                        + '-form_user_entered_omit_from_average').prop('checked', true)
+                    }
+                    // else leave unchecked, which is default
+                    td.appendChild(myCellContent);
                 } else {
+                    passedIn = passedIn.toString().trim();
+                    if (passedIn.length == 0) {
+                        myCellContent = " ";
+                    } else if (global_utils_integers.includes(myUtilsName)) {
+                        myCellContent = parseInt(passedIn);
+                    } else if (global_utils_strings.includes(myUtilsName)) {
+                        myCellContent = passedIn;
+                    } else {
+                        passedIn = generalFormatNumber(parseFloat(passedIn));
+                        passedIn = thousands_separators(passedIn);
+                        myCellContent = passedIn;
+                    }
+
                     td.appendChild(document.createTextNode(myCellContent));
+
+                    if (myUtilsName == 'caution_flag' && myCellContent.length > 0) {
+                        global_list_sample_with_caution_flags.push(each_plate_index);
+                    }
                 }
+
                 tr.appendChild(td);
+
                 colcounter = colcounter+1;
             });
-
-            // add the checkbox as the last column 32
-            var td = document.createElement('TD');
-            $(td).attr('col-index', colcounter);
-            var myCellContent = document.createElement('input');
-            myCellContent.type = 'checkbox';
-            myCellContent.id = 'omitPI-'+each_plate_index;
-            myCellContent.name = 'omitPI';
-            myCellContent.className = 'user-omit-average';
-
-            td.appendChild(myCellContent);
-            tr.appendChild(td);
-
-            $(myCellContent).attr("row-index",rowcounter)
-
-            //console.log("row_caution_flag ",row_caution_flag)
-            //console.log("row_caution_flag.length ",row_caution_flag.length)
-            // this checked attribute must be last
-            if (row_caution_flag.length > 0) {
-                $(myCellContent).attr('checked', 'checked');
-                global_list_sample_with_caution_flags.push(each_plate_index);
-            }
-            // else {
-            //
-            // }
-
             rowcounter = rowcounter+1
         });
+
         myTable.appendChild(tableBody);
         myTableDiv.appendChild(myTable);
 
-        let table_column_defs = [
-                // target is the column number starting from 0
-                // true is default, could just comment out these lines, but that makes harder to edit them
-                // NOTE: these numbers rely on the order of the arrays
-                {"targets": [   0], "visible": false, },
-            {"targets": [   1], "visible": true, },
-                {"targets": [   2], "visible": false, },
-                {"targets": [   3], "visible": false, },
-
-                {"targets": [   4], "visible": false, },
-            {"targets": [   5], "visible": true, },
-                {"targets": [   6], "visible": false, },
-
-            {"targets": [   7], "visible": true, },
-            {"targets": [   8], "visible": true, },
-                {"targets": [   9], "visible": false, },
-
-                {"targets": [  10], "visible": false, },
-                {"targets": [  11], "visible": false, },
-                {"targets": [  12], "visible": false, },
-                {"targets": [  13], "visible": false, },
-                {"targets": [  14], "visible": false, },
-
-            {"targets": [  15], "visible": true, },
-                {"targets": [  16], "visible": false, },
-                {"targets": [  17], "visible": false, },
-            {"targets": [  18], "visible": true, },
-            {"targets": [  19], "visible": true, },
-
-                {"targets": [  20], "visible": false, },
-                {"targets": [  21], "visible": false, },
-                {"targets": [  22], "visible": false, },
-                {"targets": [  23], "visible": false, },
-
-            {"targets": [  24], "visible": true, },
-            {"targets": [  25], "visible": true, },
-            {"targets": [  26], "visible": true, },
-
-            {"targets": [  27], "visible": true, },
-            {"targets": [  28], "visible": true, },
-                {"targets": [  29], "visible": false, },
-                {"targets": [  30], "visible": true, },
-                {"targets": [  31], "visible": false, },
-            {"targets": [  32], "visible": true,  },
-
-
-                {responsivePriority: 1, targets: 5},
-                {responsivePriority: 2, targets: 28},
-                {responsivePriority: 3, targets: 32},
-                {responsivePriority: 4, targets: 30},
-
-
-           { "orderDataType": "dom-text", "targets": [ 30 ] },
-           // { "type": "numeric", "targets": 3 },
-           // { "orderDataType": "dom-select", "targets": 4 },
-            { "orderDataType": "dom-checkbox", "targets": [ 32 ] },
-
-            ];
-        //https://datatables.net/reference/option/columns.orderDataType
-
-
-        // console.log("Before " , table_column_defs)
-        // console.log("global_calibrate_radio_standard_option_use_or_not " , global_calibrate_radio_standard_option_use_or_not)
-            // let dict18 = {"targets": [  18], "visible": false, };
-            // let dict19 = {"targets": [  19], "visible": false, };
-
-        if (global_calibrate_calibration_curve_method == 'no_calibration') {
-            // console.log("here   ")
-            table_column_defs[18]['visible'] = false;
-            table_column_defs[19]['visible'] = false;
-        } else {
-            // console.log("there  ")
-            table_column_defs[18]['visible'] = true;
-            table_column_defs[19]['visible'] = true;
-        }
-        // console.log("After " , table_column_defs)
-
-        // to format the table - after creating it
-        // these column number are in the table cell tags - use them to keep everything straight
-        sampleDataTable = $('#processed_samples_table').DataTable({
-            //     $(myTable).DataTable({
+        sampleDataTable = $('#'+thisTableName).DataTable({
             "iDisplayLength": 25,
             "sDom": '<B<"row">lfrtip>',
             fixedHeader: {headerOffset: 50},
             responsive: true,
             "order": [[2, "asc"]],
-
-            "columnDefs": table_column_defs
-
+            "columnDefs": global_table_column_defs
         });
 
-        updateTheFormFieldCheckBoxes();
-
-        return myTable;
-    }
-
-    function buildTableOfStandardsDataCurve_ajax(list_of_dicts_of_each_standard_row_curve) {
-        global_lol_standards_curve = [];
-
-        $.each(list_of_dicts_of_each_standard_row_curve, function (index, each) {
-            let myconcentration = 0;
-            let myobservedresponse = 0;
-            let mypredictedresponse = 0;
-            let counterEachItemInThisRow = 0;
-            $.each(each, function (indexi, eachi) {
-                if (counterEachItemInThisRow == 0) {
-                    myconcentration = eachi;
-                };
-                if (counterEachItemInThisRow == 2) {
-                    mypredictedresponse = eachi;
-                };
-                counterEachItemInThisRow = counterEachItemInThisRow + 1;
-            });
-            global_lol_standards_curve.push([parseFloat(myconcentration), parseFloat(mypredictedresponse), null, null, null]);
-        });
-    }
-
-    function buildTableOfStandardsDataAvePoints_ajax(list_of_dicts_of_each_standard_row_ave_points) {
-        global_lol_standards_ave_points = [];
-        global_lol_standards_average_points_for_table = [];
-
-        $.each(list_of_dicts_of_each_standard_row_ave_points, function (index, each) {
-            let myconcentration = 0;
-            let myadjustedresponse = 0;
-            let myobservedresponse = 0;
-            let myfitted = 0;
-            let counterEachItemInThisRow = 0;
-            $.each(each, function (indexi, eachi) {
-                if (counterEachItemInThisRow == 0) {
-                    myconcentration = eachi;
-                };
-                if (counterEachItemInThisRow == 1) {
-                    myadjustedresponse = eachi;
-                };
-                if (counterEachItemInThisRow == 2) {
-                    myobservedresponse = eachi;
-                }
-                if (counterEachItemInThisRow == 3) {
-                    myfitted = eachi;
-                }
-                counterEachItemInThisRow = counterEachItemInThisRow + 1;
-            });
-            global_lol_standards_ave_points.push([parseFloat(myconcentration), null, parseFloat(myadjustedresponse), null, null]);
-            global_lol_standards_average_points_for_table.push([parseFloat(myconcentration), parseFloat(myobservedresponse), parseFloat(myadjustedresponse), parseFloat(myfitted)]);
-
-        });
-
-        buildTheStandardAveragesTable_ajax();
-    }
-
-    function buildTheStandardAveragesTable_ajax() {
-        // HANDY delete child node
-        var standardTableHeaders = ["Concentration (Added)", "Signal", "Signal (Adjusted)", "Signal (Fitted)"];
-        var elem = document.getElementById('div_for_standard_averages_table');
-        elem.removeChild(elem.childNodes[0]);
-
-        var myTableDiv = document.getElementById("div_for_standard_averages_table");
-        var myTable = document.createElement('TABLE');
-        $(myTable).attr('id', 'standard_averages_table');
-        $(myTable).attr('cellspacing', '0');
-        $(myTable).attr('width', '100%');
-        $(myTable).addClass('display table table-striped table-hover');
-
-        var tableHead = document.createElement("THEAD");
-        var tr = document.createElement('TR');
-        $(tr).attr('hrow-index', 0);
-
-        tableHead.appendChild(tr);
-        var hcolcounter = 0;
-        $.each(standardTableHeaders, function (index, header) {
-            //console.log("header ", header)
-            var th = document.createElement('TH');
-            $(th).attr('hcol-index', hcolcounter);
-            th.appendChild(document.createTextNode(header));
-            tr.appendChild(th);
-            hcolcounter = hcolcounter+1;
-        });
-        myTable.appendChild(tableHead);
-
-        var tableBody = document.createElement('TBODY');
-        var rowcounter = 0;
-        $.each(global_lol_standards_average_points_for_table, function (ir, row) {
-            //console.log("rowcounter ", rowcounter)
-            //console.log("--row ", row)
-            var tr = document.createElement('TR');
-            $(tr).attr('row-index', rowcounter);
-            tableBody.appendChild(tr);
-
-            var colcounter = 0;
-            let myCellContentWithCommas = "";
-            $.each(row, function (ii, col) {
-                //console.log("colcounter ", colcounter)
-                //console.log("--col ", col)
-                var td = document.createElement('TD');
-                $(td).attr('col-index', colcounter);
-                let myCellContent = col.toString().trim();
-                if (myCellContent.length == 0 || myCellContent == 'NaN') {
-                    myCellContent = " ";
-                } else
-                {
-                    myCellContent = generalFormatNumber(parseFloat(col));
-                    myCellContent = thousands_separators(myCellContent);
-                }
-                //else leave the myCellContent as it was
-
-                td.appendChild(document.createTextNode(myCellContent));
-                tr.appendChild(td);
-                //console.log(td)
-                colcounter = colcounter+1;
-            });
-            rowcounter = rowcounter+1
-        });
-        myTable.appendChild(tableBody);
-        myTableDiv.appendChild(myTable);
-
-        // to format the table - after creating it
-        // these column number are in the table cell tags - use them to keep everything straight
-        $('#standard_averages_table').DataTable({
-            //     $(myTable).DataTable({
-            "iDisplayLength": 25,
-            "sDom": '<B<"row">lfrtip>',
-            fixedHeader: {headerOffset: 50},
-            responsive: true,
-            "order": [[0, "asc"]],
-
-            "columnDefs": [
-                // target is the column number starting from 0
-                // NOTE: these numbers rely on the order of the arrays
-                //{"targets": [   0], "visible": false, },
-                //{"targets": [   1], "visible": false, },
-                //{"targets": [   2], "visible": false, }
-            ]
-
-        });
-        return myTable;
-    }
-
-    function buildTableOfStandardsDataPoints_ajax(list_of_dicts_of_each_standard_row_points) {
-        global_lol_standards_points = [];
-        global_lol_standards_points_for_table = [];
-        var k = 0;
-        $.each(list_of_dicts_of_each_standard_row_points, function (index, each) {
-            let myconcentration = 0;
-            let myadjustedresponse = 0;
-            let myobservedresponse = 0;
-            let myfittedconcentration = 0;
-            let counterEachItemInThisRow = 0;
-            $.each(each, function (indexi, eachi) {
-                //console.log(indexi)
-                //console.log(eachi)
-                if (counterEachItemInThisRow == 0) {
-                    myconcentration = eachi;
-                }
-                if (counterEachItemInThisRow == 1) {
-                    myadjustedresponse = eachi;
-                }
-                if (counterEachItemInThisRow == 2) {
-                    myobservedresponse = eachi;
-                }
-                if (counterEachItemInThisRow == 3) {
-                    myfittedconcentration = eachi;
-                }
-                counterEachItemInThisRow = counterEachItemInThisRow + 1;
-            });
-
-            global_lol_standards_points.push([parseFloat(myconcentration), null, null, parseFloat(myadjustedresponse), null]);
-            global_lol_standards_points_for_table.push([parseFloat(myconcentration), parseFloat(myobservedresponse), parseFloat(myadjustedresponse), parseFloat(myfittedconcentration)]);
-            //console.log(global_lol_standards_points_for_table[k])
-            k++;
-        });
-
-        buildTheStandardsTable_ajax();
-
-    }
-
-    function buildTheStandardsTable_ajax() {
-        // HANDY delete child node
-        var standardTableHeaders = ["Concentration (Added)", "Signal", "Signal (Adjusted)","Concentration (Fitted)"];
-        var elem = document.getElementById('div_for_standards_table');
-        elem.removeChild(elem.childNodes[0]);
-
-        var myTableDiv = document.getElementById("div_for_standards_table");
-        var myTable = document.createElement('TABLE');
-        $(myTable).attr('id', 'standards_table');
-        $(myTable).attr('cellspacing', '0');
-        $(myTable).attr('width', '100%');
-        $(myTable).addClass('display table table-striped table-hover');
-
-        var tableHead = document.createElement("THEAD");
-        var tr = document.createElement('TR');
-        $(tr).attr('hrow-index', 0);
-
-        tableHead.appendChild(tr);
-        var hcolcounter = 0;
-        $.each(standardTableHeaders, function (index, header) {
-            //console.log("header ", header)
-            var th = document.createElement('TH');
-            $(th).attr('hcol-index', hcolcounter);
-            th.appendChild(document.createTextNode(header));
-            tr.appendChild(th);
-            hcolcounter = hcolcounter+1;
-        });
-        myTable.appendChild(tableHead);
-
-        var tableBody = document.createElement('TBODY');
-        var rowcounter = 0;
-        $.each(global_lol_standards_points_for_table, function (ir, row) {
-            //console.log("rowcounter ", rowcounter)
-            //console.log("--row ", row)
-            var tr = document.createElement('TR');
-            $(tr).attr('row-index', rowcounter);
-            tableBody.appendChild(tr);
-
-            var colcounter = 0;
-            let myCellContentWithCommas = "";
-            $.each(row, function (ii, col) {
-                // console.log("colcounter ", colcounter)
-                // console.log("--col ", col)
-                // order as this: global_lol_standards_points_for_table.push([parseFloat(myconcentration), parseFloat(myobservedresponse), parseFloat(myadjustedresponse)]);
-                var td = document.createElement('TD');
-                $(td).attr('col-index', colcounter);
-                let myCellContent = col.toString().trim();
-                if (myCellContent.length == 0 || myCellContent == 'NaN') {
-                    myCellContent = " ";
-                } else
-                {
-                    myCellContent = generalFormatNumber(parseFloat(col));
-                    myCellContent = thousands_separators(myCellContent);
-                }
-                //else leave the myCellContent as it was
-
-                td.appendChild(document.createTextNode(myCellContent));
-                tr.appendChild(td);
-                //console.log(td)
-                colcounter = colcounter+1;
-            });
-            rowcounter = rowcounter+1
-        });
-        myTable.appendChild(tableBody);
-        myTableDiv.appendChild(myTable);
-
-        // to format the table - after creating it
-        // these column number are in the table cell tags - use them to keep everything straight
-        $('#standards_table').DataTable({
-            //     $(myTable).DataTable({
-            "iDisplayLength": 25,
-            "sDom": '<B<"row">lfrtip>',
-            fixedHeader: {headerOffset: 50},
-            responsive: true,
-            "order": [[0, "asc"], [1, "asc"] ],
-
-            "columnDefs": [
-                // target is the column number starting from 0
-                // NOTE: these numbers rely on the order of the arrays
-                {"targets": [   0], "visible": true, },
-                {"targets": [   1], "visible": true, },
-                {"targets": [   2], "visible": true, },
-                {"targets": [   3], "visible": true, }
-            ]
-
-        });
-        return myTable;
-    }
-
-    $("#showHideStandardsTableButton").click(function () {
-        // console.log("sh ", global_showhide_samples)
-        if ($('#div_for_standards_table').hasClass('hidden')) {
-            $('#div_for_standards_table').removeClass('hidden');
-            $('#div_for_standard_averages_table').removeClass('hidden');
-            $('#all_standard_points_table_title').removeClass('hidden');
-            $('#ave_standard_points_table_title').removeClass('hidden');
-        } else {
-            $('#div_for_standards_table').addClass('hidden');
-            $('#div_for_standard_averages_table').addClass('hidden');
-            $('#all_standard_points_table_title').addClass('hidden');
-            $('#ave_standard_points_table_title').addClass('hidden');
+        if (each_or_average == 'each') {
+            // change what see columns are shown by default based on if calibration or not
+            // overwrites what was set above for the general case
+            if (global_calibrate_calibration_curve_method == 'no_calibration') {
+                global_table_column_defs_each[18]['visible'] = false;
+                global_table_column_defs_each[19]['visible'] = false;
+            } else {
+                global_table_column_defs_each[18]['visible'] = true;
+                global_table_column_defs_each[19]['visible'] = true;
+            }
         }
-    });
 
-    $("#showHideSamplesOnGraphButton").click(function () {
-        // console.log("sh ", global_showhide_samples)
-        if (global_showhide_samples == "hide_samples") {
-            global_showhide_samples = "show_samples";
-            drawCalibrationCurve();
-        } else {
-            global_showhide_samples = "hide_samples";
-            drawCalibrationCurve();
-        }
-    });
+        return myTable;
+    }
 
+    /**
+     * part of packProcessedData's post ajax processing but
+     * also called from other places too (to redraw) ie when user clicks to show/hide sample points on graph
+     * draws the calibration curve graph
+    */
     function drawCalibrationCurve(){
+        // console.log("in draw the curve")
 
         let testForError = $('#id_form_data_parsable_message').val();
 
@@ -1645,13 +1723,15 @@ $(document).ready(function () {
 
             google.charts.setOnLoadCallback(drawStandardCurve01);
 
+            // console.log("above the curve 01 function")
+
             function drawStandardCurve01() {
 
                 // global_fitted
                 var fitted = global_lol_standards_curve;
                 // console.log('fitted ', fitted)
 
-                // NOTE: ADDED a fifth column to all to accomodate this
+                // NOTE: ADDED a fifth column to all to accommodate this
                 var ave_standards = global_lol_standards_ave_points;
                 // console.log('ave_standards ', ave_standards)
 
@@ -1659,8 +1739,13 @@ $(document).ready(function () {
                 var standards = global_lol_standards_points;
                 // console.log('standards ', standards)
 
-                // global_lol_samples
-                var samples = global_lol_samples;
+                var samples_each = global_lol_samples_for_graph_each;
+                var samples_average = global_lol_samples_for_graph_average;
+
+                var samples = global_lol_samples_for_graph_each;
+                // if (global_calibrate_radio_replicate_handling_average_or_not_0 === 'average') {
+                //     samples = global_lol_samples_for_graph_average;
+                // }
 
                 // var preData = [
                 //     ['Standard Concentration', 'Fitted Curve', 'Standard Response', 'Sample Response'  added a fifth],
@@ -1707,6 +1792,9 @@ $(document).ready(function () {
                         fitted),
                         ave_standards);
 
+                    // console.log("should see pre data in if")
+                    // console.log(preData)
+
                     options = {
                         title: global_floater_method,
                         seriesType: 'scatter',
@@ -1741,6 +1829,9 @@ $(document).ready(function () {
                         fitted),
                         ave_standards);
 
+                    // console.log("should see pre data in else")
+                    // console.log(preData)
+
                     // https://developers.google.com/chart/interactive/docs/points
 
                     options = {
@@ -1771,7 +1862,6 @@ $(document).ready(function () {
                 var data = google.visualization.arrayToDataTable(preData);
                 var dataView = new google.visualization.DataView(data);
 
-                // console.log(global_calibrate_calibration_curve_method)
                 let thisCurveMethod = $("#id_used_curve").val();
 
                 // have to use the curve method brought back due to best fit
@@ -1808,6 +1898,10 @@ $(document).ready(function () {
             }
         }
     }
+
+
+    //with the exception of some functions at the bottom, the stuff below is pre calibrate
+    //can go back and document as have time....
 
     function loadTheFileBlocksWithStandardsDropdown(){
         //populate the dropdown with the file block options with file blocks in this study that have standards
@@ -1918,6 +2012,10 @@ $(document).ready(function () {
     // this box only shows if there is/are file/block associated
 
     $("#id_se_block_select_string").change(function () {
+        global_calibrate_calibration_curve_method = 'select_one';
+        //this will trigger the change event for recalibrating - want that if there was an error so the page does not sit on previous results
+        $("#id_se_form_calibration_curve").selectize()[0].selectize.setValue(global_calibrate_calibration_curve_method);
+
         findThePkForTheSelectedString("#id_se_block_select_string", "id_ns_block_select_pk");
         findValueSetInsteadOfValueFormsetPackPlateLabelsBuildPlate_ajax("update_or_view_change_block");
         theSuiteOfPreCalibrationChecks();
@@ -2472,7 +2570,7 @@ $(document).ready(function () {
             $("#checkbox_collection_time").prop("checked", false);
         } else {
             // this is when well use is blank, empty, standard, or sample
-            // here here
+            // here here if change blank logic
             if (
                 global_plate_well_use === "blank" ||
                 global_plate_well_use === "empty" ||

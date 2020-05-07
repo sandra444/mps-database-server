@@ -5156,6 +5156,7 @@ def fetch_data_processing_for_plate_map_integration(request):
     volume_unit =                      request.POST.get('volume_unit', '0')
     user_notes =                       request.POST.get('user_notes', '0')
     user_omits =                       request.POST.get('user_omits', '0')
+    plate_size =                       request.POST.get('plate_size', '0')
 
     if not standard_unit:
         return HttpResponseServerError()
@@ -5185,6 +5186,7 @@ def fetch_data_processing_for_plate_map_integration(request):
         'volume_unit'                     : volume_unit                             ,
         'user_notes': user_notes,
         'user_omits': user_omits,
+        'plate_size': plate_size,
     }
 
     # print(set_dict)
@@ -5194,7 +5196,7 @@ def fetch_data_processing_for_plate_map_integration(request):
     data = {}
     data.update({
         'sendmessage':                        data_mover[0],
-        'list_of_dicts_of_each_sample_row':   data_mover[1],
+        'list_of_dicts_of_each_sample_row_each':   data_mover[1],
         'list_of_dicts_of_each_standard_row_points': data_mover[2],
         'list_of_dicts_of_each_standard_row_ave_points': data_mover[3],
         'list_of_dicts_of_each_standard_row_curve':  data_mover[4],
@@ -5202,6 +5204,7 @@ def fetch_data_processing_for_plate_map_integration(request):
         'dict_of_parameter_values':  data_mover[6],
         'dict_of_curve_info':        data_mover[7],
         'dict_of_standard_info':     data_mover[8],
+        'list_of_dicts_of_each_sample_row_average': data_mover[9],
         })
     return HttpResponse(json.dumps(data), content_type="application/json")
 

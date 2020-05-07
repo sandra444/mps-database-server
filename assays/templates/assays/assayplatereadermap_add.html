@@ -1611,7 +1611,7 @@
                                 <br>
 
 {#                              This was primarily for QC, but it could be unhidden in the console if needed#}
-                                <div class="hidden">
+                                <div class="">
                                     <div class="row">
                                         <div class="col-md-7">
                                             <h3 class="hidden" id="all_standard_points_table_title">Standard Points (Fitted)</h3>
@@ -1649,13 +1649,12 @@
                             <br>
                             <h2>Processed Sample Data</h2>
 
-                                <div >
+                                <div class="hidden" >
                                     <div class="row">
                                         <div class="col-md-3">
                                             <div class="plate-map-page-field-labels-small">
                                                 <div><p id="plate_replicate_handling_tooltip"></p>
                                                     <label for="plate_replicate_handling_tooltip">Replicate Handling &nbsp;</label>
-                                                    <p>Not working yet....shows Each</p>
                                                 </div>
                                             </div>
                                         </div>
@@ -1678,13 +1677,41 @@
 
                                 <div class="row">
                                     <div class="col-md-12">
-                                        <div id="div_for_processed_samples_table">
+                                        <div class="for-processed-samples-table-each">
+                                            <h3>Each Sample Individually</h3>
+                                        </div>
+                                        <div id="div_for_processed_samples_table_each" class="for-processed-samples-table-each">
+{#                                        <table id="processed_samples_table" class="display table table-striped table-hover" cellspacing="0" width="100%">#}
+                                        {#  note that the table (including the table tag) is made in javascript #}
+{#                                        </table>#}
+                                        </div>
+                                    </div>
+                                </div>
+{#                              this is assigned to each for now, may want to move it back to average if put toggle back on page#}
+                                <div class="row">
+                                    <div class="col-md-10">
+                                        <div class="for-processed-samples-table-each">
+                                            <h3>Samples Averaged by Key Fields (Chip ID, Sample Location, and Sample Time)</h3>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <div class="recalculate-averages-button hidden">
+                                            <div class="plate-map-page-field-contents-large">
+                                                <button type="button" class="btn btn-primary" id="flipToAverageButton">Show Averages</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div id="div_for_processed_samples_table_average" class="for-processed-samples-table-average">
 {#                                        <table id="processed_samples_table" class="display table table-striped table-hover" cellspacing="0" width="100%">#}
                                         {#  note that the table (including the table tag) is made in javascript #}
 {#                                        </table>#}
                                         </div>
                                         <br>
-                                        <p><i>Caution Flag:</i> E - Above Calibration Range; e - Below Calibration Range;</p>
+                                        <p><i>Caution Flag:</i> E - Above Calibration Range; e - Below Calibration Range; F - Could Not Be Calculated</p>
                                     </div>
                                 </div>
                         </div>
@@ -1712,7 +1739,7 @@
                                     <div class="col-md-3">
                                         <div class="plate-map-page-field-labels-small">
                                             <div><p id="submit_to_study_summary_tooltip"></p>
-                                                <label for="submit_to_study_summary_tooltip">Send to Study Summary &nbsp;</label>
+                                                <label for="submit_to_study_summary_tooltip">Send Averages to Study Summary &nbsp;</label>
                                                 <p>Not working yet.</p>
                                             </div>
                                         </div>
@@ -1736,6 +1763,7 @@
 
             {# START THE DIALOGUE SECTION #}
             <div class="hidden">
+                <p>The hold value:</p>
                 <p id="hold_note_val"></p>
             </div>
             <div id="dialog_element" class="hidden" >
