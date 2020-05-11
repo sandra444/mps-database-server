@@ -23,6 +23,8 @@ from .models import (
     AssayStudySet,
     AssayCategory,
     AssayTarget,
+    AssayReference,
+    SpeciesParameters,
     DEFAULT_SETUP_CRITERIA,
     DEFAULT_SETTING_CRITERIA,
     DEFAULT_COMPOUND_CRITERIA,
@@ -38,6 +40,9 @@ from microdevices.models import (
     OrganModelProtocol,
     OrganModelProtocolCell,
     OrganModelProtocolSetting,
+)
+from compounds.models import (
+    Compound
 )
 
 # from mps.settings import TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX
@@ -60,7 +65,9 @@ from .utils import (
     intra_status_for_inter,
     two_sample_power_analysis,
     one_sample_power_analysis,
-    create_power_analysis_group_table
+    create_power_analysis_group_table,
+    pk_clearance_results,
+    calculate_pk_parameters
 )
 
 import csv
@@ -1894,14 +1901,15 @@ def fetch_assay_study_reproducibility(request):
 # NAIVE: REQUIRES REVISION
 def fetch_pre_submission_filters(request):
     current_filters = json.loads(request.POST.get('filters', '{}'))
-    filters_present = False
-
-    for key, value in list(current_filters.items()):
-        if value:
-            filters_present = True
-            break
 
     accessible_studies = get_user_accessible_studies(request.user)
+
+    if current_filters.get('studies', None) is not None:
+        accessible_studies = accessible_studies.filter(
+            pbpk_steady_state=True
+        ) | accessible_studies.filter(
+            pbpk_bolus=True
+        )
 
     # Notice EXCLUSION of items without organ models
     accessible_matrix_items = AssayMatrixItem.objects.filter(
@@ -1928,42 +1936,145 @@ def fetch_pre_submission_filters(request):
     groups = {}
     targets = {}
     compounds = {}
+    studies = {}
+    data = {}
 
     number_of_points = 0
     # TODO TODO TODO
     number_of_studies = 0
     number_of_centers = 0
+    if current_filters.get('organ_models', []):
+        new_organ_model_ids = [int(id) for id in current_filters.get('organ_models', []) if int(id) in organ_model_ids]
 
-    if filters_present:
-        if current_filters.get('organ_models', []):
-            new_organ_model_ids = [int(id) for id in current_filters.get('organ_models', []) if int(id) in organ_model_ids]
+        # In case changes in filters eliminate all organ models
+        if new_organ_model_ids:
+            organ_model_ids = new_organ_model_ids
+    else:
+        organ_model_ids = []
 
-            # In case changes in filters eliminate all organ models
-            if new_organ_model_ids:
-                organ_model_ids = new_organ_model_ids
-        else:
-            organ_model_ids = []
+    accessible_matrix_items = accessible_matrix_items.filter(
+        organ_model_id__in=organ_model_ids
+    )
+
+    accessible_studies = accessible_studies.filter(
+        id__in=list(accessible_matrix_items.values_list('study_id', flat=True))
+    )
+
+    groups = sorted(list(set([
+        (study.group_id, study.group.name) for study in
+        accessible_studies
+    ])), key=lambda x: x[1])
+
+    group_ids = {group[0]: True for group in groups}
+
+    if current_filters.get('groups', []):
+        group_ids = [int(id) for id in current_filters.get('groups', []) if int(id) in group_ids]
+    else:
+        group_ids = []
+
+    # Enter PBPK logic
+    if current_filters.get('studies', None) is not None:
+        accessible_studies = accessible_studies.filter(
+            group_id__in=group_ids,
+            # TODO  Get only PBPK studies
+        )
 
         accessible_matrix_items = accessible_matrix_items.filter(
-            organ_model_id__in=organ_model_ids
+            study_id__in=accessible_studies
         )
+
+        accessible_compounds = AssaySetupCompound.objects.filter(
+            matrix_item__in=accessible_matrix_items
+        ).prefetch_related(
+            'compound_instance__compound'
+        )
+
+        compounds = sorted(list(set([
+            (compound.compound_instance.compound_id, compound.compound_instance.compound.name) for compound in
+            accessible_compounds
+        ])), key=lambda x: x[1])
+
+        # Check to see whether to include no compounds
+        include_no_compounds = accessible_matrix_items.filter(
+            assaysetupcompound__isnull=True
+        ).count()
+
+        # Prepend contrived no compound
+        if include_no_compounds:
+            compounds.insert(0, (0, NO_COMPOUNDS_STRING))
+
+        compound_ids = {compound[0]: True for compound in compounds}
+
+        if current_filters.get('compounds', []):
+            new_compound_ids = [int(id) for id in current_filters.get('compounds', []) if int(id) in compound_ids]
+
+            # In case changes in filters eliminate all compounds
+            if new_compound_ids:
+                compound_ids = new_compound_ids
+
+            # TODO Only take Compounds that correspond to a Target, and ignore No Compound
+            # A little odd
+            if '0' in current_filters.get('compounds', []):
+                include_no_compounds = True
+            else:
+                include_no_compounds = False
+        else:
+            # Default to none
+            compound_ids = []
+            include_no_compounds = False
+
+        # Compensate for no compounds
+        if include_no_compounds:
+            accessible_matrix_items = accessible_matrix_items.filter(
+                assaysetupcompound__compound_instance__compound_id__in=compound_ids
+            ) | accessible_matrix_items.filter(
+                assaysetupcompound__isnull=True
+            )
+        else:
+            accessible_matrix_items = accessible_matrix_items.filter(
+                assaysetupcompound__compound_instance__compound_id__in=compound_ids
+            )
+
+        # Acquisition of studies (odd)
+        relevant_study_ids = list(set(list(accessible_matrix_items.values_list('study_id', flat=True))))
 
         accessible_studies = accessible_studies.filter(
-            id__in=list(accessible_matrix_items.values_list('study_id', flat=True))
+            id__in=relevant_study_ids
         )
 
-        groups = sorted(list(set([
-            (study.group_id, study.group.name) for study in
+        studies = sorted(list(set([
+            (study.id, str(study)) for study in
             accessible_studies
         ])), key=lambda x: x[1])
 
-        group_ids = {group[0]: True for group in groups}
+        study_ids = {study[0]: True for study in studies}
 
-        if current_filters.get('groups', []):
-            group_ids = [int(id) for id in current_filters.get('groups', []) if int(id) in group_ids]
+        if current_filters.get('studies', []):
+            study_ids = [int(id) for id in current_filters.get('studies', []) if int(id) in study_ids]
         else:
-            group_ids = []
+            study_ids = []
 
+        accessible_matrix_items = accessible_matrix_items.filter(
+            study_id__in=study_ids
+        )
+
+        number_of_points = AssayDataPoint.objects.filter(
+            matrix_item_id__in=accessible_matrix_items,
+            replaced=False,
+            excluded=False,
+            value__isnull=False
+        ).count()
+
+        data = {
+            'filters': {
+                'groups': groups,
+                'organ_models': organ_models,
+                'compounds': compounds,
+                'studies': studies,
+            },
+            'number_of_points': number_of_points
+        }
+    else:
         accessible_studies = accessible_studies.filter(group_id__in=group_ids)
 
         accessible_matrix_items = accessible_matrix_items.filter(
@@ -2068,15 +2179,15 @@ def fetch_pre_submission_filters(request):
     #         value__isnull=False
     #     ).count()
 
-    data = {
-        'filters': {
-            'groups': groups,
-            'organ_models': organ_models,
-            'targets': targets,
-            'compounds': compounds,
-        },
-        'number_of_points': number_of_points
-    }
+        data = {
+            'filters': {
+                'groups': groups,
+                'organ_models': organ_models,
+                'targets': targets,
+                'compounds': compounds,
+            },
+            'number_of_points': number_of_points
+        }
 
     return HttpResponse(json.dumps(data),
                         content_type='application/json')
@@ -4240,6 +4351,624 @@ def clone_study(request):
         content_type="application/json"
     )
 
+
+def fetch_pbpk_group_table(request):
+    data = {}
+    post_filter = json.loads(request.POST.get('post_filter', '{}'))
+    pre_filter = {}
+
+    if request.POST.get('filters', ''):
+        current_filters = json.loads(request.POST.get('filters', '{}'))
+        accessible_studies = get_user_accessible_studies(request.user)
+
+        if current_filters.get('studies', []):
+            study_ids = [int(id) for id in current_filters.get('studies', []) if id]
+            accessible_studies = accessible_studies.filter(
+                id__in=study_ids
+            )
+        else:
+            accessible_studies = AssayStudy.objects.none()
+
+        # Notice exclusion of missing organ model
+        matrix_items = AssayMatrixItem.objects.filter(
+            study_id__in=accessible_studies
+        ).exclude(
+            organ_model_id=None
+        ).prefetch_related(
+            'organ_model',
+        )
+
+        if current_filters.get('organ_models', []):
+            organ_model_ids = [int(id) for id in current_filters.get('organ_models', []) if id]
+
+            matrix_items = matrix_items.filter(
+                organ_model_id__in=organ_model_ids
+            )
+        # Default to empty
+        else:
+            matrix_items = AssayMatrixItem.objects.none()
+
+        accessible_studies = accessible_studies.filter(
+            id__in=list(matrix_items.values_list('study_id', flat=True))
+        )
+
+        matrix_items.prefetch_related(
+            'assaysetupcompound_set__compound_instance',
+            # Need cells for discrimination later
+            'assaysetupcell_set__cell_sample__cell_type__organ',
+            'assaydatapoint_set__study_assay__target'
+        )
+
+        if current_filters.get('groups', []):
+            group_ids = [int(id) for id in current_filters.get('groups', []) if id]
+            accessible_studies = accessible_studies.filter(group_id__in=group_ids)
+
+            matrix_items = matrix_items.filter(
+                study_id__in=accessible_studies
+            )
+        else:
+            matrix_items = AssayMatrixItem.objects.none()
+
+        compound_ids = []
+        if current_filters.get('compounds', []):
+            compound_ids = [int(id) for id in current_filters.get('compounds', []) if id]
+            # TODO Only take Compounds that correspond to a Target, and ignore No Compound
+
+            # See whether to include no compounds
+            if '0' in current_filters.get('compounds', []):
+                matrix_items = matrix_items.filter(
+                    assaysetupcompound__compound_instance__compound_id__in=compound_ids
+                ) | matrix_items.filter(assaysetupcompound__isnull=True)
+            else:
+                matrix_items = matrix_items.filter(
+                    assaysetupcompound__compound_instance__compound_id__in=compound_ids
+                )
+
+        else:
+            matrix_items = AssayMatrixItem.objects.none()
+
+        pre_filter.update({
+            'matrix_item_id__in': matrix_items.filter(assaydatapoint__isnull=False).distinct()
+        })
+
+        studies = accessible_studies
+
+        # For each compound in filter, get name, match to Target, get list of IDs
+        pbpk_compounds = [comp.title() for comp in Compound.objects.filter(id__in=compound_ids).values_list('name', flat=True)]
+
+        targets = AssayTarget.objects.filter(name__in=pbpk_compounds)
+
+        # A little contrived
+        # TODO These targets need to match the compound for PBPK
+        assays = AssayStudyAssay.objects.filter(
+            study_id__in=studies,
+            target_id__in=targets
+        )
+
+        pre_filter.update({'study_assay_id__in': assays})
+
+        # Not particularly DRY
+        data_points = AssayDataPoint.objects.filter(
+            **pre_filter
+        ).prefetch_related(
+            # TODO
+            'study__group',
+            'study_assay__target',
+            'study_assay__method',
+            'study_assay__unit__base_unit',
+            'sample_location',
+            'matrix_item__matrix',
+            'matrix_item__organ_model',
+            'subtarget'
+        ).filter(
+            replaced=False,
+            excluded=False,
+            value__isnull=False
+        )
+
+        if not post_filter:
+            assays = assays.prefetch_related(
+                'target',
+                'method'
+            )
+
+            post_filter = acquire_post_filter(studies, assays, matrix_items, data_points)
+        else:
+            studies, assays, matrix_items, data_points = apply_post_filter(
+                post_filter, studies, assays, matrix_items, data_points
+            )
+
+        data = get_pbpk_info(
+            data_points,
+            matrix_items,
+        )
+
+        data.update({'post_filter': post_filter})
+
+        return HttpResponse(
+            json.dumps(data),
+            content_type="application/json"
+        )
+    else:
+        return HttpResponseServerError()
+
+
+def get_pbpk_info(data_points, matrix_items):
+    # Hardcoded for now:
+    criteria = {
+        'setup': ['study_id', 'organ_model_id', 'device_id'],
+        'special': ['method', 'sample_location'],
+        # Maybe we'll utilize concentration unit later
+        # 'compound': ['compound_instance.compound_id', 'concentration', 'concentration_unit_id']
+        'compound': ['compound_instance.compound_id', 'concentration']
+    }
+    # Organization is assay -> unit -> compound/tag -> field -> time -> value
+    treatment_group_representatives, setup_to_treatment_group, treatment_header_keys = get_item_groups(
+        None,
+        criteria,
+        matrix_items
+    )
+
+    cell_group_representives, setup_to_cell_group, cell_header_keys = get_item_groups(
+        None,
+        {'cell': ['cell_sample_id']},
+        matrix_items
+    )
+
+    matrix_item_id_to_tooltip_string = {
+        matrix_item.id: '{} ({})'.format(matrix_item.name, matrix_item.matrix.name) for matrix_item in matrix_items
+    }
+
+    inter_data = []
+
+    data_point_treatment_groups = {}
+    treatment_group_table = {}
+    # Probably don't need these for PBPK
+    data_group_to_studies = {}
+    data_group_to_sample_locations = {}
+    data_group_to_organ_models = {}
+
+    # CONTRIVED FOR NOW
+    data_header_keys = [
+        'Target',
+        # 'Method',
+        'Value Unit',
+        # 'Sample Location'
+    ]
+
+    base_tuple = (
+        'study_assay.target_id',
+        # 'study_assay.method_id',
+        'study_assay.unit.base_unit_id',
+        # 'sample_location_id'
+    )
+
+    current_tuple = (
+        'study_assay.target_id',
+        # 'study_assay.method_id',
+        'study_assay.unit_id',
+        # 'sample_location_id'
+    )
+
+    additional_keys = []
+
+    sets_intra_points = {}
+
+    if criteria:
+        group_sample_location = 'sample_location' in criteria.get('special', [])
+        group_method = 'method' in criteria.get('special', [])
+
+        if group_method:
+            data_header_keys.append('Method')
+            additional_keys.append('study_assay.method_id')
+
+        if group_sample_location:
+            data_header_keys.append('Sample Location')
+            additional_keys.append('sample_location_id')
+
+    if additional_keys:
+        base_tuple += tuple(additional_keys)
+        current_tuple += tuple(additional_keys)
+
+    # ASSUME _id termination
+    base_value_tuple = tuple([x.replace('_id', '') for x in base_tuple])
+    current_value_tuple = tuple([x.replace('_id', '') for x in current_tuple])
+
+    # TODO TODO TODO TODO
+    data_point_attribute_getter_base = tuple_attrgetter(*base_tuple)
+    data_point_attribute_getter_current = tuple_attrgetter(*current_tuple)
+
+    data_point_attribute_getter_base_values = tuple_attrgetter(*base_value_tuple)
+    data_point_attribute_getter_current_values = tuple_attrgetter(*current_value_tuple)
+
+    study_name_to_pk_params = {}
+
+    for point in data_points:
+        point.standard_value = point.value
+        item_id = point.matrix_item_id
+        # Hopefully/probably will able to have a base unit (micro Mole)
+        if point.study_assay.unit.base_unit_id:
+            data_point_tuple = data_point_attribute_getter_base(point)
+            point.standard_value *= point.study_assay.unit.scale_factor
+        else:
+            data_point_tuple = data_point_attribute_getter_current(point)
+        current_group = data_point_treatment_groups.setdefault(
+            (
+                data_point_tuple,
+                # setup_to_treatment_group.get(item_id).get('id')
+                setup_to_treatment_group.get(item_id).get('index')
+            ),
+            # 'Group {}'.format(len(data_point_treatment_groups) + 1)
+            '{}'.format(len(data_point_treatment_groups) + 1)
+        )
+
+        if current_group not in sets_intra_points:
+            sets_intra_points[current_group] = []
+        sets_intra_points[current_group].append([
+            point.time,
+            point.value,
+            point.matrix_item_id
+        ])
+
+        point.data_group = current_group
+        if current_group not in treatment_group_table:
+            if point.study_assay.unit.base_unit_id:
+                treatment_group_table.update({
+                    current_group: [str(x) for x in list(
+                        data_point_attribute_getter_base_values(point)
+                    ) + [setup_to_treatment_group.get(item_id).get('index')]]
+                })
+            else:
+                treatment_group_table.update({
+                    current_group: [str(x) for x in list(
+                        data_point_attribute_getter_current_values(point)
+                    ) + [setup_to_treatment_group.get(item_id).get('index')]]
+                })
+
+        if point.study.id not in study_name_to_pk_params:
+            study_name_to_pk_params[point.study.id] = {'PK Type': '', 'Relevant Cells': point.study.number_of_relevant_cells, 'Total Device Volume': point.study.total_device_volume, 'Flow Rate': point.study.flow_rate}
+            if point.study.pbpk_steady_state:
+                study_name_to_pk_params[point.study.id]['PK Type'] = 'Continuous Infusion'
+            else:
+                study_name_to_pk_params[point.study.id]['PK Type'] = 'Bolus'
+
+        data_group_to_studies.setdefault(
+            current_group, {}
+        ).update({
+            '<a data-anchor="study" href="{}" target="_blank">{} ({})</a>'.format(point.study.get_absolute_url(), point.study.name, point.study.group.name): point.study.name
+        })
+
+        data_group_to_sample_locations.setdefault(
+            current_group, {}
+        ).update({
+            point.sample_location.name: True
+        })
+
+        data_group_to_organ_models.setdefault(
+            current_group, {}
+        ).update({
+            point.matrix_item.organ_model.name: True
+        })
+
+    inter_data.append([
+        'Study ID',
+        'Chip ID',
+        'Time',
+        'Value',
+        'MPS User Group',
+        # NAME THIS SOMETHING ELSE
+        # THIS IS A DATA GROUP, NOT A TREATMENT GROUP
+        # TREATMENT GROUPS = ITEMS, DATA GROUP = DATA POINTS
+        'Treatment Group'
+    ])
+
+    # GET RAW DATAPOINTS AS LEGEND -> TIME -> LIST OF VALUES
+    # AFTER THAN REPOSITION THEM FOR CHARTING AND AVERAGE ONE OF THE SETS (KEEP RAW THOUGH)
+    initial_chart_data = {}
+    final_chart_data = {}
+
+    for point in data_points:
+        inter_data.append([
+            point.study.name,
+            point.matrix_item.name,
+            point.time,
+            # NOTE USE OF STANDARD VALUE RATHER THAN VALUE
+            point.standard_value,
+            point.study.group.name,
+            point.data_group
+        ])
+
+        # This should probably be cells later
+        # legend = point.study.name
+
+        legend = cell_group_representives[setup_to_cell_group.get(point.matrix_item_id).get('index')].get('Cells')
+
+        initial_chart_data.setdefault(
+            point.data_group, {}
+        ).setdefault(
+            legend, {}
+        ).setdefault(
+            # NOTE CONVERT TO HOURS
+            point.time / 60.0, []
+        ).append(point.standard_value)
+
+    for this_set, legends in list(initial_chart_data.items()):
+        current_data = {}
+        current_table = final_chart_data.setdefault(this_set, [['Time']])
+        x_header = {}
+        y_header = {}
+        for legend, times in list(legends.items()):
+            x_header.update({
+                legend: True,
+                # This is to deal with intervals
+                '{}{}'.format(legend, INTERVAL_1_SIGIL): True,
+                '{}{}'.format(legend, INTERVAL_2_SIGIL): True,
+            })
+
+            for time, values in list(times.items()):
+                if len(values) > 1:
+                    # TODO TODO TODO ONLY ARITHMETIC MEAN RIGHT NOW
+                    value = np.mean(values)
+                    std = np.std(values)
+                    current_data.setdefault(legend, {}).update({time: value})
+                    current_data.setdefault('{}{}'.format(legend, INTERVAL_1_SIGIL), {}).update({time: value - std})
+                    current_data.setdefault('{}{}'.format(legend, INTERVAL_2_SIGIL), {}).update({time: value + std})
+                else:
+                    current_data.setdefault(legend, {}).update({time: values[0]})
+                y_header.update({time: True})
+
+        x_header_keys = list(x_header.keys())
+        x_header_keys.sort(key=alphanum_key)
+        current_table[0].extend(x_header_keys)
+
+        x_header = {x_header_keys[index]: index + 1 for index in range(len(x_header_keys))}
+
+        y_header = list(y_header.keys())
+        y_header.sort(key=lambda x: float(str(x).split('~')[0]))
+
+        for y in y_header:
+            current_table.append([float(str(y).split('~')[0])] + [None] * (len(x_header)))
+
+        y_header = {y_header[index]: index + 1 for index in range(len(y_header))}
+
+        for x, data_point in list(current_data.items()):
+            for y, value in list(data_point.items()):
+                current_table[y_header.get(y)][x_header.get(x)] = value
+
+    data = {
+        'chart_data': final_chart_data,
+        'data_groups': treatment_group_table,
+        'header_keys': {
+            'treatment': treatment_header_keys,
+            'data': data_header_keys
+        },
+        'treatment_groups': treatment_group_representatives,
+        'study_name_to_pk_params': study_name_to_pk_params
+    }
+
+    return data
+
+
+def fetch_species_parameters(request):
+    # This will eventually need to consider input from the interface, but none of this has been specified at this point.
+    # STOPGAP for now. Select off of stringified version where organ+species match in future?
+    species_params = SpeciesParameters.objects.get(id=1)
+
+    # Sloppy, get Usansky reference. Always needed? Just for liver? I have no idea.
+    additional_reference = AssayReference.objects.get(pubmed_id="15833900")
+    if (additional_reference):
+        additional_reference_url = additional_reference.get_absolute_url()
+    else:
+        additional_reference = ''
+        additional_reference_url = ''
+
+    data = {
+        'species': species_params.species.species_name,
+        'organ': species_params.organ.organ_name,
+        'reference': str(species_params.reference),
+        'reference_url': str(species_params.reference.get_absolute_url()),
+        'additional_reference': str(additional_reference),
+        'additional_reference_url': str(additional_reference_url),
+        'body_mass': species_params.body_mass,
+        'total_organ_weight': species_params.total_organ_weight,
+        'organ_tissue': species_params.organ_tissue,
+        'plasma_volume': species_params.plasma_volume,
+        'vp': species_params.vp,
+        've': species_params.ve,
+        'rei': species_params.rei,
+        'vr': species_params.vr,
+        'asr': species_params.absorptive_surface_area,
+        'ki': species_params.ki
+    }
+
+    return HttpResponse(
+        json.dumps(data),
+        content_type="application/json"
+    )
+
+
+def fetch_compound_physicochemical_parameters(request):
+    # This will eventually need to consider input from the interface, but none of this has been specified at this point.
+    # STOPGAP for now. Select off of stringified version where organ+species match in future?
+    pk_compound = request.POST.get('pk_compound', '')
+
+    pk_compound = (" ").join(pk_compound.split(" ")[:-3])
+
+    compound = Compound.objects.filter(name__iexact=pk_compound)[0]
+
+    if compound.protein_binding:
+        fu = 1.0-(float(re.findall(r"[-+]?\d*\.\d+|\d+", compound.protein_binding)[0])/100)
+    else:
+        fu = compound.protein_binding
+
+    # if compound.bioavailability:
+    #     bioavailability = float(re.findall(r"[-+]?\d*\.\d+|\d+", compound.bioavailability)[0])/100
+    # else:
+    #     bioavailability = compound.bioavailability
+
+    data = {
+        'compound': pk_compound,
+        'mw': compound.molecular_weight,
+        'logd': compound.logd,
+        'acidic_pka': compound.acidic_pka,
+        'basic_pka': compound.basic_pka,
+        # 'bioavailability': bioavailability,
+        'fu': fu
+    }
+
+    return HttpResponse(
+        json.dumps(data),
+        content_type="application/json"
+    )
+
+
+def fetch_pbpk_intrinsic_clearance_results(request):
+    data = {}
+
+    try:
+        total_device_vol_ul = float(request.POST.get('total_device_vol_ul', ''))
+    except ValueError:
+        total_device_vol_ul = None
+    try:
+        total_cells_in_device = float(request.POST.get('total_cells_in_device', ''))
+    except ValueError:
+        total_cells_in_device = None
+    try:
+        flow_rate = float(request.POST.get('flow_rate', ''))
+    except ValueError:
+        flow_rate = None
+    cell_name = request.POST.get('cell_name', '').replace(u'\xa0', u' ')
+    raw_compound_pk_data = eval(request.POST.get('compound_pk_data', ''))
+    final_compound_pk_data = []
+    cell_index = raw_compound_pk_data[0].index(cell_name)
+    try:
+        no_cell_index = raw_compound_pk_data[0].index("-No Cell Samples-")
+    except ValueError:
+        no_cell_index = -1
+
+    for line in raw_compound_pk_data[1:]:
+        final_compound_pk_data.append([float(line[0]), cell_name, float(line[cell_index])])
+        if no_cell_index > 0:
+            final_compound_pk_data.append([float(line[0]), "-No Cell Samples-", float(line[no_cell_index])])
+
+    clearance_results = pk_clearance_results(
+        request.POST.get('pk_type', ''),
+        request.POST.get('with_no_cell_data', '') == 'true',
+        cell_name,
+        float(request.POST.get('start_time', '')),
+        float(request.POST.get('end_time', '')),
+        total_device_vol_ul,
+        total_cells_in_device,
+        flow_rate,
+        float(request.POST.get('cells_per_tissue_g', '')),
+        float(request.POST.get('total_organ_weight_g', '')),
+        float(request.POST.get('compound_conc', '')),
+        final_compound_pk_data
+    )
+
+    # TODO TEMP
+    data = clearance_results
+
+    return HttpResponse(
+        json.dumps(data),
+        content_type="application/json"
+    )
+
+
+def fetch_pbpk_dosing_results(request):
+    data = {}
+    fetch_pbpk_error = ""
+
+    usansky_sinko_volume_data = [
+        ['Human', 'Volume (L)', 'Vw', 'Vn', 'Vph'],
+        ['Heart', 0.329, 0.758, 0.0115, 0.0166],
+        ['Kidney', 0.308, 0.783, 0.0207, 0.0162],
+        ['Liver', 1.82, 0.751, 0.0348, 0.0252],
+        ['Lung', 0.532, 0.811, 0.003, 0.009],
+        ['Spleen', 0.182, 0.788, 0.0201, 0.0198],
+        ['Muscle', 28.3, 0.76, 0.0238, 0.0072],
+        ['Plasma', 2.968, 0.945, 0.0035, 0.00225]
+    ]
+
+    # Plasma Values
+    dose_mg = ''
+    dose_interval = ''
+    if request.POST.get('dose_mg'):
+        try:
+            dose_mg = float(request.POST.get('dose_mg').strip())
+        except ValueError:
+            fetch_pbpk_error = 'Invalid input provided for Dose.'
+    if request.POST.get('dose_interval'):
+        try:
+            dose_interval = float(request.POST.get('dose_interval').strip())
+        except ValueError:
+            fetch_pbpk_error = 'Invalid input provided for Dose Interval.'
+
+    # Dosing Values
+    desired_Cp = ''
+    desired_dose_interval = ''
+    estimated_fraction_absorbed = ''
+    if request.POST.get('desired_Cp'):
+        try:
+            desired_Cp = float(request.POST.get('desired_Cp').strip())
+        except ValueError:
+            fetch_pbpk_error = 'Invalid input provided for Desired Cp.'
+    if request.POST.get('desired_dose_interval'):
+        try:
+            desired_dose_interval = float(request.POST.get('desired_dose_interval').strip())
+        except ValueError:
+            fetch_pbpk_error = 'Invalid input provided for Desired Dose Interval.'
+    if request.POST.get('estimated_fraction_absorbed'):
+        try:
+            estimated_fraction_absorbed = float(request.POST.get('estimated_fraction_absorbed').strip())
+        except ValueError:
+            fetch_pbpk_error = 'Invalid input provided for Fraction Absorbed.'
+
+    if desired_dose_interval == 0 or dose_interval == 0:
+        fetch_pbpk_error = 'Intervals cannot be 0.'
+
+    if fetch_pbpk_error != "":
+        return HttpResponse(
+            json.dumps({'error': fetch_pbpk_error}),
+            content_type="application/json"
+        )
+
+    dosing_results = calculate_pk_parameters(
+        float(request.POST.get('cl_ml_min').strip()),
+        usansky_sinko_volume_data,
+        float(request.POST.get('body_mass').strip()),
+        float(request.POST.get('MW').strip()),
+        float(request.POST.get('logD').strip()),
+        float(request.POST.get('pKa').strip()),
+        float(request.POST.get('fu').strip()),
+        float(request.POST.get('Vp').strip()),
+        float(request.POST.get('VE').strip()),
+        float(request.POST.get('REI').strip()),
+        float(request.POST.get('VR').strip()),
+        float(request.POST.get('ASR').strip()),
+        float(request.POST.get('Ki').strip()),
+        float(request.POST.get('Ka').strip()),
+        float(request.POST.get('Fa').strip()),
+        dose_mg,
+        dose_interval,
+        desired_Cp,
+        desired_dose_interval,
+        estimated_fraction_absorbed,
+        round(float(request.POST.get('prediction_time_length'))),
+        request.POST.get('missing_plasma_values') == "true",
+        request.POST.get('missing_dosing_values') == "true",
+        request.POST.get('acidic_basic') == "acidic"
+    )
+
+    # TODO TEMP
+    data = dosing_results
+
+    return HttpResponse(
+        json.dumps(data),
+        content_type="application/json"
+    )
+
+
 # TODO TODO TODO
 switch = {
     'fetch_center_id': {'call': fetch_center_id},
@@ -4304,6 +5033,21 @@ switch = {
         'call': clone_study,
         'validation': study_editor_validation
     },
+    'fetch_pbpk_group_table': {
+        'call': fetch_pbpk_group_table
+    },
+    'fetch_species_parameters': {
+        'call': fetch_species_parameters
+    },
+    'fetch_compound_physicochemical_parameters': {
+        'call': fetch_compound_physicochemical_parameters
+    },
+    'fetch_pbpk_intrinsic_clearance_results': {
+        'call': fetch_pbpk_intrinsic_clearance_results
+    },
+    'fetch_pbpk_dosing_results': {
+        'call': fetch_pbpk_dosing_results
+    }
     # 'fetch_dropdown': {
     #     'call': fetch_dropdown,
     #     'validation': valid_user_validation
