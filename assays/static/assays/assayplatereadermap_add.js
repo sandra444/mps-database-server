@@ -203,32 +203,20 @@ $(document).ready(function () {
     */
     // START SECTION TO SET GLOBAL VARIABLES plus some logic when needed
 
-    let global_plate_check_page_call = $("#check_load").html().trim();
-
-    // must have this variable for other load page element logic
-    let global_plate_number_file_block_sets = 0;
-    try {
-        global_plate_number_file_block_sets = document.getElementById("id_form_number_file_block_combos").value;
-    } catch (err) {
-    }
-
-    let global_calibration_multiplier = null;
-    let global_calibration_multiplier_string = "Not computed yet.";
-    let global_calibration_multiplier_string_display = "";
-
-    let global_plate_this_platemap_id = parseInt(document.getElementById('this_platemap_id').innerText.trim());
-    let global_plate_study_id = parseInt(document.getElementById("this_study_id").innerText.trim());
+    let global_calibration_form_data_processing_multiplier = null;
+    let global_calibration_form_data_processing_multiplier_string = "Not computed yet.";
+    let global_calibration_form_data_processing_multiplier_string_display = "";
 
     // HARDCODED - but just sets a default and do not want to have to put the plate size list into here...
-    let global_plate_size = 96;
+    let global_plate_size_form_device = 96;
     try {
-        global_plate_size = $("#id_device").selectize()[0].selectize.items[0];
+        global_plate_size_form_device = $("#id_device").selectize()[0].selectize.items[0];
     } catch (err) {
-        global_plate_size = $("#id_device").val();
+        global_plate_size_form_device = $("#id_device").val();
     }
 
     let global_plate_whole_plate_index_list = [];
-    for (var idx = 0, ls = global_plate_size; idx < ls; idx++) {
+    for (var idx = 0, ls = global_plate_size_form_device; idx < ls; idx++) {
         global_plate_whole_plate_index_list.push(idx);
     }
 
@@ -268,7 +256,7 @@ $(document).ready(function () {
     }
 
     // if review or update, need the correct defaults of fancy check box adjustments
-    if (global_plate_check_page_call !== 'add') {
+    if ($("#check_load").html().trim() !== 'add') {
         global_plate_start_map = 'a_platemap';
     }
     // not a dom, hence the etc
@@ -376,55 +364,48 @@ $(document).ready(function () {
     let global_plate_first_item_form = $('#formset').find('.inline').first()[0].outerHTML;
 
     let global_plate_first_value_form = null;
-    if (global_plate_number_file_block_sets == 0) {
+    if (document.getElementById("id_form_number_file_block_combos").value == 0) {
         global_plate_first_value_form = $('#value_formset').find('.inline').first()[0].outerHTML;
     }
 
     // load-function
     // don't worry about the extra formset in the update or view page since it won't be populated or saved
     // but, when on add page, after copied to global variable, delete the extra formset so it is not saved during submit
-    if ($('#formset').find('.inline').length === 1 && global_plate_check_page_call === 'add') {
+    if ($('#formset').find('.inline').length === 1 && $("#check_load").html().trim() === 'add') {
         $('#formset').find('.inline').first().remove();
     }
 
-    if (global_plate_number_file_block_sets == 0) {
-        if ($('#value_formset').find('.inline').length === 1 && global_plate_check_page_call === 'add') {
+    if (document.getElementById("id_form_number_file_block_combos").value == 0) {
+        if ($('#value_formset').find('.inline').length === 1 && $("#check_load").html().trim() === 'add') {
             $('#value_formset').find('.inline').first().remove();
         }
     }
     // NOTE: when added the following code here (after the above), made 2x forms, so moved it back to the loop
-    // $('#id_assayplatereadermapitem_set-TOTAL_FORMS').val(global_plate_size);
+    // $('#id_assayplatereadermapitem_set-TOTAL_FORMS').val(global_plate_size_form_device);
     //}).trigger('change');
 
 
     // this will get populated when the plate gets loaded (ajax call)
-    let global_plate_well_use_count_of_standards_this_platemap = 0;
-
-    let global_floater_study_assay = "";
-    let global_floater_target = "";
-    let global_floater_method = "";
-    let global_floater_unit = "";
-    let global_floater_standard_unit = "";
-    let global_floater_volume_unit = "";
-    let global_floater_well_volume = "";
-    let global_floater_cell_count = "";
-    let global_floater_molecular_weight = "";
-    let global_floater_time_unit = "";
-    let global_showhide_samples = "hide_samples";
+    let global_floater_model_study_assay = "";
+    let global_floater_form_calibration_target = "";
+    let global_floater_form_calibration_method = "";
+    let global_floater_form_calibration_unit = "";
+    let global_floater_model_standard_unit = "";
+    let global_floater_model_volume_unit = "";
+    let global_floater_model_well_volume = "";
+    let global_floater_model_cell_count = "";
+    let global_floater_model_standard_molecular_weight = "";
+    let global_floater_model_time_unit = "";
+    let global_showhide_samples_toggle_on_graph = "hide_samples";
     let global_checkbox_platemap_index_working_notes = 0;
     let global_checkbox_platemap_index_working_omits = 0;
-
-    // END SECTION TO SET GLOBAL VARIABLES plus some
-
-
-    // START - the CALIBRATION SECTION
-
+    
     // global variables for the calibration
     let global_calibrate_true_if_blocks_in_study_with_standards_are_loaded_to_memory = false;
 
     let global_calibrate_block_borrowing_standard_from_string  = "0";
-    let global_calibrate_block_borrowing_standard_from_pk = -1;
-    let global_calibrate_block_borrowing_standard_from_pk_platemap = -1;
+    let global_calibrate_form_block_standard_borrow_pk_single_for_storage = -1;
+    let global_calibrate_form_block_standard_borrow_pk_platemap_single_for_storage = -1;
 
 
     let global_calibrate_borrowed_index_block = [];
@@ -464,6 +445,7 @@ $(document).ready(function () {
      * Column headers are for the table (MIF-C file) in cases where they are MIF-C file fields.
      * Look in the utils.py for the keys.
     */
+     // search term MIFC - if MIFC changes, this will need changed
     let utils_key_column_header = {}
     utils_key_column_header['plate_index'] = 'Plate Index';
     utils_key_column_header['matrix_item_name'] = 'Chip ID';
@@ -625,6 +607,7 @@ $(document).ready(function () {
         //{ "orderDataType": "dom-text", "targets": [ 30 ] },
         //{ "orderDataType": "dom-checkbox", "targets": [ 32 ] },
     ];
+    // search term MIFC - if MIFC changes, this will need changed
     let column_table_headers_average = [
         'Chip ID',
         'Cross Reference',
@@ -672,29 +655,26 @@ $(document).ready(function () {
         {"targets": [17], "visible": false,},
     ];
 
-    let global_calibrate_calibration_curve_method = 'select_one';
-    if (global_plate_number_file_block_sets > 0) {
+    let global_calibrate_se_form_calibration_curve = 'select_one';
+    if (document.getElementById("id_form_number_file_block_combos").value > 0) {
+
         try {
-            global_blank_handling_option = $("#id_se_form_blank_handling").selectize()[0].selectize.items[0];
+            global_calibrate_se_form_calibration_curve = $("#id_se_form_calibration_curve").selectize()[0].selectize.items[0];
         } catch (err) {
-            global_blank_handling_option = $("#id_se_form_blank_handling").val();
-        }
-        try {
-            global_calibrate_calibration_curve_method = $("#id_se_form_calibration_curve").selectize()[0].selectize.items[0];
-        } catch (err) {
-            global_calibrate_calibration_curve_method = $("#id_se_form_calibration_curve").val();
+            global_calibrate_se_form_calibration_curve = $("#id_se_form_calibration_curve").val();
         }
         // set the default to wait
         $('#refresh_needed_indicator').text('wait');
     }
-    let global_calibrate_calibration_curve_method_prev = global_calibrate_calibration_curve_method;
+    let global_calibrate_se_form_calibration_curve_prev = global_calibrate_se_form_calibration_curve;
 
     let global_calibrate_block_select_string_is_block_working_with_string  = "0";
-    let global_calibrate_block_select_string_is_block_working_with_pk = 0;
+    let global_calibrate_form_ns_block_select_pk = 0;
+    let global_calibrate_form_block_file_data_block_selected_pk_for_storage = 0;
 
     // load-function
-    if (global_plate_number_file_block_sets > 0) {
-        findThePkForTheSelectedString("#id_se_block_select_string", "id_ns_block_select_pk");
+    if (document.getElementById("id_form_number_file_block_combos").value > 0) {
+        findThePkForTheSelectedString("id_se_block_select_string", "id_ns_block_select_pk");
         loadPlatesIndexNotesAndOmitsToMemoryFromFormFields('page_load');
         clearTheOmitAndNoteFieldsBeforeRecalibration('page_load');
     }
@@ -706,20 +686,25 @@ $(document).ready(function () {
      * In this case, the string is selected, and an associated PK is extracted.
      * These are loaded into global variables for use throughout the script.
     */
+    //findThePkForTheSelectedString("id_se_block_select_string", "id_ns_block_select_pk")
     function findThePkForTheSelectedString(thisStringElement, thisPkElement) {
         // get the selected index of the pk of the selected data block (0 to # file/blocks-1) and get index of the selection box = 0, 1, 2, 3...
         if (global_calibrate_block_select_string_is_block_working_with_string) {
             try {
-                global_calibrate_block_select_string_is_block_working_with_string = $(thisStringElement).selectize()[0].selectize.items[0];
+                global_calibrate_block_select_string_is_block_working_with_string = $("#"+thisStringElement).selectize()[0].selectize.items[0];
             } catch (err) {
-                global_calibrate_block_select_string_is_block_working_with_string = $(thisStringElement).val();
+                global_calibrate_block_select_string_is_block_working_with_string = $("#"+thisStringElement).val();
             }
         }
-        // console.log("global_calibrate_block_select_string_is_block_working_with_string ",global_calibrate_block_select_string_is_block_working_with_string)
-        // using the local block index, find the actual pk of the file/block selected
-        document.getElementById(thisPkElement).selectedIndex = global_calibrate_block_select_string_is_block_working_with_string;
-        // using the index (a number from [0, 1, 2]), get the pk of the data block block from the list [22, 234, 255]
-        global_calibrate_block_select_string_is_block_working_with_pk = parseInt(document.getElementById(thisPkElement).selectedOptions[0].text);
+        $("#"+thisPkElement).selectize()[0].selectize.setValue(global_calibrate_block_select_string_is_block_working_with_string);
+
+        //HANDY get the text from selectized
+        global_calibrate_form_ns_block_select_pk = $("#"+thisPkElement).selectize()[0].selectize.options[global_calibrate_block_select_string_is_block_working_with_string]['text'];
+        // console.log("global_calibrate_form_ns_block_select_pk ", global_calibrate_form_ns_block_select_pk)
+        $("#id_form_block_file_data_block_selected_pk_for_storage").val(global_calibrate_form_ns_block_select_pk);
+        //another way to do this....if needed HANDY
+        // document.getElementById(thisPkElement).selectedIndex = global_calibrate_block_select_string_is_block_working_with_string;
+        // global_calibrate_form_ns_block_select_pk = parseInt(document.getEleentById(thisPkElement).selectedOptions[0].text);
     }
 
     /**
@@ -731,13 +716,13 @@ $(document).ready(function () {
      * if file/block is attached, pull from formset and data pass in
      * if file/block is not attached, pull from formset and value formset
     */
-    if (global_plate_check_page_call === 'add') {
+    if ($("#check_load").html().trim() === 'add') {
         $('.show-when-add').removeClass('hidden');
         global_plate_add_or_edit_etc = "add_first_load_starting_from_empty_plate";
         packPlateLabelsAndBuildOrChangePlate_ajax();
     } else {
         $('.show-when-add').addClass('hidden');
-        if (global_plate_number_file_block_sets < 1) {
+        if (document.getElementById("id_form_number_file_block_combos").value < 1) {
             // no data blocks are attached, the value formset should be passed in and work as on the add page
             global_plate_add_or_edit_etc = "update_or_view_first_load";
             packPlateLabelsAndBuildOrChangePlate_ajax();
@@ -747,12 +732,13 @@ $(document).ready(function () {
             findValueSetInsteadOfValueFormsetPackPlateLabelsBuildPlate_ajax("update_or_view_first_load");
         }
     }
-
+    // END SECTION TO SET GLOBAL VARIABLES plus some
+    
+    
     /**
      * On change - post data processing option to show/hide calibration details
     */
     $("#showHideStandardsTableButton").click(function () {
-        // console.log("sh ", global_showhide_samples)
         if ($('#div_for_standards_table').hasClass('hidden')) {
             $('#div_for_standards_table').removeClass('hidden');
             $('#div_for_standard_averages_table').removeClass('hidden');
@@ -771,12 +757,11 @@ $(document).ready(function () {
      * because some thought it was too confusing to see the samples on the graph
     */
     $("#showHideSamplesOnGraphButton").click(function () {
-        // console.log("sh ", global_showhide_samples)
-        if (global_showhide_samples == "hide_samples") {
-            global_showhide_samples = "show_samples";
+        if (global_showhide_samples_toggle_on_graph == "hide_samples") {
+            global_showhide_samples_toggle_on_graph = "show_samples";
             drawCalibrationCurve();
         } else {
-            global_showhide_samples = "hide_samples";
+            global_showhide_samples_toggle_on_graph = "hide_samples";
             drawCalibrationCurve();
         }
     });
@@ -1067,16 +1052,18 @@ $(document).ready(function () {
         global_calibrate_radio_standard_option_use_or_not = $(this).val();
 
         // if there are not standards on this plate - this button should not show in this case, but check anyway
-        if (global_plate_well_use_count_of_standards_this_platemap == 0) {
+        if ($("#id_form_number_standards_this_plate").val() == 0) {
 
             if ($('input[name=radio_standard_option_use_or_not]:checked').val() === 'pick_block') {
 
-                // this is a tangent - on first time using this is picked, have to load the drop down
-                // did not want to do on page load because it took too long
-                if (!global_calibrate_true_if_blocks_in_study_with_standards_are_loaded_to_memory) {
-                    loadTheFileBlocksWithStandardsDropdown();
-                    global_calibrate_true_if_blocks_in_study_with_standards_are_loaded_to_memory = true;
-                }
+                // 20200510 - moving this to forms.py, but keep for now in case change mind and put back
+                // // this is a tangent - on first time using this is picked, have to load the drop down
+                // // did not want to do on page load because it took too long
+                // if (!global_calibrate_true_if_blocks_in_study_with_standards_are_loaded_to_memory) {
+                //     loadTheFileBlocksWithStandardsDropdown();
+                //     global_calibrate_true_if_blocks_in_study_with_standards_are_loaded_to_memory = true;
+                // }
+
                 $('.pick-standard-file-block').removeClass('hidden');
             } else {
                 $('.pick-standard-file-block').addClass('hidden');
@@ -1096,20 +1083,31 @@ $(document).ready(function () {
     */
     $("#id_se_block_standard_borrow_string").change(function () {
 
-        try {
-            global_calibrate_block_borrowing_standard_from_string = $("#id_se_block_standard_borrow_string").selectize()[0].selectize.items[0];
-        } catch (err) {
-            global_calibrate_block_borrowing_standard_from_string = $("#id_se_block_standard_borrow_string").val();
-        }
-        let the_index_of_the_element = global_calibrate_borrowed_metadata_block.indexOf(global_calibrate_block_borrowing_standard_from_string);
-        global_calibrate_block_borrowing_standard_from_pk = global_calibrate_borrowed_pk_block[the_index_of_the_element];
-        global_calibrate_block_borrowing_standard_from_pk_platemap = global_calibrate_borrowed_pk_platemap[the_index_of_the_element];
+        // the way before 20200510
+        // try {
+        //     global_calibrate_block_borrowing_standard_from_string = $("#id_se_block_standard_borrow_string").selectize()[0].selectize.items[0];
+        // } catch (err) {
+        //     global_calibrate_block_borrowing_standard_from_string = $("#id_se_block_standard_borrow_string").val();
+        // }
 
-        $("#id_form_block_standard_borrow_pk_single_for_storage").val(global_calibrate_block_borrowing_standard_from_pk);
-        $("#id_form_block_standard_borrow_pk_platemap_single_for_storage").val(global_calibrate_block_borrowing_standard_from_pk_platemap);
+        // let the_index_of_the_element = global_calibrate_borrowed_metadata_block.indexOf(global_calibrate_block_borrowing_standard_from_string);
+        // global_calibrate_form_block_standard_borrow_pk_single_for_storage =          global_calibrate_borrowed_pk_block[the_index_of_the_element];
+        // global_calibrate_form_block_standard_borrow_pk_platemap_single_for_storage = global_calibrate_borrowed_pk_platemap[the_index_of_the_element];
 
-        // console.log("global_calibrate_block_borrowing_standard_from_string ", global_calibrate_block_borrowing_standard_from_string)
-        // console.log("the_index_of_the_element ", the_index_of_the_element)
+        // the way after 20200510   eg for tuple (316, 96)
+        // HANDY to fetch the value of selectize (the left one of the tuple) use .items[0]
+        // eg 316
+        //HANDY get the value from selectized
+        global_calibrate_form_block_standard_borrow_pk_single_for_storage = $("#id_se_block_standard_borrow_string").selectize()[0].selectize.items[0];
+        // eg 96 shows in the html box
+        //HANDY set value of selectized
+        $("#id_ns_block_standard_borrow_string_to_block_pk_back_to_platemap_pk").selectize()[0].selectize.setValue(global_calibrate_form_block_standard_borrow_pk_single_for_storage);
+
+        //HANDY get the text from selectized
+        global_calibrate_form_block_standard_borrow_pk_platemap_single_for_storage = $("#id_ns_block_standard_borrow_string_to_block_pk_back_to_platemap_pk").selectize()[0].selectize.options[global_calibrate_form_block_standard_borrow_pk_single_for_storage]['text'];
+        console.log("global_calibrate_form_block_standard_borrow_pk_platemap_single_for_storage ",global_calibrate_form_block_standard_borrow_pk_platemap_single_for_storage)
+        $("#id_form_block_standard_borrow_pk_single_for_storage").val(         global_calibrate_form_block_standard_borrow_pk_single_for_storage);
+        $("#id_form_block_standard_borrow_pk_platemap_single_for_storage").val(global_calibrate_form_block_standard_borrow_pk_platemap_single_for_storage);
 
         changedTheCalibrationCurveAndOtherChangesThatMightCauseRunCalibrate('change_standard_pk_and_string');
     });
@@ -1120,11 +1118,11 @@ $(document).ready(function () {
      * Trigger the change of calibration to select_one so the user will have to pick again.
     */
     $("#id_form_data_processing_multiplier").change(function () {
-        global_calibrate_calibration_curve_method = 'select_one';
+        global_calibrate_se_form_calibration_curve = 'select_one';
         //this will trigger the change event for recalibrating
-        $("#id_se_form_calibration_curve").selectize()[0].selectize.setValue(global_calibrate_calibration_curve_method);
-        global_calibration_multiplier = $("#id_form_data_processing_multiplier").val();
-        //console.log(global_calibration_multiplier)
+        $("#id_se_form_calibration_curve").selectize()[0].selectize.setValue(global_calibrate_se_form_calibration_curve);
+        global_calibration_form_data_processing_multiplier = $("#id_form_data_processing_multiplier").val();
+        //console.log(global_calibration_form_data_processing_multiplier)
     });
 
     /**
@@ -1132,8 +1130,8 @@ $(document).ready(function () {
      * Trigger the change of calibration to select_one so the user will have to pick again.
      */
     $("#id_se_form_calibration_curve").change(function () {
-        global_calibrate_calibration_curve_method_prev = global_calibrate_calibration_curve_method;
-        global_calibrate_calibration_curve_method = $("#id_se_form_calibration_curve").selectize()[0].selectize.items[0];
+        global_calibrate_se_form_calibration_curve_prev = global_calibrate_se_form_calibration_curve;
+        global_calibrate_se_form_calibration_curve = $("#id_se_form_calibration_curve").selectize()[0].selectize.items[0];
         changedTheCalibrationCurveAndOtherChangesThatMightCauseRunCalibrate('change_curve');
     });
 
@@ -1158,7 +1156,7 @@ $(document).ready(function () {
             }
         }
 
-        if (global_calibrate_calibration_curve_method == 'select_one') {
+        if (global_calibrate_se_form_calibration_curve == 'select_one') {
             $('.plate-calibration-or-processing-yes').addClass('hidden');
             $('.plate-calibration-yes').addClass('hidden');
             $('.plate-calibration-guts-yes').addClass('hidden');
@@ -1180,7 +1178,7 @@ $(document).ready(function () {
 
         } else {
 
-            if (global_calibrate_calibration_curve_method == 'no_calibration') {
+            if (global_calibrate_se_form_calibration_curve == 'no_calibration') {
                 $('.plate-calibration-or-processing-yes').removeClass('hidden');
                 $('.plate-calibration-yes').addClass('hidden');
                 $('.plate-calibration-guts-yes').addClass('hidden');
@@ -1199,7 +1197,7 @@ $(document).ready(function () {
                 $('.plate-calibration-guts-yes').removeClass('hidden');
                 changeVisibilityOfSampleEachAndAverage();
 
-                if (global_plate_well_use_count_of_standards_this_platemap == 0) {
+                if ($("#id_form_number_standards_this_plate").val() == 0) {
                     // calibration method was selected but there are not standards on the plate
                     $('.plate-map-options-standards-blocks').removeClass('hidden');
                     // no standards on this plate
@@ -1212,7 +1210,7 @@ $(document).ready(function () {
                         $('.plate-calibration-curve-guts-yes').addClass('hidden');
                     } else {
                         $('.pick-standard-file-block').removeClass('hidden');
-                        if (global_calibrate_block_borrowing_standard_from_pk > 0) {
+                        if (global_calibrate_form_block_standard_borrow_pk_single_for_storage > 0) {
                             // the borrow pk is been populated, okay to go
                             $('#refresh_needed_indicator').text('need');
                             changesThatAffectCalibrationPlusCallCalibrate(called_from, 'borrow pk is selected');
@@ -1263,7 +1261,7 @@ $(document).ready(function () {
         // when called from python, these will be form fields, but, when calling in page, need memory variables
         global_list_plate_holding_user_omits_string = "";
         global_list_plate_holding_user_notes_string = "";
-        for(i = 0; i < global_plate_size; i++) {
+        for(i = 0; i < global_plate_size_form_device; i++) {
             let formFieldUserNotes = $('#id_assayplatereadermapitem_set-' + i + '-form_user_entered_notes').val();
             global_list_plate_holding_user_notes.push(formFieldUserNotes);
             let formFieldUserOmitsIsChecked = $('#id_assayplatereadermapitem_set-' + i + '-form_user_entered_omit_from_average').is(':checked');
@@ -1286,7 +1284,7 @@ $(document).ready(function () {
     */
     function clearTheOmitAndNoteFieldsBeforeRecalibration(called_from) {
         // since getting ready to recalibrate from the page, clear the form fields of notes and omit boxes
-        for(i = 0; i < global_plate_size; i++) {
+        for(i = 0; i < global_plate_size_form_device; i++) {
             $('#id_assayplatereadermapitem_set-' + i + '-form_user_entered_notes').val("");
             $('#id_assayplatereadermapitem_set-' + i + '-form_user_entered_omit_from_average').prop('checked', false)
         }
@@ -1317,45 +1315,39 @@ $(document).ready(function () {
     */
     // Get what is needed for the calibration/processing
     function packProcessedData(called_from) {
-        // console.log("packProcessedData")
-
-        let form_blank_handling = "";
-        try {
-            form_blank_handling = $("#id_se_form_blank_handling").selectize()[0].selectize.items[0];
-        } catch (err) {
-            form_blank_handling = $("#id_se_form_blank_handling").val();
-        }
-
-        // console.log('global_floater_target  ',    global_floater_target)
-        // console.log('global_floater_method  ',    global_floater_method)
-        // console.log('global_floater_unit  ',      global_floater_unit )
+        //console.log("packProcessedData")
 
         let data = {
             call: 'fetch_data_processing_for_plate_map_integration',
             called_from: called_from,
-            study: global_plate_study_id,
-            pk_platemap: global_plate_this_platemap_id,
-            pk_data_block: global_calibrate_block_select_string_is_block_working_with_pk,
+            // use for form save: 'form_save'
+            study: parseInt(document.getElementById("this_study_id").innerText.trim()),
+            pk_platemap: parseInt(document.getElementById('this_platemap_id').innerText.trim()),
+            pk_data_block: global_calibrate_form_ns_block_select_pk,
+            // use for form save: $("#id_form_block_file_data_block_selected_pk_for_storage")
             plate_name: $("#id_name").val(),
-            form_calibration_curve: global_calibrate_calibration_curve_method,
-            multiplier: global_calibration_multiplier,
-            unit: global_floater_unit,
-            standard_unit: global_floater_standard_unit,
+            form_calibration_curve: global_calibrate_se_form_calibration_curve,
+            // use for form save: self.fields['form_calibration_curve_method_used'].required = False
+            multiplier: global_calibration_form_data_processing_multiplier,
+            unit: global_floater_form_calibration_unit,
+            standard_unit: global_floater_model_standard_unit,
             form_min_standard: $("#id_form_min_standard").val(),
             form_max_standard: $("#id_form_max_standard").val(),
-            form_blank_handling: form_blank_handling,
+            // use for form save: self.fields['form_calibration_standard_fitted_min_for_e'].required = False
+            // use for form save: self.fields['form_calibration_standard_fitted_max_for_e'].required = False
+            form_blank_handling: $("#id_se_form_blank_handling").selectize()[0].selectize.items[0],
             radio_standard_option_use_or_not: global_calibrate_radio_standard_option_use_or_not,
             radio_replicate_handling_average_or_not_0: global_calibrate_radio_replicate_handling_average_or_not_0,
-            borrowed_block_pk: global_calibrate_block_borrowing_standard_from_pk,
-            borrowed_platemap_pk: global_calibrate_block_borrowing_standard_from_pk_platemap,
-            count_standards_current_plate: global_plate_well_use_count_of_standards_this_platemap,
-            target: global_floater_target,
-            method: global_floater_method,
-            time_unit: global_floater_time_unit,
-            volume_unit: global_floater_volume_unit,
+            borrowed_block_pk: global_calibrate_form_block_standard_borrow_pk_single_for_storage,
+            borrowed_platemap_pk: global_calibrate_form_block_standard_borrow_pk_platemap_single_for_storage,
+            count_standards_current_plate: $("#id_form_number_standards_this_plate").val(),
+            target: global_floater_form_calibration_target,
+            method: global_floater_form_calibration_method,
+            time_unit: global_floater_model_time_unit,
+            volume_unit: global_floater_model_volume_unit,
             user_notes: global_list_plate_holding_user_notes_string,
             user_omits: global_list_plate_holding_user_omits_string,
-            plate_size: global_plate_size,
+            plate_size: global_plate_size_form_device,
             csrfmiddlewaretoken: window.COOKIES.csrfmiddlewaretoken
         };
         window.spinner.spin(document.getElementById("spinner"));
@@ -1380,9 +1372,9 @@ $(document).ready(function () {
                 window.spinner.stop();
                 alert('An error has occurred (finding processed data). Could be caused by many errors or by injection of invalid values. Try a different calibration method. If the problem persists, contact the database admins.');
                 console.log(xhr.status + ": " + xhr.responseText);
-                global_calibrate_calibration_curve_method = 'select_one';
+                global_calibrate_se_form_calibration_curve = 'select_one';
                 //this will trigger the change event for recalibrating - want that if there was an error so the page does not sit on previous results
-                $("#id_se_form_calibration_curve").selectize()[0].selectize.setValue(global_calibrate_calibration_curve_method);
+                $("#id_se_form_calibration_curve").selectize()[0].selectize.setValue(global_calibrate_se_form_calibration_curve);
             }
         });
     }
@@ -1691,7 +1683,7 @@ $(document).ready(function () {
         if (each_or_average == 'each') {
             // change what see columns are shown by default based on if calibration or not
             // overwrites what was set above for the general case
-            if (global_calibrate_calibration_curve_method == 'no_calibration') {
+            if (global_calibrate_se_form_calibration_curve == 'no_calibration') {
                 global_table_column_defs_each[18]['visible'] = false;
                 global_table_column_defs_each[19]['visible'] = false;
             } else {
@@ -1779,7 +1771,7 @@ $(document).ready(function () {
                 var colHeaders = {};
                 var options = {};
 
-                if (global_showhide_samples == "hide_samples") {
+                if (global_showhide_samples_toggle_on_graph == "hide_samples") {
                     colHeaders =
                         [
                             ['Standard Concentration', 'Fitted Standard Curve', 'Standard (Average)', 'Standard (All Points)', '']
@@ -1796,7 +1788,7 @@ $(document).ready(function () {
                     // console.log(preData)
 
                     options = {
-                        title: global_floater_method,
+                        title: global_floater_form_calibration_method,
                         seriesType: 'scatter',
                         series: {
                             // 0: {pointShape: 'square'}, pointSize: 1,
@@ -1813,7 +1805,7 @@ $(document).ready(function () {
                         },
                         legend: {position: 'bottom'},
                         vAxis: {title: 'Signal (Adjusted)'},
-                        hAxis: {title: global_floater_standard_unit},
+                        hAxis: {title: global_floater_model_standard_unit},
                         colors: ['MidnightBlue', 'MediumBlue', 'SteelBlue', 'White'],
                     };
                 } else {
@@ -1835,7 +1827,7 @@ $(document).ready(function () {
                     // https://developers.google.com/chart/interactive/docs/points
 
                     options = {
-                        title: global_floater_method,
+                        title: global_floater_form_calibration_method,
                         seriesType: 'scatter',
                         series: {
                             // 0: {pointShape: 'square'}, pointSize: 0.3,
@@ -1851,9 +1843,9 @@ $(document).ready(function () {
                             },
                         },
                         legend: {position: 'bottom'},
-                        //vAxis: {title: global_floater_target},
+                        //vAxis: {title: global_floater_form_calibration_target},
                         vAxis: {title: 'Signal'},
-                        hAxis: {title: global_floater_standard_unit},
+                        hAxis: {title: global_floater_model_standard_unit},
                         colors: ['MidnightBlue', 'MediumBlue', 'SteelBlue', 'FireBrick'],
                     };
 
@@ -1898,16 +1890,19 @@ $(document).ready(function () {
             }
         }
     }
+    // END - the calibrate google charts section
 
-
-    //with the exception of some functions at the bottom, the stuff below is pre calibrate
-    //can go back and document as have time....
-
+    /**
+     * This function is used to load the data blocks (from files) that have standards that are in this study.
+     * It is called only once, then, a switch is flipped to keep it from being called again.
+     * 20200510 - not using for now, but might go back to it for performance reasons later
+     * keep for now
+    */
     function loadTheFileBlocksWithStandardsDropdown(){
         //populate the dropdown with the file block options with file blocks in this study that have standards
         let data = {
             call: 'fetch_information_for_study_platemap_standard_file_blocks',
-            study: global_plate_study_id,
+            study: parseInt(document.getElementById("this_study_id").innerText.trim()),
             csrfmiddlewaretoken: window.COOKIES.csrfmiddlewaretoken
         };
         window.spinner.spin(document.getElementById("spinner"));
@@ -1975,9 +1970,9 @@ $(document).ready(function () {
         //     global_calibrate_borrowed_metadata_block.push(Object.values(each)[0]);
         // });
 
-        // https://github.com/selectize/selectize.js/blob/master/docs/api.md HANDY
-        var $this_block_standard_borrow_string = $(document.getElementById('id_se_block_standard_borrow_string'));
-        var this_block = $this_block_standard_borrow_string[0].selectize;
+        // https://github.com/selectize/selectize.js/blob/master/docs/api.md HANDY to set the options
+        var $this_form_se_block_standard_borrow_string = $(document.getElementById('id_se_block_standard_borrow_string'));
+        var this_block = $this_form_se_block_standard_borrow_string[0].selectize;
         // fill the dropdown with what brought back from ajax call
         for(i=0; i < global_calibrate_borrowed_metadata_block.length; i++){
             this_block.addOption({value: global_calibrate_borrowed_metadata_block[i], text: global_calibrate_borrowed_metadata_block[i]});
@@ -1985,7 +1980,8 @@ $(document).ready(function () {
         //user will need to select on to make the borrow standards pull
     };
 
-    // END - the calibrate google charts section
+    //with the exception of some functions at the bottom, the stuff below is pre calibrate
+    //can go back and document as have time....
 
     // these need to exist on the page before changing them, some moved them down
     try {
@@ -1995,7 +1991,7 @@ $(document).ready(function () {
     }
 
     // should not need this - see around line 450ish
-    // if (global_plate_number_file_block_sets > 0) {
+    // if (document.getElementById("id_form_number_file_block_combos").value > 0) {
     //     try {
     //         // set a default
     //         document.getElementById("id_radio_replicate_handling_average_or_not_0").checked = true;
@@ -2012,20 +2008,31 @@ $(document).ready(function () {
     // this box only shows if there is/are file/block associated
 
     $("#id_se_block_select_string").change(function () {
-        global_calibrate_calibration_curve_method = 'select_one';
+        global_calibrate_se_form_calibration_curve = 'select_one';
         //this will trigger the change event for recalibrating - want that if there was an error so the page does not sit on previous results
-        $("#id_se_form_calibration_curve").selectize()[0].selectize.setValue(global_calibrate_calibration_curve_method);
+        $("#id_se_form_calibration_curve").selectize()[0].selectize.setValue(global_calibrate_se_form_calibration_curve);
 
-        findThePkForTheSelectedString("#id_se_block_select_string", "id_ns_block_select_pk");
+        findThePkForTheSelectedString("id_se_block_select_string", "id_ns_block_select_pk");
         findValueSetInsteadOfValueFormsetPackPlateLabelsBuildPlate_ajax("update_or_view_change_block");
         theSuiteOfPreCalibrationChecks();
     });
     $("#id_cell_count").change(function () {
         theSuiteOfPreCalibrationChecks();
     });
-    $("#id_study_assay").change(function () {
+    $("#id_study_assay").change(function () {  
+        changeAndLoadStudyAssayMethodTargetUnit();
         theSuiteOfPreCalibrationChecks();
     });
+    function changeAndLoadStudyAssayMethodTargetUnit() {
+        // watch these! be if change how Unit, Target, Method are, will need to UPDATE these WATCH CAREFUL!
+        global_floater_form_calibration_target = global_floater_model_study_assay.substring(global_floater_model_study_assay.indexOf("TARGET") + 8, global_floater_model_study_assay.indexOf("METHOD")-3).trim();
+        global_floater_form_calibration_method = global_floater_model_study_assay.substring(global_floater_model_study_assay.indexOf("METHOD") + 8, global_floater_model_study_assay.length).trim();
+        global_floater_form_calibration_unit   = global_floater_model_study_assay.substring(0, global_floater_model_study_assay.indexOf("TARGET")-5).trim();
+        $('#id_form_calibration_method').val(global_floater_form_calibration_method);
+        $('#id_form_calibration_target').val(global_floater_form_calibration_target);
+        $('#id_form_calibration_unit').val(global_floater_form_calibration_unit);
+    }
+    
     $("#id_volume_unit").change(function () {
        theSuiteOfPreCalibrationChecks();
     });
@@ -2039,7 +2046,7 @@ $(document).ready(function () {
        theSuiteOfPreCalibrationChecks();
     });
     $("#id_time_unit").change(function () {
-        global_floater_time_unit = $('#id_time_unit').children("option:selected").text().trim();
+        global_floater_model_time_unit = $('#id_time_unit').children("option:selected").text().trim();
         theSuiteOfPreCalibrationChecks();
     });
     // load-function
@@ -2049,7 +2056,7 @@ $(document).ready(function () {
     //end section of change functions to warn the user about order of processing data
 
     // change to show by default by forcing the click button on load for add page, but not calibrate page
-    if (global_plate_number_file_block_sets == 0) {
+    if (document.getElementById("id_form_number_file_block_combos").value == 0) {
         setTimeout(function () {
             $("#checkboxButton").trigger('click');
         }, 10);
@@ -2214,14 +2221,14 @@ $(document).ready(function () {
         // this fires when the user changes AND/OR when one of the other start methods is selected
         // update the global plate size based on new selection (add page, user changed directly)
         try {
-            global_plate_size = $("#id_device").selectize()[0].selectize.items[0];
+            global_plate_size_form_device = $("#id_device").selectize()[0].selectize.items[0];
         } catch (err) {
-            global_plate_size = $("#id_device").val();
+            global_plate_size_form_device = $("#id_device").val();
         }
-        for (var idx = 0, ls = global_plate_size; idx < ls; idx++) {
+        for (var idx = 0, ls = global_plate_size_form_device; idx < ls; idx++) {
             global_plate_whole_plate_index_list.push(idx);
         }
-        // console.log("changed device what size is plate: ", global_plate_size)
+        // console.log("changed device what size is plate: ", global_plate_size_form_device)
         // set to only fire on change plate size IF the selection is a_plate (an empty plate)
         if (global_plate_start_map === 'a_plate') {
             startFromAnEmptyPlate();
@@ -2268,7 +2275,7 @@ $(document).ready(function () {
         // clear the matrix and exising platemap selections incase go back and repick the same one
         $("#id_se_matrix").selectize()[0].selectize.setValue();
         $("#id_se_platemap").selectize()[0].selectize.setValue();
-        //$("#id_device").selectize()[0].selectize.setValue(global_plate_size);
+        //$("#id_device").selectize()[0].selectize.setValue(global_plate_size_form_device);
         addPageRemoveFormsetsBeforeBuildPlate();
         global_plate_add_or_edit_etc = 'add_change_device_size_starting_from_empty_plate';
         packPlateLabelsAndBuildOrChangePlate_ajax();
@@ -2280,7 +2287,7 @@ $(document).ready(function () {
         if (global_plate_start_map === 'a_platemap') {
             let data = {
                 call: 'fetch_assay_study_platemap_for_platemap',
-                study: global_plate_study_id,
+                study: parseInt(document.getElementById("this_study_id").innerText.trim()),
                 platemap: $("#id_se_platemap").selectize()[0].selectize.items[0],
                 csrfmiddlewaretoken: window.COOKIES.csrfmiddlewaretoken
             };
@@ -2324,7 +2331,7 @@ $(document).ready(function () {
         //$("#id_se_platemap").selectize()[0].selectize.setValue();
         let pm_device = platemap_info_0.device;
         $("#id_device").selectize()[0].selectize.setValue(pm_device);
-        global_plate_size = pm_device;
+        global_plate_size_form_device = pm_device;
 
         // Need to set the other form fields
         $('#id_name').val($('#id_name').val() + " - starting from " + platemap_info_0.name);
@@ -2337,7 +2344,7 @@ $(document).ready(function () {
         let pm_well_volume = platemap_info_0.well_volume;
         let pm_study_assay = platemap_info_0.study_assay_id;
         let pm_standard_unit = platemap_info_0.standard_unit;
-        global_floater_time_unit = pm_time_unit;
+        global_floater_model_time_unit = pm_time_unit;
         try {$("#id_time_unit").selectize()[0].selectize.setValue(pm_time_unit);
         } catch (err) {$("#id_time_unit").removeProp('selected');
         }
@@ -2367,7 +2374,7 @@ $(document).ready(function () {
         // the time will be gotten from default time in the build plate function
 
         // make the changes to the well content memory variables
-        for (var idx = 0, ls = global_plate_size; idx < ls; idx++) {
+        for (var idx = 0, ls = global_plate_size_form_device; idx < ls; idx++) {
             global_plate_mems_well_use.push(item_info[idx].well_use);
             global_plate_mems_standard_value.push(item_info[idx].standard_value);
             global_plate_mems_matrix_item.push(item_info[idx].matrix_item);
@@ -2385,7 +2392,7 @@ $(document).ready(function () {
         if (global_plate_start_map === 'a_matrix') {
             let data = {
                 call: 'fetch_assay_study_matrix_for_platemap',
-                study: global_plate_study_id,
+                study: parseInt(document.getElementById("this_study_id").innerText.trim()),
                 matrix: $("#id_se_matrix").selectize()[0].selectize.items[0],
                 csrfmiddlewaretoken: window.COOKIES.csrfmiddlewaretoken
             };
@@ -2431,8 +2438,8 @@ $(document).ready(function () {
         // clear the matrix and exising platemap selections incase go back and repick the same one
         //$("#id_se_matrix").selectize()[0].selectize.setValue();
         $("#id_se_platemap").selectize()[0].selectize.setValue();
-        global_plate_size = device_size;
-        $("#id_device").selectize()[0].selectize.setValue(global_plate_size);
+        global_plate_size_form_device = device_size;
+        $("#id_device").selectize()[0].selectize.setValue(global_plate_size_form_device);
 
         // since this is going to be a BUILD plate, not a CHANGE plate
         // it make life easier to have a complete plate
@@ -2471,9 +2478,9 @@ $(document).ready(function () {
             // console.log(button_column_index)
             // console.log(button_row_index)
             // console.log(button_column_or_row)
-            // console.log("plate size: ", global_plate_size)
+            // console.log("plate size: ", global_plate_size_form_device)
             // and send the assay plate map indexes to the function for processing
-            for (var idx = 0, ls = global_plate_size; idx < ls; idx++) {
+            for (var idx = 0, ls = global_plate_size_form_device; idx < ls; idx++) {
                 // console.log($('#well_use-' + idx).attr('column-index'))
                 if (button_column_or_row === 'column') {
                     if ($('#well_use-' + idx).attr('column-index') == button_column_index) {
@@ -2679,7 +2686,7 @@ $(document).ready(function () {
         // when the user selects a different file block, only two fields in the platemap need changed
         // to save time, build a special case here that only loads the time and raw value
 
-        if (global_plate_number_file_block_sets > 0) {
+        if (document.getElementById("id_form_number_file_block_combos").value > 0) {
             // this is the case where it is an edit or view page
             // not the first time it is build
             // but after the default data block is changed to something else
@@ -3020,7 +3027,7 @@ $(document).ready(function () {
             global_plate_mems_cell = [];
             global_plate_mems_setting = [];
 
-            for (var formsetidx = 0, ls = global_plate_size; formsetidx < ls; formsetidx++) {
+            for (var formsetidx = 0, ls = global_plate_size_form_device; formsetidx < ls; formsetidx++) {
                 d_matrix_item = global_plate_mems_matrix_item[formsetidx];
                 my_matrix_item_setup_index = global_plate_isetup_matrix_item_id.indexOf(parseInt(d_matrix_item));
                 d_compound = global_plate_isetup_compound[my_matrix_item_setup_index];
@@ -3069,7 +3076,7 @@ $(document).ready(function () {
             global_plate_mems_cell = [];
             global_plate_mems_setting = [];
 
-            for (var formsetidx = 0, ls = global_plate_size; formsetidx < ls; formsetidx++) {
+            for (var formsetidx = 0, ls = global_plate_size_form_device; formsetidx < ls; formsetidx++) {
                 global_plate_mems_well_use.push($('#id_assayplatereadermapitem_set-' + formsetidx + '-well_use').val());
                 global_plate_mems_standard_value.push($('#id_assayplatereadermapitem_set-' + formsetidx + '-standard_value').val());
                 d_matrix_item = $('#id_assayplatereadermapitem_set-' + formsetidx + '-matrix_item').val();
@@ -3087,7 +3094,7 @@ $(document).ready(function () {
                 global_plate_mems_collection_time.push($('#id_assayplatereadermapitem_set-' + formsetidx + '-collection_time').val());
                 global_plate_mems_default_time.push($('#id_assayplatereadermapitem_set-' + formsetidx + '-default_time').val());
 
-                if (global_plate_number_file_block_sets == 0) {
+                if (document.getElementById("id_form_number_file_block_combos").value == 0) {
                     d_time = $('#id_assayplatereadermapitemvalue_set-' + formsetidx + '-time').val();
                     d_block_raw_value = $('#id_assayplatereadermapitemvalue_set-' + formsetidx + '-raw_value').val();
                 } else {
@@ -3151,7 +3158,7 @@ $(document).ready(function () {
             // global_plate_mems_time = [];
             // global_plate_mems_block_raw_value = [];
 
-            // for (var formsetidx = 0, ls = global_plate_size; formsetidx < ls; formsetidx++) {
+            // for (var formsetidx = 0, ls = global_plate_size_form_device; formsetidx < ls; formsetidx++) {
             //     global_plate_mems_well_use.push(d_well_use);
             //     global_plate_mems_standard_value.push(d_standard_value);
             //     global_plate_mems_matrix_item.push(d_matrix_item);
@@ -3244,7 +3251,7 @@ $(document).ready(function () {
         } else if (build_or_change_or_clear_or_show === "build") {
             // Build was from assay plate map or study matrix and they could have changed well use, get the defaults
             // leave it as true - call_hide_by_welluse = true;
-            if (global_plate_number_file_block_sets < 1) {
+            if (document.getElementById("id_form_number_file_block_combos").value < 1) {
                 // get the default check boxes to show
                 x_show_fancy_list = [
                     '#show_matrix_item',
@@ -3352,8 +3359,8 @@ $(document).ready(function () {
     function findValueSetInsteadOfValueFormsetPackPlateLabelsBuildPlate_ajax(called_from) {
         let data = {
             call: 'fetch_information_for_value_set_of_plate_map_for_data_block',
-            pk_data_block: global_calibrate_block_select_string_is_block_working_with_pk,
-            pk_platemap: global_plate_this_platemap_id,
+            pk_data_block: global_calibrate_form_ns_block_select_pk,
+            pk_platemap: parseInt(document.getElementById('this_platemap_id').innerText.trim()),
             num_colors: global_color_ramp_use_this_ramp.length,
             csrfmiddlewaretoken: window.COOKIES.csrfmiddlewaretoken
         };
@@ -3425,7 +3432,7 @@ $(document).ready(function () {
         // console.log("called well use show in plate from ", where_called_from)
         // go to each cell in assay plate map and hide non relevant fields
 
-        for (var idx = 0, ls = global_plate_size; idx < ls; idx++) {
+        for (var idx = 0, ls = global_plate_size_form_device; idx < ls; idx++) {
             setHeatMapColorOfRawValue(idx);
             // plate_index_list.forEach(function (idx) {
             // note, cannot use the mems well use because it is not a complete list for the study matrix start
@@ -3466,13 +3473,13 @@ $(document).ready(function () {
     // Makes the well labels to use in building the assay plate map (based on the plate size)
     // this is called when page is loaded and when START is changed (plate size, matrix, platemap)
     function packPlateLabelsAndBuildOrChangePlate_ajax() {
-        // console.log("plate size before call ajax: ",global_plate_size)
+        // console.log("plate size before call ajax: ",global_plate_size_form_device)
         // console.log("yes_if_matrix_item_setup_already_run: ",yes_if_matrix_item_setup_already_run)
         //
         let data = {
             call: 'fetch_information_for_plate_map_layout',
-            study: global_plate_study_id,
-            plate_size: global_plate_size,
+            study: parseInt(document.getElementById("this_study_id").innerText.trim()),
+            plate_size: global_plate_size_form_device,
             yes_if_matrix_item_setup_already_run: yes_if_matrix_item_setup_already_run,
             csrfmiddlewaretoken: window.COOKIES.csrfmiddlewaretoken
         };
@@ -3586,7 +3593,7 @@ $(document).ready(function () {
 
             let th = document.createElement("th");
             // th.appendChild(document.createTextNode(colnumber + top_label_button));
-            if (global_plate_number_file_block_sets > 0) {
+            if (document.getElementById("id_form_number_file_block_combos").value > 0) {
                 //top_label_button = colnumber;
                 top_label_button = '';
             } else {
@@ -3640,7 +3647,7 @@ $(document).ready(function () {
             let trbodyrow = document.createElement("tr");
             let tdbodyrow = document.createElement("th");
             let rowletter = local_plate_data_packed[1][ridx];
-            if (global_plate_number_file_block_sets > 0) {
+            if (document.getElementById("id_form_number_file_block_combos").value > 0) {
                 //side_label_button = rowletter;
                 side_label_button = '';
             } else {
@@ -3780,7 +3787,7 @@ $(document).ready(function () {
                 // Get the formsets working correctly for the add page - do NOT need to change for view or update page
                 // HANDY - need the .trim() after the .html() to strip white space
                 // will call for any add option each time
-                if (global_plate_check_page_call === 'add') {
+                if ($("#check_load").html().trim() === 'add') {
                     // console.log("in add")
                     // if adding (from any add option)
                     // need a formset for EACH well in the plate (for the item and the item value tables)
@@ -3789,7 +3796,7 @@ $(document).ready(function () {
                     $('#formset').append(global_plate_first_item_form.replace(/-0-/g, '-' + formsetidx + '-'));
                     $('#id_assayplatereadermapitem_set-TOTAL_FORMS').val(formsetidx + 1);
 
-                    if (global_plate_number_file_block_sets == 0) {
+                    if (document.getElementById("id_form_number_file_block_combos").value == 0) {
                         $('#value_formset').append(global_plate_first_value_form.replace(/-0-/g, '-' + formsetidx + '-'));
                         $('#id_assayplatereadermapitemvalue_set-TOTAL_FORMS').val(formsetidx + 1);
                     }
@@ -3871,7 +3878,7 @@ $(document).ready(function () {
                     ret_block_raw_value = global_plate_mems_block_raw_value[formsetidx];
                 }
 
-                if ((global_plate_check_page_call === 'add')) {
+                if (($("#check_load").html().trim() === 'add')) {
                     // set the values in the formset and value formset that just got added above for the add page
                     // the raw value formset is NEVER changed in this GUI
                     // Make the changes to the formset (s)
@@ -3887,7 +3894,7 @@ $(document).ready(function () {
                     $('#id_assayplatereadermapitem_set-' + formsetidx + '-setting').val(ret_setting);
                     $('#id_assayplatereadermapitem_set-' + formsetidx + '-default_time').val(ret_default_time);
 
-                    if (global_plate_number_file_block_sets > 0) {
+                    if (document.getElementById("id_form_number_file_block_combos").value > 0) {
                         // do not need to change the value formset because it is not pulled in,
                         // only the data are pulled in for display
                     } else {
@@ -4020,7 +4027,7 @@ $(document).ready(function () {
         // when the user selects a different file block, only two fields in the platemap need changed
         // to save time, build a special case here that only changes the time and raw value in the plate
 
-        if (global_plate_number_file_block_sets > 0) {
+        if (document.getElementById("id_form_number_file_block_combos").value > 0) {
             // plate was already build, just changing what is display for time and raw value
             // remember, as of 20200113, no value formset is present after file data has been attached to the platemap
             plate_index_list.forEach(function () {
@@ -4074,7 +4081,7 @@ $(document).ready(function () {
                 $('#id_assayplatereadermapitem_set-' + formset_number + '-setting').val(ret_setting);
                 $('#id_assayplatereadermapitem_set-' + formset_number + '-default_time').val(ret_default_time);
 
-                if (global_plate_number_file_block_sets > 0) {
+                if (document.getElementById("id_form_number_file_block_combos").value > 0) {
                     // do not need to change the value formset because it is not pulled in,
                     // only the data are pulled in for display
                 } else {
@@ -4111,39 +4118,34 @@ $(document).ready(function () {
         if (yesToContinue == 'yes'){
             reviewInformationNeededForUnitConversionAndWarningIfMissingAndFindMultiplier();
         }
-        if (global_plate_number_file_block_sets > 0) {
-            global_calibrate_calibration_curve_method = 'select_one';
+        if (document.getElementById("id_form_number_file_block_combos").value > 0) {
+            global_calibrate_se_form_calibration_curve = 'select_one';
             //this will trigger the change event for recalibrating
-            $("#id_se_form_calibration_curve").selectize()[0].selectize.setValue(global_calibrate_calibration_curve_method);
+            $("#id_se_form_calibration_curve").selectize()[0].selectize.setValue(global_calibrate_se_form_calibration_curve);
         }
 
         $('#refresh_needed_indicator').text('wait');
     }
 
     function loadAndReloadTheAssayInfoPlus() {
-        global_floater_study_assay = $('#id_study_assay').children("option:selected").text().trim();
-        global_floater_standard_unit = $('#id_standard_unit').children("option:selected").text().trim();
-        global_floater_volume_unit = $('#id_volume_unit').children("option:selected").text().trim();
-        global_floater_well_volume = $('#id_well_volume').val();
-        global_floater_cell_count = $('#id_cell_count').val();
-        // watch these! be if change how Unit, Target, Method are, will need to UPDATE these WATCH CAREFUL!
-        // global_floater_target = global_floater_study_assay.substring(global_floater_study_assay.indexOf("TARGET") + 8, global_floater_study_assay.indexOf("METHOD")).trim();
-        // global_floater_method = global_floater_study_assay.substring(global_floater_study_assay.indexOf("METHOD") + 8, global_floater_study_assay.indexOf("UNIT")).trim();
-        // global_floater_unit   = global_floater_study_assay.substring(global_floater_study_assay.indexOf("UNIT") + 6, global_floater_study_assay.length).trim();
-        global_floater_target = global_floater_study_assay.substring(global_floater_study_assay.indexOf("TARGET") + 8, global_floater_study_assay.indexOf("METHOD")-3).trim();
-        global_floater_method = global_floater_study_assay.substring(global_floater_study_assay.indexOf("METHOD") + 8, global_floater_study_assay.length).trim();
-        global_floater_unit   = global_floater_study_assay.substring(0, global_floater_study_assay.indexOf("TARGET")-5).trim();
-        // console.log('global_floater_target  ',    global_floater_target)
-        // console.log('global_floater_method  ',    global_floater_method)
-        // console.log('global_floater_unit  ',      global_floater_unit )
-        global_floater_molecular_weight = $('#id_standard_molecular_weight').val();
-        global_floater_time_unit = $('#id_time_unit').children("option:selected").text().trim();
+        global_floater_model_study_assay = $('#id_study_assay').children("option:selected").text().trim();
+        //need to set the method, target, and unit fields after the assay field
+        changeAndLoadStudyAssayMethodTargetUnit();
+        global_floater_model_standard_unit = $('#id_standard_unit').children("option:selected").text().trim();
+        global_floater_model_volume_unit = $('#id_volume_unit').children("option:selected").text().trim();
+        global_floater_model_well_volume = $('#id_well_volume').val();
+        global_floater_model_cell_count = $('#id_cell_count').val();
+
+        
+        global_floater_model_standard_molecular_weight = $('#id_standard_molecular_weight').val();
+        global_floater_model_time_unit = $('#id_time_unit').children("option:selected").text().trim();
+        changeAndLoadStudyAssayMethodTargetUnit();
     }
 
     function changingOptionalToRequiredCalling() {
 
         let result = 'yes';
-        if (global_floater_standard_unit.search('well') >= 0) {
+        if (global_floater_model_standard_unit.search('well') >= 0) {
             $('#id_well_volume').addClass('required');
         } else {
             $('#id_well_volume').removeClass('required');
@@ -4151,46 +4153,46 @@ $(document).ready(function () {
 
         // if have mL (no mass or mole) and going to mass in reporting unit, don't have...
         if (
-            ( 2 + parseInt(global_floater_standard_unit.search('g'))
-                + parseInt(global_floater_standard_unit.search('mol'))
-                + parseInt(global_floater_standard_unit.search('M'))
+            ( 2 + parseInt(global_floater_model_standard_unit.search('g'))
+                + parseInt(global_floater_model_standard_unit.search('mol'))
+                + parseInt(global_floater_model_standard_unit.search('M'))
             ) < 0
-            && global_floater_unit.search('g') >= 0 ) {
+            && global_floater_form_calibration_unit.search('g') >= 0 ) {
 
-            global_calibration_multiplier = 0.0;
-            global_calibration_multiplier_string = "This unit conversion is beyond my capability.";
-            global_calibration_multiplier_string_display = global_calibration_multiplier_string;
-            $('#id_form_data_processing_multiplier').val(generalFormatNumber(global_calibration_multiplier));
-            $('#id_form_data_processing_multiplier_string').val(global_calibration_multiplier_string);
-            $('#id_display_multiplier_message').text(global_calibration_multiplier_string_display);
+            global_calibration_form_data_processing_multiplier = 0.0;
+            global_calibration_form_data_processing_multiplier_string = "This unit conversion is beyond my capability.";
+            global_calibration_form_data_processing_multiplier_string_display = global_calibration_form_data_processing_multiplier_string;
+            $('#id_form_data_processing_multiplier').val(generalFormatNumber(global_calibration_form_data_processing_multiplier));
+            $('#id_form_data_processing_multiplier_string').val(global_calibration_form_data_processing_multiplier_string);
+            $('#id_display_multiplier_message').text(global_calibration_form_data_processing_multiplier_string_display);
             result = 'no'
         } else {
             if (
-                ((global_floater_standard_unit.search('mol') >= 0
-                    || global_floater_standard_unit.search('M') >= 0
-                    || global_floater_standard_unit.search('N') >= 0)
-                    && global_floater_unit.search('g') >= 0)
+                ((global_floater_model_standard_unit.search('mol') >= 0
+                    || global_floater_model_standard_unit.search('M') >= 0
+                    || global_floater_model_standard_unit.search('N') >= 0)
+                    && global_floater_form_calibration_unit.search('g') >= 0)
                 ||
-                ((global_floater_unit.search('mol') >= 0
-                    || global_floater_unit.search('M') >= 0
-                    || global_floater_unit.search('N') >= 0)
-                    && global_floater_standard_unit.search('g') >= 0)
+                ((global_floater_form_calibration_unit.search('mol') >= 0
+                    || global_floater_form_calibration_unit.search('M') >= 0
+                    || global_floater_form_calibration_unit.search('N') >= 0)
+                    && global_floater_model_standard_unit.search('g') >= 0)
             ) {
                 $('#id_standard_molecular_weight').addClass('required');
             } else {
                 $('#id_standard_molecular_weight').removeClass('required');
             }
 
-            if (global_floater_standard_unit.search('day') < 0
-                && global_floater_unit.search('day') >= 0) {
+            if (global_floater_model_standard_unit.search('day') < 0
+                && global_floater_form_calibration_unit.search('day') >= 0) {
                 $('#id_cell_count').addClass('required');
             } else {
                 $('#id_cell_count').removeClass('required');
             }
 
-            if ((global_floater_standard_unit.search('day') < 0
-                && global_floater_unit.search('day') >= 0)
-                || global_floater_standard_unit.search('well') >= 0) {
+            if ((global_floater_model_standard_unit.search('day') < 0
+                && global_floater_form_calibration_unit.search('day') >= 0)
+                || global_floater_model_standard_unit.search('well') >= 0) {
                 $('#id_volume_unit').next().addClass('required');
             } else {
                 $('#id_volume_unit').next().removeClass('required');
@@ -4219,12 +4221,12 @@ $(document).ready(function () {
         // if there is info missing, give a message but do not call the find multiplier
         if (mycounter > 0) {
 
-            global_calibration_multiplier = 0.0;
-            global_calibration_multiplier_string = "The sample time unit and/or information that is required for unit conversion is missing.";
-            global_calibration_multiplier_string_display = global_calibration_multiplier_string;
-            $('#id_form_data_processing_multiplier').val(generalFormatNumber(global_calibration_multiplier));
-            $('#id_form_data_processing_multiplier_string').val(global_calibration_multiplier_string);
-            $('#id_display_multiplier_message').text(global_calibration_multiplier_string_display);
+            global_calibration_form_data_processing_multiplier = 0.0;
+            global_calibration_form_data_processing_multiplier_string = "The sample time unit and/or information that is required for unit conversion is missing.";
+            global_calibration_form_data_processing_multiplier_string_display = global_calibration_form_data_processing_multiplier_string;
+            $('#id_form_data_processing_multiplier').val(generalFormatNumber(global_calibration_form_data_processing_multiplier));
+            $('#id_form_data_processing_multiplier_string').val(global_calibration_form_data_processing_multiplier_string);
+            $('#id_display_multiplier_message').text(global_calibration_form_data_processing_multiplier_string_display);
 
             $('#refresh_needed_indicator').text('missed');
         } else {
@@ -4238,20 +4240,20 @@ $(document).ready(function () {
 
         // should have info to be able to calculate the multiplier or should not be here
         //easy cases
-        if (global_floater_standard_unit == global_floater_unit) {
+        if (global_floater_model_standard_unit == global_floater_form_calibration_unit) {
 
-            global_calibration_multiplier = 1.0;
-            global_calibration_multiplier_string = "No unit conversion is required.";
-            global_calibration_multiplier_string_display = global_calibration_multiplier_string;
-            $('#id_form_data_processing_multiplier').val(generalFormatNumber(global_calibration_multiplier));
-            $('#id_form_data_processing_multiplier_string').val(global_calibration_multiplier_string);
-            $('#id_display_multiplier_message').text(global_calibration_multiplier_string_display);
+            global_calibration_form_data_processing_multiplier = 1.0;
+            global_calibration_form_data_processing_multiplier_string = "No unit conversion is required.";
+            global_calibration_form_data_processing_multiplier_string_display = global_calibration_form_data_processing_multiplier_string;
+            $('#id_form_data_processing_multiplier').val(generalFormatNumber(global_calibration_form_data_processing_multiplier));
+            $('#id_form_data_processing_multiplier_string').val(global_calibration_form_data_processing_multiplier_string);
+            $('#id_display_multiplier_message').text(global_calibration_form_data_processing_multiplier_string_display);
 
         } else {
             // do after functions in call since ajax race issues
             gutsFindTheMultiplier();
         }
-        if (incomingMultiplier == global_calibration_multiplier) {
+        if (incomingMultiplier == global_calibration_form_data_processing_multiplier) {
             $('#refresh_needed_indicator').text('updated');
         } else {
             $('#refresh_needed_indicator').text('needed');
@@ -4262,15 +4264,15 @@ $(document).ready(function () {
         // remember - this is really separate from calibration
         let data = {
             call: 'fetch_multiplier_for_data_processing_plate_map_integration',
-            target: global_floater_target,
-            method: global_floater_method,
-            unit: global_floater_unit,
-            standard_unit: global_floater_standard_unit,
-            volume_unit: global_floater_volume_unit,
-            well_volume: global_floater_well_volume,
-            cell_count: global_floater_cell_count,
-            molecular_weight: global_floater_molecular_weight,
-            time_unit: global_floater_time_unit,
+            target: global_floater_form_calibration_target,
+            method: global_floater_form_calibration_method,
+            unit: global_floater_form_calibration_unit,
+            standard_unit: global_floater_model_standard_unit,
+            volume_unit: global_floater_model_volume_unit,
+            well_volume: global_floater_model_well_volume,
+            cell_count: global_floater_model_cell_count,
+            molecular_weight: global_floater_model_standard_molecular_weight,
+            time_unit: global_floater_model_time_unit,
             csrfmiddlewaretoken: window.COOKIES.csrfmiddlewaretoken
         };
         window.spinner.spin(document.getElementById("spinner"));
@@ -4306,13 +4308,13 @@ $(document).ready(function () {
         let returnedMultiplierStringDisplay = multiplier_data[0].multiplier_string_display;
         //console.log("returnedMultiplierString ",returnedMultiplierString)
 
-        global_calibration_multiplier = returnedMultiplier;
+        global_calibration_form_data_processing_multiplier = returnedMultiplier;
         // console.log("returnedMultiplier ",returnedMultiplier)
-        global_calibration_multiplier_string = returnedMultiplierString;
-        global_calibration_multiplier_string_display = returnedMultiplierStringDisplay;
-        $('#id_form_data_processing_multiplier').val(generalFormatNumber(parseFloat(global_calibration_multiplier)));
-        $('#id_form_data_processing_multiplier_string').val(global_calibration_multiplier_string);
-        $('#id_display_multiplier_message').text(global_calibration_multiplier_string_display);
+        global_calibration_form_data_processing_multiplier_string = returnedMultiplierString;
+        global_calibration_form_data_processing_multiplier_string_display = returnedMultiplierStringDisplay;
+        $('#id_form_data_processing_multiplier').val(generalFormatNumber(parseFloat(global_calibration_form_data_processing_multiplier)));
+        $('#id_form_data_processing_multiplier_string').val(global_calibration_form_data_processing_multiplier_string);
+        $('#id_display_multiplier_message').text(global_calibration_form_data_processing_multiplier_string_display);
 
     };
 
@@ -4324,7 +4326,7 @@ $(document).ready(function () {
                 mycount = mycount + 1;
             }
         });
-        global_plate_well_use_count_of_standards_this_platemap = mycount;
+        $("#id_form_number_standards_this_plate").val(mycount);
     }
 
     function setHeatMapColorOfRawValue(formsetidx) {
@@ -4505,13 +4507,13 @@ $(document).ready(function () {
 //}
 // if can not figure out other ways:
 // let elem_size = document.getElementById ("existing_device_size");
-// global_plate_size = $("#existing_device_size").val(); does not work...
-// global_plate_size = elem_size.innerText;
+// global_plate_size_form_device = $("#existing_device_size").val(); does not work...
+// global_plate_size_form_device = elem_size.innerText;
 // BEST so far
 //     try {
-//         global_plate_size = $("#id_device").selectize()[0].selectize.items[0];
+//         global_plate_size_form_device = $("#id_device").selectize()[0].selectize.items[0];
 //     } catch(err) {
-//         global_plate_size = $("#id_device").val();
+//         global_plate_size_form_device = $("#id_device").val();
 //     }
 //
 // WORKS! KEEP, KEEP, KEEP

@@ -4151,6 +4151,7 @@ def fetch_information_for_plate_map_layout(request):
         #     print(matrix_item.stringify_settings())
         #     print(matrix_item.matrix.name)
 
+        # search term - change if CHIP SETUP changes todo-sck I think this is the only place in plate map stuff
         for each in matrix_items:
             short_compound = ""
             short_cell = ""
@@ -4664,6 +4665,9 @@ def sub_to_fetch_information_for_value_set_of_plate_map_for_data_block(bin_upper
     return bin_index
 
 # sck - assay plate map - Get raw value and time for display in existing plate map with file block attached.
+# 20200510 transitioning this to get the selection down in the forms.py
+# eventually, can get rid of this, but do not do it until sure do not want to do this way
+# but note that, might go back for performance reasons
 def fetch_information_for_study_platemap_standard_file_blocks(request):
     """
     Assay Plate Map Calibrate - Get list of file blocks in this study with at least one standard on plate.

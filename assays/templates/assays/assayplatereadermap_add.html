@@ -93,6 +93,10 @@
                         {{form.instance.study_id}}
                     {% endif %}
                 </div>
+                <div>{{form.form_calibration_method}}</div>
+                <div>{{form.form_calibration_target}}</div>
+                <div>{{form.form_calibration_unit}}</div>
+                <div>{{form.form_number_standards_this_plate}}</div>
             </div>
 
             {# global plate map edits #}
@@ -245,6 +249,7 @@
                                             {{ form.se_block_select_string }}
 {#                                            yes, using this to get the pk of the selected file/block in the calibrate form (top of page)#}
                                             <div class="hidden">{{ form.ns_block_select_pk }}</div>
+                                            <div class="hidden">{{ form.form_block_file_data_block_selected_pk_for_storage }}</div>
                                         </div>
                                     </div>
 {#                                    <div class="col-md-2"></div>#}
@@ -1426,12 +1431,16 @@
                                         <div class="col-md-9">
                                             <div class="plate-map-page-field-contents-medium">
                                                 {{ form.se_block_standard_borrow_string }}
+                                                 <div class="hidden">
+                                                    {{ form.ns_block_standard_borrow_string_to_block_pk_back_to_platemap_pk }}
+                                                </div>
                                                 <div class="hidden">
                                                     {{ form.form_block_standard_borrow_pk_single_for_storage }}
                                                 </div>
                                                 <div class="hidden">
                                                     {{ form.form_block_standard_borrow_pk_platemap_single_for_storage }}
                                                 </div>
+
                                             </div>
                                         </div>
                                     </div>
