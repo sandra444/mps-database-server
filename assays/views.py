@@ -3143,30 +3143,44 @@ class AssayPlateReaderMapUpdate(StudyGroupMixin, UpdateView):
                 # })
 
                 # what comes back is a dictionary of
-                list_of_dicts_mifc = data_mover[9]
-                # print("list_of_dicts_mifc ", list_of_dicts_mifc)
+                list_of_dicts = data_mover[9]
 
-                # rename the headers (dictionary keys) for MIF-C file
-                for this_header in column_table_headers_average:
-                    # print("this_header ", this_header)
-                    utils_dict_header = find_a_key_by_value_in_dictionary(utils_key_column_header, this_header)
-                    # print("utils_dict_header ", utils_dict_header)
-                    # https://www.geeksforgeeks.org/python-ways-to-change-keys-in-dictionary/
-                    # HANDY change the key of a dictionary
-                    # list_of_dicts_mifc[this_header] = list_of_dicts_mifc.pop(utils_dict_header)
-                    # ini_dict['akash'] = ini_dict['akshat']
-                    # del ini_dict['akshat']
-                    for each in list_of_dicts_mifc:
-                        each[this_header] = each[utils_dict_header]
-                        del each[utils_dict_header]
+                # rename the headers (dictionary keys) for MIF-C file...went a different direction, hold in case go back
+                # for this_header in column_table_headers_average:
+                #     utils_dict_header = find_a_key_by_value_in_dictionary(utils_key_column_header, this_header)
+                #     # https://www.geeksforgeeks.org/python-ways-to-change-keys-in-dictionary/
+                #     # HANDY change the key of a dictionary
+                #     for each in list_of_dicts:
+                #         each[this_header] = each[utils_dict_header]
+                #         del each[utils_dict_header]
+
+                list_of_lists_mifc_headers_row_0 = [None]*(len(list_of_dicts)+1)
+                list_of_lists_mifc_headers_row_0[0] = column_table_headers_average
+                i = 1
+                # print(" ")
+                for each_dict_in_list in list_of_dicts:
+                    list_each_row = []
+                    for this_mifc_header in column_table_headers_average:
+                        # print("this_mifc_header ", this_mifc_header)
+                        # find the key in the dictionary that we need
+                        utils_dict_header = find_a_key_by_value_in_dictionary(utils_key_column_header, this_mifc_header)
+                        # print("utils_dict_header ", utils_dict_header)
+                        # get the value that is associated with this header in the dict
+                        this_value = each_dict_in_list.get(utils_dict_header)
+                        # print("this_value ", this_value)
+                        # add the value to the list for this dict in the list of dicts
+                        list_each_row.append(this_value)
+                    # when down with the dictionary, add the completely list for this row to the list of lists
+                    # print("list_each_row ", list_each_row)
+                    list_of_lists_mifc_headers_row_0[i] = list_each_row
+                    i = i + 1
+
+                # print("  ")
+                # print('list_of_lists_mifc_headers_row_0')
+                # print(list_of_lists_mifc_headers_row_0)
 
                 # # LUKE LUKE LUKE this is where I need to interface with LUKE's data import
-                # # list of dictionaries with headers as shown above in the first (index 0)
-                # # list_of_dicts_mifc
-
-                print("  ")
-                print('list_of_dicts_mifc')
-                print(list_of_dicts_mifc)
+                
 
             return redirect(self.object.get_post_submission_url())
         else:

@@ -1601,6 +1601,9 @@ $(document).ready(function () {
 
             $.each(column_table_headers, function (ii, col) {
                 let each_plate_index = row['plate_index'];
+                if (each_or_average == 'standards') {
+                    each_plate_index = rowcounter;
+                }
                 let myUtilsName = findTheUtilsKeyFromMIFCHeader(col);
                 let passedIn = row[myUtilsName];
                 // console.log("colcounter ", colcounter)
@@ -1671,12 +1674,17 @@ $(document).ready(function () {
         myTable.appendChild(tableBody);
         myTableDiv.appendChild(myTable);
 
+        let table_order = [[2, "asc"]];
+        if (each_or_average == 'standards') {
+            table_order = [[0, "asc"]];
+        }
+
         sampleDataTable = $('#'+thisTableName).DataTable({
             "iDisplayLength": 25,
             "sDom": '<B<"row">lfrtip>',
             fixedHeader: {headerOffset: 50},
             responsive: true,
-            "order": [[2, "asc"]],
+            "order": table_order,
             "columnDefs": global_table_column_defs
         });
 

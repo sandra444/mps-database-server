@@ -4214,6 +4214,7 @@ def plate_reader_data_file_process_data(set_dict):
                 sqls = sqls + str(use_form_max) + " "
 
                 sqls = sqls + " GROUP BY assays_AssayPlateReaderMapItem.standard_value"
+                sqls = sqls + " ORDER BY assays_AssayPlateReaderMapItem.standard_value"
                 # print("all standards sql: ", sqls)
                 cursor.execute(sqls)
                 mystandardsAvg = cursor.fetchall()
@@ -4923,12 +4924,16 @@ def plate_reader_data_file_process_data(set_dict):
 
                 # reset to start for next time
                 if (omits == 'false'):
+                    # the point we are sitting on WILL be included, so set with this points info
+                    cumCautionFlag = caution_flag
                     cumNotes = notes
                     cumWelln = welln
                     valueSum = pdv
                     valueCount = 1
                     omitsFalseSum = 1
                 else:
+                    # the point we are sitting on will NOT be included, so do not set its info
+                    cumCautionFlag = ''
                     cumNotes = ''
                     cumWelln = ''
                     valueSum = 0
