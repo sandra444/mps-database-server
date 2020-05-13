@@ -385,16 +385,26 @@ CSV_ROOT = settings.MEDIA_ROOT.replace('mps/../', '', 1) + '/csv/'
 
 class AssayFileProcessor:
     """Processes Assay MIFC files"""
-    def __init__(self, current_file, study, user, current_data_file_upload=None, save=False):
+    def __init__(self, current_file, study, user, current_data_file_upload=None, save=False, full_path=''):
         self.current_file = current_file
         self.user = user
+        self.full_path = full_path
+
         if save:
-            self.data_file_upload = AssayDataFileUpload(
-                file_location=current_file.url,
-                created_by=user,
-                modified_by=user,
-                study=study
-            )
+            if hasattr(current_file, 'url'):
+                self.data_file_upload = AssayDataFileUpload(
+                    file_location=current_file.url,
+                    created_by=user,
+                    modified_by=user,
+                    study=study
+                )
+            else:
+                self.data_file_upload = AssayDataFileUpload(
+                    file_location=full_path,
+                    created_by=user,
+                    modified_by=user,
+                    study=study
+                )
         else:
             self.data_file_upload = AssayDataFileUpload()
         self.study = study
@@ -921,10 +931,13 @@ class AssayFileProcessor:
             self.data_file_upload.save()
 
         self.current_file.seek(0, 0)
-        try:
-            self.process_excel_file()
-        except xlrd.XLRDError:
+        if self.full_path:
             self.process_csv_file()
+        else:
+            try:
+                self.process_excel_file()
+            except xlrd.XLRDError:
+                self.process_csv_file()
 
 
 # TODO TODO TODO PLEASE REVISE STYLES WHEN POSSIBLE

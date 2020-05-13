@@ -1,4 +1,15 @@
 $(document).ready(function () {
+    /**
+     * Some IMPORTANT things to remember: this page has many uses and the things that are needed changes with the use.
+     * When it is an add page, it has a form and formset and a value formset that are built using the plate size.
+     * The add page is the only one where the plate size (and hence the formset size) can be changed.
+     * The update page has a form, formset, and value formset, and all can be edited,
+     * but the size of the formset and value formset cannot be changed.
+     * Once a data file block had been assigned to a plate map, the update becomes a calibrate form.
+     * In this case, there is only a form and a formset. The information from the value formset is pulled in
+     * a different way to improve performance of the page load.
+     * Thus, only editing of the form information is allowed in the calibrate mode of the update page.
+    */
 
     /**
      * Load what is needed to run google charts.
@@ -202,6 +213,9 @@ $(document).ready(function () {
      * A page can be edited until a data block is attached to the plate map, then it becomes a calibrate page.
     */
     // START SECTION TO SET GLOBAL VARIABLES plus some logic when needed
+    // HANDY another way to get the selectized value
+    $("#id_form_hold_the_study_id").val(parseInt(document.getElementById("this_study_id").innerText.trim()));
+    $("#id_form_hold_the_platemap_id").val(parseInt(document.getElementById('this_platemap_id').innerText.trim()));
 
     let global_calibration_form_data_processing_multiplier = null;
     let global_calibration_form_data_processing_multiplier_string = "Not computed yet.";
@@ -385,28 +399,21 @@ $(document).ready(function () {
     //}).trigger('change');
 
 
-    // this will get populated when the plate gets loaded (ajax call)
+    // these will get populated when the plate gets loaded (ajax call)
     let global_floater_model_study_assay = "";
-    let global_floater_form_calibration_target = "";
-    let global_floater_form_calibration_method = "";
-    let global_floater_form_calibration_unit = "";
     let global_floater_model_standard_unit = "";
     let global_floater_model_volume_unit = "";
-    let global_floater_model_well_volume = "";
-    let global_floater_model_cell_count = "";
-    let global_floater_model_standard_molecular_weight = "";
     let global_floater_model_time_unit = "";
+
+    // global variables for the calibration
     let global_showhide_samples_toggle_on_graph = "hide_samples";
     let global_checkbox_platemap_index_working_notes = 0;
     let global_checkbox_platemap_index_working_omits = 0;
-    
-    // global variables for the calibration
     let global_calibrate_true_if_blocks_in_study_with_standards_are_loaded_to_memory = false;
 
     let global_calibrate_block_borrowing_standard_from_string  = "0";
     let global_calibrate_form_block_standard_borrow_pk_single_for_storage = -1;
     let global_calibrate_form_block_standard_borrow_pk_platemap_single_for_storage = -1;
-
 
     let global_calibrate_borrowed_index_block = [];
     let global_calibrate_borrowed_pk_block = [];
@@ -433,13 +440,14 @@ $(document).ready(function () {
     $('input[name=radio_standard_option_use_or_not][value=no_calibration]').prop('checked',true);
     let global_calibrate_radio_standard_option_use_or_not = 'no_calibration';
 
+    // these get used in the table maker to determine what needs to be parsed and formatted how
     let global_utils_integers = ['plate_index','matrix_item_id','location_id', 'replicate'];
     let global_utils_strings = ['matrix_item_name', 'cross_reference', 'well_name', 'well_use',
     'target', 'subtarget', 'method', 'location_name', 'standard_unit', 'volume_unit', 'unit',
     'caution_flag', 'exclude', 'notes', 'sendmessage'];
 
      /**
-     * Object/Dictionary of crossrefences between the utily.py dict and column headers
+     * Object/Dictionary of cross references between the utils.py dict and column headers
      * Column headers needed for Each and Average table.
      * column_table_headers is a list of headers to be used for the samples table.
      * Column headers are for the table (MIF-C file) in cases where they are MIF-C file fields.
@@ -505,7 +513,7 @@ $(document).ready(function () {
         }
         return myKey
     }
-
+    //headers for the table for EACH sample
     let column_table_headers_each = [
         'Plate Index',
         'Chip ID',
@@ -608,6 +616,7 @@ $(document).ready(function () {
         //{ "orderDataType": "dom-checkbox", "targets": [ 32 ] },
     ];
     // search term MIFC - if MIFC changes, this will need changed
+    //headers for the mifc (average) table
     let column_table_headers_average = [
         'Chip ID',
         'Cross Reference',
@@ -655,6 +664,7 @@ $(document).ready(function () {
         {"targets": [17], "visible": false,},
     ];
 
+    //setting more of the variables needed for calibration
     let global_calibrate_se_form_calibration_curve = 'select_one';
     if (document.getElementById("id_form_number_file_block_combos").value > 0) {
 
@@ -672,7 +682,10 @@ $(document).ready(function () {
     let global_calibrate_form_ns_block_select_pk = 0;
     let global_calibrate_form_block_file_data_block_selected_pk_for_storage = 0;
 
-    // load-function
+    /**
+     * This the list of functions that need/will be called when the form is loaded AND
+     * when one or more data file blocks have been associated to the plate map.
+    */
     if (document.getElementById("id_form_number_file_block_combos").value > 0) {
         findThePkForTheSelectedString("id_se_block_select_string", "id_ns_block_select_pk");
         loadPlatesIndexNotesAndOmitsToMemoryFromFormFields('page_load');
@@ -685,6 +698,7 @@ $(document).ready(function () {
      * This is based on the assumption that they may have assigned more than one file block to a platemap.
      * In this case, the string is selected, and an associated PK is extracted.
      * These are loaded into global variables for use throughout the script.
+     * Also, the TEXT of the selected value is also extracted using ['text']
     */
     //findThePkForTheSelectedString("id_se_block_select_string", "id_ns_block_select_pk")
     function findThePkForTheSelectedString(thisStringElement, thisPkElement) {
@@ -705,6 +719,8 @@ $(document).ready(function () {
         //another way to do this....if needed HANDY
         // document.getElementById(thisPkElement).selectedIndex = global_calibrate_block_select_string_is_block_working_with_string;
         // global_calibrate_form_ns_block_select_pk = parseInt(document.getEleentById(thisPkElement).selectedOptions[0].text);
+
+        $("#id_form_hold_the_data_block_metadata_string").val($("#"+thisStringElement).selectize()[0].selectize.options[global_calibrate_block_select_string_is_block_working_with_string]['text']);
     }
 
     /**
@@ -732,9 +748,9 @@ $(document).ready(function () {
             findValueSetInsteadOfValueFormsetPackPlateLabelsBuildPlate_ajax("update_or_view_first_load");
         }
     }
-    // END SECTION TO SET GLOBAL VARIABLES plus some
+    // END SECTION TO SET GLOBAL VARIABLES plus some functions
     
-    
+    // SECTION - ON CHANGE or CLICK
     /**
      * On change - post data processing option to show/hide calibration details
     */
@@ -750,6 +766,22 @@ $(document).ready(function () {
             $('#all_standard_points_table_title').addClass('hidden');
             $('#ave_standard_points_table_title').addClass('hidden');
         }
+    });
+
+    /**
+     * On Change of the file data block selected at the top of a calibrate page.
+     * Remember that, multiple files can be assigned to the same plate map.
+     * Users need a way of picking which they are working with.
+     * This is triggered with the user changes that choice.
+    */
+    $("#id_se_block_select_string").change(function () {
+        global_calibrate_se_form_calibration_curve = 'select_one';
+        //this will trigger the change event for recalibrating - want that if there was an error so the page does not sit on previous results
+        $("#id_se_form_calibration_curve").selectize()[0].selectize.setValue(global_calibrate_se_form_calibration_curve);
+
+        findThePkForTheSelectedString("id_se_block_select_string", "id_ns_block_select_pk");
+        findValueSetInsteadOfValueFormsetPackPlateLabelsBuildPlate_ajax("update_or_view_change_block");
+        theSuiteOfPreCalibrationChecks();
     });
 
     /**
@@ -879,8 +911,8 @@ $(document).ready(function () {
     });
 
     /**
-     * Function to fill a field by DOM id.
-     * This is part of the user note filling functions.
+     * Function to fill the note field by DOM id.
+     * This is part of the user note filling functions when they uncheck a box of out of an QC sample.
     */
     function fillTheNote() {
         //this should fire after a user changes a checked Omit From Average to unchecked
@@ -898,6 +930,8 @@ $(document).ready(function () {
         $('#id_assayplatereadermapitem_set-' + global_checkbox_platemap_index_working_omits
             + '-form_user_entered_notes').val($('#each_text_notes_'
             + global_checkbox_platemap_index_working_omits).val());
+
+        fillTheStringsOfOmitsAndNotesForTheForm();
     }
 
     /**
@@ -969,13 +1003,21 @@ $(document).ready(function () {
         $("#id_se_form_blank_handling").selectize()[0].selectize.setValue(global_blank_handling_option);
     }
 
+    /**
+     * Click event for refreshing the average table. This replaced the toggle to go back and forth
+     * between average and each.
+     * All of these replicate handling functions will need revisited if the team wants to change
+     * the page logic (eg toggle back and forth for visibility instead of seeing both and clicking
+     * the refresh button if change notes or omits)
+    */
     // on 20200507 hid the toggle radio button to show both average and each at the same time
     // when did this, needed to flip the choice with a click button and when a change was made
     $("#flipToAverageButton").click(function () {
         tweakingWithTheReplicateAverageHandling('average', 'average_button');
     });
+
     /**
-     * Click events for toggling between each or average for display in the sample table
+     * Click event for toggling between each or average for display in the sample table
      * right now, this is hidden, but leave the logic incase turn the toggle back to the user
      * if do that, will need to modify some
     */
@@ -984,11 +1026,20 @@ $(document).ready(function () {
         tweakingWithTheReplicateAverageHandling($(this).val(), 'radio_change');
     });
 
+    /**
+     * Function that is called when changes are make to omits or notes.
+     * Changes the refresh indicator so will know need to reprocess data and calls other functions.
+    */
     function changeMadeToOmitsOrNotesChangeReplicateHandling() {
+        fillTheStringsOfOmitsAndNotesForTheForm();
         $('#refresh_needed_indicator').text('need');
         tweakingWithTheReplicateAverageHandling('each', 'flip_each');
     }
-    
+
+    /**
+     * Function that is called when changes to some DOMs (replicate handling).
+     * Controls the hidden toggle between average and each of the replicate handling.
+    */
     function tweakingWithTheReplicateAverageHandling(average_or_each, when_called){
         // console.log("average_or_each ",average_or_each)
         // console.log("when_called ",when_called)
@@ -1012,6 +1063,11 @@ $(document).ready(function () {
             }
         }
     }
+
+    /**
+     * Function that is called when changes to some DOMs.
+     * Controls the hidden toggle between average and each of the replicate handling.
+    */
     // may want to change this if the toggle is shown to user again
     // right now, they are both shown until the user changes a note or omit, then average is hidden
     // if change these, need to change the classes in the html of the title for the average table
@@ -1275,6 +1331,37 @@ $(document).ready(function () {
                 global_list_plate_holding_user_omits_string = global_list_plate_holding_user_omits_string + "|" + formFieldUserOmitsIsChecked;
             }
         }
+        $("#id_form_hold_the_notes_string").val(global_list_plate_holding_user_notes_string);
+        $("#id_form_hold_the_omits_string").val(global_list_plate_holding_user_omits_string);
+    }
+
+    /**
+     * Function that will fill DOM form fields so that the info can be used in the form clean.
+     * The fields are the omits and notes strings that will be used in processing the data
+     * after the Submit button is clicked.
+     * This function is called whenever notes or omits are changed and also when back from data processing.
+     * These strings must stay aligned with the form fields so that, if the user clicks submit,
+     * they are correct (match the form fields).
+    */
+    function fillTheStringsOfOmitsAndNotesForTheForm() {
+        //could be more surgical about this, but for now, assume there will not be many changes directly to the fields in the table
+        let holding_user_omits_string = "";
+        let holding_user_notes_string = "";
+
+        for(i = 0; i < global_plate_size_form_device; i++) {
+            let formFieldUserNotes = $('#id_assayplatereadermapitem_set-' + i + '-form_user_entered_notes').val();
+            let formFieldUserOmitsIsChecked = $('#id_assayplatereadermapitem_set-' + i + '-form_user_entered_omit_from_average').is(':checked');
+
+            if (i == 0) {
+                holding_user_notes_string = formFieldUserNotes;
+                holding_user_omits_string = formFieldUserOmitsIsChecked;
+            } else {
+                holding_user_notes_string = holding_user_notes_string + "|" + formFieldUserNotes;
+                holding_user_omits_string = holding_user_omits_string + "|" + formFieldUserOmitsIsChecked;
+            }
+        }
+        $("#id_form_hold_the_notes_string").val(holding_user_notes_string);
+        $("#id_form_hold_the_omits_string").val(holding_user_omits_string);
     }
 
     /**
@@ -1324,25 +1411,25 @@ $(document).ready(function () {
             study: parseInt(document.getElementById("this_study_id").innerText.trim()),
             pk_platemap: parseInt(document.getElementById('this_platemap_id').innerText.trim()),
             pk_data_block: global_calibrate_form_ns_block_select_pk,
-            // use for form save: $("#id_form_block_file_data_block_selected_pk_for_storage")
+            // use for form save pk_data_block: $("#id_form_block_file_data_block_selected_pk_for_storage")
             plate_name: $("#id_name").val(),
             form_calibration_curve: global_calibrate_se_form_calibration_curve,
             // use for form save: self.fields['form_calibration_curve_method_used'].required = False
             multiplier: global_calibration_form_data_processing_multiplier,
-            unit: global_floater_form_calibration_unit,
+            unit: $('#id_form_calibration_unit').val(),
             standard_unit: global_floater_model_standard_unit,
             form_min_standard: $("#id_form_min_standard").val(),
             form_max_standard: $("#id_form_max_standard").val(),
-            // use for form save: self.fields['form_calibration_standard_fitted_min_for_e'].required = False
-            // use for form save: self.fields['form_calibration_standard_fitted_max_for_e'].required = False
+            // use for form save for min: self.fields['form_calibration_standard_fitted_min_for_e'].required = False
+            // use for form save for max: self.fields['form_calibration_standard_fitted_max_for_e'].required = False
             form_blank_handling: $("#id_se_form_blank_handling").selectize()[0].selectize.items[0],
             radio_standard_option_use_or_not: global_calibrate_radio_standard_option_use_or_not,
             radio_replicate_handling_average_or_not_0: global_calibrate_radio_replicate_handling_average_or_not_0,
             borrowed_block_pk: global_calibrate_form_block_standard_borrow_pk_single_for_storage,
             borrowed_platemap_pk: global_calibrate_form_block_standard_borrow_pk_platemap_single_for_storage,
             count_standards_current_plate: $("#id_form_number_standards_this_plate").val(),
-            target: global_floater_form_calibration_target,
-            method: global_floater_form_calibration_method,
+            target: $('#id_form_calibration_target').val(),
+            method: $('#id_form_calibration_method').val(),
             time_unit: global_floater_model_time_unit,
             volume_unit: global_floater_model_volume_unit,
             user_notes: global_list_plate_holding_user_notes_string,
@@ -1472,12 +1559,13 @@ $(document).ready(function () {
         // console.log("##list_of_dicts_of_each_standard_row_curve");
         // console.log(list_of_dicts_of_each_standard_row_curve);
         drawCalibrationCurve();
+        fillTheStringsOfOmitsAndNotesForTheForm();
         $('#refresh_needed_indicator').text('done');
 
     };
     /**
      * part of packProcessedData's post ajax processing
-     * prepares data to build the samples table and points for graph
+     * prepares data to build the points for graph
     */
     function prepGraphInfoOfProcessedDataEach_ajax(list_of_dicts_of_each_sample_row_each) {
         global_lol_samples_for_graph_each = [];
@@ -1489,7 +1577,7 @@ $(document).ready(function () {
     }
     /**
      * part of packProcessedData's post ajax processing
-     * prepares data to build the samples table and points for graph
+     * prepares data to build the points for graph
     */
     function prepGraphInfoOfProcessedDataAverage_ajax(list_of_dicts_of_each_sample_row_average) {
         global_lol_samples_for_graph_average = [];
@@ -1513,7 +1601,7 @@ $(document).ready(function () {
     }
     /**
      * part of packProcessedData's post ajax processing
-     * prepares data to build the standard average point table and points for graph
+     * prepares data to build the standard average points for graph
     */
     function prepForGraphOfStandardsDataAvePoints_ajax(list_of_dicts_of_each_standard_row_ave_points) {
         global_lol_standards_ave_points = [];
@@ -1527,7 +1615,7 @@ $(document).ready(function () {
     }
     /**
      * part of packProcessedData's post ajax processing
-     * prepares data to build the standard data points table and points for graph
+     * prepares data to build the standard data points for graph
     */
     function prepForGraphOfStandardsDataPoints_ajax(list_of_dicts_of_each_standard_row_points) {
         global_lol_standards_points = [];
@@ -1542,7 +1630,7 @@ $(document).ready(function () {
    
     /**
      * part of packProcessedData's post ajax processing
-     * builds the samples table
+     * builds the tables (builds all the calibration related tables based on parameters passed in).
      * For this (dataTable) to work, the table must be destroyed before it can be rebuilt.
      * There are two primary conditions, controlled by a toggle:
      * display the average or display each (global_calibrate_radio_replicate_handling_average_or_not_0)
@@ -1704,7 +1792,8 @@ $(document).ready(function () {
     }
 
     /**
-     * part of packProcessedData's post ajax processing but
+     * Function to draw the calibration curve graph.
+     * Part of packProcessedData's post ajax processing but
      * also called from other places too (to redraw) ie when user clicks to show/hide sample points on graph
      * draws the calibration curve graph
     */
@@ -1796,7 +1885,7 @@ $(document).ready(function () {
                     // console.log(preData)
 
                     options = {
-                        title: global_floater_form_calibration_method,
+                        title: $('#id_form_calibration_method').val(),
                         seriesType: 'scatter',
                         series: {
                             // 0: {pointShape: 'square'}, pointSize: 1,
@@ -1851,7 +1940,6 @@ $(document).ready(function () {
                             },
                         },
                         legend: {position: 'bottom'},
-                        //vAxis: {title: global_floater_form_calibration_target},
                         vAxis: {title: 'Signal'},
                         hAxis: {title: global_floater_model_standard_unit},
                         colors: ['MidnightBlue', 'MediumBlue', 'SteelBlue', 'FireBrick'],
@@ -1901,7 +1989,7 @@ $(document).ready(function () {
     // END - the calibrate google charts section
 
     /**
-     * This function is used to load the data blocks (from files) that have standards that are in this study.
+     * Function used to load the data blocks (from files) that have standards that are in this study.
      * It is called only once, then, a switch is flipped to keep it from being called again.
      * 20200510 - not using for now, but might go back to it for performance reasons later
      * keep for now
@@ -1988,59 +2076,63 @@ $(document).ready(function () {
         //user will need to select on to make the borrow standards pull
     };
 
-    //with the exception of some functions at the bottom, the stuff below is pre calibrate
-    //can go back and document as have time....
-
-    // these need to exist on the page before changing them, some moved them down
+    /**
+     * These are some load things, but id_form_data_processing_multiplier must exist before called,
+     * so they are moved down here.
+    */
     try {
         let element_id5 = 'id_form_data_processing_multiplier';
         document.getElementById(element_id5).style.backgroundColor = 'Gainsboro';
     } catch (err) { // this is not on the page, skip it
     }
-
-    // should not need this - see around line 450ish
-    // if (document.getElementById("id_form_number_file_block_combos").value > 0) {
-    //     try {
-    //         // set a default
-    //         document.getElementById("id_radio_replicate_handling_average_or_not_0").checked = true;
-    //     } catch (err) { // this is not on the page, skip it
-    //     }
-    // }
+    // not sure if this needs to be down here, but keep it here for now
+    theSuiteOfPreCalibrationChecks();
 
     // CALIBRATE SECTION IS ABOVE (EXCEPT SOME FUNCTIONS ARE BELOW)
 
-    // START - SECTION FOR CHANGES ON PAGE that have to keep track of to change on page display
-    // set the global or other variables for the selections if file_block change
-    // NOTE: this is the file block for THIS assay plate map
-    // (NOT NOT NOT if on add page and selecting to start from a different assay plate map)
-    // this box only shows if there is/are file/block associated
+    /**
+     * With the exception of some functions that are mixed in below, all the calibration changes and functions
+     * should be above this point. Below should be the code writen prior to the calibration development.
+    */
 
-    $("#id_se_block_select_string").change(function () {
-        global_calibrate_se_form_calibration_curve = 'select_one';
-        //this will trigger the change event for recalibrating - want that if there was an error so the page does not sit on previous results
-        $("#id_se_form_calibration_curve").selectize()[0].selectize.setValue(global_calibrate_se_form_calibration_curve);
+    /**
+     * Section for change events and some associated functions with form fields (add, update, and calibate).
+     * This section's change events all trigger the pre calibration function.
+    */
 
-        findThePkForTheSelectedString("id_se_block_select_string", "id_ns_block_select_pk");
-        findValueSetInsteadOfValueFormsetPackPlateLabelsBuildPlate_ajax("update_or_view_change_block");
-        theSuiteOfPreCalibrationChecks();
-    });
+    /**
+     * On Change of the cell count. This effects the multiplier, if the unit conversion requires the cell count.
+    */
     $("#id_cell_count").change(function () {
         theSuiteOfPreCalibrationChecks();
     });
+
+    /**
+     * On Change of the reporting method, target, unit. Will change multiplier and other fields needed for data processing.
+    */
     $("#id_study_assay").change(function () {  
         changeAndLoadStudyAssayMethodTargetUnit();
         theSuiteOfPreCalibrationChecks();
     });
+
+    /**
+     * Function called when changes are made to the study assay. Gets and loads into DOM form fields the
+     * method, target, and unit. Also loads them to global variables.
+    */
     function changeAndLoadStudyAssayMethodTargetUnit() {
         // watch these! be if change how Unit, Target, Method are, will need to UPDATE these WATCH CAREFUL!
-        global_floater_form_calibration_target = global_floater_model_study_assay.substring(global_floater_model_study_assay.indexOf("TARGET") + 8, global_floater_model_study_assay.indexOf("METHOD")-3).trim();
-        global_floater_form_calibration_method = global_floater_model_study_assay.substring(global_floater_model_study_assay.indexOf("METHOD") + 8, global_floater_model_study_assay.length).trim();
-        global_floater_form_calibration_unit   = global_floater_model_study_assay.substring(0, global_floater_model_study_assay.indexOf("TARGET")-5).trim();
-        $('#id_form_calibration_method').val(global_floater_form_calibration_method);
-        $('#id_form_calibration_target').val(global_floater_form_calibration_target);
-        $('#id_form_calibration_unit').val(global_floater_form_calibration_unit);
+        let form_calibration_target = global_floater_model_study_assay.substring(global_floater_model_study_assay.indexOf("TARGET") + 8, global_floater_model_study_assay.indexOf("METHOD")-3).trim();
+        let form_calibration_method = global_floater_model_study_assay.substring(global_floater_model_study_assay.indexOf("METHOD") + 8, global_floater_model_study_assay.length).trim();
+        let form_calibration_unit   = global_floater_model_study_assay.substring(0, global_floater_model_study_assay.indexOf("TARGET")-5).trim();
+        $('#id_form_calibration_method').val(form_calibration_method);
+        $('#id_form_calibration_target').val(form_calibration_target);
+        $('#id_form_calibration_unit').val(form_calibration_unit);
     }
-    
+
+    /**
+     * On Change of the volume unit, standard unit, well volume, molecular weight, time unit.
+     * These will affect the multiplier and will mean a reprocessing of data.
+    */
     $("#id_volume_unit").change(function () {
        theSuiteOfPreCalibrationChecks();
     });
@@ -2057,23 +2149,28 @@ $(document).ready(function () {
         global_floater_model_time_unit = $('#id_time_unit').children("option:selected").text().trim();
         theSuiteOfPreCalibrationChecks();
     });
-    // load-function
-    // do this on the load of the page
-    theSuiteOfPreCalibrationChecks();
-
     //end section of change functions to warn the user about order of processing data
 
-    // change to show by default by forcing the click button on load for add page, but not calibrate page
+    /**
+     * On Load of a page that has not been assigned any file block data, trigger the show hide display options click button
+     * so choices show by default when the plate is editable but not when it is not.
+    */
     if (document.getElementById("id_form_number_file_block_combos").value == 0) {
         setTimeout(function () {
             $("#checkboxButton").trigger('click');
         }, 10);
     }
-    //start with it off
+
+    /**
+     * On Load toggle visibility of some of the classes
+    */
     $(".plate-map-page-show-multiplier-details").toggle();
     $(".plate-map-page-show-parameter-details").toggle();
 
-    // toggle to hide/show the customized show in assay plate map fancy check boxes (what will and won't show in plate)
+    /**
+     * On Click of some of the buttons (radio and other), toggle visibility of some of the elements/classes
+     * and or set/update global variable.
+    */
     $("#checkboxButton").click(function () {
         $("#platemap_checkbox_section").toggle();
     });
@@ -2088,12 +2185,12 @@ $(document).ready(function () {
         // run through and uncheck all fancy checkboxes
         setFancyCheckBoxesLoopOverFancyCheckboxClass(global_plate_whole_plate_index_list, 'clear');
     });
+
     $("#checkAllFancyChecksButton").click(function () {
         // run through and uncheck all fancy checkboxes
         setFancyCheckBoxesLoopOverFancyCheckboxClass(global_plate_whole_plate_index_list, 'show');
     });
 
-    // class show/hide and also what is checked/unchecked based on radio button of starting option
     $("input[type='radio'][name='start_map']").click(function () {
         global_plate_start_map = $(this).val();
         // console.log("where starting from when making assay plate map: ", global_plate_start_map)
@@ -2109,7 +2206,6 @@ $(document).ready(function () {
         }
     });
 
-    // if copy or increment (show different options and behave differently)
     $("input[type='radio'][name='change_method']").click(function () {
         global_plate_change_method = $(this).val();
         if (global_plate_change_method === 'increment') {
@@ -2127,7 +2223,6 @@ $(document).ready(function () {
         global_plate_increment_operation = $(this).val();
     });
 
-    // if the user checked to change a sample box that was currently hidden, show it
     $("#checkbox_matrix_item").change(function () {
         if($(this).prop("checked") == true) {
             x_show_fancy_list = ['#show_matrix_item', ];
@@ -2176,21 +2271,21 @@ $(document).ready(function () {
             setWhatHiddenInEachWellOfPlateLoopsOverPlate(global_plate_whole_plate_index_list, 'change');
         }
     });
-
-    // controlling more of what shows and does not show on page (options to change) based on selected to apply
-    // this option is for when the well use was in a dropdown - not currently using, but keep in case change back
-    // $("#id_se_main_well_use").change(function () {
-    //     global_plate_well_use = $(this).val();
-    //     changePageSectionShownWhenChangeRadioWellUse()
-    // });
     // this option is for when the well use is radio buttons - currently using
     // Well use: sample, standard, blank, empty, copy, and paste (extended the function to copy and paste)
     $("input[type='radio'][name='change_well_use']").click(function () {
         global_plate_well_use = $(this).val();
         changePageSectionShownWhenChangeRadioWellUse()
     });
+    // this option is for when the well use was in a dropdown - not currently using, but keep in case change back
+    // $("#id_se_main_well_use").change(function () {
+    //     global_plate_well_use = $(this).val();
+    //     changePageSectionShownWhenChangeRadioWellUse()
+    // });
 
-    //change what is shown in the assay plate map if changed a fancy check box selection
+    /**
+     * On Change - change what is shown in the assay plate map if changed a fancy check box selection.
+    */
     $("input[type='checkbox']").change(function () {
         // limit to checkboxes that are part of the fancy check box selections
         // (not the check boxes that get check for what gets changed when click apply or drag)
@@ -2222,8 +2317,11 @@ $(document).ready(function () {
     //      setWhatHiddenInEachWellOfPlateLoopsOverPlate(plate_index_list, 'change_check_box');
     //  });
 
-    // START SECTION FOR CHANGING PLATEMAP FOR ADD PAGE BASED ON SELECTED "STARTING" PLACE (WITH FUNCTIONS)
-    // --START FROM AN EMPTY PLATE
+    /**
+     * On Change - the plate size when starting from an empty well plate on an ADD page
+     * START SECTION FOR CHANGING PLATEMAP FOR ADD PAGE BASED ON SELECTED "STARTING" PLACE (WITH FUNCTIONS)
+     * --START FROM AN EMPTY PLATE
+    */
     $("#id_device").change(function () {
         // console.log("device change fired")
         // this fires when the user changes AND/OR when one of the other start methods is selected
@@ -2245,20 +2343,27 @@ $(document).ready(function () {
         // fired in secondary selection (when the matrix or platemap is selected)
     });
 
-    // --START FROM AN EXISTING PLATEMAP (CROSSING PLATEMAPS)
+    /**
+     * On Change - the plate size when starting from an empty well plate on an ADD page
+     * START SECTION FOR CHANGING PLATEMAP FOR ADD PAGE BASED ON SELECTED "STARTING" PLACE (WITH FUNCTIONS)
+     * --START FROM AN EXISTING PLATEMAP (CROSSING PLATEMAPS)
+    */
     $("#id_se_platemap").change(function () {
         startFromAnOtherPlatemap_ajax();
     });
 
-    // --START FROM AN EXISTING MATRIX
-    // matrix selector only shows on the ADD page after user radio button to pick from matrix
-    // NOTE that, the id_device field was easy to change but the se_matrix was not.
-    // one is a query set and one is a list, perhaps therein lies the difference
+    /**
+     * On Change - the plate size when starting from an empty well plate on an ADD page
+     * START SECTION FOR CHANGING PLATEMAP FOR ADD PAGE BASED ON SELECTED "STARTING" PLACE (WITH FUNCTIONS)
+     * --START FROM AN EXISTING MATRIX
+     * matrix selector only shows on the ADD page after user radio button to pick from matrix
+     * NOTE that, the id_device field was easy to change but the se_matrix was not.
+     * one is a query set and one is a list, perhaps therein lies the difference
+    */
     $("#id_se_matrix").change(function () {
         let my_matrix_pk = $(this).val();
         startFromAnExistingMatrix_ajax(my_matrix_pk);
     });
-
     // END - SECTION FOR CHANGING PLATEMAP FOR ADD PAGE BASED ON SELECTED "STARTING" PLACE
 
     // START - secondary changes to assay plate map (Apply and Drag)
@@ -4139,13 +4244,9 @@ $(document).ready(function () {
         global_floater_model_study_assay = $('#id_study_assay').children("option:selected").text().trim();
         //need to set the method, target, and unit fields after the assay field
         changeAndLoadStudyAssayMethodTargetUnit();
+        //HANDY another way of getting the selected value
         global_floater_model_standard_unit = $('#id_standard_unit').children("option:selected").text().trim();
         global_floater_model_volume_unit = $('#id_volume_unit').children("option:selected").text().trim();
-        global_floater_model_well_volume = $('#id_well_volume').val();
-        global_floater_model_cell_count = $('#id_cell_count').val();
-
-        
-        global_floater_model_standard_molecular_weight = $('#id_standard_molecular_weight').val();
         global_floater_model_time_unit = $('#id_time_unit').children("option:selected").text().trim();
         changeAndLoadStudyAssayMethodTargetUnit();
     }
@@ -4165,7 +4266,7 @@ $(document).ready(function () {
                 + parseInt(global_floater_model_standard_unit.search('mol'))
                 + parseInt(global_floater_model_standard_unit.search('M'))
             ) < 0
-            && global_floater_form_calibration_unit.search('g') >= 0 ) {
+            && $('#id_form_calibration_unit').val().search('g') >= 0 ) {
 
             global_calibration_form_data_processing_multiplier = 0.0;
             global_calibration_form_data_processing_multiplier_string = "This unit conversion is beyond my capability.";
@@ -4179,11 +4280,11 @@ $(document).ready(function () {
                 ((global_floater_model_standard_unit.search('mol') >= 0
                     || global_floater_model_standard_unit.search('M') >= 0
                     || global_floater_model_standard_unit.search('N') >= 0)
-                    && global_floater_form_calibration_unit.search('g') >= 0)
+                    && $('#id_form_calibration_unit').val().search('g') >= 0)
                 ||
-                ((global_floater_form_calibration_unit.search('mol') >= 0
-                    || global_floater_form_calibration_unit.search('M') >= 0
-                    || global_floater_form_calibration_unit.search('N') >= 0)
+                (($('#id_form_calibration_unit').val().search('mol') >= 0
+                    || $('#id_form_calibration_unit').val().search('M') >= 0
+                    || $('#id_form_calibration_unit').val().search('N') >= 0)
                     && global_floater_model_standard_unit.search('g') >= 0)
             ) {
                 $('#id_standard_molecular_weight').addClass('required');
@@ -4192,14 +4293,14 @@ $(document).ready(function () {
             }
 
             if (global_floater_model_standard_unit.search('day') < 0
-                && global_floater_form_calibration_unit.search('day') >= 0) {
+                && $('#id_form_calibration_unit').val().search('day') >= 0) {
                 $('#id_cell_count').addClass('required');
             } else {
                 $('#id_cell_count').removeClass('required');
             }
 
             if ((global_floater_model_standard_unit.search('day') < 0
-                && global_floater_form_calibration_unit.search('day') >= 0)
+                && $('#id_form_calibration_unit').val().search('day') >= 0)
                 || global_floater_model_standard_unit.search('well') >= 0) {
                 $('#id_volume_unit').next().addClass('required');
             } else {
@@ -4248,7 +4349,7 @@ $(document).ready(function () {
 
         // should have info to be able to calculate the multiplier or should not be here
         //easy cases
-        if (global_floater_model_standard_unit == global_floater_form_calibration_unit) {
+        if (global_floater_model_standard_unit == $('#id_form_calibration_unit').val()) {
 
             global_calibration_form_data_processing_multiplier = 1.0;
             global_calibration_form_data_processing_multiplier_string = "No unit conversion is required.";
@@ -4272,14 +4373,14 @@ $(document).ready(function () {
         // remember - this is really separate from calibration
         let data = {
             call: 'fetch_multiplier_for_data_processing_plate_map_integration',
-            target: global_floater_form_calibration_target,
-            method: global_floater_form_calibration_method,
-            unit: global_floater_form_calibration_unit,
+            target: $('#id_form_calibration_target').val(),
+            method: $('#id_form_calibration_method').val(),
+            unit: $('#id_form_calibration_unit').val(),
             standard_unit: global_floater_model_standard_unit,
             volume_unit: global_floater_model_volume_unit,
-            well_volume: global_floater_model_well_volume,
-            cell_count: global_floater_model_cell_count,
-            molecular_weight: global_floater_model_standard_molecular_weight,
+            well_volume: $('#id_well_volume').val(),
+            cell_count: $('#id_cell_count').val(),
+            molecular_weight: $('#id_standard_molecular_weight').val(),
             time_unit: global_floater_model_time_unit,
             csrfmiddlewaretoken: window.COOKIES.csrfmiddlewaretoken
         };
@@ -4513,20 +4614,7 @@ $(document).ready(function () {
 //    // console.log( index + ": " + $( this ).text() );
 //  });
 //}
-// if can not figure out other ways:
-// let elem_size = document.getElementById ("existing_device_size");
-// global_plate_size_form_device = $("#existing_device_size").val(); does not work...
-// global_plate_size_form_device = elem_size.innerText;
-// BEST so far
-//     try {
-//         global_plate_size_form_device = $("#id_device").selectize()[0].selectize.items[0];
-//     } catch(err) {
-//         global_plate_size_form_device = $("#id_device").val();
-//     }
-//
-// WORKS! KEEP, KEEP, KEEP
-// console.log( $("#id_time_unit").selectize()[0].selectize.items[0] )
-// $("#id_time_unit").selectize()[0].selectize.setValue('hour')
+
 
 // HANDY to know for going through a formset
 // console.log("$('#value_formset')")
