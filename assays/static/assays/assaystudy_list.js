@@ -82,7 +82,7 @@ $(document).ready(function() {
         // Hide again
         studies_table.hide();
 
-
+        // PLEASE NOTE THAT: sck added two columns to table 20200515 (8 and 9) and moved later columns down 2
         studies_table.DataTable({
             dom: 'B<"row">lfrtip',
             fixedHeader: {headerOffset: 50},
@@ -101,19 +101,19 @@ $(document).ready(function() {
                 },
                 {
                     "type": "numeric-comma",
-                    "targets": [5, 6, 7, 8]
+                    "targets": [5, 6, 7, 8, 9, 10]
                 },
                 {
                     'visible': false,
-                    'targets': [7, 8, 12, 14, 15]
+                    'targets': [7, 9, 10, 14, 16, 17]
                 },
                 {
                     'className': 'none',
-                    'targets': [9]
+                    'targets': [11]
                 },
                 {
                     'sortable': false,
-                    'targets': [10]
+                    'targets': [12]
                 }
             ],
             drawCallback: function () {
