@@ -2772,6 +2772,12 @@ class AssayPlateReaderMapForm(BootstrapForm):
     )
     form_make_mifc_on_submit = forms.BooleanField(required=False)
 
+    # def save(self, commit=True):
+    #     print("made it here")
+    #     data = self.cleaned_data
+    #     print("data.get('form_make_mifc_on_submit') ", data.get('form_make_mifc_on_submit'))
+
+
     def clean(self):
         data = self.cleaned_data
 
