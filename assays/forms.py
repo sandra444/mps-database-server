@@ -2954,6 +2954,7 @@ class AssayPlateReaderMapForm(BootstrapForm):
 
             file_to_write.close()
             new_mifc_file = open(file_location, 'rb')
+            # print("self.user ",self.user)
             file_processor = AssayFileProcessor(new_mifc_file,
                                                 self.study,
                                                 self.user, save=True,
