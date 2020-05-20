@@ -2772,7 +2772,19 @@ class AssayPlateReaderMapForm(BootstrapForm):
     )
     form_make_mifc_on_submit = forms.BooleanField(required=False)
 
-    # def save(self, commit=True):
+    # def clean(self):
+    #     # FORCE UNIQUE - this will return back to the form instead of showing the user an error
+    #     cleaned_data = super(AssayPlateReaderMapForm, self).clean()
+    #
+    #     if AssayPlateReaderMap.objects.filter(
+    #             study_id=self.instance.study.id,
+    #             name=self.cleaned_data.get('name', '')
+    #     ).exclude(pk=self.instance.pk).count():
+    #         raise forms.ValidationError({'name': ['Plate Map name must be unique within study.']})
+    #
+    #     return cleaned_data
+
+        # def save(self, commit=True):
     #     print("made it here")
     #     data = self.cleaned_data
     #     print("data.get('form_make_mifc_on_submit') ", data.get('form_make_mifc_on_submit'))
