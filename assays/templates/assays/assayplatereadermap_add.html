@@ -487,7 +487,7 @@
                                             <tr>
                                                 <td>The database's base units were used to perform unit conversion. To review base units and associated scale factors, go to Studies, Study Components, View Units. Not all conversions are possible with this tool. Some tips: Reporting units that include per cell should include 10^, measurement units that include /well must be molar not mass, and reporting units with /time/10^# cells should have the time in 'day', 'hour', or 'minute', NOT other representations of time (i.e. 'days'). If necessary, the multiplier can be edited manually, but do so with care.</td>
                                             </tr>
-                                            <tr class="hidden">
+                                            <tr class="">
                                                 <td> {{ form.form_data_processing_multiplier_string }} </td>
                                             </tr>
                                         </tbody>
@@ -510,9 +510,10 @@
                                                     {{ form.form_data_processing_multiplier }}
                                                 </div>
                                             </div>
-                                            <div class="col-md-3">
-                                             </div>
-                                            <div class="col-md-4">
+                                            <div class="col-md-7">
+                                                 <div class="plate-map-page-field-contents-large">
+                                                    <h5 id="id_unit_multiplier"></h5>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>

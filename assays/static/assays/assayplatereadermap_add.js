@@ -4080,15 +4080,17 @@ $(document).ready(function () {
                 tdbodycell.appendChild(div_well_use);
                 tdbodycell.appendChild(div_block_raw_value);
                 tdbodycell.appendChild(div_time);
-                tdbodycell.appendChild(div_default_time);
-                tdbodycell.appendChild(div_dilution_factor);
+
                 tdbodycell.appendChild(div_matrix_item);
                 tdbodycell.appendChild(div_location);
+                tdbodycell.appendChild(div_dilution_factor);
+                tdbodycell.appendChild(div_default_time);
                 tdbodycell.appendChild(div_compound);
                 tdbodycell.appendChild(div_cell);
                 tdbodycell.appendChild(div_setting);
                 tdbodycell.appendChild(div_collection_volume);
                 tdbodycell.appendChild(div_collection_time);
+
                 tdbodycell.appendChild(div_standard_value);
                 trbodyrow.appendChild(tdbodycell);
 
@@ -4310,6 +4312,9 @@ $(document).ready(function () {
             global_calibration_form_data_processing_multiplier_string_display = global_calibration_form_data_processing_multiplier_string;
             $('#id_form_data_processing_multiplier').val(generalFormatNumber(global_calibration_form_data_processing_multiplier));
             $('#id_form_data_processing_multiplier_string').val(global_calibration_form_data_processing_multiplier_string);
+            $('#id_unit_multiplier').text("[" + $('#id_form_calibration_unit').val()+ "] / [" + global_floater_model_standard_unit + "]")
+
+
             $('#id_display_multiplier_message').text(global_calibration_form_data_processing_multiplier_string_display);
             result = 'no'
 
@@ -4386,6 +4391,9 @@ $(document).ready(function () {
             global_calibration_form_data_processing_multiplier_string_display = global_calibration_form_data_processing_multiplier_string;
             $('#id_form_data_processing_multiplier').val(generalFormatNumber(global_calibration_form_data_processing_multiplier));
             $('#id_form_data_processing_multiplier_string').val(global_calibration_form_data_processing_multiplier_string);
+            $('#id_unit_multiplier').text("[" + $('#id_form_calibration_unit').val()+ "] / [" + global_floater_model_standard_unit + "]")
+
+
             $('#id_display_multiplier_message').text(global_calibration_form_data_processing_multiplier_string_display);
 
             $('#refresh_needed_indicator').text('missed');
@@ -4421,6 +4429,8 @@ $(document).ready(function () {
             global_calibration_form_data_processing_multiplier_string_display = global_calibration_form_data_processing_multiplier_string;
             $('#id_form_data_processing_multiplier').val(generalFormatNumber(global_calibration_form_data_processing_multiplier));
             $('#id_form_data_processing_multiplier_string').val(global_calibration_form_data_processing_multiplier_string);
+            $('#id_unit_multiplier').text("[" + $('#id_form_calibration_unit').val()+ "] / [" + global_floater_model_standard_unit + "]")
+
             $('#id_display_multiplier_message').text(global_calibration_form_data_processing_multiplier_string_display);
 
             $('#id_form_data_processing_multiplier_string_short').val('-');
@@ -4501,6 +4511,9 @@ $(document).ready(function () {
         global_calibration_form_data_processing_multiplier_string_display = returnedMultiplierStringDisplay;
         $('#id_form_data_processing_multiplier').val(generalFormatNumber(parseFloat(global_calibration_form_data_processing_multiplier)));
         $('#id_form_data_processing_multiplier_string').val(global_calibration_form_data_processing_multiplier_string);
+        $('#id_unit_multiplier').text("[" + $('#id_form_calibration_unit').val()+ "] / [" + global_floater_model_standard_unit + "]")
+
+
         $('#id_display_multiplier_message').text(global_calibration_form_data_processing_multiplier_string_display);
 
         if (returnedMultiplier == 0) {
