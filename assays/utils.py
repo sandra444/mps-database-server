@@ -3564,7 +3564,7 @@ def sub_function_inside_utils_plate_reader_map_file_guess_plate_size(
 
     return plate_size
 
-# sck adds the plate data to the map item table when file form submitted
+# sck adds the plate data to the map item value table when file form submitted
 def add_update_plate_reader_data_map_item_values_from_file(
         pk_for_file,
         block_dict):
@@ -5106,11 +5106,11 @@ def sub_to_load_processed_data_to_dict(
     this_row.update({'well_name'                : welln                 })
     this_row.update({'well_use'                 : wellu                  })
     # 7,8,9
-    if (time_unit == 'Day'):
+    if (time_unit == 'Day' or time_unit == 'day'):
         this_row.update({'day'                  : st                    })
         this_row.update({'hour': '0'     })
         this_row.update({'minute': '0'     })
-    elif (time_unit == 'Hour'):
+    elif (time_unit == 'Hour' or time_unit == 'hour'):
         this_row.update({'day': '0'})
         this_row.update({'hour'                 : st                    })
         this_row.update({'minute': '0'     })
@@ -5207,11 +5207,11 @@ def sub_to_load_processed_data_to_dict_limited(
     this_row.update({'well_name'                : welln                 })
     # this_row.update({'well_use'                 : wellu                  })
     # 7,8,9
-    if (time_unit == 'Day'):
+    if (time_unit == 'Day' or time_unit == 'day'):
         this_row.update({'day'                  : st                    })
         this_row.update({'hour': '0'     })
         this_row.update({'minute': '0'     })
-    elif (time_unit == 'Hour'):
+    elif (time_unit == 'Hour' or time_unit == 'hour'):
         this_row.update({'day': '0'})
         this_row.update({'hour'                 : st                    })
         this_row.update({'minute': '0'     })
@@ -5596,32 +5596,33 @@ def sandrasGeneralFormatNumberFunction(this_number_in):
         x = float(this_number_in)
         if x == 0:
             formatted_number = '{:.0f}'.format(x)
-        elif x <= 0.00001:
+        elif x < 0.00001:
             formatted_number = '{:.4e}'.format(x)
             #formatted_number = '{:.8f}'.format(x)
-        elif x <= 0.0001:
+        elif x < 0.0001:
+            formatted_number = '{:.4e}'.format(x)
+            # formatted_number = '{:.5f}'.format(x)
+        elif x < 0.001:
             formatted_number = '{:.5f}'.format(x)
-        elif x <= 0.001:
-            formatted_number = '{:.5f}'.format(x)
-        elif x <= 0.01:
+        elif x < 0.01:
             formatted_number = '{:.3f}'.format(x)
-        elif x <= 0.1:
+        elif x < 0.1:
             formatted_number = '{:.3f}'.format(x)
-        elif x <= 1.0:
+        elif x < 1.0:
             formatted_number = '{:.3f}'.format(x)
-        elif x <= 10:
+        elif x < 10:
             formatted_number = '{:.1f}'.format(x)
-        elif x <= 30:
+        elif x < 30:
             formatted_number = '{:.1f}'.format(x)
-        elif x <= 100:
+        elif x < 100:
             formatted_number = '{:.0f}'.format(x)
-        elif x <= 1000:
+        elif x < 1000:
             formatted_number = '{:,.0f}'.format(x)
-        elif x <= 10000:
+        elif x < 10000:
             formatted_number = '{:,.0f}'.format(x)
-        elif x <= 100000:
+        elif x < 100000:
             formatted_number = '{:,.0f}'.format(x)
-        elif x <= 1000000:
+        elif x < 1000000:
             formatted_number = '{:,.0f}'.format(x)
         else:
             formatted_number = '{:.3e}'.format(x)

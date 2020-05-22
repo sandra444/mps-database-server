@@ -2981,6 +2981,7 @@ class AssayPlateReaderMapUpdate(StudyGroupMixin, UpdateView):
             # form_calibration_curve_method_used = form.cleaned_data.get('form_calibration_curve_method_used')
             # print("form_calibration_curve_method_used ", form_calibration_curve_method_used)
 
+            # here here day is in minutes column .... why
 
             data = form.cleaned_data
             # study = get_object_or_404(AssayStudy, pk=self.kwargs['study_id'])
@@ -3051,6 +3052,8 @@ class AssayPlateReaderMapUpdate(StudyGroupMixin, UpdateView):
                 # µg / mL
                 # .id
                 # 6
+                # print(".unit ",data.get('standard_unit').unit)
+                # print(".id ", data.get('standard_unit').id)
 
                 if data.get('form_block_standard_borrow_pk_single_for_storage') == None:
                     borrowed_block_pk = -1
@@ -3113,6 +3116,7 @@ class AssayPlateReaderMapUpdate(StudyGroupMixin, UpdateView):
                         utils_dict_header = find_a_key_by_value_in_dictionary(utils_key_column_header,
                                                                               this_mifc_header)
                         # print("utils_dict_header ", utils_dict_header)
+                        # print("this_mifc_header ", this_mifc_header)
                         # get the value that is associated with this header in the dict
                         this_value = each_dict_in_list.get(utils_dict_header)
                         # print("this_value ", this_value)
@@ -3126,14 +3130,13 @@ class AssayPlateReaderMapUpdate(StudyGroupMixin, UpdateView):
                 # print("  ")
                 # print('list_of_lists_mifc_headers_row_0')
                 # print(list_of_lists_mifc_headers_row_0)
+                # print("  ")
 
                 # First make a csv from the list_of_lists (using list_of_lists_mifc_headers_row_0)
 
                 # or self.objects.study
                 my_study = form.instance.study
                 my_user = self.request.user
-
-                
 
                 # Specify the file for use with the file uploader class
                 bulk_location = upload_file_location(
@@ -3159,7 +3162,10 @@ class AssayPlateReaderMapUpdate(StudyGroupMixin, UpdateView):
                 # Add the UTF-8 BOM
                 list_of_lists_mifc_headers_row_0[0][0] = '\ufeff' + list_of_lists_mifc_headers_row_0[0][0]
 
-                # Write the lines
+                # print("!!!!!!!!")
+                # print("at views.py 3168 - turn this back on later!!!!!")
+                # print("!!!!!!!!")
+                # Write the lines here here uncomment this
                 for one_line_of_data in list_of_lists_mifc_headers_row_0:
                     csv_writer.writerow(one_line_of_data)
 

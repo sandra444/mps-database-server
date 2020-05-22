@@ -191,7 +191,7 @@ $(document).ready(function () {
         , "Points that are marked for exclusion are available for use in the study summary if the appropriate selections are made by the user, but they are hidden by default."
         , "This plate map has no standards. To calibrate, a block of data with standards must be selected. Note that, it is assumed that standards and their associated standard blanks will be on the same plate. Thus, if standards are 'borrowed', standard blanks are also borrowed."
 
-        , "If calibrating, this is the multiplier that will be applied to the calibrated values. If not calibrating, this is the multiplier that will be applied to the raw values. Click to show the details for more information about how this multiplier was obtained."
+        , "If calibrating, this is the multiplier that will be applied to the calibrated values. If not calibrating, this is the multiplier that will be applied to the raw values. This can be set manually, if needed."
         , "Use Copy to copy sections of the assay plate map to other wells in the plate. A popular method of using this feature is to start from an Existing Study Matrix, then copy the matrix items from that plate, change to Start From a Blank Assay Plate Map, select the desired plate size, then paste that matrix items on the plate. "
         , "To make these data available in the Study Summary, check the box and click the Submit button. If these data have already been sent to the Study Summary, it is recommended that these data be removed from the study prior to resubmitting them (remove associated data file on the Upload Data File page).  If replicates are present, the average of unchecked replicates will be sent to the Study Summary."
 
@@ -1179,7 +1179,7 @@ $(document).ready(function () {
 
         //HANDY get the text from selectized
         global_calibrate_form_block_standard_borrow_pk_platemap_single_for_storage = $("#id_ns_block_standard_borrow_string_to_block_pk_back_to_platemap_pk").selectize()[0].selectize.options[global_calibrate_form_block_standard_borrow_pk_single_for_storage]['text'];
-        console.log("global_calibrate_form_block_standard_borrow_pk_platemap_single_for_storage ",global_calibrate_form_block_standard_borrow_pk_platemap_single_for_storage)
+        //console.log("global_calibrate_form_block_standard_borrow_pk_platemap_single_for_storage ",global_calibrate_form_block_standard_borrow_pk_platemap_single_for_storage)
         $("#id_form_block_standard_borrow_pk_single_for_storage").val(         global_calibrate_form_block_standard_borrow_pk_single_for_storage);
         $("#id_form_block_standard_borrow_pk_platemap_single_for_storage").val(global_calibrate_form_block_standard_borrow_pk_platemap_single_for_storage);
 
@@ -1705,8 +1705,11 @@ $(document).ready(function () {
         var each_plate_index = 0;
 
         $.each(lol_processed, function (ir, row) {
-            // console.log("rowcounter ", rowcounter)
-            // console.log("--row ", row)
+
+            if (each_or_average === 'average') {
+                // console.log("rowcounter ", rowcounter)
+                // console.log("--row ", row)
+            }
 
             var tr = document.createElement('TR');
             $(tr).attr('row-index', rowcounter);
@@ -1723,10 +1726,13 @@ $(document).ready(function () {
                 }
                 let myUtilsName = findTheUtilsKeyFromMIFCHeader(col);
                 let passedIn = row[myUtilsName];
-                // console.log("colcounter ", colcounter)
-                // console.log("--col ", col)
-                // console.log("--myUtilsName ", myUtilsName)
-                // console.log("--passedIn ", passedIn)
+
+                if (each_or_average === 'average') {
+                    // console.log("colcounter ", colcounter)
+                    // console.log("--col ", col)
+                    // console.log("--myUtilsName ", myUtilsName)
+                    // console.log("--passedIn ", passedIn)
+                }
 
                 var td = document.createElement('TD');
                 $(td).attr('col-index', colcounter);
@@ -2454,7 +2460,7 @@ $(document).ready(function () {
                 error: function (xhr, errmsg, err) {
                     window.spinner.stop();
                     // $("#test_me1").text("error happened");
-                    console.log("return error....")
+                    // console.log("return error....")
                     alert('An error has occurred (starting from another plate map), try a different matrix, assay plate map, or start from an empty plate.');
                     console.log(xhr.status + ": " + xhr.responseText);
                 }
@@ -4306,6 +4312,20 @@ $(document).ready(function () {
             $('#id_form_data_processing_multiplier_string').val(global_calibration_form_data_processing_multiplier_string);
             $('#id_display_multiplier_message').text(global_calibration_form_data_processing_multiplier_string_display);
             result = 'no'
+
+            $('#id_form_data_processing_multiplier_string_short').val('-');
+            $('#id_form_data_processing_multiplier_value_short').val('-');
+            $('#id_form_data_processing_multiplier_string1').val('-');
+            $('#id_form_data_processing_multiplier_string2').val('-');
+            $('#id_form_data_processing_multiplier_string3').val('-');
+            $('#id_form_data_processing_multiplier_string4').val('-');
+            $('#id_form_data_processing_multiplier_string5').val('-');
+            $('#id_form_data_processing_multiplier_string6').val('-');
+            $('#id_form_data_processing_multiplier_string7').val('-');
+            $('#id_form_data_processing_multiplier_string8').val('-');
+            $('#id_form_data_processing_multiplier_string9').val('-');
+            $('#id_multiplier_breakdown').addClass('hidden');
+
         } else {
             if (
                 ((global_floater_model_standard_unit.search('mol') >= 0
@@ -4369,6 +4389,20 @@ $(document).ready(function () {
             $('#id_display_multiplier_message').text(global_calibration_form_data_processing_multiplier_string_display);
 
             $('#refresh_needed_indicator').text('missed');
+
+            $('#id_form_data_processing_multiplier_string_short').val('-');
+            $('#id_form_data_processing_multiplier_value_short').val('-');
+            $('#id_form_data_processing_multiplier_string1').val('-');
+            $('#id_form_data_processing_multiplier_string2').val('-');
+            $('#id_form_data_processing_multiplier_string3').val('-');
+            $('#id_form_data_processing_multiplier_string4').val('-');
+            $('#id_form_data_processing_multiplier_string5').val('-');
+            $('#id_form_data_processing_multiplier_string6').val('-');
+            $('#id_form_data_processing_multiplier_string7').val('-');
+            $('#id_form_data_processing_multiplier_string8').val('-');
+            $('#id_form_data_processing_multiplier_string9').val('-');
+            $('#id_multiplier_breakdown').addClass('hidden');
+
         } else {
             dataProcessingFindTheMultiplier(mycounter);
         }
@@ -4388,6 +4422,19 @@ $(document).ready(function () {
             $('#id_form_data_processing_multiplier').val(generalFormatNumber(global_calibration_form_data_processing_multiplier));
             $('#id_form_data_processing_multiplier_string').val(global_calibration_form_data_processing_multiplier_string);
             $('#id_display_multiplier_message').text(global_calibration_form_data_processing_multiplier_string_display);
+
+            $('#id_form_data_processing_multiplier_string_short').val('-');
+            $('#id_form_data_processing_multiplier_value_short').val('-');
+            $('#id_form_data_processing_multiplier_string1').val('-');
+            $('#id_form_data_processing_multiplier_string2').val('-');
+            $('#id_form_data_processing_multiplier_string3').val('-');
+            $('#id_form_data_processing_multiplier_string4').val('-');
+            $('#id_form_data_processing_multiplier_string5').val('-');
+            $('#id_form_data_processing_multiplier_string6').val('-');
+            $('#id_form_data_processing_multiplier_string7').val('-');
+            $('#id_form_data_processing_multiplier_string8').val('-');
+            $('#id_form_data_processing_multiplier_string9').val('-');
+            $('#id_multiplier_breakdown').addClass('hidden');
 
         } else {
             // do after functions in call since ajax race issues
@@ -4455,6 +4502,34 @@ $(document).ready(function () {
         $('#id_form_data_processing_multiplier').val(generalFormatNumber(parseFloat(global_calibration_form_data_processing_multiplier)));
         $('#id_form_data_processing_multiplier_string').val(global_calibration_form_data_processing_multiplier_string);
         $('#id_display_multiplier_message').text(global_calibration_form_data_processing_multiplier_string_display);
+
+        if (returnedMultiplier == 0) {
+            $('#id_form_data_processing_multiplier_string_short').val('-');
+            $('#id_form_data_processing_multiplier_value_short').val('-');
+            $('#id_form_data_processing_multiplier_string1').val('-');
+            $('#id_form_data_processing_multiplier_string2').val('-');
+            $('#id_form_data_processing_multiplier_string3').val('-');
+            $('#id_form_data_processing_multiplier_string4').val('-');
+            $('#id_form_data_processing_multiplier_string5').val('-');
+            $('#id_form_data_processing_multiplier_string6').val('-');
+            $('#id_form_data_processing_multiplier_string7').val('-');
+            $('#id_form_data_processing_multiplier_string8').val('-');
+            $('#id_form_data_processing_multiplier_string9').val('-');
+            $('#id_multiplier_breakdown').addClass('hidden');
+        } else {
+            $('#id_form_data_processing_multiplier_string_short').val(multiplier_data[0].multiplier_string_short);
+            $('#id_form_data_processing_multiplier_value_short').val(multiplier_data[0].multiplier_value_short);
+            $('#id_form_data_processing_multiplier_string1').val(multiplier_data[0].multiplier_string1);
+            $('#id_form_data_processing_multiplier_string2').val(multiplier_data[0].multiplier_string2);
+            $('#id_form_data_processing_multiplier_string3').val(multiplier_data[0].multiplier_string3);
+            $('#id_form_data_processing_multiplier_string4').val(multiplier_data[0].multiplier_string4);
+            $('#id_form_data_processing_multiplier_string5').val(multiplier_data[0].multiplier_string5);
+            $('#id_form_data_processing_multiplier_string6').val(multiplier_data[0].multiplier_string6);
+            $('#id_form_data_processing_multiplier_string7').val(multiplier_data[0].multiplier_string7);
+            $('#id_form_data_processing_multiplier_string8').val(multiplier_data[0].multiplier_string8);
+            $('#id_form_data_processing_multiplier_string9').val(multiplier_data[0].multiplier_string9);
+            $('#id_multiplier_breakdown').removeClass('hidden');
+        }
 
     };
 
@@ -4524,11 +4599,11 @@ $(document).ready(function () {
         } else if (this_number < 10000) {
             formatted_number = this_number.toFixed(0);
         } else if (this_number < 100000) {
-            formatted_number = this_number.toFixed(0);
+            formatted_number = this_number.toExponential(2);
         } else if (this_number < 1000000) {
-            formatted_number = this_number.toFixed(0);
+            formatted_number = this_number.toExponential(2);
         } else if (this_number < 10000000) {
-            formatted_number = this_number.toFixed(0);
+            formatted_number = this_number.toExponential(2);
         } else {
             formatted_number = this_number.toExponential(2);
         }

@@ -2904,9 +2904,9 @@ class AssayPlateReaderMap(FlaggableModel):
 
     class Meta(object):
         verbose_name_plural = 'Assay Plate Reader Map'
-        unique_together = [
-            ('study', 'name')
-        ]
+        # unique_together = [
+        #     ('study', 'name')
+        # ]
 
     study = models.ForeignKey(
         AssayStudy,

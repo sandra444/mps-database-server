@@ -2452,6 +2452,20 @@ class AssayPlateReaderMapForm(BootstrapForm):
 
         # HANDY - save problems, this is likely the cause (required fields!)
         self.fields['form_data_processing_multiplier_string'].required = False
+
+        self.fields['form_data_processing_multiplier_string_short'].required = False
+        self.fields['form_data_processing_multiplier_value_short'].required = False
+
+        self.fields['form_data_processing_multiplier_string1'].required = False
+        self.fields['form_data_processing_multiplier_string2'].required = False
+        self.fields['form_data_processing_multiplier_string3'].required = False
+        self.fields['form_data_processing_multiplier_string4'].required = False
+        self.fields['form_data_processing_multiplier_string5'].required = False
+        self.fields['form_data_processing_multiplier_string6'].required = False
+        self.fields['form_data_processing_multiplier_string7'].required = False
+        self.fields['form_data_processing_multiplier_string8'].required = False
+        self.fields['form_data_processing_multiplier_string9'].required = False
+
         self.fields['form_data_parsable_message'].required = False
         self.fields['form_calibration_curve_method_used'].required = False
         self.fields['form_calibration_equation'].required = False
@@ -2677,8 +2691,32 @@ class AssayPlateReaderMapForm(BootstrapForm):
 
     # HANDY - how to make an extra field a widget so can manipulate it eg readonly
     form_data_processing_multiplier_string = forms.CharField(
-        widget=forms.Textarea(attrs={'rows': 1, 'readonly': 'readonly', 'required': False})
+        widget=forms.Textarea(attrs={'rows': 3, 'readonly': 'readonly', 'required': False})
     )
+
+    form_data_processing_multiplier_string_short = forms.CharField(
+        widget=forms.Textarea(attrs={'rows': 1, 'readonly': 'readonly'}))
+    form_data_processing_multiplier_value_short = forms.CharField(
+        widget=forms.Textarea(attrs={'rows': 1, 'readonly': 'readonly'}))
+
+    form_data_processing_multiplier_string1 = forms.CharField(
+        widget=forms.Textarea(attrs={'rows': 1, 'readonly': 'readonly'}))
+    form_data_processing_multiplier_string2 = forms.CharField(
+        widget=forms.Textarea(attrs={'rows': 1, 'readonly': 'readonly'}))
+    form_data_processing_multiplier_string3 = forms.CharField(
+        widget=forms.Textarea(attrs={'rows': 1, 'readonly': 'readonly'}))
+    form_data_processing_multiplier_string4 = forms.CharField(
+        widget=forms.Textarea(attrs={'rows': 1, 'readonly': 'readonly'}))
+    form_data_processing_multiplier_string5 = forms.CharField(
+        widget=forms.Textarea(attrs={'rows': 1, 'readonly': 'readonly'}))
+    form_data_processing_multiplier_string6 = forms.CharField(
+        widget=forms.Textarea(attrs={'rows': 1, 'readonly': 'readonly'}))
+    form_data_processing_multiplier_string7 = forms.CharField(
+        widget=forms.Textarea(attrs={'rows': 1, 'readonly': 'readonly'}))
+    form_data_processing_multiplier_string8 = forms.CharField(
+        widget=forms.Textarea(attrs={'rows': 2, 'readonly': 'readonly'}))
+    form_data_processing_multiplier_string9 = forms.CharField(
+        widget=forms.Textarea(attrs={'rows': 1, 'readonly': 'readonly'}))
 
     form_data_parsable_message = forms.CharField(
         widget=forms.Textarea(attrs={'rows': 6, 'readonly': 'readonly', 'required': False})
@@ -2772,6 +2810,7 @@ class AssayPlateReaderMapForm(BootstrapForm):
     )
     form_make_mifc_on_submit = forms.BooleanField(required=False)
 
+    # Let them name the maps the same if they really want to. Does not really matter to me
     # def clean(self):
     #     # FORCE UNIQUE - this will return back to the form instead of showing the user an error
     #     cleaned_data = super(AssayPlateReaderMapForm, self).clean()
@@ -2780,7 +2819,7 @@ class AssayPlateReaderMapForm(BootstrapForm):
     #             study_id=self.instance.study.id,
     #             name=self.cleaned_data.get('name', '')
     #     ).exclude(pk=self.instance.pk).count():
-    #         raise forms.ValidationError({'name': ['Plate Map name must be unique within study.']})
+    #         raise forms.ValidationError({'name': ['Plate Map name must be unique within study. This plate map is now corrupted. Go back to the Plate Map List and click to Add Plate Map and start again.']})
     #
     #     return cleaned_data
 

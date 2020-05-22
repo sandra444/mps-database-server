@@ -103,6 +103,52 @@
                 <div>{{form.form_hold_the_data_block_metadata_string}}</div>
                 <div>{{form.form_hold_the_omits_string}}</div>
                 <div>{{form.form_hold_the_notes_string}}</div>
+                <p id="id_used_curve" class="hidden"></p>
+            </div>
+
+            {#        This is the section to show the user prettier errors#}
+            <div>
+                {% include 'errors.html' %}
+
+                {% if form.errors %}
+                    {% for field in form %}
+                        {% if field.errors %}
+                            {% for error in field.errors %}
+                                <div class="alert alert-danger" role="alert">
+                                    <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                                    <span class="sr-only">Error:</span>
+                                    {{field.label}}: {{error}}
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+
+                {% if form.non_field_errors %}
+                    <div class="alert alert-danger" role="alert">
+                        <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                        <span class="sr-only">Error:</span>
+                        {{ form.non_field_errors }}
+                        form.errors<br>
+                        {{ form.errors }}<br>
+                    </div>
+                {% endif %}
+                {# Formset errors #}
+                {% if formset.errors.0 %}
+                    formset.errors<br>
+                    {{ formset.errors }}<br>
+                    {% for dict in formset.errors %}
+                        {% for key,value in dict.items %}
+                            {% if key %}
+                                <div class="alert alert-danger" role="alert">
+                                    <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                                    <span class="sr-only">Error:</span>
+                                    {{ forloop.parentloop.counter }}.) {{ key }} : {{ value }}
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                    {% endfor %}
+                {% endif %}
             </div>
 
             {# global plate map edits #}
@@ -122,7 +168,7 @@
                                 <div class="plate-map-page-radio-contents">
                                     <label><input type="radio" name="start_map" value="a_plate" checked> Blank Assay Plate Map </label>
                                     <label><input type="radio" name="start_map" value="a_platemap"> Existing Assay Plate Map </label>
-                                    <label><input type="radio" name="start_map" value="a_matrix"> Existing Study Matrix </label>
+                                    <label><input type="radio" name="start_map" value="a_matrix"> Existing Study Collection </label>
                                 </div>
                             </div>
 {#                            <div class="col-md-2"></div>#}
@@ -183,7 +229,7 @@
                                     <div class="col-md-3">
                                         <div class="plate-map-page-field-labels-small">
                                             <div><p id="matrix_select_tooltip"></p>
-                                                <label for="matrix_select_tooltip">Starting Study Matrix* &nbsp;</label>
+                                                <label for="matrix_select_tooltip">Starting Study Collection* &nbsp;</label>
                                             </div>
                                         </div>
                                     </div>
@@ -409,59 +455,148 @@
                         </div>
                     </div>
 
-{#                    {% if form.form_number_file_block_combos.value > 0 %}#}
-
-                        <div class="row">
-                            <div class="col-md-3">
-                                <div class="plate-map-page-field-labels-small">
-                                    <div><p id="plate_map_multiplier_for_processing"></p>
-                                        <label for="plate_map_multiplier_for_processing">Data Processing Multiplier &nbsp;</label>
+                    {# START of the MULITIPIER INFORMATION Section#}
+                    <div>
+                        <div>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="plate-map-page-field-contents-medium">
+                                        <button type="button" class="btn btn-primary" id="multiplierDetailsButton">Show/Hide Unit Conversion Details</button>
+                                    </div>
+                                </div>
+                                <div class="col-md-8">
+                                    <div class="plate-map-page-field-contents-large">
+                                        <h4 id="id_display_multiplier_message"></h4>
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-md-2">
-                                <div class="plate-map-page-field-contents-medium">
-                                    {{ form.form_data_processing_multiplier }}
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="plate-map-page-field-contents-medium">
-                                    <button type="button" class="btn btn-primary" id="multiplierDetailsButton">Show/Hide Multiplier Details</button>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="plate-map-page-field-contents-medium">
-                                    <p id="id_display_multiplier_message"></p>
-                                </div>
-                            </div>
+
                         </div>
 
                         <div class="plate-map-page-show-multiplier-details">
                             <br>
                             <div class="row">
                                 <div class="col-md-12">
-
                                     <table class="table table-striped">
                                         <thead>
-                                          <tr>
-                                            <th> Multiplier Details </th>
-                                          </tr>
+{#                                          <tr>#}
+{#                                            <th>  </th>#}
+{#                                          </tr>#}
                                         </thead>
                                         <tbody>
                                             <tr>
                                                 <td>The database's base units were used to perform unit conversion. To review base units and associated scale factors, go to Studies, Study Components, View Units. Not all conversions are possible with this tool. Some tips: Reporting units that include per cell should include 10^, measurement units that include /well must be molar not mass, and reporting units with /time/10^# cells should have the time in 'day', 'hour', or 'minute', NOT other representations of time (i.e. 'days'). If necessary, the multiplier can be edited manually, but do so with care.</td>
                                             </tr>
-                                            <tr>
+                                            <tr class="hidden">
                                                 <td> {{ form.form_data_processing_multiplier_string }} </td>
                                             </tr>
                                         </tbody>
                                     </table>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="">
+                                        <div class="row">
+                                            <div class="col-md-3">
+                                                <div class="plate-map-page-field-labels-small">
+                                                    <div><p id="plate_map_multiplier_for_processing"></p>
+                                                        <label for="plate_map_multiplier_for_processing">Data Processing Multiplier &nbsp;</label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <div class="plate-map-page-field-contents-medium">
+                                                    {{ form.form_data_processing_multiplier }}
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                             </div>
+                                            <div class="col-md-4">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
 
+                                    <table class="table table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th> Calculated Value </th>
+                                                <th> Multiplier Pieces </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td> {{ form.form_data_processing_multiplier_value_short }} </td>
+                                                <td> {{ form.form_data_processing_multiplier_string_short }} </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+{#                                    <h3> Multiplier Breakdown </h3>#}
+
+                                    <table class="table table-striped" id="id_multiplier_breakdown">
+                                        <thead>
+                                          <tr>
+                                              <th> Reason for Conversion </th>
+                                              <th> Multiplier </th>
+                                          </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td> Initial Base Unit Conversion (if applicable)</td>
+                                                <td> {{ form.form_data_processing_multiplier_string1 }} </td>
+                                            </tr>
+                                            <tr>
+                                                <td> Molar to Mass (if applicable)</td>
+                                                <td> {{ form.form_data_processing_multiplier_string2 }} </td>
+                                            </tr>
+                                            <tr>
+                                                <td> Measurement Unit is per well (if applicable) </td>
+                                                <td> {{ form.form_data_processing_multiplier_string3 }} </td>
+                                            </tr>
+                                            <tr>
+                                                <td> Secondary Base Unit Conversion (if applicable)</td>
+                                                <td> {{ form.form_data_processing_multiplier_string4 }} </td>
+                                            </tr>
+                                            <tr>
+                                                <td> Unit of the Efflux Volume (if applicable, unit only)</td>
+                                                <td> {{ form.form_data_processing_multiplier_string5 }} </td>
+                                            </tr>
+                                            <tr>
+                                                <td> Unit of the Efflux Collection Time (if applicable, unit only)</td>
+                                                <td> {{ form.form_data_processing_multiplier_string6 }} </td>
+                                            </tr>
+                                            <tr>
+                                                <td> Adjust for the Number of Cells (if applicable)</td>
+                                                <td> {{ form.form_data_processing_multiplier_string7 }} </td>
+                                            </tr>
+                                            <tr>
+                                                <td> Final Base Unit Conversion (if needed) </td>
+                                                <td> {{ form.form_data_processing_multiplier_string8 }} </td>
+                                            </tr>
+{#                                            <tr>#}
+{#                                                <td> ...</td>#}
+{#                                                <td> {{ form.form_data_processing_multiplier_string9 }} </td>#}
+{#                                            </tr>#}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <h3> Processing Based On Selections </h3>
                                     <table class="table table-striped">
                                         <thead>
                                           <tr>
                                             <th> Option </th>
-                                            <th> Processing Algorithm </th>
+                                            <th> Processing Algorithm (Units are Handled in the Multiplier)</th>
                                           </tr>
                                         </thead>
                                         <tbody>
@@ -483,10 +618,9 @@
                                 </div>
                                 <div class="col-md-4"></div>
                             </div>
-
                         </div>
-
-{#                    {% endif %}#}
+                    </div>
+                    {# END of the MULITIPIER INFORMATION Section#}
 
                 </div>
 
@@ -559,6 +693,12 @@
                         {% endif %}
                     </div>
 
+
+
+
+
+
+
                     {# Working on the Samples #}
                     <div>
                         {% if not review %}
@@ -586,7 +726,7 @@
                                     <div class="row">
                                         <div class="col-md-3">
                                             <div><p id="sample_matrix_item_tooltip"></p>
-                                                <label for="sample_matrix_item_tooltip">Matrix Item &nbsp;</label>
+                                                <label for="sample_matrix_item_tooltip">Chip &nbsp;</label>
                                             </div>
                                         </div>
                                         <div class="col-md-3">
@@ -970,7 +1110,7 @@
                                                                 <span> </span>
                                                             </label>
                                                             <label for="show_matrix_item" class="btn btn-default active">
-                                                                Matrix Item
+                                                                Chip
                                                             </label>
                                                         </div>
                                                     </div>
@@ -1268,7 +1408,7 @@
                     {% endif %}
                 </div>
 
-                {% include 'errors.html' %}
+
 
                 {% comment %}  <h6>tracking begin</h6>
                 {% include 'tracking.html' %}
@@ -1501,12 +1641,12 @@
 
                         <div class="plate-calibration-curve-guts-yes hidden">
                             <div class="row">
-                                <div class="col-md-3">
+                                <div class="col-md-4">
                                     <div class="plate-map-page-field-contents-medium">
-                                        <button type="button" class="btn btn-primary" id="parameterDetailsButton">Show/Hide Parameter Details</button>
+                                        <button type="button" class="btn btn-primary" id="parameterDetailsButton">Show/Hide Standard Parameter Details</button>
                                     </div>
                                 </div>
-                                <div class="col-md-9">
+                                <div class="col-md-8">
                                 </div>
                             </div>
                         </div>
@@ -1660,11 +1800,20 @@
                         </div>
 
 
+                         <div class="data-processing-errors hidden">
+                            <br>
+                                <h2>Data Processing Errors</h2>
+                                    <div class="alert alert-danger" role="alert">
+                                        <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                                        <span class="sr-only">Error:</span>
+                                        <p>{{ form.form_data_parsable_message }} </p>
+                                    </div>
+                        </div>
+
                         {# samples table  #}
                         <div class="plate-calibration-or-processing-yes hidden">
                             <br>
                             <h2>Processed Sample Data</h2>
-
                                 <div class="hidden" >
                                     <div class="row">
                                         <div class="col-md-3">
@@ -1732,13 +1881,6 @@
                                 </div>
                         </div>
 
-                        <div class="data-processing-errors hidden">
-                            <br>
-                            <h2>Data Processing Errors</h2>
-                            <p>{{ form.form_data_parsable_message }} </p>
-                            <p id="id_used_curve" class="hidden"></p>
-                        </div>
-
 
                         {# Send to main study #}
 
@@ -1800,7 +1942,7 @@
                 {# changes are made to the formsets and then saved   #}
                 {# need this (mangement_form) or form will not save   #}
                 {{ formset.management_form }}
-                <div class="hidden">
+                <div class="">
                     <div class="no-selectize">
                         {# this is the main formset (plate and plate items)  #}
                         <h3>FormSet </h3>
@@ -1819,7 +1961,7 @@
 
                 {% if form.form_number_file_block_combos.value == 0 %}
                     {{ value_formset.management_form }}
-                    <div class="hidden">
+                    <div class="">
                         <div class="no-selectize">
                             <h3>value_formset </h3>
                             <div id="value_formset">
@@ -1864,20 +2006,20 @@
             </div>
 
 {#        HANDY any save problems turn this on#}
-            <div class="hidden">
-                {% if not review %}
-                    <div>
-                        <h2>For Development Testing</h2>
-                        Use for error checking
-                        For testing<br>
-                        form.errors<br>
-                        {{ form.errors }}<br>
-                        formset.errors<br>
-                        {{ formset.errors }}<br>
-                        value_formset.errors<br>
-                        {{ value_formset.errors }}<br>
-                    </div>
-                {% endif %}
+{#            <div class="hidden">#}
+{#                {% if not review %}#}
+{#                    <div>#}
+{#                        <h2>For Development Testing</h2>#}
+{#                        Use for error checking#}
+{#                        For testing<br>#}
+{#                        form.errors<br>#}
+{#                        {{ form.errors }}<br>#}
+{#                        formset.errors<br>#}
+{#                        {{ formset.errors }}<br>#}
+{#                        value_formset.errors<br>#}
+{#                        {{ value_formset.errors }}<br>#}
+{#                    </div>#}
+{#                {% endif %}#}
             </div>
 
         </div>
