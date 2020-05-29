@@ -586,8 +586,11 @@ $(document).ready(function () {
         var name_input = $('#id_group_name')
             .clone()
             .removeAttr('id')
-            .addClass('group-name')
+            .addClass('group-name required')
             .attr('data-row', row_index);
+
+        // SLOPPY: MAKE REQUIRED FOR NOW
+        name_input.attr('required', 'required')
 
         new_row.append(
             $('<td>').append(name_input)
