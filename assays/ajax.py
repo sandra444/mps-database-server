@@ -4151,7 +4151,7 @@ def fetch_information_for_plate_map_layout(request):
         #     print(matrix_item.stringify_settings())
         #     print(matrix_item.matrix.name)
 
-        # search term - change if CHIP SETUP changes todo-sck I think this is the only place in plate map stuff
+        # search term - change if CHIP SETUP changes todo-sck here here I think this is the only place in plate map stuff
         for each in matrix_items:
             short_compound = ""
             short_cell = ""
@@ -4599,11 +4599,24 @@ def fetch_information_for_value_set_of_plate_map_for_data_block(request):
     elif not this_data_file_block.isnumeric():
         return HttpResponseServerError()
 
+    # 20200522 changing schema since do not need to allow edit after plate map association
+    # this_queryset = AssayPlateReaderMapItemValue.objects.filter(
+    #     assayplatereadermapdatafileblock_id=this_data_file_block
+    # ).filter(
+    #     assayplatereadermap_id=this_platemap
+    # ).order_by('plate_index', )
+
+    # 20200522 update
     this_queryset = AssayPlateReaderMapItemValue.objects.filter(
         assayplatereadermapdatafileblock_id=this_data_file_block
     ).filter(
         assayplatereadermap_id=this_platemap
-    ).order_by('plate_index', )
+    ).prefetch_related(
+        'assayplatereadermap',
+    ).order_by(
+        'assayplatereadermapitem__plate_index',
+    )
+    # print("this_queryset ", this_queryset)
 
     min_raw_value = this_queryset.aggregate(Min('raw_value')).get('raw_value__min')
     max_raw_value = this_queryset.aggregate(Max('raw_value')).get('raw_value__max')
@@ -4683,14 +4696,16 @@ def fetch_information_for_study_platemap_standard_file_blocks(request):
         study_id=this_study
     ).filter(
         assayplatereadermapdatafileblock__isnull=False
-    ).filter(
-        well_use='standard'
     ).prefetch_related(
         'assayplatereadermapdatafileblock',
         'assayplatereadermap',
+        'assayplatereadermapitem',
+    ).filter(
+        assayplatereadermapitem__well_use='standard'
     ).order_by(
         'assayplatereadermapdatafileblock__id', 'well_use'
     )
+    # here here make sure gets well_use after change schema
 
     # print(as_value_formset_with_file_block_standard)
 
@@ -4830,7 +4845,7 @@ def fetch_multiplier_for_data_processing_plate_map_integration(request):
     else:
         multiplier_string1 = rmultiplier_step_string
         multiplier_value_short = rmultiplier
-        multiplier_string_short = str(sandrasGeneralFormatNumberFunction(rmultiplier))
+        multiplier_string_short = str(sandrasGeneralFormatNumberFunction(rmultiplier)) + " * "
 
     # print("**0 first send: ", rmultiplier_string)
     # print("**0 first send: ", rmultiplier)
@@ -4839,8 +4854,10 @@ def fetch_multiplier_for_data_processing_plate_map_integration(request):
     if more_conversions_needed == "error" or more_conversions_needed == "done":
         multiplier = multiplier * rmultiplier
         multiplier_string = multiplier_string + rmultiplier_string
-        multiplier_string_display = multiplier_string_display + " " + rmultiplier_string_display
+        multiplier_string_display = multiplier_string_display + rmultiplier_string_display
         more_conversions_needed = "STOP"
+        # add the rest of the 1s to the string
+        multiplier_string_short = multiplier_string_short + "1 * 1 * 1 * 1 * 1 * 1 * 1"
 
         # print("**1A first send: ", multiplier_string)
         # print("**1A first send: ", multiplier)
@@ -4961,7 +4978,7 @@ def fetch_multiplier_for_data_processing_plate_map_integration(request):
         else:
             multiplier_string4 = rmultiplier_step_string
             multiplier_value_short = multiplier_value_short * rmultiplier
-            multiplier_string_short = multiplier_string_short + str(sandrasGeneralFormatNumberFunction(rmultiplier))
+            multiplier_string_short = multiplier_string_short + str(sandrasGeneralFormatNumberFunction(rmultiplier)) + " * "
 
         # print("1B.2** after mole to mass: ", multiplier_string)
         # print("1B.2** after mole to mass: ", multiplier)
@@ -4974,6 +4991,8 @@ def fetch_multiplier_for_data_processing_plate_map_integration(request):
         multiplier_string = multiplier_string + rmultiplier_string
         multiplier_string_display = multiplier_string_display + " " + rmultiplier_string_display
         more_conversions_needed = "STOP"
+        # add the rest of the 1s to the string
+        multiplier_string_short = multiplier_string_short + "1 * 1 * 1 * 1 "
 
         # print("2A** after per mol to mass and /well: ", multiplier_string)
         # print("2A** after per mol to mass and /well: ", multiplier)
@@ -5192,7 +5211,8 @@ def fetch_multiplier_for_data_processing_plate_map_integration(request):
                 intcellNumberExponent = int(cellNumberExponent)
                 multiplier = multiplier * (10 ** intcellNumberExponent) / cell_count
                 multiplier_string = multiplier_string + "*(10^" + str(intcellNumberExponent) + ")/(" + str(cell_count) + "*10^" + str(intcellNumberExponent) + " cells)"
-                mysubstring = "(10^" + str(intcellNumberExponent) + ")/(" + str(cell_count) + "*10^" + str(intcellNumberExponent) + " cells)" + " Note: 10^" + str(intcellNumberExponent) + " will remain in the denominator."
+                mysubstring = "(10^" + str(intcellNumberExponent) + ")/(" + str(cell_count) + "*10^" + str(intcellNumberExponent) + " cells)"
+                              # + " Note: 10^" + str(intcellNumberExponent) + " will remain in the denominator."
                 mysubmultiplier = (10 ** intcellNumberExponent) / cell_count
             except:
                 multiplier = 0.0

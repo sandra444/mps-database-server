@@ -2395,17 +2395,17 @@ class AssayPlateReaderMapForm(BootstrapForm):
         # get a record in the table with the plate index of 0 and that have a file block id
         as_value_formset_with_file_block = AssayPlateReaderMapItemValue.objects.filter(
             assayplatereadermap=my_instance.id
+        ).prefetch_related(
+            'assayplatereadermapitem',
         ).filter(
-            plate_index=0
+            assayplatereadermapitem__plate_index=0
         ).filter(
             assayplatereadermapdatafileblock__isnull=False
-        # ).prefetch_related(
-        #     'assayplatereadermapdatafile',
-        #     'assayplatereadermapdatafileblock',
         ).order_by(
             'assayplatereadermapdatafileblock__id',
-            'plate_index',
         )
+
+        # here here make sure the plate map index works after remove from value
 
         distinct_plate_map_with_select_string = []
         distinct_plate_map_with_block_pk = []
@@ -2522,14 +2522,17 @@ class AssayPlateReaderMapForm(BootstrapForm):
                 study_id=self.study
             ).filter(
                 assayplatereadermapdatafileblock__isnull=False
-            ).filter(
-                well_use='standard'
             ).prefetch_related(
                 'assayplatereadermapdatafileblock',
                 'assayplatereadermap',
+                'assayplatereadermapitem',
+            ).filter(
+                assayplatereadermapitem__well_use='standard'
             ).order_by(
-                'assayplatereadermapdatafileblock__id', 'well_use'
+                'assayplatereadermapdatafileblock__id', 'assayplatereadermapitem__well_use'
             )
+
+            # here here check well_use after change
 
             # print('as_value_formset_with_file_block_standard')
             # print(as_value_formset_with_file_block_standard)
@@ -2634,7 +2637,8 @@ class AssayPlateReaderMapForm(BootstrapForm):
             ('select_one', 'Select One'),
             ('no_calibration', 'No Calibration'),
             ('best_fit', 'Best Fit'),
-            ('logistic4', '4 Parameter Logistic'),
+            ('logistic4', '4 Parameter Logistic w/fitted lower bound'),
+            ('logistic4a0', '4 Parameter Logistic w/lower bound = 0'),
             ('linear', 'Linear w/fitted intercept'),
             ('linear0', 'Linear w/intercept = 0'),
             ('log', 'Logarithmic'),
@@ -2700,23 +2704,23 @@ class AssayPlateReaderMapForm(BootstrapForm):
         widget=forms.Textarea(attrs={'rows': 1, 'readonly': 'readonly'}))
 
     form_data_processing_multiplier_string1 = forms.CharField(
-        widget=forms.Textarea(attrs={'rows': 1, 'readonly': 'readonly'}))
+        widget=forms.Textarea(attrs={'rows': 2, 'readonly': 'readonly'}))
     form_data_processing_multiplier_string2 = forms.CharField(
-        widget=forms.Textarea(attrs={'rows': 1, 'readonly': 'readonly'}))
+        widget=forms.Textarea(attrs={'rows': 2, 'readonly': 'readonly'}))
     form_data_processing_multiplier_string3 = forms.CharField(
-        widget=forms.Textarea(attrs={'rows': 1, 'readonly': 'readonly'}))
+        widget=forms.Textarea(attrs={'rows': 2, 'readonly': 'readonly'}))
     form_data_processing_multiplier_string4 = forms.CharField(
-        widget=forms.Textarea(attrs={'rows': 1, 'readonly': 'readonly'}))
+        widget=forms.Textarea(attrs={'rows': 2, 'readonly': 'readonly'}))
     form_data_processing_multiplier_string5 = forms.CharField(
-        widget=forms.Textarea(attrs={'rows': 1, 'readonly': 'readonly'}))
+        widget=forms.Textarea(attrs={'rows': 2, 'readonly': 'readonly'}))
     form_data_processing_multiplier_string6 = forms.CharField(
-        widget=forms.Textarea(attrs={'rows': 1, 'readonly': 'readonly'}))
+        widget=forms.Textarea(attrs={'rows': 2, 'readonly': 'readonly'}))
     form_data_processing_multiplier_string7 = forms.CharField(
-        widget=forms.Textarea(attrs={'rows': 1, 'readonly': 'readonly'}))
+        widget=forms.Textarea(attrs={'rows': 2, 'readonly': 'readonly'}))
     form_data_processing_multiplier_string8 = forms.CharField(
         widget=forms.Textarea(attrs={'rows': 2, 'readonly': 'readonly'}))
     form_data_processing_multiplier_string9 = forms.CharField(
-        widget=forms.Textarea(attrs={'rows': 1, 'readonly': 'readonly'}))
+        widget=forms.Textarea(attrs={'rows': 2, 'readonly': 'readonly'}))
 
     form_data_parsable_message = forms.CharField(
         widget=forms.Textarea(attrs={'rows': 6, 'readonly': 'readonly', 'required': False})
@@ -3062,31 +3066,34 @@ class AssayPlateReaderMapItemForm(forms.ModelForm):
     )
     form_user_entered_omit_from_average = forms.BooleanField(required=False, )
 
-
-# Item VALUES are sets that correspond to items. Each set should have a match to a well in the plate map.
-# If not file/blocks attached to plate map, will have one set of values (with one value for each item)
-# If one file/block attached to plate map, will have two sets of values (one for the file, one null file) etc.
-class AssayPlateReaderMapItemValueForm(forms.ModelForm):
-    """Form for Assay Plate Reader Map Item Value"""
-
-    # 20200113 - changing so this formset is only called when adding and when update or view when no data are yet attached
-
-    class Meta(object):
-        model = AssayPlateReaderMapItemValue
-        # it is worth noting that there is a nuance to excluding or setting fields
-        # exclude = tracking + ('study', )
-        fields = [
-            # 'id', do not need
-            # 'assayplatereadermapdatafile', do not need
-            # 'assayplatereadermapitem', do not need
-            # next item - can remove later - do not need since, if there are matches, this formset will not be called
-            # but check rest is working first since will also affect formset (the custom_fields)
-            # 'assayplatereadermapdatafileblock',
-            'plate_index',
-            'raw_value',
-            'time',
-            'well_use',
-        ]
+###########
+# 20200522 getting rid of the value form all together since not allowing editing after values attached to plate map.
+# GET RID OF THIS
+# # Item VALUES are sets that correspond to items. Each set should have a match to a well in the plate map.
+# # If not file/blocks attached to plate map, will have one set of values (with one value for each item)
+# # If one file/block attached to plate map, will have two sets of values (one for the file, one null file) etc.
+# class AssayPlateReaderMapItemValueForm(forms.ModelForm):
+#     """Form for Assay Plate Reader Map Item Value"""
+#
+#     # 20200113 - changing so this formset is only called when adding and when update or view when no data are yet attached
+#
+#     class Meta(object):
+#         model = AssayPlateReaderMapItemValue
+#         # it is worth noting that there is a nuance to excluding or setting fields
+#         # exclude = tracking + ('study', )
+#         fields = [
+#             # 'id', do not need
+#             # 'assayplatereadermapdatafile', do not need
+#             # 'assayplatereadermapitem', do not need
+#             # next item - can remove later - do not need since, if there are matches, this formset will not be called
+#             # but check rest is working first since will also affect formset (the custom_fields)
+#             # 'assayplatereadermapdatafileblock',
+#             'plate_index',
+#             'raw_value',
+#             'time',
+#             'well_use',
+#         ]
+###########
 
 
 # Formset for items
@@ -3122,46 +3129,50 @@ class AssayPlateReaderMapItemFormSet(BaseInlineFormSetForcedUniqueness):
 
         # print(self.queryset)
 
-# Formset for item values
-class AssayPlateReaderMapItemValueFormSet(BaseInlineFormSetForcedUniqueness):
-    # changed way this worked on 20200114 and do not need this field any more
-    # custom_fields = (
-    #     'assayplatereadermapdatafileblock',
-    # )
-
-    def __init__(self, *args, **kwargs):
-        self.study = kwargs.pop('study', None)
-        self.user = kwargs.pop('user', None)
-        super(AssayPlateReaderMapItemValueFormSet, self).__init__(*args, **kwargs)
-
-        if not self.study:
-            self.study = self.instance.study
-
-        # changed way this worked on 20200114 and do not need this field any more - skip making the dic...
-        # # use the filter to get matrix items in this study ONLY - makes the dic much smaller
-        # # this speed up the custom_fields
-        # filters = {'assayplatereadermapdatafileblock': {'study_id': self.study.id}}
-        # self.dic = get_dic_for_custom_choice_field(self, filters=filters)
-        # # print(self.dic)
-        #
-        for form in self.forms:
-            # for field in self.custom_fields:
-            #     form.fields[field] = DicModelChoiceField(field, self.model, self.dic)
-
-            if self.study:
-                form.instance.study = self.study
-            if form.instance.pk:
-                form.instance.modified_by = self.user
-            else:
-                form.instance.created_by = self.user
-
-        # HANDY had this up before the self.forms loop, but needed to move it down to work
-        # HANDY to know how to print a queryset to the console
-        # self.queryset = self.queryset.order_by('assayplatereadermapdatafile', 'assayplatereadermapdatafileblock', 'plate_index')
-        # https://stackoverflow.com/questions/13387446/changing-the-display-order-of-forms-in-a-formset
-        # print(self.queryset)
-        self.queryset = self.queryset.order_by('assayplatereadermapdatafileblock', 'plate_index')
-        # print(self.queryset)
+###########
+# 20200522 getting rid of the value form all together since not allowing editing after values attached to plate map.
+# # GET RID OF THIS
+# # Formset for item values
+# class AssayPlateReaderMapItemValueFormSet(BaseInlineFormSetForcedUniqueness):
+#     # changed way this worked on 20200114 and do not need this field any more
+#     # custom_fields = (
+#     #     'assayplatereadermapdatafileblock',
+#     # )
+#
+#     def __init__(self, *args, **kwargs):
+#         self.study = kwargs.pop('study', None)
+#         self.user = kwargs.pop('user', None)
+#         super(AssayPlateReaderMapItemValueFormSet, self).__init__(*args, **kwargs)
+#
+#         if not self.study:
+#             self.study = self.instance.study
+#
+#         # changed way this worked on 20200114 and do not need this field any more - skip making the dic...
+#         # # use the filter to get matrix items in this study ONLY - makes the dic much smaller
+#         # # this speed up the custom_fields
+#         # filters = {'assayplatereadermapdatafileblock': {'study_id': self.study.id}}
+#         # self.dic = get_dic_for_custom_choice_field(self, filters=filters)
+#         # # print(self.dic)
+#         #
+#         for form in self.forms:
+#             # for field in self.custom_fields:
+#             #     form.fields[field] = DicModelChoiceField(field, self.model, self.dic)
+#
+#             if self.study:
+#                 form.instance.study = self.study
+#             if form.instance.pk:
+#                 form.instance.modified_by = self.user
+#             else:
+#                 form.instance.created_by = self.user
+#
+#         # HANDY had this up before the self.forms loop, but needed to move it down to work
+#         # HANDY to know how to print a queryset to the console
+#         # self.queryset = self.queryset.order_by('assayplatereadermapdatafile', 'assayplatereadermapdatafileblock', 'plate_index')
+#         # https://stackoverflow.com/questions/13387446/changing-the-display-order-of-forms-in-a-formset
+#         # print(self.queryset)
+#         self.queryset = self.queryset.order_by('assayplatereadermapdatafileblock', 'plate_index')
+#         # print(self.queryset)
+###########
 
 
 # Formset factory for item and value
@@ -3175,15 +3186,20 @@ AssayPlateReaderMapItemFormSetFactory = inlineformset_factory(
     exclude=tracking + ('study',),
 )
 
+###########
+# 20200522 getting rid of the value form all together since not allowing editing after values attached to plate map.
+# # GET RID OF THIS
+# AssayPlateReaderMapItemValueFormSetFactory = inlineformset_factory(
+#     AssayPlateReaderMap,
+#     AssayPlateReaderMapItemValue,
+#     formset=AssayPlateReaderMapItemValueFormSet,
+#     form=AssayPlateReaderMapItemValueForm,
+#     extra=1,
+#     exclude=tracking + ('study',),
+# )
+##########
 
-AssayPlateReaderMapItemValueFormSetFactory = inlineformset_factory(
-    AssayPlateReaderMap,
-    AssayPlateReaderMapItemValue,
-    formset=AssayPlateReaderMapItemValueFormSet,
-    form=AssayPlateReaderMapItemValueForm,
-    extra=1,
-    exclude=tracking + ('study',),
-)
+
 # end plate reader map page
 #####
 
