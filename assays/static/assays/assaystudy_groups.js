@@ -430,16 +430,16 @@ $(document).ready(function () {
     function add_chip(setup_index) {
         chips.push({
             'name': chips.length + 1,
-            'group_id': setup_index
+            'group_index': setup_index
         });
     }
 
     // TODO REVISE FOR TRUE ID
     function remove_chip(setup_index) {
         $.each(chips, function(index, chip) {
-            // NOTE: group_id is just an index for the moment
-            // Really, it needs to be changed to an actual ID
-            if (chip.group_id === setup_index) {
+            // NOTE: group_index is just an index for the moment
+            // We also need access to the id, ideally
+            if (chip.group_index === setup_index) {
                 chips.splice(index, 1);
                 // Break after removal
                 return false;
@@ -451,9 +451,9 @@ $(document).ready(function () {
         var current_number_of_chips = 0;
 
         $.each(chips, function(index, chip) {
-            // NOTE: group_id is just an index for the moment
-            // Really, it needs to be changed to an actual ID
-            if (chip.group_id === setup_index) {
+            // NOTE: group_index is just an index for the moment
+            // We also need access to the id, ideally
+            if (chip.group_index === setup_index) {
                 current_number_of_chips += 1;
             }
         });
