@@ -1923,6 +1923,128 @@ class AssayStudy(FlaggableModel):
 
         return '\n'.join([' '.join(x) for x in list(current_study.values())])
 
+    # TODO REVIEW
+    def get_group_data_string(self, get_chips=False, plate_id=None):
+        data = {
+            # Probably should change name?
+            'series_data': [],
+            # Mode defines which get populated
+            # May need modify for a 'both' option
+            'chips': [],
+            'plates': []
+        }
+
+        groups = AssayGroup.objects.filter(
+            study_id=self.id
+        ).prefetch_related(
+            # Prefetch the cells etc.
+            # Kind of rough, but on the bright side we don't need chaining
+            'assaygroupcell_set',
+            'assaygroupcompound_set',
+            'assaygroupsetting_set',
+        )
+
+        # For mapping chips
+        group_id_to_index = {}
+
+        # No junk
+        # We actually do want to get the id for updates and the like
+        excluded_keys = ['_state']
+
+        for group in groups:
+            current_group = {
+                'cell': [],
+                'compound': [],
+                'setting': []
+            }
+
+            # Not very DRY
+            for cell in group.assaygroupcell_set.all():
+                current_group.get('cell').append(
+                    {
+                        key: cell.__dict__.get(key) for key in cell.__dict__.keys() if key not in excluded_keys
+                    }
+                )
+
+            for compound in group.assaygroupcompound_set.all():
+                current_group.get('compound').append(
+                    {
+                        key: compound.__dict__.get(key) for key in compound.__dict__.keys() if key not in excluded_keys
+                    }
+                )
+
+            for setting in group.assaygroupsetting_set.all():
+                current_group.get('setting').append(
+                    {
+                        key: setting.__dict__.get(key) for key in setting.__dict__.keys() if key not in excluded_keys
+                    }
+                )
+
+        if get_chips:
+            # TODO TODO TODO
+            # PLEASE NOTE: WE WILL HAVE TO GO BACK AND CONSOLIDATE ALL CHIPS IN EXISTING STUDIES TO A SINGLE MATRIX
+            # We can't get the matrix in question with a name (the study name can change)
+            # We can get the correct chips by either seeing if the organ model is for chips or checking the representation of the matrix
+            # For the moment we will assume only one chip matrix
+            chips = AssayMatrixItem.objects.filter(
+                # Must be for this study
+                study_id=self.id,
+                # Must be in the chip matrix
+                matrix__representation='chips'
+            ).prefetch_related(
+                # Unfortunately, to avoid N+1, we need to prefetch
+                'matrix'
+            )
+
+            # For every chip, tack on an object with
+            for chip in chips:
+                data.get('chips').append(
+                    {
+                        'name': chip.name,
+                        'group_id': chip.group_id,
+                        # We use group index in the group page rather than id because groups may or may not exist on that page
+                        # Default *ideally* is not necessary here
+                        'group_index': group_id_to_index.get(chip.group_id, None)
+                    }
+                )
+
+        # Get the plate information
+        # It is worth noting that for the purposes of a plate edit page, we really only need the one...
+        # Maybe we could have a plate_id arg as a filter?
+        # TODO REVIEW
+        if plate_id:
+            current_plate_data = {}
+
+            # We don't really care about much outside of the column, row, group_id, name
+            # Passing the plate_id is what tells us the current plate
+            current_plate = AssayMatrix.objects.filter(
+                id=plate_id,
+                # Insurance
+                study_id=self.id
+            )[0]
+
+            current_plate_data.update({
+                'id': current_plate.id
+            })
+
+            for well in AssayMatrixItem.objects.filter(matrix_id=current_plate.id):
+                current_well_data = {
+                    'group_id': well.group_id,
+                    'group_index': group_id_to_index.get(chip.group_id, None),
+                    'name': well.name
+                }
+                current_plate_data.update({
+                    '{}_{}'.format(
+                        current_well_data.row_index,
+                        current_well_data.column_index,
+                    ) : current_well_data
+                })
+
+            # It probably isn't ideal to pass the plate this way?
+            data.get('plates').append(current_plate_data)
+
+        return json.dumps(data)
+
     def get_study_types_string(self):
         current_types = []
         if self.toxicity:
@@ -2482,6 +2604,15 @@ class AbstractSetupSetting(models.Model):
 
 # Previously considered the name "AssaySetupGroup"
 class AssayGroup(models.Model):
+    class Meta(object):
+        # Do not allow duplicates of name per study
+        unique_together = [
+            (
+                'name',
+                'study'
+            )
+        ]
+
     # We are not considering series at the moment
     # series = models.ForeignKey(
     #     AssayItemSeries,
@@ -2501,8 +2632,10 @@ class AssayGroup(models.Model):
     name = models.CharField(
         max_length=255,
         verbose_name='Name',
-        blank=True,
-        default=''
+        # Ought to be required
+        # Additionally, ought to be unique with study
+        # blank=True,
+        # default=''
     )
 
     # Need to store test type here, acquiring it implicitly is unpleasant
@@ -2518,8 +2651,9 @@ class AssayGroup(models.Model):
     organ_model = models.ForeignKey(
         OrganModel,
         verbose_name='MPS Model',
-        null=True,
-        blank=True,
+        # Ought to be required
+        # null=True,
+        # blank=True,
         on_delete=models.CASCADE
     )
 
@@ -2528,6 +2662,7 @@ class AssayGroup(models.Model):
     organ_model_protocol = models.ForeignKey(
         OrganModelProtocol,
         verbose_name='MPS Model Version',
+        # Not required
         null=True,
         blank=True,
         on_delete=models.CASCADE
@@ -2670,16 +2805,14 @@ class AssayMatrixItem(FlaggableModel):
     row_index = models.IntegerField(verbose_name='Row Index')
     column_index = models.IntegerField(verbose_name='Column Index')
 
-    # TODO DEPRECATED: PURGE
-    # HENCEFORTH ALL ITEMS WILL HAVE AN ORGAN MODEL PROTOCOL
+    # These are repetitive, as they can be found in the group
+    # (With the exception of device, which is implicitly present via organ_model in group)
     device = models.ForeignKey(
         Microdevice,
         verbose_name='Device',
         on_delete=models.CASCADE
     )
 
-    # TODO DEPRECATED: PURGE
-    # HENCEFORTH ALL ITEMS WILL HAVE AN ORGAN MODEL PROTOCOL
     organ_model = models.ForeignKey(
         OrganModel,
         verbose_name='MPS Model',
