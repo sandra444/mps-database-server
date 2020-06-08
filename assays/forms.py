@@ -711,7 +711,7 @@ class AssayStudyDetailForm(SignOffMixin, BootstrapForm):
         # clean the form data, before validation
         data = super(AssayStudyDetailForm, self).clean()
 
-        if not any([data['toxicity'], data['efficacy'], data['disease'], data['cell_characterization'], ['pbpk_steady_state'], data['pbpk_bolus']]):
+        if not any([data['toxicity'], data['efficacy'], data['disease'], data['cell_characterization'], data['pbpk_steady_state'], data['pbpk_bolus']]):
             raise forms.ValidationError('Please select at least one study type')
 
         if data.get('pbpk_steady_state', '') and (not data.get('number_of_relevant_cells', '') or not data.get('flow_rate', '')):
