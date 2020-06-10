@@ -223,7 +223,7 @@ $(document).ready(function () {
                     }
                     return '';
                 },
-                "className": "dt-body-center",
+                "className": "dt-center",
                 "createdCell": function (td, cellData, rowData, row, col) {
                     if (cellData) {
                         $(td).css('vertical-align', 'middle')
@@ -400,7 +400,6 @@ $(document).ready(function () {
             },
             columns: columns,
             columnDefs: [
-                { "className": "dt-center", "targets": 0},
                 { "responsivePriority": 1, "targets": 11 },
                 { "responsivePriority": 2, "targets": [0,1,2,3] },
                 { "responsivePriority": 3, "targets": 5 },
