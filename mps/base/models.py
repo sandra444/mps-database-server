@@ -181,7 +181,7 @@ def save_forms_with_tracking(self, form, formset=None, update=False):
             form.instance.signed_off_by = None
             form.instance.signed_off_date = None
 
-        self.object = form.save(commit=False)
+        self.object = form.save(commit=True)
 
         # Else if Add
         if not update:

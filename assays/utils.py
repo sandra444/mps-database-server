@@ -3710,6 +3710,8 @@ def add_update_plate_reader_data_map_item_values_from_file(
                     # will be sorted by plate index and should go from 0 to size of plate minus 1
                     # check for corruption
                     # if item.plate_index == pidx:
+                    # here here get rid of this 5==5 todo
+
                     if 5==5:
 
                         # all is well, continue
@@ -4022,7 +4024,7 @@ def plate_reader_data_file_process_data(set_dict):
     # print("e2 time orm ",  time.time() - start_time)
     # sql - time compare
     # start_time = time.time()
-    with connection.cursor() as cursor:
+    # with connection.cursor() as cursor:
         sqls =        " SELECT COUNT(*) "
         sqls = sqls + sqlsFromJoinMapItemID
         sqls = sqls + " WHERE assays_AssayPlateReaderMapItemValue.assayplatereadermap_id = "
@@ -4054,7 +4056,7 @@ def plate_reader_data_file_process_data(set_dict):
     # e2 time sql  0.0013592243194580078
 
     # look for samples with missing matrix items
-    with connection.cursor() as cursor:
+    # with connection.cursor() as cursor:
         sqls =        " SELECT COUNT(*) "
         sqls = sqls + sFromWhereSAMPLEItem
         sqls = sqls + sAndMatrixItemNull
@@ -4071,7 +4073,7 @@ def plate_reader_data_file_process_data(set_dict):
             yes_to_continue = 'no'
 
     # look for samples with missing sample locations
-    with connection.cursor() as cursor:
+    # with connection.cursor() as cursor:
         sqls =        " SELECT COUNT(*) "
         sqls = sqls + sFromWhereSAMPLEItem
         sqls = sqls + sAndLocationNull
@@ -4135,7 +4137,7 @@ def plate_reader_data_file_process_data(set_dict):
                 yes_to_continue = 'no'
 
         # look for missing standard raw values from the plate selected to use for standards
-        with connection.cursor() as cursor:
+        # with connection.cursor() as cursor:
             sqls =        " SELECT COUNT(*) "
             sqls = sqls + sqlsFromJoinMapItemID
             sqls = sqls + sWhereSTNDValue
@@ -4316,7 +4318,7 @@ def plate_reader_data_file_process_data(set_dict):
             # for fitting - get the average at each concentration that is IN user specified bounds
             # will subtract 0 in not adjusting, so okay to treat all the same
             # bounds should be set correctly if treat all the same (include all or some some subset of user selection)
-            with connection.cursor() as cursor:
+            # with connection.cursor() as cursor:
                 sqls = "SELECT "
                 sqls = sqls + "  assays_AssayPlateReaderMapItem.standard_value "
                 sqls = sqls + ", AVG(assays_AssayPlateReaderMapItemValue.raw_value-" + str(standard_blank_average) + ") as aRaw "
@@ -4581,7 +4583,7 @@ def plate_reader_data_file_process_data(set_dict):
 
             if number_standard_values_excluding_0 < 4 and use_calibration_curve in ['log', 'logistic4', 'logistic4a0', 'logistic4f']:
                 use_calibration_curve = 'linear'
-                special_note_when_excluding_0_and_curve_change_needed = " - IMPORTANT: Not enough standard concentrations for log or logistic."
+                special_note_when_excluding_0_and_curve_change_needed = " IMPORTANT: Not enough standard concentrations for log or logistic."
 
             # do not move this into a place that it happens before selection of best fit!
             if use_calibration_curve in ['log', 'logistic4', 'logistic4a0', 'logistic4f']:
@@ -4624,7 +4626,7 @@ def plate_reader_data_file_process_data(set_dict):
                     {'p1': icept, 'p2': slope, 'p3': 0, 'p4': 0, 'p5': 0})
 
                 dict_of_curve_info_linear = (
-                    {'method': 'Linear w/fitted intercept' + special_note_when_excluding_0_and_curve_change_needed, 'equation': equation, 'rsquared': rsquared, 'used_curve': use_calibration_curve})
+                    {'method': 'Linear w/fitted intercept', 'equation': equation, 'rsquared': rsquared, 'used_curve': use_calibration_curve})
                 dict_of_standard_info_linear = (
                     {'min': use_form_min, 'max': use_form_max, 'standard0average': standard_blank_average,
                      'blankaverage': sample_blank_average})
@@ -5265,7 +5267,7 @@ def plate_reader_data_file_process_data(set_dict):
         # print(list_of_dicts_of_each_sample_row_average)
 
     # if failed one or more of QC, only the sendGeneralQcErrorMessage should be populated
-    return [sendGeneralQcErrorMessage,
+    return [sendGeneralQcErrorMessage + special_note_when_excluding_0_and_curve_change_needed,
             list_of_dicts_of_each_sample_row_each,
             list_of_dicts_of_each_standard_row_points,
             list_of_dicts_of_each_standard_row_ave_points,
