@@ -2111,8 +2111,8 @@
             </div>
 
 
-            {# these are the ones that show to user  #}
-            <div>
+            {# these are the ones that show to user, but they are moved to the top  #}
+            <div class="hidden">
                 {% if formset.errors %}
                     {% for field, error in formset.errors.items %}
                         <div class="alert alert-danger" role="alert">
@@ -2141,21 +2141,21 @@
             </div>
 
 {#        HANDY any save problems turn this on#}
-{#            <div class="hidden">#}
-{#                {% if not review %}#}
-{#                    <div>#}
-{#                        <h2>For Development Testing</h2>#}
-{#                        Use for error checking#}
-{#                        For testing<br>#}
-{#                        form.errors<br>#}
-{#                        {{ form.errors }}<br>#}
-{#                        formset.errors<br>#}
-{#                        {{ formset.errors }}<br>#}
+            <div class="hidden">
+                {% if not review %}
+                    <div>
+                        <h2>For Development Testing</h2>
+                        Use for error checking
+                        For testing<br>
+                        form.errors<br>
+                        {{ form.errors }}<br>
+                        formset.errors<br>
+                        {{ formset.errors }}<br>
 {#                        value_formset.errors<br>#}
 {#                        {{ value_formset.errors }}<br>#}
-{#                    </div>#}
-{#                {% endif %}#}
-{#            </div>#}
+                    </div>
+                {% endif %}
+            </div>
 
             {# submit bar #}
             <div>

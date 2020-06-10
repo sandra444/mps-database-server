@@ -2887,7 +2887,27 @@ class AssayPlateReaderMapUpdate(StudyGroupMixin, UpdateView):
         context['page_called'] = 'update'
         #####
 
-        context['assay_map_additional_info'] = AssayPlateReadMapAdditionalInfoForm(study_id=self.object.study_id)
+        # using the form field for conditional logic was making the query file multiple times
+        # let's just send a boolean
+        block_combos = AssayPlateReaderMapItemValue.objects.filter(
+            assayplatereadermap=self.object
+        ).prefetch_related(
+            'assayplatereadermapitem',
+        ).filter(
+            assayplatereadermapitem__plate_index=0
+        ).filter(
+            assayplatereadermapdatafileblock__isnull=False
+        )
+        if len(block_combos) > 0:
+            data_attached = True
+        else:
+            data_attached = False
+        context['data_attached'] = data_attached
+
+        if data_attached:
+            context['assay_map_additional_info'] = ""
+        else:
+            context['assay_map_additional_info'] = AssayPlateReadMapAdditionalInfoForm(study_id=self.object.study_id)
 
         # print("calling formset")
         if 'formset' not in context:
@@ -2951,24 +2971,6 @@ class AssayPlateReaderMapUpdate(StudyGroupMixin, UpdateView):
         # context['matrix_list_pk'] = return_list[1]
         # context['matrix_column_size'] = return_list[2]
         # print("returning context map update")
-        # here here make sure the plate map index works after remove from value
-
-        # using the form field for conditional logic was making the query file multiple times
-        # let's just send a boolean
-        block_combos = AssayPlateReaderMapItemValue.objects.filter(
-            assayplatereadermap=self.object
-        ).prefetch_related(
-            'assayplatereadermapitem',
-        ).filter(
-            assayplatereadermapitem__plate_index=0
-        ).filter(
-            assayplatereadermapdatafileblock__isnull=False
-        )
-        if len(block_combos) > 0:
-            data_attached = True
-        else:
-            data_attached = False
-        context['data_attached'] = data_attached
 
         return context
 
@@ -3232,14 +3234,16 @@ class AssayPlateReaderMapUpdate(StudyGroupMixin, UpdateView):
             # #### END When saving AssayPlateReaderMapUpdate after a calibration
 
 
-
-            # here here todo do redirect to study summary
-            # only save if the form is in "update/edit" mode, not calibrate
+            # only save if the formSET is in "update/edit" mode, not calibrate
             # calibrate occurs when a file block has been added to this plate map (one or more)
-            # The number of file blocks is passed in by the initilation of this form field in the forms.py
+            # The number of file blocks is passed in by the initialization of this form field in the forms.py
+            # Save form and formset
             if form.cleaned_data.get('form_number_file_block_combos') == 0:
                 save_forms_with_tracking(self, form, formset=formsets, update=True)
-
+            # HANDY - to Save just the form and not the formset
+            else:
+                # Note that we elect NOT to send the formset
+                save_forms_with_tracking(self, form, formset=[], update=True)
             return redirect(self.object.get_post_submission_url())
         else:
             return self.render_to_response(self.get_context_data(form=form, formset=formset))
@@ -3266,12 +3270,30 @@ class AssayPlateReaderMapView(StudyGroupMixin, DetailView):
         context['review'] = True
         context['page_called'] = 'review'
         #####
-        # context['assay_map_additional_info'] = AssayPlateReadMapAdditionalInfoForm(study_id=self.object.study_id)
+
+        block_combos = AssayPlateReaderMapItemValue.objects.filter(
+            assayplatereadermap=self.object
+        ).prefetch_related(
+            'assayplatereadermapitem',
+        ).filter(
+            assayplatereadermapitem__plate_index=0
+        ).filter(
+            assayplatereadermapdatafileblock__isnull=False
+        )
+        if len(block_combos) > 0:
+            data_attached = True
+        else:
+            data_attached = False
+        context['data_attached'] = data_attached
+
+        if data_attached:
+            context['assay_map_additional_info'] = ""
+        else:
+            context['assay_map_additional_info'] = AssayPlateReadMapAdditionalInfoForm(study_id=self.object.study_id)
 
         context.update({
             'form': AssayPlateReaderMapForm(instance=self.object),
             'formset': AssayPlateReaderMapItemFormSetFactory(instance=self.object, user=self.request.user),
-            'assay_map_additional_info': AssayPlateReadMapAdditionalInfoForm(study_id=self.object.study_id)
         })
 
         return context
@@ -3288,74 +3310,74 @@ class AssayPlateReaderMapDelete(StudyViewerMixin, DeleteView):
 # function used in plate reader map app (add, view, and update) to get associated matrix item setup for display
 # do not think need this anymore, code that called got moved
 # here here todo remove this ..not needed, but do it separately to make sure no error generated
-def get_matrix_item_information_for_plate_map(study_id):
-
-    # # moved some of this function to ajax call instead
-    # matrix_items_with_setup = AssayMatrixItem.objects.filter(
-    #     study_id=study_id
-    # ).prefetch_related(
-    #     'matrix',
-    #     'assaysetupcompound_set__compound_instance__compound',
-    #     'assaysetupcompound_set__concentration_unit',
-    #     'assaysetupcompound_set__addition_location',
-    #     'assaysetupcell_set__cell_sample__cell_type__organ',
-    #     'assaysetupcell_set__cell_sample__cell_subtype',
-    #     'assaysetupcell_set__cell_sample__supplier',
-    #     'assaysetupcell_set__addition_location',
-    #     'assaysetupcell_set__density_unit',
-    #     'assaysetupsetting_set__setting',
-    #     'assaysetupsetting_set__unit',
-    #     'assaysetupsetting_set__addition_location',
-    # ).order_by('matrix__name', 'name',)
-
-    matrix_list_for_size = AssayMatrix.objects.filter(
-            study_id=study_id
-        ).order_by('name',)
-
-    matrix_list_size = []
-    matrix_list_pk = []
-    matrix_column_size = []
-
-    # #  HARDCODED plate map size
-    # for record in matrix_list_for_size:
-    #     if record.number_of_rows <= 4 and record.number_of_columns <= 6:
-    #         matrix_list_size.append(24)
-    #         matrix_list_pk.append(record.id)
-    #     elif record.number_of_rows <= 8 and record.number_of_columns <= 12:
-    #         matrix_list_size.append(96)
-    #         matrix_list_pk.append(record.id)
-    #     else:
-    #         matrix_list_size.append(384)
-    #         matrix_list_pk.append(record.id)
-
-
-    # START replacing the hardcoded stuff above
-    # HANDY - must sort in place or get empty list back
-    # copy list to new variable
-    plate_sizes = assay_plate_reader_map_info_plate_size_choices_list
-    # sort in place
-    plate_sizes.sort()
-    # print("list after sorting ", plate_sizes)
-
-    for record in matrix_list_for_size:
-        my_size = plate_sizes[-1]
-        my_record_id = record.id
-        for this_size in plate_sizes:
-            row_size = assay_plate_reader_map_info_shape_row_dict.get(this_size)
-            col_size = assay_plate_reader_map_info_shape_col_dict.get(this_size)
-            if record.number_of_rows <= row_size and record.number_of_columns <= col_size:
-                my_size = this_size
-                my_record_id = record.id
-                my_col_size = col_size
-                break
-
-        matrix_list_size.append(my_size)
-        matrix_list_pk.append(my_record_id)
-        matrix_column_size.append(my_col_size)
-    # END replacing the hardcoded stuff above
-
-    # return matrix_items_with_setup, matrix_list_size, matrix_list_pk
-    return matrix_list_size, matrix_list_pk, matrix_column_size
+# def get_matrix_item_information_for_plate_map(study_id):
+#
+#     # # moved some of this function to ajax call instead
+#     # matrix_items_with_setup = AssayMatrixItem.objects.filter(
+#     #     study_id=study_id
+#     # ).prefetch_related(
+#     #     'matrix',
+#     #     'assaysetupcompound_set__compound_instance__compound',
+#     #     'assaysetupcompound_set__concentration_unit',
+#     #     'assaysetupcompound_set__addition_location',
+#     #     'assaysetupcell_set__cell_sample__cell_type__organ',
+#     #     'assaysetupcell_set__cell_sample__cell_subtype',
+#     #     'assaysetupcell_set__cell_sample__supplier',
+#     #     'assaysetupcell_set__addition_location',
+#     #     'assaysetupcell_set__density_unit',
+#     #     'assaysetupsetting_set__setting',
+#     #     'assaysetupsetting_set__unit',
+#     #     'assaysetupsetting_set__addition_location',
+#     # ).order_by('matrix__name', 'name',)
+#
+#     matrix_list_for_size = AssayMatrix.objects.filter(
+#             study_id=study_id
+#         ).order_by('name',)
+#
+#     matrix_list_size = []
+#     matrix_list_pk = []
+#     matrix_column_size = []
+#
+#     # #  HARDCODED plate map size
+#     # for record in matrix_list_for_size:
+#     #     if record.number_of_rows <= 4 and record.number_of_columns <= 6:
+#     #         matrix_list_size.append(24)
+#     #         matrix_list_pk.append(record.id)
+#     #     elif record.number_of_rows <= 8 and record.number_of_columns <= 12:
+#     #         matrix_list_size.append(96)
+#     #         matrix_list_pk.append(record.id)
+#     #     else:
+#     #         matrix_list_size.append(384)
+#     #         matrix_list_pk.append(record.id)
+#
+#
+#     # START replacing the hardcoded stuff above
+#     # HANDY - must sort in place or get empty list back
+#     # copy list to new variable
+#     plate_sizes = assay_plate_reader_map_info_plate_size_choices_list
+#     # sort in place
+#     plate_sizes.sort()
+#     # print("list after sorting ", plate_sizes)
+#
+#     for record in matrix_list_for_size:
+#         my_size = plate_sizes[-1]
+#         my_record_id = record.id
+#         for this_size in plate_sizes:
+#             row_size = assay_plate_reader_map_info_shape_row_dict.get(this_size)
+#             col_size = assay_plate_reader_map_info_shape_col_dict.get(this_size)
+#             if record.number_of_rows <= row_size and record.number_of_columns <= col_size:
+#                 my_size = this_size
+#                 my_record_id = record.id
+#                 my_col_size = col_size
+#                 break
+#
+#         matrix_list_size.append(my_size)
+#         matrix_list_pk.append(my_record_id)
+#         matrix_column_size.append(my_col_size)
+#     # END replacing the hardcoded stuff above
+#
+#     # return matrix_items_with_setup, matrix_list_size, matrix_list_pk
+#     return matrix_list_size, matrix_list_pk, matrix_column_size
 
 
 #####
@@ -3442,7 +3464,6 @@ class AssayPlateReaderMapDataFileView(StudyGroupMixin, DetailView):
             context['no_saved_blocks'] = True
 
         return context
-
 
 
 class AssayPlateReaderMapDataFileDelete(StudyViewerMixin, DeleteView):
@@ -3614,6 +3635,7 @@ class AssayPlateReaderMapDataFileUpdate(StudyGroupMixin, UpdateView):
             # this function is in utils.py
             # add_update_map_item_values =
             # call it to write to the map item value table, do not need to return anything
+            # in the utils.py file
             add_update_plate_reader_data_map_item_values_from_file(
                 pk_for_file,
                 block_dict

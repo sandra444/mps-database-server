@@ -65,6 +65,8 @@ from .utils import (
     AssayFileProcessor,
     get_user_accessible_studies,
     plate_reader_data_file_process_data,
+    CALIBRATION_CURVE_MASTER_DICT,
+    calibration_choices,
 )
 
 from django.utils import timezone
@@ -2410,8 +2412,6 @@ class AssayPlateReaderMapForm(BootstrapForm):
             'assayplatereadermapdatafileblock__id',
         )
 
-        # here here make sure the plate map index works after remove from value
-
         distinct_plate_map_with_select_string = []
         distinct_plate_map_with_block_pk = []
         number_filed_combos = len(as_value_formset_with_file_block)
@@ -2618,7 +2618,6 @@ class AssayPlateReaderMapForm(BootstrapForm):
     form_hold_the_notes_string = forms.CharField(
         widget=forms.TextInput(attrs={'readonly': 'readonly', 'initial': '-'})
     )
-
     form_block_file_data_block_selected_pk_for_storage = forms.IntegerField(
         required=False,
     )
@@ -2631,19 +2630,22 @@ class AssayPlateReaderMapForm(BootstrapForm):
 
     # END section to deal with raw data showing in the plate map after file assignment and deal with standard in a different file block
 
+    # print(calibration_choices)
+
     # processing the data fields added
     se_form_calibration_curve = forms.ChoiceField(
         choices=(
-            ('select_one', 'Select One'),
-            ('no_calibration', 'No Calibration'),
-            ('best_fit', 'Best Fit'),
-            ('logistic4', '4 Parameter Logistic w/fitted bounds'),
-            ('logistic4a0', '4 Parameter Logistic w/lower bound = 0'),
-            ('logistic4f', '4 Parameter Logistic w/user specified bound(s)'),
-            ('linear', 'Linear w/fitted intercept'),
-            ('linear0', 'Linear w/intercept = 0'),
-            ('log', 'Logarithmic'),
-            ('poly2', 'Quadratic Polynomial'),
+            calibration_choices
+            # ('select_one', 'Select One'),
+            # ('no_calibration', 'No Calibration'),
+            # ('best_fit', 'Best Fit'),
+            # ('logistic4', '4 Parameter Logistic w/fitted bounds'),
+            # ('logistic4a0', '4 Parameter Logistic w/lower bound = 0'),
+            # ('logistic4f', '4 Parameter Logistic w/user specified bound(s)'),
+            # ('linear', 'Linear w/fitted intercept'),
+            # ('linear0', 'Linear w/intercept = 0'),
+            # ('log', 'Logarithmic'),
+            # ('poly2', 'Quadratic Polynomial'),
 
             # ('select_one', 'Select One (n = standard concentration, s = signal)'),
             # ('no_calibration', 'No Calibration'),
@@ -2845,22 +2847,18 @@ class AssayPlateReaderMapForm(BootstrapForm):
         return data
 
     def save(self, commit=True):
-        print("commit: ", commit)
-        # First thing in save
+                # First thing in save
         # Make sure to pass commit to the super call (don't want accidental saves)
         map = super(AssayPlateReaderMapForm, self).save(commit=commit)
 
         # Only save the file if commit is true
         if commit:
-            print("here2")
             self.process_file(save=True, calledme="save")
         return map
 
     def process_file(self, save=False, calledme="c"):
         #### START When saving AssayPlateReaderMapUpdate after a calibration
         # if user checked the box to send to study summary, make that happen
-        print("calledme ", calledme)
-        print("save ", save)
 
         data = self.cleaned_data
         # study = get_object_or_404(AssayStudy, pk=self.kwargs['study_id'])
@@ -2868,6 +2866,7 @@ class AssayPlateReaderMapForm(BootstrapForm):
         if data.get('form_make_mifc_on_submit'):
             # search term MIFC - if MIFC changes, this will need changed
             # make a list of column headers for the mifc file
+            # could use COLUMN_HEADERS, but need to append one
             column_table_headers_average = [
                 'Chip ID',
                 'Cross Reference',
@@ -2913,19 +2912,6 @@ class AssayPlateReaderMapForm(BootstrapForm):
                 'notes': 'Notes',
                 'sendmessage': 'Processing Details'}
 
-            # these should match what is in the forms.py...could make a generic dict, but leave for now WATCH BE CAREFUL
-            calibration_curve_xref = {
-                'select_one': 'Select One',
-                'no_calibration': 'No Calibration',
-                'best_fit': 'Best Fit',
-                'logistic4': '4 Parameter Logistic w/fitted bounds',
-                'logistic4a0': '4 Parameter Logistic w/user specified bound(s)',
-                'linear': 'Linear w/fitted intercept',
-                'linear0': 'Linear w/intercept = 0',
-                'log': 'Logarithmic',
-                'poly2': 'Quadratic Polynomial'
-            }
-
             # print(".unit ",data.get('standard_unit').unit)
             # print(".id ", data.get('standard_unit').id)
             # .unit
@@ -2947,21 +2933,18 @@ class AssayPlateReaderMapForm(BootstrapForm):
                     'form_block_standard_borrow_pk_platemap_single_for_storage')
 
             use_curve_long = data.get('form_calibration_curve_method_used')
-            use_curve = find_a_key_by_value_in_dictionary(calibration_curve_xref, use_curve_long)
+            use_curve = find_a_key_by_value_in_dictionary(CALIBRATION_CURVE_MASTER_DICT, use_curve_long)
             if use_curve == 'select_one':
                 use_curve = 'no_calibration'
 
             if len(use_curve.strip()) == 0:
-                err_msg = "very bad error, no match to selected curve found, did a string get added to the controlled vocab?"
+                err_msg = "The calibration method " + use_curve_long + " was not found in the cross reference. This is a very bad error. It must be fixed"
                 print(err_msg)
 
-            # here here  prefer to get plate and study from form...fix this
             # form.instance.study
             # make a dictionary to send to the utils.py when call the function
             set_dict = {
                 'called_from': 'form_save',
-                # 'study': data.get('form_hold_the_study_id'),
-                # 'pk_platemap': data.get('form_hold_the_platemap_id'),
                 'study': self.instance.study.id,
                 'pk_platemap': self.instance.id,
                 'pk_data_block': data.get('form_block_file_data_block_selected_pk_for_storage'),
@@ -3015,10 +2998,10 @@ class AssayPlateReaderMapForm(BootstrapForm):
                 list_of_lists_mifc_headers_row_0[i] = list_each_row
                 i = i + 1
 
-            print("  ")
-            print('list_of_lists_mifc_headers_row_0')
-            print(list_of_lists_mifc_headers_row_0)
-            print("  ")
+            # print("  ")
+            # print('list_of_lists_mifc_headers_row_0')
+            # print(list_of_lists_mifc_headers_row_0)
+            # print("  ")
 
             # First make a csv from the list_of_lists (using list_of_lists_mifc_headers_row_0)
 
@@ -3056,9 +3039,6 @@ class AssayPlateReaderMapForm(BootstrapForm):
             )
 
             # Make sure study has directories
-            # here here change reference to the study to self.instance.study.id and check it
-            # if not os.path.exists(MEDIA_ROOT + '/data_points/{}'.format(data.get('form_hold_the_study_id'))):
-            #     os.makedirs(MEDIA_ROOT + '/data_points/{}'.format(data.get('form_hold_the_study_id')))
             if not os.path.exists(MEDIA_ROOT + '/data_points/{}'.format(my_study.id)):
                 os.makedirs(MEDIA_ROOT + '/data_points/{}'.format(my_study.id))
 
@@ -3185,7 +3165,7 @@ class AssayPlateReaderMapItemFormSet(BaseInlineFormSetForcedUniqueness):
             self.study = self.instance.study
 
         # use the filter to get matrix items in this study ONLY - makes the dic much smaller
-        # this speed up the custom_fields here here maybe well use
+        # HANDY - this speed up the custom_fields
         filters = {'matrix_item': {'study_id': self.study.id}}
         self.dic = get_dic_for_custom_choice_field(self, filters=filters)
         for form in self.forms:

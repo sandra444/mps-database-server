@@ -781,6 +781,9 @@ $(document).ready(function () {
         // HANDY - to make everything on a page read only
         $('.selectized').each(function() { this.selectize.disable() });
         $(':input').attr('disabled', 'disabled');
+        // HANDY - to make on thing re enabled
+        $('#id_se_block_select_string').removeAttr('disabled');
+        $('#id_se_block_select_string')[0].selectize.enable();
 
     }
 
@@ -2518,6 +2521,7 @@ $(document).ready(function () {
         }
         for (var idx = 0, ls = global_plate_size_form_device; idx < ls; idx++) {
             global_plate_whole_plate_index_list.push(idx);
+            // console.log("idx ", idx)
         }
         // console.log("changed device what size is plate: ", global_plate_size_form_device)
         // set to only fire on change plate size IF the selection is a_plate (an empty plate)
@@ -4185,7 +4189,8 @@ $(document).ready(function () {
                     $('#id_assayplatereadermapitem_set-' + formsetidx + '-row_index').val(ridx);
                     // actually do not really need these, removed from formset to make quicker 20200609
                     //$('#id_assayplatereadermapitem_set-' + formsetidx + '-column_index').val(cidx);
-                    //$('#id_assayplatereadermapitem_set-' + formsetidx + '-plate_index').val(formsetidx);
+
+                    $('#id_assayplatereadermapitem_set-' + formsetidx + '-plate_index').val(formsetidx);
 
                     // 20200522 getting rid of the value formset
                     // $('#id_assayplatereadermapitemvalue_set-' + formsetidx + '-plate_index').val(formsetidx);
