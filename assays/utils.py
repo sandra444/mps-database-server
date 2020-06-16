@@ -5698,7 +5698,7 @@ def plate_map_sub_return_the_fitted_and_other_info(
             ftv = araw / slope_linear0
 
     # WATCH if change this above, will not work here!! Be careful.
-    if ftv != " " and not None and str(ftv).strip() != "nan":
+    if ftv != " ":
         # adjust by normalization
         if standardunitCellsStart == None and unitCellsStart != None:
             if (cv == 0 or ct == 0):
@@ -5717,12 +5717,6 @@ def plate_map_sub_return_the_fitted_and_other_info(
                 caution_flag = 'E'
     else:
         pdv = " "
-        if ftv is None or str(ftv).strip() != "nan":
-            # to deal with a problem in poly2
-            ftv = " "
-            caution_flag = 'F'
-            sendmessage = sendmessage + " Cannot calculate fitted value."
-            # print("ftv ~",ftv,"~")
 
     if len(caution_flag) > 0:
         omits = 'true'
