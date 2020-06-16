@@ -1891,8 +1891,8 @@ class AssayDataFromFilters(TemplateView):
             else:
                 matrix_items = AssayMatrixItem.objects.none()
 
-            if len(current_filters) > 3 and current_filters[3]:
-                compound_ids = [int(id) for id in current_filters[3].split(',') if id]
+            if len(current_filters) > 2 and current_filters[2]:
+                compound_ids = [int(id) for id in current_filters[2].split(',') if id]
 
                 # See whether to include no compounds
                 if 0 in compound_ids:
@@ -1907,8 +1907,8 @@ class AssayDataFromFilters(TemplateView):
             else:
                 matrix_items = AssayMatrixItem.objects.none()
 
-            if len(current_filters) > 2 and current_filters[2]:
-                target_ids = [int(id) for id in current_filters[2].split(',') if id]
+            if len(current_filters) > 3 and current_filters[3]:
+                target_ids = [int(id) for id in current_filters[3].split(',') if id]
 
                 matrix_items = matrix_items.filter(
                     assaydatapoint__study_assay__target_id__in=target_ids
