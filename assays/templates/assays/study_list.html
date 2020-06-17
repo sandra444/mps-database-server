@@ -2,7 +2,7 @@
 
 {# PLEASE NOTE THAT SORTING ETC. IS NOT HERE, IT CHANGES DEPENDING ON THE PAGE #}
 {# PLEASE NOTE THAT THE ID IS CONTRIVED, ALWAYS "studies" #}
-<table hidden id="studies" class="display" cellspacing="0" width="100%">
+<table hidden id="studies" class="display table table-striped" cellspacing="0" width="100%">
     <thead>
         <tr>
             {% if not for_study_set_list %}
@@ -47,7 +47,7 @@
             {% endif %}
 {#                    <td>{{ study.assay_run_id }}</td>#}
             <td style="word-wrap: break-word">{{ study.name }}</td>
-            <td>{{ study.start_date|date:"M d, Y" }}</td>
+            <td>{{ study.start_date|date:"Y-m-d" }}</td>
             <td>{{ study.get_study_types_string }}</td>
             <td>{{ study.organ_models|default:"-No MPS Models-" }}</td>
 {#                    <td>{{ study.study_configuration }}</td>#}
@@ -99,7 +99,7 @@
             </td>
             <td>
                 {% if study.signed_off_date %}
-                {{ study.signed_off_date|date:"M d, Y" }}
+                {{ study.signed_off_date|date:"Y-m-d" }}
                 {% endif %}
             </td>
             <td>
