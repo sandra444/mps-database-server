@@ -728,7 +728,7 @@ class AssayMatrixForm(SetupFormsMixin, SignOffMixin, BootstrapForm):
 
     def __init__(self, *args, **kwargs):
         self.study = kwargs.pop('study', None)
-        self.user = kwargs.pop('user', None)
+        # self.user = kwargs.pop('user', None)
         super(AssayMatrixForm, self).__init__(*args, **kwargs)
 
         if self.study:
@@ -2393,7 +2393,7 @@ class AssayMatrixFormNew(SetupFormsMixin, SignOffMixin, BootstrapForm):
         user -- the user in question
         """
         # PROBABLY DON'T NEED THIS?
-        self.user = kwargs.pop('user', None)
+        # self.user = kwargs.pop('user', None)
         super(AssayMatrixFormNew, self).__init__(*args, **kwargs)
 
         # SLOPPY
@@ -2770,7 +2770,7 @@ class AssayPlateReaderMapForm(BootstrapForm):
 
     def __init__(self, *args, **kwargs):
         self.study = kwargs.pop('study', None)
-        self.user = kwargs.pop('user', None)
+        # self.user = kwargs.pop('user', None)
         super(AssayPlateReaderMapForm, self).__init__(*args, **kwargs)
 
         # need these or get blank study_assay in the update page (add page worked okay without)
@@ -3723,7 +3723,7 @@ class AssayPlateReaderMapDataFileForm(BootstrapForm):
 
     def __init__(self, *args, **kwargs):
         self.study = kwargs.pop('study', None)
-        self.user = kwargs.pop('user', None)
+        # self.user = kwargs.pop('user', None)
         # # ??
         # filename_only = kwargs.pop('extra', 0)
         super(AssayPlateReaderMapDataFileForm, self).__init__(*args, **kwargs)
