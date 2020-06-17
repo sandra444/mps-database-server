@@ -331,7 +331,7 @@ class DicModelChoiceField(forms.Field):
         return value
 
     def valid_value(self, value):
-        # "Check to see if the provided value is a valid choice"
+        """Check to see if the provided value is a valid choice"""
         if str(value.id) in self.dic.get(self.name):
             return True
         return False
@@ -2417,8 +2417,8 @@ class AssayTargetForm(BootstrapForm):
         exclude = tracking
 
         widgets = {
-                'description': forms.Textarea(attrs={'cols': 50, 'rows': 3}),
-            }
+            'description': forms.Textarea(attrs={'cols': 50, 'rows': 3}),
+        }
 
     def __init__(self, *args, **kwargs):
         super(AssayTargetForm, self).__init__(*args, **kwargs)
