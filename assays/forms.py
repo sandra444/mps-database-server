@@ -2698,7 +2698,9 @@ class AssayPlateReadMapAdditionalInfoForm(forms.Form):
         choices=assay_plate_reader_time_unit_choices
     )
     se_location = forms.ModelChoiceField(
-         queryset=AssaySampleLocation.objects.all(),
+         queryset=AssaySampleLocation.objects.all().order_by(
+             'name'
+         ),
          required=False,
     )
     ns_location = forms.ModelChoiceField(
