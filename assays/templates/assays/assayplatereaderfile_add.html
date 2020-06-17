@@ -1,10 +1,6 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block load_js %}
-    <script src="{% static "assays/assayplatereaderfile_add.js" %}"></script>
-{% endblock %}
-
 {# only the add page uses this template, so do not have to make conditional #}
 {% block breadcrumbs %}
     <li><a href="/assays/assaystudy/">Studies</a>
