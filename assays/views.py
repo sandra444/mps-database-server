@@ -3585,10 +3585,8 @@ class AssayPlateReaderMapUpdate(StudyGroupMixin, UpdateView):
             data_attached = False
         context['data_attached'] = data_attached
 
-        if data_attached:
-            context['assay_map_additional_info'] = ""
-        else:
-            context['assay_map_additional_info'] = AssayPlateReadMapAdditionalInfoForm(study_id=self.object.study_id)
+        # Always acquire map_additional_info
+        context['assay_map_additional_info'] = AssayPlateReadMapAdditionalInfoForm(study_id=self.object.study_id)
 
         # print("calling formset")
         if 'formset' not in context:
