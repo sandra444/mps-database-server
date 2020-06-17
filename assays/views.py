@@ -3941,7 +3941,7 @@ class AssayPlateReaderMapUpdate(StudyGroupMixin, UpdateView):
 #     return my_key
 
 
-class AssayPlateReaderMapView(StudyGroupMixin, DetailView):
+class AssayPlateReaderMapView(StudyViewerMixin, DetailView):
     """Assay plate map view"""
     model = AssayPlateReaderMap
     template_name = 'assays/assayplatereadermap_add.html'
@@ -3981,7 +3981,7 @@ class AssayPlateReaderMapView(StudyGroupMixin, DetailView):
         return context
 
 
-class AssayPlateReaderMapDelete(StudyViewerMixin, DeleteView):
+class AssayPlateReaderMapDelete(CreatorAndNotInUseMixin, DeleteView):
     model = AssayPlateReaderMap
     template_name = 'assays/assayplatereadermap_delete.html'
 
@@ -4120,7 +4120,7 @@ class AssayPlateReaderMapDataFileIndex(StudyViewerMixin, DetailView):
         return context
 
 
-class AssayPlateReaderMapDataFileView(StudyGroupMixin, DetailView):
+class AssayPlateReaderMapDataFileView(StudyViewerMixin, DetailView):
     """Assay Plate Reader File Detail View"""
     model = AssayPlateReaderMapDataFile
     template_name = 'assays/assayplatereaderfile_update.html'
@@ -4148,7 +4148,7 @@ class AssayPlateReaderMapDataFileView(StudyGroupMixin, DetailView):
         return context
 
 
-class AssayPlateReaderMapDataFileDelete(StudyViewerMixin, DeleteView):
+class AssayPlateReaderMapDataFileDelete(CreatorAndNotInUseMixin, DeleteView):
     model = AssayPlateReaderMapDataFile
     template_name = 'assays/assayplatereaderfile_delete.html'
 
