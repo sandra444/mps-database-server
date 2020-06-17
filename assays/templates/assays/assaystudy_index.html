@@ -90,7 +90,6 @@
                     </ul>
                 </span>
                 {% if user_is_group_editor and not object.signed_off_by %}
-                {% comment %}
                 <span class="dropdown btn-group">
                     <button class="btn btn-warning dropdown-toggle" type="button" id="add_data" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
                         Add Data
@@ -102,8 +101,6 @@
                         <li><a href="{% url 'assayplatereaderfile-index' object.id %}">Assay Plate Reader Files</a></li>
                     </ul>
                 </span>
-                {% endcomment %}
-                <a href="upload" class="btn btn-warning" role="button">Upload Data</a>
                 {% endif %}
 
                 {% if user_is_group_admin or user_is_stakeholder_admin or user.is_superuser or show_indicate_study_sign_off or not user_is_group_admin and user_is_group_editor and not object.signed_off_by%}
