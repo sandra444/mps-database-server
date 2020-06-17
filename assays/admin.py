@@ -48,7 +48,12 @@ from assays.models import (
     AssayStudyReference,
     AssayStudySet,
     AssayCategory,
-    SpeciesParameters
+    SpeciesParameters,
+    AssayPlateReaderMap,
+    AssayPlateReaderMapItem,
+    AssayPlateReaderMapDataFile,
+    AssayPlateReaderMapDataFileBlock,
+    AssayPlateReaderMapItemValue,
 )
 from microdevices.models import MicrophysiologyCenter
 # from compounds.models import Compound
@@ -1249,7 +1254,6 @@ class AssayStudySetAdmin(ImportExportModelAdmin):
     form = AssayStudySetAdminForm
     search_fields = ('name', 'description')
 
-
 admin.site.register(AssayStudySet, AssayStudySetAdmin)
 
 
@@ -1266,3 +1270,27 @@ class SpeciesParametersAdmin(ImportExportModelAdmin):
     search_fields = ('species', 'organ', 'reference')
 
 admin.site.register(SpeciesParameters, SpeciesParametersAdmin)
+
+
+# do not want to allow editing of the wells in the plate in the admin
+# the relationship between the item and item value tables needs to be controlled by the GUI
+class AssayPlateReaderMapAdmin(ImportExportModelAdmin):
+    model = AssayPlateReaderMap
+    list_display = ('name', 'description', 'device', 'study_assay', 'time_unit', 'volume_unit', 'cell_count')
+    search_fields = ('name', 'description')
+
+admin.site.register(AssayPlateReaderMap, AssayPlateReaderMapAdmin)
+
+class AssayPlateReaderMapDataFileAdmin(ImportExportModelAdmin):
+    model = AssayPlateReaderMapDataFile
+    list_display = ('description', )
+    search_fields = ('description',)
+
+admin.site.register(AssayPlateReaderMapDataFile, AssayPlateReaderMapDataFileAdmin)
+
+class AssayPlateReaderMapDataFileBlockAdmin(ImportExportModelAdmin):
+    model = AssayPlateReaderMapDataFileBlock
+    list_display = ('assayplatereadermap', 'assayplatereadermapdatafile', 'data_block', 'data_processing_parsable')
+    search_fields = ('data_block',)
+
+admin.site.register(AssayPlateReaderMapDataFileBlock, AssayPlateReaderMapDataFileBlockAdmin)
