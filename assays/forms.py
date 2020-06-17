@@ -3348,7 +3348,8 @@ class AssayPlateReaderMapForm(BootstrapForm):
 
             if len(use_curve.strip()) == 0:
                 err_msg = "The calibration method " + use_curve_long + " was not found in the cross reference. This is a very bad error. It must be fixed"
-                print(err_msg)
+                # print(err_msg)
+                raise forms.ValidationError(err_msg)
 
             # form.instance.study
             # make a dictionary to send to the utils.py when call the function
@@ -3364,6 +3365,8 @@ class AssayPlateReaderMapForm(BootstrapForm):
                 'standard_unit': data.get('standard_unit').unit,
                 'form_min_standard': data.get('form_calibration_standard_fitted_min_for_e'),
                 'form_max_standard': data.get('form_calibration_standard_fitted_max_for_e'),
+                'form_logistic4_A': data.get('form_logistic4_A'),
+                'form_logistic4_D': data.get('form_logistic4_D'),
                 'form_blank_handling': data.get('se_form_blank_handling'),
                 'radio_standard_option_use_or_not': data.get('radio_standard_option_use_or_not'),
                 'radio_replicate_handling_average_or_not_0': data.get(
