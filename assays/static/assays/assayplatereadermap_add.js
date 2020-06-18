@@ -561,7 +561,7 @@ $(document).ready(function () {
         'Exclude',
 
         'Notes',
-        'Processing Details', 
+        'Processing Details',
         'Omit From Average',
     ];
      /**
@@ -797,7 +797,7 @@ $(document).ready(function () {
     }
 
     // END SECTION TO SET GLOBAL VARIABLES plus some functions
-    
+
     // SECTION - ON CHANGE or CLICK
     /**
      * On change - post data processing option to show/hide calibration details
@@ -1470,8 +1470,8 @@ $(document).ready(function () {
             //$('#id_assayplatereadermapitem_set-' + i + '-form_user_entered_omit_from_average').prop('checked', false)
             psudo_formset_user_omits[i] = false;
         }
-    }    
-    
+    }
+
     /**
      * Function is called to move forward with calibration/data processing
      * @param called_from indicates what triggered the need for the reprocessing
@@ -1690,7 +1690,7 @@ $(document).ready(function () {
             ["Concentration (Added)", "Signal", "Signal (Adjusted)", "Signal (Fitted)"],
             'standards',
             []);
-        
+
         prepForGraphOfStandardsDataPoints_ajax(list_of_dicts_of_each_standard_row_points)
         buildADataTable_ajax(
             list_of_dicts_of_each_standard_row_points,
@@ -2307,7 +2307,7 @@ $(document).ready(function () {
     /**
      * On Change of the reporting method, target, unit. Will change multiplier and other fields needed for data processing.
     */
-    $("#id_study_assay").change(function () {  
+    $("#id_study_assay").change(function () {
         changeAndLoadStudyAssayMethodTargetUnit();
         theSuiteOfPreCalibrationChecks();
     });
@@ -2582,7 +2582,7 @@ $(document).ready(function () {
         } else {
             callChangeSelectedByDragOnPlate()
         }
-    }  
+    }
     // END - secondary changes to assay plate map (Apply and Drag)
 
     // START - ADDITIONAL FUNCTION SECTION
@@ -2782,8 +2782,8 @@ $(document).ready(function () {
         if (global_plate_well_use == 'pastes' || global_plate_well_use == 'copys') {
             alert('Copy/Paste does not work with Apply buttons. Use Copy and drag.');
         } else {
-            // this is limited to either one column or one row 
-            // if make an Apply to All, don't send 
+            // this is limited to either one column or one row
+            // if make an Apply to All, don't send
             // get the plate_indexes of the selected wells in the assay plate map table
             let plate_index_list = [];
             // what button was pushed (what column, what row, a column or row header)
@@ -2847,7 +2847,7 @@ $(document).ready(function () {
 
     function callChangeSelectedByDragOnPlate2(plate_index_list, plate_indexes_rows, plate_indexes_columns) {
         // this could include the whole plate - so,
-        // IF the incrementer is being used and if one of the - start over at top, left, or right 
+        // IF the incrementer is being used and if one of the - start over at top, left, or right
         // then, need to limit to either one column or one row for EACH call to makeSpecificChangesToPlateUsingPlatemapIndexList
 
         // this is called when drag and any well use option (including copys and pastes), so, have to handle all logic
@@ -4467,46 +4467,48 @@ $(document).ready(function () {
                 ret_time = global_plate_mems_time[idx];
                 ret_block_raw_value = global_plate_mems_block_raw_value[idx];
 
-                // Make the changes to the formset (s)
-                $('#id_assayplatereadermapitem_set-' + formset_number + '-well_use').val(ret_well_use);
-                $('#id_assayplatereadermapitem_set-' + formset_number + '-standard_value').val(ret_standard_value);
-                $('#id_assayplatereadermapitem_set-' + formset_number + '-matrix_item').val(ret_matrix_item);
+                if (typeof(ret_well_use) != "undefined") {
+                    // Make the changes to the formset (s)
+                    $('#id_assayplatereadermapitem_set-' + formset_number + '-well_use').val(ret_well_use);
+                    $('#id_assayplatereadermapitem_set-' + formset_number + '-standard_value').val(ret_standard_value);
+                    $('#id_assayplatereadermapitem_set-' + formset_number + '-matrix_item').val(ret_matrix_item);
 
-                $('#id_assayplatereadermapitem_set-' + formset_number + '-location').val(ret_location);
+                    $('#id_assayplatereadermapitem_set-' + formset_number + '-location').val(ret_location);
 
-                $('#id_assayplatereadermapitem_set-' + formset_number + '-dilution_factor').val(ret_dilution_factor);
-                $('#id_assayplatereadermapitem_set-' + formset_number + '-collection_volume').val(ret_collection_volume);
-                $('#id_assayplatereadermapitem_set-' + formset_number + '-collection_time').val(ret_collection_time);
-                $('#id_assayplatereadermapitem_set-' + formset_number + '-compound').val(ret_compound);
-                $('#id_assayplatereadermapitem_set-' + formset_number + '-cell').val(ret_cell);
-                $('#id_assayplatereadermapitem_set-' + formset_number + '-setting').val(ret_setting);
-                $('#id_assayplatereadermapitem_set-' + formset_number + '-default_time').val(ret_default_time);
+                    $('#id_assayplatereadermapitem_set-' + formset_number + '-dilution_factor').val(ret_dilution_factor);
+                    $('#id_assayplatereadermapitem_set-' + formset_number + '-collection_volume').val(ret_collection_volume);
+                    $('#id_assayplatereadermapitem_set-' + formset_number + '-collection_time').val(ret_collection_time);
+                    $('#id_assayplatereadermapitem_set-' + formset_number + '-compound').val(ret_compound);
+                    $('#id_assayplatereadermapitem_set-' + formset_number + '-cell').val(ret_cell);
+                    $('#id_assayplatereadermapitem_set-' + formset_number + '-setting').val(ret_setting);
+                    $('#id_assayplatereadermapitem_set-' + formset_number + '-default_time').val(ret_default_time);
 
-                // 20200522 getting rid of the value formset
-                // if (document.getElementById("id_form_number_file_block_combos").value > 0) {
-                //     // do not need to change the value formset because it is not pulled in,
-                //     // only the data are pulled in for display
-                // } else {
-                //     $('#id_assayplatereadermapitemvalue_set-' + formset_number + '-well_use').val(ret_well_use);
-                //     $('#id_assayplatereadermapitemvalue_set-' + formset_number + '-time').val(ret_time);
-                // }
+                    // 20200522 getting rid of the value formset
+                    // if (document.getElementById("id_form_number_file_block_combos").value > 0) {
+                    //     // do not need to change the value formset because it is not pulled in,
+                    //     // only the data are pulled in for display
+                    // } else {
+                    //     $('#id_assayplatereadermapitemvalue_set-' + formset_number + '-well_use').val(ret_well_use);
+                    //     $('#id_assayplatereadermapitemvalue_set-' + formset_number + '-time').val(ret_time);
+                    // }
 
-                // Make the changes to the plate
-                $('#well_use-' + formset_number).text(ret_well_use);
+                    // Make the changes to the plate
+                    $('#well_use-' + formset_number).text(ret_well_use);
 
-                $('#matrix_item-' + formset_number).text(ret_matrix_item_text);
+                    $('#matrix_item-' + formset_number).text(ret_matrix_item_text);
 
-                $('#location-' + formset_number).text(ret_location_text);
-                $('#dilution_factor-' + formset_number).text(ret_dilution_factor);
-                $('#collection_volume-' + formset_number).text(ret_collection_volume);
-                $('#collection_time-' + formset_number).text(ret_collection_time);
-                $('#standard_value-' + formset_number).text(ret_standard_value);
-                $('#compound-' + formset_number).text(ret_compound);
-                $('#cell-' + formset_number).text(ret_cell);
-                $('#setting-' + formset_number).text(ret_setting);
-                $('#default_time-' + formset_number).text(ret_default_time);
-                $('#time-' + formset_number).text(ret_time);
-                $('#block_raw_value-' + formset_number).text(ret_block_raw_value);
+                    $('#location-' + formset_number).text(ret_location_text);
+                    $('#dilution_factor-' + formset_number).text(ret_dilution_factor);
+                    $('#collection_volume-' + formset_number).text(ret_collection_volume);
+                    $('#collection_time-' + formset_number).text(ret_collection_time);
+                    $('#standard_value-' + formset_number).text(ret_standard_value);
+                    $('#compound-' + formset_number).text(ret_compound);
+                    $('#cell-' + formset_number).text(ret_cell);
+                    $('#setting-' + formset_number).text(ret_setting);
+                    $('#default_time-' + formset_number).text(ret_default_time);
+                    $('#time-' + formset_number).text(ret_time);
+                    $('#block_raw_value-' + formset_number).text(ret_block_raw_value);
+                }
 
                 idx = idx + 1;
             });
