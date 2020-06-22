@@ -796,529 +796,529 @@ class AssayStudyGroupForm(SetupFormsMixin, SignOffMixin, BootstrapForm):
         # Contrivances
         self.fields['test_type'].widget.attrs['class'] = 'no-selectize required form-control'
 
-    def clean(self):
-        """Checks for at least one study type"""
-        # clean the form data, before validation
-        data = super(AssayStudyGroupForm, self).clean()
-
-        # SLOPPY NOT DRY
-        new_setup_data = {}
-
-        # This matrix is only for chips
-        # WARNING: THIS WILL BREAK IN STUDIES WITH MULTIPLE CHIP SETS
-        # IMPORTANT NOTE: WHEN BACK-FILLING, WE WILL NEED TO CONSOLIDATE CHIP MATRICES! Otherwise this flow will not work correctly...
-        current_matrix = AssayMatrix.objects.filter(
-            # The study must exist in order to visit this page, so getting the id this was is fine
-            study_id=self.instance.id,
-            representation='chips'
-        )
-
-        # Current group ids so that we can match for deletes and edits
-        current_groups = AssayGroup.objects.filter(
-            study_id=self.instance.id
-        )
-
-        current_group_ids = {
-            group.id: group for group in current_groups
-        }
-
-        # Ditto for items (chips, in this case as wells are managed elsewhere)
-        current_items = AssayMatrixItem.objects.filter(
-            study_id=self.instance.id
-        )
-
-        current_item_ids = {
-            item.id: item for item in current_items
-        }
-
-        if current_matrix:
-            current_matrix = current_matrix[0]
-        else:
-            current_matrix = None
-
-        # Need to get the current groups (this could be an edit of groups)
-        new_groups = None
-        # Note that the instance is None for new adds, of course
-        current_groups = AssayGroup.objects.filter(study_id=form.instance.id)
-
-        new_items = None
-        # Likewise with chips, some may need to be edited or removed etc.
-        current_items = AssayMatrixItems.objects.filter(matrix_id=current_matrix)
-
-        # This is supposed to contain data for cells, compounds, and settings (perhaps more later)
-        new_related = None
-
-        # Just have the errors be non-field errors for the moment
-        current_errors = []
-
-        # Am I sticking with the name 'series_data'?
-        if self.cleaned_data.get('series_data', None):
-            all_data = json.loads(self.cleaned_data.get('series_data', '[]'))
-        else:
-            # Contrived defaults
-            all_data = {
-                'series_data': [],
-                'chips': [],
-                'plates': []
-            }
-
-        # The data for groups is currently stored in series_data
-        all_setup_data = all_data.get('series_data')
-
-        # Catch technically empty setup data
-        setup_data_is_empty = True
-
-        for group_set in all_setup_data:
-            if group_set:
-                setup_data_is_empty = not any(group_set.values())
-
-        if setup_data_is_empty:
-            all_setup_data = []
-
-        # if commit and all_setup_data:
-        # SEE BASE MODELS FOR WHY COMMIT IS NOT HERE
-        if all_setup_data:
-            created_by = self.user
-            created_on = timezone.now()
-
-            current_item_number = 1
-
-            # CRUDE: JUST MAKE ONE LARGE ROW?
-            number_of_items = 0
-
-            for setup_group in all_setup_data:
-                number_of_items += int(setup_group.get('number_of_items', '0'))
-
-            # Alternative for one row per group
-            # # Find max for number of columns
-            # number_of_columns = 0
-            # for setup_group in all_setup_data:
-            #     if int(setup_group.get('number_of_items', '0')) > number_of_columns:
-            #         number_of_columns = int(setup_group.get('number_of_items', '0'))
-
-            if not current_matrix:
-                new_matrix = AssayMatrix(
-                    # Just name the chip matrix the same thing as the study?
-                    name=self.instance.name,
-                    # Does not work with plates at the moment
-                    representation='chips',
-                    study=self.instance,
-                    # Doesn't matter for chips
-                    device=None,
-                    # Alternative that looks nicer, but these matrices probably won't be accessible anyway
-                    # number_of_rows=len(all_setup_data),
-                    # number_of_columns=number_of_columns,
-                    number_of_rows=1,
-                    number_of_columns=number_of_items,
-                    created_by=created_by,
-                    created_on=created_on,
-                    modified_by=created_by,
-                    modified_on=created_on,
-                )
-
-                try:
-                    new_matrix.full_clean()
-                except forms.ValidationError as e:
-                    current_errors.append(e.values())
-            else:
-                new_matrix = current_matrix
-
-            # COMPOUND STUFF BECAUSE COMPOUND SCHEMA IS MISERABLE
-            # Get all chip setup assay compound instances
-            assay_compound_instances = {}
-
-            # Get all Compound Instances
-            compound_instances = {
-                (
-                    instance.compound.id,
-                    instance.supplier.id,
-                    instance.lot,
-                    str(instance.receipt_date)
-                ): instance for instance in CompoundInstance.objects.all().prefetch_related(
-                    'compound',
-                    'supplier'
-                )
-            }
-
-            # Get all suppliers
-            suppliers = {
-                supplier.name: supplier for supplier in CompoundSupplier.objects.all()
-            }
-
-            new_items = []
-            new_related = {}
-
-            # For now, chips are are all in one row
-            for setup_row, setup_group in enumerate(all_setup_data):
-                items_in_group = int(setup_group.pop('number_of_items', '0'))
-                test_type = setup_group.get('test_type', '')
-
-                # To break out to prevent repeat errors
-                group_has_error = False
-
-                # Make the group
-                # Add the group to the new_groups
-                # TODO DIFFERENTIATE NEW AND EXISTING GROUPS HERE
-                # We can identify and existing group by checking for an id
-                current_group = current_group_ids.get(setup_group.get('id', ''), None)
-
-                if current_group:
-                    new_group = current_group
-
-                    # TODO LOGIC FOR UPDATE HERE?
-                else:
-                    new_group = AssayGroup(
-                        # Study should just be instance
-                        study=self.instance,
-                        name=setup_group.get('name', ''),
-                        test_type=setup_group.get('test_type', ''),
-                        organ_model_id=setup_group.get('organ_model_id', ''),
-                        organ_model_protocol_id=setup_group.get('organ_model_protocol_id', ''),
-                    )
-
-                    # Logic for first clean and adding to new_groups here
-
-                for iteration in range(items_in_group):
-                    # We know whether this is a current item if the id matches one in our list
-                    current_item = current_item_ids.get(setup_group.get('id', ''), None)
-
-                    # TODO
-                    if current_item:
-                        new_item = current_item
-
-                        # TODO LOGIC FOR UPDATE HERE?
-                    else:
-                        new_item = AssayMatrixItem(
-                            # study=study,
-                            # matrix=new_matrix,
-                            name=str(current_item_number),
-                            # JUST MAKE SETUP DATE THE STUDY DATE FOR NOW
-                            setup_date=self.instance.start_date,
-                            # Alternative row and column
-                            # row_index=setup_row,
-                            # column_index=iteration,
-                            row_index=0,
-                            column_index=current_item_number-1,
-                            # Irrelevant (but required, unfortunately, maybe will remove later)
-                            # device=study.organ_model.device,
-                            organ_model=setup_group.get('organ_model_id', None),
-                            # Some nuances here that we will gloss over
-                            organ_model_protocol_id=setup_group.get('organ_model_protocol_id', None),
-                            test_type=test_type,
-                            created_by=created_by,
-                            created_on=created_on,
-                            modified_by=created_by,
-                            modified_on=created_on,
-                        )
-
-                        try:
-                            new_item.full_clean(exclude=[
-                                # The matrix needs to be excluded because it might not exist yet
-                                'matrix',
-
-                                # Why exclude these?
-                                # 'device',
-                                # 'organ_model',
-                                # 'organ_model_protocol',
-                            ])
-                            new_items.append(new_item)
-
-                        except forms.ValidationError as e:
-                            current_errors.append(e.values())
-                            group_has_error = True
-
-                    current_item_number += 1
-
-                # Keep in mind that to decrease sparsity related data is now tied to a group
-                for prefix, current_objects in setup_group.items():
-                    # Related are tied to group, not item
-                    # Groups are INDEX DEPENDENT, *NOT* by ID (group may or may not exist)
-                    current_related_list = new_related.setdefault(
-                        str(setup_row), []
-                    )
-
-                    for setup_column, current_object in enumerate(current_objects):
-                        if prefix in ['cell', 'compound', 'setting'] and current_object:
-                            current_object.update({
-                                'matrix_item': new_item,
-                            })
-                            if prefix == 'cell':
-                                new_cell = AssayGroupCell(**current_object)
-
-                                try:
-                                    new_cell.full_clean(exclude=['group'])
-                                    current_related_list.append(new_cell)
-                                except forms.ValidationError as e:
-                                    # May need to revise process_error
-                                    current_errors.append(
-                                        process_error_for_study_new(
-                                            prefix,
-                                            setup_row,
-                                            setup_column,
-                                            e
-                                        )
-                                    )
-                                    group_has_error = True
-
-                            elif prefix == 'setting':
-                                new_setting = AssayGroupSetting(**current_object)
-                                try:
-                                    new_setting.full_clean(exclude=['group'])
-                                    current_related_list.append(new_setting)
-                                except forms.ValidationError as e:
-                                    current_errors.append(
-                                        process_error_for_study_new(
-                                            prefix,
-                                            setup_row,
-                                            setup_column,
-                                            e
-                                        )
-                                    )
-                                    group_has_error = True
-
-                                # new_setting.save()
-                            elif prefix == 'compound':
-                                # CONFUSING NOT DRY BAD
-                                compound = int(current_object.get('compound_id', '0'))
-                                supplier_text = current_object.get('supplier_text', 'N/A').strip()
-                                lot_text = current_object.get('lot_text', 'N/A').strip()
-                                receipt_date = current_object.get('receipt_date', '')
-
-                                # NOTE THE DEFAULT, PLEASE DO THIS IN A WAY THAT IS MORE DRY
-                                if not supplier_text:
-                                    supplier_text = 'N/A'
-
-                                if not lot_text:
-                                    lot_text = 'N/A'
-
-                                # Check if the supplier already exists
-                                supplier = suppliers.get(supplier_text, '')
-
-                                concentration = current_object.get('concentration', '0')
-                                # Annoying, bad
-                                if not concentration:
-                                    concentration = 0.0
-                                else:
-                                    concentration = float(concentration)
-                                concentration_unit_id = int(current_object.get('concentration_unit_id', '0'))
-                                addition_location_id = int(current_object.get('addition_location_id', '0'))
-
-                                addition_time = current_object.get('addition_time', '0')
-                                duration = current_object.get('duration', '0')
-
-                                if not addition_time:
-                                    addition_time = 0.0
-                                else:
-                                    addition_time = float(addition_time)
-
-                                if not duration:
-                                    duration = 0.0
-                                else:
-                                    duration = float(duration)
-
-                                # Otherwise create the supplier
-                                if not supplier:
-                                    supplier = CompoundSupplier(
-                                        name=supplier_text,
-                                        created_by=created_by,
-                                        created_on=created_on,
-                                        modified_by=created_by,
-                                        modified_on=created_on,
-                                    )
-                                    try:
-                                        supplier.full_clean()
-                                        supplier.save()
-                                    except forms.ValidationError as e:
-                                        # raise forms.ValidationError(e)
-                                        current_errors.append(
-                                            process_error_for_study_new(
-                                                prefix,
-                                                setup_row,
-                                                setup_column,
-                                                e
-                                            )
-                                        )
-                                        group_has_error = True
-
-                                    suppliers.update({
-                                        supplier_text: supplier
-                                    })
-
-                                # FRUSTRATING EXCEPTION
-                                if not receipt_date:
-                                    receipt_date = None
-
-                                # Check if compound instance exists
-                                compound_instance = compound_instances.get((compound, supplier.id, lot_text, str(receipt_date)), '')
-
-                                if not compound_instance:
-                                    compound_instance = CompoundInstance(
-                                        compound_id=compound,
-                                        supplier=supplier,
-                                        lot=lot_text,
-                                        receipt_date=receipt_date,
-                                        created_by=created_by,
-                                        created_on=created_on,
-                                        modified_by=created_by,
-                                        modified_on=created_on,
-                                    )
-                                    try:
-                                        compound_instance.full_clean()
-                                        compound_instance.save()
-                                    except forms.ValidationError as e:
-                                        # raise forms.ValidationError(e)
-                                        current_errors.append(
-                                            process_error_for_study_new(
-                                                prefix,
-                                                setup_row,
-                                                setup_column,
-                                                e
-                                            )
-                                        )
-                                        group_has_error = True
-
-                                    compound_instances.update({
-                                        (compound, supplier.id, lot_text, str(receipt_date)): compound_instance
-                                    })
-
-                                # Save the AssayCompoundInstance
-                                conflicting_assay_compound_instance = assay_compound_instances.get(
-                                    (
-                                        # new_item.id,
-                                        current_item_number,
-                                        compound_instance.id,
-                                        concentration,
-                                        concentration_unit_id,
-                                        addition_time,
-                                        duration,
-                                        addition_location_id
-                                    ), None
-                                )
-                                if not conflicting_assay_compound_instance:
-                                    new_compound = AssayGroupCompound(
-                                        # matrix_item_id=new_item.id,
-                                        compound_instance_id=compound_instance.id,
-                                        concentration=concentration,
-                                        concentration_unit_id=concentration_unit_id,
-                                        addition_time=addition_time,
-                                        duration=duration,
-                                        addition_location_id=addition_location_id
-                                    )
-
-                                    try:
-                                        new_compound.full_clean(exclude=['group'])
-                                        current_related_list.append(new_compound)
-                                    except forms.ValidationError as e:
-                                        # raise forms.ValidationError(e)
-                                        current_errors.append(
-                                            process_error_for_study_new(
-                                                prefix,
-                                                setup_row,
-                                                setup_column,
-                                                e
-                                            )
-                                        )
-                                        group_has_error = True
-
-                                    # new_compound.save()
-
-                                assay_compound_instances.update({
-                                    (
-                                        # new_item.id,
-                                        current_item_number,
-                                        compound_instance.id,
-                                        concentration,
-                                        concentration_unit_id,
-                                        addition_time,
-                                        duration,
-                                        addition_location_id
-                                    ): True
-                                })
-
-                    # Don't keep iterating through this group if there is a problem
-                    if group_has_error:
-                        break
-
-        if current_errors:
-            errors.get('organ_model').append(['Please review the table below for errors.'])
-            raise forms.ValidationError(errors)
-
-        new_setup_data.update({
-            'new_matrix': new_matrix,
-            'new_items': new_items,
-            'new_related': new_related,
-        })
-
-        data.update({
-            'processed_setup_data': new_setup_data
-        })
-
-        return data
-
-    def save(self, commit=True):
-        # PLEASE SEE BASE MODELS
-        # study = super(AssayStudyFormNew, self).save(commit)
-        study = super(AssayStudyGroupForm, self).save()
-
-        # VERY SLOPPY
-        created_by = self.user
-        created_on = timezone.now()
-
-        study.created_by = created_by
-        study.created_on = created_on
-        study.modified_by = created_by
-        study.modified_on = created_on
-
-        study.save()
-        # SLOPPY: REVISE
-
-        study_id = study.id
-
-        if study.organ_model_id:
-            device_id = study.organ_model.device_id
-        else:
-            device_id = None
-
-        organ_model_id = study.organ_model_id
-        organ_model_protocol_id = study.organ_model_protocol_id
-
-        all_setup_data = self.cleaned_data.get('processed_setup_data', None)
-
-        if all_setup_data:
-            new_matrix = all_setup_data.get('new_matrix', None)
-            new_items = all_setup_data.get('new_items', None)
-            new_related = all_setup_data.get('new_related', None)
-
-            if new_matrix:
-                new_matrix.study_id = study_id
-                new_matrix.save()
-                new_matrix_id = new_matrix.id
-
-                new_item_ids = {}
-
-                for new_item in new_items:
-                    # ADD MATRIX and tracking
-                    new_item.matrix_id = new_matrix_id
-                    new_item.study_id = study_id
-                    new_item.device_id = device_id
-                    new_item.organ_model_id = organ_model_id
-                    new_item.organ_model_protocol_id = organ_model_protocol_id
-                    new_item.save()
-
-                    new_item_ids.update({
-                        new_item.name: new_item.id
-                    })
-
-                for current_item_name, new_related_data_set in new_related.items():
-                    new_item_id = new_item_ids.get(current_item_name, None)
-
-                    if new_item_id:
-                        for new_related_data in new_related_data_set:
-                            # ADD MATRIX ITEM
-                            new_related_data.matrix_item_id = new_item_id
-                            new_related_data.save()
-
-        return study
+    # def clean(self):
+    #     """Checks for at least one study type"""
+    #     # clean the form data, before validation
+    #     data = super(AssayStudyGroupForm, self).clean()
+
+    #     # SLOPPY NOT DRY
+    #     new_setup_data = {}
+
+    #     # This matrix is only for chips
+    #     # WARNING: THIS WILL BREAK IN STUDIES WITH MULTIPLE CHIP SETS
+    #     # IMPORTANT NOTE: WHEN BACK-FILLING, WE WILL NEED TO CONSOLIDATE CHIP MATRICES! Otherwise this flow will not work correctly...
+    #     current_matrix = AssayMatrix.objects.filter(
+    #         # The study must exist in order to visit this page, so getting the id this was is fine
+    #         study_id=self.instance.id,
+    #         representation='chips'
+    #     )
+
+    #     # Current group ids so that we can match for deletes and edits
+    #     current_groups = AssayGroup.objects.filter(
+    #         study_id=self.instance.id
+    #     )
+
+    #     current_group_ids = {
+    #         group.id: group for group in current_groups
+    #     }
+
+    #     # Ditto for items (chips, in this case as wells are managed elsewhere)
+    #     current_items = AssayMatrixItem.objects.filter(
+    #         study_id=self.instance.id
+    #     )
+
+    #     current_item_ids = {
+    #         item.id: item for item in current_items
+    #     }
+
+    #     if current_matrix:
+    #         current_matrix = current_matrix[0]
+    #     else:
+    #         current_matrix = None
+
+    #     # Need to get the current groups (this could be an edit of groups)
+    #     new_groups = None
+    #     # Note that the instance is None for new adds, of course
+    #     current_groups = AssayGroup.objects.filter(study_id=form.instance.id)
+
+    #     new_items = None
+    #     # Likewise with chips, some may need to be edited or removed etc.
+    #     current_items = AssayMatrixItems.objects.filter(matrix_id=current_matrix)
+
+    #     # This is supposed to contain data for cells, compounds, and settings (perhaps more later)
+    #     new_related = None
+
+    #     # Just have the errors be non-field errors for the moment
+    #     current_errors = []
+
+    #     # Am I sticking with the name 'series_data'?
+    #     if self.cleaned_data.get('series_data', None):
+    #         all_data = json.loads(self.cleaned_data.get('series_data', '[]'))
+    #     else:
+    #         # Contrived defaults
+    #         all_data = {
+    #             'series_data': [],
+    #             'chips': [],
+    #             'plates': []
+    #         }
+
+    #     # The data for groups is currently stored in series_data
+    #     all_setup_data = all_data.get('series_data')
+
+    #     # Catch technically empty setup data
+    #     setup_data_is_empty = True
+
+    #     for group_set in all_setup_data:
+    #         if group_set:
+    #             setup_data_is_empty = not any(group_set.values())
+
+    #     if setup_data_is_empty:
+    #         all_setup_data = []
+
+    #     # if commit and all_setup_data:
+    #     # SEE BASE MODELS FOR WHY COMMIT IS NOT HERE
+    #     if all_setup_data:
+    #         created_by = self.user
+    #         created_on = timezone.now()
+
+    #         current_item_number = 1
+
+    #         # CRUDE: JUST MAKE ONE LARGE ROW?
+    #         number_of_items = 0
+
+    #         for setup_group in all_setup_data:
+    #             number_of_items += int(setup_group.get('number_of_items', '0'))
+
+    #         # Alternative for one row per group
+    #         # # Find max for number of columns
+    #         # number_of_columns = 0
+    #         # for setup_group in all_setup_data:
+    #         #     if int(setup_group.get('number_of_items', '0')) > number_of_columns:
+    #         #         number_of_columns = int(setup_group.get('number_of_items', '0'))
+
+    #         if not current_matrix:
+    #             new_matrix = AssayMatrix(
+    #                 # Just name the chip matrix the same thing as the study?
+    #                 name=self.instance.name,
+    #                 # Does not work with plates at the moment
+    #                 representation='chips',
+    #                 study=self.instance,
+    #                 # Doesn't matter for chips
+    #                 device=None,
+    #                 # Alternative that looks nicer, but these matrices probably won't be accessible anyway
+    #                 # number_of_rows=len(all_setup_data),
+    #                 # number_of_columns=number_of_columns,
+    #                 number_of_rows=1,
+    #                 number_of_columns=number_of_items,
+    #                 created_by=created_by,
+    #                 created_on=created_on,
+    #                 modified_by=created_by,
+    #                 modified_on=created_on,
+    #             )
+
+    #             try:
+    #                 new_matrix.full_clean()
+    #             except forms.ValidationError as e:
+    #                 current_errors.append(e.values())
+    #         else:
+    #             new_matrix = current_matrix
+
+    #         # COMPOUND STUFF BECAUSE COMPOUND SCHEMA IS MISERABLE
+    #         # Get all chip setup assay compound instances
+    #         assay_compound_instances = {}
+
+    #         # Get all Compound Instances
+    #         compound_instances = {
+    #             (
+    #                 instance.compound.id,
+    #                 instance.supplier.id,
+    #                 instance.lot,
+    #                 str(instance.receipt_date)
+    #             ): instance for instance in CompoundInstance.objects.all().prefetch_related(
+    #                 'compound',
+    #                 'supplier'
+    #             )
+    #         }
+
+    #         # Get all suppliers
+    #         suppliers = {
+    #             supplier.name: supplier for supplier in CompoundSupplier.objects.all()
+    #         }
+
+    #         new_items = []
+    #         new_related = {}
+
+    #         # For now, chips are are all in one row
+    #         for setup_row, setup_group in enumerate(all_setup_data):
+    #             items_in_group = int(setup_group.pop('number_of_items', '0'))
+    #             test_type = setup_group.get('test_type', '')
+
+    #             # To break out to prevent repeat errors
+    #             group_has_error = False
+
+    #             # Make the group
+    #             # Add the group to the new_groups
+    #             # TODO DIFFERENTIATE NEW AND EXISTING GROUPS HERE
+    #             # We can identify and existing group by checking for an id
+    #             current_group = current_group_ids.get(setup_group.get('id', ''), None)
+
+    #             if current_group:
+    #                 new_group = current_group
+
+    #                 # TODO LOGIC FOR UPDATE HERE?
+    #             else:
+    #                 new_group = AssayGroup(
+    #                     # Study should just be instance
+    #                     study=self.instance,
+    #                     name=setup_group.get('name', ''),
+    #                     test_type=setup_group.get('test_type', ''),
+    #                     organ_model_id=setup_group.get('organ_model_id', ''),
+    #                     organ_model_protocol_id=setup_group.get('organ_model_protocol_id', ''),
+    #                 )
+
+    #                 # Logic for first clean and adding to new_groups here
+
+    #             for iteration in range(items_in_group):
+    #                 # We know whether this is a current item if the id matches one in our list
+    #                 current_item = current_item_ids.get(setup_group.get('id', ''), None)
+
+    #                 # TODO
+    #                 if current_item:
+    #                     new_item = current_item
+
+    #                     # TODO LOGIC FOR UPDATE HERE?
+    #                 else:
+    #                     new_item = AssayMatrixItem(
+    #                         # study=study,
+    #                         # matrix=new_matrix,
+    #                         name=str(current_item_number),
+    #                         # JUST MAKE SETUP DATE THE STUDY DATE FOR NOW
+    #                         setup_date=self.instance.start_date,
+    #                         # Alternative row and column
+    #                         # row_index=setup_row,
+    #                         # column_index=iteration,
+    #                         row_index=0,
+    #                         column_index=current_item_number-1,
+    #                         # Irrelevant (but required, unfortunately, maybe will remove later)
+    #                         # device=study.organ_model.device,
+    #                         organ_model=setup_group.get('organ_model_id', None),
+    #                         # Some nuances here that we will gloss over
+    #                         organ_model_protocol_id=setup_group.get('organ_model_protocol_id', None),
+    #                         test_type=test_type,
+    #                         created_by=created_by,
+    #                         created_on=created_on,
+    #                         modified_by=created_by,
+    #                         modified_on=created_on,
+    #                     )
+
+    #                     try:
+    #                         new_item.full_clean(exclude=[
+    #                             # The matrix needs to be excluded because it might not exist yet
+    #                             'matrix',
+
+    #                             # Why exclude these?
+    #                             # 'device',
+    #                             # 'organ_model',
+    #                             # 'organ_model_protocol',
+    #                         ])
+    #                         new_items.append(new_item)
+
+    #                     except forms.ValidationError as e:
+    #                         current_errors.append(e.values())
+    #                         group_has_error = True
+
+    #                 current_item_number += 1
+
+    #             # Keep in mind that to decrease sparsity related data is now tied to a group
+    #             for prefix, current_objects in setup_group.items():
+    #                 # Related are tied to group, not item
+    #                 # Groups are INDEX DEPENDENT, *NOT* by ID (group may or may not exist)
+    #                 current_related_list = new_related.setdefault(
+    #                     str(setup_row), []
+    #                 )
+
+    #                 for setup_column, current_object in enumerate(current_objects):
+    #                     if prefix in ['cell', 'compound', 'setting'] and current_object:
+    #                         current_object.update({
+    #                             'matrix_item': new_item,
+    #                         })
+    #                         if prefix == 'cell':
+    #                             new_cell = AssayGroupCell(**current_object)
+
+    #                             try:
+    #                                 new_cell.full_clean(exclude=['group'])
+    #                                 current_related_list.append(new_cell)
+    #                             except forms.ValidationError as e:
+    #                                 # May need to revise process_error
+    #                                 current_errors.append(
+    #                                     process_error_for_study_new(
+    #                                         prefix,
+    #                                         setup_row,
+    #                                         setup_column,
+    #                                         e
+    #                                     )
+    #                                 )
+    #                                 group_has_error = True
+
+    #                         elif prefix == 'setting':
+    #                             new_setting = AssayGroupSetting(**current_object)
+    #                             try:
+    #                                 new_setting.full_clean(exclude=['group'])
+    #                                 current_related_list.append(new_setting)
+    #                             except forms.ValidationError as e:
+    #                                 current_errors.append(
+    #                                     process_error_for_study_new(
+    #                                         prefix,
+    #                                         setup_row,
+    #                                         setup_column,
+    #                                         e
+    #                                     )
+    #                                 )
+    #                                 group_has_error = True
+
+    #                             # new_setting.save()
+    #                         elif prefix == 'compound':
+    #                             # CONFUSING NOT DRY BAD
+    #                             compound = int(current_object.get('compound_id', '0'))
+    #                             supplier_text = current_object.get('supplier_text', 'N/A').strip()
+    #                             lot_text = current_object.get('lot_text', 'N/A').strip()
+    #                             receipt_date = current_object.get('receipt_date', '')
+
+    #                             # NOTE THE DEFAULT, PLEASE DO THIS IN A WAY THAT IS MORE DRY
+    #                             if not supplier_text:
+    #                                 supplier_text = 'N/A'
+
+    #                             if not lot_text:
+    #                                 lot_text = 'N/A'
+
+    #                             # Check if the supplier already exists
+    #                             supplier = suppliers.get(supplier_text, '')
+
+    #                             concentration = current_object.get('concentration', '0')
+    #                             # Annoying, bad
+    #                             if not concentration:
+    #                                 concentration = 0.0
+    #                             else:
+    #                                 concentration = float(concentration)
+    #                             concentration_unit_id = int(current_object.get('concentration_unit_id', '0'))
+    #                             addition_location_id = int(current_object.get('addition_location_id', '0'))
+
+    #                             addition_time = current_object.get('addition_time', '0')
+    #                             duration = current_object.get('duration', '0')
+
+    #                             if not addition_time:
+    #                                 addition_time = 0.0
+    #                             else:
+    #                                 addition_time = float(addition_time)
+
+    #                             if not duration:
+    #                                 duration = 0.0
+    #                             else:
+    #                                 duration = float(duration)
+
+    #                             # Otherwise create the supplier
+    #                             if not supplier:
+    #                                 supplier = CompoundSupplier(
+    #                                     name=supplier_text,
+    #                                     created_by=created_by,
+    #                                     created_on=created_on,
+    #                                     modified_by=created_by,
+    #                                     modified_on=created_on,
+    #                                 )
+    #                                 try:
+    #                                     supplier.full_clean()
+    #                                     supplier.save()
+    #                                 except forms.ValidationError as e:
+    #                                     # raise forms.ValidationError(e)
+    #                                     current_errors.append(
+    #                                         process_error_for_study_new(
+    #                                             prefix,
+    #                                             setup_row,
+    #                                             setup_column,
+    #                                             e
+    #                                         )
+    #                                     )
+    #                                     group_has_error = True
+
+    #                                 suppliers.update({
+    #                                     supplier_text: supplier
+    #                                 })
+
+    #                             # FRUSTRATING EXCEPTION
+    #                             if not receipt_date:
+    #                                 receipt_date = None
+
+    #                             # Check if compound instance exists
+    #                             compound_instance = compound_instances.get((compound, supplier.id, lot_text, str(receipt_date)), '')
+
+    #                             if not compound_instance:
+    #                                 compound_instance = CompoundInstance(
+    #                                     compound_id=compound,
+    #                                     supplier=supplier,
+    #                                     lot=lot_text,
+    #                                     receipt_date=receipt_date,
+    #                                     created_by=created_by,
+    #                                     created_on=created_on,
+    #                                     modified_by=created_by,
+    #                                     modified_on=created_on,
+    #                                 )
+    #                                 try:
+    #                                     compound_instance.full_clean()
+    #                                     compound_instance.save()
+    #                                 except forms.ValidationError as e:
+    #                                     # raise forms.ValidationError(e)
+    #                                     current_errors.append(
+    #                                         process_error_for_study_new(
+    #                                             prefix,
+    #                                             setup_row,
+    #                                             setup_column,
+    #                                             e
+    #                                         )
+    #                                     )
+    #                                     group_has_error = True
+
+    #                                 compound_instances.update({
+    #                                     (compound, supplier.id, lot_text, str(receipt_date)): compound_instance
+    #                                 })
+
+    #                             # Save the AssayCompoundInstance
+    #                             conflicting_assay_compound_instance = assay_compound_instances.get(
+    #                                 (
+    #                                     # new_item.id,
+    #                                     current_item_number,
+    #                                     compound_instance.id,
+    #                                     concentration,
+    #                                     concentration_unit_id,
+    #                                     addition_time,
+    #                                     duration,
+    #                                     addition_location_id
+    #                                 ), None
+    #                             )
+    #                             if not conflicting_assay_compound_instance:
+    #                                 new_compound = AssayGroupCompound(
+    #                                     # matrix_item_id=new_item.id,
+    #                                     compound_instance_id=compound_instance.id,
+    #                                     concentration=concentration,
+    #                                     concentration_unit_id=concentration_unit_id,
+    #                                     addition_time=addition_time,
+    #                                     duration=duration,
+    #                                     addition_location_id=addition_location_id
+    #                                 )
+
+    #                                 try:
+    #                                     new_compound.full_clean(exclude=['group'])
+    #                                     current_related_list.append(new_compound)
+    #                                 except forms.ValidationError as e:
+    #                                     # raise forms.ValidationError(e)
+    #                                     current_errors.append(
+    #                                         process_error_for_study_new(
+    #                                             prefix,
+    #                                             setup_row,
+    #                                             setup_column,
+    #                                             e
+    #                                         )
+    #                                     )
+    #                                     group_has_error = True
+
+    #                                 # new_compound.save()
+
+    #                             assay_compound_instances.update({
+    #                                 (
+    #                                     # new_item.id,
+    #                                     current_item_number,
+    #                                     compound_instance.id,
+    #                                     concentration,
+    #                                     concentration_unit_id,
+    #                                     addition_time,
+    #                                     duration,
+    #                                     addition_location_id
+    #                                 ): True
+    #                             })
+
+    #                 # Don't keep iterating through this group if there is a problem
+    #                 if group_has_error:
+    #                     break
+
+    #     if current_errors:
+    #         errors.get('organ_model').append(['Please review the table below for errors.'])
+    #         raise forms.ValidationError(errors)
+
+    #     new_setup_data.update({
+    #         'new_matrix': new_matrix,
+    #         'new_items': new_items,
+    #         'new_related': new_related,
+    #     })
+
+    #     data.update({
+    #         'processed_setup_data': new_setup_data
+    #     })
+
+    #     return data
+
+    # def save(self, commit=True):
+    #     # PLEASE SEE BASE MODELS
+    #     # study = super(AssayStudyFormNew, self).save(commit)
+    #     study = super(AssayStudyGroupForm, self).save()
+
+    #     # VERY SLOPPY
+    #     created_by = self.user
+    #     created_on = timezone.now()
+
+    #     study.created_by = created_by
+    #     study.created_on = created_on
+    #     study.modified_by = created_by
+    #     study.modified_on = created_on
+
+    #     study.save()
+    #     # SLOPPY: REVISE
+
+    #     study_id = study.id
+
+    #     if study.organ_model_id:
+    #         device_id = study.organ_model.device_id
+    #     else:
+    #         device_id = None
+
+    #     organ_model_id = study.organ_model_id
+    #     organ_model_protocol_id = study.organ_model_protocol_id
+
+    #     all_setup_data = self.cleaned_data.get('processed_setup_data', None)
+
+    #     if all_setup_data:
+    #         new_matrix = all_setup_data.get('new_matrix', None)
+    #         new_items = all_setup_data.get('new_items', None)
+    #         new_related = all_setup_data.get('new_related', None)
+
+    #         if new_matrix:
+    #             new_matrix.study_id = study_id
+    #             new_matrix.save()
+    #             new_matrix_id = new_matrix.id
+
+    #             new_item_ids = {}
+
+    #             for new_item in new_items:
+    #                 # ADD MATRIX and tracking
+    #                 new_item.matrix_id = new_matrix_id
+    #                 new_item.study_id = study_id
+    #                 new_item.device_id = device_id
+    #                 new_item.organ_model_id = organ_model_id
+    #                 new_item.organ_model_protocol_id = organ_model_protocol_id
+    #                 new_item.save()
+
+    #                 new_item_ids.update({
+    #                     new_item.name: new_item.id
+    #                 })
+
+    #             for current_item_name, new_related_data_set in new_related.items():
+    #                 new_item_id = new_item_ids.get(current_item_name, None)
+
+    #                 if new_item_id:
+    #                     for new_related_data in new_related_data_set:
+    #                         # ADD MATRIX ITEM
+    #                         new_related_data.matrix_item_id = new_item_id
+    #                         new_related_data.save()
+
+    #     return study
 
 
 class AssayStudyChipForm(SetupFormsMixin, SignOffMixin, BootstrapForm):
