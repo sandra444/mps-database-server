@@ -62,9 +62,9 @@ $(document).ready(function () {
 
     function make_row(index, chip) {
         // Previously just used the index
-        // var current_stored_tds = window.GROUPS.difference_table_displays[chip['group_id']];
+        // var current_stored_tds = window.GROUPS.difference_table_displays[chip['group_index']];
 
-        var current_group_name = series_data[Math.floor(chip['group_id'])].name;
+        var current_group_name = series_data[Math.floor(chip['group_index'])].name;
 
         // ASSUMES UNIQUE NAMES
         var current_stored_tds = window.GROUPS.difference_table_displays[current_group_name];
@@ -111,7 +111,7 @@ $(document).ready(function () {
         // Set values
         new_row.find('.name').val(chip['name']);
 
-        new_row.find('.group').val(chip['group_id']);;
+        new_row.find('.group').val(chip['group_index']);;
         // new_row.find('.group')[0].selectize.setValue(chip['group']);
 
         chips_table_body.append(new_row);
@@ -154,10 +154,10 @@ $(document).ready(function () {
         // Add to new group
         series_data[$(this).val()]['number_of_items'] += 1;
         // Remove from old TODO: SUBJECT TO CHANGE
-        series_data[chips[$(this).attr('data-index')]['group_id']]['number_of_items'] -= 1;
+        series_data[chips[$(this).attr('data-index')]['group_index']]['number_of_items'] -= 1;
 
         // Modify the chip group
-        chips[$(this).attr('data-index')]['group_id'] = $(this).val();
+        chips[$(this).attr('data-index')]['group_index'] = $(this).val();
         replace_series_data();
 
         // Rebuild the table
