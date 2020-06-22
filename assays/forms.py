@@ -799,7 +799,7 @@ class AssayStudyGroupForm(SetupFormsMixin, SignOffMixin, BootstrapForm):
     def clean(self):
         """Checks for at least one study type"""
         # clean the form data, before validation
-        data = super(AssayStudyFormNew, self).clean()
+        data = super(AssayStudyGroupForm, self).clean()
 
         # SLOPPY NOT DRY
         new_setup_data = {}
@@ -1258,7 +1258,7 @@ class AssayStudyGroupForm(SetupFormsMixin, SignOffMixin, BootstrapForm):
     def save(self, commit=True):
         # PLEASE SEE BASE MODELS
         # study = super(AssayStudyFormNew, self).save(commit)
-        study = super(AssayStudyFormNew, self).save()
+        study = super(AssayStudyGroupForm, self).save()
 
         # VERY SLOPPY
         created_by = self.user
