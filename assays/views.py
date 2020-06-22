@@ -643,6 +643,22 @@ class AssayStudyDetailsMixin(AssayStudyMixin):
 class AssayStudyAdd(OneGroupRequiredMixin, AssayStudyDetailsMixin, CreateView):
     # Special handling for handling next button
     def extra_form_processing(self, form):
+        # Contact superusers
+        # Superusers to contact
+        superusers_to_be_alerted = User.objects.filter(is_superuser=True, is_active=True)
+
+        # Magic strings are in poor taste, should use a template instead
+        superuser_subject = 'Study Created: {0}'.format(form.instance)
+        superuser_message = render_to_string(
+            'assays/email/superuser_study_created_alert.txt',
+            {
+                'study': form.instance
+            }
+        )
+
+        for user_to_be_alerted in superusers_to_be_alerted:
+            user_to_be_alerted.email_user(superuser_subject, superuser_message, DEFAULT_FROM_EMAIL)
+
         if self.request.POST.get('post_submission_url_override') == '#':
             self.post_submission_url_override = reverse('assays-assaystudy-update-groups', args=[form.instance.pk])
         return super(AssayStudyAdd, self).extra_form_processing(form)
