@@ -60,6 +60,147 @@ $(document).ready(function () {
         series_data_selector.val(JSON.stringify(full_series_data));
     }
 
+    // Needed for renaming chips with the popups
+    // Modified version from Matrix Add
+    function get_incremented_name(index, initial_value, first_half, second_half, original_name) {
+        var incremented_value = index + initial_value;
+        incremented_value += '';
+
+        while (first_half.length + second_half.length + incremented_value.length < original_name.length) {
+            incremented_value = '0' + incremented_value;
+        }
+
+        var value = first_half + incremented_value + second_half;
+
+        return value;
+    }
+
+    function chip_style_name_incrementer(original_name, example_section, apply, group) {
+        var split_name = original_name.split(/(\d+)/).filter(Boolean);
+
+        var numeric_index = original_name.length - 1;
+        // Increment the first number encountered
+        while (!$.isNumeric(split_name[numeric_index]) && numeric_index >= 0) {
+            numeric_index -= 1;
+        }
+
+        if (numeric_index === -1) {
+            numeric_index = original_name.length;
+        }
+
+        var first_half = split_name.slice(0, numeric_index).join('');
+        var second_half = split_name.slice(numeric_index + 1).join('');
+        var initial_value = Math.floor(split_name[numeric_index]);
+
+        if (isNaN(initial_value)) {
+            initial_value = 1;
+        }
+
+        // When we want to apply
+        if (apply) {
+            // Iterate over all chips
+            // If there is a group, passed, then use it for comparison
+            // Note that "true_index" is necessary for by group
+            var true_index = 0;
+            $.each(chips, function(index, chip) {
+                // Check the group if necessary
+                // Using group_index may be dangerous??
+                // (It is probably fine, but an ID is maybe more specific)
+                if (!group || (group && chip['group_index'] == group)) {
+                    var current_name = get_incremented_name(true_index, initial_value, first_half, second_half, original_name);
+
+                    // Change the data
+                    chip['name'] = current_name;
+
+                    true_index++;
+                }
+            });
+
+            // NEED TO RESET THE INPUT FIELD
+            replace_series_data();
+
+            // Just rebuild the table
+            // I *could* just change the input, but this is easier
+            build_chip_table();
+        }
+        // Otherwise, we just change the example
+        // NOTE: this would occur from a change trigger on the respective input field
+        else {
+            var example_strings = [];
+
+            // Three examples for the moment
+            for(var i=0; i < 3; i++) {
+                example_strings.push(
+                    get_incremented_name(i, initial_value, first_half, second_half, original_name)
+                );
+            }
+
+            example_section.text(
+                example_strings.join(', ') + '...'
+            );
+        }
+    }
+
+    // Make the naming popups
+    var rename_chips_sequentially_popup = $('#rename_chips_sequentially_popup');
+    rename_chips_sequentially_popup.dialog({
+        width: 1000,
+        height: 250,
+        modal: true,
+        buttons: [
+        {
+            text: 'Apply',
+            click: function() {
+                // TODO APPLY THE NAMES
+                chip_style_name_incrementer($('#id_rename_chips_sequentially').val(), $('#rename_chips_sequentially_example'), true);
+
+                $(this).dialog('close');
+            }
+        },
+        {
+            text: 'Cancel',
+            click: function() {
+               $(this).dialog('close');
+            }
+        }]
+    });
+    rename_chips_sequentially_popup.removeProp('hidden');
+
+    // Populate a table for by group naming?
+    // For the moment, instead, I will populate a dropdown
+    var group_to_rename = $('#id_group_to_rename');
+    chip_group_reference.find('option').each(function() {
+        group_to_rename.append(
+            $(this).clone()
+        );
+    });
+
+    var rename_chips_by_group_popup = $('#rename_chips_by_group_popup');
+    rename_chips_by_group_popup.dialog({
+        width: 1000,
+        height: 300,
+        modal: true,
+        buttons: [
+        {
+            text: 'Apply',
+            click: function() {
+                // TODO APPLY THE NAMES
+                // BE SURE TO APPLY THE GROUP
+                // *THEORETICALLY* there will always be a group
+                chip_style_name_incrementer($('#id_rename_chips_by_group').val(), $('#rename_chips_by_group_example'), true, $('#id_group_to_rename').val());
+
+                $(this).dialog('close');
+            }
+        },
+        {
+            text: 'Cancel',
+            click: function() {
+               $(this).dialog('close');
+            }
+        }]
+    });
+    rename_chips_by_group_popup.removeProp('hidden');
+
     function make_row(index, chip) {
         // Previously just used the index
         // var current_stored_tds = window.GROUPS.difference_table_displays[chip['group_index']];
@@ -176,4 +317,27 @@ $(document).ready(function () {
     $('#spawn_setting_full_contents_popup_duplicate').click(function() {
         $('#spawn_setting_full_contents_popup').trigger('click');
     });
+
+    // Triggers for naming popups
+    $('#rename_chips_sequentially_button').click(function() {
+        rename_chips_sequentially_popup.dialog('open');
+    });
+
+    $('#rename_chips_by_group_button').click(function() {
+        rename_chips_by_group_popup.dialog('open');
+    });
+
+    // Triggers for example names
+    // Triggers immediately in case of stored form values
+    // Input is maybe an excessive trigger? Means no click away though...
+    $('#id_rename_chips_sequentially').on('input', function() {
+        // Group is irrelevant here
+        chip_style_name_incrementer($('#id_rename_chips_sequentially').val(), $('#rename_chips_sequentially_example'), false);
+    }).trigger('input');
+
+    $('#id_rename_chips_by_group').on('input', function() {
+        // NOTE: Doesn't do anything with the group just yet
+        // TODO SHOW A WARNING IF THE GROUP IS EMPTY
+        chip_style_name_incrementer($('#id_rename_chips_by_group').val(), $('#rename_chips_by_group_example'), false);
+    }).trigger('input');
 });

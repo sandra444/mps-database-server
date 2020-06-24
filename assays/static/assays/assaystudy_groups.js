@@ -680,7 +680,7 @@ $(document).ready(function () {
             new_row.find('.number-of-items')
                 .val(0)
                 .attr('disabled', 'disabled')
-                .attr('title', 'The Group is for Plates Only')
+                .attr('title', 'Apply to Wells in the Plate Tab')
         }
         else {
             new_row.find('.number-of-items')
