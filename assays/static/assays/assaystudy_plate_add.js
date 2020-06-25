@@ -905,7 +905,7 @@ $(document).ready(function () {
 
             matrix_contents_hover_body.empty();
             matrix_contents_hover_body.html(
-                generate_row_clone_html($(this).parent().attr('data-well-name'), current_series, current_group)
+                generate_row_clone_html($(this).parent().attr('data-well-name'), current_group, current_group)
             );
         }
     });
