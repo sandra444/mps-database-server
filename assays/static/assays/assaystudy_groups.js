@@ -107,8 +107,8 @@ $(document).ready(function () {
     // var selection_dialog_selected_items = $('#selection_dialog_selected_items');
     // var series_selector = $('#id_series_selector');
     // var selection_dialog_naming_section = $('.selection_dialog_naming_section');
-    // var use_chip_naming = $('#id_use_chip_naming');
-    // var chip_naming = $('#id_chip_naming');
+    // var use_chip_naming = $('#id_use_incremental_well_naming');
+    // var chip_naming = $('#id_incremental_well_naming');
 
     // Default values
     var default_values = {};

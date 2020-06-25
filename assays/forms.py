@@ -1369,6 +1369,9 @@ class AssayStudyPlateForm(SetupFormsMixin, SignOffMixin, BootstrapForm):
             'name',
             'notes',
             'device',
+            # Maybe a bit unorthodox
+            'number_of_columns',
+            'number_of_rows',
             # TODO
             'series_data',
         )
