@@ -121,9 +121,12 @@ $(document).ready(function () {
     });
 
     // Crude: Scroll to top after a delay
+    var initial_hash = window.location.hash;
     if (initial_hash) {
-        $('html, body').animate({
-            scrollTop: $(initial_hash).offset().top - offset
-        }, 1000);
+        setTimeout(function() {
+            $('html, body').animate({
+                scrollTop: $(initial_hash).offset().top - offset
+            }, 500);
+        }, 500);
     }
 });
