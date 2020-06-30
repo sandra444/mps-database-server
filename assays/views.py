@@ -2220,6 +2220,27 @@ class AssayStudyAddNew(OneGroupRequiredMixin, AssayStudyMixin, CreateView):
 
         return context
 
+    # Special handling for emailing on creation
+    def extra_form_processing(self, form):
+        # Contact superusers
+        # Superusers to contact
+        superusers_to_be_alerted = User.objects.filter(is_superuser=True, is_active=True)
+
+        # Magic strings are in poor taste, should use a template instead
+        superuser_subject = 'Study Created: {0}'.format(form.instance)
+        superuser_message = render_to_string(
+            'assays/email/superuser_study_created_alert.txt',
+            {
+                'study': form.instance
+            }
+        )
+
+        for user_to_be_alerted in superusers_to_be_alerted:
+            user_to_be_alerted.email_user(superuser_subject, superuser_message, DEFAULT_FROM_EMAIL)
+
+        return super(AssayStudyAddNew, self).extra_form_processing(form)
+
+
 # class AssayStudyAddNew(OneGroupRequiredMixin, CreateView):
 #     """Add a study"""
 #     template_name = 'assays/assaystudy_add_new.html'
