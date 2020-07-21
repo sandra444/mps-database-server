@@ -48,7 +48,7 @@ from assays.models import (
     assay_plate_reader_map_info_plate_size_choices,
     assay_plate_reader_volume_unit_choices,
     assay_plate_reader_file_delimiter_choices,
-    upload_file_location,
+    upload_file_location, AssayOmicDataFileUpload,
 )
 from compounds.models import Compound, CompoundInstance, CompoundSupplier
 from microdevices.models import (
@@ -3901,3 +3901,50 @@ AssayPlateReaderMapDataFileBlockFormSetFactory = inlineformset_factory(
 
 # ASSAY PLATE MAP END
 #####
+
+
+#####
+# Start omics section
+
+class AssayOmicDataFileUploadForm(BootstrapForm):
+    """Form Upload an AssayOmicDataFileUpload file and associated metadata """
+
+    class Meta(object):
+        model = AssayOmicDataFileUpload
+        widgets = {
+            'description': forms.Textarea(attrs={'cols': 50, 'rows': 3}),
+        }
+        exclude = tracking
+
+    def __init__(self, *args, **kwargs):
+        self.study = kwargs.pop('study', None)
+        super(AssayOmicDataFileUploadForm, self).__init__(*args, **kwargs)
+
+    time_1 = forms.DecimalField(
+        required=False,
+    )
+    time_2 = forms.DecimalField(
+        required=False,
+    )
+    time_unit = forms.ChoiceField(
+        choices=assay_plate_reader_time_unit_choices
+    )
+
+    # # check the file extension of the loaded file to make sure the user is not adding spreadsheet files
+    # # https://medium.com/@literallywords/server-side-file-extension-validation-in-django-2-1-b8c8bc3245a0
+    # def clean_plate_reader_file(self):
+    #     data = self.cleaned_data['plate_reader_file']
+    #     # Run file extension check
+    #     file_extension = os.path.splitext(data.name)[1]
+    #     if file_extension not in ['.csv', '.tsv', '.txt']:
+    #         if '.xl' in file_extension or '.wk' in file_extension or '.12' in file_extension:
+    #             raise ValidationError(
+    #                  "This appears to be an spreadsheet file. To upload, export to a tab delimited file and try again.",
+    #                  code='invalid'
+    #             )
+    #         else:
+    #             raise ValidationError(
+    #                  "Invalid file extension - must be in ['.csv', '.tsv', '.txt']",
+    #                  code='invalid'
+    #             )
+    #     return data

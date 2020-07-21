@@ -54,6 +54,7 @@ from assays.models import (
     AssayPlateReaderMapDataFile,
     AssayPlateReaderMapDataFileBlock,
     AssayPlateReaderMapItemValue,
+    AssayOmicDataGroup, AssayOmicDataFileUpload,
 )
 from microdevices.models import MicrophysiologyCenter
 # from compounds.models import Compound
@@ -577,6 +578,17 @@ class AssayStudySupportingDataInline(admin.TabularInline):
     )
     extra = 1
 
+class AssayOmicDataGroupInline(admin.TabularInline):
+    """Inline for Studies"""
+    model = AssayOmicDataGroup
+    verbose_name = 'Assay Omic Data Group - Temporary Group Options'
+    fields = (
+        (
+            'name', 'number'
+        ),
+    )
+    extra = 1
+
 
 # TODO REMAKE FOR ASSAY STUDY
 class AssayStudyStakeholderInline(admin.TabularInline):
@@ -686,7 +698,7 @@ class AssayStudyAdmin(LockableAdmin):
         ),
     )
 
-    inlines = [AssayStudyStakeholderInline, AssayStudyAssayInline, AssayStudySupportingDataInline, AssayStudyReferenceInline]
+    inlines = [AssayStudyStakeholderInline, AssayStudyAssayInline, AssayStudySupportingDataInline, AssayStudyReferenceInline, AssayOmicDataGroupInline]
 
     def get_queryset(self, request):
         qs = super(AssayStudyAdmin, self).get_queryset(request)
@@ -1294,3 +1306,20 @@ class AssayPlateReaderMapDataFileBlockAdmin(ImportExportModelAdmin):
     search_fields = ('data_block',)
 
 admin.site.register(AssayPlateReaderMapDataFileBlock, AssayPlateReaderMapDataFileBlockAdmin)
+
+class AssayOmicDataGroupAdmin(ImportExportModelAdmin):
+    model = AssayOmicDataGroup
+    list_display = ('name', 'number', 'study')
+    search_fields = ('name', 'study')
+
+admin.site.register(AssayOmicDataGroup, AssayOmicDataGroupAdmin)
+
+class AssayOmicDataFileUploadAdmin(ImportExportModelAdmin):
+    model = AssayOmicDataFileUpload
+    list_display = ('study', 'study_2', 'omic_data_file', 'description', 'data_type', 'method', 'pipeline',
+                    'group', 'group_2', 'time', 'time_2', 'location', 'location_2')
+    search_fields = ('description', )
+
+admin.site.register(AssayOmicDataFileUpload, AssayOmicDataFileUploadAdmin)
+
+

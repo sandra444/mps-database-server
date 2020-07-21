@@ -4007,3 +4007,179 @@ class AssayPlateReaderMapItemValue(models.Model):
         return '{}delete/'.format(self.get_absolute_url())
 
 ##### END ASSAY PLATE MAP SECTION
+
+
+##### Start Assay Omic Section
+
+class AssayOmicDataGroup(LockableModel):
+    """Assay omic data groups - pk used to tie chip and sample metadata to a data group."""
+
+    class Meta(object):
+        verbose_name = 'Assay Omic Data Group'
+        verbose_name_plural = 'Assay Omic Data Groups'
+        unique_together = [('study', 'name')]
+
+    study = models.ForeignKey(
+        AssayStudy,
+        default=1,
+        on_delete=models.CASCADE
+    )
+    name = models.CharField(
+        max_length=100,
+        default=set_default_description()
+    )
+    number = models.IntegerField(
+        default=999,
+        blank=True
+    )
+
+    def __str__(self):
+        return '{}'.format(self.name)
+
+
+class AssayOmicDataFileUpload(FlaggableModel):
+    """Assay omic data - usually export from a DEG tool."""
+
+    class Meta(object):
+        verbose_name = 'Assay Omic Data File Upload'
+        verbose_name_plural = 'Assay Omic Data File Uploads'
+        unique_together = [('study', 'study_2', 'omic_data_file')]
+
+    study = models.ForeignKey(
+        AssayStudy,
+        default=1,
+        on_delete=models.CASCADE
+    )
+    study_2 = models.ForeignKey(
+        AssayStudy,
+        default=1,
+        related_name="study_2",
+        on_delete=models.CASCADE
+    )
+
+    description = models.CharField(
+        max_length=2000,
+        blank=True,
+        null=True,
+        default=set_default_description()
+    )
+
+    # omic_data_file = models.FileField(
+    #     upload_to='over_write_in_views.py',
+    #     verbose_name='Assay Omic Data File',
+    # )
+
+    omic_data_file = models.FileField(
+        upload_to='omic_data_file',
+        verbose_name='Omic Data File',
+        blank=True,
+        null=True,
+        help_text='Omic Data File'
+    )
+
+    data_type = models.CharField(
+        max_length=25,
+        default='Log2fc',
+        blank=True,
+        null=True
+    )
+
+    pipeline = models.CharField(
+        max_length=25,
+        default='DESeq2',
+        blank=True,
+        null=True
+    )
+
+    method = models.ForeignKey(
+        AssayMethod,
+        blank=True,
+        null=True,
+        on_delete=models.CASCADE)
+
+    group = models.ForeignKey(
+        AssayOmicDataGroup,
+        default=1,
+        on_delete=models.CASCADE)
+    group_2 = models.ForeignKey(
+        AssayOmicDataGroup,
+        default=1,
+        related_name='group_2',
+        on_delete=models.CASCADE)
+
+    time = models.FloatField(
+        default=0,
+        null=True,
+        blank=True
+    )
+    time_2 = models.FloatField(
+        default=0,
+        null=True,
+        blank=True
+    )
+
+    location = models.ForeignKey(
+        'AssaySampleLocation',
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE
+    )
+    location_2 = models.ForeignKey(
+        'AssaySampleLocation',
+        null=True,
+        blank=True,
+        related_name="location_2",
+        on_delete=models.CASCADE
+    )
+
+    def __str__(self):
+        return '{0}'.format(self.id)
+
+    def get_absolute_url(self):
+        return '/assays/assayomicdatafile/{}/'.format(self.id)
+
+    def get_post_submission_url(self):
+        return '/assays/assaystudy/{}/'.format(self.study_id)
+
+    def get_delete_url(self):
+        return '{}delete/'.format(self.get_absolute_url())
+
+class AssayOmicDataPoint(models.Model):
+    """Individual points of omic data"""
+
+    # this will be the study in which the user was sitting when they uploaded the data file
+    # in theory, it could be study_1 or study_2
+    study = models.ForeignKey(
+        'assays.AssayStudy',
+        on_delete=models.CASCADE,
+        verbose_name='Study'
+    )
+
+    omic_data_file = models.ForeignKey(
+        AssayOmicDataFileUpload,
+        null=False,
+        blank=False,
+        on_delete=models.CASCADE
+    )
+
+    name = models.CharField(
+        max_length=100,
+        blank=False,
+        null=False
+    )
+
+    target = models.ForeignKey(
+        AssayTarget,
+        blank=False,
+        null=False,
+        on_delete=models.CASCADE)
+
+    value = models.FloatField(
+        blank=True,
+        null=True,
+        verbose_name='Value'
+    )
+
+
+
+

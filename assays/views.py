@@ -45,7 +45,7 @@ from assays.models import (
     assay_plate_reader_map_info_shape_row_dict,
     assay_plate_reader_map_info_plate_size_choices,
     assay_plate_reader_map_info_plate_size_choices_list,
-    upload_file_location,
+    upload_file_location, AssayOmicDataFileUpload,
 )
 from assays.forms import (
     AssayStudyConfigurationForm,
@@ -89,7 +89,7 @@ from assays.forms import (
     AssayPlateReaderMapDataFileAddForm,
     AssayPlateReaderMapDataFileForm,
     AssayPlateReaderMapDataFileBlockFormSetFactory,
-    AbstractClassAssayStudyAssay,
+    AbstractClassAssayStudyAssay, AssayOmicDataFileUploadForm,
 )
 
 from microdevices.models import MicrophysiologyCenter
@@ -4457,3 +4457,247 @@ class AssayPlateReaderMapDataFileUpdate(StudyGroupMixin, UpdateView):
 
 #####
 # END Plate reader file list, add, update, view and HOLD section
+
+##### Start the omic data section
+class AssayOmicDataFileUploadIndex(StudyViewerMixin, DetailView):
+    """Assay Omic Data file"""
+
+    model = AssayStudy
+    context_object_name = 'assayomicdatafileupload_index'
+    template_name = 'assays/assayomicdatafileupload_index.html'
+
+    # For permission mixin
+    def get_object(self, queryset=None):
+        self.study = super(AssayOmicDataFileUploadIndex, self).get_object()
+        return self.study
+
+    def get_context_data(self, **kwargs):
+        context = super(AssayOmicDataFileUploadIndex, self).get_context_data(**kwargs)
+
+        # get files
+        datafiles = AssayOmicDataFileUpload.objects.filter(
+            study=self.object.id
+        )
+        # get and put short file name into queryset
+        for file in datafiles:
+            file.name_short = os.path.basename(str(file.omic_data_file))
+
+        context['datafiles'] = datafiles
+        return context
+
+
+# class AssayOmicDataFileUploadView(StudyViewerMixin, DetailView):
+#     """Assay Plate Reader File Detail View"""
+#     model = AssayPlateReaderMapDataFile
+#     template_name = 'assays/assayplatereaderfile_update.html'
+#
+#     def get_context_data(self, **kwargs):
+#         context = super(AssayPlateReaderMapDataFileView, self).get_context_data(**kwargs)
+#         #####
+#         context['review'] = True
+#         context['page_called'] = 'review'
+#         #####
+#
+#         context.update({
+#             'form': AssayPlateReaderMapDataFileForm(instance=self.object),
+#             'formset': AssayPlateReaderMapDataFileBlockFormSetFactory(instance=self.object, user=self.request.user)
+#         })
+#
+#         # find block count per file id
+#         file_block_count = AssayPlateReaderMapDataFileBlock.objects.filter(
+#             assayplatereadermapdatafile=self.object.id
+#         )
+#         number_of_blocks = len(file_block_count)
+#         if number_of_blocks == 0:
+#             context['no_saved_blocks'] = True
+#
+#         return context
+
+
+class AssayOmicDataFileUploadDelete(CreatorAndNotInUseMixin, DeleteView):
+    model = AssayOmicDataFileUpload
+    template_name = 'assays/AssayOmicDataFileUpload_delete.html'
+
+    def get_success_url(self):
+        return self.object.get_post_submission_url()
+
+
+class AssayOmicDataFileUploadAdd(StudyGroupMixin, CreateView):
+    """Views Add Upload an AssayOmicDataFileUpload file """
+
+    model = AssayOmicDataFileUpload
+    template_name = 'assays/AssayOmicDataFileUpload_add.html'
+    form_class = AssayOmicDataFileUploadForm
+
+    def get_form(self, form_class=None):
+        form_class = self.get_form_class()
+        study = get_object_or_404(AssayStudy, pk=self.kwargs['study_id'])
+
+        if self.request.method == 'POST':
+            return form_class(self.request.POST, self.request.FILES, study=study)
+        else:
+            return form_class(study=study)
+
+    def get_context_data(self, **kwargs):
+        context = super(AssayOmicDataFileUploadForm, self).get_context_data(**kwargs)
+        context['add'] = True
+        context['page_called'] = 'add'
+        return context
+
+    def form_valid(self, form):
+
+        if form.is_valid():
+            self.object = form.save()
+            return redirect(self.object.get_post_submission_url())
+        else:
+            return self.render_to_response(self.get_context_data(form=form, ))
+#
+# # the user is routed here after adding the file by a get_post_add_submission_url in the models.py
+# class AssayPlateReaderMapDataFileUpdate(StudyGroupMixin, UpdateView):
+#     """Assay Plate Reader File Update"""
+#     model = AssayPlateReaderMapDataFile
+#     template_name = 'assays/assayplatereaderfile_update.html'
+#     form_class = AssayPlateReaderMapDataFileForm
+#
+#     def get_context_data(self, **kwargs):
+#         context = super(AssayPlateReaderMapDataFileUpdate, self).get_context_data(**kwargs)
+#         #####
+#         context['update'] = True
+#         context['page_called'] = 'update'
+#         #####
+#
+#         if 'formset' not in context:
+#             if self.request.POST:
+#                 context['formset'] = AssayPlateReaderMapDataFileBlockFormSetFactory(
+#                         self.request.POST,
+#                         instance=self.object,
+#                         user=self.request.user
+#                 )
+#             else:
+#                 context['formset'] = AssayPlateReaderMapDataFileBlockFormSetFactory(
+#                     instance=self.object,
+#                     user=self.request.user
+#                 )
+#
+#         # find block count per file id
+#         file_block_count = AssayPlateReaderMapDataFileBlock.objects.filter(
+#             assayplatereadermapdatafile=self.object.id
+#         )
+#         number_of_blocks = len(file_block_count)
+#         if number_of_blocks == 0:
+#             context['no_saved_blocks'] = True
+#
+#         return context
+#
+#     def form_valid(self, form):
+#
+#         pk_for_file = self.object
+#
+#         formset = AssayPlateReaderMapDataFileBlockFormSetFactory(
+#             self.request.POST,
+#             instance=self.object
+#         )
+#         # print("form: ", form)
+#         # print("SELF.OBJECT - self.object: ", self.object)
+#
+#         formsets = [formset, ]
+#         formsets_are_valid = True
+#
+#         for formset in formsets:
+#             # this executes for EACH formset, but hard to read data
+#             # print("FORMSET IN FORMSETS: ", formset)
+#             if not formset.is_valid():
+#                 formsets_are_valid = False
+#
+#         if form.is_valid() and formsets_are_valid:
+#
+#             instance = form.save(commit=False)
+#             # example of what can be done here - HANDY
+#             # this executes ONCE - if need for each formset - put in forms.py
+#             # password = form.cleaned_data.get(‘password’)
+#             # instance.set_password(password)
+#             # can do this BEFORE instance.save(), after, they are none
+#             data_block = form.cleaned_data.get('data_block')
+#             line_start = form.cleaned_data.get('line_start')
+#             # print("data_block ", data_block) --- None until saved
+#
+#             instance.save()
+#             formset.save()
+#
+#             #####
+#             # # this would work for all but the pk of the data block table, so do not use it
+#             # for each in formset:
+#             #     data_block = each.cleaned_data.get('data_block')
+#             #     if data_block < 999:
+#             #         pk_id = each.cleaned_data.get('id')
+#             #         assayplatereadermap = each.cleaned_data.get('assayplatereadermap')
+#             #         data_block_metadata = each.cleaned_data.get('data_block_metadata')
+#             #         over_write_sample_time = each.cleaned_data.get('over_write_sample_time')
+#             #         line_start = each.cleaned_data.get('line_start')
+#             #         line_end = each.cleaned_data.get('line_end')
+#             #         delimited_start = each.cleaned_data.get('delimited_start')
+#             #         delimited_end = each.cleaned_data.get('delimited_end')
+#             #
+#             #         block_data_dict['assayplatereadermapdatafile'] = pk_for_file
+#             #         block_data_dict['assayplatereadermap'] = assayplatereadermap
+#             #         block_data_dict['over_write_sample_time'] = over_write_sample_time
+#             #         block_data_dict['line_start'] = line_start
+#             #         block_data_dict['line_end'] = line_end
+#             #         block_data_dict['delimited_start'] = delimited_start
+#             #         block_data_dict['delimited_end'] = delimited_end
+#             #
+#             #         block_data_list_of_dicts.append(block_data_dict)
+#             #
+#             #####
+#
+#             # .values makes a dictionary! saves some steps - HANDY
+#             block_dict = AssayPlateReaderMapDataFileBlock.objects.filter(
+#                 assayplatereadermapdatafile=pk_for_file
+#             ).prefetch_related(
+#                 'assayplatereadermap',
+#                 'assayplatereadermapdatafile',
+#             ).values()
+#
+#             # print('PK FOR FILE ', pk_for_file)
+#             # print('DICT:')
+#             # print(block_dict)
+#
+#             # this function is in utils.py
+#             # add_update_map_item_values =
+#             # call it to write to the map item value table, do not need to return anything
+#             # in the utils.py file
+#             add_update_plate_reader_data_map_item_values_from_file(
+#                 pk_for_file,
+#                 block_dict
+#             )
+#
+#             # some other methods...KEEP for reference for now
+#             # save_forms_with_tracking(self, form, formset=formsets, update=True)
+#             # form.save()
+#             # formset.save()
+#
+#             # One for each field in the form - HANDY
+#             # countis=0
+#             # for each in form:
+#             #     .print("FORM ", countis)
+#             #     .print(each)
+#             #     countis=countis+1
+#
+#             # One for each SAVED (no extra) formset, but hard to parse - HANDY
+#             # countss=0
+#             # for each in formset:
+#             #     .print("FORMSET: ", countss)
+#             #     .print(each)
+#             #     # print(each.data_block)  --  gives error, cannot get this way
+#             #     countss=countss+1
+#
+#             # print("form and formset valid")
+#             return redirect(self.object.get_post_submission_url())
+#         else:
+#             # print("form or formset NOT valid")
+#             return self.render_to_response(self.get_context_data(form=form, formset=formset))
+
+# END omic data file list, add, update, view and delete section
+
+
+

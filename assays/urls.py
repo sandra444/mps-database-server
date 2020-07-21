@@ -82,6 +82,11 @@ from assays.views import (
     AssayPlateReaderMapDataFileIndex,
     AssayPlateReaderMapDataFileView,
     AssayPlateReaderMapDataFileDelete,
+    # AssayOmicDataFileUploadUpdate,
+    # AssayOmicDataFileUploadAdd,
+    AssayOmicDataFileUploadIndex, AssayOmicDataFileUploadAdd,
+    # AssayOmicDataFileUploadView,
+    # AssayOmicDataFileUploadDelete,
 )
 import assays.ajax
 
@@ -253,4 +258,17 @@ urlpatterns = [
     url(r'^assays/assayplatereaderfile/(?P<pk>[0-9]+)/view/$', AssayPlateReaderMapDataFileView.as_view(), name='assayplatereaderfile-view'),
     url(r'^assays/assayplatereaderfile/(?P<pk>[0-9]+)/update/$', AssayPlateReaderMapDataFileUpdate.as_view(), name='assayplatereaderfile-update'),
     url(r'^assays/assayplatereaderfile/(?P<pk>[0-9]+)/delete/$', AssayPlateReaderMapDataFileDelete.as_view(), name='assayplatereaderfile-delete'),
+
+    # Omic Data
+    url(r'^assays/assaystudy/(?P<pk>[0-9]+)/assayomicdatafileupload/$', AssayOmicDataFileUploadIndex.as_view(),
+        name='assayomicdatafileupload-index'),
+    url(r'^assays/assaystudy/(?P<study_id>[0-9]+)/assayomicdatafileupload/add/$', AssayOmicDataFileUploadAdd.as_view(),
+        name='assayomicdatafileupload-add'),
+    # url(r'^assays/assayomicdatafileupload/(?P<pk>[0-9]+)/view/$', AssayPlateReaderMapDataFileView.as_view(),
+    #     name='assayomicdatafileupload-view'),
+    # url(r'^assays/assayomicdatafileupload/(?P<pk>[0-9]+)/update/$', AssayPlateReaderMapDataFileUpdate.as_view(),
+    #     name='assayomicdatafileupload-update'),
+    # url(r'^assays/assayomicdatafileupload/(?P<pk>[0-9]+)/delete/$', AssayPlateReaderMapDataFileDelete.as_view(),
+    #     name='assayomicdatafileupload-delete'),
+
 ]
