@@ -4037,7 +4037,7 @@ class AssayOmicDataGroup(LockableModel):
         return '{}'.format(self.name)
 
 
-class AssayOmicDataFileUpload(FlaggableModel):
+class AssayOmicDataFileUpload(LockableModel):
     """Assay omic data - usually export from a DEG tool."""
 
     class Meta(object):
@@ -4047,12 +4047,11 @@ class AssayOmicDataFileUpload(FlaggableModel):
 
     study = models.ForeignKey(
         AssayStudy,
-        default=1,
+        verbose_name='Study 1',
         on_delete=models.CASCADE
     )
     study_2 = models.ForeignKey(
         AssayStudy,
-        default=1,
         related_name="study_2",
         on_delete=models.CASCADE
     )
@@ -4060,7 +4059,6 @@ class AssayOmicDataFileUpload(FlaggableModel):
     description = models.CharField(
         max_length=2000,
         blank=True,
-        null=True,
         default=set_default_description()
     )
 
@@ -4081,14 +4079,12 @@ class AssayOmicDataFileUpload(FlaggableModel):
         max_length=25,
         default='Log2fc',
         blank=True,
-        null=True
     )
 
     pipeline = models.CharField(
         max_length=25,
         default='DESeq2',
         blank=True,
-        null=True
     )
 
     method = models.ForeignKey(
@@ -4100,6 +4096,7 @@ class AssayOmicDataFileUpload(FlaggableModel):
     group = models.ForeignKey(
         AssayOmicDataGroup,
         default=1,
+        verbose_name='Group 1',
         on_delete=models.CASCADE)
     group_2 = models.ForeignKey(
         AssayOmicDataGroup,
@@ -4110,7 +4107,8 @@ class AssayOmicDataFileUpload(FlaggableModel):
     time = models.FloatField(
         default=0,
         null=True,
-        blank=True
+        blank=True,
+        verbose_name='Sample Collection Time'
     )
     time_2 = models.FloatField(
         default=0,
@@ -4122,6 +4120,7 @@ class AssayOmicDataFileUpload(FlaggableModel):
         'AssaySampleLocation',
         null=True,
         blank=True,
+        verbose_name='Sample Location',
         on_delete=models.CASCADE
     )
     location_2 = models.ForeignKey(
@@ -4129,6 +4128,7 @@ class AssayOmicDataFileUpload(FlaggableModel):
         null=True,
         blank=True,
         related_name="location_2",
+        verbose_name='Sample Location 2',
         on_delete=models.CASCADE
     )
 
@@ -4136,13 +4136,14 @@ class AssayOmicDataFileUpload(FlaggableModel):
         return '{0}'.format(self.id)
 
     def get_absolute_url(self):
-        return '/assays/assayomicdatafile/{}/'.format(self.id)
+        return '/assays/assayomicdatafileupload/{}/'.format(self.id)
 
     def get_post_submission_url(self):
-        return '/assays/assaystudy/{}/'.format(self.study_id)
+        return '/assays/assaystudy/{}/assayomicdatafileupload/'.format(self.study_id)
 
     def get_delete_url(self):
         return '{}delete/'.format(self.get_absolute_url())
+
 
 class AssayOmicDataPoint(models.Model):
     """Individual points of omic data"""

@@ -3911,14 +3911,24 @@ class AssayOmicDataFileUploadForm(BootstrapForm):
 
     class Meta(object):
         model = AssayOmicDataFileUpload
-        widgets = {
-            'description': forms.Textarea(attrs={'cols': 50, 'rows': 3}),
-        }
-        exclude = tracking
+        # widgets = {
+        #     'description': forms.Textarea(attrs={'cols': 50, 'rows': 3}),
+        # }
+        # fields = ('omic_data_file',)
+        # exclude = tracking + ('study',),
+        exclude = tracking + ('data_type', 'pipeline', 'study',)
 
     def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request', None)
         self.study = kwargs.pop('study', None)
         super(AssayOmicDataFileUploadForm, self).__init__(*args, **kwargs)
+
+        if not self.study and self.instance.study:
+            self.study = self.instance.study
+        if self.study:
+            self.instance.study = self.study
+
+        self.fields['study_2'].initial = self.instance.study
 
     time_1 = forms.DecimalField(
         required=False,
@@ -3927,9 +3937,11 @@ class AssayOmicDataFileUploadForm(BootstrapForm):
         required=False,
     )
     time_unit = forms.ChoiceField(
+        required=False,
         choices=assay_plate_reader_time_unit_choices
     )
 
+    # will need to do this after get basics working
     # # check the file extension of the loaded file to make sure the user is not adding spreadsheet files
     # # https://medium.com/@literallywords/server-side-file-extension-validation-in-django-2-1-b8c8bc3245a0
     # def clean_plate_reader_file(self):
@@ -3948,3 +3960,252 @@ class AssayOmicDataFileUploadForm(BootstrapForm):
     #                  code='invalid'
     #             )
     #     return data
+
+
+    # Let them name the maps the same if they really want to. Does not really matter to me
+    # def clean(self):
+    #     # FORCE UNIQUE - this will return back to the form instead of showing the user an error
+    #     cleaned_data = super(AssayPlateReaderMapForm, self).clean()
+    #
+    #     if AssayPlateReaderMap.objects.filter(
+    #             study_id=self.instance.study.id,
+    #             name=self.cleaned_data.get('name', '')
+    #     ).exclude(pk=self.instance.pk).count():
+    #         raise forms.ValidationError({'name': ['Plate Map name must be unique within study. This plate map is now corrupted. Go back to the Plate Map List and click to Add Plate Map and start again.']})
+    #
+    #     return cleaned_data
+
+    # def clean(self):
+    #     # First thing in clean
+    #     # Call super for data
+    #     data = super(AssayPlateReaderMapForm, self).clean()
+    #     # After initial stuff done
+    #     self.process_file(save=False, calledme='clean')
+    #     return data
+    #
+    # def save(self, commit=True):
+    #             # First thing in save
+    #     # Make sure to pass commit to the super call (don't want accidental saves)
+    #     map = super(AssayPlateReaderMapForm, self).save(commit=commit)
+    #
+    #     # Only save the file if commit is true
+    #     if commit:
+    #         self.process_file(save=True, calledme="save")
+    #     return map
+    #
+    # def process_file(self, save=False, calledme="c"):
+    #     #### START When saving AssayPlateReaderMapUpdate after a calibration
+    #     # if user checked the box to send to study summary, make that happen
+    #
+    #     data = self.cleaned_data
+    #     # study = get_object_or_404(AssayStudy, pk=self.kwargs['study_id'])
+    #
+    #     if data.get('form_make_mifc_on_submit'):
+    #         # search term MIFC - if MIFC changes, this will need changed
+    #         # make a list of column headers for the mifc file
+    #         # could use COLUMN_HEADERS, but need to append one
+    #         column_table_headers_average = [
+    #             'Chip ID',
+    #             'Cross Reference',
+    #             'Assay Plate ID',
+    #             'Assay Well ID',
+    #             'Day',
+    #
+    #             'Hour',
+    #             'Minute',
+    #             'Target/Analyte',
+    #             'Subtarget',
+    #             'Method/Kit',
+    #
+    #             'Sample Location',
+    #             'Value',
+    #             'Value Unit',
+    #             'Replicate',
+    #             'Caution Flag',
+    #
+    #             'Exclude',
+    #             'Notes',
+    #             'Processing Details',
+    #         ]
+    #         # search term MIFC - if MIFC changes, this will need changed
+    #         # Make a dictionary of headers in utils and header needed in the mifc file
+    #         utils_key_column_header = {
+    #             'matrix_item_name': 'Chip ID',
+    #             'cross_reference': 'Cross Reference',
+    #             'plate_name': 'Assay Plate ID',
+    #             'well_name': 'Assay Well ID',
+    #             'day': 'Day',
+    #             'hour': 'Hour',
+    #             'minute': 'Minute',
+    #             'target': 'Target/Analyte',
+    #             'subtarget': 'Subtarget',
+    #             'method': 'Method/Kit',
+    #             'location_name': 'Sample Location',
+    #             'processed_value': 'Value',
+    #             'unit': 'Value Unit',
+    #             'replicate': 'Replicate',
+    #             'caution_flag': 'Caution Flag',
+    #             'exclude': 'Exclude',
+    #             'notes': 'Notes',
+    #             'sendmessage': 'Processing Details'}
+    #
+    #         # print(".unit ",data.get('standard_unit').unit)
+    #         # print(".id ", data.get('standard_unit').id)
+    #         # .unit
+    #         # µg / mL
+    #         # .id
+    #         # 6
+    #         # print(".unit ",data.get('standard_unit').unit)
+    #         # print(".id ", data.get('standard_unit').id)
+    #
+    #         if data.get('form_block_standard_borrow_pk_single_for_storage') == None:
+    #             borrowed_block_pk = -1
+    #         else:
+    #             borrowed_block_pk = data.get('form_block_standard_borrow_pk_single_for_storage')
+    #
+    #         if data.get('form_block_standard_borrow_pk_platemap_single_for_storage') == None:
+    #             borrowed_platemap_pk = -1
+    #         else:
+    #             borrowed_platemap_pk = data.get(
+    #                 'form_block_standard_borrow_pk_platemap_single_for_storage')
+    #
+    #         use_curve_long = data.get('form_calibration_curve_method_used')
+    #         use_curve = find_a_key_by_value_in_dictionary(CALIBRATION_CURVE_MASTER_DICT, use_curve_long)
+    #         if use_curve == 'select_one':
+    #             use_curve = 'no_calibration'
+    #
+    #         if len(use_curve.strip()) == 0:
+    #             err_msg = "The calibration method " + use_curve_long + " was not found in the cross reference. This is a very bad error. It must be fixed"
+    #             # print(err_msg)
+    #             raise forms.ValidationError(err_msg)
+    #
+    #         # form.instance.study
+    #         # make a dictionary to send to the utils.py when call the function
+    #         set_dict = {
+    #             'called_from': 'form_save',
+    #             'study': self.instance.study.id,
+    #             'pk_platemap': self.instance.id,
+    #             'pk_data_block': data.get('form_block_file_data_block_selected_pk_for_storage'),
+    #             'plate_name': data.get('name'),
+    #             'form_calibration_curve': use_curve,
+    #             'multiplier': data.get('form_data_processing_multiplier'),
+    #             'unit': data.get('form_calibration_unit'),
+    #             'standard_unit': data.get('standard_unit').unit,
+    #             'form_min_standard': data.get('form_calibration_standard_fitted_min_for_e'),
+    #             'form_max_standard': data.get('form_calibration_standard_fitted_max_for_e'),
+    #             'form_logistic4_A': data.get('form_logistic4_A'),
+    #             'form_logistic4_D': data.get('form_logistic4_D'),
+    #             'form_blank_handling': data.get('se_form_blank_handling'),
+    #             'radio_standard_option_use_or_not': data.get('radio_standard_option_use_or_not'),
+    #             'radio_replicate_handling_average_or_not_0': data.get(
+    #                 'radio_replicate_handling_average_or_not'),
+    #             'borrowed_block_pk': borrowed_block_pk,
+    #             'borrowed_platemap_pk': borrowed_platemap_pk,
+    #             'count_standards_current_plate': data.get('form_number_standards_this_plate'),
+    #             'target': data.get('form_calibration_target'),
+    #             'method': data.get('form_calibration_method'),
+    #             'time_unit': data.get('time_unit'),
+    #             'volume_unit': data.get('volume_unit'),
+    #             'user_notes': data.get('form_hold_the_notes_string'),
+    #             'user_omits': data.get('form_hold_the_omits_string'),
+    #             'plate_size': data.get('device'),
+    #         }
+    #
+    #         # this function is in utils.py that returns data
+    #         data_mover = plate_reader_data_file_process_data(set_dict)
+    #         # what comes back is a dictionary of
+    #         list_of_dicts = data_mover[9]
+    #         list_of_lists_mifc_headers_row_0 = [None] * (len(list_of_dicts) + 1)
+    #         list_of_lists_mifc_headers_row_0[0] = column_table_headers_average
+    #         i = 1
+    #         # print(" ")
+    #         for each_dict_in_list in list_of_dicts:
+    #             list_each_row = []
+    #             for this_mifc_header in column_table_headers_average:
+    #                 # print("this_mifc_header ", this_mifc_header)
+    #                 # find the key in the dictionary that we need
+    #                 utils_dict_header = find_a_key_by_value_in_dictionary(utils_key_column_header,
+    #                                                                       this_mifc_header)
+    #                 # print("utils_dict_header ", utils_dict_header)
+    #                 # print("this_mifc_header ", this_mifc_header)
+    #                 # get the value that is associated with this header in the dict
+    #                 this_value = each_dict_in_list.get(utils_dict_header)
+    #                 # print("this_value ", this_value)
+    #                 # add the value to the list for this dict in the list of dicts
+    #                 list_each_row.append(this_value)
+    #             # when down with the dictionary, add the completely list for this row to the list of lists
+    #             # print("list_each_row ", list_each_row)
+    #             list_of_lists_mifc_headers_row_0[i] = list_each_row
+    #             i = i + 1
+    #
+    #         # print("  ")
+    #         # print('list_of_lists_mifc_headers_row_0')
+    #         # print(list_of_lists_mifc_headers_row_0)
+    #         # print("  ")
+    #
+    #         # First make a csv from the list_of_lists (using list_of_lists_mifc_headers_row_0)
+    #
+    #         # or self.objects.study
+    #         my_study = self.instance.study
+    #         # my_user = self.request.user
+    #         my_user = self.user
+    #         my_platemap = self.instance
+    #         my_data_block_pk = data.get('form_block_file_data_block_selected_pk_for_storage')
+    #
+    #         platenamestring1 = str(my_platemap)
+    #         metadatastring1 = str(data.get('form_hold_the_data_block_metadata_string'))
+    #
+    #         # print("study ",my_study)
+    #         # print("platemap ",my_platemap)
+    #         # print("user ",my_user)
+    #         # print("data block ", my_data_block_pk)
+    #
+    #         # Specify the file for use with the file uploader class
+    #         # some of these caused errors in the file name so remove them
+    #         # Luke and Quinn voted for all the symbols out instead of a few
+    #
+    #         platenamestring = re.sub('[^a-zA-Z0-9_]', '', platenamestring1)
+    #         metadatastring = re.sub('[^a-zA-Z0-9_]', '', metadatastring1)
+    #
+    #         name_the_file = 'PLATE-{}-{}--METADATA-{}-{}'.format(
+    #                             my_platemap.id, platenamestring,
+    #                             my_data_block_pk, metadatastring
+    #                         )
+    #         # print("name_the_file ",name_the_file)
+    #
+    #         bulk_location = upload_file_location(
+    #             my_study,
+    #             name_the_file
+    #         )
+    #
+    #         # Make sure study has directories
+    #         if not os.path.exists(MEDIA_ROOT + '/data_points/{}'.format(my_study.id)):
+    #             os.makedirs(MEDIA_ROOT + '/data_points/{}'.format(my_study.id))
+    #
+    #         # Need to import from models
+    #         # Avoid magic string, use media location
+    #         file_location = MEDIA_ROOT.replace('mps/../', '', 1) + '/' + bulk_location + '.csv'
+    #
+    #         # Should make a csv writer to avoid repetition
+    #         file_to_write = open(file_location, 'w')
+    #         csv_writer = csv.writer(file_to_write, dialect=csv.excel)
+    #
+    #         # Add the UTF-8 BOM
+    #         list_of_lists_mifc_headers_row_0[0][0] = '\ufeff' + list_of_lists_mifc_headers_row_0[0][0]
+    #
+    #         # print("!!!!!!!!")
+    #         # Write the lines here here uncomment this
+    #         for one_line_of_data in list_of_lists_mifc_headers_row_0:
+    #             csv_writer.writerow(one_line_of_data)
+    #
+    #         file_to_write.close()
+    #         new_mifc_file = open(file_location, 'rb')
+    #
+    #         file_processor = AssayFileProcessor(new_mifc_file,
+    #                                             my_study,
+    #                                             my_user, save=save,
+    #                                             full_path='/media/' + bulk_location + '.csv')
+    #
+    #         # Process the file
+    #         file_processor.process_file()
+    #     #### END When saving AssayPlateReaderMapUpdate after a calibration

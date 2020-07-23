@@ -84,7 +84,8 @@ from assays.views import (
     AssayPlateReaderMapDataFileDelete,
     # AssayOmicDataFileUploadUpdate,
     # AssayOmicDataFileUploadAdd,
-    AssayOmicDataFileUploadIndex, AssayOmicDataFileUploadAdd,
+    AssayOmicDataFileUploadIndex, AssayOmicDataFileUploadAdd, AssayOmicDataFileUploadView,
+    AssayOmicDataFileUploadUpdate, AssayOmicDataFileUploadDelete,
     # AssayOmicDataFileUploadView,
     # AssayOmicDataFileUploadDelete,
 )
@@ -264,11 +265,11 @@ urlpatterns = [
         name='assayomicdatafileupload-index'),
     url(r'^assays/assaystudy/(?P<study_id>[0-9]+)/assayomicdatafileupload/add/$', AssayOmicDataFileUploadAdd.as_view(),
         name='assayomicdatafileupload-add'),
-    # url(r'^assays/assayomicdatafileupload/(?P<pk>[0-9]+)/view/$', AssayPlateReaderMapDataFileView.as_view(),
-    #     name='assayomicdatafileupload-view'),
-    # url(r'^assays/assayomicdatafileupload/(?P<pk>[0-9]+)/update/$', AssayPlateReaderMapDataFileUpdate.as_view(),
-    #     name='assayomicdatafileupload-update'),
-    # url(r'^assays/assayomicdatafileupload/(?P<pk>[0-9]+)/delete/$', AssayPlateReaderMapDataFileDelete.as_view(),
-    #     name='assayomicdatafileupload-delete'),
+    url(r'^assays/assayomicdatafileupload/(?P<pk>[0-9]+)/view/$', AssayOmicDataFileUploadView.as_view(),
+        name='assayomicdatafileupload-view'),
+    url(r'^assays/assayomicdatafileupload/(?P<pk>[0-9]+)/update/$', AssayOmicDataFileUploadUpdate.as_view(),
+        name='assayomicdatafileupload-update'),
+    url(r'^assays/assayomicdatafileupload/(?P<pk>[0-9]+)/delete/$', AssayOmicDataFileUploadDelete.as_view(),
+        name='assayomicdatafileupload-delete'),
 
 ]

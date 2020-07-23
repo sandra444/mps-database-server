@@ -8,10 +8,6 @@
     <li class="active">Assay Omic Data Files</li>
 {% endblock %}
 
-{% block load_js %}
-    <script src="{% static "assays/assayomicdatafileupload_index.js" %}"></script>
-{% endblock %}
-
 {% block content %}
 
     {% include 'tracking.html' with study_submit='true' %}
@@ -47,7 +43,7 @@
         {% if datafiles %}
         <div>
             <div><p id="omic_file_index_tooltip"></p>
-                <label for="omic_file_index_tooltip">Assay Plate Reader File List &nbsp;</label>
+                <label for="omic_file_index_tooltip">Assay Omic Data File List &nbsp;</label>
             </div>
 
             <table id="assayomicdatafileuploads" class="display table table-striped table-hover" cellspacing="0" width="100%">
@@ -58,9 +54,9 @@
                     <th>Short File Name</th>
                     <th>File</th>
                     <th>Description</th>
-                    <th>Data Type</th>
+{#                    <th>Data Type</th>#}
                     <th>Method</th>
-                    <th>Pipeline</th>
+{#                    <th>Pipeline</th>#}
                     <th>Group 1</th>
                     <th>Group 2</th>
                     <th>Time</th>
@@ -77,7 +73,7 @@
                     </td>
                     <td>
 {#                      {% if not object.signed_off_by %}#}
-                        <a class="btn btn-primary" href="{% url 'assayomicdatafileload-update' file.id  %}">Edit </a>
+                        <a class="btn btn-primary" href="{% url 'assayomicdatafileupload-update' file.id  %}">Edit </a>
 {#                      {% endif %}#}
                     </td>
                     <td>{{ file.name_short }}</td>
@@ -87,15 +83,15 @@
                         </a>
                     </td>
                     <td>{{ file.description }}</td>
-                    <td>{{ file.data_type }}</td>
+{#                    <td>{{ file.data_type }}</td>#}
                     <td>{{ file.method }}</td>
-                    <td>{{ file.pipeline }}</td>
+{#                    <td>{{ file.pipeline }}</td>#}
                     <td>{{ file.group }}</td>
                     <td>{{ file.group_2 }}</td>
                     <td>{{ file.time }}</td>
-                    <td>{{ file.time_2 }}</td>
+{#                    <td>{{ file.time_2 }}</td>#}
                     <td>{{ file.location }}</td>
-                    <td>{{ file.location_2 }}</td>
+{#                    <td>{{ file.location_2 }}</td>#}
                 </tr>
             {% endfor %}
             </tbody>
