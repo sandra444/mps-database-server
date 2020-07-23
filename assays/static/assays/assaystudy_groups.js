@@ -427,6 +427,9 @@ $(document).ready(function () {
     }
 
     // TODO REVISE FOR TRUE ID
+    // NOTE: Interestingly, the way add works right now, one will NEVER be able to "add back" a group they inadvertently deleted
+    // Is this a problem?
+    // Obviously it would be an issue if there was data, someone (for whatever reason) decreased the item number, increased it again, and then saved. How often would this occur? It is difficult to say.
     function add_chip(setup_index) {
         chips.push({
             'name': chips.length + 1,
@@ -435,12 +438,20 @@ $(document).ready(function () {
     }
 
     // TODO REVISE FOR TRUE ID
+    // TODO BE CAREFUL HERE
     function remove_chip(setup_index) {
         $.each(chips, function(index, chip) {
             // NOTE: group_index is just an index for the moment
             // We also need access to the id, ideally
             if (chip.group_index === setup_index) {
-                chips.splice(index, 1);
+                // If the chip exists, we need to mark it for deletion
+                if (chip.id) {
+                    chip.deleted = true;
+                }
+                // If the chip doesn't exist yet, just kill it
+                else {
+                    chips.splice(index, 1);
+                }
                 // Break after removal
                 return false;
             }
@@ -453,7 +464,8 @@ $(document).ready(function () {
         $.each(chips, function(index, chip) {
             // NOTE: group_index is just an index for the moment
             // We also need access to the id, ideally
-            if (chip.group_index === setup_index) {
+            // NOTE: DO NOT COUNT DELETED CHIPS
+            if (chip.group_index === setup_index && !chip.deleted) {
                 current_number_of_chips += 1;
             }
         });
@@ -467,8 +479,6 @@ $(document).ready(function () {
             add_chip(setup_index);
             current_number_of_chips += 1;
         }
-
-        console.log(chips);
 
         replace_series_data();
     }
@@ -781,6 +791,8 @@ $(document).ready(function () {
 
         // A somewhat odd way to kill the chips
         // Set the number of items to zero and trigger it
+        // We *PROBABLY* can get away with this
+        // Cascade will kill chips when it gets deleted anyway
         $('.number-of-items[data-row="' + $(this).attr('data-row') + '"]').val(0).trigger('change');
 
         // TODO: WE NEED TO DEAL WITH THE CONSEQUENCES OF DELETION!
@@ -805,7 +817,16 @@ $(document).ready(function () {
         // });
 
         // JUST FLAT OUT DELETE THE ROW
-        series_data.splice(current_row_index, 1);
+        // BUT WAIT! MAKE SURE THERE ISN'T A GROUP YET!
+        // TODO TODO TODO: NOTE: BUT WAIT!!!! ONLY DO THIS IF IT DOESN'T ALREADY EXIST!
+        // We would know this because it has an id (unless something goofy is happening)
+        if (series_data[current_row_index].id === undefined) {
+            // DELETE THE DATA HERE
+            series_data.splice(current_row_index, 1);
+        }
+        else {
+            // TODO STRIKE IT OUT!
+        }
 
         rebuild_table();
     });
@@ -816,7 +837,14 @@ $(document).ready(function () {
         current_prefix = $(this).attr('data-prefix');
 
         // DELETE THE DATA HERE
-        series_data[current_row_index][current_prefix][current_column_index] = {};
+        // TODO TODO TODO: NOTE: BUT WAIT!!!! ONLY DO THIS IF IT DOESN'T ALREADY EXIST!
+        // We would know this because it has an id (unless something goofy is happening)
+        if (series_data[current_row_index][current_prefix][current_column_index].id === undefined) {
+            series_data[current_row_index][current_prefix][current_column_index] = {};
+        }
+        else {
+            // TODO: STRIKEOUT!
+        }
 
         rebuild_table();
     });

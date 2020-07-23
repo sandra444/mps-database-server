@@ -30,6 +30,8 @@ from django.urls import reverse
 # THIS WILL ONLY BE USED FOR PROTOTYPE
 from django.contrib.postgres.fields import JSONField
 
+import ujson as json
+
 
 # These are here to avoid potentially messy imports, may change later
 def attr_getter(item, attributes):
@@ -1859,8 +1861,9 @@ class AssayStudy(FlaggableModel):
     #     )
     #     return study_types
 
+    # !!!!
     # THIS IS ONLY FOR THE PROTOTYPE
-    series_data = JSONField(default=dict, blank=True)
+    # series_data = JSONField(default=dict, blank=True)
 
     # TODO INEFFICIENT BUT SHOULD WORK
     def stakeholder_approval_needed(self):
@@ -1934,14 +1937,22 @@ class AssayStudy(FlaggableModel):
             'plates': []
         }
 
+        # If we so desired, we could order these
+        # One option is PK to get order of addition?
         groups = AssayGroup.objects.filter(
             study_id=self.id
         ).prefetch_related(
             # Prefetch the cells etc.
             # Kind of rough, but on the bright side we don't need chaining
             'assaygroupcell_set',
-            'assaygroupcompound_set',
+            # Shame we need to do this
+            # BUT COMPOUND SCHEMA IS STUPID
+            'assaygroupcompound_set__compound_instance',
             'assaygroupsetting_set',
+            # Guess I need to eat the cost...
+            'organ_model__device'
+        ).order_by(
+            'id'
         )
 
         # For mapping chips
@@ -1949,13 +1960,32 @@ class AssayStudy(FlaggableModel):
 
         # No junk
         # We actually do want to get the id for updates and the like
-        excluded_keys = ['_state']
+        excluded_keys = [
+            '_state',
+            # Interestingly, we are going to exclude id for now
+            # Since we are killing all of the related data on save anyway...
+            # We just end up making a mess keeping this
+            # TODO TODO TODO BRING BACK WHEN WE REFACTOR PLEASE
+            'id',
+        ]
 
-        for group in groups:
+        for group_index, group in enumerate(groups):
             current_group = {
                 'cell': [],
                 'compound': [],
-                'setting': []
+                'setting': [],
+                'id': str(group.id),
+                'name': group.name,
+                # Tricky, these are passed as strings
+                'organ_model_id': str(group.organ_model_id),
+                # TRICKY! TODO BE CAREFUL MAY NOT EXIST
+                'organ_model_protocol_id': str(group.organ_model_protocol_id),
+                'test_type': group.test_type,
+                # TECHNICALLY ONLY RELEVANT WHEN GETTING CHIPS
+                # SEE BELOW
+                'number_of_items': 0,
+                # Prevents AJAX requests, I guess
+                'device_type': group.organ_model.device.device_type
             }
 
             # Not very DRY
@@ -1966,11 +1996,27 @@ class AssayStudy(FlaggableModel):
                     }
                 )
 
+            # OH BOY! BECAUSE THE SCHEMA FOR COMPOUNDS ARE STUPID, WE NEED SPECIAL HANDLING
+            # WOO WOO!
+            # We need the compound instances to be devolved, unfortunately
+            # Either that, or we, you know, revise the compound schema
+            # To meet deadlines, I guess that isn't really an option
+            # Here we go!
             for compound in group.assaygroupcompound_set.all():
+                current_dic = {
+                    key: compound.__dict__.get(key) for key in compound.__dict__.keys() if key not in excluded_keys
+                }
+
+                # Because compound schema is stupid
+                current_dic.update({
+                    'compound_id': compound.compound_instance.compound_id,
+                    'supplier_text': compound.compound_instance.supplier.name,
+                    'lot_text': compound.compound_instance.lot,
+                    'receipt_date': compound.compound_instance.receipt_date,
+                })
+
                 current_group.get('compound').append(
-                    {
-                        key: compound.__dict__.get(key) for key in compound.__dict__.keys() if key not in excluded_keys
-                    }
+                    current_dic
                 )
 
             for setting in group.assaygroupsetting_set.all():
@@ -1979,6 +2025,11 @@ class AssayStudy(FlaggableModel):
                         key: setting.__dict__.get(key) for key in setting.__dict__.keys() if key not in excluded_keys
                     }
                 )
+
+            data.get('series_data').append(current_group)
+            group_id_to_index.update({
+                group.id: group_index
+            })
 
         if get_chips:
             # TODO TODO TODO
@@ -2004,9 +2055,12 @@ class AssayStudy(FlaggableModel):
                         'group_id': chip.group_id,
                         # We use group index in the group page rather than id because groups may or may not exist on that page
                         # Default *ideally* is not necessary here
-                        'group_index': group_id_to_index.get(chip.group_id, None)
+                        'group_index': group_id_to_index.get(chip.group_id, None),
+                        'id': chip.id
                     }
                 )
+
+                data.get('series_data')[group_id_to_index.get(chip.group_id, None)]['number_of_items'] += 1
 
         # Get the plate information
         # It is worth noting that for the purposes of a plate edit page, we really only need the one...

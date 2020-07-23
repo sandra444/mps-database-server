@@ -51,7 +51,6 @@ from assays.forms import (
     AssayStudyConfigurationForm,
     ReadyForSignOffForm,
     AssayStudyForm,
-    AssayStudyFormNew,
     AssayStudyDetailForm,
     AssayStudyGroupForm,
     AssayStudyChipForm,
@@ -2402,7 +2401,7 @@ class AssayStudySetUpdate(CreatorOrSuperuserRequiredMixin, AssayStudySetMixin, U
 # TODO TO BE DEPRECATED
 class AssayStudyAddNew(OneGroupRequiredMixin, AssayStudyMixin, CreateView):
     template_name = 'assays/assaystudy_add_new.html'
-    form_class = AssayStudyFormNew
+    form_class = AssayStudyForm
 
     template_name = 'assays/assaystudy_add.html'
     form_class = AssayStudyForm
