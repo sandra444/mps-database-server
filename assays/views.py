@@ -45,7 +45,8 @@ from assays.models import (
     assay_plate_reader_map_info_shape_row_dict,
     assay_plate_reader_map_info_plate_size_choices,
     assay_plate_reader_map_info_plate_size_choices_list,
-    upload_file_location, AssayOmicDataFileUpload,
+    upload_file_location,
+    AssayOmicDataFileUpload,
 )
 from assays.forms import (
     AssayStudyConfigurationForm,
