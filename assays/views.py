@@ -4550,7 +4550,7 @@ class AssayOmicDataFileUploadUpdate(StudyGroupMixin, UpdateView):
         else:
             return self.render_to_response(self.get_context_data(form=form, ))
 
-class AssayOmicDataFileUploadView(StudyGroupMixin, UpdateView):
+class AssayOmicDataFileUploadView(StudyGroupMixin, DetailView):
     """Views View Upload an AssayOmicDataFileUpload file """
 
     model = AssayOmicDataFileUpload
@@ -4561,6 +4561,12 @@ class AssayOmicDataFileUploadView(StudyGroupMixin, UpdateView):
         context = super(AssayOmicDataFileUploadView, self).get_context_data(**kwargs)
         context['review'] = True
         context['page_called'] = 'review'
+
+        # HANDY to use DetailView in a View view and trick Django into getting the form
+        context.update({
+            'form': AssayOmicDataFileUploadForm(instance=self.object),
+        })
+
         return context
 
 # END omic data file list, add, update, view and delete section

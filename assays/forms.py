@@ -75,6 +75,10 @@ from .utils import (
     calibration_choices,
 )
 
+from mps.utils import (
+    get_split_times,
+)
+
 from django.utils import timezone
 
 from mps.templatetags.custom_filters import is_group_admin, filter_groups, ADMIN_SUFFIX
@@ -86,7 +90,6 @@ import ujson as json
 import os
 import csv
 import re
-from decimal import Decimal
 
 # TODO REFACTOR WHITTLING TO BE HERE IN LIEU OF VIEW
 # TODO REFACTOR FK QUERYSETS TO AVOID N+1
@@ -3917,7 +3920,6 @@ class AssayOmicDataFileUploadForm(BootstrapForm):
 
 
     def __init__(self, *args, **kwargs):
-        self.request = kwargs.pop('request', None)
         self.study = kwargs.pop('study', None)
         super(AssayOmicDataFileUploadForm, self).__init__(*args, **kwargs)
 
@@ -3927,31 +3929,30 @@ class AssayOmicDataFileUploadForm(BootstrapForm):
             self.instance.study = self.study
 
         # to display the file name without the whole path
-        form_filename_only = os.path.basename(str(self.instance.omic_data_file))
+        filename_only = os.path.basename(str(self.instance.omic_data_file))
+        self.fields['filename_only'].initial = filename_only
 
         if self.instance.time:
             time_instance = self.instance.time
-            time_1d = round(time_instance/(24*60), 0)
-            time_1h = round((time_instance - time_1d*24*60)/60, 0)
-            time_1m = (time_instance - time_1d*24*60 - time_1h*60)
+            times = get_split_times(time_instance)
+            self.fields['time_day'].initial = times.get("day")
+            self.fields['time_hour'].initial = times.get("hour")
+            self.fields['time_minute'].initial = times.get("minute")
 
-            self.fields['time_1_day'].initial = time_1d
-            self.fields['time_1_hour'].initial = time_1h
-            self.fields['time_1_minute'].initial = time_1m
-
-    time_1_day = forms.DecimalField(
+    # when do time_2, will need to add the _2 to all the places, include the method call, do not forget
+    time_day = forms.DecimalField(
         required=False,
         label='Day'
     )
-    time_1_hour = forms.DecimalField(
+    time_hour = forms.DecimalField(
         required=False,
         label='Hour'
     )
-    time_1_minute = forms.DecimalField(
+    time_minute = forms.DecimalField(
         required=False,
         label='Minute'
     )
-    form_filename_only = forms.CharField(
+    filename_only = forms.CharField(
         required=False,
     )
 
@@ -3969,13 +3970,15 @@ class AssayOmicDataFileUploadForm(BootstrapForm):
 
     def process_file(self, save=False, calledme="c"):
         data = self.cleaned_data
-        # study = get_object_or_404(AssayStudy, pk=self.kwargs['study_id'])
+        day = data.get('time_day', '')
+        hour = data.get('time_hour', '')
+        minute = data.get('time_minute', '')
+        data['time'] = 0;
 
-        d = Decimal(data.get('time_1_day', ''))
-        h = Decimal(data.get('time_1_hour', ''))
-        m = Decimal(data.get('time_1_minute', ''))
-        data['time'] = (d*24*60)+(h*60)+m
-
+        for time_unit, conversion in list(TIME_CONVERSIONS.items()):
+            data.update({
+                'time': data.get('time') + data.get('time_' + time_unit, 0) * conversion,
+            })
         return data
 
 

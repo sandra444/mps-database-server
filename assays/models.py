@@ -4022,15 +4022,18 @@ class AssayOmicDataGroup(LockableModel):
     study = models.ForeignKey(
         AssayStudy,
         default=1,
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
+        verbose_name='This Study'
     )
     name = models.CharField(
         max_length=100,
-        default=set_default_description()
+        default=set_default_description(),
+        verbose_name='Group Name'
     )
     number = models.IntegerField(
         default=999,
-        blank=True
+        blank=True,
+        verbose_name='Group Number'
     )
 
     def __str__(self):
@@ -4047,74 +4050,88 @@ class AssayOmicDataFileUpload(LockableModel):
 
     study = models.ForeignKey(
         AssayStudy,
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
+        verbose_name='This Study'
     )
 
     description = models.CharField(
         max_length=2000,
         blank=True,
-        default=set_default_description()
+        default=set_default_description(),
+        verbose_name='File Description'
     )
 
     omic_data_file = models.FileField(
         upload_to='omic_data_file',
+        help_text='Omic Data File',
         blank=True,
         null=True,
-        help_text='Omic Data File'
+        verbose_name='Data File'
     )
 
     data_type = models.CharField(
         max_length=25,
         default='Log2fc',
         blank=True,
+        verbose_name='Data Type'
     )
 
     pipeline = models.CharField(
         max_length=25,
         default='DESeq2',
         blank=True,
+        verbose_name='Computation Pipeline'
     )
 
     method = models.ForeignKey(
         AssayMethod,
         blank=True,
         null=True,
-        on_delete=models.CASCADE)
+        on_delete=models.CASCADE,
+        verbose_name='Method'
+    )
 
     group = models.ForeignKey(
         AssayOmicDataGroup,
         default=1,
-        verbose_name='Group 1',
-        on_delete=models.CASCADE)
+        on_delete=models.CASCADE,
+        verbose_name='Group'
+    )
     group_2 = models.ForeignKey(
         AssayOmicDataGroup,
         default=1,
         related_name='group_2',
-        on_delete=models.CASCADE)
+        on_delete=models.CASCADE,
+        verbose_name='Group 2'
+    )
 
     time = models.FloatField(
         default=0,
         null=True,
         blank=True,
+        verbose_name='Sample Time'
     )
     time_2 = models.FloatField(
         default=0,
         null=True,
         blank=True,
+        verbose_name='Sample Time 2'
     )
 
     location = models.ForeignKey(
         'AssaySampleLocation',
         null=True,
         blank=True,
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
+        verbose_name='Sample Location'
     )
     location_2 = models.ForeignKey(
         'AssaySampleLocation',
         null=True,
         blank=True,
         related_name="location_2",
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
+        verbose_name='Sample Location 2'
     )
 
     def __str__(self):
@@ -4138,30 +4155,36 @@ class AssayOmicDataPoint(models.Model):
     study = models.ForeignKey(
         'assays.AssayStudy',
         on_delete=models.CASCADE,
+        verbose_name='This Study'
     )
 
     omic_data_file = models.ForeignKey(
         AssayOmicDataFileUpload,
         null=False,
         blank=False,
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
+        verbose_name='Data File'
     )
 
     name = models.CharField(
         max_length=100,
         blank=False,
-        null=False
+        null=False,
+        verbose_name='Name'
     )
 
     target = models.ForeignKey(
         AssayTarget,
         blank=False,
         null=False,
-        on_delete=models.CASCADE)
+        on_delete=models.CASCADE,
+        verbose_name='Computational Target'
+    )
 
     value = models.FloatField(
         blank=True,
         null=True,
+        verbose_name='Computed Value'
     )
 
 ##### End Assay Omic Section - Phase 1 design

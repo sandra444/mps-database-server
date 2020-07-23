@@ -17,9 +17,9 @@
 {% endblock %}
 
 {% block content %}
+
     <form class="form-horizontal" method="post" enctype="multipart/form-data">
         <div class="padded-bottom">
-            {# title #}
             <div class="well">
                 <h1 class="text-center">
                     <em><b>
@@ -38,73 +38,76 @@
                 </h1>
             </div>
 
-            {# pass to js file need for use in js #}
-            <div>
-                <div class="hidden" id="check_load">
-                    {{ page_called }}
+            {% if not review %}
+                {% include "submit.html" with flag="y" creator=object.created_by.id %}
+            {% endif %}
+
+            {% include 'errors.html' %}
+            {% if form.errors %}
+                {% for field in form %}
+                    {% if field.errors %}
+                        {% for error in field.errors %}
+                            <div class="alert alert-danger" role="alert">
+                                <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                                <span class="sr-only">Error:</span>
+                                {{field.label}}: {{error}}
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+            {% if form.non_field_errors %}
+                <div class="alert alert-danger" role="alert">
+                    <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                    <span class="sr-only">Error:</span>
+                    {{ form.non_field_errors }}
+                    form.errors<br>
+                    {{ form.errors }}<br>
                 </div>
-                <div class="hidden" id="this_file_id">
-                    {{ object.id }}
-                </div>
-            </div>
-
-            {# This is the section to show the user prettier errors#}
-            <div>
-                {% include 'errors.html' %}
-
-                {% if form.errors %}
-                    {% for field in form %}
-                        {% if field.errors %}
-                            {% for error in field.errors %}
-                                <div class="alert alert-danger" role="alert">
-                                    <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
-                                    <span class="sr-only">Error:</span>
-                                    {{field.label}}: {{error}}
-                                </div>
-                            {% endfor %}
-                        {% endif %}
-                    {% endfor %}
-                {% endif %}
-
-                {% if form.non_field_errors %}
-                    <div class="alert alert-danger" role="alert">
-                        <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
-                        <span class="sr-only">Error:</span>
-                        {{ form.non_field_errors }}
-                        form.errors<br>
-                        {{ form.errors }}<br>
-                    </div>
-                {% endif %}
-            </div>
+            {% endif %}
 
             {# main #}
             <div class="container">
+            {# pass to js file need for use in js #}
+                <div>
+                    <div class="hidden" id="check_load">
+                        {{ page_called }}
+                    </div>
+                    <div class="hidden" id="this_file_id">
+                        {{ object.id }}
+                    </div>
+                </div>
 
                 {% if update %}
                     {% if form.omic_data_file.errors %}
-                    {% for error in form.omic_data_file.errors %}
-                        <div class="alert alert-danger" role="alert">
-                            <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
-                            <span class="sr-only">Error:</span>
-                            {{ error }}
-                        </div>
-                    {% endfor %}
+                        {% for error in form.omic_data_file.errors %}
+                            <div class="alert alert-danger" role="alert">
+                                <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                                <span class="sr-only">Error:</span>
+                                {{ error }}
+                            </div>
+                        {% endfor %}
                     <div class="form-group has-error">
                     {% else %}
                     <div class="form-group">
                     {% endif %}
-                    <label for="omic_data_file" class="col-sm-2 control-label">Omic Data File</label>
-                    <div class="col-sm-10">
-                        {{ form.omic_data_file }}
-                        <div>
-                            <br>
-                            <b>Acceptable Formats: csv or Excel</b>
+                        <label for="protocol" class="col-sm-2 control-label">Omic Data File</label>
+                        <div class="col-sm-10">
+                            {{ form.omic_data_file }}
+                            <div>
+                                <br>
+                                <b>Acceptable Formats: Excel and CSV</b>
+                            </div>
                         </div>
                     </div>
+                    {% if form.omic_data_file.errors %}
+                    </div>
+                    {% endif %}
+
                 {% else %}
                     <label for="omic_data_file" class="col-sm-2 control-label">Omic Data File</label>
                     <div class="col-sm-10">
-                        <em>{{ form.form_filename_only.value }} </em>
+                        <em><b> {{ form.filename_only.value }} </b></em>
                         {# Show form field as text .name vrs .value HANDY  #}
                         {# name {{ form.form_filename_only.name }} #}
                         {# value {{ form.form_filename_only.value }} #}
@@ -112,9 +115,10 @@
                     <br>
                 {% endif %}
 
+
+                <br>
                 <br>
                 {% include 'generic_field.html' with field=form.description %}
-
                 {% if update %}
                     {% include 'generic_field.html' with field=form.method %}
                 {% else %}
@@ -130,6 +134,8 @@
                     </div>
                 {% endif %}
 
+                {# groups #}
+                <br>
                 <div class="row">
                     <div class="col-md-2">
                     </div>
@@ -137,9 +143,9 @@
                         <label>If value is positive, gene is up regulated in group 1.</label>
                     </div>
                 </div>
-
                 {% include 'generic_field.html' with field=form.group %}
                 {% include 'generic_field.html' with field=form.group_2 %}
+
 
                 <div class="row">
                     <div class="col-md-2">
@@ -157,7 +163,6 @@
                                 <td class="bg-warning">
                                     {% if update %}
                                         {% include 'generic_popup_link.html' with field=form.location %}
-                                    {% else %}
                                     {% endif %}
                                 </td>
                             </tr>
@@ -165,23 +170,13 @@
                                 <td hidden>
                                     {{ form.time }}
                                 </td>
-                                <td class="bg-success">{{ form.time_1_day }}</td>
-                                <td class="bg-success">{{ form.time_1_hour }}</td>
-                                <td class="bg-success">{{ form.time_1_minute }}</td>
+                                <td class="bg-success">{{ form.time_day }}</td>
+                                <td class="bg-success">{{ form.time_hour }}</td>
+                                <td class="bg-success">{{ form.time_minute }}</td>
                                 <td class="bg-warning">{{ form.location }}</td>
                             </tr>
                         </table>
                     </div>
-                </div>
-
-            </div>
-
-            {# submit bar #}
-            <div>
-                <div>
-                    {% if not review %}
-                        {% include "submit.html" with flag="y" creator=object.created_by.id %}
-                    {% endif %}
                 </div>
             </div>
         </div>

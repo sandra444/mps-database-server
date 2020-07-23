@@ -15,10 +15,9 @@
 {% endblock %}
 
 {% block content %}
+
     <form class="form-horizontal" method="post" enctype="multipart/form-data">
         <div class="padded-bottom">
-
-            {# title #}
             <div class="well">
                 <h1 class="text-center">
                     <em><b>
@@ -32,50 +31,68 @@
                 </h1>
             </div>
 
-            {# This is the section to show the user prettier errors#}
-            <div>
-                {% include 'errors.html' %}
+            {% include "submit.html" with flag="y" creator=object.created_by.id %}
 
-                {% if form.errors %}
-                    {% for field in form %}
-                        {% if field.errors %}
-                            {% for error in field.errors %}
-                                <div class="alert alert-danger" role="alert">
-                                    <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
-                                    <span class="sr-only">Error:</span>
-                                    {{field.label}}: {{error}}
-                                </div>
-                            {% endfor %}
-                        {% endif %}
-                    {% endfor %}
-                {% endif %}
-
-                {% if form.non_field_errors %}
-                    <div class="alert alert-danger" role="alert">
-                        <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
-                        <span class="sr-only">Error:</span>
-                        {{ form.non_field_errors }}
-                        form.errors<br>
-                        {{ form.errors }}<br>
-                    </div>
-                {% endif %}
-            </div>
+            {% include 'errors.html' %}
+            {% if form.errors %}
+                {% for field in form %}
+                    {% if field.errors %}
+                        {% for error in field.errors %}
+                            <div class="alert alert-danger" role="alert">
+                                <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                                <span class="sr-only">Error:</span>
+                                {{field.label}}: {{error}}
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+            {% if form.non_field_errors %}
+                <div class="alert alert-danger" role="alert">
+                    <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                    <span class="sr-only">Error:</span>
+                    {{ form.non_field_errors }}
+                    form.errors<br>
+                    {{ form.errors }}<br>
+                </div>
+            {% endif %}
 
             {# main #}
             <div class="container">
 
-                <label for="omic_data_file" class="col-sm-2 control-label">Upload File</label>
-                <div class="col-sm-10">
-                    <input type="file" name="omic_data_file" class="btn btn-primary btn-lg" id="id_omic_data_file">
-                    <div>
-                        <br>
-                        <b>Acceptable Formats: csv or Excel</b>
+                {% if form.omic_data_file.errors %}
+                    {% for error in form.omic_data_file.errors %}
+                        <div class="alert alert-danger" role="alert">
+                            <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                            <span class="sr-only">Error:</span>
+                            {{ error }}
+                        </div>
+                    {% endfor %}
+                <div class="form-group has-error">
+                {% else %}
+                <div class="form-group">
+                {% endif %}
+                    <label for="protocol" class="col-sm-2 control-label">Omic Data File</label>
+                    <div class="col-sm-10">
+                        {{ form.omic_data_file }}
+                        <div>
+                            <br>
+                            <b>Acceptable Formats: Excel and CSV</b>
+                        </div>
                     </div>
                 </div>
+                {% if form.omic_data_file.errors %}
+                </div>
+                {% endif %}
+
+
+                <br>
                 <br>
                 {% include 'generic_field.html' with field=form.description %}
                 {% include 'generic_field.html' with field=form.method %}
 
+                {# groups #}
+                <br>
                 <div class="row">
                     <div class="col-md-2">
                     </div>
@@ -83,7 +100,6 @@
                         <label>Select groups so that, if value is positive, gene is up regulated in group 1.</label>
                     </div>
                 </div>
-
                 {% include 'generic_field.html' with field=form.group %}
                 {% include 'generic_field.html' with field=form.group_2 %}
 
@@ -109,22 +125,14 @@
                                 <td hidden>
                                     {{ form.time }}
                                 </td>
-                                <td class="bg-success">{{ form.time_1_day }}</td>
-                                <td class="bg-success">{{ form.time_1_hour }}</td>
-                                <td class="bg-success">{{ form.time_1_minute }}</td>
+                                <td class="bg-success">{{ form.time_day }}</td>
+                                <td class="bg-success">{{ form.time_hour }}</td>
+                                <td class="bg-success">{{ form.time_minute }}</td>
                                 <td class="bg-warning">{{ form.location }}</td>
                             </tr>
                         </table>
                     </div>
                 </div>
-
-
-
-            </div>
-
-            {# submit bar #}
-            <div>
-                {% include "submit.html" with flag="y" creator=object.created_by.id %}
             </div>
         </div>
     </form>
