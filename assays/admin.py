@@ -54,7 +54,8 @@ from assays.models import (
     AssayPlateReaderMapDataFile,
     AssayPlateReaderMapDataFileBlock,
     AssayPlateReaderMapItemValue,
-    AssayOmicDataGroup, AssayOmicDataFileUpload,
+    AssayOmicDataGroup,
+    AssayOmicDataFileUpload,
 )
 from microdevices.models import MicrophysiologyCenter
 # from compounds.models import Compound

@@ -48,7 +48,8 @@ from assays.models import (
     assay_plate_reader_map_info_plate_size_choices,
     assay_plate_reader_volume_unit_choices,
     assay_plate_reader_file_delimiter_choices,
-    upload_file_location, AssayOmicDataFileUpload,
+    upload_file_location,
+    AssayOmicDataFileUpload,
 )
 from compounds.models import Compound, CompoundInstance, CompoundSupplier
 from microdevices.models import (
