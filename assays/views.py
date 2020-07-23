@@ -89,7 +89,8 @@ from assays.forms import (
     AssayPlateReaderMapDataFileAddForm,
     AssayPlateReaderMapDataFileForm,
     AssayPlateReaderMapDataFileBlockFormSetFactory,
-    AbstractClassAssayStudyAssay, AssayOmicDataFileUploadForm,
+    AbstractClassAssayStudyAssay,
+    AssayOmicDataFileUploadForm,
 )
 
 from microdevices.models import MicrophysiologyCenter

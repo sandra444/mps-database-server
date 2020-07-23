@@ -82,12 +82,11 @@ from assays.views import (
     AssayPlateReaderMapDataFileIndex,
     AssayPlateReaderMapDataFileView,
     AssayPlateReaderMapDataFileDelete,
-    # AssayOmicDataFileUploadUpdate,
-    # AssayOmicDataFileUploadAdd,
-    AssayOmicDataFileUploadIndex, AssayOmicDataFileUploadAdd, AssayOmicDataFileUploadView,
-    AssayOmicDataFileUploadUpdate, AssayOmicDataFileUploadDelete,
-    # AssayOmicDataFileUploadView,
-    # AssayOmicDataFileUploadDelete,
+    AssayOmicDataFileUploadIndex,
+    AssayOmicDataFileUploadAdd,
+    AssayOmicDataFileUploadView,
+    AssayOmicDataFileUploadUpdate,
+    AssayOmicDataFileUploadDelete,
 )
 import assays.ajax
 
