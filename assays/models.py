@@ -4043,16 +4043,10 @@ class AssayOmicDataFileUpload(LockableModel):
     class Meta(object):
         verbose_name = 'Assay Omic Data File Upload'
         verbose_name_plural = 'Assay Omic Data File Uploads'
-        unique_together = [('study', 'study_2', 'omic_data_file')]
+        unique_together = [('study', 'omic_data_file')]
 
     study = models.ForeignKey(
         AssayStudy,
-        verbose_name='Study 1',
-        on_delete=models.CASCADE
-    )
-    study_2 = models.ForeignKey(
-        AssayStudy,
-        related_name="study_2",
         on_delete=models.CASCADE
     )
 
@@ -4062,14 +4056,8 @@ class AssayOmicDataFileUpload(LockableModel):
         default=set_default_description()
     )
 
-    # omic_data_file = models.FileField(
-    #     upload_to='over_write_in_views.py',
-    #     verbose_name='Assay Omic Data File',
-    # )
-
     omic_data_file = models.FileField(
         upload_to='omic_data_file',
-        verbose_name='Omic Data File',
         blank=True,
         null=True,
         help_text='Omic Data File'
@@ -4108,19 +4096,17 @@ class AssayOmicDataFileUpload(LockableModel):
         default=0,
         null=True,
         blank=True,
-        verbose_name='Sample Collection Time'
     )
     time_2 = models.FloatField(
         default=0,
         null=True,
-        blank=True
+        blank=True,
     )
 
     location = models.ForeignKey(
         'AssaySampleLocation',
         null=True,
         blank=True,
-        verbose_name='Sample Location',
         on_delete=models.CASCADE
     )
     location_2 = models.ForeignKey(
@@ -4128,7 +4114,6 @@ class AssayOmicDataFileUpload(LockableModel):
         null=True,
         blank=True,
         related_name="location_2",
-        verbose_name='Sample Location 2',
         on_delete=models.CASCADE
     )
 
@@ -4153,7 +4138,6 @@ class AssayOmicDataPoint(models.Model):
     study = models.ForeignKey(
         'assays.AssayStudy',
         on_delete=models.CASCADE,
-        verbose_name='Study'
     )
 
     omic_data_file = models.ForeignKey(
@@ -4178,9 +4162,8 @@ class AssayOmicDataPoint(models.Model):
     value = models.FloatField(
         blank=True,
         null=True,
-        verbose_name='Value'
     )
 
-
+##### End Assay Omic Section - Phase 1 design
 
 

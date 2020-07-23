@@ -4517,15 +4517,12 @@ class AssayOmicDataFileUploadAdd(StudyGroupMixin, CreateView):
             return form_class(study=study)
 
     def get_context_data(self, **kwargs):
-        # BREAKS context = super(AssayOmicDataFileUploadForm, self).get_context_data(**kwargs)
         context = super(AssayOmicDataFileUploadAdd, self).get_context_data(**kwargs)
-
         context['add'] = True
         context['page_called'] = 'add'
         return context
 
     def form_valid(self, form):
-
         if form.is_valid():
             save_forms_with_tracking(self, form, update=True)
             return redirect(self.object.get_post_submission_url())
@@ -4539,20 +4536,13 @@ class AssayOmicDataFileUploadUpdate(StudyGroupMixin, UpdateView):
     template_name = 'assays/assayomicdatafileupload_update.html'
     form_class = AssayOmicDataFileUploadForm
 
-    # For permission mixin
-    def get_object(self, queryset=None):
-        self.study = super(AssayOmicDataFileUploadUpdate, self).get_object()
-        return self.study
-
     def get_context_data(self, **kwargs):
         context = super(AssayOmicDataFileUploadUpdate, self).get_context_data(**kwargs)
-
         context['update'] = True
         context['page_called'] = 'update'
         return context
 
     def form_valid(self, form):
-
         if form.is_valid():
             save_forms_with_tracking(self, form, update=True)
             return redirect(self.object.get_post_submission_url())
@@ -4566,25 +4556,11 @@ class AssayOmicDataFileUploadView(StudyGroupMixin, UpdateView):
     template_name = 'assays/assayomicdatafileupload_update.html'
     form_class = AssayOmicDataFileUploadForm
 
-    # For permission mixin
-    def get_object(self, queryset=None):
-        self.study = super(AssayOmicDataFileUploadView, self).get_object()
-        return self.study
-
     def get_context_data(self, **kwargs):
         context = super(AssayOmicDataFileUploadView, self).get_context_data(**kwargs)
-
-        context['view'] = True
-        context['page_called'] = 'view'
+        context['review'] = True
+        context['page_called'] = 'review'
         return context
-
-    def form_valid(self, form):
-
-        if form.is_valid():
-            save_forms_with_tracking(self, form, update=True)
-            return redirect(self.object.get_post_submission_url())
-        else:
-            return self.render_to_response(self.get_context_data(form=form, ))
 
 # END omic data file list, add, update, view and delete section
 

@@ -2,34 +2,50 @@
 {% load static %}
 
 {% block load_js %}
+    <script src="{% static "assays/assayomicdatafileupload_update.js" %}"></script>
     <script src="{% static "js/enter_override.js" %}"></script>
 {% endblock %}
 
+{# this template is for update and reveiw only (not add) #}
 {% block breadcrumbs %}
     <li><a href="/assays/assaystudy/">Studies</a>
     <li><a href="{{ form.instance.study.get_absolute_url }}">{{ form.instance.study }}</a></li>
-    <li><a href="{% url 'assayomicdatafileupload-index' form.instance.study_id %}">Assay Omic Files</a>
+    <li><a href="{% url 'assayomicdatafileupload-index' object.study.id %}">Assay Omic Data Files</a>
     <li class="active">
-        Add
+        <em>{{ object }}</em>
     </li>
 {% endblock %}
 
 {% block content %}
     <form class="form-horizontal" method="post" enctype="multipart/form-data">
         <div class="padded-bottom">
-
             {# title #}
             <div class="well">
                 <h1 class="text-center">
                     <em><b>
-                    Add Assay Omic File
+                    {% if update %}
+                        Update
+                    {% else %}
+                        Review
+                    {% endif %}
+                    Assay Omic File
                     </b></em>
                     <br>
                     <br>
-                    to Study {{ form.instance.study }}
+                    in Study {{ form.instance.study }}
                     <br>
                 {% csrf_token %}
                 </h1>
+            </div>
+
+            {# pass to js file need for use in js #}
+            <div>
+                <div class="hidden" id="check_load">
+                    {{ page_called }}
+                </div>
+                <div class="hidden" id="this_file_id">
+                    {{ object.id }}
+                </div>
             </div>
 
             {# This is the section to show the user prettier errors#}
@@ -64,29 +80,66 @@
             {# main #}
             <div class="container">
 
-                <label for="omic_data_file" class="col-sm-2 control-label">Upload File</label>
-                <div class="col-sm-10">
-                    <input type="file" name="omic_data_file" class="btn btn-primary btn-lg" id="id_omic_data_file">
-                    <div>
-                        <br>
-                        <b>Acceptable Formats: csv or Excel</b>
+                {% if update %}
+                    {% if form.omic_data_file.errors %}
+                    {% for error in form.omic_data_file.errors %}
+                        <div class="alert alert-danger" role="alert">
+                            <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                            <span class="sr-only">Error:</span>
+                            {{ error }}
+                        </div>
+                    {% endfor %}
+                    <div class="form-group has-error">
+                    {% else %}
+                    <div class="form-group">
+                    {% endif %}
+                    <label for="omic_data_file" class="col-sm-2 control-label">Omic Data File</label>
+                    <div class="col-sm-10">
+                        {{ form.omic_data_file }}
+                        <div>
+                            <br>
+                            <b>Acceptable Formats: csv or Excel</b>
+                        </div>
                     </div>
-                </div>
+                {% else %}
+                    <label for="omic_data_file" class="col-sm-2 control-label">Omic Data File</label>
+                    <div class="col-sm-10">
+                        <em>{{ form.form_filename_only.value }} </em>
+                        {# Show form field as text .name vrs .value HANDY  #}
+                        {# name {{ form.form_filename_only.name }} #}
+                        {# value {{ form.form_filename_only.value }} #}
+                    </div>
+                    <br>
+                {% endif %}
+
                 <br>
                 {% include 'generic_field.html' with field=form.description %}
-                {% include 'generic_field.html' with field=form.method %}
+
+                {% if update %}
+                    {% include 'generic_field.html' with field=form.method %}
+                {% else %}
+                    <div class="row">
+                        <div class="col-md-2">
+                            <div class="plate-map-page-field-labels-small">
+                                <b>Method</b>
+                            </div>
+                        </div>
+                        <div class="col-md-10">
+                            {{ form.method }}
+                        </div>
+                    </div>
+                {% endif %}
 
                 <div class="row">
                     <div class="col-md-2">
                     </div>
                     <div class="col-md-10">
-                        <label>Select groups so that, if value is positive, gene is up regulated in group 1.</label>
+                        <label>If value is positive, gene is up regulated in group 1.</label>
                     </div>
                 </div>
 
                 {% include 'generic_field.html' with field=form.group %}
                 {% include 'generic_field.html' with field=form.group_2 %}
-
 
                 <div class="row">
                     <div class="col-md-2">
@@ -102,7 +155,10 @@
                                 <th class="bg-success">Hour</th>
                                 <th class="bg-success">Minute</th>
                                 <td class="bg-warning">
-                                    {% include 'generic_popup_link.html' with field=form.location %}
+                                    {% if update %}
+                                        {% include 'generic_popup_link.html' with field=form.location %}
+                                    {% else %}
+                                    {% endif %}
                                 </td>
                             </tr>
                             <tr>
@@ -118,14 +174,17 @@
                     </div>
                 </div>
 
-
-
             </div>
 
             {# submit bar #}
             <div>
-                {% include "submit.html" with flag="y" creator=object.created_by.id %}
+                <div>
+                    {% if not review %}
+                        {% include "submit.html" with flag="y" creator=object.created_by.id %}
+                    {% endif %}
+                </div>
             </div>
         </div>
     </form>
 {% endblock %}
+

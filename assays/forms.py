@@ -85,6 +85,7 @@ import ujson as json
 import os
 import csv
 import re
+from decimal import Decimal
 
 # TODO REFACTOR WHITTLING TO BE HERE IN LIEU OF VIEW
 # TODO REFACTOR FK QUERYSETS TO AVOID N+1
@@ -3911,12 +3912,8 @@ class AssayOmicDataFileUploadForm(BootstrapForm):
 
     class Meta(object):
         model = AssayOmicDataFileUpload
-        # widgets = {
-        #     'description': forms.Textarea(attrs={'cols': 50, 'rows': 3}),
-        # }
-        # fields = ('omic_data_file',)
-        # exclude = tracking + ('study',),
-        exclude = tracking + ('data_type', 'pipeline', 'study',)
+        exclude = tracking + ('data_type', 'pipeline', 'study')
+
 
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop('request', None)
@@ -3928,18 +3925,59 @@ class AssayOmicDataFileUploadForm(BootstrapForm):
         if self.study:
             self.instance.study = self.study
 
-        self.fields['study_2'].initial = self.instance.study
+        # to display the file name without the whole path
+        form_filename_only = os.path.basename(str(self.instance.omic_data_file))
 
-    time_1 = forms.DecimalField(
+        if self.instance.time:
+            time_instance = self.instance.time
+            time_1d = round(time_instance/(24*60), 0)
+            time_1h = round((time_instance - time_1d*24*60)/60, 0)
+            time_1m = (time_instance - time_1d*24*60 - time_1h*60)
+
+            self.fields['time_1_day'].initial = time_1d
+            self.fields['time_1_hour'].initial = time_1h
+            self.fields['time_1_minute'].initial = time_1m
+
+    time_1_day = forms.DecimalField(
+        required=False,
+        label='Day'
+    )
+    time_1_hour = forms.DecimalField(
+        required=False,
+        label='Hour'
+    )
+    time_1_minute = forms.DecimalField(
+        required=False,
+        label='Minute'
+    )
+    form_filename_only = forms.CharField(
         required=False,
     )
-    time_2 = forms.DecimalField(
-        required=False,
-    )
-    time_unit = forms.ChoiceField(
-        required=False,
-        choices=assay_plate_reader_time_unit_choices
-    )
+
+    def clean(self):
+        data = super(AssayOmicDataFileUploadForm, self).clean()
+        self.process_file(save=False, calledme='clean')
+        return data
+
+    def save(self, commit=True):
+        map = super(AssayOmicDataFileUploadForm, self).save(commit=commit)
+
+        if commit:
+            self.process_file(save=True, calledme="save")
+        return map
+
+    def process_file(self, save=False, calledme="c"):
+        data = self.cleaned_data
+        # study = get_object_or_404(AssayStudy, pk=self.kwargs['study_id'])
+
+        d = Decimal(data.get('time_1_day', ''))
+        h = Decimal(data.get('time_1_hour', ''))
+        m = Decimal(data.get('time_1_minute', ''))
+        data['time'] = (d*24*60)+(h*60)+m
+
+        return data
+
+
 
     # will need to do this after get basics working
     # # check the file extension of the loaded file to make sure the user is not adding spreadsheet files

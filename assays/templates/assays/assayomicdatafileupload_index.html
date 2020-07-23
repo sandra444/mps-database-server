@@ -2,6 +2,10 @@
 {% load static %}
 {% load custom_filters %}
 
+{% block load_js %}
+    <script src="{% static "assays/assayomicdatafileupload_index.js" %}"></script>
+{% endblock %}
+
 {% block breadcrumbs %}
     <li><a href="/assays/assaystudy/">Studies</a></li>
     <li><a href="{{ object.get_absolute_url }}">{{ object }}</a></li>
@@ -51,18 +55,11 @@
                 <tr>
                     <th>View</th>
                     <th>Edit</th>
-                    <th>Short File Name</th>
                     <th>File</th>
                     <th>Description</th>
-{#                    <th>Data Type</th>#}
                     <th>Method</th>
-{#                    <th>Pipeline</th>#}
                     <th>Group 1</th>
                     <th>Group 2</th>
-                    <th>Time</th>
-{#                    <th>Time 2</th>#}
-                    <th>Location</th>
-{#                    <th>Location 2</th>#}
                 </tr>
             </thead>
             <tbody>
@@ -76,22 +73,15 @@
                         <a class="btn btn-primary" href="{% url 'assayomicdatafileupload-update' file.id  %}">Edit </a>
 {#                      {% endif %}#}
                     </td>
-                    <td>{{ file.name_short }}</td>
                     <td>
                         <a target="_blank" href="/media/{{ file.omic_data_file }}">
                             {{ file.omic_data_file }}
                         </a>
                     </td>
                     <td>{{ file.description }}</td>
-{#                    <td>{{ file.data_type }}</td>#}
                     <td>{{ file.method }}</td>
-{#                    <td>{{ file.pipeline }}</td>#}
                     <td>{{ file.group }}</td>
                     <td>{{ file.group_2 }}</td>
-                    <td>{{ file.time }}</td>
-{#                    <td>{{ file.time_2 }}</td>#}
-                    <td>{{ file.location }}</td>
-{#                    <td>{{ file.location_2 }}</td>#}
                 </tr>
             {% endfor %}
             </tbody>
