@@ -1226,8 +1226,14 @@ class AssayStudyGroupForm(SetupFormsMixin, SignOffMixin, BootstrapForm):
                                 # Save the AssayCompoundInstance
                                 conflicting_assay_compound_instance = assay_compound_instances.get(
                                     (
-                                        # new_item.id,
-                                        current_item_number,
+                                        # NOPE! HAVE TO USE
+                                        # Hmmm... not sure what to use...
+                                        # We need something that is id agnostic
+                                        # But we can't use just the name!
+                                        # We need the study id and group name
+                                        # Should be enough!
+                                        self.instance.id,
+                                        setup_group.get('name', ''),
                                         compound_instance.id,
                                         concentration,
                                         concentration_unit_id,
@@ -1267,8 +1273,8 @@ class AssayStudyGroupForm(SetupFormsMixin, SignOffMixin, BootstrapForm):
 
                                 assay_compound_instances.update({
                                     (
-                                        # new_item.id,
-                                        current_item_number,
+                                        self.instance.id,
+                                        setup_group.get('name', ''),
                                         compound_instance.id,
                                         concentration,
                                         concentration_unit_id,
@@ -1278,92 +1284,92 @@ class AssayStudyGroupForm(SetupFormsMixin, SignOffMixin, BootstrapForm):
                                     ): True
                                 })
 
-                # We ought to process items separately for a number of reasons
+            # We ought to process items separately for a number of reasons
+            # TODO
+            # Start of numbering for items
+            # We begin with the number of current_items + 1
+            # We assume, for the moment, that there will not be name collisions
+            # TODO: FOR TOTAL ASSURANCE, PREVENT NAME COLLISIONS
+            current_item_number = current_items.count() + 1
+
+            for current_chip in all_chip_data:
+                # Terminate early if no group
+                # BE CAREFUL, ZERO IS FALSY
+                if current_chip.get('group_index', None) is not None:
+                    setup_group = all_setup_data[current_chip.get('group_index')]
+                else:
+                    continue
+
+                # We know whether this is a current item if the id matches one in our list
+                current_item = current_item_ids.get(int(current_chip.get('id', 0)), None)
+
                 # TODO
-                # Start of numbering for items
-                # We begin with the number of current_items + 1
-                # We assume, for the moment, that there will not be name collisions
-                # TODO: FOR TOTAL ASSURANCE, PREVENT NAME COLLISIONS
-                current_item_number = current_items.count() + 1
+                if current_item:
+                    # ??
+                    # new_item = current_item
 
-                for current_chip in all_chip_data:
-                    # Terminate early if no group
-                    # BE CAREFUL, ZERO IS FALSY
-                    if current_chip.get('group_index', None) is not None:
-                        setup_group = all_setup_data[current_chip.get('group_index')]
-                    else:
-                        continue
+                    # TODO LOGIC FOR UPDATE HERE?
+                    # It might be overkill, but user could change the organ model and protocol
+                    # So just always pass the organ model, protocol, test_type, modified on and by
+                    # NEVER BOTHER WITH THE GROUP
+                    # WE KNOW WHAT THE GROUP IS BECAUSE YOU CANNOT CHANGE IT HERE
 
-                    # We know whether this is a current item if the id matches one in our list
-                    current_item = current_item_ids.get(int(current_chip.get('id', 0)), None)
+                    # WE AREN'T BOTHERING WITH UPDATING ITEMS HERE
+                    # We will delete them, though
+                    if current_chip.get('deleted', False):
+                        deleted_items.append(current_item.id)
+                else:
+                    # TODO NOTE: New chip names *theoretically* can conflict with existing chips
+                    # For instance, someone can rename their 3 chips "3,4,5" and add three new chips, bad news!
+                    new_item = AssayMatrixItem(
+                        # study=study,
+                        # matrix=new_matrix,
+                        name=str(current_item_number),
+                        # JUST MAKE SETUP DATE THE STUDY DATE FOR NOW
+                        setup_date=self.instance.start_date,
+                        # Alternative row and column
+                        # row_index=setup_row,
+                        # column_index=iteration,
+                        row_index=0,
+                        column_index=current_item_number-1,
+                        # Irrelevant (but required, unfortunately, maybe will remove later)
+                        # device=study.organ_model.device,
+                        organ_model_id=setup_group.get('organ_model_id', None),
+                        # Some nuances here that we will gloss over
+                        organ_model_protocol_id=setup_group.get('organ_model_protocol_id', None),
+                        test_type=setup_group.get('test_type', ''),
+                        created_by=created_by,
+                        created_on=created_on,
+                        modified_by=created_by,
+                        modified_on=created_on,
+                        study_id=self.instance.id,
 
-                    # TODO
-                    if current_item:
-                        # ??
-                        # new_item = current_item
+                        # SOMEWHAT UNORTHODOX:
+                        # We put the group name here
+                        # THEN OVERRIDE IT WITH THE ID LATER
+                        group_id=setup_group.get('name', ''),
+                    )
 
-                        # TODO LOGIC FOR UPDATE HERE?
-                        # It might be overkill, but user could change the organ model and protocol
-                        # So just always pass the organ model, protocol, test_type, modified on and by
-                        # NEVER BOTHER WITH THE GROUP
-                        # WE KNOW WHAT THE GROUP IS BECAUSE YOU CANNOT CHANGE IT HERE
+                    try:
+                        new_item.full_clean(exclude=[
+                            # The matrix needs to be excluded because it might not exist yet
+                            'matrix',
+                            # DEFINITELY EXCLUDE GROUP
+                            'group',
 
-                        # WE AREN'T BOTHERING WITH UPDATING ITEMS HERE
-                        # We will delete them, though
-                        if current_chip.get('deleted', False):
-                            deleted_items.append(current_item.id)
-                    else:
-                        # TODO NOTE: New chip names *theoretically* can conflict with existing chips
-                        # For instance, someone can rename their 3 chips "3,4,5" and add three new chips, bad news!
-                        new_item = AssayMatrixItem(
-                            # study=study,
-                            # matrix=new_matrix,
-                            name=str(current_item_number),
-                            # JUST MAKE SETUP DATE THE STUDY DATE FOR NOW
-                            setup_date=self.instance.start_date,
-                            # Alternative row and column
-                            # row_index=setup_row,
-                            # column_index=iteration,
-                            row_index=0,
-                            column_index=current_item_number-1,
-                            # Irrelevant (but required, unfortunately, maybe will remove later)
-                            # device=study.organ_model.device,
-                            organ_model_id=setup_group.get('organ_model_id', None),
-                            # Some nuances here that we will gloss over
-                            organ_model_protocol_id=setup_group.get('organ_model_protocol_id', None),
-                            test_type=setup_group.get('test_type', ''),
-                            created_by=created_by,
-                            created_on=created_on,
-                            modified_by=created_by,
-                            modified_on=created_on,
-                            study_id=self.instance.id,
+                            # Why exclude these?
+                            'device',
+                            # 'organ_model',
+                            # 'organ_model_protocol',
+                        ])
+                        new_items.append(new_item)
 
-                            # SOMEWHAT UNORTHODOX:
-                            # We put the group name here
-                            # THEN OVERRIDE IT WITH THE ID LATER
-                            group_id=setup_group.get('name', ''),
-                        )
+                    except forms.ValidationError as e:
+                        current_errors.append(e)
+                        group_has_error = True
 
-                        try:
-                            new_item.full_clean(exclude=[
-                                # The matrix needs to be excluded because it might not exist yet
-                                'matrix',
-                                # DEFINITELY EXCLUDE GROUP
-                                'group',
-
-                                # Why exclude these?
-                                'device',
-                                # 'organ_model',
-                                # 'organ_model_protocol',
-                            ])
-                            new_items.append(new_item)
-
-                        except forms.ValidationError as e:
-                            current_errors.append(e)
-                            group_has_error = True
-
-                    # CAN CAUSE UNUSUAL BEHAVIOR DURING UPDATES!
-                    current_item_number += 1
+                # CAN CAUSE UNUSUAL BEHAVIOR DURING UPDATES!
+                current_item_number += 1
 
         if current_errors:
             current_errors.append(['Please review the table below for errors.'])

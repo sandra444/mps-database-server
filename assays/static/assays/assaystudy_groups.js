@@ -1,4 +1,5 @@
 // TODO WE ARE NOW CALLING THEM GROUPS AGAIN, I GUESS
+// TODO: WHY ARE WE GOING BACK AND FORTH BETWEEN INT AND STING FOR INDICES???????
 $(document).ready(function () {
     // TEMPORARY
     var series_data_selector = $('#id_series_data');
@@ -433,7 +434,7 @@ $(document).ready(function () {
     function add_chip(setup_index) {
         chips.push({
             'name': chips.length + 1,
-            'group_index': setup_index
+            'group_index': Math.floor(setup_index)
         });
     }
 
