@@ -1967,6 +1967,7 @@ class AssayStudy(FlaggableModel):
             # We just end up making a mess keeping this
             # TODO TODO TODO BRING BACK WHEN WE REFACTOR PLEASE
             'id',
+            '_prefetched_objects_cache',
         ]
 
         for group_index, group in enumerate(groups):

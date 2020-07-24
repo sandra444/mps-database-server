@@ -443,17 +443,20 @@ $(document).ready(function () {
         $.each(chips, function(index, chip) {
             // NOTE: group_index is just an index for the moment
             // We also need access to the id, ideally
-            if (chip.group_index === setup_index) {
+            // TODO TODO TODO SHOULD BE MORE CAREFUL ABOUT STRING TO INTEGER COMPARISONS
+            if (chip.group_index == setup_index) {
                 // If the chip exists, we need to mark it for deletion
-                if (chip.id) {
-                    chip.deleted = true;
+                if (chip.id && !chip.deleted) {
+                    full_series_data['chips'][index]['deleted'] = true;
+                    // Break after removal
+                    return false;
                 }
                 // If the chip doesn't exist yet, just kill it
-                else {
+                else if (!chip.id) {
                     chips.splice(index, 1);
+                    // Break after removal
+                    return false;
                 }
-                // Break after removal
-                return false;
             }
         });
     }
@@ -465,7 +468,7 @@ $(document).ready(function () {
             // NOTE: group_index is just an index for the moment
             // We also need access to the id, ideally
             // NOTE: DO NOT COUNT DELETED CHIPS
-            if (chip.group_index === setup_index && !chip.deleted) {
+            if (chip.group_index == setup_index && !chip.deleted) {
                 current_number_of_chips += 1;
             }
         });

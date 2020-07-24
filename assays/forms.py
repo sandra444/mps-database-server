@@ -1288,7 +1288,8 @@ class AssayStudyGroupForm(SetupFormsMixin, SignOffMixin, BootstrapForm):
 
                 for current_chip in all_chip_data:
                     # Terminate early if no group
-                    if current_chip.get('group_index'):
+                    # BE CAREFUL, ZERO IS FALSY
+                    if current_chip.get('group_index', None) is not None:
                         setup_group = all_setup_data[current_chip.get('group_index')]
                     else:
                         continue
@@ -1367,6 +1368,9 @@ class AssayStudyGroupForm(SetupFormsMixin, SignOffMixin, BootstrapForm):
         if current_errors:
             current_errors.append(['Please review the table below for errors.'])
             raise forms.ValidationError(current_errors)
+
+        # Kind of odd at first blush, but we reverse to save in order
+        new_items = list(reversed(new_items))
 
         new_setup_data.update({
             'new_matrix': new_matrix,
@@ -1483,7 +1487,9 @@ class AssayStudyGroupForm(SetupFormsMixin, SignOffMixin, BootstrapForm):
                 new_matrix.save()
                 new_matrix_id = new_matrix.id
                 current_matrix_id = new_matrix_id
-            elif not new_matrix and (new_items or update_items):
+            # Uh... why use an elif here?
+            # elif not new_matrix and (new_items or update_items):
+            else:
                 # TODO TODO TODO
                 # Have some way to get the "current matrix" if there isn't a new matrix
                 # TODO Be careful, if there are no chips, don't bother!
@@ -1645,6 +1651,12 @@ class AssayStudyChipForm(SetupFormsMixin, SignOffMixin, BootstrapForm):
 
     # TODO NEEDS TO BE REVISED
     # TODO TODO TODO CLEAN AND SAVE
+
+    def __init__(self, *args, **kwargs):
+        super(AssayStudyChipForm, self).__init__(*args, **kwargs)
+
+        # Prepopulate series_data from thing
+        self.fields['series_data'].initial = self.instance.get_group_data_string(get_chips=True)
 
 # OLD TO BE REMOVED
 # class AssayStudyPlateForm(SignOffMixin, BootstrapForm):
