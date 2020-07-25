@@ -974,10 +974,14 @@ class AssayStudyGroupForm(SetupFormsMixin, SignOffMixin, BootstrapForm):
             update_groups = []
             deleted_groups = []
 
+            # CHECK UNIQUENESS
+            group_names = {}
+
             new_items = []
             update_items = []
             deleted_items = []
 
+            # Superfluous?
             new_item_to_group_name = {}
 
             new_cells = []
@@ -1023,6 +1027,17 @@ class AssayStudyGroupForm(SetupFormsMixin, SignOffMixin, BootstrapForm):
 
                         if group_needs_to_be_updated:
                             update_groups.append(current_group)
+
+                        # Add to group names
+                        # Check uniqueness
+                        if setup_group.get('name', '') in group_names:
+                            current_errors.append('The Group name "{}" is duplicated. The names of Groups must be unique.'.format(
+                                setup_group.get('name', '')
+                            ))
+                        else:
+                            group_names.update({
+                                setup_group.get('name', ''): True
+                            })
                 else:
                     new_group = AssayGroup(
                         # Study should just be instance
@@ -1042,6 +1057,17 @@ class AssayStudyGroupForm(SetupFormsMixin, SignOffMixin, BootstrapForm):
                     except forms.ValidationError as e:
                         current_errors.append(e)
                         group_has_error = True
+
+                    # Add to group names
+                    # Check uniqueness
+                    if setup_group.get('name', '') in group_names:
+                        current_errors.append('The Group name "{}" is duplicated. The names of Groups must be unique.'.format(
+                            setup_group.get('name', '')
+                        ))
+                    else:
+                        group_names.update({
+                            setup_group.get('name', ''): True
+                        })
 
                 # Always iterate for cells, compounds, and settings
                 # Keep in mind that to decrease sparsity related data is now tied to a group
@@ -1657,6 +1683,13 @@ class AssayStudyChipForm(SetupFormsMixin, SignOffMixin, BootstrapForm):
 
     # TODO NEEDS TO BE REVISED
     # TODO TODO TODO CLEAN AND SAVE
+    def clean(self):
+        cleaned_data = super(AssayStudyChipForm, self).clean()
+
+        return cleaned_data
+
+    def save(self, commit=True):
+        pass
 
     def __init__(self, *args, **kwargs):
         super(AssayStudyChipForm, self).__init__(*args, **kwargs)
