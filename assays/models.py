@@ -1968,6 +1968,9 @@ class AssayStudy(FlaggableModel):
             # TODO TODO TODO BRING BACK WHEN WE REFACTOR PLEASE
             'id',
             '_prefetched_objects_cache',
+            # WE DON'T WANT THE GROUP ID
+            # THIS WILL RUIN THE DIFFERENCE CHECKER
+            'group_id',
         ]
 
         for group_index, group in enumerate(groups):
