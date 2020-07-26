@@ -1098,6 +1098,10 @@ class AssayStudyGroupForm(SetupFormsMixin, SignOffMixin, BootstrapForm):
                             # The query for this, hopefully, shouldn't be too big!
                             # We only care about that which is associated with groups in THIS study, so it should be fine?
 
+                            # Skip if nothing
+                            if not current_object:
+                                continue
+
                             # NOTE TODO TODO TODO
                             # I am probably just going to blow up all of the old related data for the moment and always add
                             # This is much faster to write but more expensive than it needs to be
