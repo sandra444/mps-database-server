@@ -1671,8 +1671,6 @@ class AssayStudyGroupForm(SetupFormsMixin, SignOffMixin, BootstrapForm):
 
 class AssayStudyChipForm(SetupFormsMixin, SignOffMixin, BootstrapForm):
     series_data = forms.CharField(required=False)
-    # Contrived
-    chip_data = forms.CharField(required=False)
 
     class Meta(object):
         model = AssayStudy
@@ -1793,14 +1791,14 @@ class AssayStudyChipForm(SetupFormsMixin, SignOffMixin, BootstrapForm):
     def save(self, commit=True):
         # Just do the bulk update
         # We don't need to do anything else
-        print(self.cleaned_data.get('chip_data', None))
-        AssayMatrixItem.objects.bulk_update(
-            self.cleaned_data.get('chip_data', None),
-            [
-                'group_id',
-                'name'
-            ]
-        )
+        if commit:
+            AssayMatrixItem.objects.bulk_update(
+                self.cleaned_data.get('chip_data', None),
+                [
+                    'group_id',
+                    'name'
+                ]
+            )
 
         return self.instance
 
@@ -1865,17 +1863,60 @@ class AssayStudyPlateForm(SetupFormsMixin, SignOffMixin, BootstrapForm):
             self.study = self.instance.study
 
         # Crude! TEMPORARY
-        self.fields['series_data'].initial = json.dumps(self.study.series_data)
+        if self.instance.id:
+            self.fields['series_data'].initial = self.study.get_group_data_string(plate_id=self.instance.id)
+        else:
+            self.fields['series_data'].initial = self.study.get_group_data_string()
 
     # FORCE UNIQUENESS CHECK
     def clean(self):
-        super(AssayStudyPlateForm, self).clean()
+        cleaned_data = super(AssayStudyPlateForm, self).clean()
 
+        # TODO TODO TODO NOTE CRAMMED IN
+        # Am I sticking with the name 'series_data'?
+        if self.cleaned_data.get('series_data', None):
+            all_data = json.loads(self.cleaned_data.get('series_data', '[]'))
+        else:
+            # Contrived defaults
+            all_data = {
+                'series_data': [],
+                'chips': [],
+                'plates': []
+            }
+
+        # The data for groups is currently stored in series_data
+        all_setup_data = all_data.get('series_data')
+        all_plate_data = all_data.get('plates')
+
+        # Catch technically empty setup data
+        setup_data_is_empty = True
+
+        for group_set in all_setup_data:
+            if group_set:
+                setup_data_is_empty = not any(group_set.values())
+
+        if setup_data_is_empty:
+            all_setup_data = []
+
+        # Plate name
         if AssayMatrix.objects.filter(
                 study_id=self.instance.study.id,
                 name=self.cleaned_data.get('name', '')
         ).exclude(pk=self.instance.pk).count():
-            raise forms.ValidationError({'name': ['Matrix name must be unique within study.']})
+            raise forms.ValidationError({'name': ['Plate name must be unique within Study.']})
+
+        new_wells = []
+        update_wells = []
+
+        for row_column, well in all_plate_data.items():
+            print(row_column, well)
+
+        cleaned_data.update({
+            'new_wells': new_wells,
+            'update_wells': update_wells,
+        })
+
+        return cleaned_data
 
     # CRUDE, TEMPORARY
     # TODO REVISE ASAP
@@ -1883,19 +1924,10 @@ class AssayStudyPlateForm(SetupFormsMixin, SignOffMixin, BootstrapForm):
         matrix = super(AssayStudyPlateForm, self).save(commit)
 
         if commit:
-            # Add the plate ID to the new plate in the series data
-            series_data = json.loads(self.cleaned_data.get('series_data'))
+            # Add new wells
 
-            for plate in series_data.get('plates'):
-                if plate.get('id') == '':
-                    plate.update({
-                        'id': matrix.id
-                    })
-
-            # Remember, for the moment, this is a JSON FIELD
-            # We will change this ASAP
-            self.study.series_data = series_data
-            self.study.save()
+            # Update wells
+            pass
 
         return matrix
 

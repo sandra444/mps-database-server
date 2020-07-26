@@ -515,7 +515,7 @@ $(document).ready(function () {
     }
 
     // JUST USES DEFAULT PROTOCOL FOR NOW
-    function spawn_row(setup_to_use, add_new_row) {
+    function spawn_row(setup_to_use, add_new_row, is_clone) {
         // TODO: SHOULD REMOVE, WHOLE CONCEPT OF current_setup NEEDS TO BE REVISED
         if (!setup_to_use) {
             setup_to_use = {
@@ -708,8 +708,15 @@ $(document).ready(function () {
         study_setup_body.append(new_row);
 
         if (add_new_row) {
+            var new_series_data = $.extend(true, {}, setup_to_use);
+
+            // GET RID OF THE GROUP ID WHEN THIS IS A NEW ROW
+            if (is_clone) {
+                delete new_series_data['id'];
+            }
+
             series_data.push(
-                $.extend(true, {}, setup_to_use)
+                new_series_data
             );
 
             // Crude way to make sure the chips get generated
@@ -783,7 +790,7 @@ $(document).ready(function () {
     // NOT ALLOWED IN EDIT?
     $(document).on('click', 'a[data-clone-row-button="true"]', function() {
         current_row_index = Math.floor($(this).attr('data-row'));
-        spawn_row(series_data[current_row_index], true);
+        spawn_row(series_data[current_row_index], true, true);
 
         // MAKE SURE HIDDEN COLUMNS ARE ADHERED TO
         change_matrix_visibility();

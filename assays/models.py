@@ -1978,7 +1978,9 @@ class AssayStudy(FlaggableModel):
                 'cell': [],
                 'compound': [],
                 'setting': [],
-                'id': str(group.id),
+                # Why stringify this?
+                'id': group.id,
+                # 'id': str(group.id),
                 'name': group.name,
                 # Tricky, these are passed as strings
                 'organ_model_id': str(group.organ_model_id),
@@ -2092,7 +2094,8 @@ class AssayStudy(FlaggableModel):
                 current_well_data = {
                     'group_id': well.group_id,
                     'group_index': group_id_to_index.get(chip.group_id, None),
-                    'name': well.name
+                    'name': well.name,
+                    'id': well.id
                 }
                 current_plate_data.update({
                     '{}_{}'.format(
@@ -2102,7 +2105,10 @@ class AssayStudy(FlaggableModel):
                 })
 
             # It probably isn't ideal to pass the plate this way?
-            data.get('plates').append(current_plate_data)
+            # data.get('plates').append(current_plate_data
+            data.update({
+
+            })
 
         return json.dumps(data)
 
