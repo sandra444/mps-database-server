@@ -1402,7 +1402,7 @@ class AssayStudyGroupForm(SetupFormsMixin, SignOffMixin, BootstrapForm):
             raise forms.ValidationError(current_errors)
 
         # Kind of odd at first blush, but we reverse to save in order
-        new_items = list(reversed(new_items))
+        # new_items = list(reversed(new_items))
 
         new_setup_data.update({
             'new_matrix': new_matrix,
@@ -1671,6 +1671,8 @@ class AssayStudyGroupForm(SetupFormsMixin, SignOffMixin, BootstrapForm):
 
 class AssayStudyChipForm(SetupFormsMixin, SignOffMixin, BootstrapForm):
     series_data = forms.CharField(required=False)
+    # Contrived
+    chip_data = forms.CharField(required=False)
 
     class Meta(object):
         model = AssayStudy
@@ -1681,21 +1683,126 @@ class AssayStudyChipForm(SetupFormsMixin, SignOffMixin, BootstrapForm):
             'organ_model_protocol_full'
         )
 
-    # TODO NEEDS TO BE REVISED
-    # TODO TODO TODO CLEAN AND SAVE
-    def clean(self):
-        cleaned_data = super(AssayStudyChipForm, self).clean()
-
-        return cleaned_data
-
-    def save(self, commit=True):
-        pass
-
     def __init__(self, *args, **kwargs):
         super(AssayStudyChipForm, self).__init__(*args, **kwargs)
 
         # Prepopulate series_data from thing
         self.fields['series_data'].initial = self.instance.get_group_data_string(get_chips=True)
+
+    # TODO NEEDS TO BE REVISED
+    # TODO TODO TODO CLEAN AND SAVE
+    def clean(self):
+        cleaned_data = super(AssayStudyChipForm, self).clean()
+
+        # TODO TODO TODO NOTE CRAMMED IN
+        # Am I sticking with the name 'series_data'?
+        if self.cleaned_data.get('series_data', None):
+            all_data = json.loads(self.cleaned_data.get('series_data', '[]'))
+        else:
+            # Contrived defaults
+            all_data = {
+                'series_data': [],
+                'chips': [],
+                'plates': []
+            }
+
+        # The data for groups is currently stored in series_data
+        all_setup_data = all_data.get('series_data')
+        all_chip_data = all_data.get('chips')
+
+        # Catch technically empty setup data
+        setup_data_is_empty = True
+
+        for group_set in all_setup_data:
+            if group_set:
+                setup_data_is_empty = not any(group_set.values())
+
+        if setup_data_is_empty:
+            all_setup_data = []
+
+        # if commit and all_setup_data:
+        # SEE BASE MODELS FOR WHY COMMIT IS NOT HERE
+        if all_chip_data:
+            chip_data = []
+
+            chip_names = {}
+
+            current_errors = []
+
+            current_matrix = AssayMatrix.objects.filter(
+                # The study must exist in order to visit this page, so getting the id this was is fine
+                study_id=self.instance.id,
+                representation='chips'
+            )
+
+            # Get the group ids
+            group_ids = {
+                group.id: True for group in AssayGroup.objects.filter(
+                    study_id=self.instance.id
+                )
+            }
+
+            chip_id_to_chip = {
+                chip.id: chip for chip in AssayMatrixItem.objects.filter(
+                    study_id=self.instance.id,
+                    matrix_id=current_matrix[0].id
+                )
+            }
+
+            # We basically just modify group_id and name
+            # TODO MAKE SURE THE GROUP IDS ARE VALID
+            # That is, check against the group ids of the study
+            for chip in all_chip_data:
+                if chip_id_to_chip.get(chip.get('id', 0)):
+                    current_chip = chip_id_to_chip.get(chip.get('id', 0))
+                else:
+                    current_chip = False
+                    current_errors.append('A Chip is missing, please refresh and try again.')
+
+                if current_chip:
+                    # Add to group names
+                    # Check uniqueness
+                    if chip.get('name', '') in chip_names:
+                        current_errors.append('The Chip name "{}" is duplicated. The names of Chips must be unique.'.format(
+                            chip.get('name', '')
+                        ))
+                    else:
+                        chip_names.update({
+                            chip.get('name', ''): True
+                        })
+
+                        current_chip.name = chip.get('name', '')
+
+                    if chip.get('group_id', '') in group_ids:
+                        current_chip.group_id = chip.get('group_id', '')
+                    try:
+                        current_chip.full_clean()
+                        chip_data.append(current_chip)
+                    except forms.ValidationError as e:
+                        current_errors.append(e)
+
+        self.cleaned_data.update({
+            'chip_data': chip_data
+        })
+
+        if current_errors:
+            raise forms.ValidationError(current_errors)
+
+        return cleaned_data
+
+    def save(self, commit=True):
+        # Just do the bulk update
+        # We don't need to do anything else
+        print(self.cleaned_data.get('chip_data', None))
+        AssayMatrixItem.objects.bulk_update(
+            self.cleaned_data.get('chip_data', None),
+            [
+                'group_id',
+                'name'
+            ]
+        )
+
+        return self.instance
 
 # OLD TO BE REMOVED
 # class AssayStudyPlateForm(SignOffMixin, BootstrapForm):

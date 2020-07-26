@@ -299,6 +299,10 @@ $(document).ready(function () {
 
         // Modify the chip group
         chips[$(this).attr('data-index')]['group_index'] = $(this).val();
+
+        // MODIFY THE ID BECAUSE THAT IS THE IMPORTANT ONE
+        chips[$(this).attr('data-index')]['group_id'] = parseInt(series_data[$(this).val()].id);
+
         replace_series_data();
 
         // Rebuild the table

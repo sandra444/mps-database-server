@@ -2049,6 +2049,9 @@ class AssayStudy(FlaggableModel):
             ).prefetch_related(
                 # Unfortunately, to avoid N+1, we need to prefetch
                 'matrix'
+            # Possibly annoying, I don't know
+            ).order_by(
+                'id'
             )
 
             # For every chip, tack on an object with
