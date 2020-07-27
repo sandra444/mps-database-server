@@ -1983,9 +1983,9 @@ class AssayStudy(FlaggableModel):
                 # 'id': str(group.id),
                 'name': group.name,
                 # Tricky, these are passed as strings
-                'organ_model_id': str(group.organ_model_id),
+                'organ_model_id': group.organ_model_id,
                 # TRICKY! TODO BE CAREFUL MAY NOT EXIST
-                'organ_model_protocol_id': str(group.organ_model_protocol_id),
+                'organ_model_protocol_id': group.organ_model_protocol_id,
                 'test_type': group.test_type,
                 # TECHNICALLY ONLY RELEVANT WHEN GETTING CHIPS
                 # SEE BELOW

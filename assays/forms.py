@@ -1024,9 +1024,17 @@ class AssayStudyGroupForm(SetupFormsMixin, SignOffMixin, BootstrapForm):
                         for field in self.update_group_fields:
                             if getattr(current_group, field) != setup_group.get(field, ''):
                                 setattr(current_group, field, setup_group.get(field, ''))
+                                group_needs_to_be_updated = True
 
                         if group_needs_to_be_updated:
-                            update_groups.append(current_group)
+                            try:
+                                # I think we are fine with no exclusions
+                                current_group.full_clean()
+                                update_groups.append(current_group)
+                            # MUST BE MODIFIED TO ADD TO CORRECT ROW (we could display all above too?)
+                            except forms.ValidationError as e:
+                                current_errors.append(e)
+                                group_has_error = True
 
                         # Add to group names
                         # Check uniqueness
@@ -1039,13 +1047,23 @@ class AssayStudyGroupForm(SetupFormsMixin, SignOffMixin, BootstrapForm):
                                 setup_group.get('name', ''): True
                             })
                 else:
+                    current_organ_model_id = setup_group.get('organ_model_id', '')
+
+                    if current_organ_model_id:
+                        current_organ_model_id = int(current_organ_model_id)
+
+                    current_organ_model_protocol_id = setup_group.get('organ_model_protocol_id', '')
+
+                    if organ_model_protocol_id:
+                        organ_model_protocol_id = int(organ_model_protocol_id)
+
                     new_group = AssayGroup(
                         # Study should just be instance
                         study=self.instance,
                         name=setup_group.get('name', ''),
                         test_type=setup_group.get('test_type', ''),
-                        organ_model_id=setup_group.get('organ_model_id', ''),
-                        organ_model_protocol_id=setup_group.get('organ_model_protocol_id', ''),
+                        organ_model_id=current_organ_model_id,
+                        organ_model_protocol_id=organ_model_protocol_id,
                     )
 
                     # TODO Logic for first clean and adding to new_groups here
