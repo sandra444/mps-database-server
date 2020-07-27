@@ -1319,6 +1319,8 @@ $(document).ready(function () {
             // GET RID OF SIDEBAR
             $('.toggle_sidebar_button').first().trigger('click');
         }
+
+        $('#charts').css('height', Math.ceil(sorted_assays.length / 2) * min_height + 50);
     };
 
     // TODO TODO TODO NOT DRY
