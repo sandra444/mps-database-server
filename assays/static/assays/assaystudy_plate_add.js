@@ -639,7 +639,14 @@ $(document).ready(function () {
 
     function delete_selected() {
         current_selection.each(function() {
-            delete matrix_item_data[$(this).attr('data-row-column')];
+            var current_well = matrix_item_data[$(this).attr('data-row-column')];
+
+            if (current_well.id) {
+                current_well.deleted = true;
+            }
+            else {
+                delete matrix_item_data[$(this).attr('data-row-column')];
+            }
 
             unset_label($(this));
         });

@@ -1054,8 +1054,8 @@ class AssayStudyGroupForm(SetupFormsMixin, SignOffMixin, BootstrapForm):
 
                     current_organ_model_protocol_id = setup_group.get('organ_model_protocol_id', '')
 
-                    if organ_model_protocol_id:
-                        organ_model_protocol_id = int(organ_model_protocol_id)
+                    if current_organ_model_protocol_id:
+                        current_organ_model_protocol_id = int(current_organ_model_protocol_id)
 
                     new_group = AssayGroup(
                         # Study should just be instance
@@ -1063,7 +1063,7 @@ class AssayStudyGroupForm(SetupFormsMixin, SignOffMixin, BootstrapForm):
                         name=setup_group.get('name', ''),
                         test_type=setup_group.get('test_type', ''),
                         organ_model_id=current_organ_model_id,
-                        organ_model_protocol_id=organ_model_protocol_id,
+                        organ_model_protocol_id=current_organ_model_protocol_id,
                     )
 
                     # TODO Logic for first clean and adding to new_groups here
@@ -1949,6 +1949,7 @@ class AssayStudyPlateForm(SetupFormsMixin, SignOffMixin, BootstrapForm):
 
         new_wells = []
         update_wells = []
+        delete_wells = []
 
         # NOTE: We will be alerted during clean for anything that ISN'T INTERNAL to the plate
         taken_names = {}
@@ -1980,19 +1981,23 @@ class AssayStudyPlateForm(SetupFormsMixin, SignOffMixin, BootstrapForm):
 
             # Update if already exists
             if current_well:
-                # Update name
-                current_well.name = current_name
-                if well.get('group_id', '') in current_groups:
-                    # Update group id
-                    current_well.group_id = well.get('group_id', '')
+                # If slated for deletion
+                if well.get('deleted', ''):
+                    delete_wells.append(current_well.id)
+                else:
+                    # Update name
+                    current_well.name = current_name
+                    if well.get('group_id', '') in current_groups:
+                        # Update group id
+                        current_well.group_id = well.get('group_id', '')
 
-                    # Make sure nothing broke
-                    try:
-                        current_well.full_clean()
-                        # Add it to those slated to update
-                        update_wells.append(current_well)
-                    except forms.ValidationError as e:
-                        current_errors.append(e)
+                        # Make sure nothing broke
+                        try:
+                            current_well.full_clean()
+                            # Add it to those slated to update
+                            update_wells.append(current_well)
+                        except forms.ValidationError as e:
+                            current_errors.append(e)
             # Add otherwise
             else:
                 new_item = AssayMatrixItem(
@@ -2037,6 +2042,7 @@ class AssayStudyPlateForm(SetupFormsMixin, SignOffMixin, BootstrapForm):
         cleaned_data.update({
             'new_wells': new_wells,
             'update_wells': update_wells,
+            'delete_wells': delete_wells,
         })
 
         if current_errors:
@@ -2063,6 +2069,7 @@ class AssayStudyPlateForm(SetupFormsMixin, SignOffMixin, BootstrapForm):
 
             new_wells = self.cleaned_data.get('new_wells')
             update_wells = self.cleaned_data.get('update_wells')
+            delete_wells = self.cleaned_data.get('delete_wells')
 
             # Add new wells
             if new_wells:
@@ -2088,6 +2095,9 @@ class AssayStudyPlateForm(SetupFormsMixin, SignOffMixin, BootstrapForm):
                         'group_id'
                     ]
                 )
+
+            if delete_wells:
+                AssayMatrixItem.objects.filter(id__in=delete_wells).delete()
 
         return matrix
 
