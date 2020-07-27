@@ -20,7 +20,7 @@ $(document).ready(function () {
             series_data: [],
             // Plates is an array, kind of ugly, but for the moment one has to search for the current plate on the plate page
             // On the other hand, might we not have another "fake schema" contrivance for matrices?
-            plates: [],
+            plates: {},
             // The ID needs to be in individual chip objects, they don't exist initially (unlike plates!)
             chips: []
         };
@@ -36,23 +36,23 @@ $(document).ready(function () {
     // var matrix_item_data = full_series_data.matrix_item_data;
     // var matrix_item_data = $('#id_matrix_item_data').val();
 
-    var matrix_item_data = null;
+    var matrix_item_data =  matrix_item_data = full_series_data.plates;
 
     console.log(plate_id);
     // Try to get the plate
     // TODO: IF WE ARE EDITING ONLY ONE PLATE AT A TIME, THIS IS POINTLESS
     // The only possible benefit is strange front-end validation?
     // We don't really want to depend on front-end validation, and there are MUCH better methods to pass that data...
-    $.each(full_series_data.plates, function(index, plate) {
-        if (plate.id === plate_id) {
-            matrix_item_data = full_series_data.plates[index];
-        }
-    });
-    if (!matrix_item_data) {
-        full_series_data.plates.push({id: ''});
-        console.log(full_series_data);
-        matrix_item_data = full_series_data.plates[full_series_data.plates.length-1];
-    }
+    // $.each(full_series_data.plates, function(index, plate) {
+    //     if (plate.id === plate_id) {
+    //         matrix_item_data = full_series_data.plates[index];
+    //     }
+    // });
+    // if (!matrix_item_data) {
+    //     full_series_data.plates.push({id: ''});
+    //     console.log(full_series_data);
+    //     matrix_item_data = full_series_data.plates[full_series_data.plates.length-1];
+    // }
 
     // TEMPORARY ACQUISITION OF GROUPS
     // THIS NEEDS TO BE REPLACED ASAP
@@ -408,8 +408,8 @@ $(document).ready(function () {
                         // new_cell.find('.matrix-item-hover')
                         //     .removeClass('label-warning')
                         //     .addClass('label-primary')
-                        //     .text(matrix_item_data[current_name].group);
-                        set_label(new_cell, matrix_item_data[row_column].group);
+                        //     .text(matrix_item_data[current_name].group_index);
+                        set_label(new_cell, matrix_item_data[row_column].group_index);
 
                         // Add the name
                         new_cell.find('.matrix_item-name').text(matrix_item_data[row_column].name);
@@ -665,7 +665,10 @@ $(document).ready(function () {
 
                 // TODO: SET GROUP WITH RESPECT TO INCREMENT TODO
                 // TODO
-                current_matrix_item_data.group = series_selector.val();
+                current_matrix_item_data.group_index = series_selector.val();
+
+                // NEED THE ID, WE DON'T REALLY CARE ABOUT THE INDEX WHEN SAVING
+                current_matrix_item_data.group_id = series_data[parseInt(series_selector.val())].id;
 
                 set_label($(this), series_selector.val());
 
@@ -887,8 +890,8 @@ $(document).ready(function () {
         // var current_series = null;
         var current_data = matrix_item_data[$(this).parent().attr('data-row-column')];
 
-        if (current_data && current_data.group) {
-            current_group = current_data.group;
+        if (current_data && current_data.group_index) {
+            current_group = current_data.group_index;
             // current_series = current_data.series;
         }
 

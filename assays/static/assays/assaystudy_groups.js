@@ -12,7 +12,7 @@ $(document).ready(function () {
         full_series_data = {
             series_data: [],
             // Plates is an array, kind of ugly, but for the moment one has to search for the current plate on the plate page
-            plates: [],
+            plates: {},
             // The ID needs to be in individual chip objects, they don't exist initially (unlike plates!)
             chips: []
         };

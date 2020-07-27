@@ -1934,7 +1934,7 @@ class AssayStudy(FlaggableModel):
             # Mode defines which get populated
             # May need modify for a 'both' option
             'chips': [],
-            'plates': []
+            'plates': {}
         }
 
         # If we so desired, we could order these
@@ -2086,28 +2086,24 @@ class AssayStudy(FlaggableModel):
                 study_id=self.id
             )[0]
 
-            current_plate_data.update({
-                'id': current_plate.id
-            })
-
             for well in AssayMatrixItem.objects.filter(matrix_id=current_plate.id):
                 current_well_data = {
                     'group_id': well.group_id,
-                    'group_index': group_id_to_index.get(chip.group_id, None),
+                    'group_index': group_id_to_index.get(well.group_id, None),
                     'name': well.name,
                     'id': well.id
                 }
                 current_plate_data.update({
                     '{}_{}'.format(
-                        current_well_data.row_index,
-                        current_well_data.column_index,
+                        well.row_index,
+                        well.column_index,
                     ) : current_well_data
                 })
 
             # It probably isn't ideal to pass the plate this way?
             # data.get('plates').append(current_plate_data
             data.update({
-
+                'plates': current_plate_data
             })
 
         return json.dumps(data)

@@ -881,7 +881,7 @@ class AssayStudyGroupForm(SetupFormsMixin, SignOffMixin, BootstrapForm):
             all_data = {
                 'series_data': [],
                 'chips': [],
-                'plates': []
+                'plates': {}
             }
 
         # The data for groups is currently stored in series_data
@@ -1411,7 +1411,6 @@ class AssayStudyGroupForm(SetupFormsMixin, SignOffMixin, BootstrapForm):
                             # 'organ_model_protocol',
                         ])
                         new_items.append(new_item)
-
                     except forms.ValidationError as e:
                         current_errors.append(e)
                         group_has_error = True
@@ -1723,7 +1722,7 @@ class AssayStudyChipForm(SetupFormsMixin, SignOffMixin, BootstrapForm):
             all_data = {
                 'series_data': [],
                 'chips': [],
-                'plates': []
+                'plates': {}
             }
 
         # The data for groups is currently stored in series_data
@@ -1813,6 +1812,10 @@ class AssayStudyChipForm(SetupFormsMixin, SignOffMixin, BootstrapForm):
     def save(self, commit=True):
         # Just do the bulk update
         # We don't need to do anything else
+        # TODO TODO TODO
+        # NOTE NOTE NOTE
+        # WE TECHNICALLY SHOULD CHANGE THE SHARED VALUES HERE (organ_model, test_type, etc.)
+        # ON THE OTHER HAND, IT IS PROBABLY BEST TO LEAVE THEM OUT
         if commit:
             AssayMatrixItem.objects.bulk_update(
                 self.cleaned_data.get('chip_data', None),
@@ -1875,8 +1878,6 @@ class AssayStudyPlateForm(SetupFormsMixin, SignOffMixin, BootstrapForm):
 
     def __init__(self, *args, **kwargs):
         self.study = kwargs.pop('study', None)
-        self.user = kwargs.pop('user', None)
-
         super(AssayStudyPlateForm, self).__init__(*args, **kwargs)
 
         if self.study:
@@ -1894,6 +1895,10 @@ class AssayStudyPlateForm(SetupFormsMixin, SignOffMixin, BootstrapForm):
     def clean(self):
         cleaned_data = super(AssayStudyPlateForm, self).clean()
 
+        # VERY SLOPPY
+        created_by = self.user
+        created_on = timezone.now()
+
         # TODO TODO TODO NOTE CRAMMED IN
         # Am I sticking with the name 'series_data'?
         if self.cleaned_data.get('series_data', None):
@@ -1903,7 +1908,7 @@ class AssayStudyPlateForm(SetupFormsMixin, SignOffMixin, BootstrapForm):
             all_data = {
                 'series_data': [],
                 'chips': [],
-                'plates': []
+                'plates': {}
             }
 
         # The data for groups is currently stored in series_data
@@ -1927,29 +1932,162 @@ class AssayStudyPlateForm(SetupFormsMixin, SignOffMixin, BootstrapForm):
         ).exclude(pk=self.instance.pk).count():
             raise forms.ValidationError({'name': ['Plate name must be unique within Study.']})
 
+        current_wells = {
+            well.id: well for well in AssayMatrixItem.objects.filter(
+                matrix_id=self.instance.id
+            )
+        }
+
+        # Technically ought to restrict to JUST PLATE GROUPS
+        # However, that makes the query uglier
+        # First pass, we won't make sure a check
+        current_groups = {
+            group.id: group for group in AssayGroup.objects.filter(
+                study_id=self.instance.study.id
+            )
+        }
+
         new_wells = []
         update_wells = []
 
+        # NOTE: We will be alerted during clean for anything that ISN'T INTERNAL to the plate
+        taken_names = {}
+
+        current_errors = []
+
         for row_column, well in all_plate_data.items():
-            print(row_column, well)
+            row_column_split = row_column.split('_')
+            row = int(row_column_split[0])
+            column = int(row_column_split[1])
+
+            current_well = current_wells.get(well.get('id', 0), None)
+            current_group = current_groups.get(well.get('group_id', 0), None)
+
+            # Junk data
+            if not current_group:
+                continue
+
+            # BE SURE TO TEST THE NAMES!
+            current_name = well.get('name', '')
+            if current_name in taken_names:
+                current_errors.append('The name "{}" is already in use, please make sure well names are unique.'.format(
+                    current_name
+                ))
+            else:
+                taken_names.update({
+                    current_name: True
+                })
+
+            # Update if already exists
+            if current_well:
+                # Update name
+                current_well.name = current_name
+                if well.get('group_id', '') in current_groups:
+                    # Update group id
+                    current_well.group_id = well.get('group_id', '')
+
+                    # Make sure nothing broke
+                    try:
+                        current_well.full_clean()
+                        # Add it to those slated to update
+                        update_wells.append(current_well)
+                    except forms.ValidationError as e:
+                        current_errors.append(e)
+            # Add otherwise
+            else:
+                new_item = AssayMatrixItem(
+                    # We know this one
+                    study=self.instance.study,
+                    # TRICKY!
+                    # matrix=new_matrix,
+                    name=current_name,
+                    # JUST MAKE SETUP DATE THE STUDY DATE FOR NOW
+                    setup_date=self.instance.study.start_date,
+                    row_index=row,
+                    column_index=column,
+                    # Irrelevant (but required, unfortunately, maybe will remove later)
+                    # device=study.organ_model.device,
+                    organ_model_id=current_group.organ_model_id,
+                    # Some nuances here that we will gloss over
+                    organ_model_protocol_id=current_group.organ_model_protocol_id,
+                    test_type=current_group.test_type,
+                    created_by=created_by,
+                    created_on=created_on,
+                    modified_by=created_by,
+                    modified_on=created_on,
+                    group_id=current_group.id
+                )
+
+                try:
+                    new_item.full_clean(exclude=[
+                        # The matrix needs to be excluded because it might not exist yet
+                        'matrix',
+
+                        # Why exclude these?
+                        # Get rid of device for now because it is still required
+                        'device',
+                        # 'organ_model',
+                        # 'organ_model_protocol',
+                    ])
+                    new_wells.append(new_item)
+                except forms.ValidationError as e:
+                        current_errors.append(e)
+                        group_has_error = True
 
         cleaned_data.update({
             'new_wells': new_wells,
             'update_wells': update_wells,
         })
 
+        if current_errors:
+            raise forms.ValidationError(current_errors)
+
         return cleaned_data
 
     # CRUDE, TEMPORARY
     # TODO REVISE ASAP
     def save(self, commit=True):
+        # Takes care of saving the Plate in and of itself
         matrix = super(AssayStudyPlateForm, self).save(commit)
 
         if commit:
+            matrix_id = self.instance.id
+            study_id = self.instance.study.id
+
+            # TODO TODO TODO: STUPID, BUT ONE WAY TO DEAL WITH THE DEVICE ISSUE
+            # Otherwise I would need to cut it out and immediately revise every place it was called...
+            # Light query anyway (relative to the others) I guess
+            organ_model_id_to_device_id = {
+                organ_model.id: organ_model.device_id for organ_model in OrganModel.objects.all()
+            }
+
+            new_wells = self.cleaned_data.get('new_wells')
+            update_wells = self.cleaned_data.get('update_wells')
+
             # Add new wells
+            if new_wells:
+                # Need to iterate through the new wells and add the matrix id
+                # (The matrix might not exist yet)
+                for well in new_wells:
+                    well.matrix_id = matrix_id
+                    # IDEALLY WE WILL JUST CUT THESE ANYWAY??
+                    well.device_id = organ_model_id_to_device_id.get(well.organ_model_id)
+
+                AssayMatrixItem.objects.bulk_create(new_wells)
 
             # Update wells
-            pass
+            # TODO TODO TODO
+            # NOTE NOTE NOTE
+            # WE TECHNICALLY SHOULD CHANGE THE SHARED VALUES HERE (organ_model, test_type, etc.)
+            # ON THE OTHER HAND, IT IS PROBABLY BEST TO LEAVE THEM OUT
+            if update_wells:
+                AssayMatrixItem.objects.bulk_update(
+                    update_wells,
+                    [
+                        'name',
+                        'group_id'
+                    ]
+                )
 
         return matrix
 
