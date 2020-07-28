@@ -2731,6 +2731,148 @@ class AssayGroup(models.Model):
         on_delete=models.CASCADE
     )
 
+    # TODO TODO TODO
+    # ALL OF THIS COULD BE HANDLED MORE... DELICATELY
+    def devolved_settings(self, criteria=DEFAULT_SETTING_CRITERIA):
+        """Makes a tuple of cells (for comparison)"""
+        setting_tuple = []
+        attribute_getter = tuple_attrgetter(*criteria)
+        for setting in self.assaygroupsetting_set.all():
+            current_tuple = attribute_getter(setting)
+
+            setting_tuple.append(current_tuple)
+
+        return tuple(sorted(set(setting_tuple)))
+
+    def stringify_settings(self, criteria=None):
+        """Stringified cells for a setup"""
+        settings = []
+        for setting in self.assaygroupsetting_set.all():
+            settings.append(setting.flex_string(criteria))
+
+        if not settings:
+            settings = ['-No Extra Settings-']
+
+        return '\n'.join(collections.OrderedDict.fromkeys(settings))
+
+    def devolved_cells(self, criteria=DEFAULT_CELL_CRITERIA):
+        """Makes a tuple of cells (for comparison)"""
+        cell_tuple = []
+        attribute_getter = tuple_attrgetter(*criteria)
+        for cell in self.assaygroupcell_set.all():
+            current_tuple = attribute_getter(cell)
+
+            cell_tuple.append(current_tuple)
+
+        return tuple(sorted(set(cell_tuple)))
+
+    def stringify_cells(self, criteria=None):
+        """Stringified cells for a setup"""
+        cells = []
+        for cell in self.assaygroupcell_set.all():
+            cells.append(cell.flex_string(criteria))
+
+        if not cells:
+            cells = ['-No Cell Samples-']
+
+        return '\n'.join(collections.OrderedDict.fromkeys(cells))
+
+    def devolved_compounds(self, criteria=DEFAULT_COMPOUND_CRITERIA):
+        """Makes a tuple of compounds (for comparison)"""
+        compound_tuple = []
+        attribute_getter = tuple_attrgetter(*criteria)
+        for compound in self.assaygroupcompound_set.all():
+            current_tuple = attribute_getter(compound)
+
+            compound_tuple.append(current_tuple)
+
+        return tuple(sorted(set(compound_tuple)))
+
+    def stringify_compounds(self, criteria=None):
+        """Stringified cells for a setup"""
+        compounds = []
+        for compound in self.assaygroupcompound_set.all():
+            compounds.append(compound.flex_string(criteria))
+
+        if not compounds:
+            compounds = ['-No Compounds-']
+
+        return '\n'.join(collections.OrderedDict.fromkeys(compounds))
+
+    def get_compound_profile(self, matrix_item_compound_post_filters):
+        """Compound profile for determining concentration at time point"""
+        compound_profile = []
+
+        for compound in self.assaygroupcompound_set.all():
+            valid_compound = True
+
+            # Makes sure the compound doesn't violate filters
+            # This is because a compound can be excluded even if its parent matrix item isn't!
+            for filter, values in list(matrix_item_compound_post_filters.items()):
+                if str(attr_getter(compound, filter.split('__'))) not in values:
+                    valid_compound = False
+                    break
+
+            compound_profile.append({
+                'valid_compound': valid_compound,
+                'addition_time': compound.addition_time,
+                'duration': compound.duration,
+                # SCALE INITIALLY
+                'concentration': compound.concentration * compound.concentration_unit.scale_factor,
+                # JUNK
+                # 'scale_factor': compound.concentration_unit.scale_factor,
+                'name': compound.compound_instance.compound.name,
+                'base_unit': compound.concentration_unit.base_unit.unit,
+            })
+
+        return compound_profile
+
+    # SPAGHETTI CODE
+    # TERRIBLE, BLOATED
+    def quick_dic(
+        self,
+        compound_profile=False,
+        matrix_item_compound_post_filters=None,
+        criteria=None
+    ):
+        if not criteria:
+            criteria = {}
+        dic = {
+            # TODO May need to prefetch device (potential n+1)
+            # 'Device': self.device.name,
+            'Device': 'TODO',
+            'MPS User Group': self.study.group.name,
+            'Study': self.get_hyperlinked_study(),
+            'Matrix': 'TO BE REVISED TODO',
+            'MPS Model': self.get_hyperlinked_model_or_device(),
+            'Compounds': self.stringify_compounds(criteria.get('compound', None)),
+            'Cells': self.stringify_cells(criteria.get('cell', None)),
+            'Settings': self.stringify_settings(criteria.get('setting', None)),
+            'Trimmed Compounds': self.stringify_compounds({
+                'compound_instance.compound_id': True,
+                'concentration': True
+            }),
+            'Items with Same Treatment': [],
+            'item_ids': []
+        }
+
+        if compound_profile:
+            dic.update({
+                'compound_profile': self.get_compound_profile(matrix_item_compound_post_filters)
+            })
+
+        return dic
+
+    # TODO THESE ARE NOT DRY
+    def get_hyperlinked_model_or_device(self):
+        if not self.organ_model:
+            return '<a target="_blank" href="{0}">{1} (No MPS Model)</a>'.format(self.device.get_absolute_url(), self.device.name)
+        else:
+            return '<a target="_blank" href="{0}">{1}</a>'.format(self.organ_model.get_absolute_url(), self.organ_model.name)
+
+    def get_hyperlinked_study(self):
+        return '<a target="_blank" href="{0}">{1}</a>'.format(self.study.get_absolute_url(), self.study.name)
+
 
 class AssayGroupCompound(AbstractSetupCompound):
     class Meta(object):
