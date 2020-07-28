@@ -95,6 +95,7 @@ from assays.forms import (
     AssayPlateReaderMapDataFileForm,
     AssayPlateReaderMapDataFileBlockFormSetFactory,
     AbstractClassAssayStudyAssay,
+    AssayMatrixItemForm,
 )
 
 from microdevices.models import MicrophysiologyCenter
@@ -1919,121 +1920,164 @@ class AssayMatrixDelete(StudyDeletionMixin, DeleteView):
         return self.object.study.get_absolute_url()
 
 
-# TODO PROBABLY WILL REMOVE EVENTUALLY
-class AssayMatrixItemUpdate(HistoryMixin, StudyGroupMixin, UpdateView):
+# TODO NEEDS TO BE REVISED
+class AssayMatrixItemUpdate(FormHandlerMixin, StudyGroupMixin, UpdateView):
     model = AssayMatrixItem
     template_name = 'assays/assaymatrixitem_add.html'
-    form_class = AssayMatrixItemFullForm
+    # NO, NOT THE FULL FORM
+    # form_class = AssayMatrixItemFullForm
+    form_class = AssayMatrixItemForm
 
     def get_context_data(self, **kwargs):
         context = super(AssayMatrixItemUpdate, self).get_context_data(**kwargs)
 
-        if self.request.POST:
-            context['compound_formset'] = AssaySetupCompoundInlineFormSetFactory(
-                self.request.POST,
-                instance=self.object,
-                # matrix=self.object.matrix
+        # Unfortunate, there ought to be a better way
+        context.update({
+            'cellsamples' : CellSample.objects.all().prefetch_related(
+                'cell_type__organ',
+                'supplier',
+                'cell_subtype__cell_type'
             )
-            context['cell_formset'] = AssaySetupCellInlineFormSetFactory(
-                self.request.POST,
-                instance=self.object,
-                # matrix=self.object
-            )
-            context['setting_formset'] = AssaySetupSettingInlineFormSetFactory(
-                self.request.POST,
-                instance=self.object,
-                # matrix=self.object
-            )
-        else:
-            context['compound_formset'] = AssaySetupCompoundInlineFormSetFactory(
-                instance=self.object,
-                # matrix=self.object.matrix
-            )
-            context['cell_formset'] = AssaySetupCellInlineFormSetFactory(
-                instance=self.object,
-                # matrix=self.object
-            )
-            context['setting_formset'] = AssaySetupSettingInlineFormSetFactory(
-                instance=self.object,
-                # matrix=self.object
-            )
-
-        # cellsamples = get_cell_samples_for_selection(self.request.user)
-
-        # Cellsamples will always be the same
-        context['cellsamples'] = CellSample.objects.all().prefetch_related(
-            'cell_type__organ',
-            'supplier',
-            'cell_subtype__cell_type'
-        )
-
-        context['update'] = True
+        })
 
         return context
 
-    def form_valid(self, form):
-        compound_formset = AssaySetupCompoundInlineFormSetFactory(
-            self.request.POST,
-            instance=self.object,
-            # matrix=self.object.matrix
-        )
-        cell_formset = AssaySetupCellInlineFormSetFactory(
-            self.request.POST,
-            instance=self.object,
-            # matrix=self.object
-        )
-        setting_formset = AssaySetupSettingInlineFormSetFactory(
-            self.request.POST,
-            instance=self.object,
-            # matrix=self.object
-        )
+    # Extra form processing for exclusions
+    # Really, this should be in the form itself?
+    def extra_form_processing(self, form):
+        try:
+            data_point_ids_to_update_raw = json.loads(form.data.get('dynamic_exclusion', '{}'))
+            data_point_ids_to_mark_excluded = [
+                int(id) for id, value in list(data_point_ids_to_update_raw.items()) if value
+            ]
+            data_point_ids_to_mark_included = [
+                int(id) for id, value in list(data_point_ids_to_update_raw.items()) if not value
+            ]
+            if data_point_ids_to_mark_excluded:
+                AssayDataPoint.objects.filter(
+                    matrix_item=form.instance,
+                    id__in=data_point_ids_to_mark_excluded
+                ).update(excluded=True)
+            if data_point_ids_to_mark_included:
+                AssayDataPoint.objects.filter(
+                    matrix_item=form.instance,
+                    id__in=data_point_ids_to_mark_included
+                ).update(excluded=False)
+        # EVIL EXCEPTION PLEASE REVISE
+        except:
+            pass
 
-        all_formsets = [
-            compound_formset,
-            cell_formset,
-            setting_formset,
-        ]
+    # Trash from previous iteration
+    # def get_context_data(self, **kwargs):
+    #     context = super(AssayMatrixItemUpdate, self).get_context_data(**kwargs)
 
-        all_formsets_valid =  True
+    #     # Junk: We don't need any blasted inlines
+    #     # if self.request.POST:
+    #     #     context['compound_formset'] = AssaySetupCompoundInlineFormSetFactory(
+    #     #         self.request.POST,
+    #     #         instance=self.object,
+    #     #         # matrix=self.object.matrix
+    #     #     )
+    #     #     context['cell_formset'] = AssaySetupCellInlineFormSetFactory(
+    #     #         self.request.POST,
+    #     #         instance=self.object,
+    #     #         # matrix=self.object
+    #     #     )
+    #     #     context['setting_formset'] = AssaySetupSettingInlineFormSetFactory(
+    #     #         self.request.POST,
+    #     #         instance=self.object,
+    #     #         # matrix=self.object
+    #     #     )
+    #     # else:
+    #     #     context['compound_formset'] = AssaySetupCompoundInlineFormSetFactory(
+    #     #         instance=self.object,
+    #     #         # matrix=self.object.matrix
+    #     #     )
+    #     #     context['cell_formset'] = AssaySetupCellInlineFormSetFactory(
+    #     #         instance=self.object,
+    #     #         # matrix=self.object
+    #     #     )
+    #     #     context['setting_formset'] = AssaySetupSettingInlineFormSetFactory(
+    #     #         instance=self.object,
+    #     #         # matrix=self.object
+    #     #     )
 
-        for current_formset in all_formsets:
-            if not current_formset.is_valid():
-                all_formsets_valid = False
+    #     # cellsamples = get_cell_samples_for_selection(self.request.user)
 
-        if form.is_valid() and all_formsets_valid:
-            save_forms_with_tracking(self, form, update=True, formset=all_formsets)
+    #     # Cellsamples will always be the same
+    #     # context['cellsamples'] = CellSample.objects.all().prefetch_related(
+    #     #     'cell_type__organ',
+    #     #     'supplier',
+    #     #     'cell_subtype__cell_type'
+    #     # )
 
-            # Sloppy addition of logging
-            change_message = self.construct_change_message(form, [], False)
-            self.log_change(self.request, self.object, change_message)
+    #     context['update'] = True
 
-            try:
-                data_point_ids_to_update_raw = json.loads(form.data.get('dynamic_exclusion', '{}'))
-                data_point_ids_to_mark_excluded = [
-                    int(id) for id, value in list(data_point_ids_to_update_raw.items()) if value
-                ]
-                data_point_ids_to_mark_included = [
-                    int(id) for id, value in list(data_point_ids_to_update_raw.items()) if not value
-                ]
-                if data_point_ids_to_mark_excluded:
-                    AssayDataPoint.objects.filter(
-                        matrix_item=form.instance,
-                        id__in=data_point_ids_to_mark_excluded
-                    ).update(excluded=True)
-                if data_point_ids_to_mark_included:
-                    AssayDataPoint.objects.filter(
-                        matrix_item=form.instance,
-                        id__in=data_point_ids_to_mark_included
-                    ).update(excluded=False)
-            # EVIL EXCEPTION PLEASE REVISE
-            except:
-                pass
+    #     return context
 
-            return redirect(self.object.get_post_submission_url())
-        else:
-            return self.render_to_response(self.get_context_data(
-                form=form
-            ))
+    # def form_valid(self, form):
+    #     compound_formset = AssaySetupCompoundInlineFormSetFactory(
+    #         self.request.POST,
+    #         instance=self.object,
+    #         # matrix=self.object.matrix
+    #     )
+    #     cell_formset = AssaySetupCellInlineFormSetFactory(
+    #         self.request.POST,
+    #         instance=self.object,
+    #         # matrix=self.object
+    #     )
+    #     setting_formset = AssaySetupSettingInlineFormSetFactory(
+    #         self.request.POST,
+    #         instance=self.object,
+    #         # matrix=self.object
+    #     )
+
+    #     all_formsets = [
+    #         compound_formset,
+    #         cell_formset,
+    #         setting_formset,
+    #     ]
+
+    #     all_formsets_valid =  True
+
+    #     for current_formset in all_formsets:
+    #         if not current_formset.is_valid():
+    #             all_formsets_valid = False
+
+    #     if form.is_valid() and all_formsets_valid:
+    #         save_forms_with_tracking(self, form, update=True, formset=all_formsets)
+
+    #         # Sloppy addition of logging
+    #         change_message = self.construct_change_message(form, [], False)
+    #         self.log_change(self.request, self.object, change_message)
+
+    #         try:
+    #             data_point_ids_to_update_raw = json.loads(form.data.get('dynamic_exclusion', '{}'))
+    #             data_point_ids_to_mark_excluded = [
+    #                 int(id) for id, value in list(data_point_ids_to_update_raw.items()) if value
+    #             ]
+    #             data_point_ids_to_mark_included = [
+    #                 int(id) for id, value in list(data_point_ids_to_update_raw.items()) if not value
+    #             ]
+    #             if data_point_ids_to_mark_excluded:
+    #                 AssayDataPoint.objects.filter(
+    #                     matrix_item=form.instance,
+    #                     id__in=data_point_ids_to_mark_excluded
+    #                 ).update(excluded=True)
+    #             if data_point_ids_to_mark_included:
+    #                 AssayDataPoint.objects.filter(
+    #                     matrix_item=form.instance,
+    #                     id__in=data_point_ids_to_mark_included
+    #                 ).update(excluded=False)
+    #         # EVIL EXCEPTION PLEASE REVISE
+    #         except:
+    #             pass
+
+    #         return redirect(self.object.get_post_submission_url())
+    #     else:
+    #         return self.render_to_response(self.get_context_data(
+    #             form=form
+    #         ))
 
 
 class AssayMatrixItemDetail(StudyGroupMixin, DetailView):

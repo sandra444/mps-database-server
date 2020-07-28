@@ -2873,6 +2873,9 @@ class AssayGroup(models.Model):
     def get_hyperlinked_study(self):
         return '<a target="_blank" href="{0}">{1}</a>'.format(self.study.get_absolute_url(), self.study.name)
 
+    def __str__(self):
+        return self.name
+
 
 class AssayGroupCompound(AbstractSetupCompound):
     class Meta(object):

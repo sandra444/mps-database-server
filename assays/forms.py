@@ -3087,13 +3087,46 @@ class AssayMatrixItemFullForm(SignOffMixin, BootstrapForm):
             )
 
 
-class AssayMatrixItemForm(forms.ModelForm):
+# SetupFormsMixin is unfortunate, but expedient
+class AssayMatrixItemForm(SetupFormsMixin, SignOffMixin, BootstrapForm):
+    # CONTRIVED!
+    series_data = forms.CharField(required=False)
+
+    class Meta(object):
+        model = AssayMatrixItem
+        # WE OUGHT TO BE ABLE TO EDIT A SELECT FEW THINGS
+        fields = (
+            'name',
+            'group',
+            # Notes stuff worth keeping??
+            'scientist',
+            'notebook',
+            'notebook_page',
+            'notes'
+        )
+
+    def __init__(self, *args, **kwargs):
+        super(AssayMatrixItemForm, self).__init__(*args, **kwargs)
+
+        # Gee, it might be nice to have a better way to query groups!
+        self.fields['group'].queryset = AssayGroup.objects.filter(
+            # We will always know the study, this can never be an add page
+            study_id=self.instance.study_id,
+            organ_model__device__device_type='chip'
+        ).prefetch_related('organ_model__device')
+
+        # UGLY: DO NOT LIKE THIS
+        # Prepopulate series_data
+        self.fields['series_data'].initial = self.instance.study.get_group_data_string(get_chips=True)
+
+# DEPRECATED JUNK
+class AssayMatrixItemInlineForm(forms.ModelForm):
     class Meta(object):
         model = AssayMatrixItem
         exclude = ('study', 'matrix') + tracking
 
 
-# TODO NEED TO TEST
+# TODO NEED TO TEST (NOTE FROM THE FUTURE: "NOT ANYMORE I DON'T, THIS IS DEPRECATED TRASH!")
 class AssayMatrixItemFormSet(BaseInlineFormSetForcedUniqueness):
     custom_fields = (
         'device',
@@ -3161,7 +3194,7 @@ AssayMatrixItemFormSetFactory = inlineformset_factory(
     AssayMatrix,
     AssayMatrixItem,
     formset=AssayMatrixItemFormSet,
-    form=AssayMatrixItemForm,
+    form=AssayMatrixItemInlineForm,
     extra=1,
     exclude=('study',) + tracking
 )
