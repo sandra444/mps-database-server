@@ -46,6 +46,7 @@ from assays.models import (
     assay_plate_reader_map_info_plate_size_choices,
     assay_plate_reader_map_info_plate_size_choices_list,
     upload_file_location,
+    AssayGroup,
 )
 from assays.forms import (
     AssayStudyConfigurationForm,
@@ -942,38 +943,57 @@ class AssayStudyIndex(StudyViewerMixin, DetailView):
         self.study = super(AssayStudyIndex, self).get_object()
         return self.study
 
+    # NOTE: bracket assignations are against PEP, one should use .update
     def get_context_data(self, **kwargs):
         context = super(AssayStudyIndex, self).get_context_data(**kwargs)
 
-        matrices = AssayMatrix.objects.filter(
-            study_id=self.object.id
-        ).prefetch_related(
-            'assaymatrixitem_set',
-            'created_by',
-        )
+        # matrices = AssayMatrix.objects.filter(
+        #     study_id=self.object.id
+        # ).prefetch_related(
+        #     'assaymatrixitem_set',
+        #     'created_by',
+        # )
 
         items = AssayMatrixItem.objects.filter(
-            matrix_id__in=matrices
+            # matrix_id__in=matrices
+            study_id=self.object.id
         ).prefetch_related(
+            # Implicit in group
             'device',
             'created_by',
-            'matrix',
+            # 'matrix',
+            # Implicit in group
             'organ_model',
-            'assaysetupcompound_set__compound_instance__compound',
-            'assaysetupcompound_set__concentration_unit',
-            'assaysetupcompound_set__addition_location',
-            'assaysetupcell_set__cell_sample__cell_type__organ',
-            'assaysetupcell_set__cell_sample__cell_subtype',
-            'assaysetupcell_set__cell_sample__supplier',
-            'assaysetupcell_set__addition_location',
-            'assaysetupcell_set__density_unit',
-            'assaysetupsetting_set__setting',
-            'assaysetupsetting_set__unit',
-            'assaysetupsetting_set__addition_location',
+
+            # Stupid way to acquire group values, but expedient I guess
+
+            'group__assaygroupcompound_set__compound_instance__compound',
+            'group__assaygroupcompound_set__concentration_unit',
+            'group__assaygroupcompound_set__addition_location',
+            'group__assaygroupcell_set__cell_sample__cell_type__organ',
+            'group__assaygroupcell_set__cell_sample__cell_subtype',
+            'group__assaygroupcell_set__cell_sample__supplier',
+            'group__assaygroupcell_set__addition_location',
+            'group__assaygroupcell_set__density_unit',
+            'group__assaygroupsetting_set__setting',
+            'group__assaygroupsetting_set__unit',
+            'group__assaygroupsetting_set__addition_location',
+
+            # 'assaysetupcompound_set__compound_instance__compound',
+            # 'assaysetupcompound_set__concentration_unit',
+            # 'assaysetupcompound_set__addition_location',
+            # 'assaysetupcell_set__cell_sample__cell_type__organ',
+            # 'assaysetupcell_set__cell_sample__cell_subtype',
+            # 'assaysetupcell_set__cell_sample__supplier',
+            # 'assaysetupcell_set__addition_location',
+            # 'assaysetupcell_set__density_unit',
+            # 'assaysetupsetting_set__setting',
+            # 'assaysetupsetting_set__unit',
+            # 'assaysetupsetting_set__addition_location',
         )
 
         # Cellsamples will always be the same
-        context['matrices'] = matrices
+        # context['matrices'] = matrices
         context['items'] = items
 
         get_user_status_context(self, context)
@@ -988,6 +1008,39 @@ class AssayStudyIndex(StudyViewerMixin, DetailView):
         ).count() == 0
 
         context['detail'] = True
+
+        # We will get the number of chips, plates, and groups of either categories
+        chip_groups = AssayGroup.objects.filter(
+            study_id=self.object.id,
+            # Messy way to ascertain plate v chip
+            # We might benefit from a field in this regard?
+            # Perhaps we ought to redundantly link the device afterall?
+            organ_model__device__device_type='chip'
+        ).prefetch_related('organ_model__device')
+        plate_groups = AssayGroup.objects.filter(
+            study_id=self.object.id,
+            # See above
+            organ_model__device__device_type='plate'
+        ).prefetch_related('organ_model__device')
+
+        # We could indicate something like the number of chips
+        number_of_chips = AssayMatrixItem.objects.filter(
+            # Theoretically, chips bound to said group are in the study
+            group_id__in=chip_groups
+        ).count()
+
+        # We assume that matrices with devices are plates
+        plates = AssayMatrix.objects.filter(
+            device__isnull=False,
+            study_id=self.object.id
+        )
+
+        context.update({
+            'chip_groups': chip_groups,
+            'plate_groups': plate_groups,
+            'number_of_chips': number_of_chips,
+            'plates': plates,
+        })
 
         return context
 
