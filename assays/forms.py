@@ -3916,8 +3916,7 @@ class AssayOmicDataFileUploadForm(BootstrapForm):
 
     class Meta(object):
         model = AssayOmicDataFileUpload
-        exclude = tracking + ('data_type', 'pipeline', 'study')
-
+        exclude = tracking + ('study',)
 
     def __init__(self, *args, **kwargs):
         self.study = kwargs.pop('study', None)
@@ -3932,28 +3931,51 @@ class AssayOmicDataFileUploadForm(BootstrapForm):
         filename_only = os.path.basename(str(self.instance.omic_data_file))
         self.fields['filename_only'].initial = filename_only
 
-        if self.instance.time:
-            time_instance = self.instance.time
-            times = get_split_times(time_instance)
-            self.fields['time_day'].initial = times.get("day")
-            self.fields['time_hour'].initial = times.get("hour")
-            self.fields['time_minute'].initial = times.get("minute")
+        if self.instance.time_1:
+            time_1_instance = self.instance.time_1
+            times_1 = get_split_times(time_1_instance)
+            self.fields['time_1_day'].initial = times_1.get("day")
+            self.fields['time_1_hour'].initial = times_1.get("hour")
+            self.fields['time_1_minute'].initial = times_1.get("minute")
 
-    # when do time_2, will need to add the _2 to all the places, include the method call, do not forget
-    time_day = forms.DecimalField(
+        if self.instance.time_2:
+            time_2_instance = self.instance.time_2
+            times_2 = get_split_times(time_2_instance)
+            self.fields['time_2_day'].initial = times_2.get("day")
+            self.fields['time_2_hour'].initial = times_2.get("hour")
+            self.fields['time_2_minute'].initial = times_2.get("minute")
+
+    time_1_day = forms.DecimalField(
         required=False,
         label='Day'
     )
-    time_hour = forms.DecimalField(
+    time_1_hour = forms.DecimalField(
         required=False,
         label='Hour'
     )
-    time_minute = forms.DecimalField(
+    time_1_minute = forms.DecimalField(
+        required=False,
+        label='Minute'
+    )
+
+    time_2_day = forms.DecimalField(
+        required=False,
+        label='Day'
+    )
+    time_2_hour = forms.DecimalField(
+        required=False,
+        label='Hour'
+    )
+    time_2_minute = forms.DecimalField(
         required=False,
         label='Minute'
     )
     filename_only = forms.CharField(
         required=False,
+    )
+    file_was_added_or_changed = forms.BooleanField(
+        required=False,
+        initial=False
     )
 
     def clean(self):
@@ -3970,15 +3992,31 @@ class AssayOmicDataFileUploadForm(BootstrapForm):
 
     def process_file(self, save=False, calledme="c"):
         data = self.cleaned_data
-        day = data.get('time_day', '')
-        hour = data.get('time_hour', '')
-        minute = data.get('time_minute', '')
-        data['time'] = 0;
-
+        data['time_1'] = 0;
         for time_unit, conversion in list(TIME_CONVERSIONS.items()):
-            data.update({
-                'time': data.get('time') + data.get('time_' + time_unit, 0) * conversion,
-            })
+            if data.get('time_1_' + time_unit) is not None:
+                inttime = (data.get('time_1_' + time_unit))
+                data.update({
+                    'time_1': data.get('time_1') + inttime * conversion,
+                })
+
+        data['time_2'] = 0;
+        for time_unit, conversion in list(TIME_CONVERSIONS.items()):
+            if data.get('time_2_' + time_unit) is not None:
+                inttime = data.get('time_2_' + time_unit)
+                data.update({
+                    'time_2': data.get('time_2') + inttime * conversion,
+                })
+
+        # when processing data, if these, then have to remove old and parse new data
+        # if a new file given
+        # if file is required, clear_file is not an option
+        # clear_file = data.get('omic_data_file-clear', 'null')
+
+        change_file = data.get('file_was_added_or_changed', '')
+        print("aa change_file ", change_file)
+        if change_file == 'True' or change_file == change_file == 'true' or change_file == True:
+            print("cc change_file ", change_file)
         return data
 
 
