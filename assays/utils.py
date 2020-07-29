@@ -3075,6 +3075,7 @@ def pk_clearance_results(pk_type,
 
     if (np.isnan(cl_ml_min)):
         return {'error': 'Clearance was Null. Please select different times and try again.'}
+
     return {"clearance": cl_ml_min, "clearance_data": pk_steady_state_data.to_dict('split')}
 
 

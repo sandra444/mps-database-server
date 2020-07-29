@@ -4858,6 +4858,7 @@ def fetch_pbpk_intrinsic_clearance_results(request):
         flow_rate = None
     cell_name = request.POST.get('cell_name', '').replace(u'\xa0', u' ')
     raw_compound_pk_data = json.loads(request.POST.get('compound_pk_data', '[[]]'))
+
     final_compound_pk_data = []
     cell_index = raw_compound_pk_data[0].index(cell_name)
     try:
@@ -4866,9 +4867,10 @@ def fetch_pbpk_intrinsic_clearance_results(request):
         no_cell_index = -1
 
     for line in raw_compound_pk_data[1:]:
-        final_compound_pk_data.append([float(line[0]), cell_name, float(line[cell_index])])
-        if no_cell_index > 0:
-            final_compound_pk_data.append([float(line[0]), "-No Cell Samples-", float(line[no_cell_index])])
+        if line[cell_index] is not None:
+            final_compound_pk_data.append([float(line[0]), cell_name, float(line[cell_index])])
+            if no_cell_index > 0:
+                final_compound_pk_data.append([float(line[0]), "-No Cell Samples-", float(line[no_cell_index])])
 
     clearance_results = pk_clearance_results(
         request.POST.get('pk_type', ''),
