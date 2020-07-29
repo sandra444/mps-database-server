@@ -4857,7 +4857,7 @@ def fetch_pbpk_intrinsic_clearance_results(request):
     except ValueError:
         flow_rate = None
     cell_name = request.POST.get('cell_name', '').replace(u'\xa0', u' ')
-    raw_compound_pk_data = eval(request.POST.get('compound_pk_data', ''))
+    raw_compound_pk_data = json.loads(request.POST.get('compound_pk_data', '[[]]'))
     final_compound_pk_data = []
     cell_index = raw_compound_pk_data[0].index(cell_name)
     try:
