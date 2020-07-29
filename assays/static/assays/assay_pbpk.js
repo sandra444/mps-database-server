@@ -269,6 +269,11 @@ $(document).ready(function () {
             document.getElementById("spinner")
         );
 
+        // Hide any lingering junk
+        $('#pbpk-information').hide();
+        // Manually clear clearance among other things (HAR HAR *HAR*)
+        clear_pbpk();
+
         if (group_table) {
             group_table.clear();
             group_table.destroy();
@@ -404,6 +409,9 @@ $(document).ready(function () {
         $('#pk-clearance-graph').empty();
         $('#continuous-infusion-table').empty();
         $("#toggle-continuous-infusion-table").hide();
+
+        // Manually clear clearance (HAR HAR *HAR*)
+        $('#input-icl').val('');
     }
 
     function generate_pbpk(pk_type) {
