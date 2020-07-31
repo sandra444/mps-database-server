@@ -617,8 +617,11 @@ $(document).ready(function () {
         var number_of_items_input = $('#id_number_of_items')
                 .clone()
                 .removeAttr('id')
-                .addClass('number-of-items')
+                .addClass('number-of-items required')
                 .attr('data-row', row_index);
+
+        // SLOPPY: MAKE REQUIRED FOR NOW
+        number_of_items_input.attr('required', 'required')
 
         new_row.append(
             $('<td>').append(number_of_items_input)
