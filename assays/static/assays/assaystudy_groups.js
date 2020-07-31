@@ -729,6 +729,11 @@ $(document).ready(function () {
             new_row.find('.number-of-items').trigger('change');
         }
 
+        // Srikeout if delete
+        if (setup_to_use.deleted) {
+            new_row.addClass('strikethrough');
+        }
+
         replace_series_data();
 
         // Add group to selectors
@@ -807,7 +812,9 @@ $(document).ready(function () {
         // Set the number of items to zero and trigger it
         // We *PROBABLY* can get away with this
         // Cascade will kill chips when it gets deleted anyway
-        $('.number-of-items[data-row="' + $(this).attr('data-row') + '"]').val(0).trigger('change');
+
+        // Well, we don't really want this, it is hard to undo...
+        // $('.number-of-items[data-row="' + $(this).attr('data-row') + '"]').val(0).trigger('change');
 
         // TODO: WE NEED TO DEAL WITH THE CONSEQUENCES OF DELETION!
         // Iterate over matrix_item and reset the current series
@@ -840,6 +847,18 @@ $(document).ready(function () {
         }
         else {
             // TODO STRIKE IT OUT!
+            // Uh, why use data-series as index + 1?
+            var current_row = $('tr[data-series="' + (current_row_index + 1) + '"]');
+
+            // Can't strikethrough here, is overwritten after rebuild
+            // Un-delete
+            if (series_data[current_row_index].deleted) {
+                delete series_data[current_row_index].deleted;
+            }
+            // Delete
+            else {
+                series_data[current_row_index].deleted = true;
+            }
         }
 
         rebuild_table();
