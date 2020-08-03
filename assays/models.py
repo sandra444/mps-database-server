@@ -4164,6 +4164,10 @@ class AssayOmicDataFileUpload(LockableModel):
 class AssayOmicDataPoint(models.Model):
     """Individual points of omic data"""
 
+    class Meta(object):
+        verbose_name = 'Assay Omic Data Point'
+        verbose_name_plural = 'Assay Omic Data Points'
+
     # this will be the study in which the user was sitting when they uploaded the data file
     # in theory, it could be study_1 or study_2
     study = models.ForeignKey(
@@ -4202,6 +4206,9 @@ class AssayOmicDataPoint(models.Model):
         null=True,
         verbose_name='Computed Value'
     )
+
+    def __str__(self):
+        return '{0}'.format(self.id)
 
 ##### End Assay Omic Section - Phase 1 design
 

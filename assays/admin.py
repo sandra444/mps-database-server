@@ -56,6 +56,7 @@ from assays.models import (
     AssayPlateReaderMapItemValue,
     AssayOmicDataGroup,
     AssayOmicDataFileUpload,
+    AssayOmicDataPoint,
 )
 from microdevices.models import MicrophysiologyCenter
 # from compounds.models import Compound
@@ -1323,4 +1324,9 @@ class AssayOmicDataFileUploadAdmin(ImportExportModelAdmin):
 
 admin.site.register(AssayOmicDataFileUpload, AssayOmicDataFileUploadAdmin)
 
+class AssayOmicDataPointAdmin(ImportExportModelAdmin):
+    model = AssayOmicDataPoint
+    list_display = ('study', 'omic_data_file', 'name', 'target', 'value')
+    search_fields = ('name', 'target', 'study', 'omic_data_file' )
 
+admin.site.register(AssayOmicDataPoint, AssayOmicDataPointAdmin)

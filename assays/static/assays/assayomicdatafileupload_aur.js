@@ -1,4 +1,6 @@
 $(document).ready(function () {
+    //
+    // $('.has-popover').popover({'trigger':'hover'});
 
     let global_check_load = $("#check_load").html().trim();
     if (global_check_load === 'review') {
