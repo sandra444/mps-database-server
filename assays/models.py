@@ -1741,7 +1741,8 @@ class AssayStudy(FlaggableModel):
 
     use_in_calculations = models.BooleanField(
         default=False,
-        verbose_name='Use in Calculations'
+        help_text='Check this if this data should be included in Compound Reports and other data aggregations.',
+        verbose_name='Use Data in Compound Report'
     )
 
     # Access groups
