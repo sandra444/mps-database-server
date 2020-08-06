@@ -4457,3 +4457,9 @@ class AssayPlateReaderMapDataFileUpdate(StudyGroupMixin, UpdateView):
 
 #####
 # END Plate reader file list, add, update, view and HOLD section
+
+
+class AssayStudyOmics(StudyViewerMixin, DetailView):
+    """Displays the omics interface for the current study"""
+    model = AssayStudy
+    template_name = 'assays/assaystudy_omics.html'

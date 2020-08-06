@@ -6369,6 +6369,20 @@ def fetch_data_processing_for_plate_map_integration(request):
         })
     return HttpResponse(json.dumps(data), content_type="application/json")
 
+
+def fetch_omics_data(request):
+    data = {}
+
+    # To be replaced with access to Sandra's omics schema
+    with open("data.csv") as datafile:
+        data['datafile'] = list(csv.reader(datafile))
+
+    return HttpResponse(
+        json.dumps(data),
+        content_type='application/json'
+    )
+
+
 # TODO TODO TODO
 switch = {
     'fetch_center_id': {'call': fetch_center_id},
@@ -6481,6 +6495,9 @@ switch = {
     },
     'fetch_data_processing_for_plate_map_integration': {
         'call': fetch_data_processing_for_plate_map_integration
+    },
+    'fetch_omics_data': {
+        'call': fetch_omics_data
     },
 }
 
