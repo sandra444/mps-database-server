@@ -1814,6 +1814,7 @@ def fetch_assay_study_reproducibility(request):
 
     repro_data.append([
         'Study ID',
+        # Contrived name
         'Chip ID',
         'Time',
         'Value',
@@ -3258,6 +3259,7 @@ def get_inter_study_reproducibility(
 
     inter_data.append([
         'Study ID',
+        # Contrived name
         'Chip ID',
         'Time',
         'Value',
@@ -4105,6 +4107,7 @@ def fetch_power_analysis_group_table(request):
         'Group',
         'Time',
         'Compound Treatment(s)',
+        # Contrived name
         'Chip ID',
         'Value'
     ])
@@ -4562,7 +4565,7 @@ def get_pbpk_info(data_points, matrix_items):
         matrix_item.id: '{} ({})'.format(matrix_item.name, matrix_item.matrix.name) for matrix_item in matrix_items
     }
 
-    inter_data = []
+    # inter_data = []
 
     data_point_treatment_groups = {}
     treatment_group_table = {}
@@ -4693,17 +4696,19 @@ def get_pbpk_info(data_points, matrix_items):
             point.matrix_item.organ_model.name: True
         })
 
-    inter_data.append([
-        'Study ID',
-        'Chip ID',
-        'Time',
-        'Value',
-        'MPS User Group',
-        # NAME THIS SOMETHING ELSE
-        # THIS IS A DATA GROUP, NOT A TREATMENT GROUP
-        # TREATMENT GROUPS = ITEMS, DATA GROUP = DATA POINTS
-        'Treatment Group'
-    ])
+    # Why is this here?
+    # inter_data.append([
+    #     'Study ID',
+    #     # Contrived name
+    #     'Chip ID',
+    #     'Time',
+    #     'Value',
+    #     'MPS User Group',
+    #     # NAME THIS SOMETHING ELSE
+    #     # THIS IS A DATA GROUP, NOT A TREATMENT GROUP
+    #     # TREATMENT GROUPS = ITEMS, DATA GROUP = DATA POINTS
+    #     'Treatment Group'
+    # ])
 
     # GET RAW DATAPOINTS AS LEGEND -> TIME -> LIST OF VALUES
     # AFTER THAN REPOSITION THEM FOR CHARTING AND AVERAGE ONE OF THE SETS (KEEP RAW THOUGH)
@@ -4711,15 +4716,15 @@ def get_pbpk_info(data_points, matrix_items):
     final_chart_data = {}
 
     for point in data_points:
-        inter_data.append([
-            point.study.name,
-            point.matrix_item.name,
-            point.time,
-            # NOTE USE OF STANDARD VALUE RATHER THAN VALUE
-            point.standard_value,
-            point.study.group.name,
-            point.data_group
-        ])
+        # inter_data.append([
+        #     point.study.name,
+        #     point.matrix_item.name,
+        #     point.time,
+        #     # NOTE USE OF STANDARD VALUE RATHER THAN VALUE
+        #     point.standard_value,
+        #     point.study.group.name,
+        #     point.data_group
+        # ])
 
         # This should probably be cells later
         # legend = point.study.name
