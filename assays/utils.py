@@ -6489,14 +6489,14 @@ def omic_data_file_process_data(save, study_id, omic_data_file_id, data_file, fi
     Assay Omics Data File Add or Change the file (utility).
     """
 
-    error_message = ""
+    error_message = ''
     continue_outer_if_true = True
     # if there is more than one Excel sheet, will need a loop, check for number of sheets.
     looper = 1
     sheet_index = 0
     workbook = None
     # construct here so can use this name anywhere
-    df = pd.DataFrame(columns=["one"])
+    df = pd.DataFrame(columns=['one'])
     # if there are multiple sheets, they can all be added to one bulk file
     # that means only need one list_of_instances for all the sheets
     list_of_instances = []
@@ -6505,27 +6505,32 @@ def omic_data_file_process_data(save, study_id, omic_data_file_id, data_file, fi
     df_column_headers_stripped = []
     target_text_lower_list = []
     target_pk_list = []
+
+    target_to_pk_dict = {target.name: target.id for target in AssayTarget.objects.all()}
     
     # will need to handle the targets differently for the different import formats
     # get the list of target pks needed (may only need one, that is okay)
     if data_type == 'log2fc' and pipeline == 'deseq2':
-        targets_and_pks = omic_deseq2_log2fc_upload_get_file_headers_and_targets()
+        targets_and_pks = omic_deseq2_log2fc_upload_get_file_headers_and_targets(target_to_pk_dict)
         target_text_lower_list = targets_and_pks[0]
         target_pk_list = targets_and_pks[1]
     elif data_type == 'normcounts':
         target_text = 'Normalized Count'        
-        target_pk_single = sandrasGeneralFindATargetPkByName(target_text)
+        target_pk_single = target_to_pk_dict.get(target_text, 1)
         target_text_lower_list = [target_text.lower()]
         target_pk_list = [target_pk_single]
     elif data_type == 'rawcounts':
         target_text = 'Raw Count'
-        target_pk_single = sandrasGeneralFindATargetPkByName(target_text)
+        target_pk_single = target_to_pk_dict.get(target_text, 1)
         target_text_lower_list = [target_text.lower()]
         target_pk_list = [target_pk_single]
     else:
-        error_message = error_message + "No option for this combination of data type and pipeline has been programmed. Contact the MPS Database Admins."
+        error_message = error_message + 'No option for this combination of data type and pipeline has been programmed. Contact the MPS Database Admins.'
         raise forms.ValidationError(error_message)
         continue_outer_if_true = False
+
+    # print(target_text_lower_list)
+    # print(target_pk_list)
 
     if continue_outer_if_true:
         # get the number of sheets need to loop through and check to see if valid
@@ -6536,17 +6541,17 @@ def omic_data_file_process_data(save, study_id, omic_data_file_id, data_file, fi
                 looper = len(workbook.sheet_names())
             except:
                 continue_outer_if_true = False
-                error_message = error_message + "Has and Excel extension but file could not be opened."
+                error_message = error_message + 'Has and Excel extension but file could not be opened.'
                 raise forms.ValidationError(error_message)
 
     if continue_outer_if_true:
         # each sheet will be checked for data
         # not all sheets need to be valid, a sheet can be skipped and others imported
-        while sheet_index < looper:
 
+        while sheet_index < looper:
             # Guts of opening the file or sheet and find and return the dataframe
             # same for all data import types - no splitting by data type is needed
-            sub_find_dataframe = sandrasGeneralDataFileToDataFrame(data_file, file_extension, workbook, sheet_index)
+            sub_find_dataframe = data_file_to_data_frame(data_file, file_extension, workbook, sheet_index)
             continue_this_sheet_if_true = sub_find_dataframe[0]
             error_message = error_message + sub_find_dataframe[1]
             df = sub_find_dataframe[2]
@@ -6614,14 +6619,14 @@ def omic_data_file_process_data(save, study_id, omic_data_file_id, data_file, fi
             sheet_index = sheet_index + 1
 
     if instance_counter == 0:
-        error_message = error_message + "There were no records in the file to upload. "
+        error_message = error_message + 'There were no records in the file to upload. '
         raise forms.ValidationError(error_message)
         continue_outer_if_true = False
 
     if called_from == 'save' and continue_outer_if_true:
         omic_upload_remove_and_add(omic_data_file_id, list_of_instances, error_message)
 
-    return "done"
+    return 'done'
 
 
 def omic_upload_remove_and_add(data_file_pk, list_of_instances, error_message):
@@ -6639,20 +6644,20 @@ def omic_upload_remove_and_add(data_file_pk, list_of_instances, error_message):
         AssayOmicDataPoint.objects.bulk_create(list_of_instances)
     else:
         # This should not happen - should be screened out in the clean - here just in case
-        error_message = error_message + " During the save, found no records in the file to upload. Should have received and error message during data cleaning. "
+        error_message = error_message + ' During the save, found no records in the file to upload. Should have received and error message during data cleaning. '
         raise forms.ValidationError(error_message)
 
 
-def sandrasGeneralDataFileToDataFrame(data_file, file_extension, workbook=None, sheet_index=None):
+def data_file_to_data_frame(data_file, file_extension, workbook=None, sheet_index=None):
     # should be able to use this for all data to data frame
 
     # being called for each text file or each workbook sheet
     # make a default data frame
-    df = pd.DataFrame(columns=["one"])
+    df = pd.DataFrame(columns=['one'])
 
     try_again = False
     true_if_dataframe_found = True
-    error_message = ""
+    error_message = ''
 
     if file_extension == '.csv':
         try:
@@ -6677,13 +6682,13 @@ def sandrasGeneralDataFileToDataFrame(data_file, file_extension, workbook=None, 
         try:
             df = pd.read_csv(data_file, header=0)
         except:
-            error_message = "ERROR - file was not in a recognized format."
+            error_message = 'ERROR - file was not in a recognized format.'
             true_if_dataframe_found = False
 
     return [true_if_dataframe_found, error_message, df]
 
 
-def omic_deseq2_log2fc_upload_get_file_headers_and_targets():
+def omic_deseq2_log2fc_upload_get_file_headers_and_targets(target_to_pk_dict):
     # in forms.py, this finds the key for the value provided as thisHeader
     # def find_a_key_by_value_in_dictionary(this_dict, this_header):
 
@@ -6706,26 +6711,18 @@ def omic_deseq2_log2fc_upload_get_file_headers_and_targets():
         omic_deseq2_headers.append(ke)
         omic_deseq2_headers_lower.append(ke.lower())
         omic_deseq2_targets.append(va)
-    for t in omic_deseq2_targets:
-        target_pk = sandrasGeneralFindATargetPkByName(t)
+
+    for name in omic_deseq2_targets:
+        target_pk = target_to_pk_dict.get(name, 1)
         omic_deseq2_targets_pk.append(target_pk)
     return [omic_deseq2_headers_lower, omic_deseq2_targets_pk]
 
 
-def sandrasGeneralFindATargetPkByName(name):
-    # default value for missing targets is 1
-    pk = 1
-    obj = AssayTarget.objects.filter(name=name).first()
-    if obj is not None:
-        pk = obj.id
-    return pk
-
-
 def omic_deseq2_log2fc_qc_the_fold_change_file_level(df, target_text_lower_list):
-    error_message = ""
+    error_message = ''
     continue_this_sheet_if_true = True
     # may need other options here (eg probe_id, refseq name, etc), but these will do for now
-    gene_id_field_name_if_app = ""
+    gene_id_field_name_if_app = ''
     if 'gene' in df.columns:
         gene_id_field_name_if_app = 'gene'
     elif 'name' in df.columns:
@@ -6739,34 +6736,27 @@ def omic_deseq2_log2fc_qc_the_fold_change_file_level(df, target_text_lower_list)
             pass
         else:
             continue_this_sheet_if_true = False
-            error_message = error_message + " Required field " + each + " is missing. "
+            error_message = error_message + ' Required field ' + each + ' is missing. '
     return [continue_this_sheet_if_true, error_message, gene_id_field_name_if_app]
 
 
 def omic_count_qc_the_count_file_level(df, study_id):
-    error_message = ""
+    error_message = ''
     continue_this_sheet_if_true = True
-    # make sure all the required target_text_lower_list are in this file
+
+    matrix_item_name_to_pk = {matrix_item.name: matrix_item.id for matrix_item in AssayMatrixItem.objects.filter(study_id=study_id)}
+
     matrix_item_pk_list = []
     i = 0
     for each in df.columns:
-        pk = sandrasGeneralFindAMatrixItemPkByName(each, study_id)
+        pk = matrix_item_name_to_pk.get(each, 0)
         matrix_item_pk_list.append(pk)
         if pk == 0 and i > 0:
             # build the error string just in case NONE of the fields are valid, but otherwise, just ignore them
             # continue_this_sheet_if_true = False
-            error_message = error_message + " Chip/Well Name " + each + " not found in this study. "
+            error_message = error_message + ' Chip/Well Name ' + each + ' not found in this study. '
         i = i + 1
     return [continue_this_sheet_if_true, error_message, matrix_item_pk_list]
-
-
-def sandrasGeneralFindAMatrixItemPkByName(name, study_id):
-    # default value for missing is 0
-    pk = 0
-    obj = AssayMatrixItem.objects.filter(study_id=study_id).filter(name=name).first()
-    if obj is not None:
-        pk = obj.id
-    return pk
 
 
 def omic_deseq2_log2fc_data_to_list_of_instances(
@@ -6775,18 +6765,17 @@ def omic_deseq2_log2fc_data_to_list_of_instances(
     target_text_lower_list, called_from, gene_id_field_name_if_app
     ):
 
-    error_message = ""
+    error_message = ''
     continue_this_sheet_if_true = True
 
     for index, row in df.iterrows():
-        # each row should have the 5 target columns - 0 to 5
         i = 0
-        while i < 6:
+        while i < len(target_text_lower_list):
             name = row[gene_id_field_name_if_app]
             target = int(target_pk_list[i])
             value = row[target_text_lower_list[i]]
 
-            # print("index ",index,"  instance_counter ", instance_counter ,"  i ",i,"  name ",name,"  target ",target, "  value ",value)
+            # print('index ',index,'  instance_counter ', instance_counter ,'  i ',i,'  name ',name,'  target ',target, '  value ',value)
 
             # creating an instance causes an error in the clean since there is no pk for this file on the add form
             # but we want the rest to go through the save AND we want to make sure instances are being counted in the clean
@@ -6812,11 +6801,11 @@ def omic_counts_data_to_list_of_instances(
     matrix_item_pk_list, called_from, gene_id_field_name_if_app
     ):
 
-    error_message = ""
+    error_message = ''
     continue_this_sheet_if_true = True
 
     if len(matrix_item_pk_list) != len(df.columns):
-        error_message = "There is a problem with finding the list of matrix items. Notify the MPS Database Admins."
+        error_message = 'There is a problem with finding the list of matrix items. Notify the MPS Database Admins.'
         continue_this_sheet_if_true = False
         print(error_message)
     else:
@@ -6834,15 +6823,15 @@ def omic_counts_data_to_list_of_instances(
             # if there are additional header rows, deal with them here ....
 
             name = row[gene_id_field_name_if_app]
-            print("name for this row ",name)
+            print('name for this row ',name)
             c = 0
 
             while c < len(data_cols):
-                print("c ", c, " data_cols[c] ", data_cols[c])
+                print('c ', c, ' data_cols[c] ', data_cols[c])
                 value = row[data_cols[c]]
                 # note the +1 because the first one was not popped off as the data_cols was
                 this_matrix_item = int(matrix_item_pk_list[c + 1])
-                # print("index ",index,"  instance_counter ", instance_counter ,"  i ",i,"  name ",name,"  target ",target, "  value ",value)
+                # print('index ',index,'  instance_counter ', instance_counter ,'  i ',i,'  name ',name,'  target ',target, '  value ',value)
 
                 # creating an instance causes an error in the clean since there is no pk for this file on the add form
                 # but we want the rest to go through the save AND we want to make sure instances are being counted in the clean

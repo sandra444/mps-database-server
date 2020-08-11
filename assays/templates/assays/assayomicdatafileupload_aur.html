@@ -11,9 +11,9 @@
     <li><a href="/assays/assaystudy/">Studies</a>
     <li><a href="{{ form.instance.study.get_absolute_url }}">{{ form.instance.study }}</a></li>
     {% if object %}
-        <li><a href="{% url 'assayomicdatafileupload-index' object.study.id %}">Assay Omic Data Files</a>
+        <li><a href="{% url "assayomicdatafileupload-index" object.study.id %}">Assay Omic Data Files</a>
     {% else %}
-        <li><a href="{% url 'assayomicdatafileupload-index' form.instance.study_id %}">Assay Omic Data Files</a>
+        <li><a href="{% url "assayomicdatafileupload-index" form.instance.study_id %}">Assay Omic Data Files</a>
     {% endif %}
     <li class="active">
         {% if object %}
@@ -54,7 +54,7 @@
                 {% include "submit.html" with flag="y" creator=object.created_by.id %}
             {% endif %}
 
-            {% include 'errors.html' %}
+            {% include "errors.html" %}
             {% if form.errors %}
                 {% for field in form %}
                     {% if field.errors %}
@@ -112,7 +112,7 @@
                             </div>
                             <button type="button" class="btn" id="fileFormatDetailsButton">File Format Details</button>
                             <br>
-                            <div id="omic_file_format_details_section" class="toggle-display-none">
+                            <div id="omic_file_format_details_section">
                                 <div><p id="omic_file_format_deseq2_log2fc_tooltip"></p>
                                     <label for="omic_file_format_deseq2_log2fc_tooltip">--  DESeq2 Log 2 Fold Change Files &nbsp;</label>
                                 </div>
@@ -141,15 +141,15 @@
                 {% endif %}
 
                 <br>
-                {% include 'generic_field.html' with field=form.description %}
+                {% include "generic_field.html" with field=form.description %}
 
-                {% include 'generic_field.html' with field=form.method %}
+                {% include "generic_field.html" with field=form.method %}
 
-                {% include 'generic_field.html' with field=form.name_reference %}
+                {% include "generic_field.html" with field=form.name_reference %}
 
-                {% include 'generic_field.html' with field=form.data_type %}
+                {% include "generic_field.html" with field=form.data_type %}
 
-                {% include 'generic_field.html' with field=form.pipeline %}
+                {% include "generic_field.html" with field=form.pipeline %}
 
                 {# groups #}
                 <br>
@@ -165,7 +165,7 @@
                 </div>
 
                 <div class="one-group">
-                    {% include 'generic_field.html' with field=form.group_1 %}
+                    {% include "generic_field.html" with field=form.group_1 %}
                     <div class="row">
                         <div class="col-md-2">
                         </div>
@@ -181,7 +181,7 @@
                                     <th class="bg-success">Minute</th>
                                     <td class="bg-warning">
     {#                                    {% if update or add %}#}
-                                            {% include 'generic_popup_link.html' with field=form.location_1 %}
+                                            {% include "generic_popup_link.html" with field=form.location_1 %}
     {#                                    {% endif %}#}
                                     </td>
                                 </tr>
@@ -208,7 +208,7 @@
                         </div>
                     </div>
 
-                    {% include 'generic_field.html' with field=form.group_2 %}
+                    {% include "generic_field.html" with field=form.group_2 %}
 
                     <div class="row">
                         <div class="col-md-2">
@@ -225,7 +225,7 @@
                                     <th class="bg-success">Minute</th>
                                     <td class="bg-warning">
 {#                                        {% if update or add %}#}
-                                            {% include 'generic_popup_link.html' with field=form.location_2 %}
+                                            {% include "generic_popup_link.html" with field=form.location_2 %}
 {#                                        {% endif %}#}
                                     </td>
                                 </tr>
