@@ -3951,10 +3951,17 @@ class AssayOmicDataFileUploadForm(BootstrapForm):
         data_groups_filtered = AssayOmicDataGroup.objects.filter(
             study_id=self.instance.study.id
         )
+        # find the pk for the method tempo-seq
+        obj = AssayMethod.objects.filter(name='TempO-Seq').first()
+        if obj is not None:
+            method_pk = obj.id
+            self.fields['method'].initial = method_pk
 
         # HANDY to limit options in a dropdown on a model field in a form
         self.fields['group_1'].queryset = data_groups_filtered
         self.fields['group_2'].queryset = data_groups_filtered
+
+        self.fields['group_2'].widget.attrs['class'] += ' required'
 
         if self.instance.time_1:
             time_1_instance = self.instance.time_1
@@ -4040,18 +4047,23 @@ class AssayOmicDataFileUploadForm(BootstrapForm):
 
         if true_to_continue:
             data_file_pk = self.instance.id
-            if calledme == "clean":
-                # this function is in utils.py
-                # print("form clean")
-                data_file = data.get('omic_data_file')
-                amessage = omic_data_file_process_data(save, self.study.id, data_file_pk, data_file, file_extension, calledme)
-                # print(amessage)
-            else:
-                # print("form save")
-                queryset = AssayOmicDataFileUpload.objects.get(id=data_file_pk)
-                data_file = queryset.omic_data_file.open()
-                amessage = omic_data_file_process_data(save, self.study.id, data_file_pk, data_file, file_extension, calledme)
-                # print(amessage)
+            data_type = data['data_type']
+            pipeline = data['pipeline']
+
+            # here here when decide on other data types
+            if data_type == 'log2fc':
+                if calledme == "clean":
+                    # this function is in utils.py
+                    # print("form clean")
+                    data_file = data.get('omic_data_file')
+                    amessage = omic_data_file_process_data(save, self.study.id, data_file_pk, data_file, file_extension, calledme, data_type, pipeline)
+                    # print(amessage)
+                else:
+                    # print("form save")
+                    queryset = AssayOmicDataFileUpload.objects.get(id=data_file_pk)
+                    data_file = queryset.omic_data_file.open()
+                    amessage = omic_data_file_process_data(save, self.study.id, data_file_pk, data_file, file_extension, calledme, data_type, pipeline)
+                    # print(amessage)
 
         return data
 

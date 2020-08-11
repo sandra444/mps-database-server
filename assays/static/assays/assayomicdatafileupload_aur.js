@@ -8,6 +8,12 @@ $(document).ready(function () {
     let global_omic_upload_group_pk_working2 = 0
     let global_omic_upload_called_from = "add"
 
+    let global_omic_current_group1 = $("#id_group_1").selectize()[0].selectize.items[0]
+    let global_omic_current_group2 = $("#id_group_2").selectize()[0].selectize.items[0]
+
+    //set the required ness of the groups on load based on data type on load
+    changedDataType();
+
     let global_omic_upload_check_load = $("#check_load").html().trim();
     if (global_omic_upload_check_load === 'review') {
         // HANDY - to make everything on a page read only (for review page)
@@ -23,8 +29,14 @@ $(document).ready(function () {
     }
 
     // tool tip requirements
-    let global_omic_upload_omic_file_format_tooltip = "The following headers are required to be located in the first row of the file or worksheet: baseMean, log2FoldChange, lfcSE, stat, pvalue, padj, and gene or name.";
-    $('#omic_file_format_tooltip').next().html($('#omic_file_format_tooltip').next().html() + make_escaped_tooltip(global_omic_upload_omic_file_format_tooltip));
+    // here here update the tool tips for the different file formats
+    let global_omic_upload_omic_file_format_deseq2_log2fc_tooltip = "For DESeq2 Log2Fold change data, the following headers are required to be located in the first row of the file or worksheet: baseMean, log2FoldChange, lfcSE, stat, pvalue, padj, and gene or name.";
+    $('#omic_file_format_deseq2_log2fc_tooltip').next().html($('#omic_file_format_deseq2_log2fc_tooltip').next().html() + make_escaped_tooltip(global_omic_upload_omic_file_format_deseq2_log2fc_tooltip));
+    let global_omic_upload_omic_file_format_normcounts_tooltip = "Normalized counts data files must have one header row. the first column must be named 'name' and contain a reference to the gene. The remaining columns must be named with the chip or well name as assigned in the MPS Database. ";
+    $('#omic_file_format_normcounts_tooltip').next().html($('#omic_file_format_normcounts_tooltip').next().html() + make_escaped_tooltip(global_omic_upload_omic_file_format_normcounts_tooltip));
+    let global_omic_upload_omic_file_format_rawcounts_tooltip = "Raw counts data files must have one header row. The first column must be named 'name' and contain a reference to the gene. The remaining columns must be named with the chip or well name as assigned in the MPS Database. ";
+    $('#omic_file_format_rawcounts_tooltip').next().html($('#omic_file_format_rawcounts_tooltip').next().html() + make_escaped_tooltip(global_omic_upload_omic_file_format_rawcounts_tooltip));
+
 
     // activates Bootstrap tooltips, must be AFTER tooltips are created - keep
     $('[data-toggle="tooltip"]').tooltip({container:"body", html: true});
@@ -44,22 +56,90 @@ $(document).ready(function () {
         return new_span.html();
     }
 
+    $("#fileFormatDetailsButton").click(function () {
+        $("#omic_file_format_details_section").toggle();
+    });
+
+
+    /**
+     * On change data type, change what is required
+    */
+    $("#id_data_type").change(function () {
+        changedDataType();
+    });
+    function changedDataType() {
+        if ($("#id_data_type").selectize()[0].selectize.items[0] == 'log2fc') {
+            $("#id_group_1").next().addClass('required');
+            $(".one-group").removeClass('hidden');
+
+            $("#id_group_2").next().addClass('required');
+            $(".two-groups").removeClass('hidden');
+        } else {
+            //here here to update when ready
+            alert('Uploading of Normalized and Raw Count Data is Currently in Development.');
+            $("#id_group_1").next().removeClass('required');
+            $(".one-group").addClass('hidden');
+            $("#id_group_1").selectize()[0].selectize.setValue('not-full');
+            $("#id_time_1_day").val(0);
+            $("#id_time_1_hour").val(0);
+            $("#id_time_1_minute").val(0);
+            global_omic_current_group1 = $("#id_group_1").selectize()[0].selectize.items[0];
+
+            $("#id_group_2").next().removeClass('required');
+            $(".two-groups").addClass('hidden');
+            $("#id_group_2").selectize()[0].selectize.setValue('not-full');
+            $("#id_time_2_day").val(0);
+            $("#id_time_2_hour").val(0);
+            $("#id_time_2_minute").val(0);
+            global_omic_current_group2 = $("#id_group_2").selectize()[0].selectize.items[0];
+        }
+    }
+    /**
+     * On change method
+    */
+    $("#id_method").change(function () {
+        method_value = $("#id_method").selectize()[0].selectize.items[0];
+        try {
+            method_text = $("#id_method").selectize()[0].selectize.options[method_value]['text'];
+            if (method_text.toLowerCase() == 'tempo-seq') {
+                new_value = 'probe';
+            } else {
+                new_value = 'ncbi';
+            }
+            $("#id_name_reference").selectize()[0].selectize.setValue(new_value);
+        } catch {
+            $("#id_name_reference").selectize()[0].selectize.setValue('ncbi');
+        }
+    });
+
     /**
      * On change a group, call a function that gets sample info
     */
     $("#id_group_1").change(function () {
         //console.log("change 1")
-        global_omic_upload_called_from = "change"
-        global_omic_upload_group_id_working = 1
-        global_omic_upload_group_pk_working = $("#id_group_1").selectize()[0].selectize.items[0]
-        getGroupSampleInfo('change')
+        if ($("#id_group_1").selectize()[0].selectize.items[0] == $("#id_group_2").selectize()[0].selectize.items[0]) {
+            $("#id_group_1").selectize()[0].selectize.setValue(global_omic_current_group1);
+            alert('Group 1 and Group 2 must be different.');
+        } else {
+            global_omic_upload_called_from = "change"
+            global_omic_upload_group_id_working = 1
+            global_omic_upload_group_pk_working = $("#id_group_1").selectize()[0].selectize.items[0]
+            getGroupSampleInfo('change')
+        }
+        global_omic_current_group1 = $("#id_group_1").selectize()[0].selectize.items[0];
     });
     $("#id_group_2").change(function () {
-        global_omic_upload_called_from = "change"
-        //console.log("change 2")
-        global_omic_upload_group_id_working = 2
-        global_omic_upload_group_pk_working = $("#id_group_2").selectize()[0].selectize.items[0]
-        getGroupSampleInfo('change')
+        if ($("#id_group_1").selectize()[0].selectize.items[0] == $("#id_group_2").selectize()[0].selectize.items[0]) {
+            $("#id_group_2").selectize()[0].selectize.setValue(global_omic_current_group2);
+            alert('Group 1 and Group 2 must be different.');
+        } else {
+            global_omic_upload_called_from = "change"
+            //console.log("change 2")
+            global_omic_upload_group_id_working = 2
+            global_omic_upload_group_pk_working = $("#id_group_2").selectize()[0].selectize.items[0]
+            getGroupSampleInfo('change')
+        }
+        global_omic_current_group2 = $("#id_group_2").selectize()[0].selectize.items[0];
     });
 
      /**
