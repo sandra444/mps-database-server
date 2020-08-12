@@ -476,9 +476,9 @@ def get_data_as_list_of_lists(ids, data_points=None, both_assay_names=False, inc
         # compounds = data_point.matrix_item.stringify_compounds()
 
         # Revised
-        settings = data_point.matrix_item.group.stringify_settings()
-        cells = data_point.matrix_item.group.stringify_cells()
-        compounds = data_point.matrix_item.group.stringify_compounds()
+        settings = data_point.matrix_item.stringify_settings()
+        cells = data_point.matrix_item.stringify_cells()
+        compounds = data_point.matrix_item.stringify_compounds()
 
         if not replaced and (include_all or not excluded):
             data.append(
