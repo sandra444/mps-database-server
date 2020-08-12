@@ -353,14 +353,34 @@ def get_data_as_list_of_lists(ids, data_points=None, both_assay_names=False, inc
         # TODO ORDER SUBJECT TO CHANGE
         data_points = AssayDataPoint.objects.prefetch_related(
             'study__group__microphysiologycenter_set',
-            'matrix_item__assaysetupsetting_set__setting',
-            'matrix_item__assaysetupcell_set__cell_sample',
-            'matrix_item__assaysetupcell_set__density_unit',
-            'matrix_item__assaysetupcell_set__cell_sample__cell_type__organ',
-            'matrix_item__assaysetupcompound_set__compound_instance__compound',
-            'matrix_item__assaysetupcompound_set__concentration_unit',
-            'matrix_item__device',
-            'matrix_item__organ_model',
+
+            # Is going through the matrix item too expensive here?
+            'matrix_item__group__assaygroupcompound_set__compound_instance__compound',
+            'matrix_item__group__assaygroupcompound_set__concentration_unit',
+            'matrix_item__group__assaygroupcompound_set__addition_location',
+            'matrix_item__group__assaygroupcell_set__cell_sample__cell_type__organ',
+            'matrix_item__group__assaygroupcell_set__cell_sample__cell_subtype',
+            'matrix_item__group__assaygroupcell_set__cell_sample__supplier',
+            'matrix_item__group__assaygroupcell_set__addition_location',
+            'matrix_item__group__assaygroupcell_set__density_unit',
+            'matrix_item__group__assaygroupsetting_set__setting',
+            'matrix_item__group__assaygroupsetting_set__unit',
+            'matrix_item__group__assaygroupsetting_set__addition_location',
+
+            # Old!
+            # 'matrix_item__assaysetupsetting_set__setting',
+            # 'matrix_item__assaysetupcell_set__cell_sample',
+            # 'matrix_item__assaysetupcell_set__density_unit',
+            # 'matrix_item__assaysetupcell_set__cell_sample__cell_type__organ',
+            # 'matrix_item__assaysetupcompound_set__compound_instance__compound',
+            # 'matrix_item__assaysetupcompound_set__concentration_unit',
+            # We ought to rely on the group's device and organ model, to be sure?
+            # 'matrix_item__device',
+            # 'matrix_item__organ_model',
+
+            # Replace with group device and organ_model
+            'matrix_item__group__organ_model__device',
+
             'matrix_item__matrix',
             'study_assay__target',
             'study_assay__method',
@@ -415,12 +435,20 @@ def get_data_as_list_of_lists(ids, data_points=None, both_assay_names=False, inc
 
         subtarget = data_point.subtarget.name
 
-        device = data_point.matrix_item.device.name
+        # OLD
+        # device = data_point.matrix_item.device.name
 
-        if data_point.matrix_item.organ_model:
-            organ_model = data_point.matrix_item.organ_model.name
-        else:
-            organ_model = '-No MPS Model-'
+        # if data_point.matrix_item.organ_model:
+        #     organ_model = data_point.matrix_item.organ_model.name
+        # else:
+        #     organ_model = '-No MPS Model-'
+
+        # Revised for Group schema
+        # Device acquisition may be foolish
+        device = data_point.matrix_item.group.organ_model.device.name
+        organ_model = data_point.matrix_item.group.organ_model.name
+
+        # TODO TODO TODO: Ought we include the version? It wasn't previously requested
 
         value = data_point.value
 
@@ -443,9 +471,14 @@ def get_data_as_list_of_lists(ids, data_points=None, both_assay_names=False, inc
         notes = data_point.notes
 
         # Sets of data
-        settings = data_point.matrix_item.stringify_settings()
-        cells = data_point.matrix_item.stringify_cells()
-        compounds = data_point.matrix_item.stringify_compounds()
+        # settings = data_point.matrix_item.stringify_settings()
+        # cells = data_point.matrix_item.stringify_cells()
+        # compounds = data_point.matrix_item.stringify_compounds()
+
+        # Revised
+        settings = data_point.matrix_item.group.stringify_settings()
+        cells = data_point.matrix_item.group.stringify_cells()
+        compounds = data_point.matrix_item.group.stringify_compounds()
 
         if not replaced and (include_all or not excluded):
             data.append(
