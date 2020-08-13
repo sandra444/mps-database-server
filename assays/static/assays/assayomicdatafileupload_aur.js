@@ -128,7 +128,7 @@ let global_omic_method_tooltip = 'Assay Method';
     */
     $('#id_group_1').change(function () {
         //console.log('change 1')
-        if (global_make_the_group_change == true) {
+        if (global_make_the_group_change) {
             if ($('#id_group_1')[0].selectize.items[0] == $('#id_group_2')[0].selectize.items[0]) {
                 $('#id_group_1')[0].selectize.setValue(global_omic_current_group1);
                 send_user_different_message();
@@ -142,7 +142,7 @@ let global_omic_method_tooltip = 'Assay Method';
         }
     });
     $('#id_group_2').change(function () {
-        if (global_make_the_group_change == true) {
+        if (global_make_the_group_change) {
             if ($('#id_group_1')[0].selectize.items[0] == $('#id_group_2')[0].selectize.items[0]) {
                 $('#id_group_2')[0].selectize.setValue(global_omic_current_group2);
                 send_user_different_message();
