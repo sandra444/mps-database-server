@@ -4102,7 +4102,7 @@ class AssayOmicDataFileUpload(LockableModel):
         default='temposeq_probe',
         choices=assay_omic_gene_name_choices,
         help_text='Gene ID Reference (genenames.org)',
-        verbose_name='Gene Name Reference'
+        verbose_name='Gene Reference'
     )
 
     pipeline = models.CharField(
@@ -4111,7 +4111,7 @@ class AssayOmicDataFileUpload(LockableModel):
         # blank=True,
         choices=assay_omic_pipeline_choices,
         help_text='Primary Data Processing Tool',
-        verbose_name='Computation Pipeline'
+        verbose_name='Pipeline'
     )
 
     method = models.ForeignKey(
