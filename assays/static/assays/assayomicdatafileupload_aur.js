@@ -83,7 +83,7 @@ let global_omic_method_tooltip = 'Assay Method';
             alert('Uploading of Normalized and Raw Count Data is Currently in Development.');
             $('#id_group_1').next().removeClass('required');
             $('.one-group').hide();
-            $('#id_group_1')[0].selectize.setValue('full');
+            $('#id_group_1')[0].selectize.setValue('not-full');
             $('#id_time_1_day').val(0);
             $('#id_time_1_hour').val(0);
             $('#id_time_1_minute').val(0);
