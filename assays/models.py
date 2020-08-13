@@ -4054,11 +4054,12 @@ assay_omic_data_type_choices = [
     ('rawcounts', 'Raw Counts')
 ]
 assay_omic_gene_name_choices = [
-    ('probe', 'TempO-Seq Probe ID'),
-    ('ncbi', 'NCBI Gene ID'),
-    ('ensembl', 'Ensemble Gene ID'),
-    ('refseq', 'RefSeq ID'),
-    ('symbol', 'Gene Symbol')
+    ('temposeq_probe', 'TempO-Seq Probe ID'),
+    ('entrez_gene', 'NCBI Gene ID (Entrez)'),
+    ('ensembl_gene', 'Ensemble Gene ID'),
+    ('refseq_gene', 'RefSeq ID'),
+    ('affymerix_probe', 'Affymerix Probeset ID'),
+    ('gene_symbol', 'Gene Symbol')
 ]
 
 class AssayOmicDataFileUpload(LockableModel):
@@ -4085,7 +4086,7 @@ class AssayOmicDataFileUpload(LockableModel):
     omic_data_file = models.FileField(
         upload_to='omic_data_file',
         help_text='Omic Data File',
-        verbose_name='Data File'
+        verbose_name='Omic Data File*'
     )
 
     data_type = models.CharField(
@@ -4098,7 +4099,7 @@ class AssayOmicDataFileUpload(LockableModel):
 
     name_reference = models.CharField(
         max_length=25,
-        default='probe',
+        default='temposeq_probe',
         choices=assay_omic_gene_name_choices,
         help_text='Gene ID Reference (genenames.org)',
         verbose_name='Gene Name Reference'
@@ -4107,7 +4108,7 @@ class AssayOmicDataFileUpload(LockableModel):
     pipeline = models.CharField(
         max_length=25,
         default='deseq2',
-        blank=True,
+        # blank=True,
         choices=assay_omic_pipeline_choices,
         help_text='Primary Data Processing Tool',
         verbose_name='Computation Pipeline'
@@ -4128,7 +4129,7 @@ class AssayOmicDataFileUpload(LockableModel):
         on_delete=models.CASCADE,
         related_name='group_1',
         help_text='Data Processing Group 1',
-        verbose_name='Group 1'
+        verbose_name='Group 1*'
     )
     group_2 = models.ForeignKey(
         AssayOmicDataGroup,
@@ -4137,7 +4138,7 @@ class AssayOmicDataFileUpload(LockableModel):
         on_delete=models.CASCADE,
         related_name='group_2',
         help_text='Data Processing Group 2',
-        verbose_name='Group 2'
+        verbose_name='Group 2*'
     )
 
     time_1 = models.FloatField(
