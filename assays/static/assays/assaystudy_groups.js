@@ -1100,7 +1100,7 @@ $(document).ready(function () {
                 // Special exception for groups
                 // Not really used as of yet
                 if (prefix === 'group') {
-                    current_errors_section = $('tr[data-series="' + (row_index+1) + '"]').find('error-message-section').first();
+                    current_errors_section = $('tr[data-series="' + (parseInt(row_index)+1) + '"]').find('.error-message-section').first();
                 }
                 else {
                     current_errors_section = $('.subform-delete[data-prefix="' + prefix +'"][data-row="' + row_index + '"][data-column="' + column_index + '"]').parent().parent().find('.error-message-section');

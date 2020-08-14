@@ -1043,7 +1043,7 @@ class AssayStudyGroupForm(SetupFormsMixin, SignOffMixin, BootstrapForm):
                             except forms.ValidationError as e:
                                 current_errors.append(
                                     process_error_with_annotation(
-                                        'Group',
+                                        'group',
                                         setup_row,
                                         0,
                                         e
@@ -1095,7 +1095,7 @@ class AssayStudyGroupForm(SetupFormsMixin, SignOffMixin, BootstrapForm):
                     except forms.ValidationError as e:
                         current_errors.append(
                             process_error_with_annotation(
-                                'Group',
+                                'group',
                                 setup_row,
                                 0,
                                 e
@@ -1146,6 +1146,18 @@ class AssayStudyGroupForm(SetupFormsMixin, SignOffMixin, BootstrapForm):
                             # Skip if nothing
                             if not current_object:
                                 continue
+
+                            # Crudely convert to int
+                            for current_field, current_value in current_object.items():
+                                if current_field.endswith('_id'):
+                                    if current_value:
+                                        current_object.update({
+                                            current_field: int(current_value)
+                                        })
+                                    else:
+                                        current_object.update({
+                                            current_field: None
+                                        })
 
                             # NOTE TODO TODO TODO
                             # I am probably just going to blow up all of the old related data for the moment and always add
