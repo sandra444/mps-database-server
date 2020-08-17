@@ -4051,6 +4051,7 @@ class AssayImageSetting(models.Model):
 
 class AssayImage(models.Model):
     # May want to have an FK to study for convenience?
+    # YEAH: WE SHOULD ADD STUDY HERE METHINKS, WHY EVER NOT?!
     # study = models.ForeignKey(AssayStudy, on_delete=models.CASCADE)
     # The associated item
     matrix_item = models.ForeignKey(
