@@ -2200,6 +2200,7 @@ class AssayMatrix(FlaggableModel):
         verbose_name='Study'
     )
 
+    # DEPRECATED!
     device = models.ForeignKey(
         Microdevice,
         null=True,
@@ -2218,7 +2219,8 @@ class AssayMatrix(FlaggableModel):
         OrganModel,
         null=True,
         blank=True,
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
+        verbose_name='MPS Model'
     )
     #
     # organ_model_protocol = models.ForeignKey(
