@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block extra_head %}
+    <script src="//www.google.com/jsapi"></script>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+{% endblock %}
+
+{% block load_js %}
+    <script src="{% static "assays/grouping_filtering.js" %}"></script>
+    <script src="{% static "assays/assaystudy_omics.js" %}"></script>
+{% endblock %}
+
+{% block breadcrumbs %}
+    <li><a href="{{ object.get_list_url }}">All Studies</a></li>
+    <li><a href="{{ object.get_absolute_url }}">{{ object }}</a></li>
+    <li class="active">Gene Expression Analysis</li>
+{% endblock %}
+
+{% block sidebar %}
+    {% include 'assays/grouping_filtering.html' with omics="true"%}
+{% endblock %}
+
+<style>
+    #sidebar {
+        overflow: auto;
+        position: fixed;
+        height: 100vh;
+        min-width: 250px;
+        max-width: 250px;
+        background: #eaeaea;
+        transition: all 0.3s;
+        margin-left: -250px;
+        margin-top: -20px;
+        z-index: 1000;
+    }
+
+    #sidebar.active {
+        margin-left: 0px;
+    }
+
+    #sidebar ul.components {
+        padding: 20px 0;
+    }
+
+    #sidebar ul li a {
+        padding: 10px;
+        display: block;
+    }
+    #sidebar ul li a:hover {
+        background: #fff;
+    }
+
+    #sidebar ul li.active > a, #sidebar a[aria-expanded="true"] {
+        background: #f8f8ff;
+    }
+
+    #sidebar a[data-toggle="collapse"] {
+        position: relative;
+    }
+
+    #sidebar a[aria-expanded="false"]::before {
+        content: "\e259";
+        display: block;
+        position: absolute;
+        right: 20px;
+        font-family: "Glyphicons Halflings";
+    }
+    #sidebar a[aria-expanded="true"]::before {
+        content: "\e260";
+        display: block;
+        position: absolute;
+        right: 20px;
+        font-family: "Glyphicons Halflings";
+    }
+
+    #page {
+        min-height: 100vh;
+        transition: all 0.3s;
+    }
+
+    #page.pushed {
+        padding-left: 275px;
+        min-height: 100vh;
+        /* Removed for now, too problematic on small screens */
+        /* max-width: 90vw; */
+        transition: all 0.3s;
+    }
+
+    @media (max-width: 768px) {
+        #sidebar {
+            margin-left: -250px;
+        }
+        #sidebar.active {
+            margin-left: 0;
+        }
+        #sidebarCollapse span {
+            /* display: none; */
+        }
+    }
+</style>
+
+{% block content %}
+    <div class="well">
+        <div class="row text-center">
+            <h1>
+                Gene Expression Analysis for:<br>
+                <em>{{ object }}</em>
+            </h1>
+        </div>
+        <div class="row text-center small-padding-top">
+            <a href="{{ object.get_summary_url }}" class="btn btn-primary" role="button">Study Summary</a>
+        </div>
+    </div>
+
+    <div id="plots">
+        <div id="volcano-plots">
+        </div>
+        <div id="ma-plots" style="display: none">
+        </div>
+    </div>
+
+    {# Just a spacer (and yes, inline styles are ugly)#}
+    <div style="padding-bottom: 250px;"></div>
+{% endblock %}
