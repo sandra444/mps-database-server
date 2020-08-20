@@ -6502,7 +6502,7 @@ def sub_fetch_omic_sample_info_from_upload_data_table(groupId, groupPk):
 def fetch_omics_data(request):
     data = {'data': {}}
 
-    study = json.loads(request.POST.get('study_id', '{}'))
+    study = request.POST.get('study_id', '{}')
 
     try:
         study = int(study)
@@ -6515,7 +6515,7 @@ def fetch_omics_data(request):
 
     datafiles = AssayOmicDataFileUpload.objects.filter(study=study)
 
-    if len(datafiles) == 0:
+    if datafiles.count() == 0:
         data = {'error': 'There is no omics data for this study.'}
         return HttpResponse(
             json.dumps(data),
