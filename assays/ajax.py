@@ -6530,13 +6530,18 @@ def fetch_omics_data(request):
 
     datapoints = AssayOmicDataPoint.objects.filter(study=study)
 
+    target_ids = {}
+
     for datapoint in datapoints:
         if datapoint.name not in data['data'][data['file_id_to_name'][datapoint.omic_data_file_id]]:
             data['data'][data['file_id_to_name'][datapoint.omic_data_file_id]][datapoint.name] = {}
         data['data'][data['file_id_to_name'][datapoint.omic_data_file_id]][datapoint.name][datapoint.target_id] = datapoint.value
 
-    # I want a dict of target PKs to their names, self-adjusting if we ever add additional targets, usable on Stage/Production even if the PKs change. There are many easier ways to do this.
-    data['target_name_to_id'] = {AssayTarget.objects.filter(id=target)[0].name: target for target in data['data'][[*data['data'].keys()][0]][[*data['data'][[*data['data'].keys()][0]].keys()][1]]}
+        target_ids.update({
+            datapoint.target_id: True
+        })
+
+    data['target_name_to_id'] = {target.name: target.id for target in AssayTarget.objects.filter(id__in=target_ids)}
 
     return HttpResponse(
         json.dumps(data),
