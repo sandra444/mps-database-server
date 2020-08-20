@@ -41,6 +41,11 @@ $(document).ready(function () {
         $("#ma-plots").toggle();
     });
 
+    $(".filter-input").change(function() {
+        $("#slider-range-log2foldchange").slider("option", "values", [$("#log2foldchange-low").val(), $("#log2foldchange-high").val()])
+        $("#slider-range-pvalue").slider("option", "values", [$("#pvalue-low").val(), $("#pvalue-high").val()])
+    })
+
     $("#apply-filters").click(function() {
         window.spinner.spin(
             document.getElementById("spinner")
@@ -148,8 +153,9 @@ $(document).ready(function () {
             for (y of Object.keys(data[x])) {
                 log2fc = parseFloat(data[x][y][omics_target_name_to_id['log2FoldChange']]);
                 avgexpress = Math.log2(parseFloat(data[x][y][omics_target_name_to_id['baseMean']]));
-                neglog10pvalue = -Math.log10(parseFloat(data[x][y][omics_target_name_to_id['pvalue']]));
-                pvalue = parseFloat(data[x][y][omics_target_name_to_id['pvalue']])
+                pvalue = parseFloat(data[x][y][omics_target_name_to_id['pvalue']]);
+                neglog10pvalue = -Math.log10(pvalue);
+
                 // On first pass: Determine high/low for Log2FoldChange slider
                 if (firstTime) {
                     if (Object.keys(data[x])[0] == y && Object.keys(data)[0] == x) {
@@ -172,6 +178,7 @@ $(document).ready(function () {
                     }
                 }
 
+                // Starter rows for each plot, consisting of headers and an invisible anchor point.
                 if (chartData[x]['volcano'].length == 1) {
                 	chartData[x]['volcano'].push([0, 0, 'point { fill-opacity: 0; }', '', 0, 'point { fill-opacity: 0; }', '', 0, 'point { fill-opacity: 0; }', '']);
                 	chartData[x]['ma'].push([0, 0, 'point { fill-opacity: 0; }', '', 0, 'point { fill-opacity: 0; }', '', 0, 'point { fill-opacity: 0; }', '']);
