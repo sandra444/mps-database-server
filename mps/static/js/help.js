@@ -60,7 +60,7 @@ $(document).ready(function () {
 
     // Call datatables for glossary
     var glossary_table = $('#glossary_table').DataTable({
-        dom: 'B<"row">lfrtip',
+        dom: '<Bl<"row">frptip>',
         "iDisplayLength": 10,
         responsive: true
     });
@@ -75,7 +75,7 @@ $(document).ready(function () {
         .addClass('btn btn-sm')
         .appendTo(alphabet);
 
-    for(var i=0 ; i<26 ; i++) {
+    for(var i=0; i<26; i++) {
         var letter = String.fromCharCode(65 + i);
 
         $('<a/>')

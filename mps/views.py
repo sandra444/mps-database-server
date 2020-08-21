@@ -243,6 +243,7 @@ def mps_about(request):
     ).exclude(
         signed_off_date__isnull=True
     ).order_by(
+        '-modified_by',
         '-signed_off_date'
     )[:25]
 

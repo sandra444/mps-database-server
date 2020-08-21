@@ -7,44 +7,87 @@ $(document).ready(function() {
         return event.keyCode != 13;
     });
 
-    var ids = [
-        '#matrices',
-        '#matrix_items'
-    ];
+    // var ids = [
+    //     '#matrices',
+    //     '#matrix_items'
+    // ];
 
     // var middleware_token = getCookie('csrftoken');
     var study_id = Math.floor(window.location.href.split('/')[5]);
 
-    $.each(ids, function(index, table_id) {
-        if ($(table_id)[0]) {
-            $(table_id).DataTable({
-                "iDisplayLength": 10,
-                dom: 'B<"row">lfrtip',
-                fixedHeader: {headerOffset: 50},
-                responsive: false,
-                // Initially sort on start date (descending), not ID
-                "order": [[1, "asc"], [2, "desc"]],
-                "aoColumnDefs": [
-                    {
-                        "bSortable": false,
-                        "aTargets": [0]
-                    },
-                    {
-                        "width": "10%",
-                        "targets": [0]
-                    }
-                ]
-            });
-        }
+    // $.each(ids, function(index, table_id) {
+    //     if ($(table_id)[0]) {
+    //         $(table_id).DataTable({
+    //             "iDisplayLength": 10,
+    //             dom: '<Bl<"row">frptip>',
+    //             fixedHeader: {headerOffset: 50},
+    //             responsive: false,
+    //             // Initially sort on start date (descending), not ID
+    //             "order": [[1, "asc"], [2, "desc"]],
+    //             "aoColumnDefs": [
+    //                 {
+    //                     "bSortable": false,
+    //                     "aTargets": [0]
+    //                 },
+    //                 {
+    //                     "width": "10%",
+    //                     "targets": [0]
+    //                 }
+    //             ]
+    //         });
+    //     }
+    // });
+
+    $('#matrix_items').DataTable({
+        "iDisplayLength": 10,
+        dom: '<Bl<"row">frptip>',
+        fixedHeader: {headerOffset: 50},
+        responsive: false,
+        // Initially sort on start date (descending), not ID
+        "order": [[1, "asc"], [2, "desc"]],
+        "aoColumnDefs": [
+            {
+                "bSortable": false,
+                "aTargets": [0]
+            },
+            {
+                "width": "10%",
+                "targets": [0]
+            },
+            {
+                visible: false,
+                targets: [7]
+            }
+        ]
+    });
+
+    // NOT DRY
+    $('#plates').DataTable({
+        "iDisplayLength": 10,
+        dom: '<Bl<"row">frptip>',
+        fixedHeader: {headerOffset: 50},
+        responsive: false,
+        // Initially sort on start date (descending), not ID
+        "order": [[1, "asc"], [2, "desc"]],
+        "aoColumnDefs": [
+            {
+                "bSortable": false,
+                "aTargets": [0]
+            },
+            {
+                "width": "10%",
+                "targets": [0]
+            }
+        ]
     });
 
     // TODO CHANGE POPUP BEHAVIOR
     var ready_for_sign_off_section = $('#ready_for_sign_off_section');
     ready_for_sign_off_section.dialog({
-       height:500,
-       width:900,
-       modal: true,
-       buttons: {
+        height:500,
+        width:900,
+        modal: true,
+        buttons: {
             Send: function() {
                 process_email_request();
                 // $(this).dialog("close");
@@ -54,9 +97,9 @@ $(document).ready(function() {
                 });
             },
             Cancel: function() {
-               $(this).dialog("close");
+                $(this).dialog("close");
             }
-       }
+        }
     });
     ready_for_sign_off_section.removeProp('hidden');
 
