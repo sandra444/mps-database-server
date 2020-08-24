@@ -44,7 +44,6 @@ from .models import (
     assay_plate_reader_map_info_plate_size_choices_list,
     PhysicalUnits,
     AssayOmicDataFileUpload,
-    AssayOmicDataGroup,
     AssayOmicDataPoint,
     AssayGroup,
 )
