@@ -1,7 +1,7 @@
 # coding=utf-8
 import ujson as json
 # Ask if folks mind the pvalues getting truncated, non-U-json fixes this
-# import json
+import json as default_json
 # from collections import defaultdict
 from django.http import (
     HttpResponse,
@@ -6547,7 +6547,7 @@ def fetch_omics_data(request):
     data['target_name_to_id'] = {target.name: target.id for target in AssayTarget.objects.filter(id__in=target_ids)}
 
     return HttpResponse(
-        json.dumps(data),
+        default_json.dumps(data),
         content_type='application/json'
     )
 
