@@ -54,7 +54,7 @@ from assays.models import (
     AssayPlateReaderMapDataFile,
     AssayPlateReaderMapDataFileBlock,
     AssayPlateReaderMapItemValue,
-    AssayOmicDataGroup,
+    # AssayOmicDataGroup,
     AssayOmicDataFileUpload,
     AssayOmicDataPoint,
 )
@@ -580,16 +580,16 @@ class AssayStudySupportingDataInline(admin.TabularInline):
     )
     extra = 1
 
-class AssayOmicDataGroupInline(admin.TabularInline):
-    """Inline for Studies"""
-    model = AssayOmicDataGroup
-    verbose_name = 'Assay Omic Data Group - Temporary Group Options'
-    fields = (
-        (
-            'name', 'number'
-        ),
-    )
-    extra = 1
+# class AssayOmicDataGroupInline(admin.TabularInline):
+#     """Inline for Studies"""
+#     model = AssayOmicDataGroup
+#     verbose_name = 'Assay Omic Data Group - Temporary Group Options'
+#     fields = (
+#         (
+#             'name', 'number'
+#         ),
+#     )
+#     extra = 1
 
 
 # TODO REMAKE FOR ASSAY STUDY
@@ -700,7 +700,8 @@ class AssayStudyAdmin(LockableAdmin):
         ),
     )
 
-    inlines = [AssayStudyStakeholderInline, AssayStudyAssayInline, AssayStudySupportingDataInline, AssayStudyReferenceInline, AssayOmicDataGroupInline]
+    # inlines = [AssayStudyStakeholderInline, AssayStudyAssayInline, AssayStudySupportingDataInline, AssayStudyReferenceInline, AssayOmicDataGroupInline]
+    inlines = [AssayStudyStakeholderInline, AssayStudyAssayInline, AssayStudySupportingDataInline, AssayStudyReferenceInline]
 
     def get_queryset(self, request):
         qs = super(AssayStudyAdmin, self).get_queryset(request)
@@ -1309,12 +1310,12 @@ class AssayPlateReaderMapDataFileBlockAdmin(ImportExportModelAdmin):
 
 admin.site.register(AssayPlateReaderMapDataFileBlock, AssayPlateReaderMapDataFileBlockAdmin)
 
-class AssayOmicDataGroupAdmin(ImportExportModelAdmin):
-    model = AssayOmicDataGroup
-    list_display = ('name', 'number', 'study')
-    search_fields = ('name', 'study')
-
-admin.site.register(AssayOmicDataGroup, AssayOmicDataGroupAdmin)
+# class AssayOmicDataGroupAdmin(ImportExportModelAdmin):
+#     model = AssayOmicDataGroup
+#     list_display = ('name', 'number', 'study')
+#     search_fields = ('name', 'study')
+#
+# admin.site.register(AssayOmicDataGroup, AssayOmicDataGroupAdmin)
 
 class AssayOmicDataFileUploadAdmin(ImportExportModelAdmin):
     model = AssayOmicDataFileUpload

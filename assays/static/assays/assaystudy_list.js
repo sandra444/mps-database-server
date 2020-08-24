@@ -89,7 +89,7 @@ $(document).ready(function() {
 
         // PLEASE NOTE THAT: sck added two columns to table 20200515 (8 and 9) and moved later columns down 2
         studies_table.DataTable({
-            dom: 'B<"row">lfrtip',
+            dom: '<Bl<"row">frptip>',
             fixedHeader: {headerOffset: 50},
             responsive: true,
             "iDisplayLength": 50,

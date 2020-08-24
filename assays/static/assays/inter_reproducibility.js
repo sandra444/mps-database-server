@@ -454,7 +454,7 @@ $(document).ready(function() {
             //     }
             // },
             "responsive": true,
-            dom: 'B<"row">lfrtip',
+            dom: '<Bl<"row">frptip>',
             fixedHeader: {headerOffset: 50},
             deferRender: true,
             destroy: true,
