@@ -1787,14 +1787,14 @@ class AssayStudyChipForm(SetupFormsMixin, SignOffMixin, BootstrapForm):
         if setup_data_is_empty:
             all_setup_data = []
 
+        # Variables must always exist
+        chip_data = []
+        current_errors = []
+
         # if commit and all_setup_data:
         # SEE BASE MODELS FOR WHY COMMIT IS NOT HERE
         if all_chip_data:
-            chip_data = []
-
             chip_names = {}
-
-            current_errors = []
 
             current_matrix = AssayMatrix.objects.filter(
                 # The study must exist in order to visit this page, so getting the id this was is fine
