@@ -931,6 +931,7 @@ class AssayStudyGroupForm(SetupFormsMixin, SignOffMixin, BootstrapForm):
                     study=self.instance,
                     # Doesn't matter for chips
                     device=None,
+                    organ_model=None,
                     # Alternative that looks nicer, but these matrices probably won't be accessible anyway
                     # number_of_rows=len(all_setup_data),
                     # number_of_columns=number_of_columns,
@@ -1925,6 +1926,10 @@ class AssayStudyPlateForm(SetupFormsMixin, SignOffMixin, BootstrapForm):
         self.fields['organ_model'].queryset = OrganModel.objects.filter(
             id__in=plate_groups.values_list('organ_model_id', flat=True)
         )
+
+        # Improper, but one method to make organ model required
+        self.fields['organ_model'].widget.attrs['class'] += ' required'
+        self.fields['organ_model'].required = True
 
     # FORCE UNIQUENESS CHECK
     def clean(self):
