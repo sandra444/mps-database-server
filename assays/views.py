@@ -856,7 +856,7 @@ class AssayStudyAssays(ObjectGroupRequiredMixin, AssayStudyMixin, UpdateView):
 class AssayStudyDataIndex(StudyViewerMixin, AssayStudyMixin, DetailView):
     """Show all data sections for a given study"""
     model = AssayStudy
-    template_name = 'assays/assaystudydata_index.html'
+    template_name = 'assays/assaystudy_data_index.html'
 
     # For permission mixin NOT AS USELESS AS IT SEEMS
     def get_object(self, queryset=None):
