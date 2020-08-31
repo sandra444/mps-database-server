@@ -1049,6 +1049,7 @@ class AssayStudyIndex(StudyViewerMixin, DetailView):
             # Stupid way to acquire group values, but expedient I guess
 
             'group__assaygroupcompound_set__compound_instance__compound',
+            'group__assaygroupcompound_set__compound_instance__supplier',
             'group__assaygroupcompound_set__concentration_unit',
             'group__assaygroupcompound_set__addition_location',
             'group__assaygroupcell_set__cell_sample__cell_type__organ',
