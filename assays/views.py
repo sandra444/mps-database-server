@@ -789,6 +789,9 @@ class AssayStudyPlates(ObjectGroupRequiredMixin, AssayStudyMixin, DetailView):
                 # device__isnull=False,
                 organ_model__isnull=False,
                 study_id=self.object.id
+            ).prefetch_related(
+                'organ_model',
+                'assaymatrixitem_set'
             )
         })
 
@@ -1117,6 +1120,9 @@ class AssayStudyIndex(StudyViewerMixin, DetailView):
             # device__isnull=False,
             organ_model__isnull=False,
             study_id=self.object.id
+        ).prefetch_related(
+            'organ_model',
+            'assaymatrixitem_set'
         )
 
         context.update({
