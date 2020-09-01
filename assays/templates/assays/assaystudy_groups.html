@@ -61,6 +61,8 @@
     <a role="button" class="btn btn-success" data-add-new-button="true" data-prefix="setting">Add Setting</a>
     </div>
 
+    {% include 'default_paginator.html' with paginator_id='group-table' %}
+
     {# Avoid inline styles #}
     <div class="overflow-auto" style="margin-bottom: 50px;">
     {# Contrived inline style #}
