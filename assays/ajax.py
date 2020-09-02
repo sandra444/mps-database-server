@@ -6942,10 +6942,10 @@ def fetch_omics_data(request):
     for datapoint in datapoints:
         if datapoint.name not in data['data'][data['file_id_to_name'][datapoint.omic_data_file_id]]:
             data['data'][data['file_id_to_name'][datapoint.omic_data_file_id]][datapoint.name] = {}
-        data['data'][data['file_id_to_name'][datapoint.omic_data_file_id]][datapoint.name][datapoint.analysis_target_id] = datapoint.value
+        data['data'][data['file_id_to_name'][datapoint.omic_data_file_id]][datapoint.name][datapoint.target_id] = datapoint.value
 
         target_ids.update({
-            datapoint.analysis_target_id: True
+            datapoint.target_id: True
         })
 
     data['target_name_to_id'] = {target.name: target.id for target in AssayTarget.objects.filter(id__in=target_ids)}

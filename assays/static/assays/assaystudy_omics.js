@@ -93,18 +93,28 @@ $(document).ready(function () {
         $("#quantitative-filters").show();
     }
 
-    function fetchOmicsData(){
+
+    let global_omic_file = null;
+
+    function fetchOmicsData(global_omic_file){
         window.spinner.spin(
             document.getElementById("spinner")
         );
+
+        if ($("#called_from").val() == "upload") {
+            call = 'fetch_omics_data_for_upload_preview';
+        } else {
+            call = 'fetch_omics_data';
+        }
 
         $.ajax(
             "/assays_ajax/",
             {
                 data: {
-                    call: 'fetch_omics_data',
+                    call: call,
                     csrfmiddlewaretoken: window.COOKIES.csrfmiddlewaretoken,
                     study_id: study_id,
+                    omic_file: global_omic_file,
                 },
                 type: 'POST',
             }

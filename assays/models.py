@@ -5200,7 +5200,7 @@ class AssayOmicDataPoint(models.Model):
     omic_data_file = models.ForeignKey(
         AssayOmicDataFileUpload,
         on_delete=models.CASCADE,
-        verbose_name='Two Group Data File'
+        verbose_name='Data File'
     )
     # this might be replaced later with a pk to a master table
     name = models.CharField(
