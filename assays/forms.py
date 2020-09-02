@@ -5049,17 +5049,19 @@ class AssayOmicDataFileUploadForm(BootstrapForm):
         # 1 category = gene expression
         # 2 the target must be associated to that category
         gene_targets = AssayTarget.objects.filter(assaycategory__name="Gene Expression")
-        # gene_target_dict = {}
-        gene_target_pks = []
-        for each in gene_targets:
-            # gene_target_dict[each.id] = each.name
-            gene_target_pks.append(each.id)
+
+        # HANDY, to get pks from a queryset, gene_targets_pks=gene_targets.values_list('pk',flat=True)
+        # gene_target_pks = []
+        # for each in gene_targets:
+        #     gene_target_pks.append(each.id)
 
         # this would be what the user set up in the assay setup tab (e.g. Human 1500+, TempO-Seq, Fold Change)
         study_assay_queryset = AbstractClassAssayStudyAssayOmic.objects.filter(
             study_id=self.study
         ).filter(
-            target_id__in=gene_target_pks
+            # HANDY to use a queryset as a filter instead of pks
+            # instead of getting a list of pks and using them here      target_id__in=gene_targets_pks
+            target__in=gene_targets
         ).prefetch_related(
             'target',
             'method',
@@ -5150,8 +5152,13 @@ class AssayOmicDataFileUploadForm(BootstrapForm):
         self.fields['group_2'].queryset = data_groups_filtered
 
         # when these are visible, they should be class required
-        self.fields['group_1'].widget.attrs.update({'class': ' required'})
-        self.fields['group_2'].widget.attrs.update({'class': ' required'})
+        # HANDY for adding classes in forms
+        # the following could remove other classes, so stick with the below
+        # NO self.fields['group_1'].widget.attrs.update({'class': ' required'})
+        # YES self.fields['group_1'].widget.attrs['class'] += 'required'
+
+        self.fields['group_1'].widget.attrs['class'] += 'required'
+        self.fields['group_2'].widget.attrs['class'] += 'required'
 
         if self.instance.time_1:
             time_1_instance = self.instance.time_1

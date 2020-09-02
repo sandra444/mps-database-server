@@ -60,11 +60,6 @@ $(document).ready(function () {
         return new_span.html();
     }
 
-    //start these hidden
-    $('#omic_file_format_details_section').hide();
-    $('#omic_preview_button_section').hide();
-    $('#omic_preview_the_graphs_section').hide();
-
     /**
      * On click to toggle
     */
