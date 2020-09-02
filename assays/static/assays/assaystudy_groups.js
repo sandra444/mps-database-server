@@ -1,5 +1,6 @@
 // TODO WE ARE NOW CALLING THEM GROUPS AGAIN, I GUESS
 // TODO: WHY ARE WE GOING BACK AND FORTH BETWEEN INT AND STING FOR INDICES???????
+// A SERIOUS STYLISTIC DEFICIENCY IS THAT FILE SCOPE VARIABLES ARE NOT CLEARLY INDICATED, THE LIKELIHOOD OF COLLISIONS ARE THEREFORE QUITE HIGH
 $(document).ready(function () {
     // TEMPORARY
     var series_data_selector = $('#id_series_data');
@@ -152,15 +153,15 @@ $(document).ready(function () {
     // TODO TODO TODO
     pagination_previous_button_selector.click(function() {
         if (!$(this).hasClass('disabled') && current_page > 0) {
-            current_page -= 1;
-            rebuild_table(false);
+            // current_page -= 1;
+            rebuild_table(false, current_page - 1);
         }
     });
 
     pagination_next_button_selector.click(function() {
         if (!$(this).hasClass('disabled') && current_page < number_of_pages) {
-            current_page += 1;
-            rebuild_table(false);
+            // current_page += 1;
+            rebuild_table(false, current_page + 1);
         }
     });
 
@@ -835,7 +836,7 @@ $(document).ready(function () {
 
         number_of_columns[current_prefix] -= 1;
 
-        rebuild_table(true);
+        rebuild_table(true, current_page);
     });
 
     // NOT ALLOWED IN EDIT?
@@ -851,9 +852,9 @@ $(document).ready(function () {
         // TODO LAZY
 
         // SKIP TO LAST PAGE
-        current_page = Math.ceil(series_data.length / 10) - 1;
+        let new_current_page = Math.ceil(series_data.length / 10) - 1;
 
-        rebuild_table(true);
+        rebuild_table(true, new_current_page);
     });
 
     // NOT ALLOWED IN EDIT?
@@ -921,7 +922,7 @@ $(document).ready(function () {
             }
         }
 
-        rebuild_table(true);
+        rebuild_table(true, current_page);
     });
 
     $(document).on('click', '.subform-delete', function() {
@@ -939,7 +940,7 @@ $(document).ready(function () {
             // TODO: STRIKEOUT!
         }
 
-        rebuild_table(true);
+        rebuild_table(true, current_page);
     });
 
     $(document).on('click', '.subform-edit', function() {
@@ -958,10 +959,10 @@ $(document).ready(function () {
         // change_matrix_visibility();
 
         // SKIP TO LAST PAGE
-        current_page = Math.ceil(series_data.length / 10) - 1;
+        let new_current_page = Math.ceil(series_data.length / 10) - 1;
 
         // TODO LAZY
-        rebuild_table(true);
+        rebuild_table(true, new_current_page);
     });
 
     // SLOPPY: PLEASE REVISE
@@ -1092,7 +1093,7 @@ $(document).ready(function () {
 
                         // console.log(series_data);
 
-                        rebuild_table(true);
+                        rebuild_table(true, current_page);
                     }
                     // Contrived make preview
                     else {
@@ -1124,7 +1125,7 @@ $(document).ready(function () {
         else if (!protocol.val()) {
             if (is_new) {
                 reset_current_setup();
-                rebuild_table(true);
+                rebuild_table(true, current_page);
             }
             else {
                 series_table_preview.empty();
@@ -1136,7 +1137,7 @@ $(document).ready(function () {
         get_device_type(is_new);
     }
 
-    function rebuild_table(data_change) {
+    function rebuild_table(data_change, new_current_page) {
         // GET RID OF ANYTHING IN THE TABLE
         study_setup_head.find('.new_column').remove();
         study_setup_body.empty();
@@ -1146,6 +1147,13 @@ $(document).ready(function () {
             'compound': 0,
             'setting': 0,
         };
+
+        let page_change = false;
+        if (new_current_page !== current_page) {
+            page_change = true;
+        }
+
+        current_page = new_current_page;
 
         // console.log(series_data);
         // console.log('REBUILD', 'PAGE: ', current_page, 'START: ', current_page * display_length, 'DATA CHANGE: ', data_change);
@@ -1168,6 +1176,12 @@ $(document).ready(function () {
 
         if (data_change) {
             replace_series_data();
+        }
+        // SLOPPY: If this is just a pagination, snap to the top
+        if (page_change) {
+            $('html, body').animate({
+                scrollTop: $('#study_setup_table').offset().top - 175
+            }, 500);
         }
 
         // MAKE SURE HIDDEN COLUMNS ARE ADHERED TO
@@ -1209,7 +1223,7 @@ $(document).ready(function () {
     }
 
     // TESTING
-    rebuild_table(true);
+    rebuild_table(true, current_page);
 
     var version_dialog = $('#version_dialog');
     version_dialog.dialog({

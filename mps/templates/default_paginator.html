@@ -1,7 +1,10 @@
 {# MISSING ARIA AMONG OTHER THINGS #}
+{% comment %}
 <div class="row">
 <div class="col-xs-12">
-<ul class="pagination pull-right">
+{% endcomment %}
+{# STUPID INLINE STYLE #}
+<ul style="margin: 0px;" class="pagination pull-right">
     <li class="paginate_button previous disabled {{ paginator_id }}-previous">
         <a role="button">Previous</a>
     </li>
@@ -12,5 +15,7 @@
         <a role="button">Next</a>
     </li>
 </ul>
+{% comment %}
 </div>
 </div>
+{% endcomment %}
