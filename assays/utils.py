@@ -6518,12 +6518,12 @@ def omic_data_file_process_data(save, study_id, omic_data_file_id, data_file, fi
         # fill omic_target_text_header_list = [] and target_pk_list = []
         # pull from the AssayOmicAnalysisTarget
         # where file_header is true and data_type matches data_type and analysis_method matches analysis_method
+        # HANDY combine filters with commas in queryset
         target_matches = AssayOmicAnalysisTarget.objects.filter(
-            data_type=data_type
-        ).filter(
+            data_type=data_type,
             method=analysis_method
         )
-        print(target_matches)
+        # print(target_matches)
         target_to_pk_dict = {target.name: target.id for target in target_matches}
         if len(target_to_pk_dict) == 0:
             error_message = error_message + 'No option for this combination of data type and analysis method has been programmed. Contact the MPS Database Admins (AssayOmicAnalysisTargets not found).'
