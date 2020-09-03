@@ -23,7 +23,7 @@
     <li class="active">
         {% if update %}
         Edit Plate <em>{{ object }}</em>
-        {% if not detail %}
+        {% elif not detail %}
         Add Plate
         {% else %}
         <em>{{ object }}</em>
