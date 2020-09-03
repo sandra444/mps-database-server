@@ -29,6 +29,7 @@ $(document).ready(function () {
         return new_span.html();
     }
 
+    // Swap between Volcano and MA plots
     $("#toggle-plot-type").click(function() {
         if ($("#ma-plots").css("display") == "none") {
             $("#toggle-plot-type").text("Switch to Volcano Plots");
@@ -41,15 +42,33 @@ $(document).ready(function () {
         $("#ma-plots").toggle();
     });
 
+    // Swap between P-value and -Log10(P-value)
+    $(".swap-pvalue").click(function() {
+        $("#pvalue-filter1").toggle();
+        $("#pvalue-filter2").toggle();
+    });
+
+    // Swap between Log2(FoldChange) and Absolute Log2(FoldChange)
+    $(".swap-l2fc").click(function() {
+        $("#l2fc-filter1").toggle();
+        $("#l2fc-filter2").toggle();
+    });
+
+    // Correct filter inputs on slider change
     $(".filter-input").change(function() {
         $("#slider-range-log2foldchange").slider("option", "values", [$("#log2foldchange-low").val(), $("#log2foldchange-high").val()])
+        $("#slider-log2foldchange-abs").slider("option", "value", [$("#log2foldchange-abs").val()])
         $("#slider-range-pvalue").slider("option", "values", [$("#pvalue-low").val(), $("#pvalue-high").val()])
+        $("#slider-range-pvalue-neg").slider("option", "values", [$("#pvalue-low-neg").val(), $("#pvalue-high-neg").val()])
     })
 
+    // Apply filters and thresholds before drawing graphs
     $("#apply-filters").click(function() {
         window.spinner.spin(
             document.getElementById("spinner")
         );
+
+        // Update threshold colors
         volcanoOptions['series'] = {
             0: { color: $("#color-over-expressed").val() },
             1: { color: $("#color-under-expressed").val() },
@@ -60,10 +79,23 @@ $(document).ready(function () {
             1: { color: $("#color-under-expressed").val() },
             2: { color: $("#color-not-significant").val() }
         };
-        drawPlots(JSON.parse(JSON.stringify(omics_data)), false, $("#slider-range-pvalue").slider("option", "values")[0], $("#slider-range-pvalue").slider("option", "values")[1], $("#slider-range-log2foldchange").slider("option", "values")[0], $("#slider-range-log2foldchange").slider("option", "values")[1]);
+
+        // Draw filtered plots
+        drawPlots(
+            JSON.parse(JSON.stringify(omics_data)),
+            false,
+            $("#slider-range-pvalue").slider("option", "values")[0],
+            $("#slider-range-pvalue").slider("option", "values")[1],
+            $("#slider-range-log2foldchange").slider("option", "values")[0],
+            $("#slider-range-log2foldchange").slider("option", "values")[1],
+            $("#slider-range-pvalue-neg").slider("option", "values")[0],
+            $("#slider-range-pvalue-neg").slider("option", "values")[1],
+            $("#slider-log2foldchange-abs").slider("option", "value")
+        );
     })
 
     function createSliders() {
+        //P-value filter slider
         $("#slider-range-pvalue").slider({
             range: true,
             min: lowestPVAL,
@@ -77,6 +109,23 @@ $(document).ready(function () {
         });
         $("#pvalue-low").val($("#slider-range-pvalue").slider("values", 0).toFixed(3));
         $("#pvalue-high").val($("#slider-range-pvalue").slider("values", 1).toFixed(3));
+
+        // -Log10(P-value) filter slider
+        $("#slider-range-pvalue-neg").slider({
+            range: true,
+            min: -Math.log10(highestPVAL),
+            max: -Math.log10(lowestPVAL)+0.001,
+            step: 0.001,
+            values: [-Math.log10(highestPVAL), -Math.log10(lowestPVAL)],
+            slide: function(event, ui) {
+                $("#pvalue-low-neg").val(ui.values[0].toFixed(3));
+                $("#pvalue-high-neg").val(ui.values[1].toFixed(3));
+            }
+        });
+        $("#pvalue-low-neg").val($("#slider-range-pvalue-neg").slider("values", 0).toFixed(3));
+        $("#pvalue-high-neg").val($("#slider-range-pvalue-neg").slider("values", 1).toFixed(3));
+
+        // Log2(FoldChange) filter slider
         $("#slider-range-log2foldchange").slider({
             range: true,
             min: lowestL2FC,
@@ -90,6 +139,21 @@ $(document).ready(function () {
         });
         $("#log2foldchange-low").val($("#slider-range-log2foldchange").slider("values", 0).toFixed(3));
         $("#log2foldchange-high").val($("#slider-range-log2foldchange").slider("values", 1).toFixed(3));
+
+        // Absolute Log2(FoldChange) filter slider
+        let log2foldchange_absolute = Math.max(-lowestL2FC, highestL2FC)
+        $("#slider-log2foldchange-abs").slider({
+            range: "min",
+            min: 0,
+            max: log2foldchange_absolute,
+            step: 0.001,
+            value: log2foldchange_absolute,
+            slide: function(event, ui) {
+                $("#log2foldchange-abs").val(ui.value.toFixed(3));
+            }
+        });
+        $("#log2foldchange-abs").val($("#slider-log2foldchange-abs").slider("value").toFixed(3));
+
         $("#quantitative-filters").show();
     }
 
@@ -115,8 +179,9 @@ $(document).ready(function () {
             omics_data = data['data']
             omics_target_name_to_id = data['target_name_to_id']
             omics_file_id_to_name = data['file_id_to_name']
+            omics_table = data['table']
             if (!('error' in data)) {
-                drawPlots(JSON.parse(JSON.stringify(omics_data)), true, 1, 0, 1, 0);
+                drawPlots(JSON.parse(JSON.stringify(omics_data)), true, 0, 0, 0, 0, 0, 0, 0);
             } else {
                 console.log(data['error']);
                 // Stop spinner
@@ -133,23 +198,25 @@ $(document).ready(function () {
         });
     }
 
-    function drawPlots(data, firstTime, minPval, maxPval, minL2FC, maxL2FC) {
+    function drawPlots(data, firstTime, minPval, maxPval, minL2FC, maxL2FC, minPval_neg, maxPval_neg, L2FC_abs) {
         var chartData = {}
-        var log2fc, avgexpress, neglog10pvalue, pvalue, check_over, check_under, check_neither, threshold_log2fc, threshold_pvalue;
+        var log2fc, avgexpress, neglog10pvalue, pvalue, check_over, check_under, check_neither, log2fc_threshold, threshold_pvalue;
         check_over = $("#check-over").is(":checked");
         check_under = $("#check-under").is(":checked");
         check_neither = $("#check-neither").is(":checked");
         pvalue_threshold = $("#pvalue-threshold").val()
         log2fc_threshold = $("#log2foldchange-threshold").val()
 
+        // For each group/file/TBD
         for (x of Object.keys(data)) {
             if (!(data[x] in chartData)) {
                 chartData[x] = {
-                    'volcano': [['Log2FoldChange', 'Over Expressed', {'type': 'string', 'role': 'style'}, {'type': 'string', 'role': 'tooltip'}, 'Under Expressed', {'type': 'string', 'role': 'style'}, {'type': 'string', 'role': 'tooltip'}, 'Not Significant', {'type': 'string', 'role': 'style'}, {'type': 'string', 'role': 'tooltip'}]],
+                    'volcano': [['Log2(FoldChange)', 'Over Expressed', {'type': 'string', 'role': 'style'}, {'type': 'string', 'role': 'tooltip'}, 'Under Expressed', {'type': 'string', 'role': 'style'}, {'type': 'string', 'role': 'tooltip'}, 'Not Significant', {'type': 'string', 'role': 'style'}, {'type': 'string', 'role': 'tooltip'}]],
                     'ma': [['Average Expression', 'Over Expressed', {'type': 'string', 'role': 'style'}, {'type': 'string', 'role': 'tooltip'}, 'Under Expressed', {'type': 'string', 'role': 'style'}, {'type': 'string', 'role': 'tooltip'}, 'Not Significant', {'type': 'string', 'role': 'style'}, {'type': 'string', 'role': 'tooltip'}]]
                 };
             }
 
+            // For each gene probe ID
             for (y of Object.keys(data[x])) {
                 log2fc = parseFloat(data[x][y][omics_target_name_to_id['log2FoldChange']]);
                 avgexpress = Math.log2(parseFloat(data[x][y][omics_target_name_to_id['baseMean']]));
@@ -184,17 +251,31 @@ $(document).ready(function () {
                 	chartData[x]['ma'].push([0, 0, 'point { fill-opacity: 0; }', '', 0, 'point { fill-opacity: 0; }', '', 0, 'point { fill-opacity: 0; }', '']);
                 }
 
-                // Add data if first pass OR all filter conditions met
-                if (firstTime || ((log2fc >= minL2FC && log2fc <= maxL2FC) && (pvalue >= minPval && pvalue <= maxPval))) {
-                	if (check_over && (log2fc >= Math.log2(log2fc_threshold) && pvalue <= pvalue_threshold)) {
-                		chartData[x]['volcano'].push([log2fc, neglog10pvalue, null, null, null, null, '', null, null, '']);
-                		chartData[x]['ma'].push([avgexpress, log2fc, null, '', null, null, '', null, null, '']);
-                	} else if (check_under && (log2fc <= -Math.log2(log2fc_threshold) && pvalue <= pvalue_threshold)) {
-                		chartData[x]['volcano'].push([log2fc, null, null, '', neglog10pvalue, null, null, null, null, '']);
-                		chartData[x]['ma'].push([avgexpress, null, null, '', log2fc, null, '', null, null, '']);
-                	} else if (check_neither && !(log2fc >= Math.log2(log2fc_threshold) && pvalue <= pvalue_threshold) && !(log2fc <= -Math.log2(log2fc_threshold) && pvalue <= pvalue_threshold)) {
-                		chartData[x]['volcano'].push([log2fc, null, null, '', null, null, '', neglog10pvalue, null, null]);
-                		chartData[x]['ma'].push([avgexpress, null, null, '', null, null, '', log2fc, null, '']);
+                // Determine filter conditions.
+                if ($("#pvalue-filter1").css("display") !== "none") {
+                    var pvalue_filter = (pvalue >= minPval && pvalue <= maxPval);
+                } else {
+                    var pvalue_filter = (neglog10pvalue >= minPval_neg && neglog10pvalue <= maxPval_neg);
+                }
+
+                if ($("#l2fc-filter1").css("display") !== "none") {
+                    var l2fc_filter = (log2fc >= minL2FC && log2fc <= maxL2FC);
+                } else {
+                    var l2fc_filter = (log2fc >= -L2FC_abs && log2fc <= L2FC_abs);
+                }
+
+                // Add data if first pass OR all filter conditions met.
+                if (firstTime || ((pvalue_filter) && (l2fc_filter))) {
+                    // Threshold determination and point addition.
+                	if (check_over && (log2fc >= log2fc_threshold && pvalue <= pvalue_threshold)) {
+                		chartData[x]['volcano'].push([log2fc, neglog10pvalue, null, 'Probe ID: ' + y + '\n-Log10(pvalue): ' + neglog10pvalue.toFixed(3) + '\nLog2(FoldChange): ' + log2fc.toFixed(3), null, null, '', null, null, '']);
+                		chartData[x]['ma'].push([avgexpress, log2fc, null, 'Probe ID: ' + y + '\nLog2(FoldChange): ' + log2fc.toFixed(3) + '\nAverage Expression: ' + avgexpress.toFixed(3), null, null, '', null, null, '']);
+                	} else if (check_under && (log2fc <= -log2fc_threshold && pvalue <= pvalue_threshold)) {
+                		chartData[x]['volcano'].push([log2fc, null, null, '', neglog10pvalue, null, 'Probe ID: ' + y + '\n-Log10(pvalue): ' + neglog10pvalue.toFixed(3) + '\nLog2(FoldChange): ' + log2fc.toFixed(3), null, null, '']);
+                		chartData[x]['ma'].push([avgexpress, null, null, '', log2fc, null, 'Probe ID: ' + y + '\nLog2(FoldChange): ' + log2fc.toFixed(3) + '\nAverage Expression: ' + avgexpress.toFixed(3), null, null, '']);
+                	} else if (check_neither && !(log2fc >= log2fc_threshold && pvalue <= pvalue_threshold) && !(log2fc <= -log2fc_threshold && pvalue <= pvalue_threshold)) {
+                		chartData[x]['volcano'].push([log2fc, null, null, '', null, null, '', neglog10pvalue, null, 'Probe ID: ' + y + '\n-Log10(pvalue): ' + neglog10pvalue.toFixed(3) + '\nLog2(FoldChange): ' + log2fc.toFixed(3)]);
+                		chartData[x]['ma'].push([avgexpress, null, null, '', null, null, '', log2fc, null, 'Probe ID: ' + y + '\nLog2(FoldChange): ' + log2fc.toFixed(3) + '\nAverage Expression: ' + avgexpress.toFixed(3)]);
                 	}
                 }
             }
@@ -205,33 +286,34 @@ $(document).ready(function () {
             createSliders();
         }
 
-        // console.log(chartData)
-
         var volcanoData, maData, volcanoChart, maChart;
-        var counter = 0;
 
-        $('#volcano-plots').append("<div class='row'>");
-        $('#ma-plots').append("<div class='row'>");
+        let volcano_chart_row = $('<div>').addClass('row');
+        let ma_chart_row = $('<div>').addClass('row');
+        // $('#volcano-plots').append("<div class='row'>");
+        // $('#ma-plots').append("<div class='row'>");
         for (const prop in chartData) {
             console.log(prop)
-            $('#volcano-plots').append("<div class='col-lg-6'><div id='volcano-" + prop + "'></div></div>");
-            $('#ma-plots').append("<div class='col-lg-6'><div id='ma-" + prop + "'></div></div>");
-            counter++;
+            volcano_chart_row.append("<div class='col-lg-6'><div id='volcano-" + prop + "'></div></div>");
+            ma_chart_row.append("<div class='col-lg-6'><div id='ma-" + prop + "'></div></div>");
+        }
 
+        $('#volcano-plots').html(volcano_chart_row);
+        $('#ma-plots').append(ma_chart_row);
+
+        for (const prop in chartData) {
             volcanoData = google.visualization.arrayToDataTable(chartData[prop]['volcano']);
             maData = google.visualization.arrayToDataTable(chartData[prop]['ma']);
 
             volcanoChart = new google.visualization.LineChart(document.getElementById('volcano-' + prop));
             maChart = new google.visualization.LineChart(document.getElementById('ma-' + prop));
 
-            volcanoOptions['title'] = 'Volcano ' + prop
-            maOptions['title'] = 'MA ' + prop
+            volcanoOptions['title'] = prop
+            maOptions['title'] = prop
 
             volcanoChart.draw(volcanoData, volcanoOptions);
             maChart.draw(maData, maOptions);
         }
-        $('#volcano-plots').append("</div>");
-        $('#ma-plots').append("</div>");
 
         // Stop spinner
         window.spinner.stop();
@@ -311,6 +393,7 @@ $(document).ready(function () {
                 italic: false
             },
             minValue: 0,
+            scaleType: 'log'
         },
         vAxis: {
             title: 'Log2FoldChange',

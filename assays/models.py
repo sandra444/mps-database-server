@@ -5209,5 +5209,3 @@ class AssayOmicDataPoint(models.Model):
         return '{0}'.format(self.id)
 
 ##### End Assay Omic Section - Phase 1 design
-
-
