@@ -7,8 +7,6 @@ $(document).ready(function () {
     let global_omic_upload_group_id_working2 = 0;
     let global_omic_upload_group_pk_working2 = 0;
     let global_omic_upload_called_from = 'add';
-    let global_omic_file = null;
-    let global_this_files_data = null;
 
     let global_omic_current_group1 = $('#id_group_1')[0].selectize.items[0];
     let global_omic_current_group2 = $('#id_group_2')[0].selectize.items[0];
@@ -201,9 +199,9 @@ $(document).ready(function () {
                 else {
                     let exist = true;
                     // get_group_sample_info_ajax(json, exist);
-                    global_this_files_data = json.list_of_lists;
+                    this_files_data = json.list_of_lists;
                     // want to avoid another ajax all - should be able to get data back in format needed first time
-                    // format_and_call_preview_update(global_this_files_data);
+                    format_and_call_preview_update(this_files_data);
                 }
             },
             // error callback
@@ -219,13 +217,13 @@ $(document).ready(function () {
       * When a group is changed, if that group has already been added to the data upload file
       * get the first occurrence that has sample information.
     */
-    function format_and_call_preview_update() {
+    function format_and_call_preview_update(this_files_data) {
          console.log("back");
-         console.log(global_this_files_data);
+         console.log(this_files_data);
 
         let data = {
             call: 'fetch_omics_data_for_upload_preview',
-            data: global_this_files_data,
+            data: this_files_data,
             csrfmiddlewaretoken: window.COOKIES.csrfmiddlewaretoken
         };
         window.spinner.spin(document.getElementById('spinner'));
