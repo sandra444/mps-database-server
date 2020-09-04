@@ -33,7 +33,7 @@
 
 {% block content %}
 
-    <form class="form-horizontal" method="post" enctype="multipart/form-data">
+    <form name="omic_file" class="form-horizontal" method="post" enctype="multipart/form-data">
         <div class="padded-bottom">
             <div class="well">
                 <h1 class="text-center">
@@ -94,6 +94,9 @@
                     </div>
                     <div class="hidden" id="this_file_id">
                         {{ object.id }}
+                    </div>
+                    <div class="hidden" id="this_study_id">
+                        {{ form.instance.study_id }}
                     </div>
                 </div>
 

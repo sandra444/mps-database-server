@@ -8,13 +8,14 @@ $(document).ready(function () {
     let global_omic_upload_group_pk_working2 = 0;
     let global_omic_upload_called_from = 'add';
     let global_omic_file = null;
+    let global_this_files_data = null;
 
     let global_omic_current_group1 = $('#id_group_1')[0].selectize.items[0];
     let global_omic_current_group2 = $('#id_group_2')[0].selectize.items[0];
 
     let global_make_the_group_change = true;
 
-    //set the required ness of the groups on load based on data type on load
+    //set the required-ness of the groups on load based on data type on load
     changed_data_type();
 
     let global_omic_upload_check_load = $('#check_load').html().trim();
@@ -32,7 +33,7 @@ $(document).ready(function () {
     }
 
     // tool tip requirements
-    // here here update the tool tips for the different file formats
+    // todo here here update the tool tips for the different file formats
     let global_omic_upload_omic_file_format_deseq2_log2fc_tooltip = 'For DESeq2 Log2Fold change data, the header "log2FoldChange" must be in the first row. Other optional columns headers are: "baseMean", "lfcSE", "stat", "pvalue", "padj", and "gene" (or "name").';
     $('#omic_file_format_deseq2_log2fc_tooltip').next().html($('#omic_file_format_deseq2_log2fc_tooltip').next().html() + make_escaped_tooltip(global_omic_upload_omic_file_format_deseq2_log2fc_tooltip));
     let global_omic_upload_omic_file_format_normcounts_tooltip = 'Under Development - ?????? Normalized counts data files must have one header row. the first column must be named "name" and contain a reference to the gene. The remaining columns must be named with the chip or well name as assigned in the MPS Database. ';
@@ -73,48 +74,11 @@ $(document).ready(function () {
     /**
      * On change data type, change what is required
     */
-    $('#id_omic_data_file').on("change", function (e) {
-        // global_omic_file = e.target.files[0];
-        // console.log("file")
-        // console.log(global_omic_file)
-        if ($('#id_data_type')[0].selectize.items[0] == 'log2fc') {
-            //google.charts.setOnLoadCallback(fetchOmicsData);
-            //fetchOmicsData(global_omic_file);
-
-            $('#omic_preview_button_section').show();
-        }
-    });
-    // $('#id_omic_data_file').change(function () {
-    //     console.log("file1: "+$('#id_omic_data_file').val())
-    //     console.log("file2: "+document.getElementById("id_omic_data_file").files[0].name);
-    //     var input = document.getElementById("id_omic_data_file");
-    //     var fReader = new FileReader();
-    //     // fReader.readAsDataURL(input.files[0]);
-    //     // fReader.onloadend = function(event){
-    //     //     var img = document.getElementById("yourImgTag");
-    //     //     img.src = event.target.result;
-    //     // }
-    // });
-// var input = document.getElementById("inputFile");
-// var fReader = new FileReader();
-// fReader.readAsDataURL(input.files[0]);
-// fReader.onloadend = function(event){
-//     var img = document.getElementById("yourImgTag");
-//     img.src = event.target.result;
-// }
-
-    // need to set the upload_file to make the selected file
-    //$("#check_load").html().trim() === 'add')
-    //$("#upload_file").val();
-    //console.log("file: "+$('#id_omic_data_file').val())
-
-
-    /**
-     * On change data type, change what is required
-    */
     $('#id_data_type').change(function () {
         changed_data_type();
+        made_change_affected_preview();
     });
+
     function changed_data_type() {
         if ($('#id_data_type')[0].selectize.items[0] == 'log2fc') {
             $('#id_group_1').next().addClass('required');
@@ -146,6 +110,151 @@ $(document).ready(function () {
 
         }
     }
+
+    /**
+     * On change analysis method
+    */
+    $('#id_anaylsis_method').on('change', function (e) {
+        made_change_affected_preview();
+    });
+    /**
+     * On change data type, change what is required
+    */
+    $('#id_omic_data_file').on('change', function (e) {
+        made_change_affected_preview();
+        //only need to show the button if the file was changed
+        //if file was not changed, it is not a preview (it is already in the database)
+        $('#omic_preview_button_section').show();
+    });
+
+    function made_change_affected_preview() {
+        // can add things here if needed
+        get_data_for_this_file_ready_for_preview();
+        // do not put anything here ajax - race errors
+    };
+
+    function get_data_for_this_file_ready_for_preview() {
+        var data = {
+            call: 'fetch_omics_data_for_upload_preview_prep',
+            csrfmiddlewaretoken: window.COOKIES.csrfmiddlewaretoken
+        };
+
+        // HANDY - send all form fields to ajax
+        // name a form in the html: <form name="omic_file"....
+        // add to form data as shown below
+        // access in the ajax.py like this: data_type = request.POST.get('data_type', '{}')
+        // access the file like this:     print(request.FILES)
+        //     < MultiValueDict: {'omic_data_file': [ < InMemoryUploadedFile: tc_118_112.csv(text / csv) >]} >
+        var form = document.omic_file;
+        var serializedData = $('form').serializeArray();
+        var formData = new FormData(form);
+        $.each(serializedData, function(index, field) {
+            // console.log("name: "+field.name+ "  value: "+field.value)
+            formData.append(field.name, field.value);
+        });
+
+        // let fileInput = document.getElementById('id_omic_data_file');
+        // let file = $('#id_omic_data_file')[0].files[0];
+        // console.log("file "+file)
+        // formData.append('file', file);
+
+        // is anything else needed for the data sub
+        // formData.append('file', file);
+        let study_id = $('#this_study_id').html().trim()
+        formData.append('study_id', study_id);
+
+        let file_id = 1;
+        try {
+            file_id = $('#this_file_id').val();
+        } catch {
+            file_id = 1;
+        }
+        formData.append('file_id', file_id);
+
+        $.each(data, function(index, contents) {
+            formData.append(index, contents);
+            // console.log("index "+index)
+            // console.log("contents "+contents)
+        });
+
+        // console.log("formData")
+        // console.log(formData)
+        // for (var key in formData) {
+        //     console.log(key, formData[key])
+        // }
+
+        window.spinner.spin(document.getElementById('spinner'));
+        $.ajax({
+            url: '/assays_ajax/',
+            type: 'POST',
+            dataType: 'json',
+            cache: false,
+            contentType: false,
+            processData: false,
+            data: formData,
+            success: function (json) {
+                window.spinner.stop();
+                if (json.errors) {
+                    // Display errors
+                    alert(json.errors);
+                }
+                else {
+                    let exist = true;
+                    // get_group_sample_info_ajax(json, exist);
+                    global_this_files_data = json.list_of_lists;
+                    // want to avoid another ajax all - should be able to get data back in format needed first time
+                    // format_and_call_preview_update(global_this_files_data);
+                }
+            },
+            // error callback
+            error: function (xhr, errmsg, err) {
+                window.spinner.stop();
+                alert('an error in processing data');
+                console.log(xhr.status + ': ' + xhr.responseText);
+            }
+        });
+    };
+
+     /**
+      * When a group is changed, if that group has already been added to the data upload file
+      * get the first occurrence that has sample information.
+    */
+    function format_and_call_preview_update() {
+         console.log("back");
+         console.log(global_this_files_data);
+
+        let data = {
+            call: 'fetch_omics_data_for_upload_preview',
+            data: global_this_files_data,
+            csrfmiddlewaretoken: window.COOKIES.csrfmiddlewaretoken
+        };
+        window.spinner.spin(document.getElementById('spinner'));
+        $.ajax({
+            url: '/assays_ajax/',
+            type: 'POST',
+            dataType: 'json',
+            data: data,
+            success: function (json) {
+                window.spinner.stop();
+                if (json.errors) {
+                    // Display errors
+                    alert(json.errors);
+                }
+                else {
+                    let exist = true;
+                    //get_group_sample_info_ajax(json, exist);
+                    console.log("really back now")
+                }
+            },
+            // error callback
+            error: function (xhr, errmsg, err) {
+                window.spinner.stop();
+                alert('An error has occurred (finding group sample information). Enter the information manually.');
+                console.log(xhr.status + ': ' + xhr.responseText);
+            }
+        });
+    }
+
     /**
      * On change method
     */

@@ -87,6 +87,7 @@ from .utils import (
     get_the_plate_layout_info_for_assay_plate_map,
     review_plate_reader_data_file_return_file_list,
     plate_reader_data_file_process_data,
+    omic_data_file_process_data,
     sandrasGeneralFormatNumberFunction
 )
 
@@ -6956,6 +6957,68 @@ def fetch_omics_data(request):
     )
 
 
+def fetch_omics_data_for_upload_preview_prep(request):
+
+    save = False
+    study_id = request.POST.get('study_id', '{}')
+    # the data file pk does not exist yet for preview, and, it is not used for preview, use 1
+    data_file_pk = request.POST.get('file_id', '{}')
+    data_file = request.FILES.get('omic_data_file', '{}')
+    file_extension = os.path.splitext(data_file.name)[1]
+    calledme = 'clean'
+    data_type = request.POST.get('data_type', '{}')
+    analysis_method = request.POST.get('analysis_method', '{}')
+
+    a_returned = omic_data_file_process_data(save, study_id, data_file_pk, data_file, file_extension, calledme, data_type, analysis_method)
+
+    data = {'data': {}}
+    data['list_of_lists'] = a_returned
+
+    return HttpResponse(
+        json.dumps(data),
+        content_type='application/json'
+    )
+
+
+def fetch_omics_data_for_upload_preview(request):
+    # todo here here likely will not need this...just testing right now
+    # quinn is using above
+    data = {'data': {}}
+
+    list_of_lists = request.POST.get('list_of_lists', '{}')
+    print("made it here")
+    print(list_of_lists)
+
+    # data['file_id_to_name'] = {}
+    # data['table'] = {}
+    # data['data'][joint_name] = {}
+    # data['file_id_to_name'][datafile.id] = joint_name
+    # data['table'][joint_name] = datafile.description
+    # datapoints = AssayOmicDataPoint.objects.filter(study=study).exclude(value__isnull=True)
+    #
+    # target_ids = {}
+    #
+    # for datapoint in datapoints:
+    #     if datapoint.name not in data['data'][data['file_id_to_name'][datapoint.omic_data_file_id]]:
+    #         data['data'][data['file_id_to_name'][datapoint.omic_data_file_id]][datapoint.name] = {}
+    #     data['data'][data['file_id_to_name'][datapoint.omic_data_file_id]][datapoint.name][datapoint.analysis_target_id] = datapoint.value
+    #
+    #     target_ids.update({
+    #         datapoint.analysis_target_id: True
+    #     })
+    #
+    # data['target_name_to_id'] = {target.name: target.id for target in AssayOmicAnalysisTarget.objects.filter(id__in=target_ids)}
+    # omics_data = data['data']
+    # omics_target_name_to_id = data['target_name_to_id']
+    # omics_file_id_to_name = data['file_id_to_name']
+    # omics_table = data['table']
+
+    return HttpResponse(
+        json.dumps(data),
+        content_type='application/json'
+    )
+
+
 # TODO TODO TODO
 switch = {
     'fetch_center_id': {'call': fetch_center_id},
@@ -7083,6 +7146,12 @@ switch = {
     },
     'fetch_omic_method_target_unit_combos': {
         'call': fetch_omic_method_target_unit_combos
+    },
+    'fetch_omics_data_for_upload_preview_prep': {
+        'call': fetch_omics_data_for_upload_preview_prep
+    },
+    'fetch_omics_data_for_upload_preview': {
+        'call': fetch_omics_data_for_upload_preview
     },
 }
 
