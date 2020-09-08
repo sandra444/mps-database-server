@@ -6507,6 +6507,15 @@ def omic_data_file_process_data(save, study_id, omic_data_file_id, data_file, fi
     analysis_target_pk_to_sc_target_pk_dict = {}
     sc_target_pk_to_name_dict = {}
     omic_target_text_header_list = []
+    data_dicts = {'data': {}}
+    data_dicts['file_id_to_name'] = {}
+    data_dicts['table'] = {}
+    joint_name = "File Preview"
+
+    data_dicts['data'][joint_name] = {}
+    data_dicts['file_id_to_name'][1] = joint_name
+    data_dicts['table'][joint_name] = 'Preview Chosen File'
+    data_dicts['target_name_to_id'] = {}
 
     if data_type == 'log2fc':
         pass
@@ -6594,6 +6603,8 @@ def omic_data_file_process_data(save, study_id, omic_data_file_id, data_file, fi
                 list_of_relevant_headers_in_file = qc_each_file_or_worksheet_level[2]
 
                 # print("~match headers ",list_of_relevant_headers_in_file)
+                # to be compatible with the graphing, need this dict
+                data_dicts['target_name_to_id'] = {y: analysis_target_name_to_pk_dict[y] for y in list_of_relevant_headers_in_file}
 
             if continue_this_sheet_if_true:
                 # Guts of data loading for omic data file
@@ -6603,11 +6614,13 @@ def omic_data_file_process_data(save, study_id, omic_data_file_id, data_file, fi
                         list_of_instances, instance_counter, df,
                         study_id, omic_data_file_id, analysis_target_name_to_pk_dict,
                         sc_target_pk_to_name_dict, analysis_target_pk_to_sc_target_pk_dict,
-                        list_of_relevant_headers_in_file, called_from, gene_id_field_header)
+                        list_of_relevant_headers_in_file, called_from, gene_id_field_header,
+                        data_dicts['data'][joint_name])
                     continue_this_sheet_if_true = data_loaded_to_list_of_instances[0]
                     error_message = data_loaded_to_list_of_instances[1]
                     list_of_instances = data_loaded_to_list_of_instances[2]
                     instance_counter = data_loaded_to_list_of_instances[3]
+                    data_dicts['data'] = data_loaded_to_list_of_instances[4]
 
                     # print("~list_of_instances ",list_of_instances)
 
@@ -6633,7 +6646,7 @@ def omic_data_file_process_data(save, study_id, omic_data_file_id, data_file, fi
 
     # the returned is ONLY used for the preview on the upload page
     # can change it to a dictionary and format however is needed to work with the graph preview
-    return list_of_instances
+    return data_dicts
 
 
 def omic_determine_if_field_with_header_for_gene(df_column_headers_stripped):
@@ -6691,13 +6704,16 @@ def omic_two_group_data_to_list_of_instances(
     list_of_instances, instance_counter, df,
     study_id, omic_data_file_id, analysis_target_name_to_pk_dict,
     sc_target_pk_to_name_dict, analysis_target_pk_to_sc_target_pk_dict,
-    list_of_relevant_headers_in_file, called_from, gene_id_field_header):
+    list_of_relevant_headers_in_file, called_from, gene_id_field_header,
+    data_dict):
 
     error_message = ''
     continue_this_sheet_if_true = True
 
     for index, row in df.iterrows():
         name = row[gene_id_field_header]
+        # for the preview of the graphs
+        data_dict[name] = {}
         for each in list_of_relevant_headers_in_file:
             target_pk = analysis_target_name_to_pk_dict[each]
             value = row[each]
@@ -6725,14 +6741,17 @@ def omic_two_group_data_to_list_of_instances(
                 # this will be for the preview on the page when the file is changed
                 # gene name, analysis target pk, header,
                 # study component target pk, study component target name, value
-                sc_target_pk = analysis_target_pk_to_sc_target_pk_dict.get(target_pk)
-                sc_target_name = sc_target_pk_to_name_dict.get(sc_target_pk)
-                listance = [name, target_pk, each, sc_target_pk, sc_target_name, value]
-                list_of_instances.append(listance)
+                # sc_target_pk = analysis_target_pk_to_sc_target_pk_dict.get(target_pk)
+                # sc_target_name = sc_target_pk_to_name_dict.get(sc_target_pk)
+                # listance = [name, target_pk, each, sc_target_pk, sc_target_name, value]
+                # list_of_instances.append(listance)
+
+                # This if for the graph preview on the upload page
+                data_dict[name][target_pk] = value
 
             instance_counter = instance_counter + 1
 
-    return [continue_this_sheet_if_true, error_message, list_of_instances, instance_counter]
+    return [continue_this_sheet_if_true, error_message, list_of_instances, instance_counter, data_dict]
 
 
 def omic_metadata_data_to_list_of_instances(

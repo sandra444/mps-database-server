@@ -1,13 +1,13 @@
 {% extends "base.html" %}
 {% load static %}
 
-{#{% block extra_head %}#}
-{#    <script src="//www.google.com/jsapi"></script>#}
-{#    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>#}
-{#{% endblock %}#}
+{% block extra_head %}
+    <script src="//www.google.com/jsapi"></script>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+{% endblock %}
 
 {% block load_js %}
-{#    <script src="{% static "assays/assaystudy_omics.js" %}"></script>#}
+    <script src="{% static "assays/assaystudy_omics.js" %}"></script>
     <script src="{% static "assays/assayomicdatafileupload_aur.js" %}"></script>
     <script src="{% static "js/enter_override.js" %}"></script>
 {% endblock %}

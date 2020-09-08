@@ -5229,7 +5229,9 @@ class AssayOmicDataFileUploadForm(BootstrapForm):
 
         file_extension = os.path.splitext(data.get('omic_data_file').name)[1]
 
-        if 'omic_data_file' in self.changed_data or self.instance.id is None:
+        # there are a few fields, in addition to the change of the data file, that would cause the data to need replaced
+        # including analysis_method and data_type
+        if 'omic_data_file' in self.changed_data or 'analysis_method' in self.changed_data or 'data_type' in self.changed_data or self.instance.id is None:
             # Run file extension check
             if file_extension in ['.csv', '.tsv', '.txt', '.xls', '.xlsx']:
                 true_to_continue = True

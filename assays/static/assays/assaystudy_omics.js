@@ -180,6 +180,12 @@ $(document).ready(function () {
             omics_target_name_to_id = data['target_name_to_id']
             omics_file_id_to_name = data['file_id_to_name']
             omics_table = data['table']
+
+            console.log("data ", omics_data)
+            console.log("target_name_to_id ", omics_target_name_to_id)
+            console.log("file_id_to_name", omics_file_id_to_name)
+            console.log("table ", omics_table)
+
             if (!('error' in data)) {
                 drawPlots(JSON.parse(JSON.stringify(omics_data)), true, 0, 0, 0, 0, 0, 0, 0);
             } else {
@@ -446,4 +452,89 @@ $(document).ready(function () {
             2: { color: $("#color-not-significant").val() }
         }
     }
+
+
+    // START section for preview page
+    // To make the preview in the upload page
+    // NOTE: the upload page has the following elements
+    // that are used in getting the data needed
+    // form name="omic_file"
+    // id="id_data_type"
+    // id="id_anaylsis_method"
+    // id="id_omic_data_file"
+    // And, these elements were added to the upload page
+    // id="plots"
+    // id="volcano-plots"
+    // id="ma-plots"
+
+    /**
+     * On changes that affect the graphs/plots on the preview page
+    */
+    $('#id_data_type').change(function () {
+        get_data_for_this_file_ready_for_preview();
+    });
+    $('#id_anaylsis_method').on('change', function (e) {
+        get_data_for_this_file_ready_for_preview();
+    });
+    $('#id_omic_data_file').on('change', function (e) {
+        get_data_for_this_file_ready_for_preview();
+    });
+
+    function get_data_for_this_file_ready_for_preview() {
+        let data = {
+            call: 'fetch_omics_data_for_upload_preview_prep',
+            csrfmiddlewaretoken: window.COOKIES.csrfmiddlewaretoken
+        };
+        let form = document.omic_file;
+        let serializedData = $('form').serializeArray();
+        let formData = new FormData(form);
+        $.each(serializedData, function(index, field) {
+            formData.append(field.name, field.value);
+        });
+        let study_id = 1;
+        formData.append('study_id', study_id);
+        let file_id = 1;
+        formData.append('file_id', file_id);
+
+        $.each(data, function(index, contents) {
+            formData.append(index, contents);
+        });
+
+        window.spinner.spin(document.getElementById('spinner'));
+        $.ajax({
+            url: '/assays_ajax/',
+            type: 'POST',
+            dataType: 'json',
+            cache: false,
+            contentType: false,
+            processData: false,
+            data: formData,
+            success: function (json) {
+                window.spinner.stop();
+                if (json.errors) {
+                    alert(json.errors);
+                }
+                else {
+                    let exist = true;
+                    console.log("DATA", json)
+                    omics_data = json['data'];
+                    omics_target_name_to_id = json['target_name_to_id'];
+                    omics_file_id_to_name = json['file_id_to_name'];
+                    omics_table = json['table'];
+                    console.log("data ", omics_data)
+                    console.log("target_name_to_id ", omics_target_name_to_id)
+                    console.log("file_id_to_name ", omics_file_id_to_name)
+                    console.log("table ", omics_table)
+                    // drawPlots(JSON.parse(JSON.stringify(omics_data)), true, 0, 0, 0, 0, 0, 0, 0);
+                }
+            },
+            error: function (xhr, errmsg, err) {
+                window.spinner.stop();
+                alert('an error in processing data');
+                console.log(xhr.status + ': ' + xhr.responseText);
+            }
+        });
+    };
+    // END section for preview page
+
 });

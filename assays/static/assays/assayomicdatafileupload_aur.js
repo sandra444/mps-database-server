@@ -72,9 +72,14 @@ $(document).ready(function () {
     /**
      * On change data type, change what is required
     */
+    $('#id_omic_data_file').on('change', function (e) {
+        $('#omic_preview_button_section').show();
+    });
+    /**
+     * On change data type, change what is required
+    */
     $('#id_data_type').change(function () {
         changed_data_type();
-        made_change_affected_preview();
     });
 
     function changed_data_type() {
@@ -107,150 +112,6 @@ $(document).ready(function () {
             $('.two-groups').hide();
 
         }
-    }
-
-    /**
-     * On change analysis method
-    */
-    $('#id_anaylsis_method').on('change', function (e) {
-        made_change_affected_preview();
-    });
-    /**
-     * On change data type, change what is required
-    */
-    $('#id_omic_data_file').on('change', function (e) {
-        made_change_affected_preview();
-        //only need to show the button if the file was changed
-        //if file was not changed, it is not a preview (it is already in the database)
-        $('#omic_preview_button_section').show();
-    });
-
-    function made_change_affected_preview() {
-        // can add things here if needed
-        get_data_for_this_file_ready_for_preview();
-        // do not put anything here ajax - race errors
-    };
-
-    function get_data_for_this_file_ready_for_preview() {
-        var data = {
-            call: 'fetch_omics_data_for_upload_preview_prep',
-            csrfmiddlewaretoken: window.COOKIES.csrfmiddlewaretoken
-        };
-
-        // HANDY - send all form fields to ajax
-        // name a form in the html: <form name="omic_file"....
-        // add to form data as shown below
-        // access in the ajax.py like this: data_type = request.POST.get('data_type', '{}')
-        // access the file like this:     print(request.FILES)
-        //     < MultiValueDict: {'omic_data_file': [ < InMemoryUploadedFile: tc_118_112.csv(text / csv) >]} >
-        var form = document.omic_file;
-        var serializedData = $('form').serializeArray();
-        var formData = new FormData(form);
-        $.each(serializedData, function(index, field) {
-            // console.log("name: "+field.name+ "  value: "+field.value)
-            formData.append(field.name, field.value);
-        });
-
-        // let fileInput = document.getElementById('id_omic_data_file');
-        // let file = $('#id_omic_data_file')[0].files[0];
-        // console.log("file "+file)
-        // formData.append('file', file);
-
-        // is anything else needed for the data sub
-        // formData.append('file', file);
-        let study_id = $('#this_study_id').html().trim()
-        formData.append('study_id', study_id);
-
-        let file_id = 1;
-        try {
-            file_id = $('#this_file_id').val();
-        } catch {
-            file_id = 1;
-        }
-        formData.append('file_id', file_id);
-
-        $.each(data, function(index, contents) {
-            formData.append(index, contents);
-            // console.log("index "+index)
-            // console.log("contents "+contents)
-        });
-
-        // console.log("formData")
-        // console.log(formData)
-        // for (var key in formData) {
-        //     console.log(key, formData[key])
-        // }
-
-        window.spinner.spin(document.getElementById('spinner'));
-        $.ajax({
-            url: '/assays_ajax/',
-            type: 'POST',
-            dataType: 'json',
-            cache: false,
-            contentType: false,
-            processData: false,
-            data: formData,
-            success: function (json) {
-                window.spinner.stop();
-                if (json.errors) {
-                    // Display errors
-                    alert(json.errors);
-                }
-                else {
-                    let exist = true;
-                    // get_group_sample_info_ajax(json, exist);
-                    this_files_data = json.list_of_lists;
-                    // want to avoid another ajax all - should be able to get data back in format needed first time
-                    format_and_call_preview_update(this_files_data);
-                }
-            },
-            // error callback
-            error: function (xhr, errmsg, err) {
-                window.spinner.stop();
-                alert('an error in processing data');
-                console.log(xhr.status + ': ' + xhr.responseText);
-            }
-        });
-    };
-
-     /**
-      * When a group is changed, if that group has already been added to the data upload file
-      * get the first occurrence that has sample information.
-    */
-    function format_and_call_preview_update(this_files_data) {
-         console.log("back");
-         console.log(this_files_data);
-
-        let data = {
-            call: 'fetch_omics_data_for_upload_preview',
-            data: this_files_data,
-            csrfmiddlewaretoken: window.COOKIES.csrfmiddlewaretoken
-        };
-        window.spinner.spin(document.getElementById('spinner'));
-        $.ajax({
-            url: '/assays_ajax/',
-            type: 'POST',
-            dataType: 'json',
-            data: data,
-            success: function (json) {
-                window.spinner.stop();
-                if (json.errors) {
-                    // Display errors
-                    alert(json.errors);
-                }
-                else {
-                    let exist = true;
-                    //get_group_sample_info_ajax(json, exist);
-                    console.log("really back now")
-                }
-            },
-            // error callback
-            error: function (xhr, errmsg, err) {
-                window.spinner.stop();
-                alert('An error has occurred (finding group sample information). Enter the information manually.');
-                console.log(xhr.status + ': ' + xhr.responseText);
-            }
-        });
     }
 
     /**
