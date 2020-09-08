@@ -7,7 +7,7 @@
 {% endblock %}
 
 {% block load_js %}
-    <script src="{% static "assays/assaystudy_omics.js" %}"></script>
+{#    <script src="{% static "assays/assaystudy_omics.js" %}"></script>#}
     <script src="{% static "assays/assayomicdatafileupload_aur.js" %}"></script>
     <script src="{% static "js/enter_override.js" %}"></script>
 {% endblock %}
@@ -285,23 +285,40 @@
                             </table>
                         </div>
                     </div>
-                </div>
 
-                <div class="toggle-display-none" id="omic_preview_button_section">
-                    <button type="button" class="btn" id="omicPreviewTheGraphsButton">Preview Graphs</button>
-                </div>
 
-                <div class="toggle-display-none" id="omic_preview_the_graphs_section">
-
-                    <div class="hidden" id="called_from">upload</div>
-                    <p>In development...</p>
-                    <div id="plots">
-                        <div id="volcano-plots">
-                        </div>
-                        <div id="ma-plots" style="display: none">
-                        </div>
+                    <div class="toggle-display-none" id="omic_preview_button_section">
+                        <button type="button" class="btn" id="omicPreviewTheGraphsButton">View Preview Graphs</button>
                     </div>
+
+                    <div class="toggle-display-none" id="omic_preview_the_graphs_section">
+                        <p>Currently in development.</p>
+{#                        <table id="omics_table" class="table table-bordered">#}
+{#                            <thead>#}
+{#                                <tr>#}
+{#                                    <td>#}
+{#                                        <label>Show/Hide</label>#}
+{#                                    </td>#}
+{#                                    <td>#}
+{#                                        <label>Treatment Group</label>#}
+{#                                    </td>#}
+{#                                    <td>#}
+{#                                        <label>Treatment Group Description</label>#}
+{#                                    </td>#}
+{#                                </tr>#}
+{#                            </thead>#}
+{#                            <tbody id="omics_table_body">#}
+{#                            </tbody>#}
+{#                        </table>#}
+
+                        <div id="plots">
+                            <div id="volcano-plots">
+                            </div>
+                            <div id="ma-plots" style="display: none">
+                            </div>
+                        </div>
                 </div>
+
             </div>
         </div>
     </form>

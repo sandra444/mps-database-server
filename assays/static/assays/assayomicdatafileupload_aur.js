@@ -14,7 +14,7 @@ $(document).ready(function () {
     let global_make_the_group_change = true;
 
     //set the required-ness of the groups on load based on data type on load
-    changed_data_type();
+    changed_something_important("load");
 
     let global_omic_upload_check_load = $('#check_load').html().trim();
     if (global_omic_upload_check_load === 'review') {
@@ -70,24 +70,35 @@ $(document).ready(function () {
     });
 
     /**
-     * On change data type, change what is required
+     * On change data file
     */
     $('#id_omic_data_file').on('change', function (e) {
+        //when first change the file, make the preview button available
         $('#omic_preview_button_section').show();
+        changed_something_important("data_file");
     });
     /**
-     * On change data type, change what is required
+     * On change data type, change what is required page logic
     */
     $('#id_data_type').change(function () {
-        changed_data_type();
+        changed_something_important("data_type");
+    });
+    /**
+     * On changes that affect the graphs/plots on the preview page
+    */
+    $('#id_anaylsis_method').on('change', function (e) {
+        changed_something_important("analysis_method");
     });
 
-    function changed_data_type() {
+    function changed_something_important(called_from) {
         if ($('#id_data_type')[0].selectize.items[0] == 'log2fc') {
             $('#id_group_1').next().addClass('required');
             $('.one-group').show();
             $('#id_group_2').next().addClass('required');
             $('.two-groups').show();
+            if (called_from != 'load') {
+                get_data_for_this_file_ready_for_preview()
+            }
         } else {
             //here here to update when ready
             alert('Uploading of Normalized and Raw Count Data is Currently in Development.');
@@ -110,9 +121,83 @@ $(document).ready(function () {
             $('#id_time_2_minute').val(0);
             global_omic_current_group2 = $('#id_group_2')[0].selectize.items[0];
             $('.two-groups').hide();
-
         }
     }
+
+    // START section for preview page
+    // To make the preview in the upload page
+    // NOTE: the upload page has the following elements
+    // that are used in getting the data needed
+    // form name="omic_file"
+    // id="id_data_type"
+    // id="id_anaylsis_method"
+    // id="id_omic_data_file"
+    // And, these elements were added to the upload page
+    // id="plots"
+    // id="volcano-plots"
+    // id="ma-plots"
+    function get_data_for_this_file_ready_for_preview() {
+        $('#omic_preview_the_graphs_section').hide();
+        let data = {
+            call: 'fetch_omics_data_for_upload_preview_prep',
+            csrfmiddlewaretoken: window.COOKIES.csrfmiddlewaretoken
+        };
+        let form = document.omic_file;
+        let serializedData = $('form').serializeArray();
+        let formData = new FormData(form);
+        $.each(serializedData, function(index, field) {
+            formData.append(field.name, field.value);
+        });
+        let study_id = 1;
+        formData.append('study_id', study_id);
+        let file_id = 1;
+        formData.append('file_id', file_id);
+
+        $.each(data, function(index, contents) {
+            formData.append(index, contents);
+        });
+
+        window.spinner.spin(document.getElementById('spinner'));
+        $.ajax({
+            url: '/assays_ajax/',
+            type: 'POST',
+            dataType: 'json',
+            cache: false,
+            contentType: false,
+            processData: false,
+            data: formData,
+            success: function (json) {
+                window.spinner.stop();
+                if (json.errors) {
+                    alert(json.errors);
+                }
+                else {
+                    let exist = true;
+                    console.log("DATA", json)
+                    omics_data = json['data'];
+                    omics_target_name_to_id = json['target_name_to_id'];
+                    omics_file_id_to_name = json['file_id_to_name'];
+                    omics_table = json['table'];
+                    console.log("data ", omics_data)
+                    console.log("target_name_to_id ", omics_target_name_to_id)
+                    console.log("file_id_to_name ", omics_file_id_to_name)
+                    console.log("table ", omics_table)
+                    window.OMICS.draw_plots(JSON.parse(JSON.stringify(omics_data)), true, 0, 0, 0, 0, 0, 0, 0);
+                    if($("omic_preview_the_graphs_section").is(":visible")) {
+                        $('#omic_preview_the_graphs_section').show();
+                    }
+                }
+            },
+            error: function (xhr, errmsg, err) {
+                window.spinner.stop();
+                alert('an error in processing data');
+                console.log(xhr.status + ': ' + xhr.responseText);
+            }
+        });
+    };
+    // END section for preview page
+
+
 
     /**
      * On change method
