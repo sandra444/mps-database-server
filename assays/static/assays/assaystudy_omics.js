@@ -5,6 +5,9 @@ $(document).ready(function () {
     // Set the callback
     google.charts.setOnLoadCallback(fetchOmicsData);
 
+    //GLOBAL-SCOPE
+    window.OMICS = {};
+
     // FILE-SCOPE VARIABLES
     var study_id = Math.floor(window.location.href.split('/')[5]);
 
@@ -81,7 +84,7 @@ $(document).ready(function () {
         };
 
         // Draw filtered plots
-        drawPlots(
+        window.OMICS.draw_plots(
             JSON.parse(JSON.stringify(omics_data)),
             false,
             $("#slider-range-pvalue").slider("option", "values")[0],
@@ -181,7 +184,7 @@ $(document).ready(function () {
             omics_file_id_to_name = data['file_id_to_name']
             omics_table = data['table']
             if (!('error' in data)) {
-                drawPlots(JSON.parse(JSON.stringify(omics_data)), true, 0, 0, 0, 0, 0, 0, 0);
+                window.OMICS.draw_plots(JSON.parse(JSON.stringify(omics_data)), true, 0, 0, 0, 0, 0, 0, 0);
             } else {
                 console.log(data['error']);
                 // Stop spinner
@@ -198,7 +201,7 @@ $(document).ready(function () {
         });
     }
 
-    function drawPlots(data, firstTime, minPval, maxPval, minL2FC, maxL2FC, minPval_neg, maxPval_neg, L2FC_abs) {
+    window.OMICS.draw_plots = function(data, firstTime, minPval, maxPval, minL2FC, maxL2FC, minPval_neg, maxPval_neg, L2FC_abs) {
         var chartData = {}
         var log2fc, avgexpress, neglog10pvalue, pvalue, check_over, check_under, check_neither, log2fc_threshold, threshold_pvalue;
         check_over = $("#check-over").is(":checked");
