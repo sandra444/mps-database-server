@@ -7,7 +7,8 @@
 {% endblock %}
 
 {% block load_js %}
-{#    <script src="{% static "assays/assaystudy_omics.js" %}"></script>#}
+    <script src="{% static "assays/grouping_filtering.js" %}"></script>
+    <script src="{% static "assays/assaystudy_omics.js" %}"></script>
     <script src="{% static "assays/assayomicdatafileupload_aur.js" %}"></script>
     <script src="{% static "js/enter_override.js" %}"></script>
 {% endblock %}
@@ -29,6 +30,12 @@
             Add
         {% endif %}
     </li>
+{% endblock %}
+
+{% block sidebar %}
+    <div class="toggle-display-none" id="omic_preview_the_graphs_section2">
+        {% include 'assays/grouping_filtering.html' with omics="true"%}
+    </div>
 {% endblock %}
 
 {% block content %}

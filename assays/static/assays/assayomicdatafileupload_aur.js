@@ -67,6 +67,7 @@ $(document).ready(function () {
     });
     $('#omicPreviewTheGraphsButton').click(function () {
         $('#omic_preview_the_graphs_section').toggle();
+        $('#omic_preview_the_graphs_section2').toggle();
     });
 
     /**
@@ -138,6 +139,7 @@ $(document).ready(function () {
     // id="ma-plots"
     function get_data_for_this_file_ready_for_preview() {
         $('#omic_preview_the_graphs_section').hide();
+        $('#omic_preview_the_graphs_section2').hide();
         let data = {
             call: 'fetch_omics_data_for_upload_preview_prep',
             csrfmiddlewaretoken: window.COOKIES.csrfmiddlewaretoken
@@ -185,6 +187,7 @@ $(document).ready(function () {
                     window.OMICS.draw_plots(JSON.parse(JSON.stringify(omics_data)), true, 0, 0, 0, 0, 0, 0, 0);
                     if($("omic_preview_the_graphs_section").is(":visible")) {
                         $('#omic_preview_the_graphs_section').show();
+                        $('#omic_preview_the_graphs_section2').show();
                     }
                 }
             },
