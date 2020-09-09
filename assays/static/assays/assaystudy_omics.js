@@ -85,7 +85,6 @@ $(document).ready(function () {
 
         // Draw filtered plots
         window.OMICS.draw_plots(
-            JSON.parse(JSON.stringify(omics_data)),
             false,
             $("#slider-range-pvalue").slider("option", "values")[0],
             $("#slider-range-pvalue").slider("option", "values")[1],
@@ -184,7 +183,7 @@ $(document).ready(function () {
             omics_file_id_to_name = data['file_id_to_name']
             omics_table = data['table']
             if (!('error' in data)) {
-                window.OMICS.draw_plots(JSON.parse(JSON.stringify(omics_data)), true, 0, 0, 0, 0, 0, 0, 0);
+                window.OMICS.draw_plots(true, 0, 0, 0, 0, 0, 0, 0);
             } else {
                 console.log(data['error']);
                 // Stop spinner
@@ -201,7 +200,7 @@ $(document).ready(function () {
         });
     }
 
-    window.OMICS.draw_plots = function(data, firstTime, minPval, maxPval, minL2FC, maxL2FC, minPval_neg, maxPval_neg, L2FC_abs) {
+    window.OMICS.draw_plots = function(firstTime, minPval, maxPval, minL2FC, maxL2FC, minPval_neg, maxPval_neg, L2FC_abs) {
         var chartData = {}
         var log2fc, avgexpress, neglog10pvalue, pvalue, check_over, check_under, check_neither, log2fc_threshold, threshold_pvalue;
         check_over = $("#check-over").is(":checked");
@@ -211,8 +210,8 @@ $(document).ready(function () {
         log2fc_threshold = $("#log2foldchange-threshold").val()
 
         // For each group/file/TBD
-        for (x of Object.keys(data)) {
-            if (!(data[x] in chartData)) {
+        for (x of Object.keys(omics_data)) {
+            if (!(omics_data[x] in chartData)) {
                 chartData[x] = {
                     'volcano': [['Log2(FoldChange)', 'Over Expressed', {'type': 'string', 'role': 'style'}, {'type': 'string', 'role': 'tooltip'}, 'Under Expressed', {'type': 'string', 'role': 'style'}, {'type': 'string', 'role': 'tooltip'}, 'Not Significant', {'type': 'string', 'role': 'style'}, {'type': 'string', 'role': 'tooltip'}]],
                     'ma': [['Average Expression', 'Over Expressed', {'type': 'string', 'role': 'style'}, {'type': 'string', 'role': 'tooltip'}, 'Under Expressed', {'type': 'string', 'role': 'style'}, {'type': 'string', 'role': 'tooltip'}, 'Not Significant', {'type': 'string', 'role': 'style'}, {'type': 'string', 'role': 'tooltip'}]]
@@ -225,17 +224,17 @@ $(document).ready(function () {
             }
 
             // For each gene probe ID
-            for (y of Object.keys(data[x])) {
-                log2fc = parseFloat(data[x][y][omics_target_name_to_id['log2FoldChange']]);
-                avgexpress = Math.log2(parseFloat(data[x][y][omics_target_name_to_id['baseMean']]));
-                pvalue = parseFloat(data[x][y][omics_target_name_to_id['pvalue']]);
+            for (y of Object.keys(omics_data[x])) {
+                log2fc = parseFloat(omics_data[x][y][omics_target_name_to_id['log2FoldChange']]);
+                avgexpress = Math.log2(parseFloat(omics_data[x][y][omics_target_name_to_id['baseMean']]));
+                pvalue = parseFloat(omics_data[x][y][omics_target_name_to_id['pvalue']]);
                 neglog10pvalue = -Math.log10(pvalue);
-                stat = parseFloat(data[x][y][omics_target_name_to_id['stat']]);
-                padj = parseFloat(data[x][y][omics_target_name_to_id['padj']]);
+                stat = parseFloat(omics_data[x][y][omics_target_name_to_id['stat']]);
+                padj = parseFloat(omics_data[x][y][omics_target_name_to_id['padj']]);
 
                 // On first pass: Determine high/low for Log2FoldChange slider
                 if (firstTime) {
-                    if (Object.keys(data[x])[0] == y && Object.keys(data)[0] == x) {
+                    if (Object.keys(omics_data[x])[0] == y && Object.keys(omics_data)[0] == x) {
                         lowestL2FC = log2fc;
                         highestL2FC = log2fc;
                         lowestPVAL = pvalue;
