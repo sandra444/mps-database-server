@@ -69,7 +69,6 @@ $(document).ready(function () {
         $('#omic_preview_the_graphs_section').toggle();
         $('#omic_preview_the_graphs_section2').toggle();
     });
-
     /**
      * On change data file
     */
@@ -175,16 +174,17 @@ $(document).ready(function () {
                 }
                 else {
                     let exist = true;
-                    console.log("DATA", json)
-                    omics_data = json['data'];
-                    omics_target_name_to_id = json['target_name_to_id'];
-                    omics_file_id_to_name = json['file_id_to_name'];
-                    omics_table = json['table'];
-                    console.log("data ", omics_data)
-                    console.log("target_name_to_id ", omics_target_name_to_id)
-                    console.log("file_id_to_name ", omics_file_id_to_name)
-                    console.log("table ", omics_table)
-                    window.OMICS.draw_plots(JSON.parse(JSON.stringify(omics_data)), true, 0, 0, 0, 0, 0, 0, 0);
+                    // console.log("a DATA", json)
+                    // omics_data = json['data'];
+                    // omics_target_name_to_id = json['target_name_to_id'];
+                    // omics_file_id_to_name = json['file_id_to_name'];
+                    // omics_table = json['table'];
+                    // console.log("b data ", omics_data)
+                    // console.log("c target_name_to_id ", omics_target_name_to_id)
+                    // console.log("d file_id_to_name ", omics_file_id_to_name)
+                    // console.log("e table ", omics_table)
+
+                    window.OMICS.draw_plots(JSON.parse(JSON.stringify(json)), true, 0, 0, 0, 0, 0, 0, 0);
                     if($("omic_preview_the_graphs_section").is(":visible")) {
                         $('#omic_preview_the_graphs_section').show();
                         $('#omic_preview_the_graphs_section2').show();
@@ -199,8 +199,6 @@ $(document).ready(function () {
         });
     };
     // END section for preview page
-
-
 
     /**
      * On change method
@@ -219,7 +217,6 @@ $(document).ready(function () {
             $('#id_name_reference')[0].selectize.setValue('entrez_gene');
         }
     });
-
     /**
      * On change a group, call a function that gets sample info
     */

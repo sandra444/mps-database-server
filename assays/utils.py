@@ -6620,7 +6620,7 @@ def omic_data_file_process_data(save, study_id, omic_data_file_id, data_file, fi
                     error_message = data_loaded_to_list_of_instances[1]
                     list_of_instances = data_loaded_to_list_of_instances[2]
                     instance_counter = data_loaded_to_list_of_instances[3]
-                    data_dicts['data'] = data_loaded_to_list_of_instances[4]
+                    data_dicts['data'][joint_name] = data_loaded_to_list_of_instances[4]
 
                     # print("~list_of_instances ",list_of_instances)
 
@@ -6747,6 +6747,7 @@ def omic_two_group_data_to_list_of_instances(
                 # list_of_instances.append(listance)
 
                 # This if for the graph preview on the upload page
+
                 data_dict[name][target_pk] = value
 
             instance_counter = instance_counter + 1

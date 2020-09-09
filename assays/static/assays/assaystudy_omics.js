@@ -177,20 +177,8 @@ $(document).ready(function () {
             }
         )
         .success(function(data) {
-            console.log("DATA", data)
-
-            omics_data = data['data']
-            omics_target_name_to_id = data['target_name_to_id']
-            omics_file_id_to_name = data['file_id_to_name']
-            omics_table = data['table']
-
-            console.log("data ", omics_data)
-            console.log("target_name_to_id ", omics_target_name_to_id)
-            console.log("file_id_to_name", omics_file_id_to_name)
-            console.log("table ", omics_table)
-
             if (!('error' in data)) {
-                window.OMICS.draw_plots(JSON.parse(JSON.stringify(omics_data)), true, 0, 0, 0, 0, 0, 0, 0);
+                window.OMICS.draw_plots(JSON.parse(JSON.stringify(data)), true, 0, 0, 0, 0, 0, 0, 0);
             } else {
                 console.log(data['error']);
                 // Stop spinner
@@ -208,6 +196,14 @@ $(document).ready(function () {
     }
 
     window.OMICS.draw_plots = function(data, firstTime, minPval, maxPval, minL2FC, maxL2FC, minPval_neg, maxPval_neg, L2FC_abs) {
+        console.log("DATA", data)
+
+        omics_data = data['data']
+        omics_target_name_to_id = data['target_name_to_id']
+        omics_file_id_to_name = data['file_id_to_name']
+        omics_table = data['table']
+
+
         var chartData = {}
         var log2fc, avgexpress, neglog10pvalue, pvalue, check_over, check_under, check_neither, log2fc_threshold, threshold_pvalue;
         check_over = $("#check-over").is(":checked");
@@ -217,8 +213,9 @@ $(document).ready(function () {
         log2fc_threshold = $("#log2foldchange-threshold").val()
 
         // For each group/file/TBD
-        for (x of Object.keys(data)) {
-            if (!(data[x] in chartData)) {
+        for (x of Object.keys(omics_data)) {
+            console.log("x "+x)
+            if (!(omics_data[x] in chartData)) {
                 chartData[x] = {
                     'volcano': [['Log2(FoldChange)', 'Over Expressed', {'type': 'string', 'role': 'style'}, {'type': 'string', 'role': 'tooltip'}, 'Under Expressed', {'type': 'string', 'role': 'style'}, {'type': 'string', 'role': 'tooltip'}, 'Not Significant', {'type': 'string', 'role': 'style'}, {'type': 'string', 'role': 'tooltip'}]],
                     'ma': [['Average Expression', 'Over Expressed', {'type': 'string', 'role': 'style'}, {'type': 'string', 'role': 'tooltip'}, 'Under Expressed', {'type': 'string', 'role': 'style'}, {'type': 'string', 'role': 'tooltip'}, 'Not Significant', {'type': 'string', 'role': 'style'}, {'type': 'string', 'role': 'tooltip'}]]
@@ -231,17 +228,18 @@ $(document).ready(function () {
             }
 
             // For each gene probe ID
-            for (y of Object.keys(data[x])) {
-                log2fc = parseFloat(data[x][y][omics_target_name_to_id['log2FoldChange']]);
-                avgexpress = Math.log2(parseFloat(data[x][y][omics_target_name_to_id['baseMean']]));
-                pvalue = parseFloat(data[x][y][omics_target_name_to_id['pvalue']]);
+            for (y of Object.keys(omics_data[x])) {
+
+                log2fc = parseFloat(omics_data[x][y][omics_target_name_to_id['log2FoldChange']]);
+                avgexpress = Math.log2(parseFloat(omics_data[x][y][omics_target_name_to_id['baseMean']]));
+                pvalue = parseFloat(omics_data[x][y][omics_target_name_to_id['pvalue']]);
                 neglog10pvalue = -Math.log10(pvalue);
-                stat = parseFloat(data[x][y][omics_target_name_to_id['stat']]);
-                padj = parseFloat(data[x][y][omics_target_name_to_id['padj']]);
+                stat = parseFloat(omics_data[x][y][omics_target_name_to_id['stat']]);
+                padj = parseFloat(omics_data[x][y][omics_target_name_to_id['padj']]);
 
                 // On first pass: Determine high/low for Log2FoldChange slider
                 if (firstTime) {
-                    if (Object.keys(data[x])[0] == y && Object.keys(data)[0] == x) {
+                    if (Object.keys(omics_data[x])[0] == y && Object.keys(omics_data)[0] == x) {
                         lowestL2FC = log2fc;
                         highestL2FC = log2fc;
                         lowestPVAL = pvalue;
@@ -295,7 +293,6 @@ $(document).ready(function () {
                 	}
                 }
             }
-
         }
 
         if (firstTime) {
@@ -455,89 +452,4 @@ $(document).ready(function () {
             2: { color: $("#color-not-significant").val() }
         }
     }
-
-
-    // START section for preview page
-    // To make the preview in the upload page
-    // NOTE: the upload page has the following elements
-    // that are used in getting the data needed
-    // form name="omic_file"
-    // id="id_data_type"
-    // id="id_anaylsis_method"
-    // id="id_omic_data_file"
-    // And, these elements were added to the upload page
-    // id="plots"
-    // id="volcano-plots"
-    // id="ma-plots"
-
-    /**
-     * On changes that affect the graphs/plots on the preview page
-    */
-    $('#id_data_type').change(function () {
-        get_data_for_this_file_ready_for_preview();
-    });
-    $('#id_anaylsis_method').on('change', function (e) {
-        get_data_for_this_file_ready_for_preview();
-    });
-    $('#id_omic_data_file').on('change', function (e) {
-        get_data_for_this_file_ready_for_preview();
-    });
-
-    function get_data_for_this_file_ready_for_preview() {
-        let data = {
-            call: 'fetch_omics_data_for_upload_preview_prep',
-            csrfmiddlewaretoken: window.COOKIES.csrfmiddlewaretoken
-        };
-        let form = document.omic_file;
-        let serializedData = $('form').serializeArray();
-        let formData = new FormData(form);
-        $.each(serializedData, function(index, field) {
-            formData.append(field.name, field.value);
-        });
-        let study_id = 1;
-        formData.append('study_id', study_id);
-        let file_id = 1;
-        formData.append('file_id', file_id);
-
-        $.each(data, function(index, contents) {
-            formData.append(index, contents);
-        });
-
-        window.spinner.spin(document.getElementById('spinner'));
-        $.ajax({
-            url: '/assays_ajax/',
-            type: 'POST',
-            dataType: 'json',
-            cache: false,
-            contentType: false,
-            processData: false,
-            data: formData,
-            success: function (json) {
-                window.spinner.stop();
-                if (json.errors) {
-                    alert(json.errors);
-                }
-                else {
-                    let exist = true;
-                    console.log("DATA", json)
-                    omics_data = json['data'];
-                    omics_target_name_to_id = json['target_name_to_id'];
-                    omics_file_id_to_name = json['file_id_to_name'];
-                    omics_table = json['table'];
-                    console.log("data ", omics_data)
-                    console.log("target_name_to_id ", omics_target_name_to_id)
-                    console.log("file_id_to_name ", omics_file_id_to_name)
-                    console.log("table ", omics_table)
-                    // drawPlots(JSON.parse(JSON.stringify(omics_data)), true, 0, 0, 0, 0, 0, 0, 0);
-                }
-            },
-            error: function (xhr, errmsg, err) {
-                window.spinner.stop();
-                alert('an error in processing data');
-                console.log(xhr.status + ': ' + xhr.responseText);
-            }
-        });
-    };
-    // END section for preview page
-
 });
