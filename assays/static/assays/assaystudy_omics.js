@@ -1,12 +1,14 @@
+//GLOBAL-SCOPE
+window.OMICS = {
+    draw_plots: null
+};
+
 $(document).ready(function () {
     // Load core chart package
     google.charts.load('current', {'packages': ['corechart']});
     google.charts.load('visualization', '1', {'packages': ['imagechart']});
     // Set the callback
     google.charts.setOnLoadCallback(fetchOmicsData);
-
-    //GLOBAL-SCOPE
-    window.OMICS = {};
 
     // FILE-SCOPE VARIABLES
     var study_id = Math.floor(window.location.href.split('/')[5]);
