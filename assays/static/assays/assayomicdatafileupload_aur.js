@@ -32,6 +32,7 @@ $(document).ready(function () {
 
     // tool tip requirements
     // todo here here update the tool tips for the different file formats
+    let global_omic_upload_omic_file_format_deseq2_log2fc_headers = 'name, log2FoldChange, baseMean, lfcSE, stat, pvalue, padj';
     let global_omic_upload_omic_file_format_deseq2_log2fc_tooltip = 'For DESeq2 Log2Fold change data, the header "log2FoldChange" must be in the first row. Other optional columns headers are: "baseMean", "lfcSE", "stat", "pvalue", "padj", and "gene" (or "name").';
     $('#omic_file_format_deseq2_log2fc_tooltip').next().html($('#omic_file_format_deseq2_log2fc_tooltip').next().html() + make_escaped_tooltip(global_omic_upload_omic_file_format_deseq2_log2fc_tooltip));
     let global_omic_upload_omic_file_format_normcounts_tooltip = 'Under Development - ?????? Normalized counts data files must have one header row. the first column must be named "name" and contain a reference to the gene. The remaining columns must be named with the chip or well name as assigned in the MPS Database. ';
@@ -65,16 +66,14 @@ $(document).ready(function () {
     $('#fileFormatDetailsButton').click(function () {
         $('#omic_file_format_details_section').toggle();
     });
-    $('#omicPreviewTheGraphsButton').click(function () {
-        $('#omic_preview_the_graphs_section').toggle();
-        $('#omic_preview_the_graphs_section2').toggle();
-    });
+
     /**
      * On change data file
     */
     $('#id_omic_data_file').on('change', function (e) {
         //when first change the file, make the preview button available
-        $('#omic_preview_button_section').show();
+        $('#omic_preview_the_graphs_section').show();
+        $('#omic_preview_the_graphs_section2').show();
         changed_something_important("data_file");
     });
     /**
@@ -137,8 +136,6 @@ $(document).ready(function () {
     // id="volcano-plots"
     // id="ma-plots"
     function get_data_for_this_file_ready_for_preview() {
-        $('#omic_preview_the_graphs_section').hide();
-        $('#omic_preview_the_graphs_section2').hide();
         let data = {
             call: 'fetch_omics_data_for_upload_preview_prep',
             csrfmiddlewaretoken: window.COOKIES.csrfmiddlewaretoken
@@ -183,12 +180,7 @@ $(document).ready(function () {
                     // console.log("c target_name_to_id ", omics_target_name_to_id)
                     // console.log("d file_id_to_name ", omics_file_id_to_name)
                     // console.log("e table ", omics_table)
-
                     window.OMICS.draw_plots(JSON.parse(JSON.stringify(json)), true, 0, 0, 0, 0, 0, 0, 0);
-                    if($("omic_preview_the_graphs_section").is(":visible")) {
-                        $('#omic_preview_the_graphs_section').show();
-                        $('#omic_preview_the_graphs_section2').show();
-                    }
                 }
             },
             error: function (xhr, errmsg, err) {
@@ -250,6 +242,30 @@ $(document).ready(function () {
             global_omic_current_group2 = $('#id_group_2')[0].selectize.items[0];
         }
     });
+
+    // https://www.bitdegree.org/learn/best-code-editor/javascript-download-example-1
+    function download(filename, text) {
+      var element = document.createElement('a');
+      element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+      element.setAttribute('download', filename);
+      element.style.display = 'none';
+      document.body.appendChild(element);
+      element.click();
+      document.body.removeChild(element);
+    }
+    /**
+     * On click to download
+    */
+    // Start file download.
+    document.getElementById("fileFileFormatTwoGroup").addEventListener("click", function(){
+    // Start the download of yournewfile.txt file with the content from the text area
+        // could tie this to selections in the GUI later, if requested.
+        // change with tool tip
+        var text = global_omic_upload_omic_file_format_deseq2_log2fc_headers;
+        var filename = "TwoGroupDESeq2Omic.txt";
+
+        download(filename, text);
+    }, false);
 
     function send_user_different_message() {
         if (typeof $('#id_group_1')[0].selectize.items[0] !== 'undefined') {

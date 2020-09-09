@@ -6510,7 +6510,7 @@ def omic_data_file_process_data(save, study_id, omic_data_file_id, data_file, fi
     data_dicts = {'data': {}}
     data_dicts['file_id_to_name'] = {}
     data_dicts['table'] = {}
-    joint_name = "File Preview"
+    joint_name = "New/Changed File Preview"
 
     data_dicts['data'][joint_name] = {}
     data_dicts['file_id_to_name'][1] = joint_name

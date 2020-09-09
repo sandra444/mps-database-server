@@ -36,10 +36,10 @@ $(document).ready(function () {
     $("#toggle-plot-type").click(function() {
         if ($("#ma-plots").css("display") == "none") {
             $("#toggle-plot-type").text("Switch to Volcano Plots");
-            $("#ma-plots").prependTo($("#plots"));
+            // $("#ma-plots").prependTo($("#plots"));
         } else {
             $("#toggle-plot-type").text("Switch to MA Plots");
-            $("#volcano-plots").prependTo($("#plots"));
+            // $("#volcano-plots").prependTo($("#plots"));
         }
         $("#volcano-plots").toggle();
         $("#ma-plots").toggle();
