@@ -13,8 +13,6 @@ $(document).ready(function () {
     // FILE-SCOPE VARIABLES
     var study_id = Math.floor(window.location.href.split('/')[5]);
 
-    var lowestL2FC, highestL2FC, lowestPVAL, highestPVAL;
-
     function fetchOmicsData(){
         window.spinner.spin(
             document.getElementById("spinner")

@@ -5,12 +5,6 @@ window.OMICS = {
 };
 
 $(document).ready(function () {
-    // Load core chart package
-    google.charts.load('current', {'packages': ['corechart']});
-    google.charts.load('visualization', '1', {'packages': ['imagechart']});
-
-    // FILE-SCOPE VARIABLES
-    var study_id = Math.floor(window.location.href.split('/')[5]);
 
     var lowestL2FC, highestL2FC, lowestPVAL, highestPVAL;
 
