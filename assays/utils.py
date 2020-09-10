@@ -6621,6 +6621,17 @@ def omic_data_file_process_data(save, study_id, omic_data_file_id, data_file, fi
                     list_of_instances = data_loaded_to_list_of_instances[2]
                     instance_counter = data_loaded_to_list_of_instances[3]
                     data_dicts['data'][joint_name] = data_loaded_to_list_of_instances[4]
+                    max_fold_change = data_loaded_to_list_of_instances[5]
+                    max_pvalue = data_loaded_to_list_of_instances[6]
+                    min_fold_change = data_loaded_to_list_of_instances[7]
+                    min_pvalue = data_loaded_to_list_of_instances[8]
+                    data_dicts['max_fold_change'] = max_fold_change
+                    data_dicts['max_pvalue'] = max_pvalue
+                    data_dicts['min_fold_change'] = min_fold_change
+                    data_dicts['min_pvalue'] = min_pvalue
+
+                    # print("~max_pvalue returned ", max_pvalue)
+                    # print("~max_fold_change returned ", max_fold_change)
 
                     # print("~list_of_instances ",list_of_instances)
 
@@ -6646,6 +6657,9 @@ def omic_data_file_process_data(save, study_id, omic_data_file_id, data_file, fi
 
     # the returned is ONLY used for the preview on the upload page
     # can change it to a dictionary and format however is needed to work with the graph preview
+
+    # print(data_dicts)
+
     return data_dicts
 
 
@@ -6709,50 +6723,81 @@ def omic_two_group_data_to_list_of_instances(
 
     error_message = ''
     continue_this_sheet_if_true = True
+    max_fold_change_r = -999.0
+    max_pvalue_r = -999.0
+    max_fold_change = -999.0
+    max_pvalue = -999.0
+    min_fold_change_r = 9999999.0
+    min_pvalue_r = 9999999.0
+    min_fold_change = 9999999.0
+    min_pvalue = 9999999.0
 
     for index, row in df.iterrows():
         name = row[gene_id_field_header]
         # for the preview of the graphs
-        data_dict[name] = {}
-        for each in list_of_relevant_headers_in_file:
-            target_pk = analysis_target_name_to_pk_dict[each]
-            value = row[each]
-            if np.isnan(value):
-                value = None
+        # testing
+        # if name.find('MZ') >= 0:
+        if 0 == 0:
+            data_dict[name] = {}
+            for each in list_of_relevant_headers_in_file:
+                target_pk = analysis_target_name_to_pk_dict[each]
+                value = row[each]
+                if np.isnan(value):
+                    value = None
+                else:
+                    value = float(value)
 
-            # print("instance_counter ",instance_counter)
-            # print("~each ", each)
-            # print("~target_pk ", target_pk)
-            # print("~value ", value)
+                if value != None:
 
-            # creating an instance causes an error in the clean since there is no pk for this file on the add form
-            # but we want the rest to go through the save AND we want to make sure instances are being counted in the clean
-            if called_from == 'save':
-                instance = AssayOmicDataPoint(
-                    study_id=study_id,
-                    omic_data_file_id=omic_data_file_id,
-                    name=name,
-                    analysis_target_id=target_pk,
-                    value=value
-                )
-                # add this list to the list of lists
-                list_of_instances.append(instance)
-            else:
-                # this will be for the preview on the page when the file is changed
-                # gene name, analysis target pk, header,
-                # study component target pk, study component target name, value
-                # sc_target_pk = analysis_target_pk_to_sc_target_pk_dict.get(target_pk)
-                # sc_target_name = sc_target_pk_to_name_dict.get(sc_target_pk)
-                # listance = [name, target_pk, each, sc_target_pk, sc_target_name, value]
-                # list_of_instances.append(listance)
+                    if each.find('val') >= 0:
+                        if value > max_pvalue:
+                            max_pvalue = value
+                        if value < min_pvalue:
+                            min_pvalue = value
 
-                # This if for the graph preview on the upload page
+                    if each.find('fold') >= 0 or each.find('fc') >= 0 or each.find('FC') >= 0 or each.find('Fold') >= 0:
+                        if value > max_fold_change:
+                            max_fold_change = value
+                        if value < min_fold_change:
+                            min_fold_change = value
 
-                data_dict[name][target_pk] = value
+                # print("instance_counter ",instance_counter)
+                # print("~each ", each)
+                # print("~target_pk ", target_pk)
+                # print("~value ", value)
 
-            instance_counter = instance_counter + 1
+                # creating an instance causes an error in the clean since there is no pk for this file on the add form
+                # but we want the rest to go through the save AND we want to make sure instances are being counted in the clean
+                if called_from == 'save':
+                    instance = AssayOmicDataPoint(
+                        study_id=study_id,
+                        omic_data_file_id=omic_data_file_id,
+                        name=name,
+                        analysis_target_id=target_pk,
+                        value=value
+                    )
+                    # add this list to the list of lists
+                    list_of_instances.append(instance)
+                else:
+                    # this will be for the preview on the page when the file is changed
+                    # gene name, analysis target pk, header,
+                    # study component target pk, study component target name, value
+                    # sc_target_pk = analysis_target_pk_to_sc_target_pk_dict.get(target_pk)
+                    # sc_target_name = sc_target_pk_to_name_dict.get(sc_target_pk)
+                    # listance = [name, target_pk, each, sc_target_pk, sc_target_name, value]
+                    # list_of_instances.append(listance)
 
-    return [continue_this_sheet_if_true, error_message, list_of_instances, instance_counter, data_dict]
+                    # This if for the graph preview on the upload page
+                     data_dict[name][target_pk] = value
+
+                instance_counter = instance_counter + 1
+
+        max_fold_change_r = max_fold_change
+        max_pvalue_r = max_pvalue
+        min_fold_change_r = min_fold_change
+        min_pvalue_r = min_pvalue
+
+    return [continue_this_sheet_if_true, error_message, list_of_instances, instance_counter, data_dict, max_fold_change_r, max_pvalue_r, min_fold_change_r, min_pvalue_r]
 
 
 def omic_metadata_data_to_list_of_instances(
@@ -6784,11 +6829,11 @@ def omic_metadata_data_to_list_of_instances(
             # if there are additional header rows, deal with them here ....
 
             name = row[gene_id_field_name_if_app]
-            print('name for this row ',name)
+            # print('name for this row ',name)
             c = 0
 
             while c < len(data_cols):
-                print('c ', c, ' data_cols[c] ', data_cols[c])
+                # print('c ', c, ' data_cols[c] ', data_cols[c])
                 value = row[data_cols[c]]
                 # note the +1 because the first one was not popped off as the data_cols was
                 this_matrix_item = int(matrix_item_pk_list[c + 1])

@@ -1,4 +1,13 @@
+//GLOBAL-SCOPE
+window.OMICS = {
+    draw_plots: null,
+    omics_data: null
+};
+
 $(document).ready(function () {
+    // Load core chart package
+    google.charts.load('current', {'packages': ['corechart']});
+    google.charts.load('visualization', '1', {'packages': ['imagechart']});
 
     // $('.has-popover').popover({'trigger':'hover'});
 
@@ -67,11 +76,17 @@ $(document).ready(function () {
         $('#omic_file_format_details_section').toggle();
     });
 
+    // hide/show the graph sections
+    $('#omicPreviewTheGraphsButton').click(function () {
+        $('#omic_preview_the_graphs_section').toggle();
+        $('#omic_preview_the_graphs_section2').toggle();
+    });
     /**
      * On change data file
     */
     $('#id_omic_data_file').on('change', function (e) {
         //when first change the file, make the preview button available
+        $('#omic_preview_button_section').show();
         $('#omic_preview_the_graphs_section').show();
         $('#omic_preview_the_graphs_section2').show();
         changed_something_important("data_file");
@@ -171,7 +186,7 @@ $(document).ready(function () {
                 }
                 else {
                     let exist = true;
-                    // console.log("a DATA", json)
+                    console.log("a DATA", json)
                     // omics_data = json['data'];
                     // omics_target_name_to_id = json['target_name_to_id'];
                     // omics_file_id_to_name = json['file_id_to_name'];
@@ -180,7 +195,31 @@ $(document).ready(function () {
                     // console.log("c target_name_to_id ", omics_target_name_to_id)
                     // console.log("d file_id_to_name ", omics_file_id_to_name)
                     // console.log("e table ", omics_table)
-                    window.OMICS.draw_plots(JSON.parse(JSON.stringify(json)), true, 0, 0, 0, 0, 0, 0, 0);
+                    window.OMICS.omics_data = JSON.parse(JSON.stringify(json));
+                    omics_file_id_to_name_all = window.OMICS.omics_data['file_id_to_name'];
+                    omics_file_id_to_name = omics_file_id_to_name_all[1];
+                    maxL2FC_a = window.OMICS.omics_data['max_fold_change'];
+                    maxPval_a = window.OMICS.omics_data['max_pvalue'];
+                    minL2FC_a = window.OMICS.omics_data['min_fold_change'];
+                    minPval_a = window.OMICS.omics_data['min_pvalue'];
+                    // console.log("a")
+                    // console.log(maxL2FC_a)
+                    // console.log(maxPval_a)
+                    // console.log(minL2FC_a)
+                    // console.log(minPval_a)
+                    maxL2FC = -Math.log10(maxL2FC_a);
+                    maxPval = -Math.log10(maxPval_a);
+                    minL2FC = -Math.log10(minL2FC_a);
+                    minPval = -Math.log10(minPval_a);
+                    // console.log("no a")
+                    // console.log(maxL2FC)
+                    // console.log(maxPval)
+                    // console.log(minL2FC)
+                    // console.log(minPval)
+                    // console.log("window.OMICS.omics_data ")
+                    // console.log(window.OMICS.omics_data)
+                    window.OMICS.draw_plots(window.OMICS.omics_data, true, 0, 0, 0, 0, 0, 0, 0);
+                    // function(omics_data, firstTime, minPval, maxPval, minL2FC, maxL2FC, minPval_neg, maxPval_neg, L2FC_abs)
                 }
             },
             error: function (xhr, errmsg, err) {

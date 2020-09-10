@@ -8,7 +8,7 @@
 
 {% block load_js %}
     <script src="{% static "assays/grouping_filtering.js" %}"></script>
-    <script src="{% static "assays/assaystudy_omics.js" %}"></script>
+    <script src="{% static "assays/assay_shared_omics.js" %}"></script>
     <script src="{% static "assays/assayomicdatafileupload_aur.js" %}"></script>
     <script src="{% static "js/enter_override.js" %}"></script>
 {% endblock %}
@@ -105,6 +105,9 @@
                 </div>
                 <div class="hidden" id="this_study_id">
                     {{ form.instance.study_id }}
+                </div>
+                <div class="hidden" id="show_hide_graph">
+                    hide
                 </div>
             </div>
 
@@ -301,13 +304,40 @@
                     </div>
                 </div>
 
+
+                <div class="toggle-display-none" id="omic_preview_button_section">
+                    <button type="button" class="btn" id="omicPreviewTheGraphsButton">View Preview Graphs</button>
+                </div>
+
                 <div class="toggle-display-none" id="omic_preview_the_graphs_section">
+
+                    <div class="hidden">
+                        <table id="omics_table" class="hidden table table-bordered">
+                            <thead>
+                                <tr>
+                                    <td>
+                                        <label>Show/Hide</label>
+                                    </td>
+                                    <td>
+                                        <label>Treatment Group</label>
+                                    </td>
+                                    <td>
+                                        <label>Treatment Group Description</label>
+                                    </td>
+                                </tr>
+                            </thead>
+                            <tbody id="omics_table_body">
+                            </tbody>
+                        </table>
+                    </div>
+
                     <div id="plots">
                         <div id="volcano-plots">
                         </div>
                         <div id="ma-plots" style="display: none">
                         </div>
                     </div>
+
                 </div>
 
             </div>
