@@ -6671,6 +6671,8 @@ def omic_determine_if_field_with_header_for_gene(df_column_headers_stripped):
         gene_id_field_name = 'gene'
     elif 'name' in df_column_headers_stripped:
         gene_id_field_name = 'name'
+    elif 'gene reference' in df_column_headers_stripped:
+        gene_id_field_name = 'gene reference'
     else:
         # for this sheet or file, the HEADER for the target field could not be found, skip this sheet
         continue_this_sheet_if_true = False

@@ -189,8 +189,6 @@ $(document).ready(function () {
                         highestPVAL = pvalue;
                     }
                 }
-                console.log("highestL2FC "+highestL2FC)
-                console.log("highestPVAL "+highestPVAL)
 
                 // Starter rows for each plot, consisting of headers and an invisible anchor point.
                 if (chartData[x]['volcano'].length == 1) {
