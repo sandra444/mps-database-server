@@ -6981,7 +6981,7 @@ def fetch_omics_data_for_upload_preview_prep(request):
     data = data_dicts
 
     return HttpResponse(
-        json.dumps(data),
+        default_json.dumps(data),
         content_type='application/json'
     )
 

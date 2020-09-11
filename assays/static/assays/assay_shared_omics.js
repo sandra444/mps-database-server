@@ -136,7 +136,7 @@ $(document).ready(function () {
         $("#quantitative-filters").show();
     }
 
-    window.OMICS.draw_plots = function(omics_data, firstTime, minPval, maxPval, minL2FC, maxL2FC, minPval_neg, maxPval_neg, L2FC_abs) {
+    window.OMICS.draw_plots = function(omics_data, firstTime, minPval, maxPval, minL2FC, maxL2FC, minPval_neg, maxPval_neg, L2FC_abs, called_from="analysis") {
         var chartData = {}
         var log2fc, avgexpress, neglog10pvalue, pvalue, check_over, check_under, check_neither, log2fc_threshold, threshold_pvalue;
         check_over = $("#check-over").is(":checked");
@@ -155,7 +155,7 @@ $(document).ready(function () {
             }
 
             // Create Omics info table on first pass
-            if (firstTime) {
+            if (firstTime && called_from == 'anaylsis') {
                 $("#omics_table_body").html($("#omics_table_body").html()+"<tr><td class='dt-center'><input type='checkbox' class='big-checkbox'></td><td>" + x + "</td><td>" + omics_table[x] + "</td></tr>")
             }
 
@@ -229,18 +229,20 @@ $(document).ready(function () {
 
         if (firstTime) {
             createSliders();
-            $("#omics_table").DataTable({
-                order: [1, 'asc'],
-                responsive: true,
-                dom: 'B<"row">lfrtip',
-                paging: false,
-                fixedHeader: {headerOffset: 50},
-                deferRender: true,
-                columnDefs: [
-                    // Try to sort on checkbox
-                    { "sortable": false, "targets": 0, "width": "10%" }
-                ]
-            });
+            if (called_from == 'anaylsis') {
+                $("#omics_table").DataTable({
+                    order: [1, 'asc'],
+                    responsive: true,
+                    dom: 'B<"row">lfrtip',
+                    paging: false,
+                    fixedHeader: {headerOffset: 50},
+                    deferRender: true,
+                    columnDefs: [
+                        // Try to sort on checkbox
+                        {"sortable": false, "targets": 0, "width": "10%"}
+                    ]
+                });
+            }
         }
 
         var volcanoData, maData, volcanoChart, maChart;
@@ -250,7 +252,7 @@ $(document).ready(function () {
         // $('#volcano-plots').append("<div class='row'>");
         // $('#ma-plots').append("<div class='row'>");
         for (const prop in chartData) {
-            console.log(prop)
+            // console.log(prop)
             volcano_chart_row.append("<div class='col-lg-6'><div id='volcano-" + prop + "'></div></div>");
             ma_chart_row.append("<div class='col-lg-6'><div id='ma-" + prop + "'></div></div>");
         }
