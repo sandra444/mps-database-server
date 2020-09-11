@@ -88,6 +88,7 @@ from .utils import (
     get_the_plate_layout_info_for_assay_plate_map,
     review_plate_reader_data_file_return_file_list,
     plate_reader_data_file_process_data,
+    omic_data_file_process_data,
     sandrasGeneralFormatNumberFunction
 )
 
@@ -6960,6 +6961,31 @@ def fetch_omics_data(request):
     )
 
 
+def fetch_omics_data_for_upload_preview_prep(request):
+
+    save = False
+    study_id = request.POST.get('study_id', '{}')
+    # the data file pk does not exist yet for preview, and, it is not used for preview, use 1
+    data_file_pk = request.POST.get('file_id', '{}')
+    data_file = request.FILES.get('omic_data_file', '{}')
+    file_extension = os.path.splitext(data_file.name)[1]
+    calledme = 'clean'
+    data_type = request.POST.get('data_type', '{}')
+    analysis_method = request.POST.get('analysis_method', '{}')
+    group_1 = request.POST.get('group_1', '{}')
+    group_2 = request.POST.get('group_2', '{}')
+    description = request.POST.get('description', '{}')
+
+    data_dicts = omic_data_file_process_data(save, study_id, data_file_pk, data_file, file_extension, calledme, data_type, analysis_method)
+
+    data = data_dicts
+
+    return HttpResponse(
+        default_json.dumps(data),
+        content_type='application/json'
+    )
+
+
 # TODO TODO TODO
 switch = {
     'fetch_center_id': {'call': fetch_center_id},
@@ -7087,6 +7113,9 @@ switch = {
     },
     'fetch_omic_method_target_unit_combos': {
         'call': fetch_omic_method_target_unit_combos
+    },
+    'fetch_omics_data_for_upload_preview_prep': {
+        'call': fetch_omics_data_for_upload_preview_prep
     },
 }
 

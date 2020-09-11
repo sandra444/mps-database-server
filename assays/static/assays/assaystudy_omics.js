@@ -30,7 +30,7 @@ $(document).ready(function () {
             }
         )
         .success(function(data) {
-            console.log("DATA", data)
+            // console.log("DATA", data)
 
             if (!('error' in data)) {
                 window.OMICS.omics_data = JSON.parse(JSON.stringify(data))
