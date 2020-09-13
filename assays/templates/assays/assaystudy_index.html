@@ -80,6 +80,11 @@
                     </button>
                     <ul class="dropdown-menu" aria-labelledby="analyze_edit">
                         <li><a href="summary">Study Summary</a></li>
+                        {# TODO REVISE THIS CONDITIONAL DEPENDING ON OMICS #}
+                        {% if object.assaydatafileupload_set.count or object.assaysplatereadermap.count %}
+                        {# Not a great label? #}
+                        <li><a href="data_index">Data Uploads</a></li>
+                        {% endif %}
                         {% if object.assaydatapoint_set.count %}
                         <li><a href="reproducibility">Reproducibility</a></li>
                         <li><a href="power_analysis">Power Analysis</a></li>
@@ -103,6 +108,7 @@
                     </ul>
                 </span>
 
+                {% comment %}
                 <span class="dropdown btn-group">
                     <button class="btn btn-warning dropdown-toggle" type="button" id="add_data" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
                         Add/View Data
@@ -117,6 +123,7 @@
                         <li><a href="{% url 'assayplatereaderfile-index' object.id %}">Assay Plate Reader Files</a></li>
                     </ul>
                 </span>
+                {% endcomment %}
 
                 {% if user_is_group_admin or user_is_stakeholder_admin or user.is_superuser or show_indicate_study_sign_off or not user_is_group_admin and user_is_group_editor and not object.signed_off_by%}
                 <span class="dropdown btn-group">
