@@ -242,7 +242,6 @@ $(document).ready(function () {
                         {"sortable": false, "targets": 0, "width": "10%"}
                     ]
                 });
-                $("#omics_table").show();
             }
         }
 
