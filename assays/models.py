@@ -2551,6 +2551,8 @@ class AbstractSetupCell(models.Model):
             #     full_string.append('Duration of: ' + self.get_duration_string())
             if 'addition_location_id' in criteria:
                 full_string.append(str(self.addition_location))
+            if 'biosensor_id' in criteria:
+                full_string.append(str(self.biosensor))
             return '{}; '.format(' '.join(full_string))
         else:
             return str(self)
@@ -3317,6 +3319,7 @@ class AssayMatrixItem(FlaggableModel):
 
 # Controversy has arisen over whether to put this in an organ model or not
 # This name is somewhat deceptive, it describes the quantity of cells, not a cell (rename please)
+# DEPRECATED
 class AssaySetupCell(models.Model):
     """Individual cell parameters for setup used in inline"""
     class Meta(object):
