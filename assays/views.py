@@ -2220,6 +2220,27 @@ class AssayStudyAddNew(OneGroupRequiredMixin, AssayStudyMixin, CreateView):
 
         return context
 
+    # Special handling for emailing on creation
+    def extra_form_processing(self, form):
+        # Contact superusers
+        # Superusers to contact
+        superusers_to_be_alerted = User.objects.filter(is_superuser=True, is_active=True)
+
+        # Magic strings are in poor taste, should use a template instead
+        superuser_subject = 'Study Created: {0}'.format(form.instance)
+        superuser_message = render_to_string(
+            'assays/email/superuser_study_created_alert.txt',
+            {
+                'study': form.instance
+            }
+        )
+
+        for user_to_be_alerted in superusers_to_be_alerted:
+            user_to_be_alerted.email_user(superuser_subject, superuser_message, DEFAULT_FROM_EMAIL)
+
+        return super(AssayStudyAddNew, self).extra_form_processing(form)
+
+
 # class AssayStudyAddNew(OneGroupRequiredMixin, CreateView):
 #     """Add a study"""
 #     template_name = 'assays/assaystudy_add_new.html'
@@ -2327,6 +2348,27 @@ class StudySetViewerMixin(object):
 class AssayStudySetDataPlots(StudySetViewerMixin, DetailView):
     model = AssayStudySet
     template_name = 'assays/assaystudyset_data_plots.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(AssayStudySetDataPlots, self).get_context_data(**kwargs)
+
+        # NOT DRY
+        # FILTER OUT STUDIES WITH NO ASSAYS
+        # PLEASE NOTE FILTER HERE
+        # WE ASSUME THE USER OUGHT TO SEE ALL THE STUDIES (via permission mixin)
+        # combined = get_user_accessible_studies(self.request.user).filter(
+        #     assaystudyassay__isnull=False
+        # )
+        combined = self.object.studies.all()
+
+        get_queryset_with_organ_model_map(combined)
+        get_queryset_with_number_of_data_points(combined)
+        get_queryset_with_stakeholder_sign_off(combined)
+        get_queryset_with_group_center_dictionary(combined)
+
+        context['studies'] = combined
+
+        return context
 
 
 class AssayStudySetReproducibility(StudySetViewerMixin, DetailView):

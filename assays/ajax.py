@@ -4170,7 +4170,7 @@ def get_pubmed_reference_data(request):
     if request.POST.get('term', ''):
         term = request.POST.get('term')
     # Get URL of target for scrape
-    url = 'https://www.ncbi.nlm.nih.gov/pubmed/?term={}'.format(term)
+    url = 'https://pubmed.ncbi.nlm.nih.gov/?term={}'.format(term)
     # Make the http request
     response = requests.get(url)
     # Get the webpage as text
@@ -4179,49 +4179,56 @@ def get_pubmed_reference_data(request):
     soup = BeautifulSoup(stuff, 'html5lib')
 
     # Get Title
-    if soup.find_all("div", {"class": "abstract"}):
-        data['title'] = soup.select(".abstract > h1")[0].get_text()
+    if soup.find_all('h1', {'class': 'heading-title'}):
+        data['title'] = soup.select('.heading-title')[0].get_text().strip()
 
     # Get Authors
-    if soup.find_all("div", {"class": "auths"}):
-        data['authors'] = ", ".join([x.get_text() for x in soup.select(".abstract > .auths > a")])
+    if soup.find_all('span', {'class': 'authors-list-item'}):
+        data['authors'] = ''.join([x.get_text() for x in soup.select('.authors-list-item')])
 
     # Get Abstract
-    if soup.find_all("div", {"class": "abstr"}):
-        if soup.find_all("div", {"class": "abstr_eng"}):
-            data['abstract'] = soup.select(".abstract > .abstr > .abstr_eng")[0].get_text()
-        else:
-            data['abstract'] = soup.select(".abstract > .abstr")[0].get_text()[8:]
+    if soup.find_all('div', {'class': 'abstract-content'}):
+        data['abstract'] = soup.select('.abstract-content > p')[0].get_text().strip()
     else:
-        data['abstract'] = 'None'
+        data['abstract'] = 'No abstract available.'
 
     # Get Publication
-    if soup.find_all("div", {"class": "cit"}):
-        data['publication'] = soup.select(".cit > a")[0].get_text()
+    if soup.find_all('button', {'class': 'journal-actions-trigger'}):
+        data['publication'] = soup.select('.journal-actions-trigger')[0].get_text().strip()
 
     # Get Year
-    if soup.find_all("div", {"class": "cit"}):
-        data['year'] = soup.select(".cit")[0].get_text().replace(data['publication'], '')[:5].strip()
+    if soup.find_all('span', {'class': 'cit'}):
+        data['year'] = soup.select('.cit')[0].get_text().split(' ')[0]
         # data['year'] = soup.select(".cit > span")[0].get_text()[0:5]
 
     # Get PMID and DOI
-    if soup.find_all("dl", {"class": "rprtid"}):
-        pmid_doi_headers = soup.select(".rprtid dt")
-        pmid_doi_stuff = soup.select(".rprtid dd")
-        data['pubmed_id'] = ""
-        data['doi'] = "N/A"
-        for x in range(len(pmid_doi_headers)):
-            if pmid_doi_headers[x].get_text() == "PMID:":
-                data['pubmed_id'] = pmid_doi_stuff[x].get_text()
-            elif pmid_doi_headers[x].get_text() == "DOI:":
-                data['doi'] = pmid_doi_stuff[x].get_text()
+    # if soup.find_all('dl', {'class': 'rprtid'}):
+    #     pmid_doi_headers = soup.select('.rprtid dt')
+    #     pmid_doi_stuff = soup.select('.rprtid dd')
+    #     data['pubmed_id'] = ''
+    #     data['doi'] = 'N/A'
+    #     for x in range(len(pmid_doi_headers)):
+    #         if pmid_doi_headers[x].get_text() == 'PMID:':
+    #             data['pubmed_id'] = pmid_doi_stuff[x].get_text()
+    #         elif pmid_doi_headers[x].get_text() == 'DOI:':
+    #             data['doi'] = pmid_doi_stuff[x].get_text()
+    # else:
+    #     data['pubmed_id'] = ''
+    #     data['doi'] = 'N/A'
+
+    if soup.find_all('strong', {'class': 'current-id'}):
+        data['pubmed_id'] = soup.select('.current-id')[0].get_text()
     else:
-        data['pubmed_id'] = ""
-        data['doi'] = "N/A"
+        data['pubmed_id'] = ''
+
+    if soup.find_all('span', {'class': 'citation-doi'}):
+        data['doi'] = soup.select('.citation-doi')[0].get_text().strip()[5:-1]
+    else:
+        data['doi'] = ''
 
     return HttpResponse(
         json.dumps(data),
-        content_type="application/json"
+        content_type='application/json'
     )
 
 # Somewhat crude, but we need some way to perform filters etc. if we use this
@@ -4857,7 +4864,8 @@ def fetch_pbpk_intrinsic_clearance_results(request):
     except ValueError:
         flow_rate = None
     cell_name = request.POST.get('cell_name', '').replace(u'\xa0', u' ')
-    raw_compound_pk_data = eval(request.POST.get('compound_pk_data', ''))
+    raw_compound_pk_data = json.loads(request.POST.get('compound_pk_data', '[[]]'))
+
     final_compound_pk_data = []
     cell_index = raw_compound_pk_data[0].index(cell_name)
     try:
@@ -4866,9 +4874,10 @@ def fetch_pbpk_intrinsic_clearance_results(request):
         no_cell_index = -1
 
     for line in raw_compound_pk_data[1:]:
-        final_compound_pk_data.append([float(line[0]), cell_name, float(line[cell_index])])
-        if no_cell_index > 0:
-            final_compound_pk_data.append([float(line[0]), "-No Cell Samples-", float(line[no_cell_index])])
+        if line[cell_index] is not None:
+            final_compound_pk_data.append([float(line[0]), cell_name, float(line[cell_index])])
+            if no_cell_index > 0:
+                final_compound_pk_data.append([float(line[0]), "-No Cell Samples-", float(line[no_cell_index])])
 
     clearance_results = pk_clearance_results(
         request.POST.get('pk_type', ''),
