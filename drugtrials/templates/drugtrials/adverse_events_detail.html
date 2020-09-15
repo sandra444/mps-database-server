@@ -2,10 +2,14 @@
 {% load static %}
 {% load humanize %}
 
-{% block load %}
+{% block load_js %}
     <script src="{% static "drugtrials/get_adverse_events.js" %}"></script>
-    <link href="{% static "css/c3.min.css" %}" rel="stylesheet" type="text/css">
     <script src="{% static "js/c3.min.js" %}"></script>
+{% endblock %}
+
+{% block load_css %}
+    {# TODO REVISE #}
+    <link href="{% static "css/c3.min.css" %}" rel="stylesheet" type="text/css">
 {% endblock %}
 
 {% block breadcrumbs %}
@@ -43,8 +47,9 @@
 
     <div class="padded-row">
         <div class="col-sm-3 col-md-2 thumbnail text-center">
-            <img src="https://www.ebi.ac.uk/chembldb/compound/displayimage/{{ object.compound.chemblid }}">
-            {% if object.compound.mps %}
+            {% comment %} <img src="https://www.ebi.ac.uk/chembldb/compound/displayimage/{{ object.compound.chemblid }}"> {% endcomment %}
+            <img src="https://www.ebi.ac.uk/chembl/api/data/image/{{ object.compound.chemblid }}.svg">
+            {% comment %} {% if object.compound.mps %}
                 <span class="label label-primary">MPS</span>
             {% endif %}
             {% if object.compound.epa %}
@@ -55,7 +60,7 @@
             {% endif %}
             {% if not object.compound.mps and not object.compound.epa and not object.compound.tctc %}
                 <span class="label label-default">Unassigned</span>
-            {% endif %}
+            {% endif %} {% endcomment %}
         </div>
 
         <div class="col-sm-9 col-md-10">
@@ -180,8 +185,6 @@
         {% endfor %}
         </tbody>
     </table>
-
-    <script src="{% static "js/display_datatable.js" %}"></script>
 
     <br>
 

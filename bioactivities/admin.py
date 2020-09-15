@@ -1,16 +1,27 @@
 from django.contrib import admin
-from django.contrib import messages
+# from django.contrib import messages
 from django import forms
-from django.shortcuts import render_to_response
-from django.template import RequestContext
-from django.http import HttpResponseRedirect
+# from django.shortcuts import render_to_response
+# from django.template import RequestContext
+# from django.http import HttpResponseRedirect
 from django.forms import Textarea
+from django.db import models
 
 from bioactivities.resource import BioactivityTypeResource
 from mps.base.admin import LockableAdmin
-from .models import *
+from .models import (
+    Target,
+    Assay,
+    Bioactivity,
+    BioactivityType,
+    PubChemBioactivity
+)
 from bioactivities.forms import AssayForm
 from bioactivities.forms import TargetsForm
+
+from django.utils.safestring import mark_safe
+
+# TODO TODO TODO allow_tags attribute has been removed
 
 
 class TargetAdmin(LockableAdmin):
@@ -58,7 +69,7 @@ class TargetAdmin(LockableAdmin):
         (
             'Change Tracking', {
                 'fields': (
-                    'locked',
+                    # 'locked',
                     ('created_by', 'created_on'),
                     ('modified_by', 'modified_on'),
                     ('signed_off_by', 'signed_off_date'),
@@ -187,7 +198,7 @@ class AssayAdmin(LockableAdmin):
         (
             'Change Tracking', {
                 'fields': (
-                    'locked',
+                    # 'locked',
                     ('created_by', 'created_on'),
                     ('modified_by', 'modified_on'),
                     ('signed_off_by', 'signed_off_date'),
@@ -278,21 +289,23 @@ class BioactivityAdmin(LockableAdmin):
     ordering = ('compound', 'standard_name')
     raw_id_fields = ('compound', 'target', 'assay',)
 
+    @mark_safe
     def chembl_link(self, obj):
         return obj.assay.chembl_link()
 
     chembl_link.allow_tags = True
     chembl_link.short_description = 'CHEMBL Links'
 
+    @mark_safe
     def bioactivity_display(self, obj):
 
         if obj.compound.chemblid:
-            url = (u'https://www.ebi.ac.uk/chembldb/compound/'
+            url = ('https://www.ebi.ac.uk/chembldb/compound/'
                    'displayimage/' + obj.compound.chemblid)
             return '<img src="%s">' % \
                 url
         else:
-            return u''
+            return ''
 
     bioactivity_display.allow_tags = True
     bioactivity_display.short_description = 'Structure'
@@ -309,7 +322,7 @@ class BioactivityAdmin(LockableAdmin):
         'bioactivity_type',
         'value',
         'units',
-        'locked',
+        # 'locked',
     )
     search_fields = ['compound__name', 'target__name', 'bioactivity_type']
     readonly_fields = ['created_by', 'created_on', 'modified_by',
@@ -323,7 +336,7 @@ class BioactivityAdmin(LockableAdmin):
                        ('standard_name', 'standardized_value', 'standardized_units'),
                        ('activity_comment', 'reference', 'name_in_reference'),
                        ('notes', 'data_validity'),
-                       'locked',
+                       # 'locked',
                        ('created_by', 'created_on'), ('modified_by', 'modified_on'),
                        ('signed_off_by', 'signed_off_date'),)
         }),
@@ -374,7 +387,7 @@ class BioactivityTypeAdmin(LockableAdmin):
         (
             'Change Tracking', {
                 'fields': (
-                    'locked',
+                    # 'locked',
                     ('created_by', 'created_on'),
                     ('modified_by', 'modified_on'),
                     ('signed_off_by', 'signed_off_date'),

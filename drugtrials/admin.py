@@ -1,18 +1,34 @@
 from django.contrib import admin
 from django.contrib.admin.widgets import AdminURLFieldWidget
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.utils.translation import ugettext_lazy as _
-from django.utils.text import force_text
+from django.utils.encoding import force_text
 from django.db.models import URLField
 from django.utils.safestring import mark_safe
-from django.forms import Textarea
 
 from mps.base.admin import LockableAdmin
-from drugtrials.models import *
-from drugtrials.resource import *
-from forms import *
+from drugtrials.models import (
+    Species,
+    TrialSource,
+    FindingResult,
+    FindingTreatment,
+    FindingType,
+    ResultDescriptor,
+    Finding,
+    AdverseEvent,
+    OpenFDACompound,
+    DrugTrial
+)
+from drugtrials.resource import DrugTrialResource
+from .forms import (
+    FindingResultForm,
+    DrugTrialForm,
+    FindingForm
+)
 
 from import_export.admin import ImportExportModelAdmin
+
+from django.utils.safestring import mark_safe
 
 
 class URLFieldWidget(AdminURLFieldWidget):
@@ -29,19 +45,19 @@ class URLFieldWidget(AdminURLFieldWidget):
         # u'.value)" />' \
 
         html = \
-            u'<div style="width: 55em; height: 4em;">' \
-            u'<div>' \
-            u'{0}' \
-            u'</div>' \
-            u'<div style="float: right; z-index: 10;' \
-            u' margin-top: -3em; margin-right: -25em;">' \
-            u'<button type="button" onclick="window.open(document.getElementById(\'{1}\').value, \'_newtab\');" ' \
-            u'>Open Link in New Tab</button>' \
-            u'<button type="button" onclick="window.open(document.getElementById(\'{1}\').value, \'win\', ' \
-            u'\'toolbars=0,width=800,height=800,left=200,top=200,scrollbars=1,resizable=1\');" ' \
-            u'>Open Link in New Window</button>' \
-            u'</div>' \
-            u'</div>'.format(widget, attrs['id'])
+            '<div style="width: 55em; height: 4em;">' \
+            '<div>' \
+            '{0}' \
+            '</div>' \
+            '<div style="float: right; z-index: 10;' \
+            ' margin-top: -3em; margin-right: -25em;">' \
+            '<button type="button" onclick="window.open(document.getElementById(\'{1}\').value, \'_newtab\');" ' \
+            '>Open Link in New Tab</button>' \
+            '<button type="button" onclick="window.open(document.getElementById(\'{1}\').value, \'win\', ' \
+            '\'toolbars=0,width=800,height=800,left=200,top=200,scrollbars=1,resizable=1\');" ' \
+            '>Open Link in New Window</button>' \
+            '</div>' \
+            '</div>'.format(widget, attrs['id'])
 
         return mark_safe(html)
 
@@ -60,7 +76,7 @@ class SpeciesAdmin(LockableAdmin):
         ),
         ('Change Tracking', {
             'fields': (
-                'locked',
+                # 'locked',
                 ('created_by', 'created_on'),
                 ('modified_by', 'modified_on'),
                 ('signed_off_by', 'signed_off_date'),
@@ -93,7 +109,7 @@ class TrialSourceAdmin(LockableAdmin):
         (
             'Change Tracking', {
                 'fields': (
-                    'locked',
+                    # 'locked',
                     ('created_by', 'created_on'),
                     ('modified_by', 'modified_on'),
                     ('signed_off_by', 'signed_off_date'),
@@ -103,6 +119,7 @@ class TrialSourceAdmin(LockableAdmin):
     )
     actions = ['update_fields']
 
+    @mark_safe
     def source_site(self, obj):
         return '<a href="%s" target="_blank">%s</a>' % (obj.source_website, obj.source_website)
 
@@ -119,10 +136,11 @@ class FindingResultInline(admin.TabularInline):
     verbose_name = 'Organ Finding'
     verbose_name_plural = 'Organ Findings'
     fields = ('finding_name', 'get_edit_link', 'descriptor', 'finding_time', 'time_units',
-              'result', 'severity', 'frequency', 'value', 'value_units',)
+              'result', 'severity', 'frequency', 'value', 'value_units', 'notes')
     readonly_fields = ['get_edit_link']
     extra = 0
 
+    @mark_safe
     def get_edit_link(self, obj=None):
         if obj.pk:  # if object has already been saved and has a primary key, show link to it
             url = reverse('admin:%s_%s_change' % (obj._meta.app_label, obj._meta.model_name), args=[force_text(obj.pk)])
@@ -163,11 +181,11 @@ class DrugTrialAdmin(LockableAdmin):
     class Media(object):
         js = ('js/inline_fix.js',)
 
-    resource_class = DrugTrialResource
-
-    formfield_overrides = {
-        URLField: {'widget': URLFieldWidget},
-    }
+    # resource_class = DrugTrialResource
+    #
+    # formfield_overrides = {
+    #     URLField: {'widget': URLFieldWidget},
+    # }
 
     save_on_top = True
     list_per_page = 300
@@ -183,12 +201,14 @@ class DrugTrialAdmin(LockableAdmin):
                        'modified_on', 'drug_display', 'figure1_display', 'figure2_display']
 
     # Display figures
+    @mark_safe
     def figure1_display(self, obj):
         if obj.id and obj.figure1:
             return '<img src="%s">' % \
                    obj.figure1.url
         return ''
 
+    @mark_safe
     def figure2_display(self, obj):
         if obj.id and obj.figure2:
             return '<img src="%s">' % \
@@ -197,15 +217,16 @@ class DrugTrialAdmin(LockableAdmin):
     figure1_display.allow_tags = True
     figure2_display.allow_tags = True
 
+    @mark_safe
     def drug_display(self, obj):
 
         if obj.compound.chemblid:
-            url = (u'https://www.ebi.ac.uk/chembldb/compound/'
+            url = ('https://www.ebi.ac.uk/chembldb/compound/'
                    'displayimage/' + obj.compound.chemblid)
             return '<img src="%s">' % \
                 url
         else:
-            return u''
+            return ''
 
     drug_display.allow_tags = True
     drug_display.short_description = 'Structure'
@@ -233,7 +254,7 @@ class DrugTrialAdmin(LockableAdmin):
         }),
         ('Change Tracking', {
             'fields': (
-                'locked',
+                # 'locked',
                 ('created_by', 'created_on'),
                 ('modified_by', 'modified_on'),
                 ('signed_off_by', 'signed_off_date'),
@@ -243,6 +264,7 @@ class DrugTrialAdmin(LockableAdmin):
     )
     inlines = [FindingResultInline]
 
+    @mark_safe
     def source_page(self, obj):
         return '<a href="%s" target="_blank">%s</a>' % (obj.source_link, obj.source_link)
     source_page.allow_tags = True
@@ -266,7 +288,7 @@ class FindingTypeAdmin(LockableAdmin):
         ),
         ('Change Tracking', {
             'fields': (
-                'locked',
+                # 'locked',
                 ('created_by', 'created_on'),
                 ('modified_by', 'modified_on'),
                 ('signed_off_by', 'signed_off_date'),
@@ -293,7 +315,7 @@ class ResultDescriptorAdmin(LockableAdmin):
         (
             'Change Tracking', {
                 'fields': (
-                    'locked',
+                    # 'locked',
                     ('created_by', 'created_on'),
                     ('modified_by', 'modified_on'),
                     ('signed_off_by', 'signed_off_date'),
@@ -330,7 +352,7 @@ class FindingAdmin(LockableAdmin):
         (
             'Change Tracking', {
                 'fields': (
-                    'locked',
+                    # 'locked',
                     ('created_by', 'created_on'),
                     ('modified_by', 'modified_on'),
                     ('signed_off_by', 'signed_off_date'),
@@ -340,6 +362,7 @@ class FindingAdmin(LockableAdmin):
     )
     actions = ['update_fields']
 
+    @mark_safe
     def optional_link(self, obj):
         words = obj.description.split()
         sentence = ''

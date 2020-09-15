@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block load_js %}
+    <script src="{% static "assays/assaymethod_list.js" %}"></script>
+{% endblock %}
+
+{% block breadcrumbs %}
+    <li><a href="{% url 'assays-studycomponents' %}">Study Components</a></li>
+    <li class="active">Methods</li>
+{% endblock %}
+
+{% block content %}
+    <div class="padded-bottom">
+        <legend>
+            <h2 class="text-center">
+                Method/Kits
+            </h2>
+        </legend>
+
+        <div class="row text-center padded-bottom">
+            <a href="{% url 'assays-assaymethod-add' %}"  class="btn btn-lg btn-success" role="button">Add Method</a>
+        </div>
+
+        <div id="methods">
+            <table id="methods-table" class="display table table-striped" hidden>
+                <thead>
+                    <tr>
+                        <th>View</th>
+                        <th>Edit</th>
+                        <th>Method</th>
+                        <th>Measurement Type</th>
+                        <th>Supplier</th>
+                        <th>Description</th>
+                        <th>Protocol</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                {% for method in object_list %}
+                     <tr>
+                         <td><a class="btn btn-primary" title="View paired target/analytes." href="{{ method.get_absolute_url }}">View</a></td>
+                         <td><a class="btn btn-primary" title="View paired method/kits." href="{{ method.get_update_url }}">Edit</a></td>
+                        {# <td><a class="btn btn-primary" title="View paired target/analytes." href="{{ method.id }}">View</a></td> #}
+                        <td>{{ method.name }}</td>
+                        <td>{{ method.measurement_type }}</td>
+                        <td>{{ method.supplier }}</td>
+                        <td>{{ method.description }}</td>
+                        <td>{% if method.protocol_file %}<a href="{{ method.protocol_file.url }}" download><span data-toggle="tooltip" title="Download protocol file." class="glyphicon glyphicon-file"></span></a>{% else %}{% endif %}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock %}

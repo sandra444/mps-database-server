@@ -1,8 +1,12 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block load %}
+{% block extra_head %}
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+{% endblock %}
+
+{% block load_js %}
+    <script src="{% static "assays/grouping_filtering.js" %}"></script>
     <script src="{% static "js/enter_override.js" %}"></script>
     <script src="{% static "assays/assaystudy_upload.js" %}"></script>
     <script src="{% static "assays/chart_display.js" %}"></script>
@@ -14,12 +18,16 @@
     <li class="active">Upload Data File</li>
 {% endblock %}
 
-{% block content %}
+{% block sidebar %}
+    {% include 'assays/grouping_filtering.html' with charts="true" %}
+{% endblock %}
+
+{% block fluid-content %}
     <form enctype="multipart/form-data" class="form-horizontal" method="post" >
 
     <h1>
-        Upload Data File for <em>{{ object }}</em>
-    <br>
+        Upload Data for:<br>
+        <em>{{ object }}</em>
     {% csrf_token %}
 {#        <button id="submit" type="submit" class="btn btn-primary">Submit</button>#}
     </h1>
@@ -49,45 +57,89 @@
     {% else %}
     <div class="form-group">
     {% endif %}
-        <label for="bulk_file" class="col-sm-2 control-label">Excel File*</label>
+        <label for="bulk_file" class="col-sm-2 control-label">Upload File</label>
         <div class="col-sm-10">
-            {{ form.bulk_file }}
+            <input type="file" name="bulk_file" class="btn btn-primary btn-lg" id="id_bulk_file">
         </div>
     </div>
+
+    {# <a class="btn btn-info btn-lg" role="button" href="/media/excel_templates/chip_template-{{ version }}.xlsx">Click Here For Upload Template</a> #}
+
+    <a class="btn btn-info btn-lg" role="button" href="{% url 'assays-currentuploadtemplate' %}">Click Here For Upload Template</a>
+
+    {# NOT DRY #}
+    {{ supporting_data_formset.management_form }}
+    <legend>Supporting Data</legend>
+    {% if supporting_data_formset.non_form_errors %}
+        <div class="alert alert-danger" role="alert">
+            <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+            <span class="sr-only">Error:</span>
+            {{ supporting_data_formset.non_form_errors }}
+        </div>
+    {% endif %}
+
+    {% if supporting_data_formset.errors %}
+        {% for dict in supporting_data_formset.errors %}
+            {% for key,value in dict.items %}
+                {% if key %}
+                    <div class="alert alert-danger" role="alert">
+                        <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                        <span class="sr-only">Error:</span>
+                        {{ forloop.parentloop.counter }}.) {{ key }} : {{ value }}
+                    </div>
+                {% endif %}
+            {% endfor %}
+        {% endfor %}
+    {% endif %}
+
+    <a id="add_button-{{ supporting_data_formset.prefix }}" class="btn btn-success" role="button">Add Supporting Data</a>
+    <table class="table table-striped inlines" id="{{ supporting_data_formset.prefix }}-group" name="supporting_data">
+        <thead>
+            <tr>
+                <th>Supporting Data File*</th>
+                <th>Description*</th>
+                <th>Delete</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for supporting_data in supporting_data_formset %}
+                <tr class="inline" id="supporting_data-{{ forloop.counter0 }}">
+                    {% if supporting_data.id.value %}
+                    <td class="original" hidden>
+                        <input type="hidden"
+                               id="id_{{ supporting_data_formset.prefix }}-{{ forloop.counter0 }}-id"
+                               name="{{ supporting_data_formset.prefix }}-{{ forloop.counter0 }}-id"
+                               value="{{ supporting_data.id.value }}">
+                    </td>
+                    {% endif %}
+                    <td>{{ supporting_data.supporting_data }}</td>
+                    <td>{{ supporting_data.description }}</td>
+                    <td>{{ supporting_data.DELETE }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 
     {# Excluded for now #}
 {#    <div hidden>#}
 {#    {% include 'generic_field.html' with field=form.overwrite_option label="Overwrite Option*" %}#}
 {#    </div>#}
 
-    <p>
-        <a href="/media/excel_templates/chip_template-{{ version }}.xlsx">Click Here For Upload Template</a>
-    </p>
-
     {% include 'assays/assaydatafileupload_table.html' with show_delete="true" group=object.group.name %}
 
-    {% include 'assays/grouping_filtering.html' %}
+    {# Temporary #}
+    {# {% include 'assays/chart_options.html' with chart_title="New Data" chart_prefix="charts" %} #}
+    {% include 'assays/sidebar_extras.html' with show_hide="true" %}
 
-    {% include 'assays/chart_options.html' with chart_title="New Data" chart_prefix="new_charts" %}
-    <div id="new_charts" class="padded-bottom">Preview Unavailable</div>
+    <div id="charts" class="padded-bottom">Preview Unavailable</div>
 
-    {% include 'assays/chart_options.html' with chart_title="Current Data" chart_prefix="current_charts" %}
-    <div id="current_charts" class="padded-bottom">No Current Data</div>
+    {# Revised for now #}
+    {# {% include 'assays/chart_options.html' with chart_title="New Data" chart_prefix="new_charts" %} #}
+    {# <div id="new_charts" class="padded-bottom">Preview Unavailable</div> #}
 
-    <table id="treatment_group_table" class="table table-striped table-bordered">
-        <thead id="treatment_group_head">
-        </thead>
-        <tbody id="treatment_group_display">
-        </tbody>
-    </table>
+    {# {% include 'assays/chart_options.html' with chart_title="Current Data" chart_prefix="current_charts" %} #}
+    {# <div id="current_charts" class="padded-bottom">No Current Data</div> #}
 
-    <div id="group_display" class="container">
-        <table class="table table-bordered">
-            <tbody id="group_display_body">
-
-            </tbody>
-        </table>
-    </div>
+    {% include 'assays/group_table.html' %}
     </form>
-
 {% endblock %}

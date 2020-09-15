@@ -10,9 +10,19 @@ $(document).ready(function () {
     var compounds = {};
     // Stores all currently selected adverse events
     var adverse_events = {};
+
+    var refs_for_sorting = {
+        'compounds': compounds,
+        'adverse_events': adverse_events
+    };
+
     // Format = adverse_event -> compound -> value
     var full_data = {};
     var estimated_usage = {};
+
+    // ae_to_compound for whittling lists
+    var ae_to_compound = {};
+    var compounds_to_show = {};
 
     var adverse_events_checkboxes = {};
     var compounds_checkboxes = {};
@@ -40,7 +50,7 @@ $(document).ready(function () {
     var pattern = [];
     // First darker, second lighter
     $.each(initial_pattern, function(index, col) {
-        if (index % 2 == 0) {
+        if (index % 2 === 0) {
             pattern.push(d3.hsl(col).darker(0.75));
         }
         else {
@@ -53,14 +63,6 @@ $(document).ready(function () {
     dialog.dialog({
         width: 825,
         height: 500,
-        closeOnEscape: true,
-        autoOpen: false,
-        close: function() {
-            $('body').removeClass('stop-scrolling');
-        },
-        open: function() {
-            $('body').addClass('stop-scrolling');
-        }
     });
     dialog.removeProp('hidden');
 
@@ -74,6 +76,9 @@ $(document).ready(function () {
 
     // Pass true for reset to reset the table after finished
     function clear_selections(reset) {
+        // Reset compounds to show
+        compounds_to_show = {};
+
         compounds_table.search('');
         adverse_events_table.search('');
         $('input[type=search]').val('');
@@ -82,18 +87,25 @@ $(document).ready(function () {
         // compounds_checkboxes.prop('checked', false);
 
         $.each(adverse_events, function(name, index) {
+            $(this).removeAttr('checked');
             var checkbox_index = adverse_events_checkboxes[name];
-            adverse_events_table.data()[checkbox_index].checkbox = adverse_events_table.data()[checkbox_index].checkbox.replace(' checked>', '>');
+            adverse_events_table.data()[checkbox_index].checkbox = adverse_events_table.data()[checkbox_index].checkbox.replace(' checked="checked"&gt;', '&gt;');
         });
 
         $.each(compounds, function(name, index) {
+            $(this).removeAttr('checked');
             var checkbox_index = compounds_checkboxes[name];
-            compounds_table.data()[checkbox_index].checkbox = compounds_table.data()[checkbox_index].checkbox.replace(' checked>', '>');
+            compounds_table.data()[checkbox_index].checkbox = compounds_table.data()[checkbox_index].checkbox.replace(' checked="checked"&gt;', '&gt;');
         });
 
         adverse_events = {};
         compounds = {};
         full_data = {};
+
+        refs_for_sorting = {
+            'adverse_events': adverse_events,
+            'compounds': compounds
+        };
 
         create_initial_plot();
 
@@ -102,12 +114,12 @@ $(document).ready(function () {
             adverse_events_table.clear();
             adverse_events_table.rows.add(data);
 
-            adverse_events_table.page.len(10).draw();
+            adverse_events_table.page.len(10).order([2, 'desc']).draw();
 
             data = compounds_table.data();
             compounds_table.clear();
             compounds_table.rows.add(data);
-            compounds_table.page.len(10).draw();
+            compounds_table.page.len(10).order([2, 'desc']).draw();
         }
     }
 
@@ -180,7 +192,8 @@ $(document).ready(function () {
             adverse_events[adverse_event] = adverse_event;
             var checkbox_index = adverse_events_checkboxes[adverse_event];
             if (checkbox_index) {
-                adverse_events_table.data()[checkbox_index].checkbox = adverse_events_table.data()[checkbox_index].checkbox.replace('>', ' checked>');
+                $(this).attr('checked', 'checked');
+                adverse_events_table.data()[checkbox_index].checkbox = adverse_events_table.data()[checkbox_index].checkbox.replace('&gt;', ' checked="checked"&gt;');
             }
         });
 
@@ -191,11 +204,19 @@ $(document).ready(function () {
         adverse_events_table.order([[0, 'asc']]);
         adverse_events_table.page.len(10).draw();
 
+        // Make sure compounds_to_show is correct
+        $.each(adverse_events, function(adverse_event, value) {
+            $.each(ae_to_compound[adverse_event], function(compound, value2) {
+                compounds_to_show[compound] = true;
+            });
+        });
+
         $.each(compound_selections, function(index, compound) {
             compounds[compound] = compound;
             var checkbox_index = compounds_checkboxes[compound];
             if (checkbox_index) {
-                compounds_table.data()[checkbox_index].checkbox = compounds_table.data()[checkbox_index].checkbox.replace('>', ' checked>');
+                $(this).attr('checked', 'checked');
+                compounds_table.data()[checkbox_index].checkbox = compounds_table.data()[checkbox_index].checkbox.replace('&gt;', ' checked="checked"&gt;');
             }
         });
 
@@ -458,15 +479,20 @@ $(document).ready(function () {
                 call: 'fetch_aggregate_ae_by_event',
                 csrfmiddlewaretoken: window.COOKIES.csrfmiddlewaretoken
             },
-            type: 'POST'
+            type: 'POST',
+            error: function (xhr, errmsg, err) {
+                console.log(xhr.status + ": " + xhr.responseText);
+            }
         },
         columns: [
             {
                 data: 'checkbox',
                 sSortDataType: 'dom-checkbox-defer',
                 width: '10%',
-                render:function (data, type, row, meta) {
-                    return '<input class="checkbox big-checkbox adverse-event" type="checkbox" value="' + data + '">';
+                className: 'dt-center',
+                render: function (data, type, row, meta) {
+                    // return '<input class="checkbox big-checkbox adverse-event" type="checkbox" value="' + data + '">';
+                    return $('<div>').html(data).text();
                 }
             },
             // {data: 'checkbox', type: 'dom-checkbox-defer', width: '10%'},
@@ -487,15 +513,24 @@ $(document).ready(function () {
                 call: 'fetch_aggregate_ae_by_compound',
                 csrfmiddlewaretoken: window.COOKIES.csrfmiddlewaretoken
             },
-            type: 'POST'
+            type: 'POST',
+            error: function (xhr, errmsg, err) {
+                console.log(xhr.status + ": " + xhr.responseText);
+            },
+            dataSrc: function (json) {
+                ae_to_compound = json.ae_to_compound;
+                return json.data;
+            }
         },
         columns: [
             {
                 data: 'checkbox',
                 sSortDataType: 'dom-checkbox-defer',
                 width: '10%',
+                className: 'dt-center',
                 render:function (data, type, row, meta) {
-                    return '<input class="checkbox big-checkbox compound" type="checkbox" value="' + data + '">';
+                    // return '<input class="checkbox big-checkbox compound" type="checkbox" value="' + data + '">';
+                    return $('<div>').html(data).text();
                 }
             },
             // {data: 'checkbox', type: 'dom-checkbox-defer', width: '10%'},
@@ -555,12 +590,15 @@ $(document).ready(function () {
         var checkbox_index = compounds_checkboxes[compound];
 
         if (this.checked) {
+            $(this).attr('checked', 'checked');
             compounds[compound] = compound;
-            compounds_table.data()[checkbox_index].checkbox = compounds_table.data()[checkbox_index].checkbox.replace('>', ' checked>');
+            compounds_table.data()[checkbox_index].checkbox = compounds_table.data()[checkbox_index].checkbox.replace('&gt;', ' checked="checked"&gt;');
             collect_all_adverse_events();
         }
         else {
+            $(this).removeAttr('checked');
             remove_compound(compound);
+            compounds_table.data()[checkbox_index].checkbox = compounds_table.data()[checkbox_index].checkbox.replace( ' checked="checked"&gt;', '&gt;');
         }
     });
     // Tracks the clicking of checkboxes to fill adverse events
@@ -569,12 +607,48 @@ $(document).ready(function () {
         var checkbox_index = adverse_events_checkboxes[adverse_event];
 
         if (this.checked) {
+            $(this).attr('checked', 'checked');
             adverse_events[adverse_event] = adverse_event;
-            adverse_events_table.data()[checkbox_index].checkbox = adverse_events_table.data()[checkbox_index].checkbox.replace('>', ' checked>');
+            adverse_events_table.data()[checkbox_index].checkbox = adverse_events_table.data()[checkbox_index].checkbox.replace('&gt;', ' checked="checked"&gt;');
             collect_all_adverse_events();
         }
         else {
+            $(this).removeAttr('checked');
             remove_adverse_event(adverse_event);
+            adverse_events_table.data()[checkbox_index].checkbox = adverse_events_table.data()[checkbox_index].checkbox.replace(' checked="checked"&gt;', '&gt;');
+        }
+
+        // Reset compounds to show
+        compounds_to_show = {};
+
+        $.each(adverse_events, function(adverse_event, value) {
+            $.each(ae_to_compound[adverse_event], function(compound, value2) {
+                compounds_to_show[compound] = true;
+            });
+        });
+
+        compounds_table.draw();
+    });
+
+    // This function filters the dataTable rows
+    $.fn.dataTableExt.afnFiltering.push(function(oSettings, aData, iDataIndex) {
+        // This is a special exception to make sure that other tables are not filtered on the page
+        if (oSettings.nTable.getAttribute('id') !== 'compounds') {
+            return true;
+        }
+
+        // EXCLUDE ALL ROWS THAT AREN'T IN compounds_to_show
+        if (compounds_to_show[aData[1]]) {
+            return true;
         }
     });
+
+    // Add method to sort by checkbox
+    // (I reversed it so that ascending will place checked first)
+    $.fn.dataTable.ext.order['dom-checkbox-defer'] = function(settings, col) {
+        return settings.aoData.map(function(data, index) {
+            // return refs_for_sorting[settings.nTable.getAttribute('id')][data['_aData']['checkbox']] ? 0 : 1;
+            return data._aData['checkbox'].indexOf(' checked="checked"&gt;') > -1 ? 0 : 1;
+        });
+    };
 });

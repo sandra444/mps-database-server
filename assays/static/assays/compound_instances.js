@@ -14,6 +14,7 @@
 //};
 
 $(document).ready(function() {
+    "use strict";
     // Alias for global variable
 //    var data_map = window.COMPOUND_INSTANCES.data_map;
 //    var instances = window.COMPOUND_INSTANCES.instances;
@@ -93,6 +94,8 @@ $(document).ready(function() {
                 var current_supplier_text = $(obj)
                     .parent()
                     .parent()
+                    .parent()
+                    .parent()
                     .find('input[id$="supplier_text"]')
                     .first();
 
@@ -116,17 +119,18 @@ $(document).ready(function() {
                 current_supplier_text.bind('focus', autocomplete_search_this);
 
                 // Turn on autocomplete
-                current_supplier_text.attr('autocomplete', 'on');
+                current_supplier_text.attr('autocomplete', 'off');
 
                 check_supplier(current_supplier_text);
             }
-            $(document).on('change', 'select[id$="compound"]', check_compound);
+            $(document).on('change', 'select.form-control[id$="compound"]', check_compound);
 
             // When a supplier is given
             // Sets lot based on given data
             function check_supplier(obj) {
                 if (!obj || obj.isTrigger || obj.eventPhase) obj = this;
                 var current_row = $(obj)
+                    .parent()
                     .parent()
                     .parent();
 
@@ -159,18 +163,19 @@ $(document).ready(function() {
                     current_lot_text.bind('focus', autocomplete_search_this);
 
                     // Turn on autocomplete
-                    current_lot_text.attr('autocomplete', 'on');
+                    current_lot_text.attr('autocomplete', 'off');
                 }
 
                 check_lot(current_lot_text);
             }
-            $(document).on('change', 'input[id$="supplier_text"]', check_supplier);
+            $(document).on('change', 'input.form-control[id$="supplier_text"]', check_supplier);
 
             // When a lot is given
             // Sets receipt date based on given data
             function check_lot(obj) {
                 if (!obj || obj.isTrigger || obj.eventPhase) obj = this;
                 var current_row = $(obj)
+                    .parent()
                     .parent()
                     .parent();
 
@@ -188,7 +193,10 @@ $(document).ready(function() {
                     .find('input[id$="receipt_date"]')
                     .first();
 
-                if (current_receipt_date.attr('autocomplete')) {
+                if (
+                    current_receipt_date.attr('autocomplete') &&
+                    !current_receipt_date.attr('autocomplete') === 'off'
+                ) {
                     current_receipt_date.autocomplete('destroy');
                 }
 
@@ -214,25 +222,24 @@ $(document).ready(function() {
                     current_receipt_date.bind('click', autocomplete_search_this);
 
                     // Turn on autocomplete
-                    current_receipt_date.attr('autocomplete', 'on');
+                    current_receipt_date.attr('autocomplete', 'off');
                 }
                 else {
                     current_receipt_date.unbind('click', autocomplete_search_this);
                 }
             }
-            $(document).on('change', 'input[id$="lot_text"]', check_lot);
+            $(document).on('change', 'input.form-control[id$="lot_text"]', check_lot);
 
             // Initially trigger whittling events above
-            $('select[id$="compound"]').each(function(){
+            $('select.form-control[id$="compound"]').each(function() {
                 check_compound(this);
             });
-            $('input[id$="supplier_text"]').each(function(){
+            $('input.form-control[id$="supplier_text"]').each(function() {
                 check_supplier(this);
             });
-            $('input[id$="lot_text"]').each(function(){
+            $('input.form-control[id$="lot_text"]').each(function() {
                 check_lot(this);
             });
-//            $('input[id$="receipt_date"]').trigger('change');
         },
         error: function (xhr, errmsg, err) {
             console.log(xhr.status + ": " + xhr.responseText);

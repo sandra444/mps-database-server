@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load staticfiles %}
 
-{% block load %}
+{% block load_js %}
     <script src="{% static "diseases/disease_list.js" %}"></script>
 {% endblock %}
 
@@ -21,7 +21,7 @@
             {# <a href="/diseases/add/" class="btn btn-lg btn-success" role="button">Add Disease</a>#}
         {# </div>#}
 
-        <table id="models" class="display" cellspacing="0" width="100%">
+        <table hidden id="models" class="display table table-striped" cellspacing="0" width="100%">
             <thead>
                 <tr>
                     <th>View</th>
@@ -38,7 +38,7 @@
             <tbody>
             {% for disease in object_list %}
                 {# {% for key, value in stat %}#}
-                 <tr class="disease" id={{ disease.id }} name={{ disease.name }}>
+                 <tr>
                     <td><a class="btn btn-primary" href="{{ disease.id }}">View</a></td>
                     <td>{{ disease.name }}</td>
                     {# <td></td>#}
@@ -53,6 +53,4 @@
             </tbody>
         </table>
     </div>
-
-    <script src="{% static "js/display_datatable.js" %}"></script>
 {% endblock %}

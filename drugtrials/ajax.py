@@ -1,10 +1,11 @@
 # coding=utf-8
 
-from django.http import *
+from django.http import HttpResponse, HttpResponseServerError
 from .models import CompoundAdverseEvent, OpenFDACompound, AdverseEvent
 import ujson as json
 # TODO TODO TODO REVISE IN PYTHON 3
 import cgi
+import html
 
 
 def main(request):
@@ -26,32 +27,31 @@ def fetch_adverse_events_data(request):
         'compound__estimated_usage',
         # WHY ISN'T THIS JUST NAME??
         'event__organ__organ_name',
+        # Add logp
+        'compound__compound__logp',
+        'compound__compound__alogp',
         'compound__black_box',
         # SUBJECT TO CHANGE
-        'compound__compound__tctc',
-        'compound__compound__mps',
-        'compound__compound__epa'
+        # 'compound__compound__tctc',
+        # 'compound__compound__mps',
+        # 'compound__compound__epa'
     ))
 
     data = []
 
     # A serializer would probably better serve us here...
     for ae in ae_data:
-        project = u''
+        # project = ''
+        # if ae.get('compound__compound__tctc'):
+        #     project += 'TCTC'
+        # if ae.get('compound__compound__epa'):
+        #     project += 'EPA'
+        # if ae.get('compound__compound__mps'):
+        #     project += 'MPS'
+        # if not project:
+        #     project = 'Unassigned'
 
-        if ae.get('compound__compound__tctc'):
-            project += u'TCTC'
-
-        if ae.get('compound__compound__epa'):
-            project += u'EPA'
-
-        if ae.get('compound__compound__mps'):
-            project += u'MPS'
-
-        if not project:
-            project = u'Unassigned'
-
-        organ_name = u''
+        organ_name = ''
 
         if ae.get('event__organ__organ_name'):
             organ_name = ae.get('event__organ__organ_name')
@@ -61,34 +61,36 @@ def fetch_adverse_events_data(request):
         if ae.get('compound__black_box'):
             black_box_warning = True
 
-        normalized_reports = u''
-        estimated_usage = u''
+        normalized_reports = ''
+        estimated_usage = ''
 
         if ae.get('compound__estimated_usage'):
-            normalized_reports = u'{:,.2f}'.format(
+            normalized_reports = '{:,.2f}'.format(
                 float(ae.get('frequency')) / ae.get('compound__estimated_usage') * 10000
             )
-            estimated_usage = u'{:,}'.format(ae.get('compound__estimated_usage'))
+            estimated_usage = '{:,}'.format(ae.get('compound__estimated_usage'))
 
         data.append(
             {
                 'view': ae.get('compound_id'),
                 'compound': {
                     'id': ae.get('compound__compound_id'),
-                    'name': cgi.escape(ae.get('compound__compound__name'))
+                    'name': html.escape(ae.get('compound__compound__name'))
                 },
                 'event': {
-                    'lower': cgi.escape(ae.get('event__event').lower()),
-                    'name': cgi.escape(ae.get('event__event'))
+                    'lower': html.escape(ae.get('event__event').lower()),
+                    'name': html.escape(ae.get('event__event'))
                 },
-                'number_of_reports': u'{:,}'.format(
+                'number_of_reports': '{:,}'.format(
                     ae.get('frequency')
                 ),
                 'normalized_reports': normalized_reports,
                 'estimated_usage': estimated_usage,
                 'organ': organ_name,
                 'black_box_warning': black_box_warning,
-                'project': project,
+                # 'project': project,
+                'logp': ae.get('compound__compound__logp'),
+                'alogp': ae.get('compound__compound__alogp')
             }
         )
 
@@ -108,27 +110,35 @@ def fetch_aggregate_ae_by_compound(request):
     )
 
     compound_frequency = {}
+    ae_to_compound = {}
 
-    for adverse_event in CompoundAdverseEvent.objects.all():
+    for adverse_event in CompoundAdverseEvent.objects.all().prefetch_related('event', 'compound__compound'):
         compound_frequency.setdefault(adverse_event.compound_id, []).append(adverse_event.frequency)
+        ae_to_compound.setdefault(adverse_event.event.event, {}).update({
+            adverse_event.compound.compound.name: True
+        })
 
     data = []
 
     for compound in compounds:
-        estimated_usage = u''
+        estimated_usage = ''
 
         if compound.estimated_usage:
-            estimated_usage = u'{:,}'.format(compound.estimated_usage)
+            estimated_usage = '{:,}'.format(compound.estimated_usage)
+
+        checkbox = '<input class="table-checkbox big-checkbox compound" type="checkbox" value="{}">'.format(compound.compound.name)
 
         data.append({
-            'checkbox': cgi.escape(compound.compound.name),
+            # 'checkbox': html.escape(compound.compound.name),
+            'checkbox': html.escape(checkbox),
             'compound': compound.compound.name,
             'estimated_usage': estimated_usage,
-            'frequency':  u'{:,}'.format(sum(compound_frequency.get(compound.id, [0])))
+            'frequency': '{:,}'.format(sum(compound_frequency.get(compound.id, [0])))
         })
 
     all_data = {
-        'data': data
+        'data': data,
+        'ae_to_compound': ae_to_compound
     }
 
     return HttpResponse(
@@ -150,17 +160,22 @@ def fetch_aggregate_ae_by_event(request):
     data = []
 
     for adverse_event in adverse_events:
-        organ_name = u''
+        frequency = sum(adverse_event_frequency.get(adverse_event.id, [0]))
+        organ_name = ''
 
         if adverse_event.organ:
             organ_name = adverse_event.organ.organ_name
 
-        data.append({
-            'checkbox': cgi.escape(adverse_event.event),
-            'event': adverse_event.event,
-            'organ': organ_name,
-            'frequency': u'{:,}'.format(sum(adverse_event_frequency.get(adverse_event.id, [0])))
-        })
+        checkbox = '<input class="table-checkbox big-checkbox adverse-event" type="checkbox" value="{}">'.format(adverse_event.event)
+
+        if frequency:
+            data.append({
+                # 'checkbox': html.escape(adverse_event.event),
+                'checkbox': html.escape(checkbox),
+                'event': adverse_event.event,
+                'organ': organ_name,
+                'frequency': '{:,}'.format(frequency)
+            })
 
     all_data = {
         'data': data

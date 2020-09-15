@@ -19,7 +19,7 @@ $(document).ready(function() {
         if ($(table_id)[0]) {
             $(table_id).DataTable({
                 "iDisplayLength": 10,
-                dom: 'B<"row">lfrtip',
+                dom: '<Bl<"row">frptip>',
                 fixedHeader: {headerOffset: 50},
                 responsive: false,
                 // Initially sort on start date (descending), not ID
@@ -44,32 +44,50 @@ $(document).ready(function() {
        height:500,
        width:900,
        modal: true,
-       closeOnEscape: true,
-       autoOpen: false,
        buttons: {
-           Send: function() {
+            Send: function() {
                 process_email_request();
                 // $(this).dialog("close");
                 $('.ui-dialog-buttonset').empty();
                 $(this).dialog('option', 'buttons', {
                     Close: function() { $(this).dialog("close"); }
                 });
-           },
-           Cancel: function() {
+            },
+            Cancel: function() {
                $(this).dialog("close");
-           }
-       },
-       close: function() {
-           $('body').removeClass('stop-scrolling');
-       },
-       open: function() {
-           $('body').addClass('stop-scrolling');
+            }
        }
     });
     ready_for_sign_off_section.removeProp('hidden');
 
     $('#indicate_study_is_ready_for_sign_off').click(function() {
         ready_for_sign_off_section.dialog('open');
+    });
+
+    // TODO CHANGE POPUP BEHAVIOR
+    var clone_study_section = $('#clone_study_section');
+    clone_study_section.dialog({
+       height:800,
+       width:900,
+       modal: true,
+       buttons: {
+            Clone: function() {
+                process_clone_request();
+                // $(this).dialog("close");
+                $('.ui-dialog-buttonset').empty();
+                $(this).dialog('option', 'buttons', {
+                    Close: function() { $(this).dialog("close"); }
+                });
+            },
+            Cancel: function() {
+               $(this).dialog("close");
+            }
+       }
+    });
+    clone_study_section.removeProp('hidden');
+
+    $('#clone_study_request').click(function() {
+        clone_study_section.dialog('open');
     });
 
     function process_email_request() {
@@ -88,6 +106,11 @@ $(document).ready(function() {
         $.each(data, function (index, contents) {
             formData.append(index, contents);
         });
+
+        // Show spinner
+        window.spinner.spin(
+            document.getElementById("spinner")
+        );
 
         $.ajax({
             url: "/assays_ajax/",
@@ -108,9 +131,50 @@ $(document).ready(function() {
                     $('#email_message').text('"' + json.message + '"');
                     $('#email_success').show();
                 }
+                window.spinner.stop();
             },
             error: function (xhr, errmsg, err) {
                 alert('An unknown error has occurred.');
+                window.spinner.stop();
+            }
+        });
+    }
+
+    function process_clone_request() {
+        var data = {
+            call: 'clone_study',
+            study: study_id,
+            csrfmiddlewaretoken: window.COOKIES.csrfmiddlewaretoken
+        };
+
+        // Show spinner
+        window.spinner.spin(
+            document.getElementById("spinner")
+        );
+
+        $.ajax({
+            url: "/assays_ajax/",
+            type: "POST",
+            data: data,
+            dataType: 'json',
+            success: function (json) {
+                if (json.errors) {
+                    $('#clone_failure').show();
+                    $('#clone_failure_message').text('"' + json.errors + '"');
+                    if (json.new_study_id) {
+                        $('#clone_link_fail').attr('href', json.new_study_id).show();
+                    }
+                }
+                else {
+                    $('#clone_link_success').attr('href', json.new_study_id);
+                    $('#clone_success').show();
+                }
+                window.spinner.stop();
+            },
+            error: function (xhr, errmsg, err) {
+                console.log(xhr.status + ": " + xhr.responseText);
+                alert('An unknown error has occurred.');
+                window.spinner.stop();
             }
         });
     }

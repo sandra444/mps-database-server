@@ -2,7 +2,7 @@
 {% load static %}
 {% load custom_filters %}
 
-{% block load %}
+{% block load_js %}
     <script src="{% static "js/enter_override.js" %}"></script>
     <script src="{% static "assays/assaystudy_sign_off.js" %}"></script>
 {% endblock %}
@@ -83,7 +83,7 @@
         {% endfor %}
     {% endif %}
 
-    <table class="table table-striped table-bordered table-hover table-nonfluid inlines" id="{{ stakeholder_formset.prefix }}-group" name="stakeholder">
+    <table class="table table-striped table-bordered table-hover table-nonfluid" id="{{ stakeholder_formset.prefix }}-group" name="stakeholder">
         <thead>
             <tr>
                 <th>On Behalf of</th>

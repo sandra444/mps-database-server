@@ -1,0 +1,2171 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block extra_head %}
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+{#    <script type="text/javascript" src="jquery.dataTables.js"></script>#}
+{#    <script type="text/javascript" src="dataTables.dataSourcePlugins.js"></script>#}
+
+{% endblock %}
+
+{#{% block content %}#}
+{#<p>loaded</p>#}
+{#{% endblock %}#}
+
+{# this template for add, update, and review all in one - need all conditionals to be accommidated #}
+
+{% block load_js %}
+    <script src="{% static "assays/assayplatereadermap_add.js" %}"></script>
+{% endblock %}
+
+{% block breadcrumbs %}
+    <li><a href="/assays/assaystudy/">Studies</a>
+    <li><a href="{{ form.instance.study.get_absolute_url }}">{{ form.instance.study }}</a></li>
+    {% if object %}
+        <li><a href="{% url 'assayplatereadermap-index' object.study.id %}">Assay Plate Maps</a>
+    {% else %}
+        <li><a href="{% url 'assayplatereadermap-index' form.instance.study_id %}">Assay Plate Maps</a>
+    {% endif %}
+    <li class="active">
+        {% if object %}
+            <em>{{ object }}</em>
+        {% else %}
+            Add
+        {% endif %}
+    </li>
+{% endblock %}
+
+{% block content %}
+    <form class="form-horizontal" method="post" enctype="multipart/form-data">
+        <div class="padded-bottom">
+            {# title #}
+            <div class="well">
+                <h1 class="text-center">
+                    <em><b>
+                    {% if update %}
+                        {% if data_attached %}
+                            Calibrate/Process/Export Data Using
+                        {% else %}
+                            Update
+                        {% endif %}
+                    {% else %}
+                        {% if review %}
+                            Review
+                        {% else %}
+                            Add
+                        {% endif %}
+                    {% endif %}
+                    Assay Plate Map
+                    </b></em><br><br>
+                    {% if not add %}
+{#                         {{ object.device }}#}
+{#                        Assay Plate Map: #}
+                        <em>{{ object }}</em>
+                    {% else %}
+                        to Study {{ form.instance.study }}
+                    {% endif %}
+                    <br>
+                    {% csrf_token %}
+                </h1>
+            </div>
+
+            {# pass to js file #}
+            <div>
+                {# need this in javascript #}
+                <div class="hidden">
+                    {{ assay_map_additional_info.ns_matrix_item }}
+                    {{ assay_map_additional_info.ns_location }}
+                    {{ form.form_number_file_block_combos }}
+                </div>
+                {# need this in javascript #}
+                <div id="this_platemap_id" class="hidden">
+                    {{ object.id }}
+                </div>
+                {# need this in javascript #}
+                <div id="check_load" class="hidden">
+                    {{ page_called }}
+                </div>
+                {# need this in javascript pass to ajax#}
+                <div id="this_study_id" class="hidden">
+                    {% if object %}
+                        {{ object.study.id }}
+                    {% else %}
+                        {{form.instance.study_id}}
+                    {% endif %}
+                </div>
+                <div class="hidden">{{form.form_calibration_method}}</div>
+                <div class="hidden">{{form.form_calibration_target}}</div>
+                <div class="hidden">{{form.form_calibration_unit}}</div>
+                <div class="hidden">{{form.form_number_standards_this_plate}}</div>
+{#                <div class="hidden">{{form.form_hold_the_study_id}}</div>#}
+{#                <div class="hidden">{{form.form_hold_the_platemap_id}}</div>#}
+
+                <div class="hidden">{{form.form_hold_the_data_block_metadata_string}}</div>
+                <div class="hidden">{{form.form_hold_the_omits_string}}</div>
+                <div class="hidden">{{form.form_hold_the_notes_string}}</div>
+                <p id="id_used_curve" class="hidden"></p>
+            </div>
+
+            {#        This is the section to show the user prettier errors#}
+            <div>
+                {% include 'errors.html' %}
+
+                {% if form.errors %}
+                    {% for field in form %}
+                        {% if field.errors %}
+                            {% for error in field.errors %}
+                                <div class="alert alert-danger" role="alert">
+                                    <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                                    <span class="sr-only">Error:</span>
+                                    {{field.label}}: {{error}}
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+
+                {% if form.non_field_errors %}
+                    <div class="alert alert-danger" role="alert">
+                        <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                        <span class="sr-only">Error:</span>
+                        {{ form.non_field_errors }}
+                        form.errors<br>
+                        {{ form.errors }}<br>
+                    </div>
+                {% endif %}
+                {# Formset errors #}
+                {% if formset.errors.0 %}
+                    formset.errors<br>
+                    {{ formset.errors }}<br>
+                    {% for dict in formset.errors %}
+                        {% for key,value in dict.items %}
+                            {% if key %}
+                                <div class="alert alert-danger" role="alert">
+                                    <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                                    <span class="sr-only">Error:</span>
+                                    {{ forloop.parentloop.counter }}.) {{ key }} : {{ value }}
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                    {% endfor %}
+                {% endif %}
+            </div>
+
+            {# global plate map edits #}
+            <div>
+                {% if add %}
+                    <div class="container show-when-add">
+
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="plate-map-page-field-labels-small">
+                                    <div><p></p>
+                                        <label><i>Start From</i></label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-9">
+                                <div class="plate-map-page-radio-contents">
+                                    <label><input type="radio" name="start_map" value="a_plate" checked> Blank Assay Plate Map </label>
+                                    <label><input type="radio" name="start_map" value="a_platemap"> Existing Assay Plate Map </label>
+                                    <label><input type="radio" name="start_map" value="a_matrix"> Existing Study Collection </label>
+                                </div>
+                            </div>
+{#                            <div class="col-md-2"></div>#}
+                        </div>
+
+                    </div>
+                {% endif %}
+
+                {# need the size of the plate for all uses of this template #}
+                <div>
+                    <div class="container show-when-add">
+                        <div>
+                            <div class="pick-a-plate">
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <div class="plate-map-page-field-labels-small">
+                                            <div><p id="plate_select_tooltip"></p>
+                                                <label for="plate_select_tooltip">Starting Plate Format* &nbsp;</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {# this is id_device and it is used in drawing the plate map for all drawing options #}
+                                    <div class="col-md-9">
+                                        <div class="plate-map-page-field-contents-medium required">
+                                            {{ form.device }}
+                                        </div>
+                                    </div>
+{#                                    <div class="col-md-2"></div>#}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {% if add %}
+                    <div class="container show-when-add">
+                        <div>
+                            <div class="pick-a-platemap hidden">
+                                <div class="row">
+                                    <div class="col-md-3">
+                                         <div class="plate-map-page-field-labels-small">
+                                            <div><p id="platemap_select_tooltip"></p>
+                                                <label for="platemap_select_tooltip">Starting Assay Plate Map* &nbsp;</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-9">
+                                        <div class="plate-map-page-field-contents-medium required">
+                                            {{ assay_map_additional_info.se_platemap }}
+                                        </div>
+                                    </div>
+{#                                    <div class="col-md-2"></div>#}
+                                </div>
+                            </div>
+
+                            <div class="pick-a-matrix hidden">
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <div class="plate-map-page-field-labels-small">
+                                            <div><p id="matrix_select_tooltip"></p>
+                                                <label for="matrix_select_tooltip">Starting Study Collection* &nbsp;</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-9">
+                                        <div class="plate-map-page-field-contents-medium required">
+                                            {{ assay_map_additional_info.se_matrix }}
+                                        </div>
+                                    </div>
+{#                                    <div class="col-md-2"></div>#}
+                                </div>
+                            </div>
+                        </div>
+                        {# options tried during development process - not what NOT to use #}
+                        {# {% include 'generic_field.html' with field=form.device label="Device" %}#}
+                        {# <br><b>form device</b> {% include 'generic_field.html' with field=form.device label="Plate Size"  %}#}
+                        {# <br><b>plate size</b> <h4 id="object_plate_size">{{ object.device }}</h4>#}
+                        {# <br><b>plate id</b> <h4 id="object_plate_id">{{ object.id }}</h4>#}
+                        {# <br><b>study</b> <h4 id="object_study">{{ object.study }}</h4>#}
+                        {# <br><b>study id </b> <h4 id="object_study">{{ object.study.id }}</h4>#}
+                        {# <br><b>form name</b> {% include 'generic_field.html' with field=form.name label="Map Name"  %}#}
+                        {##}
+                        {# This takes FOREVER (HANDY) if queryset is not passed (dropdowns often need prefetches) #}
+                        {# Study should be passed in backend - do not to the following!#}
+                        {# {% include 'generic_field.html' with field=form.study label="Study" %}#}
+
+                        {# {{ object.study_assay_id }} #}
+                        {# {{ object.study_assay }} #}
+                        {# {{ form.instance.study_assay }} #}
+                    </div>
+                {% endif %}
+
+                {% if not add %}
+                    {# if not add and this plate map is in use by a file block #}
+                    {% if data_attached %}
+                        {# the form_number_file_block_combos is based on the AssayPlateReaderMapItemValue #}
+                        {# not on the AssayPlateReaderMapDataFileBlock #}
+                        {# if everything works correctly, they should match, but, values may be added AFTER file is added #}
+                        {# so, there may be a number in the index, but no raw values showing in the plate map #}
+                        <div class="container">
+                            <div class="select-value-set">
+
+{#                                Now that this is in the plate map list, really do not need to show it here. Keep incase change mind#}
+{#                                <div class="row">#}
+{#                                    <div class="col-md-3">#}
+{#                                        <div class="plate-map-page-field-labels-small">#}
+{#                                            <div><p id="number_file_block_tooltip"></p>#}
+{#                                                <label for="number_file_block_tooltip"># File/Blocks &nbsp;</label>#}
+{#                                            </div>#}
+{#                                        </div>#}
+{#                                    </div>#}
+{#                                    <div class="col-md-9">#}
+{#                                        <div class="plate-map-page-field-contents-medium">#}
+{#                                            {{ data_attached }}#}
+{#                                        </div>#}
+{#                                    </div>#}
+{#                                    <div class="col-md-2"></div>#}
+{#                                </div>#}
+
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <div class="plate-map-page-field-labels-small">
+                                            <div><p id="file_block_tooltip"></p>
+                                                <label for="file_block_tooltip">File/Blocks &nbsp;</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-9">
+                                        <div class="plate-map-page-field-contents-medium required">
+                                            {{ form.se_block_select_string }}
+{#                                            yes, using this to get the pk of the selected file/block in the calibrate form (top of page)#}
+                                            <div class="hidden">{{ form.ns_block_select_pk }}</div>
+                                            <div class="hidden">{{ form.form_block_file_data_block_selected_pk_for_storage }}</div>
+                                        </div>
+                                    </div>
+{#                                    <div class="col-md-2"></div>#}
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+                {% endif %}
+
+                <div class="container">
+
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="plate-map-page-field-labels-small">
+                                <div><p id="map_name_tooltip"></p>
+                                    <label for="map_name_tooltip">Map Name* &nbsp;</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <div class="plate-map-page-field-contents-medium required">
+                                {{ form.name }}
+                            </div>
+                        </div>
+                    </div>
+{#                    {% include 'generic_field.html' with field=form.name label="Map Name" %}#}
+
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="plate-map-page-field-labels-small">
+                                <div><p></p>
+                                    <label>Map Description (optional)</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <div class="plate-map-page-field-contents-medium">
+                                {{ form.description }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+
+                        <div class="col-md-3">
+                            <div class="plate-map-page-field-labels-small">
+                                <div><p id="sample_time_unit_tooltip"></p>
+                                    <label for="sample_time_unit_tooltip">Time Unit* &nbsp;</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="plate-map-page-field-contents-medium required">
+                                {{ form.time_unit }}
+                            </div>
+                        </div>
+
+                        <div class="plate-to-enter-cell-count">
+                            <div class="col-md-2">
+                                <div class="plate-map-page-field-labels-small">
+                                    <div><p id="plate_cell_count_tooltip"></p>
+                                        <label for="plate_cell_count_tooltip"># Cells &nbsp;</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-1">
+                                <div class="plate-map-page-field-contents-medium">
+                                    {{ form.cell_count }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="plate-to-enter-volume-unit">
+                            <div class="col-md-2">
+                                <div class="plate-map-page-field-labels-small">
+                                    <div><p id="collection_volume_unit_tooltip"></p>
+                                        <label for="collection_volume_unit_tooltip">Volume Unit &nbsp;</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-1">
+                                <div class="plate-map-page-field-contents-medium">
+                                    {{ form.volume_unit }}
+                                </div>
+                            </div>
+                            <div class="col-md-1"></div>
+                        </div>
+
+                    </div>
+
+                    <div class="row">
+
+                        <div class="col-md-3">
+                            <div class="plate-map-page-field-labels-small">
+                                <div><p id="standard_unit_tooltip"></p>
+                                    <label for="standard_unit_tooltip">Measurement Unit* &nbsp;</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="plate-map-page-field-contents-medium">
+                                {{ form.standard_unit }}
+                            </div>
+                        </div>
+
+                        <div class="plate-to-enter-standard-molecular-weight">
+                            <div class="col-md-2">
+                                <div class="plate-map-page-field-labels-small">
+                                    <div><p id="plate_molecular_weight_tooltip"></p>
+                                        <label for="plate_molecular_weight_tooltip">Molecular Weight &nbsp;</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-1">
+                                <div class="plate-map-page-field-contents-medium">
+                                    {{ form.standard_molecular_weight }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="plate-to-enter-well-volume">
+                            <div class="col-md-2">
+                                <div class="plate-map-page-field-labels-small">
+                                    <div><p id="plate_volume_assay_plate_well_tooltip"></p>
+                                        <label for="plate_volume_assay_plate_well_tooltip">Well Volume &nbsp;</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-1">
+                                <div class="plate-map-page-field-contents-medium">
+                                    {{ form.well_volume }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-1"></div>
+
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="plate-map-page-field-labels-small">
+                                <div><p id="standard_tooltip"></p>
+                                    <label for="standard_tooltip">Reporting Unit --- Target, Method* &nbsp;</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <div class="plate-map-page-field-contents-medium required">
+                                {{ form.study_assay }}
+                            </div>
+                        </div>
+                    </div>
+
+                    {# START of the MULITIPIER INFORMATION Section#}
+                    <div>
+                        <div>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="plate-map-page-field-contents-medium">
+                                        <button type="button" class="btn btn-primary" id="multiplierDetailsButton">Show/Hide Unit Conversion Details</button>
+                                    </div>
+                                </div>
+                                <div class="col-md-8">
+                                    <div class="plate-map-page-field-contents-medium">
+                                        <h3 id="id_display_multiplier_message"></h3>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div class="plate-map-page-show-multiplier-details">
+                            <br>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <table class="table table-striped">
+                                        <thead>
+{#                                          <tr>#}
+{#                                            <th>  </th>#}
+{#                                          </tr>#}
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>The database's base units were used to perform unit conversion. To review base units and associated scale factors, go to Studies, Study Components, View Units. Not all conversions are possible with this tool. Some tips: Units including a number of cells must use exponential format (i.e. 10^# cells), measurement units that include /well must be molar (not mass), and reporting units with /time/10^# cells should have the time in 'day', 'hour', or 'minute', NOT other representations of time (i.e. 'days'). If necessary, the multiplier can be edited manually, but do so with care.</td>
+                                            </tr>
+                                            <tr class="hidden">
+                                                <td>
+{#                                                    {{ form.form_data_processing_multiplier_string }} #}
+                                                    <div id="id_data_processing_multiplier_string">
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="">
+                                        <div class="row">
+                                            <div class="col-md-3">
+                                                <div class="plate-map-page-field-labels-small">
+                                                    <div><p id="plate_map_multiplier_for_processing"></p>
+                                                        <label for="plate_map_multiplier_for_processing">Unit Conversion Multiplier &nbsp;</label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <div class="plate-map-page-field-contents-medium">
+                                                    {{ form.form_data_processing_multiplier }}
+                                                </div>
+                                            </div>
+                                            <div class="col-md-7">
+                                                 <div class="plate-map-page-field-contents-large">
+                                                    <h5 id="id_unit_multiplier"></h5>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+
+                                    <table class="table table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th> Calculated Value </th>
+                                                <th> Multiplier Pieces </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>
+{#                                                    {{ form.form_data_processing_multiplier_value_short }} #}
+                                                    <div id="id_data_processing_multiplier_value_short">
+                                                    </div>
+                                                </td>
+                                                <td>
+{#                                                    {{ form.form_data_processing_multiplier_string_short }} #}
+                                                    <div id="id_data_processing_multiplier_string_short">
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+{#                                    <h3> Multiplier Breakdown </h3>#}
+
+                                    <table class="table table-striped" id="id_multiplier_breakdown">
+                                        <thead>
+                                          <tr>
+                                              <th> Reason for Conversion </th>
+                                              <th> Multiplier </th>
+                                          </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td> When the Unit Conversion is through a Base Unit
+                                                    <br>
+                                                    e.g., ng/mL &#10142; pg/mL
+                                                    <br>
+                                                    Multiplier = [( 1e-06 mg/mL)/(ng/mL)] / [(1e-09 mg/mL)/(pg/mL)]
+                                                </td>
+                                                <td>
+{#                                                    {{ form.form_data_processing_multiplier_string1 }} #}
+                                                    <div id="id_data_processing_multiplier_string1">
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td> When the Measurement Unit is molar and the Reporting Unit is mass
+                                                    <br>
+                                                    e.g., nmol &#10142; ng
+                                                    <br>
+                                                    Multiplier = (1g/10^9ng)*(Molecular Weight in g/mol)
+                                                </td>
+                                                <td>
+{#                                                    {{ form.form_data_processing_multiplier_string2 }} #}
+                                                    <div id="id_data_processing_multiplier_string2">
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td> When Measurement Unit is per well and the Reporting Unit is mass or molar
+                                                    <br>
+                                                    e.g., nmol/well &#10142; nmol/mL
+                                                    <br>
+                                                    Multiplier = well/Well Volume in mL
+                                                </td>
+                                                <td>
+{#                                                    {{ form.form_data_processing_multiplier_string3 }} #}
+                                                    <div id="id_data_processing_multiplier_string3">
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td> After adjustments above, the Unit Conversion is through a Base Unit
+                                                    <br>
+                                                    e.g., ng/mL &#10142; pg/mL
+                                                    <br>
+                                                    Multiplier = [( 1e-06 mg/mL)/(ng/mL)] / [(1e-09 mg/mL)/(pg/mL)]
+                                                </td>
+                                                <td>
+{#                                                    {{ form.form_data_processing_multiplier_string4 }} #}
+                                                    <div id="id_data_processing_multiplier_string4">
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td> When normalizing, convert Efflux Volume Unit to Measurement Unit's Volume Unit
+                                                    <br>
+                                                    e.g., Volume Unit of &#181;L &#10142; Reporting Unit of mL
+                                                    <br>
+                                                    Multiplier = µL * (10^3mL/1L)*(1L/10^6µL)
+                                                </td>
+                                                <td>
+{#                                                    {{ form.form_data_processing_multiplier_string5 }} #}
+                                                    <div id="id_data_processing_multiplier_string5">
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td> When normalizing, convert Efflux Collection Time Unit to Reporting Time Unit
+                                                    <br>
+                                                    e.g., Time Unit of Minute &#10142; Reporting Unit of day
+                                                    <br>
+                                                    Multiplier = (1/minute)*(1440minute/1day)
+                                                </td>
+                                                <td>
+{#                                                    {{ form.form_data_processing_multiplier_string6 }} #}
+                                                    <div id="id_data_processing_multiplier_string6">
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td> When normalizing, adjust for the Number of Cells in the device
+                                                    <br>
+                                                    e.g., cells not included &#10142; 10^6 cells (10^6 remains in the denominator)
+                                                    <br>
+                                                    Multiplier = (10^6)/(# Cells * 10^6 cells)
+                                                </td>
+                                                <td>
+{#                                                    {{ form.form_data_processing_multiplier_string7 }} #}
+                                                    <div id="id_data_processing_multiplier_string7">
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td> After all other adjustments, the Unit Conversion is through a Base Unit
+                                                    <br>
+                                                    e.g., µg/day/10^6 &#10142; ng/day/10^6 cells
+                                                    <br>
+                                                    Multiplier = [(1 µg/day/10^6 cells)/(µg/day/10^6 cells)]/[(0.001 µg/day/10^6 cells)/(ng/day/10^6 cells)]
+                                                </td>
+                                                <td>
+{#                                                    {{ form.form_data_processing_multiplier_string8 }} #}
+                                                    <div id="id_data_processing_multiplier_string8">
+                                                    </div>
+                                                </td>
+                                            </tr>
+{#                                            <tr>#}
+{#                                                <td> ...</td>#}
+{#                                               <td> #}
+{#                                                        {{ form.form_data_processing_multiplier_string9 }} #}
+{#                                                    <div id="id_data_processing_multiplier_string9">#}
+{#                                                    </div>  #}
+{#                                                  </td>#}
+{#                                            </tr>#}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <h3> Processing Based On Selections </h3>
+                                    <table class="table table-striped">
+                                        <thead>
+                                          <tr>
+                                            <th> Option </th>
+                                            <th> Processing Algorithm (Units are Handled in the Multiplier)</th>
+                                          </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td> Not Calibrating </td>
+                                                <td> Processed Value = Multiplier * Raw Value * Dilution Factor</td>
+                                            </tr>
+                                            <tr>
+                                                <td> Calibrating but Not Normalizing </td>
+                                                <td> Processed Value = Multiplier * Fitted Value * Dilution Factor </td>
+                                            </tr>
+                                            <tr>
+                                                <td> Calibrating and Normalizing </td>
+                                                <td> Processed Value = Multiplier * Fitted Value * Dilution Factor * Efflux Volume * 1/(Duration of Collection)</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+
+                                </div>
+                                <div class="col-md-4"></div>
+                            </div>
+                        </div>
+                    </div>
+                    {# END of the MULITIPIER INFORMATION Section#}
+
+                </div>
+
+            </div>
+
+            <br>
+
+            {# guts of edit #}
+            <div>
+            {# In 2020 Jan - made changes to reduce load time (removed loading of value formset #}
+            {# since well use is in the value formset, this made editing after loading files very complicated #}
+            {# well use is in item, and could be removed from item value, but do not want to do that for processing reasons #}
+            {# consider it if requested, or make a SQL update in form save...consider #}
+                {% if not data_attached %}
+                    {# Selecting what to work with #}
+                    <div>
+                        {# Selecting what to work on #}
+                        {% if not review %}
+                            <div class="container">
+
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <div class="plate-map-page-field-labels-small">
+                                            <div>
+                                                <div><p id="well_use_tooltip"></p>
+                                                    <label for="well_use_tooltip">Well Content to Add/Edit &nbsp;</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="plate-map-page-radio-contents">
+                                        <div class="col-md-9">
+
+                                            <label><input type="radio" class="plate-map-bigger-radio" name="change_well_use" value="sample">
+                                                <h3 class="plate-map-radio-spacing plate-map-no-wrap">Sample</h3></label>
+
+                                            <label><input type="radio" class="plate-map-bigger-radio" name="change_well_use" value="standard">
+                                                <h3 class="plate-map-radio-spacing plate-map-no-wrap">Standard</h3></label>
+
+                                            <label><input type="radio" class="plate-map-bigger-radio" name="change_well_use" value="blank">
+                                                <h3 class="plate-map-radio-spacing plate-map-no-wrap">Blank</h3></label>
+
+                                            <label><input type="radio" class="plate-map-bigger-radio" name="change_well_use" value="empty" checked>
+                                                <h3 class="plate-map-radio-spacing plate-map-no-wrap">Empty</h3></label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <div class="plate-map-page-field-labels-small">
+                                            <div>
+                                                <div><p id="copys_pastes_tooltip"></p>
+                                                    <label for="copys_pastes_tooltip">Using Copy and Paste &nbsp;</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="plate-map-page-radio-contents">
+                                        <div class="col-md-9">
+                                            <label><input type="radio" class="plate-map-bigger-radio" name="change_well_use" value="copys">
+                                                <h3 class="plate-map-radio-spacing plate-map-no-wrap">Copy</h3></label>
+                                            <label><input type="radio" class="plate-map-bigger-radio" name="change_well_use" value="pastes" id="radio_pastes">
+                                                <h3 class="plate-map-radio-spacing plate-map-no-wrap">Paste</h3></label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <hr>
+                        {% endif %}
+                    </div>
+
+
+
+
+
+
+
+                    {# Working on the Samples #}
+                    <div>
+                        {% if not review %}
+                            {# rows of select boxes used to edit  #}
+                            <div class="container">
+                                <div class="sample-section hidden">
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <h3><em>Set value(s) and action, check boxes to change value(s), then drag or click an appropriate apply button to make change(s).</em></h3>
+                                            <br>
+                                        </div>
+
+{#                                            <label><input type="radio" class="plate-map-bigger-radio" name="change_well_use" value="sample">#}
+{#                                                <h3 class="plate-map-radio-spacing plate-map-no-wrap">Sample</h3></label>#}
+{#                                            <label><input type="radio" class="plate-map-bigger-radio" name="change_well_use" value="sample_blank">#}
+{#                                                <h3 class="plate-map-radio-spacing plate-map-no-wrap">Sample Blank</h3></label>#}
+
+                                    </div>
+    {#                                <div class="row">#}
+    {#                                    <div class="col-md-12">#}
+    {#                                        <h3><em>Check box next to value to place/change during drag or apply.</em></h3>#}
+    {#                                    </div>#}
+    {#                                </div>#}
+
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <div><p id="sample_matrix_item_tooltip"></p>
+                                                <label for="sample_matrix_item_tooltip">Chip &nbsp;</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div><p id="sample_location_tooltip"></p>
+                                                <label for="sample_location_tooltip">Sample Location &nbsp;</label>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-3">
+                                             <div><p id="sample_default_time_tooltip"></p>
+                                                 <label for="sample_default_time_tooltip">Default Sample Time &nbsp;</label>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-3">
+                                            <div><p id="sample_time_tooltip"></p>
+        {#                                        <label for="sample_time_tooltip">Sample Time (saved with file) &nbsp;</label>#}
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-2 plate-map-page-field-contents-medium">
+                                            {{ assay_map_additional_info.se_matrix_item }}
+                                        </div>
+                                        <div class="col-md-1">
+                                            <div>
+                                                {#  <label class="sample-section hidden"><input type="radio" name="sample_change" value="matrix_item"> Apply </label>#}
+{#                                                <input id="checkbox_matrix_item" class="big-checkbox plate-map-check-box" type="checkbox" name="change_matrix_item" value="matrix_item" checked />#}
+                                                <input id="checkbox_matrix_item" class="big-checkbox plate-map-check-box" type="checkbox" name="change_matrix_item" value="matrix_item" >
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-2 plate-map-page-field-contents-medium">
+                                            {{ assay_map_additional_info.se_location }}
+                                        </div>
+                                        <div class="col-md-1">
+                                            <div>
+                                                {#  <label class="sample-section hidden"><input type="radio" name="sample_change" value="location"> Apply </label>#}
+                                                <input id="checkbox_location" class="big-checkbox plate-map-check-box" type="checkbox" name="change_location" value="location" >
+                                            </div>
+                                        </div>
+
+
+        {#                            add back and build functionality to change sample time after file block add if requested by users#}
+                                        <div class="col-md-2 plate-map-page-field-contents-medium">
+                                            {% if not data_attached %}
+                                                {{ assay_map_additional_info.form_number_default_time }}
+                                            {% else %}
+                                                <p>Edit not currently allowed.</p>
+                                            {% endif %}
+                                        </div>
+                                        <div class="col-md-1">
+                                            <div>
+                                                {#  <label class="sample-section hidden"><input type="radio" name="sample_change" value="default_time"> Apply </label> #}
+                                            {% if not data_attached %}
+                                                <input id="checkbox_default_time" class="big-checkbox plate-map-check-box" type="checkbox" name="change_default_time" value="default_time" >
+                                            {% endif %}
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-2 plate-map-page-field-contents-medium">
+        {#                                    <p>Edit not currently allowed.</p>#}
+        {#                                    {{ assay_map_additional_info.form_number_time }}#}
+                                        </div>
+                                        <div class="col-md-1">
+                                            <div>
+                                                {#  <label class="sample-section hidden"><input type="radio" name="sample_change" value="time"> Apply </label>#}
+                                                {% if data_attached %}
+        {#                                            <input id="checkbox_time" class="big-checkbox plate-map-check-box" type="checkbox" name="change_time" value="time" />#}
+                                                {% endif %}
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+
+                                <div class="sample-section hidden">
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <div><p id="dilution_factor_tooltip"></p>
+                                                <label for="dilution_factor_tooltip">Dilution Factor &nbsp;</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div><p id="collection_volume_tooltip"></p>
+                                                <label for="collection_volume_tooltip">Sample Efflux Collected Volume &nbsp;</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div><p id="collection_time_tooltip"></p>
+                                                <label for="collection_time_tooltip">Sample Efflux Collection Time &nbsp;</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="container">
+                                            <div class="row">
+                                                <div class="col-md-2 plate-map-page-field-contents-medium">
+                                                    {{ assay_map_additional_info.form_number_dilution_factor }}
+                                                </div>
+                                                <div class="col-md-1">
+                                                    <div>
+                                                        <input id="checkbox_dilution_factor" class="big-checkbox plate-map-check-box" type="checkbox" name="change_dilution_factor" value="matrix_dilution_factor"  />
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-md-2 plate-map-page-field-contents-medium">
+                                                    {{ assay_map_additional_info.form_number_collection_volume }}
+                                                </div>
+                                                <div class="col-md-1">
+                                                    <div>
+                                                        <input id="checkbox_collection_volume" class="big-checkbox plate-map-check-box" type="checkbox" name="change_collection_volume" value="matrix_collection_volume"  />
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-md-2 plate-map-page-field-contents-medium">
+                                                     {{ assay_map_additional_info.form_number_collection_time }}
+                                                </div>
+                                                <div class="col-md-1">
+                                                    <div>
+                                                        <input id="checkbox_collection_time" class="big-checkbox plate-map-check-box" type="checkbox" name="change_collection_time" value="matrix_collection_time"  />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    {# Working on the Standards #}
+                    <div>
+                        {# rows of select boxes used to edit #}
+                        {% if not review %}
+                            <div class="container">
+                                <div class="standard-section hidden">
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <h3><em>Set value and action, then drag or click an appropriate apply button to make change(s).</em></h3>
+                                            <h4>Note: Standard blanks should be assigned a Standard Value = 0.</h4>
+
+                                            <br>
+                                        </div>
+
+                                    </div>
+    {#                                <div class="row">#}
+    {#                                    <div class="col-md-12">#}
+        {#                                    <h3><em>The standard concentration unit must match the selected Assay Standard Method/Target/Unit.</em></h3>#}
+    {#                                    </div>#}
+    {#                                </div>#}
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <div><p id="standard_value_tooltip"></p>
+                                                <label for="standard_value_tooltip">Standard Value &nbsp;</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="container">
+                                            <div class="row">
+                                                <div class="col-md-3 plate-map-page-field-contents-medium">
+                                                    {{ assay_map_additional_info.form_number_standard_value }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    {# blank  #}
+                    <div>
+                        {% if not review %}
+                            <div class="container">
+                                <div class="blank-section hidden">
+                                    <div class="row">
+                                        <div class="col-md-12">
+{#                                            <h3><em>Select type of blank and drag over wells on plate or click an appropriate apply button.</em></h3>#}
+                                            <h3><em>For SAMPLE blanks, drag over wells on plate or click an appropriate apply button. </em></h3>
+                                            <h4>Note: Standard blanks should be added under the Standard radio button selection.</h4>
+                                            <br>
+                                        </div>
+                                    </div>
+{#                                    <div class="row">#}
+{#                                        <div class="col-md-12">#}
+{#                                             <label><input type="radio" class="plate-map-bigger-radio" name="change_blank_well_use" value="blank_smp">#}
+{#                                                <h3 class="plate-map-radio-spacing plate-map-no-wrap">Sample Blank</h3></label>#}
+{#                                            <label><input type="radio" class="plate-map-bigger-radio" name="change_blank_well_use" value="blank_stn">#}
+{#                                                <h3 class="plate-map-radio-spacing plate-map-no-wrap">Standard Blank</h3></label>#}
+{#                                        </div>#}
+{#                                    </div>#}
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    {# empty  #}
+                    <div>
+                        {% if not review %}
+                            <div class="container">
+                                <div class="empty-section hidden">
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <h3><em>Drag over empty wells or click an appropriate apply button.</em></h3>
+                                            <br>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    {# pastes  #}
+                    <div>
+                        {% if not review %}
+                            <div class="container">
+                                <div class="pastes-section hidden">
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <h3><em>Drag over whole paste area (paste will be applied left to right, top down).</em></h3>
+                                            <br>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    {# Copys  #}
+                    <div>
+                        {% if not review %}
+                            <div class="container">
+                                <div class="copys-section hidden">
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <h3><em>Drag over wells to copy the well setup.</em></h3>
+    {#                                        <h3><em>Using the Copy/Paste</em></h3>#}
+    {#                                        <li>Drag over wells to copy the well setup, then, <b>drag</b> in a well (top, left) to place the copied material on the plate</li>#}
+    {#                                        <li>To clear the copy, click one of the other radio buttons (e.g., Empty).</li>#}
+    {#                                        <li>To clear the copy and start a new copy, click on the Copy button.</li>#}
+    {#                                        <li>The complete setup will be copied (regardless of check box setting).</li>#}
+    {#                                        <li>You can copy <b>once</b> and paste <b>multiple times</b>.</li>#}
+    {#                                        <li>Note: if the paste does not act as expected, make sure the selected paste spot does not extend past the plate (columns or rows) and drag in only ONE well to paste.</li>#}
+                                            <br>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    {# Options for dragging #}
+                    <div class="drag-option-section hidden">
+                        {% if not review %}
+                            <br>
+                            <div class="container">
+                                <div class="row">
+                            {# <legend>Options for Drag/Apply in Assay Assay Plate Map</legend>#}
+                                <div class="col-md-4">
+                                    <div class="row">
+                                        <label>Assay Plate Map Drag and Apply Action</label>
+                                    </div>
+                                    <div class="row">
+                                        <input type="radio" name="change_method" value="copy" checked> Copy Value
+                                    </div>
+                                    <div class="row">
+                                        <input type="radio" name="change_method" value="increment"> Increment (Time or Standard Value only)
+                                    </div>
+                                </div>
+                                <div class="increment-section hidden">
+
+                                    <div class="col-md-2">
+                                        <div class="row">
+                                            <label>Increment Operation</label>
+                                        </div>
+                                        <div class="row">
+                                            {{ assay_map_additional_info.se_increment_operation }}
+                                        </div>
+{#                                    </div>#}
+{#                                    <div class="col-md-2">#}
+                                        <div class="row">
+                                            <label>Increment By</label>
+                                        </div>
+                                        <div class="row">
+                                            {{ assay_map_additional_info.form_number_increment_value }}
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-2"></div>
+
+                                    <div class="col-md-3">
+                                        <div class="row">
+                                            <label>Increment Direction</label>
+                                        </div>
+                                        <div class="row">
+                                            <label><input type="radio" name="increment_direction" value="left-left" checked> Left to Right, Left to Right</label>
+                                        </div>
+                                        <div class="row">
+                                            <label><input type="radio" name="increment_direction" value="right-right"> Right to Left, Right to Left</label>
+                                        </div>
+                                        <div class="row">
+                                            <label><input type="radio" name="increment_direction" value="top-top"> Top to Bottom, Top to Bottom</label>
+                                        </div>
+                                        <div class="row">
+                                            <label><input type="radio" name="increment_direction" value="bottom-bottom"> Bottom to Top, Bottom to Top</label>
+                                        </div>
+                                        <div class="row">
+                                            <label><input type="radio" name="increment_direction" value="left-down"> Left to Right and Down</label>
+                                        </div>
+                                        <div class="row">
+                                            <label><input type="radio" name="increment_direction" value="right-up"> Right to Left and Up</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-1">
+                                    <div class="row">
+                                    </div>
+                                </div>
+                            </div>
+                            </div>
+                        {% endif %}
+                    </div>
+                {% else %}
+                    <div>
+                        <div class="col-md-12">
+                            <div><p id="platemap_locked_tooltip"></p>
+                                <label for="platemap_locked_tooltip"><i>Data have been attached to this assay plate map. Well content is locked.</i> &nbsp;</label>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+
+            {# {{  formset }} is the wells in the map - aways show it   #}
+            <div>
+                {#  <legend>Plate Map</legend>#}
+                {#  table of well plate              #}
+                <div class="col-md-12">
+                    <table class="table table-bordered table-inverse" id="plate_table">
+                        {#  note that the table is made in javascript #}
+                    </table>
+                </div>
+            </div>
+
+            {# Customize things to show in the plate map #}
+            {# The visibility is also controlled in js file  #}
+            <div>
+                <div>
+                    <div class="container">
+                        <div class="row">
+    {#                        <div class="col-md-3">#}
+    {#                        </div>#}
+                            <div class="col-md-6">
+                                <button type="button" class="btn btn-primary" id="checkboxButton">Show/Hide Display Options</button>
+                            </div>
+                            <div class="col-md-6">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <br>
+                <div>
+                    <div id="platemap_checkbox_section" class="toggle-display-none">
+                        <div class="container">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <table class="table table-striped table-bordered">
+                                        <thead>
+                                            <tr>
+                                                <td>
+                                                    <div class="fancy-checkbox table-filter padded-bottom" align="left">
+                                                        <input data-group="fancy-checkbox" class="visibility-checkbox" type="checkbox" name="show_matrix_item" id="show_matrix_item" value=".matrix_item_start">
+                                                        <div class="btn-group">
+                                                            <label for="show_matrix_item" class="btn plate-matrix-item extra-tall-glyphicon">
+                                                                <span class="glyphicon glyphicon-ok"></span>
+                                                                <span> </span>
+                                                            </label>
+                                                            <label for="show_matrix_item" class="btn btn-default active">
+                                                                Chip
+                                                            </label>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="fancy-checkbox table-filter padded-bottom" align="left">
+                                                        <input data-group="fancy-checkbox" class="visibility-checkbox" type="checkbox" name="show_location" id="show_location" value=".location_start">
+                                                        <div class="btn-group">
+                                                            <label for="show_location" class="btn plate-location extra-tall-glyphicon">
+                                                                <span class="glyphicon glyphicon-ok"></span>
+                                                                <span> </span>
+                                                            </label>
+                                                            <label for="show_location" class="btn btn-default active">
+                                                                Sample Location
+                                                            </label>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="fancy-checkbox table-filter padded-bottom" align="left">
+                                                        <input data-group="fancy-checkbox" class="visibility-checkbox" type="checkbox" name="show_dilution_factor" id="show_dilution_factor" value=".dilution_factor_start">
+                                                        <div class="btn-group">
+                                                            <label for="show_dilution_factor" class="btn plate-dilution-factor extra-tall-glyphicon">
+                                                                <span class="glyphicon glyphicon-ok"></span>
+                                                                <span> </span>
+                                                            </label>
+                                                            <label for="show_dilution_factor" class="btn btn-default active">
+                                                                Dilution Factor
+                                                            </label>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="select-value-set">
+                                                        <div class="fancy-checkbox table-filter padded-bottom" align="left">
+                                                            <input data-group="fancy-checkbox" class="visibility-checkbox" type="checkbox" name="show_default_time" id="show_default_time" value=".default_time_start"/>
+                                                            <div class="btn-group">
+                                                                <label for="show_default_time" class="btn plate-default-time extra-tall-glyphicon">
+                                                                    <span class="glyphicon glyphicon-ok"></span>
+                                                                    <span> </span>
+                                                                </label>
+                                                                <label for="show_default_time" class="btn btn-default active">
+                                                                    Default Sample Time
+                                                                </label>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div>
+                                                        <div class="fancy-checkbox table-filter padded-bottom" align="left">
+                                                            <input data-group="fancy-checkbox" class="visibility-checkbox" type="checkbox" name="show_time" id="show_time" value=".time_start"/>
+                                                            <div class="btn-group">
+                                                                <label for="show_time" class="btn plate-time extra-tall-glyphicon">
+                                                                    <span class="glyphicon glyphicon-ok"></span>
+                                                                    <span> </span>
+                                                                </label>
+                                                                <label for="show_time" class="btn btn-default active">
+                                                                    File Sample Time (Review Only)
+                                                                </label>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                </td>
+                                                <td>
+                                                    <div class="fancy-checkbox table-filter padded-bottom" align="left">
+                                                        <input data-group="fancy-checkbox" class="visibility-checkbox" type="checkbox" name="show_well_use" id="show_well_use" value=".well_use_start">
+                                                        <div class="btn-group">
+                                                            <label for="show_well_use" class="btn plate-well-use">
+                                                                <span class="glyphicon glyphicon-ok"></span>
+                                                                <span> </span>
+                                                            </label>
+                                                            <label for="show_well_use" class="btn btn-default active">
+                                                                Well Content
+                                                            </label>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="fancy-checkbox table-filter padded-bottom" align="left">
+                                                        <input data-group="fancy-checkbox" class="visibility-checkbox" type="checkbox" name="show_standard_value" id="show_standard_value" value=".standard_value_start">
+                                                        <div class="btn-group">
+                                                            <label for="show_standard_value" class="btn plate-standard-value extra-tall-glyphicon">
+                                                                <span class="glyphicon glyphicon-ok"></span>
+                                                                <span> </span>
+                                                            </label>
+                                                            <label for="show_standard_value" class="btn btn-default active">
+                                                                Standard Value
+                                                            </label>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="fancy-checkbox table-filter padded-bottom" align="left">
+                                                        <input data-group="fancy-checkbox" class="visibility-checkbox" type="checkbox" name="show_collection_volume" id="show_collection_volume" value=".collection_volume_start">
+                                                        <div class="btn-group">
+                                                            <label for="show_collection_volume" class="btn plate-collection-volume extra-tall-glyphicon">
+                                                                <span class="glyphicon glyphicon-ok"></span>
+                                                                <span> </span>
+                                                            </label>
+                                                            <label for="show_collection_volume" class="btn btn-default active">
+                                                                Sample Efflux Volume
+                                                            </label>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="fancy-checkbox table-filter padded-bottom" align="left">
+                                                        <input data-group="fancy-checkbox" class="visibility-checkbox" type="checkbox" name="show_collection_time" id="show_collection_time" value=".collection_time_start">
+                                                        <div class="btn-group">
+                                                            <label for="show_collection_time" class="btn plate-collection-time extra-tall-glyphicon">
+                                                                <span class="glyphicon glyphicon-ok"></span>
+                                                                <span> </span>
+                                                            </label>
+                                                            <label for="show_collection_time" class="btn btn-default active">
+                                                                Sample Efflux Time
+                                                            </label>
+                                                        </div>
+                                                    </div>
+
+
+    {#                                                stick in a click button to uncheck all as per Berts request#}
+                                                    <div >
+                                                        <button type="button" class="btn btn-primary" id="uncheckAllFancyChecksButton">Clear All</button>
+                                                        <button type="button" class="btn btn-primary" id="checkAllFancyChecksButton">Show All</button>
+                                                    </div>
+
+                                                </td>
+                                                <td>
+                                                    <div class="fancy-checkbox table-filter padded-bottom" align="left">
+                                                        <input data-group="fancy-checkbox" class="visibility-checkbox" type="checkbox" name="show_label" id="show_label" value=".label_start">
+                                                        <div class="btn-group">
+                                                            <label for="show_label" class="btn plate-label">
+                                                                <span class="glyphicon glyphicon-ok check-mark-color"></span>
+                                                                <span> </span>
+                                                            </label>
+                                                            <label for="show_label" class="btn btn-default active">
+                                                              Well Label
+                                                            </label>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="fancy-checkbox table-filter padded-bottom" align="left">
+                                                        <input data-group="fancy-checkbox" class="visibility-checkbox" type="checkbox" name="show_compound" id="show_compound" value=".compound_start">
+                                                        <div class="btn-group">
+                                                            <label for="show_compound" class="btn plate-compound">
+                                                                <span class="glyphicon glyphicon-ok check-mark-color"></span>
+                                                                <span> </span>
+                                                            </label>
+                                                            <label for="show_compound" class="btn btn-default active">
+                                                                Compound(s)
+                                                            </label>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="fancy-checkbox table-filter padded-bottom" align="left">
+                                                        <input data-group="fancy-checkbox" class="visibility-checkbox" type="checkbox" name="show_cell" id="show_cell" value=".cell_start">
+                                                        <div class="btn-group">
+                                                            <label for="show_cell" class="btn plate-cell">
+                                                                <span class="glyphicon glyphicon-ok check-mark-color"></span>
+                                                                <span> </span>
+                                                            </label>
+                                                            <label for="show_cell" class="btn btn-default active">
+                                                                Cell(s)
+                                                            </label>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="fancy-checkbox table-filter padded-bottom" align="left">
+                                                        <input data-group="fancy-checkbox" class="visibility-checkbox" type="checkbox" name="show_setting" id="show_setting" value=".setting_start">
+                                                        <div class="btn-group">
+                                                            <label for="show_setting" class="btn plate-setting">
+                                                                <span class="glyphicon glyphicon-ok check-mark-color"></span>
+                                                                <span> </span>
+                                                            </label>
+                                                            <label for="show_setting" class="btn btn-default active">
+                                                                Setting(s)
+                                                            </label>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="select-value-set">
+                                                        <div class="fancy-checkbox table-filter padded-bottom" align="left">
+                                                            <input data-group="fancy-checkbox" class="visibility-checkbox" type="checkbox" name="show_block_raw_value" id="show_block_raw_value" value=".block_value_start">
+                                                            <div class="btn-group">
+                                                                <label for="show_block_raw_value" class="btn plate-block-raw-value extra-tall-glyphicon">
+                                                                    <span class="glyphicon glyphicon-ok check-mark-color"></span>
+                                                                    <span> </span>
+                                                                </label>
+                                                                <label for="show_block_raw_value" class="btn btn-default active">
+                                                                    Raw Value (Review Only)
+                                                                </label>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                </td>
+                                            </tr>
+                                        </thead>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                                    {% comment if want to add any of the other fields to display in the plate map....%}
+                                        <div class="fancy-checkbox table-filter padded-bottom" align="left">
+                                            <input class="visibility-checkbox" type="checkbox" name="show_compound" id="show_compound" value=".compound_start">
+                                            <div class="btn-group">
+                                                <label for="show_compound" class="btn plate-compound">
+                                                    <span class="glyphicon glyphicon-ok check-mark-color"></span>
+                                                    <span> </span>
+                                                </label>
+                                                <label for="show_compound" class="btn btn-default active">
+                                                    caution flag, exclude, notes
+                                                </label>
+                                            </div>
+                                        </div>
+                                    {% endcomment %}
+                </div>
+            </div>
+
+            {# just to hide a bunch of comments when click the div #}
+            <div>
+
+            {# reference table of chip setup USED TO feed the setup (compounds, cells, settings) but not anymore #}
+            {# went a completely different way with this, but keep it here in case users ask for the table back, which, would need to populate in the views if they do.. #}
+{#            <div class="">#}
+{#                <div class="row">#}
+{#                    <legend>For Reference - Chips in the Study</legend>#}
+{#                    {% if matrix_items_in_study|length > 0 %}#}
+{#                        <div class="padded-bottom">#}
+{#                            <table id="matrix_items_table" class="table table-striped table-bordered dataTable">#}
+{#                              If the table paginates, rows not on the page are not accessible, so, do not use the class that pagenates#}
+{#                            <table id="matrix_items_table" class="table table-striped table-bordered dataTable">#}
+{#                                <thead>#}
+{#                                    <tr role="row">#}
+{#                                        <th>Name</th>#}
+{#                                        <th>Compound</th>#}
+{#                                        <th>Compound Short</th>#}
+{#                                        <th>Cell</th>#}
+{#                                        <th>Cell Short</th>#}
+{#                                        <th>Setting</th>#}
+{#                                        <th>Setting Short</th>#}
+{#                                    </tr>#}
+{#                                </thead>#}
+{#                                <tbody>#}
+{#                                    {% for item in matrix_items_in_study %}#}
+{#                                        <tr {{ item.id }}>#}
+{#                                            <td>{{ item.name }}</td>#}
+{#                                            <td id="cp{{ item.id }}-compound">{{ item.stringify_compounds|linebreaksbr }}</td>#}
+{#                                            <td id="cp{{ item.id }}-compound-short">#}
+{#                                                {%  if item.assaysetupcompound_set.all|length > 0 %}#}
+{#                                                    {% for x in item.assaysetupcompound_set.all %}#}
+{#                                                        {{ x.compound_instance.compound }} ({{ x.concentration }} {{ x.concentration_unit }})<br>#}
+{#                                                    {% endfor %}#}
+{#                                                {% else %}#}
+{#                                                    -none-#}
+{#                                                {% endif %}#}
+{#                                            </td>#}
+{#                                            <td id="cl{{ item.id }}-cell">{{ item.stringify_cells|linebreaksbr }}</td>#}
+{#                                            <td id="cl{{ item.id }}-cell-short">#}
+{#                                                {%  if item.assaysetupcell_set.all|length > 0 %}#}
+{#                                                    {% for x in item.assaysetupcell_set.all %}#}
+{#                                                        {{ x.cell_sample.cell_type }} ({{ x.density }} {{ x.density_unit }})<br>#}
+{#                                                    {% endfor %}#}
+{#                                                {% else %}#}
+{#                                                    -none-#}
+{#                                                {% endif %}#}
+{#                                            </td>#}
+{#                                            <td id="st{{ item.id }}-setting">{{ item.stringify_settings|linebreaksbr }}</td>#}
+{#                                            <td id="st{{ item.id }}-setting-short">#}
+{#                                                {%  if item.assaysetupsetting_set.all|length > 0 %}#}
+{#                                                    {% for x in item.assaysetupsetting_set.all %}#}
+{#                                                        {{ x.setting }} ({{ x.value }} {{ x.unit }})<br>#}
+{#                                                    {% endfor %}#}
+{#                                                {% else %}#}
+{#                                                    -none-#}
+{#                                                {% endif %}#}
+{#                                            </td>#}
+{#                                        </tr>#}
+{#                                    {% endfor %}#}
+{#                                </tbody>#}
+{#                            </table>#}
+{#                        </div>#}
+{#                    {% else %}#}
+{#                        <p>Not items have been setup in the study. Need to do that first.</p>#}
+{#                    {% endif %}#}
+{#                </div>#}
+{#            </div>#}
+
+            </div>
+
+            {# START THE PROCESSING DATA SECTION #}
+            <div id="data_processing_section">
+                <div class="container">
+                    {% if data_attached %}
+                        {# pick the processing details #}
+                        <div>
+                            <div class="data-processing-errors hidden">
+                                <br>
+                                    <h2>Data Processing Errors</h2>
+                                        <div class="alert alert-danger" role="alert">
+                                            <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                                            <span class="sr-only">Error:</span>
+                                            <p>{{ form.form_data_parsable_message }} </p>
+                                        </div>
+                            </div>
+                            <br>
+                            <div class="row">
+                                <h2>Options for Calibrating/Processing the Data in the File Block</h2>
+                            </div>
+
+                            <br>
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <div class="plate-map-page-field-labels-small">
+                                        <div><p id="plate_calibration_method_tooltip"></p>
+                                            <label for="plate_calibration_method_tooltip">Calibration Method* &nbsp;</label>
+                                        </div>
+                                        <div class="hidden"><p id="refresh_needed_indicator">needed</p></div>
+                                    </div>
+                                </div>
+                                <div class="col-md-9">
+                                    <div class="plate-map-page-field-contents-medium required">
+                                        {{ form.se_form_calibration_curve}}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="plate-calibration-yes hidden">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <div class="plate-map-page-field-labels-small">
+                                        <div><p id="plate_standard_bounds_tooltip"></p>
+                                            <label for="plate_standard_bounds_tooltip">Standard Bounds &nbsp;</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="plate-map-page-field-contents-large">
+                                        Minimum Concentration:
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="plate-map-page-field-contents-medium">
+                                        {{ form.form_min_standard}}
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="plate-map-page-field-contents-large">
+                                        Maximum Concentration:
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="plate-map-page-field-contents-medium">
+                                        {{ form.form_max_standard}}
+                                    </div>
+                                </div>
+                                <div class="col-md-1"></div>
+                            </div>
+
+                            <div class="logistic-set-bounds hidden">
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <div class="plate-map-page-field-labels-small">
+                                            <div><p id="logistic_bounds_set_tooltip"></p>
+                                                <label for="logistic_bounds_set_tooltip">Logistic 4P Bounds &nbsp;</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <div class="plate-map-page-field-contents-large">
+                                            Response at 0 (A):
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <div class="plate-map-page-field-contents-medium">
+                                            {{ form.form_logistic4_A}}
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <div class="plate-map-page-field-contents-large">
+                                            Response at Infinity (D):
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <div class="plate-map-page-field-contents-medium">
+                                            {{ form.form_logistic4_D}}
+                                        </div>
+                                    </div>
+                                    <div class="col-md-1"></div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <br>
+                                    <div class="plate-map-page-field-labels-small">
+                                        <div><p id="plate_blank_handling_tooltip"></p>
+                                            <label for="plate_blank_handling_tooltip">Blank Handling &nbsp;</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-9">
+                                    <br>
+                                    <table class="table table-striped table-bordered">
+                                        <thead>
+                                            <tr>
+                                                <th><i>Select Subtraction Method</i></th>
+                                                <th style="text-align:center">Average of Standard Blanks</th>
+                                                <th style="text-align:center">Average of Sample Blanks</th>
+                                                <th style="text-align:center">Nothing</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <th>Subtract from Standards</th>
+                                                <td align="center"><input id="standards_ave_standard_blanks" class="plate-map-bigger-radio" type="radio" name="radio_standards_blank_handling" value="standards_ave_standard_blanks"  checked></td>
+                                                <td align="center"><input id="standards_ave_sample_blanks"   class="plate-map-bigger-radio" type="radio" name="radio_standards_blank_handling" value="standards_ave_sample_blanks" ></td>
+                                                <td align="center"><input id="standards_nothing"             class="plate-map-bigger-radio" type="radio" name="radio_standards_blank_handling" value="standards_nothing" ></td>
+                                            </tr>
+                                            <tr>
+                                                <th>Subtract from Samples</th>
+                                                <td align="center"><input id="samples_ave_standard_blanks" class="plate-map-bigger-radio" type="radio" name="radio_samples_blank_handling" value="samples_ave_standard_blanks" ></td>
+                                                <td align="center"><input id="samples_ave_sample_blanks"   class="plate-map-bigger-radio" type="radio" name="radio_samples_blank_handling" value="samples_ave_sample_blanks"  checked></td>
+                                                <td align="center"><input id="samples_nothing"             class="plate-map-bigger-radio" type="radio" name="radio_samples_blank_handling" value="samples_nothing" ></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="hidden">
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <div class="plate-map-page-field-labels-small">
+                                            <div><p></p>
+                                                <label></label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-9">
+                                        <div class="plate-map-page-field-contents-medium">
+                                            {{ form.se_form_blank_handling}}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+
+                            <br>
+                            <div class="plate-map-options-standards-blocks hidden">
+                                <div >
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <div class="plate-map-page-field-labels-small">
+                                                <div><p id="plate_map_has_no_standards_tooltip"></p>
+                                                    <label for="plate_map_has_no_standards_tooltip">No Standards On Plate &nbsp;</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-9">
+                                            <div class="plate-map-page-radio-contents">
+        {#                                        IMPORTANT - populating the pick list depends on this radio button being changed to pick a block!!!!#}
+    {#                                            <label><input type="radio" name="standard_pick" value="no_calibration" checked> <b class="plate-map-radio-spacing">No Processing (send Raw Values)</b> </label>#}
+    {#                                            <label><input type="radio" name="standard_pick" value="pick_block"> <b class="plate-map-radio-spacing">Pick a Block of Data With Standards </b></label>#}
+    {#                                        {{ form.radio_standard_option_use_or_not }}#}
+                                            {#  HANDY to pass radio buttons from forms #}
+                                                {% for radio in form.radio_standard_option_use_or_not %}
+                                                    {{ radio.tag }}
+                                                    <label for="value_{{ forloop.counter0 }}">
+                                                        <b class="plate-map-radio-spacing">{{ radio.choice_label }}</b>
+                                                    </label>
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <br>
+                                <div class="pick-standard-file-block hidden">
+                                    <div class="row pick-standard-file-block hidden">
+                                        <div class="col-md-3">
+                                            <div class="plate-map-page-field-labels-small">
+                                                <div><p id="plate_file_block_with_standards_to_borrow_tooltip"></p>
+                                                    <label for="plate_file_block_with_standards_to_borrow_tooltip">File/Block with Standards to Use &nbsp;</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-9">
+                                            <div class="plate-map-page-field-contents-medium">
+                                                {{ form.se_block_standard_borrow_string }}
+                                                 <div class="hidden">
+                                                    {{ form.ns_block_standard_borrow_string_to_block_pk_back_to_platemap_pk }}
+                                                </div>
+                                                <div class="hidden">
+                                                    {{ form.form_block_standard_borrow_pk_single_for_storage }}
+                                                </div>
+                                                <div class="hidden">
+                                                    {{ form.form_block_standard_borrow_pk_platemap_single_for_storage }}
+                                                </div>
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        {# standard curve   #}
+                        <div class="plate-calibration-curve-yes hidden">
+                            <br>
+                            <h2>Standard Curve</h2>
+                        </div>
+
+                        <div class="plate-calibration-curve-guts-yes hidden">
+                            <div class="row">
+                                <div class="col-md-12">
+{#                                    <h3>Summary Statistics</h3>#}
+                                    <table class="table table-striped table-bordered">
+                                        <thead>
+{#                                          <tr>#}
+{#                                            <th>Fitting Information</th>#}
+{#                                            <th>Details</th>#}
+{#                                          </tr>#}
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>Fitting Method Used </td>
+                                                <td>
+                                                   {{ form.form_calibration_curve_method_used }}
+                                                    <div id="id_special_message" class="alert alert-danger"></div>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>Equation</td>
+                                                <td>
+{#                                                    {{ form.form_calibration_equation }}#}
+                                                    <div id="id_calibration_equation">
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>R squared</td>
+                                                <td>
+{#                                                    {{ form.form_calibration_rsquared }}#}
+                                                    <div id="id_calibration_rsquared">
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+{#                                <div class="col-md-4"></div>#}
+                            </div>
+                        </div>
+
+                        <div class="plate-calibration-curve-guts-yes hidden">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="plate-map-page-field-contents-medium">
+                                        <button type="button" class="btn btn-primary" id="parameterDetailsButton">Show/Hide Standard Parameter Details</button>
+                                    </div>
+                                </div>
+                                <div class="col-md-8">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="plate-calibration-curve-guts-yes hidden">
+                            <div class="plate-map-page-show-parameter-details">
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <table class="table table-striped table-bordered">
+                                            <thead>
+    {#                                          <tr>#}
+    {#                                            <th>Fitting Information</th>#}
+    {#                                            <th>Details</th>#}
+    {#                                          </tr>#}
+                                            </thead>
+                                            <tbody>
+
+                                                <div >
+                                                    <tr>
+                                                        <td>Parameter Info</td>
+                                                        <td>
+                                                            <table class="table table-bordered">
+                                                                <thead>
+    {#                                                              <tr>#}
+    {#                                                                <th>Parameter</th>#}
+    {#                                                                <th>Value</th>#}
+    {#                                                              </tr>#}
+                                                                </thead>
+                                                                <tbody>
+                                                                    <tr>
+{#                                                                        <td>{{ form.form_calibration_parameter_1_string }}</td>#}
+{#                                                                        <td>{{ form.form_calibration_parameter_1_value }}</td>#}
+                                                                        <td><div id="id_calibration_parameter_1_string">
+                                                                        </div></td>
+                                                                        <td><div id="id_calibration_parameter_1_value">
+                                                                        </div></td>
+                                                                    </tr>
+                                                                    <tr>
+{#                                                                        <td>{{ form.form_calibration_parameter_2_string }}</td>#}
+{#                                                                        <td>{{ form.form_calibration_parameter_2_value }}</td>#}
+                                                                        <td><div id="id_calibration_parameter_2_string">
+                                                                        </div></td>
+                                                                        <td><div id="id_calibration_parameter_2_value">
+                                                                        </div></td>
+                                                                    </tr>
+                                                                    <tr>
+{#                                                                        <td>{{ form.form_calibration_parameter_3_string }}</td>#}
+{#                                                                        <td>{{ form.form_calibration_parameter_3_value }}</td>#}
+                                                                        <td><div id="id_calibration_parameter_3_string">
+                                                                        </div></td>
+                                                                        <td><div id="id_calibration_parameter_3_value">
+                                                                        </div></td>
+                                                                    </tr>
+                                                                    <tr>
+{#                                                                        <td>{{ form.form_calibration_parameter_4_string }}</td>#}
+{#                                                                        <td>{{ form.form_calibration_parameter_4_value }}</td>#}
+                                                                        <td><div id="id_calibration_parameter_4_string">
+                                                                        </div></td>
+                                                                        <td><div id="id_calibration_parameter_4_value">
+                                                                        </div></td>
+                                                                    </tr>
+{#                                                                    Not using since did not do 5P logistic#}
+{#                                                                    <tr>#}
+{#                                                                        <td>{{ form.form_calibration_parameter_5_string }}</td>#}
+{#                                                                        <td>{{ form.form_calibration_parameter_5_value }}</td>#}
+{#                                                                    </tr>#}
+{#                                                                        <td><div id="id_calibration_parameter_5_string">#}
+{#                                                                        </div></td>  #}
+{#                                                                        <td><div id="id_calibration_parameter_5_value">#}
+{#                                                                        </div></td>  #}
+                                                                </tbody>
+                                                            </table>
+                                                        </td>
+                                                    </tr>
+                                                </div>
+
+                                                <div >
+                                                    <tr>
+                                                        <td>Standard Fitting Information</td>
+                                                        <td>
+                                                            <table class="table table-bordered">
+                                                                <thead>
+        {#                                                              <tr>#}
+        {#                                                                <th></th>#}
+        {#                                                                <th></th>#}
+        {#                                                              </tr>#}
+                                                                </thead>
+                                                                <tbody>
+                                                                    <tr>
+                                                                        <td>Minimum</td>
+                                                                        <td>{{ form.form_calibration_standard_fitted_min_for_e }}
+                                                                        </td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td>Maximum</td>
+                                                                        <td>{{ form.form_calibration_standard_fitted_max_for_e }}
+                                                                        </td>
+                                                                    </tr>
+{#                                                                    Note to self: these are loosely the standard and sample blank average#}
+{#                                                                    however, they get overwritt#}
+                                                                    <tr>
+                                                                        <td>Subtracting from Standards (to obtain Adjusted Signal) </td>
+                                                                        <td>{{ form.form_calibration_standard_standard0_average }}
+                                                                        </td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td>Subtracting from Samples (to obtain Adjusted Signal)</td>
+                                                                        <td>{{ form.form_calibration_sample_blank_average }}
+                                                                        </td>
+                                                                    </tr>
+                                                                </tbody>
+                                                            </table>
+                                                        </td>
+                                                    </tr>
+                                                </div>
+
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="plate-map-page-field-contents-medium">
+                                            <button type="button" class="btn btn-primary" id="showHideStandardsTableButton">Show/Hide Standards Table</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-7">
+                                        <h3 class="hidden" id="ave_standard_points_table_title">Standards (Averages Used for Fitting)</h3>
+                                            <div class="hidden" id="div_for_standard_averages_table">
+                                            {#  note that the table (including the table tag) is made in javascript #}
+                                            </div>
+                                    </div>
+                                    <div class="col-md-5">
+                                    </div>
+                                </div>
+                                <br>
+
+{#                              This was primarily for QC, but it could be unhidden in the console if needed#}
+                                <div class="">
+                                    <div class="row">
+                                        <div class="col-md-7">
+                                            <h3 class="hidden" id="all_standard_points_table_title">Standard Points (Fitted)</h3>
+                                            <div class="hidden" id="div_for_standards_table">
+                                            {#  note that the table (including the table tag) is made in javascript #}
+                                            </div>
+                                        </div>
+                                        <div class="col-md-5">
+                                        </div>
+                                    </div>
+                                </div>
+
+{#                                <div class="row">#}
+{#                                    <div class="col-md-12">#}
+{#                                        <div class="plate-map-page-field-contents-medium">#}
+{#                                            <button type="button" class="btn btn-primary" id="showHideSamplesOnGraphButton">Show/Hide Samples On Graph</button>#}
+{#                                        </div>#}
+{#                                    </div>#}
+{#                                </div>#}
+                            </div>
+                        </div>
+
+                        <div class="plate-calibration-curve-guts-yes hidden">
+                            <div class="row">
+                                <div class="col-md-11">
+                                    <div id="chart_div" style="height: 500px"></div>
+{#                                  <div id="chart_div" style="width: 900px; height: 500px"></div> #}
+                                </div>
+
+                                <div class="col-md-1">
+                                    <div class="plate-map-page-field-contents-medium">
+                                        <button type="button" class="btn btn-primary" id="showHideSamplesOnGraphButton">Show/Hide Samples On Graph</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {# samples table  #}
+                        <div class="plate-calibration-or-processing-yes hidden">
+                            <br>
+                            <h2>Processed Sample Data</h2>
+                                <div class="hidden" >
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <div class="plate-map-page-field-labels-small">
+                                                <div><p id="plate_replicate_handling_tooltip"></p>
+                                                    <label for="plate_replicate_handling_tooltip">Replicate Handling &nbsp;</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-9">
+                                            <div class="plate-map-page-radio-contents">
+    {#                                            comment{{ form.radio_replicate_handling_average_or_not }}#}
+    {#                                            comment<label><input type="radio" name="replicates" value="average" checked>  <b class="plate-map-radio-spacing">Send the Average of the Replicates to the Study Summary</b> </label>#}
+    {#                                            comment<label><input type="radio" name="replicates" value="each">  <b class="plate-map-radio-spacing">Send Each Replicate's Value to the Study Summary</b> </label>#}
+                                                {% for radio in form.radio_replicate_handling_average_or_not %}
+                                                    {{ radio.tag }}
+                                                    <label for="value_{{ forloop.counter0 }}">
+                                                        <b class="plate-map-radio-spacing">{{ radio.choice_label }}</b>
+                                                    </label>
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <br>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="for-processed-samples-table-each">
+                                            <h3>Each Sample Individually</h3>
+                                        </div>
+                                        <div id="div_for_processed_samples_table_each" class="for-processed-samples-table-each">
+{#                                        <table id="processed_samples_table" class="display table table-striped table-hover" cellspacing="0" width="100%">#}
+                                        {#  note that the table (including the table tag) is made in javascript #}
+{#                                        </table>#}
+                                        </div>
+                                    </div>
+                                </div>
+{#                              this is assigned to each for now, may want to move it back to average if put toggle back on page#}
+                                <div class="row">
+                                    <div class="col-md-10">
+                                        <div class="for-processed-samples-table-each">
+                                            <h3>Samples Averaged by Key Fields (Chip ID, Sample Location, and Sample Time)</h3>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <div class="recalculate-averages-button hidden">
+                                            <div class="plate-map-page-field-contents-large">
+                                                <button type="button" class="btn btn-primary" id="flipToAverageButton">Show Averages</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div id="div_for_processed_samples_table_average" class="for-processed-samples-table-average">
+{#                                        <table id="processed_samples_table" class="display table table-striped table-hover" cellspacing="0" width="100%">#}
+                                        {#  note that the table (including the table tag) is made in javascript #}
+{#                                        </table>#}
+                                        </div>
+                                        <br>
+                                        <p><i>Caution Flag:</i> E - Out of Calibration Range; F - Could Not Be Calculated</p>
+                                    </div>
+                                </div>
+                        </div>
+
+
+                        {# Send to main study #}
+
+{#                        <div>#}
+{#                            {{  form.form_make_mifc_on_submit }}#}
+{#                            <label for="form_make_mifc_on_submit" class="plate-map-radio-spacing">Send this Sample Data to Study Summary on Submit</label>#}
+{#                        </div>#}
+
+                        <div>
+                            <div class="plate-calibration-or-processing-yes hidden">
+                                <br>
+                                <h2>Sending Data to the Study Summary</h2>
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <div class="plate-map-page-field-labels-small">
+                                            <div><p id="submit_to_study_summary_tooltip"></p>
+                                                <label for="submit_to_study_summary_tooltip">Send Averages to Study Summary &nbsp;</label>
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-9">
+                                        <div class="plate-map-page-field-contents-medium">
+                                            {{  form.form_make_mifc_on_submit }}
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+
+                    {% endif %}
+                </div>
+            </div>
+
+            {# END THE PROCESSING DATA SECTION #}
+
+
+            {# START THE DIALOGUE SECTION #}
+            <div class="hidden">
+                <p>The hold value:</p>
+                <p id="hold_note_val"></p>
+            </div>
+            <div id="dialog_element" class="hidden" >
+                <form id=noteSelectionForm>
+{#                    these also need changed in the js#}
+                    <select name="note_options" id="selectable" class="plate-map-dialog-selectable">
+                        <option selected="selected" value=""></option>
+                        <option value="0" id="note_0">Close to calibration range</option>
+                        <option value="1" id="note_1">Preferred to include</option>
+                        <option value="2" id="note_2">Other/Unspecified</option>
+                    </select>
+                </form>
+            </div>
+            {# END THE DIALOGUE SECTION #}
+
+            {# formsets #}
+            <div>
+                {# changes are made to the formsets and then saved   #}
+                {# need this (mangement_form) or form will not save   #}
+                {{ formset.management_form }}
+                <div class="hidden">
+                    <div class="no-selectize">
+                        {# this is the main formset (plate and plate items)  #}
+                        <h3>FormSet </h3>
+                        <div id="formset">
+                            {% for form in formset %}
+    {#                           do not uncomment or get dups --{{ form.id }}--#}
+                                {# No ID tag for now #}
+        {#                        <div id="{{ form.prefix }}" class="inline no-selectize">#}
+                                <div class="inline no-selectize">
+                                {{ form }}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+{#            20200522 getting rid of the formset for the values#}
+{#                {% if not data_attached %}#}
+{#                    {{ value_formset.management_form }}#}
+{#                    <div class="">#}
+{#                        <div class="no-selectize">#}
+{#                            <h3>value_formset </h3>#}
+{#                            <div id="value_formset">#}
+{#                                {% for vform in value_formset %}#}
+        {#                          do not uncomment or get dups  --{{ vform.id }}--#}
+{#                                    <div class="inline no-selectize">#}
+{#                                        {{ vform }}#}
+{#                                    </div>#}
+{#                                {% endfor %}#}
+{#                            </div>#}
+{#                        </div>#}
+{#                    </div>#}
+{#                {% endif %}#}
+
+            </div>
+
+
+            {# these are the ones that show to user, but they are moved to the top  #}
+{#            <div class="hidden">#}
+{#                {% if formset.errors %}#}
+{#                    {% for field, error in formset.errors.items %}#}
+{#                        <div class="alert alert-danger" role="alert">#}
+{#                            <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>#}
+{#                            <span class="sr-only">Error:</span>#}
+{#                            {{ error }}#}
+{#                        </div>#}
+{#                    {% endfor %}#}
+{#                {% endif %}#}
+{#                <br>#}
+
+{#            getting rid of value formset 20200522#}
+                {# this is not tested as of 20200107  #}
+{#                {% if data_attached.value == 0 %}#}
+{#                    {% if value_formset.errors %}#}
+{#                        {% for field, error in value_formset.errors.items %}#}
+{#                            <div class="alert alert-danger" role="alert">#}
+{#                                <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>#}
+{#                                <span class="sr-only">Error:</span>#}
+{#                                {{ error }}#}
+{#                            </div>#}
+{#                        {% endfor %}#}
+{#                    {% endif %}#}
+{#                {% endif %}#}
+{#            </div>#}
+
+{#        HANDY any save problems turn this on#}
+            <div class="hidden">
+                {% if not review %}
+                    <div>
+                        <h2>For Development Testing</h2>
+                        Use for error checking
+                        For testing<br>
+                        form.errors<br>
+                        {{ form.errors }}<br>
+                        formset.errors<br>
+                        {{ formset.errors }}<br>
+{#                        value_formset.errors<br>#}
+{#                        {{ value_formset.errors }}<br>#}
+                    </div>
+                {% endif %}
+            </div>
+
+            {# submit bar #}
+            <div>
+                <div>
+                    {% if not review %}
+                        {% include "submit.html" with flag="y" creator=object.created_by.id %}
+                    {% endif %}
+                </div>
+
+                {% comment %}  <h6>tracking begin</h6>
+                {% include 'tracking.html' %}
+                <h6>tracking end</h6>{% endcomment %}
+            </div>
+
+        </div>
+    </form>
+{% endblock %}

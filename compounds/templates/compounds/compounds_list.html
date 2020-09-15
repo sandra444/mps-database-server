@@ -1,12 +1,13 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block load %}
-    <script src="{% static "js/project_filter.js" %}"></script>
+{% block load_js %}
+    {# <script src="{% static "js/project_filter.js" %}"></script> #}
     <script src="{% static "compounds/compounds_list.js" %}"></script>
 {% endblock %}
 
 {% block breadcrumbs %}
+    <li><a href="{% url 'assays-studycomponents' %}">Study Components</a></li>
     <li class="active">Compounds</li>
 {% endblock %}
 
@@ -22,9 +23,12 @@
             <a href="/compounds/add/" class="btn btn-lg btn-success" role="button">Add Compound</a>
         </div>
 
-        {% include 'project_filters.html' %}
+        {# Deprecated #}
+{# {% include 'project_filters.html' %} #}
 
-        <table hidden id="compounds" class="display" cellspacing="0" width="100%">
+        {# TODO REFACTOR THE TEMPLATE FOR LIST VIEWS #}
+        {# TODO Headers etc. ideally should not be explicitly written, not DRY #}
+        <table hidden id="compounds" class="display table table-striped" cellspacing="0" width="100%">
             <thead>
                 <tr>
                     <th>View</th>
@@ -36,15 +40,23 @@
                     <th>LogP</th>
                     <th>Rule of 5 Violations</th>
                     <th>Known Drug</th>
-{#                    <th>Last Update</th>#}
-                    <th>Image</th>
-                    <th>Project</th>
+                    <th>Rotatable Bonds</th>
+                    <th>Acidic pKa</th>
+                    <th>Basic pKa</th>
+                    <th>LogD</th>
+                    <th>Passes Rule of 3</th>
+                    <th>Protein Binding</th>
+                    <th>Half Life</th>
+                    <th>Clearance</th>
+                    <th>Bioavailability</th>
+                    <th>Absorption</th>
+                    <th>PK Metabolism</th>
                 </tr>
             </thead>
 
             <tbody>
             {% for compound in object_list %}
-                <tr class="compound" id="{{ compound.id }}">
+                <tr>
                     <td><a class="btn btn-primary" href="{{ compound.id }}">View</a></td>
                     <td><a class="btn btn-primary" href="{{ compound.id }}/update/">Edit</a></td>
                     <td class="text-wrapped">{{ compound.name }}</td>
@@ -63,40 +75,20 @@
                             <span hidden>False</span>
                         {% endif %}
                     </td>
-
-                    {# TODO Tags field is deprecated #}
-{#                    <td>{{ compound.tags|default_if_none:"" }}</td>#}
-{#                    <td>{{ compound.molecular_weight }}</td>#}
-{#                    <td>{{ compound.logp }}</td>#}
-{#                    <td>{{ compound.ro5_violations }}</td>#}
-{#                    <td>{{ compound.last_update }}</td>#}
-                    <td>
-                      {% if compound.chemblid %}
-                          <img src="https://www.ebi.ac.uk/chembldb/compound/displayimage/{{ compound.chemblid }}">
-                      {% else %}
-                        <span style="width: 128px; height: 128px;" class="glyphicon glyphicon-file text-warning" aria-hidden="true"></span>
-                      {% endif %}
-                    </td>
-
-                    <td>
-                        {% if compound.mps %}
-                            MPS
-                        {% endif %}
-                        {% if compound.epa %}
-                            EPA
-                        {% endif %}
-                        {% if compound.tctc %}
-                            TCTC
-                        {% endif %}
-                        {% if not compound.epa and not compound.mps and not compound.tctc %}
-                            Unassigned
-                        {% endif %}
-                    </td>
+                    <td>{{ compound.rotatable_bonds|default_if_none:"" }}</td>
+                    <td>{{ compound.acidic_pka|default_if_none:"" }}</td>
+                    <td>{{ compound.basic_pka|default_if_none:"" }}</td>
+                    <td>{{ compound.logd|default_if_none:"" }}</td>
+                    <td>{{ compound.ro3_passes|default_if_none:"" }}</td>
+                    <td>{{ compound.protein_binding|default_if_none:"" }}</td>
+                    <td>{{ compound.half_life|default_if_none:"" }}</td>
+                    <td>{{ compound.clearance|default_if_none:"" }}</td>
+                    <td>{{ compound.bioavailability|default_if_none:"" }}</td>
+                    <td>{{ compound.absorption|default_if_none:"" }}</td>
+                    <td>{{ compound.pk_metabolism|default_if_none:"" }}</td>
                 </tr>
             {% endfor %}
             </tbody>
         </table>
     </div>
-
-    <script src="{% static "js/display_datatable.js" %}"></script>
 {% endblock %}

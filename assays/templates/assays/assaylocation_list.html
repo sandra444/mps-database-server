@@ -1,0 +1,42 @@
+{# DEPRECATED #}
+{% extends "base.html" %}
+{% load static %}
+
+{% block load_js %}
+    <script src="{% static "assays/assaylocation_list.js" %}"></script>
+{% endblock %}
+
+{% block breadcrumbs %}
+    <li class="active">Microdevice Locations</li>
+{% endblock %}
+
+{% block content %}
+    <div class="padded-bottom">
+        <legend>
+            <h2 class="text-center">
+                Microdevice Locations List
+            </h2>
+        </legend>
+        <div id="locations">
+            <table id="locations-table" class="display table table-striped" cellspacing="0" width="100%" hidden>
+                <thead>
+                    <tr>
+                        {# <th>View Details</th>#}
+                        <th>Location</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                {% for location in object_list %}
+                     <tr>
+                        {# <td><a class="btn btn-primary" title="View paired target/analytes." href="{{ location.id }}">View</a></td>#}
+                        <td>{{ location.name }}</td>
+                        <td>{{ location.description }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock %}

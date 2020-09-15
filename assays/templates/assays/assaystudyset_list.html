@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block load_js %}
+    <script src="{% static "assays/assaystudyset_list.js" %}"></script>
+{% endblock %}
+
+{% block breadcrumbs %}
+    <li class="active">Study Sets</li>
+{% endblock %}
+
+{% block content %}
+    <div class="padded-bottom">
+        <legend>
+            <h2 class="text-center">
+                Study Sets
+            </h2>
+        </legend>
+
+        <div class="row text-center padded-bottom">
+            <a href="{% url 'assays-assaystudyset-add' %}" class="btn btn-lg btn-success" role="button">Add Study Set</a>
+        </div>
+
+        <table id="study_sets" class="display table table-striped" cellspacing="0" width="100%" hidden>
+            <thead>
+                <tr>
+                    <th>View Details</th>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Creator</th>
+                    <th>Review</th>
+                </tr>
+            </thead>
+
+            <tbody>
+            {% for study_set in object_list %}
+                 <tr>
+                    <td><a class="btn btn-primary" href="{{ study_set.id }}">View</a></td>
+                    <td>{{ study_set.name }}</td>
+                    <td>{{ study_set.description }}</td>
+                    <td>{{ study_set.created_by }}</td>
+                    {# UNPLEASANT #}
+                    <td>
+                        {% if study_set.signed_off_by %}
+                            <span hidden>1</span>
+                            <span title="This entry was signed off by {{ study_set.full_reviewer }} on {{ study_set.signed_off_date }}: '{{ study_set.signed_off_notes }}'" class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
+                        {% endif %}
+                        {% if study_set.flagged %}
+                            <span hidden>0</span>
+                            <span title="This entry is flagged for review: '{{ study_set.reason_for_flag }}'" class="glyphicon glyphicon-flag text-danger" aria-hidden="true"></span>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

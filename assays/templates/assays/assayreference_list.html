@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block load_js %}
+    <script src="{% static "assays/assayreference_list.js" %}"></script>
+{% endblock %}
+
+{% block breadcrumbs %}
+    <li><a href="{% url 'assays-studycomponents' %}">Study Components</a></li>
+    <li class="active">References</li>
+{% endblock %}
+
+{% block content %}
+    <div class="padded-bottom">
+        <legend>
+            <h2 class="text-center">
+                References
+            </h2>
+        </legend>
+
+        <div class="row text-center padded-bottom">
+            <a href="/assays/assayreference/add/" class="btn btn-lg btn-success" role="button">Add Reference</a>
+        </div>
+
+        <div id="references">
+            <table id="references-table" class="display table table-striped" cellspacing="0" width="100%" hidden>
+                <thead>
+                    <tr>
+                        <th>View</th>
+                        <th>Edit</th>
+                        <th>PubMed</th>
+                        <th>Title</th>
+                        <th>Authors</th>
+                        <th>Abstract</th>
+                        <th>Publication</th>
+                        <th>Year</th>
+                        <th>DOI</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                {% for reference in object_list %}
+                     <tr>
+                        <td><a class="btn btn-primary" href="{% url 'assays-assayreference-detail' reference.id %}">View</a></td>
+                        <td><a class="btn btn-primary" href="{% url 'assays-assayreference-update' reference.id %}">Edit</a></td>
+                        <td><a href="https://www.ncbi.nlm.nih.gov/pubmed/{{ reference.pubmed_id }}" target="_blank">{{ reference.pubmed_id }}</a></td>
+                        <td>{{ reference.title }}</td>
+                        <td>{{ reference.authors }}</td>
+                        <td>{{ reference.abstract }}</td>
+                        <td>{{ reference.publication }}</td>
+                        <td>{{ reference.year }}</td>
+                        {% if reference.doi == 'N/A' %}
+                            <td>N/A</td>
+                        {% else %}
+                            <td><a href="https://doi.org/{{ reference.doi }}" target="_blank">{{ reference.doi }}</a></td>
+                        {% endif %}
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock %}

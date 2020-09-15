@@ -1,11 +1,12 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block load %}
+{% block load_js %}
     <script src="{% static "cellsamples/cellsubtype_list.js" %}"></script>
 {% endblock %}
 
 {% block breadcrumbs %}
+    <li><a href="{% url 'assays-studycomponents' %}">Study Components</a></li>
     <li class="active">Cell Origins</li>
 {% endblock %}
 
@@ -21,7 +22,7 @@
             <a href="/cellsamples/cellsubtype/add/" class="btn btn-lg btn-success" role="button">Add Cell Origin</a>
         </div>
 
-        <table hidden id="cellsubtypes" class="display" cellspacing="0" width="100%">
+        <table hidden id="cellsubtypes" class="display table table-striped" cellspacing="0" width="100%">
             <thead>
                 <tr>
                     <th>Edit</th>
@@ -32,7 +33,7 @@
 
             <tbody>
             {% for object in object_list %}
-                <tr class="cellsubtype" id={{ object.id }} name={{ object }}>
+                <tr>
                     <td><a class="btn btn-primary" href="{{ object.id }}">Edit</a></td>
                     <td>{{ object }}</td>
                     <td>{{ object.cell_type|default:'Generic (Applicable to All Cell Types)' }}</td>
@@ -41,6 +42,4 @@
             </tbody>
         </table>
     </div>
-
-    <script src="{% static "js/display_datatable.js" %}"></script>
 {% endblock %}

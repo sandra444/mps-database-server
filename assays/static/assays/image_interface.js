@@ -15,6 +15,7 @@ $(document).ready(function () {
     var brightness = 100;
 
     var downloadFilename = '';
+    var image_types = ['jpg','jpeg','png','gif','tif','tiff']
 
     // Perform on image expansion
     var popupDialogData = {};
@@ -38,28 +39,8 @@ $(document).ready(function () {
                $(this).dialog("close");
             }
         }],
-        close: function() {
-            // Permit scrolling again
-            $('body').removeClass('stop-scrolling');
-        },
         open: function() {
-            // Prevent scrolling
-            $('body').addClass('stop-scrolling');
-
-            // Change height if necessary
-            // if ($(window).height() < 950) {
-            //     $(this).dialog('option', 'height', $(window).height() - 100);
-            // }
-            // else {
-            //     $(this).dialog('option', 'height', 750);
-            // }
-            //
-            // if ($(window).width() < 1300) {
-            //     $(this).dialog('option', 'width', $(window).width() - 200);
-            // }
-            // else {
-            //     $(this).dialog('option', 'width', 1800);
-            // }
+            $.ui.dialog.prototype.options.open();
 
             $(this).dialog('option', 'width', $(window).width());
             $(this).dialog('option', 'height', ($(window).height()-$('#floating-sliders').height()-1));
@@ -119,7 +100,7 @@ $(document).ready(function () {
             // Check filetype
             var type = '';
             var detailDisplay = '';
-            if (popupDialogData["file_name"].match(/.(jpg|jpeg|png|gif|tif|tiff)$/i)){
+            if (image_types.indexOf($.trim(popupDialogData["file_name"].split('.').pop().toLowerCase())) >= 0){
                 type = "Image";
                 detailDisplay = '<a href="/media/assay_images/'+study_pk+'/'+popupDialogData["file_name"]+'"><div class="thumbnail col-md-12 col-lg-4"><img alt="'+popupDialogData["file_name"]+'" style="filter: contrast('+contrast+'%)  brightness('+brightness+'%);" src="/media/assay_thumbs/'+study_pk+'/thumbnail_'+popupDialogData["file_name"].split(".").slice(0, -1).join('.') +'_600_600.jpg"/></div></a>'
             } else {
@@ -132,7 +113,6 @@ $(document).ready(function () {
             downloadFilename = popupDialogData["file_name"];
             $(".ui-dialog").find(".ui-button-text-only:first").html('<a style="text-decoration: none; color: white;" download href="/media/assay_images/'+study_pk+'/'+downloadFilename+'"><span class="ui-button-text">Download Unaltered '+type+' <span data-toggle="tooltip" title="Some '+type+'s are dark and may require\n intensity adjustment to discern details." class="glyphicon glyphicon-info-sign" aria-hidden="true"></span></span></a>');
 
-            // $("#myDialogText").html('<div class="row no-padding"><div class="thumbnail col-md-12 col-lg-4"><img style="filter: contrast('+contrast+'%)  brightness('+brightness+'%);" src="/media/assay_thumbs/'+study_pk+'/thumbnail_'+popupDialogData["file_name"].split(".")[0]+'_600_600.jpg"/></div><div class="col-md-12 col-lg-7"><table class="table table-hover table-striped table-bordered table-condensed small"><tr><th style="width: 250px;">Chip ID</th><td>'+iChip+'</td></tr><tr><th>Assay Plate ID</th><td>'+iPlate+'</td></tr><tr><th>Assay Well ID</th><td>'+iWell+'</td></tr><tr><th>Time</th><td>'+iTime+'</td></tr><tr><th>Method/Kit</th><td>'+iMethodKit+'</td></tr><tr><th>Target/Analyte</th><td>'+iTargetAnalyte+'</td></tr><tr><th>Subtarget</th><td>'+iSubtarget+'</td></tr><tr><th>Sample Location</th><td>'+iSampleLocation+'</td></tr><tr><th>Replicate</th><td>'+iReplicate+'</td></tr><tr><th>Notes</th><td>'+iNotes+'</td></tr><tr><th>Image File Name</th><td>'+iFileName+'</td></tr><tr><th>Image Field</th><td>'+iField+'</td></tr><tr><th>Image Field Description</th><td>'+iFieldDescription+'</td></tr><tr><th>Image Magnification</th><td>'+iMagnification+'</td></tr><tr><th>Image Resolution</th><td>'+iResolution+'</td></tr><tr><th>Image Resolution Unit</th><td>'+iResolutionUnit+'</td></tr><tr><th>Image Sample Label</th><td>'+iSampleLabel+'</td></tr><tr><th>Image Sample Label Description</th><td>'+iSampleLabelDescription+'</td></tr><tr><th>Image Wavelength (ex/em nm)</th><td>'+iWavelength+'</td></tr><tr><th>Image Color Mapping</th><td>'+iColorMapping+'</td></tr><tr><th>Image Setting Note</th><td>'+iSettingNote+'</td></tr></table></div></div>');
             $("#myDialogText").html('<div class="row no-padding">'+detailDisplay+'<div class="col-md-12 col-lg-7"><table class="table table-hover table-striped table-bordered table-condensed small">'+
                 '<div class="text-center"><label>Note: This '+type.toLowerCase()+' may have been altered to assist with viewing.<br>To perform analysis, please download the unaltered '+type.toLowerCase()+'.</label></div><br>'+
                 '<tr><th style="width: 200px;">Chip ID</th><td>'+iChip+'</td></tr>'+
@@ -146,7 +126,7 @@ $(document).ready(function () {
                 '<tr><th>Notes</th><td>'+iNotes+'</td></tr>'+
                 '<tr><th>'+type+' File Name</th><td>'+iFileName+'</td></tr>'+
                 '<tr><th>'+type+' Field</th><td>'+iField.split(".")[0]+fieldTooltip+'</td></tr>'+
-                '<tr><th>'+type+' Magnification</th><td>'+iMagnification.split(".")[0]+'x</td></tr>'+
+                '<tr><th>'+type+' Magnification</th><td>'+iMagnification+'x</td></tr>'+
                 '<tr><th>'+type+' Resolution</th><td>'+iResolution+" "+iResolutionUnit+'</td></tr>'+
                 '<tr><th>'+type+' Sample Label</th><td>'+iSampleLabel+sampleLabelTooltip+'</td></tr>'+
                 '<tr><th>'+type+' Wavelength (ex/em nm)</th><td>'+iWavelength+'</td></tr>'+
@@ -170,7 +150,7 @@ $(document).ready(function () {
     var table_elements = "<thead><tr><td style='font-weight: bold; width: .1%; white-space: nowrap;'>Chip/Well</td>";
     for (i=0; i<tableCols.length; i++) {
         var col = tableCols[i].replace(/\s/g, '').replace(/[,]/g, '');
-        table_elements += "<th style='white-space: nowrap;' data-column='" + col + "' class='text-center'>"+tableCols[i].toUpperCase()+"</th>";
+        table_elements += "<th style='white-space: nowrap;' data-column='" + col + "' class='text-center no-sort'>"+tableCols[i].toUpperCase()+"</th>";
     }
     table_elements += "</tr></thead><tbody>";
     for (i=0; i<tableRows.length; i++) {
@@ -204,34 +184,35 @@ $(document).ready(function () {
         $('.row-header').css('width', '.1%').css('white-space', 'nowrap');
 
         // Activates Bootstrap tooltips
-        $('[data-toggle="tooltip"]').tooltip({container:"body"});
+        $('[data-toggle="tooltip"]').tooltip({container:"body", html: true});
     });
 
     for (j=0; j<tableCols.length; j++){
         cls = tableCols[j].split(" ").join("").split(",").join("");
-        for (var i=0; i<Object.keys(tableData).length; i++) {
-            if (tableData[Object.keys(tableData)[i]][1] == cls) {
-                var caption = metadata_list[Object.keys(tableData)[i]]["target_analyte"] + " (" + metadata_list[Object.keys(tableData)[i]]["sample_location"] + "), "
-                +metadata_list[Object.keys(tableData)[i]]["sample_label"]+", "+metadata_list[Object.keys(tableData)[i]]["magnification"].split(".")[0]
-                +"x at " + metadata_list[Object.keys(tableData)[i]]["time"];
+        // for (var i=0; i<Object.keys(tableData).length; i++) {
+        $.each(orderedStudyImages, function(index, image_id) {
+            if (tableData[image_id][1] == cls) {
+                var caption = metadata_list[image_id]["target_analyte"] + " (" + metadata_list[image_id]["sample_location"] + "), "
+                +metadata_list[image_id]["sample_label"]+", "+metadata_list[image_id]["magnification"]
+                +"x at " + metadata_list[image_id]["time"];
 
-                var extension = metadata_list[Object.keys(tableData)[i]]["file_name"].split(".").pop().toLowerCase();
+                var extension = $.trim(metadata_list[image_id]["file_name"].split(".").pop().toLowerCase());
                 if (['flv', 'avi', 'mp4', 'mov', 'wmv'].indexOf(extension) >= 0){
-                    $('[data-column="' + cls + '"][data-row="' + tableData[Object.keys(tableData)[i]][0] + '"]').append('<span data-pic="'+Object.keys(tableData)[i]
+                    $('[data-column="' + cls + '"][data-row="' + tableData[image_id][0] + '"]').append('<span data-pic="'+image_id
                     +'" style="vertical-align: top; display: inline-block; margin:2px;" class="image_thumbnail"><figure><div style="position: absolute; z-index: 0;"><img alt="'
-                    +metadata_list[Object.keys(tableData)[i]]["file_name"]+'" style="height: 120px; width: 120px; filter: contrast('+contrast+'%) brightness('+brightness+'%);" src="/media/assay_thumbs/'
-                    +study_pk+'/thumbnail_'+metadata_list[Object.keys(tableData)[i]]["file_name"].split(".").slice(0, -1).join('.')
+                    +metadata_list[image_id]["file_name"]+'" style="height: 120px; width: 120px; filter: contrast('+contrast+'%) brightness('+brightness+'%);" src="/media/assay_thumbs/'
+                    +study_pk+'/thumbnail_'+metadata_list[image_id]["file_name"].split(".").slice(0, -1).join('.')
                     +'_120_120.jpg"/></div><div onMouseOver="this.style.opacity='+"1"+'" onMouseOut="this.style.opacity='+"0.5"+'" style="position: absolute; z-index: 1; opacity: 0.5;"><img src="/media/assay_images/playbutton.png" style="padding: 30px; filter: invert(1);"/></div><div style="padding-top:120px;"><figcaption style="width: 120px; word-wrap: break-word;" class="caption text-center">'+ caption +'</figcaption></div></figure></span>');
                 }
                 else {
-                    $('[data-column="' + cls + '"][data-row="' + tableData[Object.keys(tableData)[i]][0] + '"]').append('<span data-pic="'+Object.keys(tableData)[i]
+                    $('[data-column="' + cls + '"][data-row="' + tableData[image_id][0] + '"]').append('<span data-pic="'+image_id
                     +'" style="vertical-align: top; display: inline-block; margin:2px;" class="image_thumbnail"><figure><img alt="'
-                    +metadata_list[Object.keys(tableData)[i]]["file_name"]+'" style="height: 120px; width: 120px; filter: contrast('+contrast+'%) brightness('+brightness+'%);" src="/media/assay_thumbs/'
-                    +study_pk+'/thumbnail_'+metadata_list[Object.keys(tableData)[i]]["file_name"].split(".").slice(0, -1).join('.')
+                    +metadata_list[image_id]["file_name"]+'" style="height: 120px; width: 120px; filter: contrast('+contrast+'%) brightness('+brightness+'%);" src="/media/assay_thumbs/'
+                    +study_pk+'/thumbnail_'+metadata_list[image_id]["file_name"].split(".").slice(0, -1).join('.')
                     +'_120_120.jpg"/><figcaption style="width: 120px; word-wrap: break-word;" class="text-center caption">'+ caption +'</figcaption></figure></span>');
                 }
             }
-        }
+        });
     }
 
     $( function() {
@@ -305,13 +286,23 @@ $(document).ready(function () {
 
     image_table.dataTable({
         // columns: generateColumns(),
-        "ordering": false,
+        "ordering": true,
         "filter": false,
         "searching": false,
         dom: 'frt',
         fixedHeader: {headerOffset: 50},
         deferRender: true,
-        iDisplayLength: -1
+        iDisplayLength: -1,
+        "aoColumnDefs": [
+            {
+                "width": "10%",
+                "aTargets": [0]
+            },
+            {
+                orderable: false,
+                targets: "no-sort"
+            }
+        ]
     });
 
     // On keystroke, run search function.
@@ -328,10 +319,6 @@ $(document).ready(function () {
     function doSearch(backspace) {
         var query = $('#search-box').val().toUpperCase();
         var isChip = false;
-
-        // if (backspace) {
-        //     makeAllVisible();
-        // }
 
         // Always make everything visible again
         makeAllVisible();
@@ -409,7 +396,7 @@ $(document).ready(function () {
     $(".ui-dialog").find(".ui-widget-header").css('background', 'linear-gradient(#111111, #333333)').css('color', 'white');
 
     // "Close" and "Download" buttons as Bootstrap buttons
-    $(".ui-dialog").find(".ui-button-text-only").addClass('btn btn-primary').removeClass('ui-state-default');
+    // $(".ui-dialog").find(".ui-button-text-only").addClass('btn btn-primary').removeClass('ui-state-default');
 
     // Change caption font-size
     $(".caption").css('font-size', '13px');
@@ -417,18 +404,6 @@ $(document).ready(function () {
     // Collapsible Captions
     var lastX, indexInc, captionEndString = '';
     $(".caption").each(function(i, obj){
-        // if ($(obj).height() > 54){
-        //     $(obj).attr("data-text", $(obj).text());
-        //     obj.addEventListener("mouseover",function(){
-        //         $(obj).text($(obj).attr('data-text'));
-        //     });
-        //     obj.addEventListener("mouseout",function(){
-        //         $(obj).text($(obj).attr('data-text').substring(0,50)+'...');
-        //     });
-        //     $(obj).text($(obj).text().substring(0,50)+"...");
-        // } else {
-        //     $(obj).attr("data-text", $(obj).text());
-        // }
         if ($(obj).height() > 54){
             $(obj).attr("data-text-long", $(obj).text());
             lastX = $(obj).attr('data-text-long').lastIndexOf('x');
@@ -437,7 +412,7 @@ $(document).ready(function () {
                 indexInc += 1
             }
             captionEndString = $(obj).attr('data-text-long').substring(lastX-indexInc);
-            $(obj).attr("data-text-short", $(obj).attr('data-text-long').substring(0,50-captionEndString.length)+"..."+captionEndString);
+            $(obj).attr("data-text-short", $(obj).attr('data-text-long').substring(0,47-captionEndString.length)+"..."+captionEndString);
             $($(obj).parent())[0].addEventListener("mouseover",function(){
                 $(obj).text($(obj).attr('data-text-long'));
             });

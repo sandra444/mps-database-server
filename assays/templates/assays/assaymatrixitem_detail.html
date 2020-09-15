@@ -2,8 +2,12 @@
 {% load static %}
 {% load humanize %}
 
-{% block load %}
+{% block extra_head %}
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+{% endblock %}
+
+{% block load_js %}
+    <script src="{% static "assays/grouping_filtering.js" %}"></script>
     <script src="{% static "assays/chart_display.js" %}"></script>
     <script src="{% static "assays/assaymatrixitem_add.js" %}"></script>
 {% endblock %}
@@ -15,6 +19,10 @@
     <li class="active">
         <em>{{ object }}</em>
     </li>
+{% endblock %}
+
+{% block sidebar %}
+    {% include 'assays/grouping_filtering.html' with charts="true" %}
 {% endblock %}
 
 {% block content %}
@@ -60,7 +68,7 @@
             {% if object.organ_model %}
             <tr>
                 <th>
-                    Organ Model
+                    MPS Model
                 </th>
                 <td>
                     <a href="{{ object.organ_model.get_absolute_url }}">
@@ -74,7 +82,7 @@
             {% if object.variance_from_organ_model_protocol %}
             <tr>
                 <th>
-                    Device
+                    MPS Model Version
                 </th>
                 <td>
                     {{ object.variance_from_organ_model_protocol }}
@@ -164,7 +172,7 @@
         {% for compound in object.assaysetupcompound_set.all %}
             <tr>
                 <td>
-                    <a href="{% url 'compound-detail' compound.compound_instance.compound.id %}">
+                    <a href="{% url 'compounds-compound-detail' compound.compound_instance.compound.id %}">
                         {{ compound.compound_instance.compound }}
                     </a>
                 </td>
@@ -181,9 +189,7 @@
     </table>
     {% endif %}
 
-    {% include 'assays/grouping_filtering.html' %}
-
-    {% include 'assays/chart_options.html' with chart_title="Data" chart_prefix="charts"%}
+    {% include 'assays/sidebar_extras.html' with show_hide="true" %}
 
     <div id="charts" class="padded-bottom"></div>
 

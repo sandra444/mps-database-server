@@ -1,16 +1,18 @@
 # NOTE: Decided it was best to keep AJAX calls app-separated
 import ujson as json
-from django.http import *
+from django.http import HttpResponse, HttpResponseServerError
+import re
 
-from django.contrib.auth.models import Group
-
-from haystack.query import SearchQuerySet
+# from django.contrib.auth.models import Group
+#
+# from haystack.query import SearchQuerySet
 
 import logging
 logger = logging.getLogger(__name__)
 
 # Kind of a weird import, probably should have a utils file or something
 from .views import get_search_queryset_with_permissions
+import html
 
 
 def main(request):
@@ -26,8 +28,12 @@ def fetch_global_search_suggestions(request):
     """
     data = []
 
+    # Pattern for removing non-alphanumeric
+    regex_pattern = re.compile('[\W_]+', re.UNICODE)
+
     # Get text from request
-    text = request.POST.get('text', '')
+    # Only takes alphanumeric at the moment
+    text = regex_pattern.sub(' ', request.POST.get('text', ''))
 
     # Filter on group: either get all with no group or those with a group the user has
     sqs = get_search_queryset_with_permissions(request)
@@ -37,8 +43,8 @@ def fetch_global_search_suggestions(request):
     for suggestion in suggestions[:10]:
         # data.append(suggestion.suggestion)
         data.append({
-            'label': suggestion.text.split('\n')[0],
-            'value': suggestion.text.split('\n')[1]
+            'label': html.unescape(suggestion.text.split('\n')[0]),
+            'value': html.unescape(suggestion.text.split('\n')[1])
         })
 
     return HttpResponse(json.dumps(data),

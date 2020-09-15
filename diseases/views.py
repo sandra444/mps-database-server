@@ -1,6 +1,6 @@
 from django.views.generic import ListView, DetailView  # , CreateView
 # from mps.mixins import SpecificGroupRequiredMixin
-from models import Disease
+from .models import Disease
 from assays.models import AssayDataPoint
 from microdevices.models import OrganModel
 from drugtrials.models import FindingResult
@@ -23,6 +23,7 @@ class DiseaseList(ListView):
                 drug_trial__disease=disease
             )
 
+            # TODO TODO TODO MUST REVISE
             disease.models = OrganModel.objects.filter(disease=disease)
 
             disease.studies = get_user_accessible_studies(
@@ -80,10 +81,3 @@ class DiseaseModel(DetailView):
 
         context['studies'] = combined
         return context
-
-
-# class DiseaseAdd(SpecificGroupRequiredMixin, CreateView):
-#     """Allows the addition of Diseases"""
-#     model = Disease
-#     template_name = 'diseases/disease_add.html'
-#     form_class = DiseaseForm

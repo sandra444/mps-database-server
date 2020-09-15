@@ -4,8 +4,22 @@ from django.contrib import admin
 # from django.utils.safestring import mark_safe
 
 from mps.base.admin import LockableAdmin
-from resources.models import *
-from resources.forms import *
+from resources.models import (
+    Resource,
+    ResourceType,
+    ResourceSubtype,
+    Definition,
+    ComingSoonEntry,
+    WhatIsNewEntry
+)
+from resources.forms import (
+    ResourceForm,
+    ResourceTypeForm,
+    ResourceSubtypeForm,
+    DefinitionForm,
+)
+
+from django.utils.safestring import mark_safe
 
 
 class ResourceAdmin(LockableAdmin):
@@ -42,6 +56,7 @@ class ResourceAdmin(LockableAdmin):
     )
     actions = ['update_fields']
 
+    @mark_safe
     def resource_site(self, obj):
         return '<a href="%s" target="_blank">%s</a>' % (obj.resource_website, obj.resource_website)
     resource_site.allow_tags = True
@@ -122,7 +137,14 @@ class DefinitionAdmin(LockableAdmin):
     form = DefinitionForm
     save_on_top = True
     list_per_page = 300
-    list_display = ('term', 'definition', 'show_url')
+    list_display = (
+        'term',
+        'definition',
+        'show_url',
+        'created_on',
+        'modified_on'
+    )
+    search_fields = ['term', 'definition', 'reference']
 
     fieldsets = (
         (
@@ -149,3 +171,23 @@ class DefinitionAdmin(LockableAdmin):
 
 
 admin.site.register(Definition, DefinitionAdmin)
+
+
+# Just register the ComingSoonEntry
+class ComingSoonEntryAdmin(LockableAdmin):
+    model = ComingSoonEntry
+
+    list_display = ['id', 'contents', 'modified_on']
+    list_editable = ['contents']
+
+admin.site.register(ComingSoonEntry, ComingSoonEntryAdmin)
+
+
+# Just register the WhatIsNewEntry
+class WhatIsNewEntryAdmin(LockableAdmin):
+    model = WhatIsNewEntry
+
+    list_display = ['id', 'contents', 'short_contents', 'modified_on']
+    list_editable = ['contents', 'short_contents']
+
+admin.site.register(WhatIsNewEntry, WhatIsNewEntryAdmin)

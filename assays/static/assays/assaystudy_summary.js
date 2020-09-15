@@ -9,20 +9,39 @@ $(document).ready(function() {
     var charts = $('#charts');
     var study_id = Math.floor(window.location.href.split('/')[5]);
 
+    window.CHARTS.call = 'fetch_data_points';
+    window.CHARTS.study_id = study_id;
+
     // Name for the charts for binding events etc
     var charts_name = 'charts';
+
+    // Datatable for assays
+    $('#assay_table').DataTable({
+        dom: '<Bl<"row">frptip>',
+        fixedHeader: {headerOffset: 50},
+        responsive: true,
+        "iDisplayLength": 10,
+        // Initially sort on target (ascending)
+        "order": [ 0, "asc" ]
+    });
+
+    // PROCESS GET PARAMS INITIALLY
+    window.GROUPING.process_get_params();
+    // window.GROUPING.generate_get_params();
 
     function get_readouts() {
         var data = {
             // TODO TODO TODO CHANGE CALL
-            call: 'fetch_data_points',
+            call: window.CHARTS.call,
             study: study_id,
-            criteria: JSON.stringify(window.GROUPING.get_grouping_filtering()),
+            criteria: JSON.stringify(window.GROUPING.group_criteria),
             post_filter: JSON.stringify(window.GROUPING.current_post_filter),
             csrfmiddlewaretoken: window.COOKIES.csrfmiddlewaretoken
         };
 
-        var options = window.CHARTS.prepare_chart_options(charts_name);
+        // ODD
+        window.CHARTS.global_options = window.CHARTS.prepare_chart_options();
+        var options = window.CHARTS.global_options.ajax_data;
 
         data = $.extend(data, options);
 
@@ -56,12 +75,7 @@ $(document).ready(function() {
         });
     }
 
-    // Setup triggers
-    $('#' + charts_name + 'chart_options').find('input').change(function() {
-        get_readouts();
-    });
-
-    $('#exportinclude_all').change(function() {
+    $('#include_all').change(function() {
         var export_button = $('#export_button');
         if ($(this).prop('checked')) {
             export_button.attr('href', export_button.attr('href') + '?include_all=true');
@@ -69,5 +83,11 @@ $(document).ready(function() {
         else {
             export_button.attr('href', export_button.attr('href').split('?')[0]);
         }
+
+        $('#export_include_all').prop('checked', $(this).prop('checked'));
     }).trigger('change');
+
+    $('#export_include_all').change(function() {
+        $('#include_all').trigger('click');
+    });
 });

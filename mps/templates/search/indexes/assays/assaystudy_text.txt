@@ -5,23 +5,11 @@
 {{ object.created_by.first_name }}
 {{ object.created_by.last_name }}
 {{ object.group }}
-
 {# Assays #}
 {% for assay in object.assaystudyassay_set.all %}
     {{ assay.target }}
     {{ assay.method }}
     {{ assay.unit }}
 {% endfor %}
-
-{% for item in object.assaymatrixitem_set.all %}
-    {{ item }}
-    {% for cell in item.assaysetupcell_set.all %}
-        {{ cell }}
-    {% endfor %}
-    {% for compound in item.assaysetupcompound_set.all %}
-        {{ compound }}
-    {% endfor %}
-    {% for setting in item.assaysetupsetting_set.all %}
-        {{ setting }}
-    {% endfor %}
-{% endfor %}
+{# Extra info from items #}
+{# {{ object.get_indexing_information }} #}

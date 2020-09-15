@@ -16,7 +16,7 @@ $(document).ready(function() {
     // };
 
     var  data_table = $('#studies').DataTable( {
-        dom: 'B<"row">lfrtip',
+        dom: '<Bl<"row">frptip>',
         fixedHeader: {headerOffset: 50},
         responsive: true,
         "iDisplayLength": 50,
@@ -33,18 +33,26 @@ $(document).ready(function() {
             },
             {
                 "type": "numeric-comma",
-                "targets": [5, 6]
+                "targets": [5, 6, 7, 8]
+            },
+            {
+                'visible': false,
+                'targets': [7, 8, 12, 14, 15]
             },
             {
                 'className': 'none',
-                'targets': [7]
+                'targets': [9]
+            },
+            {
+                'sortable': false,
+                'targets': [10]
             }
         ]
     });
 
     window.TABLE = $('#models').DataTable({
         "iDisplayLength": 100,
-        "sDom": '<B<"row">lfrtip>',
+        "sDom": '<Bl<"row">frptip>',
         fixedHeader: {headerOffset: 50},
         responsive: true,
         "order": [[3, "asc"], [2, "asc"]],
@@ -53,11 +61,11 @@ $(document).ready(function() {
                 "bSortable": false,
                 "aTargets": [0, 1]
             },
-            {
-                'sortable': true,
-                'visible': false,
-                'targets': [7]
-            },
+            // {
+            //     'sortable': true,
+            //     'visible': false,
+            //     'targets': [7]
+            // },
             {
                 "width": "5%",
                 "targets": [0, 1]

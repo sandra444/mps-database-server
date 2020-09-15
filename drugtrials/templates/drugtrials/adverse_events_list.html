@@ -2,8 +2,8 @@
 {% load static %}
 {% load humanize %}
 
-{% block load %}
-    <script src="{% static "js/project_filter.js" %}"></script>
+{% block load_js %}
+    {# <script src="{% static "js/project_filter.js" %}"></script> #}
     <script src="{% static "drugtrials/adverse_events_list.js" %}"></script>
 {% endblock %}
 
@@ -19,9 +19,10 @@
             </h2>
         </legend>
 
-        {% include 'project_filters.html' %}
+        {# Deprecated #}
+{# {% include 'project_filters.html' %} #}
 
-        <table id="adverse_events" class="display" cellspacing="0" width="100%">
+        <table id="adverse_events" class="display table table-striped" cellspacing="0" width="100%">
             <thead>
                 <tr>
                     <th>View</th>
@@ -41,11 +42,11 @@
                     </th>
                     <th>Organ</th>
                     <th>Black Box Warning</th>
-                    <th>Project</th>
+                    <th>Logp</th>
+                    <th>ALogp</th>
+                    {% comment %} <th>Project</th> {% endcomment %}
                 </tr>
             </thead>
         </table>
     </div>
-
-    <script src="{% static "js/display_datatable.js" %}"></script>
 {% endblock %}

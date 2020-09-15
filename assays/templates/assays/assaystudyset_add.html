@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+{% load static humanize %}
+
+{% block extra_head %}
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <style>
+        svg > g:last-child > g:last-child {
+            pointer-events: none;
+        }
+        div.google-visualization-tooltip {
+            pointer-events: none;
+        }
+    </style>
+{% endblock %}
+
+{% block load_js %}
+    <script src="{% static "assays/assaystudyset_add.js" %}"></script>
+    <script src="{% static "assays/reference_selection.js" %}"></script>
+{% endblock %}
+
+{% block breadcrumbs %}
+    {# What will the breadcrumbs be #}
+    <li class="active">
+        {% if object %}
+            Edit <em>{{ object }}</em>
+        {% else %}
+            Add Study Set
+        {% endif %}
+    </li>
+{% endblock %}
+
+{% block content %}
+
+{# TODO NOT DRY #}
+{% if not form.is_bound or update %}
+<div id="list_section">
+{% else %}
+<div hidden id="list_section">
+{% endif %}
+    <h3 hidden id="study_list_hint">
+    <div class="alert alert-info" role="alert">
+        <span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span>
+        <span class="sr-only">Info:</span>
+        Please check the boxes next to the studies you want for your set and then hit "Continue"
+    </div>
+    </h3>
+
+    {% include 'assays/study_list.html' with studies=object_list for_study_set_list="true" %}
+
+    <nav class="footer navbar-fixed-bottom hidden-print floating-submit-row">
+        <div class="container large-padding-top">
+            <button id="list_continue_button" type="submit" class="btn btn-primary">Continue</button>
+        </div>
+        {# Contrivance #}
+        <div class="small-padding-top"></div>
+    </nav>
+</div>
+
+{% if form.is_bound or update %}
+<div id="form_section">
+{% else %}
+<div hidden id="form_section">
+{% endif %}
+
+  <div class="text-center">
+  <a type="button" class="btn btn-xlarge btn-primary text-center submit-button" id="back_button">
+      <span class="glyphicon glyphicon glyphicon-hand-left" aria-hidden="true"></span>
+      Change Study Selections
+  </a>
+  </div>
+
+{% if update %}
+    <form enctype="multipart/form-data" class="form-horizontal" method="post" >
+
+    <h1>
+        Edit <em>{{ object }}</em>
+{% else %}
+    <form enctype="multipart/form-data" class="form-horizontal" method="post" >
+
+    <h1>
+        Add Study Set
+{% endif %}
+    <br>
+    {% csrf_token %}
+    </h1>
+
+    {% include "submit.html" with flag="y" %}
+
+    {% include 'errors.html' %}
+
+    {% include 'tracking.html' %}
+
+    {% if update %}
+    {% include "sign_off_form.html" with creator=object.created_by.id %}
+    {% endif %}
+
+    <legend>Study Details</legend>
+
+    {% include 'generic_field.html' with field=form.name label="Study Set Name*" %}
+
+    {% include 'generic_field.html' with field=form.description label="Description*" %}
+
+    {% comment %} <div class="row padded-bottom">
+    <div class="col-sm-2"></div>
+    <div class="col-sm-10">
+    <a role='button' id="select_studies_button" class="btn btn-primary btn-block btn-lg">
+        <span class="glyphicon glyphicon-search"></span>
+        Select Studies
+    </a>
+    </div>
+    </div> {% endcomment %}
+
+    <div hidden>
+    {% include 'generic_field.html' with field=form.studies label="Studies*" %}
+
+    {% include 'generic_field.html' with field=form.assays label="Assays" %}
+    </div>
+
+    <legend>Studies</legend>
+    <table class="table table-striped table-bordered">
+        <thead>
+            <tr>
+                <th>Study</th>
+                <th>Assays</th>
+            </tr>
+        </thead>
+        <tbody id="selected_studies_table">
+        </tbody>
+    </table>
+
+    {% include 'add_reference.html' %}
+</form>
+</div>
+
+<div hidden id="assay_dialog" title="Select Assays">
+    <div class="padded-bottom">
+        <a id="assay_filter_section_select_all" class="btn btn-primary">Select All</a>
+        <a id="assay_filter_section_deselect_all" class="btn btn-danger">Deselect All</a>
+    </div>
+    <table id="assay_table" class="display table" cellspacing="0" width="100%">
+        <thead>
+            <tr>
+                <th>Select</th>
+                <th>Target</th>
+                <th>Method</th>
+                <th>Unit</th>
+            </tr>
+        </thead>
+        <tbody id="assay_dialog_body">
+        </tbody>
+    </table>
+</div>
+{% endblock %}

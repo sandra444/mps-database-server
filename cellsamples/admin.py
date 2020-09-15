@@ -5,7 +5,14 @@
 from django.contrib import admin
 from cellsamples.resource import CellSampleResource
 from mps.base.admin import LockableAdmin
-from cellsamples.models import *
+from cellsamples.models import (
+    CellType,
+    Organ,
+    CellSubtype,
+    CellSample,
+    Biosensor,
+    Supplier
+)
 
 
 class CellTypeAdmin(LockableAdmin):
@@ -25,7 +32,7 @@ class CellTypeAdmin(LockableAdmin):
         ),
         ('Change Tracking', {
             'fields': (
-                'locked',
+                # 'locked',
                 ('created_by', 'created_on'),
                 ('modified_by', 'modified_on'),
                 ('signed_off_by', 'signed_off_date'),
@@ -70,7 +77,7 @@ class OrganAdmin(LockableAdmin):
         ),
         ('Change Tracking', {
             'fields': (
-                'locked',
+                # 'locked',
                 ('created_by', 'created_on'),
                 ('modified_by', 'modified_on'),
                 ('signed_off_by', 'signed_off_date'),
@@ -102,7 +109,7 @@ class CellSubtypeAdmin(LockableAdmin):
         ),
         ('Change Tracking', {
             'fields': (
-                'locked',
+                # 'locked',
                 ('created_by', 'created_on'),
                 ('modified_by', 'modified_on'),
                 ('signed_off_by', 'signed_off_date'),
@@ -160,7 +167,7 @@ class CellSampleAdmin(LockableAdmin):
         }),
         ('Change Tracking', {
             'fields': (
-                'locked',
+                # 'locked',
                 ('created_by', 'created_on'),
                 ('modified_by', 'modified_on'),
                 ('signed_off_by', 'signed_off_date'), )
@@ -202,7 +209,7 @@ class BiosensorAdmin(LockableAdmin):
         ),
         ('Change Tracking', {
             'fields': (
-                'locked',
+                # 'locked',
                 ('created_by', 'created_on'),
                 ('modified_by', 'modified_on'),
                 ('signed_off_by', 'signed_off_date'),
@@ -231,7 +238,7 @@ class SupplierAdmin(LockableAdmin):
         ),
         ('Change Tracking', {
             'fields': (
-                'locked',
+                # 'locked',
                 ('created_by', 'created_on'),
                 ('modified_by', 'modified_on'),
                 ('signed_off_by', 'signed_off_date'),

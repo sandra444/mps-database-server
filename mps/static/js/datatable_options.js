@@ -1,3 +1,9 @@
+// CRUDE SOLUTION
+// Contrary to the idea that this is only for options
+window.TABLES = {
+    add_new_row_to_selection_list: null
+};
+
 // Add method to sort by checkbox
 // (I reversed it so that ascending will place checked first)
 $(document).ready(function () {
@@ -7,17 +13,9 @@ $(document).ready(function () {
     //     });
     // };
 
-    // Add method to sort by checkbox
-    // (I reversed it so that ascending will place checked first)
-    $.fn.dataTable.ext.order['dom-checkbox-defer'] = function(settings, col) {
-        return settings.aoData.map(function(data, index) {
-            return data._aData.checkbox.indexOf(' checked>') > -1 ? 0 : 1;
-        });
-    };
-
     $.fn.dataTable.ext.order['dom-checkbox'] = function(settings, col) {
         return settings.aoData.map(function(data, index) {
-            return data._aData[0].indexOf(' checked>') > -1 ? 0 : 1;
+            return data._aData[0].indexOf(' checked="checked">') > -1 ? 0 : 1;
         });
     };
 
@@ -62,23 +60,135 @@ $(document).ready(function () {
     // Defines the options for the print, copy, and save as buttons
     $.extend(true, $.fn.dataTable.defaults, {
         buttons: [
-            'copy', 'csv', 'print'
-        ]
+            'copy', 'csv', 'print', 'colvis'
+        ],
+        autoWidth: false,
         // swfPath: '/static/swf/flashExport.swf'
+        // Default draw callback
+        drawCallback: function () {
+            if ($(this).table) {
+                // Show when done
+                $(this).table().container().show('slow');
+            }
+            // For defer render
+            else {
+                $(this).show('slow');
+            }
+            // Swap positions of filter and length selection; clarify filter
+            $('.dataTables_filter').css('float', 'left').prop('title', 'Separate terms with a space to search multiple fields');
+            $('.dataTables_length').css('float', 'right');
+            // Reposition download/print/copy
+            $('.DTTT_container').css('float', 'none');
+
+            // Activates Bootstrap tooltips
+            $('[data-toggle="tooltip"]').tooltip({container:"body", html: true});
+
+            // CRUDE!
+            // Trigger resize
+            // Even cruder, trigger the resize after a delay
+            // setTimeout(function() {
+            //     $(window).trigger('resize');
+            // }, 1000);
+
+            // Let's try to remove the resize trigger
+            setTimeout(function() {
+                // $($.fn.dataTable.tables(true)).DataTable().columns.adjust();
+                $($.fn.dataTable.tables(true)).DataTable().responsive.recalc();
+                $($.fn.dataTable.tables(true)).DataTable().fixedHeader.adjust();
+            }, 1000);
+        }
     });
 
     // Indicates that floating headers need to be refreshed when a toggle-hide-button is clicked
-    $(document).on('click', '.toggle-hide-button', function() {
+    $(document).on('click', '.toggle-hide-button, .toggle_sidebar_button', function() {
         // Recalculate responsive and fixed headers
         setTimeout(function() {
-            $($.fn.dataTable.tables(true)).DataTable().responsive.recalc();
+            // $($.fn.dataTable.tables(true)).DataTable().columns.adjust();
             $($.fn.dataTable.tables(true)).DataTable().fixedHeader.adjust();
         }, 1000);
     });
 
     // Fix some issues with column width on resize.
-    window.onresize = function() {
-        $($.fn.dataTable.tables(true)).DataTable().columns.adjust();
+    // BAD
+    // window.onresize = function() {
+    //     setTimeout(function() {
+    //         $($.fn.dataTable.tables(true)).DataTable().columns.adjust();
+    //         $($.fn.dataTable.tables(true)).DataTable().responsive.recalc();
+    //         $($.fn.dataTable.tables(true)).DataTable().fixedHeader.adjust();
+    //     }, 250);
+    // }
+
+    // Jump to top after page change
+    // CRUDE
+   $(document).on('page.dt', '.dataTables_wrapper', function () {
+        $('html, body').animate({
+            scrollTop: $(this).offset().top - 75
+        }, 500);
+    });
+
+    window.TABLES.add_new_row_to_selection_list = function(
+        current_app,
+        current_model,
+        new_pk,
+        new_name
+    ) {
+        if (current_model === 'CellSample') {
+            var cell_sample_table = $('#cellsamples');
+
+            // Clear the search!
+            cell_sample_table.DataTable().search('').draw();
+
+            var new_row = cell_sample_table
+                .find('tbody')
+                .find('tr')
+                .first()
+                .clone()
+                .addClass('success');
+
+            var split_name = new_name.split(window.SIGILS.COMBINED_VALUE_SIGIL);
+
+            // CRUDE
+            new_row.find('.cellsample-selector').attr('data-cell-sample-id', new_pk).attr('data-name', split_name[6]);
+            new_row.find('td').eq(1).text(new_pk);
+            new_row.find('td').eq(2).text(split_name[0]);
+            new_row.find('td').eq(3).text(split_name[1]);
+            new_row.find('td').eq(4).text(split_name[2]);
+            new_row.find('td').eq(5).text(split_name[3]);
+            new_row.find('td').eq(6).text(split_name[4]);
+            new_row.find('td').eq(7).text(split_name[5]);
+
+            // Acquire the label
+            window.CELLS.cell_sample_id_to_label[new_pk] = split_name[6];
+
+            cell_sample_table.DataTable().row.add(new_row).draw();
+        }
+        // If reference
+        else if (current_model === 'AssayReference') {
+            var split_name = new_name.split(window.SIGILS.COMBINED_VALUE_SIGIL);
+            var authors = split_name[0];
+            var title = split_name[1];
+            // SLOPPY
+            var pmid = split_name[2];
+
+            var reference_table = $('#reference_table');
+
+            // Clear the search!
+            reference_table.DataTable().search('').draw();
+
+            var new_row = reference_table
+                .find('tbody')
+                .find('tr')
+                .first()
+                .clone()
+                .addClass('success');
+            new_row.find('button').attr('data-reference-id', new_pk);
+            new_row.find('td[data-reference-field="id"]').text(new_pk);
+            new_row.find('td[data-reference-field="pubmed_id"]').text(pmid);
+            new_row.find('td[data-reference-field="title"]').text(title);
+            new_row.find('td[data-reference-field="authors"]').text(authors);
+
+            reference_table.DataTable().row.add(new_row).draw();
+        }
     }
 });
 // $.fn.dataTable.TableTools.defaults.aButtons = [

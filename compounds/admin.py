@@ -1,15 +1,30 @@
 from django.contrib import admin
-from django.contrib import messages
-# from django import forms
-from django.shortcuts import render_to_response
-from django.template import RequestContext
-from django.http import HttpResponseRedirect
-from bioservices import ChEMBL as ChEMBLdb
+# from django.contrib import messages
+from django import forms
+# from django.shortcuts import render_to_response
+# from django.template import RequestContext
+# from django.http import HttpResponseRedirect
+# from bioservices import ChEMBL as ChEMBLdb
 
 from compounds.resource import CompoundResource
 from mps.base.admin import LockableAdmin
-# from compounds.models import *
-from compounds.forms import *
+from compounds.models import (
+    Compound,
+    CompoundSummary,
+    CompoundProperty,
+    CompoundTarget,
+    CompoundInstance,
+    SummaryType,
+    PropertyType,
+    CompoundSupplier
+)
+from compounds.forms import (
+    CompoundTargetInlineFormset,
+    CompoundSummaryInlineFormset,
+    CompoundPropertyInlineFormset
+)
+
+from django.utils.safestring import mark_safe
 
 
 class CompoundTargetInline(admin.TabularInline):
@@ -105,13 +120,14 @@ class CompoundAdmin(LockableAdmin):
                        'modified_by', 'modified_on', 'image_display')
     actions = ['update_fields']
 
+    @mark_safe
     def image_display(self, obj):
         if obj.chemblid:
             url = (
-                u'https://www.ebi.ac.uk/chembldb/compound/'
+                'https://www.ebi.ac.uk/chembldb/compound/'
                 'displayimage/' + obj.chemblid)
-            print '<img src="%s">' % \
-                url
+            print(('<img src="%s">' % \
+                url))
             return '<img src="%s">' % \
                 url
         return ''
@@ -149,7 +165,7 @@ class CompoundAdmin(LockableAdmin):
         }),
         ('Change Tracking', {
             'fields': (
-                'locked',
+                # 'locked',
                 ('created_by', 'created_on'),
                 ('modified_by', 'modified_on'),
                 ('signed_off_by', 'signed_off_date'),
@@ -261,7 +277,7 @@ class SummaryTypeAdmin(LockableAdmin):
         ),
         ('Change Tracking', {
             'fields': (
-                'locked',
+                # 'locked',
                 ('created_by', 'created_on'),
                 ('modified_by', 'modified_on'),
                 ('signed_off_by', 'signed_off_date'),
@@ -298,7 +314,7 @@ class PropertyTypeAdmin(LockableAdmin):
         }),
         ('Change Tracking', {
             'fields': (
-                'locked',
+                # 'locked',
                 ('created_by', 'created_on'),
                 ('modified_by', 'modified_on'),
                 ('signed_off_by', 'signed_off_date'),
@@ -332,7 +348,7 @@ class CompoundSupplierAdmin(LockableAdmin):
         }),
         ('Change Tracking', {
             'fields': (
-                'locked',
+                # 'locked',
                 ('created_by', 'created_on'),
                 ('modified_by', 'modified_on'),
                 ('signed_off_by', 'signed_off_date'),
@@ -369,7 +385,7 @@ class CompoundInstanceAdmin(LockableAdmin):
         }),
         ('Change Tracking', {
             'fields': (
-                'locked',
+                # 'locked',
                 ('created_by', 'created_on'),
                 ('modified_by', 'modified_on'),
                 ('signed_off_by', 'signed_off_date'),

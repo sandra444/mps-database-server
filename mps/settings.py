@@ -24,7 +24,9 @@ except ImportError:
 if socket.gethostname() in 'prody':
     DATABASES = {
         'default': {
-            'ENGINE': 'django.db.backends.postgresql_psycopg2',
+            'ENGINE': 'django.db.backends.postgresql',
+            # Deprecated
+            # 'ENGINE': 'django.db.backends.postgresql_psycopg2',
             'NAME': 'mpsdb',
             'USER': postgresql_username,
             'PASSWORD': postgresql_password,
@@ -36,7 +38,9 @@ if socket.gethostname() in 'prody':
 else:
     DATABASES = {
         'default': {
-            'ENGINE': 'django.db.backends.postgresql_psycopg2',
+            'ENGINE': 'django.db.backends.postgresql',
+            # Deprecated
+            # 'ENGINE': 'django.db.backends.postgresql_psycopg2',
             'NAME': 'mpsdb',
             'USER': 'mps',  # development DB username
             'PASSWORD': '4UhIg',  # development DB password
@@ -132,7 +136,21 @@ NEVERCACHE_KEY = 'x=scmcpvq_$-9pz3651h=ln0b#-x&%%hz_)u0uzghfwk6#++pl'
 #     'django.template.loaders.eggs.Loader',
 # )
 
-MIDDLEWARE_CLASSES = (
+# OLD STYLE: REMOVED
+# MIDDLEWARE_CLASSES = (
+#     # 'debug_toolbar.middleware.DebugToolbarMiddleware',
+#     'django.middleware.common.CommonMiddleware',
+#     'django.contrib.sessions.middleware.SessionMiddleware',
+#     'django.middleware.csrf.CsrfViewMiddleware',
+#     'django.contrib.auth.middleware.AuthenticationMiddleware',
+#     'django.contrib.messages.middleware.MessageMiddleware',
+#     # Uncomment the next line for simple clickjacking protection:
+#     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+#     'django.middleware.security.SecurityMiddleware',
+# )
+
+# NEW STYLE
+MIDDLEWARE = (
     'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -141,6 +159,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware',
     # Uncomment the next line for simple clickjacking protection:
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django.middleware.security.SecurityMiddleware',
 )
 
 ROOT_URLCONF = 'mps.urls'
@@ -174,13 +193,16 @@ TEMPLATES = [
                 'django.template.context_processors.media',
                 'django.template.context_processors.static',
                 'django.template.context_processors.tz',
+                'django.template.context_processors.request',
                 'django.contrib.messages.context_processors.messages',
+                'mps.context_processors.google_analytics',
             ],
             'loaders': [
                 # insert your TEMPLATE_LOADERS here
                 'django.template.loaders.filesystem.Loader',
                 'django.template.loaders.app_directories.Loader',
-                'django.template.loaders.eggs.Loader',
+                # REMOVED AS OF 2.0
+                # 'django.template.loaders.eggs.Loader',
             ],
             # TECHNICALLY NOT NECESSARY
             'debug': DEBUG
@@ -226,26 +248,57 @@ INSTALLED_APPS = (
 
     # MPS applications:
     'mps',
+    'assays',
     'cellsamples',
     'compounds',
     'microdevices',
     'bioactivities',
     'drugtrials',
-    'assays',
     'resources',
-    'diseases'
+    'diseases',
+    'compressor',
+
+    'django_registration'
 )
+
+# Google Analytics ID
+GOOGLE_ANALYTICS = ''
+
+# Backend for username case insensitivity
+AUTHENTICATION_BACKENDS = ('mps.backends.CaseInsensitiveModelBackend', )
+
+# COMPRESSION
+STATICFILES_FINDERS += (
+    'compressor.finders.CompressorFinder',
+)
+
+COMPRESS_CSS_FILTERS = [
+    'compressor.filters.css_default.CssAbsoluteFilter',
+    'compressor.filters.cssmin.CSSMinFilter',
+    'compressor.filters.template.TemplateFilter'
+]
+
+COMPRESS_JS_FILTERS = [
+    'compressor.filters.jsmin.JSMinFilter',
+]
+
+# Whether or not to compress
+COMPRESS_ENABLED = False
+# Whether or not to use offline cache
+COMPRESS_OFFLINE = True
 
 # This should set all indices to use real time processing
 # Users will have to pay the toll when adding or deleting indexed objects...
 # This is disabled for the moment and a CRON job will be used for now
 # HAYSTACK_SIGNAL_PROCESSOR = 'haystack.signals.RealtimeSignalProcessor'
 
+WHOOSH_INDEX = os.path.join(os.path.dirname(__file__), 'whoosh_index')
+
 # For whoosh
 HAYSTACK_CONNECTIONS = {
     'default': {
         'ENGINE': 'mps.backends.ConfigurableWhooshEngine',
-        'PATH': os.path.join(os.path.dirname(__file__), 'whoosh_index'),
+        'PATH': WHOOSH_INDEX,
         # can cause problems when dealing with data outside ascii
         # 'INCLUDE_SPELLING': True,
     },
@@ -288,7 +341,7 @@ LOGGING = {
         'file_critical': {
             'level': 'CRITICAL',
             'class': 'logging.FileHandler',
-            'filename': 'logs/django.debug.log',
+            'filename': 'logs/django.error.log',
             'formatter': 'verbose'
         },
         'file_error': {
@@ -321,9 +374,15 @@ LOGGING = {
     'loggers': {
 
         'django': {
-            'handlers': ['file_error'],
+            'handlers': ['file_critical', 'file_error'],
             'propagate': True,
             'level': 'ERROR',
+        },
+
+        'mps': {
+            'handlers': ['file_critical', 'file_error', 'file_info'],
+            'propagate': True,
+            'level': 'INFO',
         },
 
         'assays': {
@@ -393,6 +452,8 @@ REST_FRAMEWORK = {
 def show_toolbar(request):
     return True
 
+# I will need to tune this value
+DATA_UPLOAD_MAX_NUMBER_FIELDS = 40000
 
 DEBUG_TOOLBAR_CONFIG = {
     'SHOW_TOOLBAR_CALLBACK': 'mps.settings.show_toolbar'
@@ -413,6 +474,7 @@ ACCOUNT_ACTIVATION_DAYS = 7
 LOGIN_REDIRECT_URL = '/accounts/loggedin/'
 
 # The console EmailBackend will post emails in the console
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+# EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+EMAIL_BACKEND = 'mps.backends.LoggingBackend'
 
 DEFAULT_FROM_EMAIL = 'webmaster@localhost'

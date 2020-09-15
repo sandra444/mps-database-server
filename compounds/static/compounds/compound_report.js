@@ -24,14 +24,6 @@ $(document).ready(function () {
     dialog.dialog({
         width: 825,
         height: 500,
-        closeOnEscape: true,
-        autoOpen: false,
-        close: function() {
-            $('body').removeClass('stop-scrolling');
-        },
-        open: function() {
-            $('body').addClass('stop-scrolling');
-        }
     });
     dialog.removeProp('hidden');
 
@@ -346,13 +338,21 @@ $(document).ready(function () {
     });
 
     // Tracks the clicking of checkboxes to fill compounds
-    $('.checkbox').change(function() {
+    $('.table-checkbox').change(function() {
         var compound = this.value;
+        var checkbox_index = $(this).attr('data-table-index');
+
         if (this.checked) {
             compounds[compound] = compound;
+            window.TABLE.data()[checkbox_index][0] = window.TABLE.data()[
+                checkbox_index
+            ][0].replace('>', ' checked="checked">');
         }
         else {
             delete compounds[compound];
+            window.TABLE.data()[checkbox_index][0] = window.TABLE.data()[
+                checkbox_index
+            ][0].replace(' checked="checked">', '>');
         }
     });
 
@@ -393,24 +393,31 @@ $(document).ready(function () {
 
     // Make the initial data table
     window.TABLE = $('#compounds').DataTable({
-        dom: 'B<"row">lfrtip',
+        dom: '<Bl<"row">frptip>',
         fixedHeader: {headerOffset: 50},
         responsive: true,
         "order": [[ 1, "asc" ]],
         "aoColumnDefs": [
+            // {
+            //     "bSortable": false,
+            //     "aTargets": [8]
+            // },
+            // {
+            //     "targets": [3, 9],
+            //     "visible": false,
+            //     "searchable": true
+            // },
             {
-                "bSortable": false,
-                "aTargets": [8]
-            },
-            {
-                "targets": [3, 9],
+                "targets": [3],
                 "visible": false,
                 "searchable": true
             },
             {
-                sortable: false,
-                "targets": [0]
-            }
+                sSortDataType: "dom-checkbox",
+                targets: [0],
+                width: "10%",
+                className: 'dt-center'
+            },
         ],
         "iDisplayLength": 25
     });

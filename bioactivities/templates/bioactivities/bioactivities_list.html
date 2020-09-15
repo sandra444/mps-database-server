@@ -34,7 +34,7 @@
             </h2>
         </legend>
 
-        <table hidden id="bioactivities" class="display" cellspacing="0" width="100%">
+        <table hidden id="bioactivities" class="display table table-striped" cellspacing="0" width="100%">
             <thead>
                 <tr>
                     <th>Compound</th>
@@ -91,7 +91,7 @@
     <script>
         $(document).ready(function() {
             $('#bioactivities').DataTable( {
-                dom: 'B<"row">lfrtip',
+                dom: '<Bl<"row">frptip>',
                 fixedHeader: {headerOffset: 50},
                 responsive: true,
                 "iDisplayLength": 100,
@@ -107,6 +107,4 @@
             }
         });
     </script>
-
-    <script src="{% static "js/display_datatable.js" %}"></script>
 {% endblock %}

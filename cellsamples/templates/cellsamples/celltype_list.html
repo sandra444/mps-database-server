@@ -1,11 +1,12 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block load %}
+{% block load_js %}
     <script src="{% static "cellsamples/celltype_list.js" %}"></script>
 {% endblock %}
 
 {% block breadcrumbs %}
+    <li><a href="{% url 'assays-studycomponents' %}">Study Components</a></li>
     <li class="active">Cell Types</li>
 {% endblock %}
 
@@ -21,7 +22,7 @@
             <a href="/cellsamples/celltype/add/" class="btn btn-lg btn-success" role="button">Add Cell Type</a>
         </div>
 
-        <table hidden id="celltypes" class="display" cellspacing="0" width="100%">
+        <table hidden id="celltypes" class="display table table-striped" cellspacing="0" width="100%">
             <thead>
                 <tr>
                     <th>Edit</th>
@@ -33,7 +34,7 @@
 
             <tbody>
             {% for celltype in object_list %}
-                <tr class="cellsample" id={{ celltype.id }} name={{ celltype }}>
+                <tr>
                     <td><a class="btn btn-primary" href="{{ celltype.id }}">Edit</a></td>
                     <td>{{ celltype.cell_type }}</td>
                     <td>{{ celltype.organ }}</td>
@@ -43,6 +44,4 @@
             </tbody>
         </table>
     </div>
-
-    <script src="{% static "js/display_datatable.js" %}"></script>
 {% endblock %}

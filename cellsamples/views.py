@@ -1,9 +1,21 @@
 # coding=utf-8
 
-from django.views.generic import ListView, CreateView, UpdateView
-from .models import CellSample, CellType, CellSubtype
-from .forms import CellSampleForm, CellTypeForm, CellSubtypeForm
-from mps.mixins import LoginRequiredMixin, OneGroupRequiredMixin, SpecificGroupRequiredMixin, PermissionDenied, user_is_active
+from django.views.generic import ListView, CreateView, UpdateView, DetailView
+from .models import (
+    CellSample,
+    CellType,
+    CellSubtype,
+    Supplier,
+    Biosensor
+)
+from .forms import (
+    CellSampleForm,
+    CellTypeForm,
+    CellSubtypeForm,
+    SupplierForm,
+    BiosensorForm
+)
+from mps.mixins import LoginRequiredMixin, OneGroupRequiredMixin, SpecificGroupRequiredMixin, PermissionDenied, user_is_active, FormHandlerMixin, DetailHandlerMixin, ListHandlerMixin, CreatorAndNotInUseMixin
 from mps.templatetags.custom_filters import filter_groups
 from django.shortcuts import redirect
 
@@ -14,84 +26,35 @@ from django.utils.decorators import method_decorator
 from mps.templatetags.custom_filters import has_group, is_group_editor
 
 
-class CellSampleAdd(SpecificGroupRequiredMixin, CreateView):
-    """Add a Cell Sample"""
-    template_name = 'cellsamples/cellsample_add.html'
-    form_class = CellSampleForm
-
-    required_group_name = 'Add Cell Samples Front'
-
-    def get_form(self, form_class=None):
-        form_class = self.get_form_class()
-        # Get group selection possibilities
-        groups = filter_groups(self.request.user)
-
-        # If POST
-        if self.request.method == 'POST':
-            return form_class(groups, self.request.POST, self.request.FILES)
-        # If GET
-        else:
-            return form_class(groups)
-
-    # Test form validity
-    def form_valid(self, form):
-        # get user via self.request.user
-        if form.is_valid():
-            save_forms_with_tracking(self, form, formset=None, update=False)
-            return redirect('/cellsamples/cellsample')
-        else:
-            return self.render_to_response(self.get_context_data(form=form))
-
-
-# NOTE THAT CELL SAMPLE DOES NOT USE A PERMISSION MIXIN
-# Note that updating a model clears technically blank fields (exclude in form to avoid this)
-class CellSampleUpdate(UpdateView):
-    """Update a Cell Sample"""
+class CellSampleMixin(FormHandlerMixin):
     model = CellSample
     template_name = 'cellsamples/cellsample_add.html'
     form_class = CellSampleForm
 
-    required_group_name = 'Change Cell Samples Front'
 
-    @method_decorator(login_required)
-    @method_decorator(user_passes_test(user_is_active))
-    def dispatch(self, *args, **kwargs):
-        """Special dispatch for Cell Sample
+class CellSampleAdd(OneGroupRequiredMixin, CellSampleMixin, CreateView):
+    # required_group_name = 'Add Cell Samples Front'
+    pass
 
-        Rejects users that lack either the Change Cell Samples group or the Cell Sample's bound group
-        """
-        self.object = self.get_object()
-        if not has_group(self.request.user, self.required_group_name):
-            return PermissionDenied(self.request, 'Contact an administrator if you would like to gain permission')
-        if not is_group_editor(self.request.user, self.object.group.name):
-            return PermissionDenied(self.request, 'You must be a member of the group ' + str(self.object.group))
-        return super(CellSampleUpdate, self).dispatch(*args, **kwargs)
 
-    def get_form(self, form_class=None):
-        form_class = self.get_form_class()
-        # Get group selection possibilities
-        groups = filter_groups(self.request.user)
+class CellSampleUpdate(CreatorAndNotInUseMixin, CellSampleMixin, UpdateView):
+    # required_group_name = 'Change Cell Samples Front'
+    pass
 
-        # If POST
-        if self.request.method == 'POST':
-            return form_class(groups, self.request.POST, self.request.FILES, instance=self.get_object())
-        # If GET
-        else:
-            return form_class(groups, instance=self.get_object())
-
-    def get_context_data(self, **kwargs):
-        context = super(CellSampleUpdate, self).get_context_data(**kwargs)
-        context['update'] = True
-        return context
-
-    # Test form validity
-    def form_valid(self, form):
-        # get user via self.request.user
-        if form.is_valid():
-            save_forms_with_tracking(self, form, formset=None, update=True)
-            return redirect('/cellsamples/cellsample')
-        else:
-            return self.render_to_response(self.get_context_data(form=form))
+    # For the moment, superusers only
+    # @method_decorator(login_required)
+    # @method_decorator(user_passes_test(user_is_active))
+    # def dispatch(self, *args, **kwargs):
+    #     """Special dispatch for Cell Sample
+    #
+    #     Rejects users that lack either the Change Cell Samples group or the Cell Sample's bound group
+    #     """
+    #     self.object = self.get_object()
+    #     # if not has_group(self.request.user, self.required_group_name):
+    #     #     return PermissionDenied(self.request, 'Contact an administrator if you would like to gain permission')
+    #     if not is_group_editor(self.request.user, self.object.group.name):
+    #         return PermissionDenied(self.request, 'You must be a member of the group ' + str(self.object.group))
+    #     return super(CellSampleUpdate, self).dispatch(*args, **kwargs)
 
 
 class CellSampleList(LoginRequiredMixin, ListView):
@@ -109,45 +72,20 @@ class CellSampleList(LoginRequiredMixin, ListView):
         return queryset
 
 
-class CellTypeAdd(SpecificGroupRequiredMixin, CreateView):
-    """Add a Cell Type"""
-    template_name = 'cellsamples/celltype_add.html'
-    form_class = CellTypeForm
-
-    required_group_name = 'Add Cell Samples Front'
-
-    # Test form validity
-    def form_valid(self, form):
-        # get user via self.request.user
-        if form.is_valid():
-            save_forms_with_tracking(self, form, formset=None, update=False)
-            return redirect('/cellsamples/celltype')
-        else:
-            return self.render_to_response(self.get_context_data(form=form))
-
-
-# Note that updating a model clears technically blank fields (exclude in form to avoid this)
-class CellTypeUpdate(SpecificGroupRequiredMixin, UpdateView):
-    """Update a Cell Type"""
+class CellTypeMixin(FormHandlerMixin):
     model = CellType
     template_name = 'cellsamples/celltype_add.html'
     form_class = CellTypeForm
 
-    required_group_name = 'Change Cell Samples Front'
 
-    def get_context_data(self, **kwargs):
-        context = super(CellTypeUpdate, self).get_context_data(**kwargs)
-        context['update'] = True
-        return context
+class CellTypeAdd(OneGroupRequiredMixin, CellTypeMixin, CreateView):
+    # required_group_name = 'Add Cell Samples Front'
+    pass
 
-    # Test form validity
-    def form_valid(self, form):
-        # get user via self.request.user
-        if form.is_valid():
-            save_forms_with_tracking(self, form, formset=None, update=True)
-            return redirect('/cellsamples/celltype')
-        else:
-            return self.render_to_response(self.get_context_data(form=form))
+
+class CellTypeUpdate(CreatorAndNotInUseMixin, CellTypeMixin, UpdateView):
+    # required_group_name = 'Change Cell Samples Front'
+    pass
 
 
 class CellTypeList(ListView):
@@ -159,44 +97,21 @@ class CellTypeList(ListView):
         return queryset
 
 
-class CellSubtypeAdd(SpecificGroupRequiredMixin, CreateView):
+class CellSubtypeMixin(FormHandlerMixin):
     """Add a Cell Subtype"""
-    template_name = 'cellsamples/cellsubtype_add.html'
-    form_class = CellSubtypeForm
-
-    required_group_name = 'Add Cell Samples Front'
-
-    # Test form validity
-    def form_valid(self, form):
-        # get user via self.request.user
-        if form.is_valid():
-            save_forms_with_tracking(self, form, formset=None, update=False)
-            return redirect('/cellsamples/cellsubtype')
-        else:
-            return self.render_to_response(self.get_context_data(form=form))
-
-
-class CellSubtypeUpdate(SpecificGroupRequiredMixin, UpdateView):
-    """Update a Cell Subtype"""
     model = CellSubtype
     template_name = 'cellsamples/cellsubtype_add.html'
     form_class = CellSubtypeForm
 
-    required_group_name = 'Change Cell Samples Front'
 
-    def get_context_data(self, **kwargs):
-        context = super(CellSubtypeUpdate, self).get_context_data(**kwargs)
-        context['update'] = True
-        return context
+class CellSubtypeAdd(OneGroupRequiredMixin, CellSubtypeMixin, CreateView):
+    # required_group_name = 'Add Cell Samples Front'
+    pass
 
-    # Test form validity
-    def form_valid(self, form):
-        # get user via self.request.user
-        if form.is_valid():
-            save_forms_with_tracking(self, form, formset=None, update=True)
-            return redirect('/cellsamples/cellsubtype')
-        else:
-            return self.render_to_response(self.get_context_data(form=form))
+
+class CellSubtypeUpdate(CreatorAndNotInUseMixin, CellSubtypeMixin, UpdateView):
+    # required_group_name = 'Change Cell Samples Front'
+    pass
 
 
 class CellSubtypeList(ListView):
@@ -209,3 +124,207 @@ class CellSubtypeList(ListView):
             'cell_type__organ'
         )
         return queryset
+
+
+class SupplierMixin(FormHandlerMixin):
+    model = Supplier
+    form_class = SupplierForm
+
+
+class SupplierAdd(OneGroupRequiredMixin, SupplierMixin, CreateView):
+    pass
+
+
+class SupplierUpdate(CreatorAndNotInUseMixin, SupplierMixin, UpdateView):
+    pass
+
+
+class SupplierDetail(DetailHandlerMixin, DetailView):
+    pass
+
+
+class SupplierList(ListHandlerMixin, ListView):
+    model = Supplier
+
+
+class BiosensorMixin(FormHandlerMixin):
+    model = Biosensor
+    form_class = BiosensorForm
+
+
+class BiosensorAdd(OneGroupRequiredMixin, BiosensorMixin, CreateView):
+    pass
+
+
+class BiosensorUpdate(CreatorAndNotInUseMixin, BiosensorMixin, UpdateView):
+    pass
+
+
+class BiosensorDetail(DetailHandlerMixin, DetailView):
+    pass
+
+
+class BiosensorList(ListHandlerMixin, ListView):
+    model = Biosensor
+
+
+# OLD
+# class CellSampleAdd(SpecificGroupRequiredMixin, CreateView):
+#     """Add a Cell Sample"""
+#     template_name = 'cellsamples/cellsample_add.html'
+#     form_class = CellSampleForm
+#
+#     required_group_name = 'Add Cell Samples Front'
+#
+#     def get_form(self, form_class=None):
+#         form_class = self.get_form_class()
+#         # Get group selection possibilities
+#         groups = filter_groups(self.request.user)
+#
+#         # If POST
+#         if self.request.method == 'POST':
+#             return form_class(groups, self.request.POST, self.request.FILES)
+#         # If GET
+#         else:
+#             return form_class(groups)
+#
+#     # Test form validity
+#     def form_valid(self, form):
+#         # get user via self.request.user
+#         if form.is_valid():
+#             save_forms_with_tracking(self, form, formset=None, update=False)
+#             return redirect('/cellsamples/cellsample')
+#         else:
+#             return self.render_to_response(self.get_context_data(form=form))
+#
+#
+# # NOTE THAT CELL SAMPLE DOES NOT USE A PERMISSION MIXIN
+# # Note that updating a model clears technically blank fields (exclude in form to avoid this)
+# class CellSampleUpdate(UpdateView):
+#     """Update a Cell Sample"""
+#     model = CellSample
+#     template_name = 'cellsamples/cellsample_add.html'
+#     form_class = CellSampleForm
+#
+#     required_group_name = 'Change Cell Samples Front'
+#
+#     @method_decorator(login_required)
+#     @method_decorator(user_passes_test(user_is_active))
+#     def dispatch(self, *args, **kwargs):
+#         """Special dispatch for Cell Sample
+#
+#         Rejects users that lack either the Change Cell Samples group or the Cell Sample's bound group
+#         """
+#         self.object = self.get_object()
+#         if not has_group(self.request.user, self.required_group_name):
+#             return PermissionDenied(self.request, 'Contact an administrator if you would like to gain permission')
+#         if not is_group_editor(self.request.user, self.object.group.name):
+#             return PermissionDenied(self.request, 'You must be a member of the group ' + str(self.object.group))
+#         return super(CellSampleUpdate, self).dispatch(*args, **kwargs)
+#
+#     def get_form(self, form_class=None):
+#         form_class = self.get_form_class()
+#         # Get group selection possibilities
+#         groups = filter_groups(self.request.user)
+#
+#         # If POST
+#         if self.request.method == 'POST':
+#             return form_class(groups, self.request.POST, self.request.FILES, instance=self.get_object())
+#         # If GET
+#         else:
+#             return form_class(groups, instance=self.get_object())
+#
+#     def get_context_data(self, **kwargs):
+#         context = super(CellSampleUpdate, self).get_context_data(**kwargs)
+#         context['update'] = True
+#         return context
+#
+#     # Test form validity
+#     def form_valid(self, form):
+#         # get user via self.request.user
+#         if form.is_valid():
+#             save_forms_with_tracking(self, form, formset=None, update=True)
+#             return redirect('/cellsamples/cellsample')
+#         else:
+#             return self.render_to_response(self.get_context_data(form=form))
+
+# OLD
+# class CellTypeAdd(SpecificGroupRequiredMixin, CreateView):
+#     """Add a Cell Type"""
+#     template_name = 'cellsamples/celltype_add.html'
+#     form_class = CellTypeForm
+#
+#     required_group_name = 'Add Cell Samples Front'
+#
+#     # Test form validity
+#     def form_valid(self, form):
+#         # get user via self.request.user
+#         if form.is_valid():
+#             save_forms_with_tracking(self, form, formset=None, update=False)
+#             return redirect('/cellsamples/celltype')
+#         else:
+#             return self.render_to_response(self.get_context_data(form=form))
+#
+#
+# # Note that updating a model clears technically blank fields (exclude in form to avoid this)
+# class CellTypeUpdate(SpecificGroupRequiredMixin, UpdateView):
+#     """Update a Cell Type"""
+#     model = CellType
+#     template_name = 'cellsamples/celltype_add.html'
+#     form_class = CellTypeForm
+#
+#     required_group_name = 'Change Cell Samples Front'
+#
+#     def get_context_data(self, **kwargs):
+#         context = super(CellTypeUpdate, self).get_context_data(**kwargs)
+#         context['update'] = True
+#         return context
+#
+#     # Test form validity
+#     def form_valid(self, form):
+#         # get user via self.request.user
+#         if form.is_valid():
+#             save_forms_with_tracking(self, form, formset=None, update=True)
+#             return redirect('/cellsamples/celltype')
+#         else:
+#             return self.render_to_response(self.get_context_data(form=form))
+
+# OLD
+# class CellSubtypeAdd(SpecificGroupRequiredMixin, CreateView):
+#     """Add a Cell Subtype"""
+#     template_name = 'cellsamples/cellsubtype_add.html'
+#     form_class = CellSubtypeForm
+#
+#     required_group_name = 'Add Cell Samples Front'
+#
+#     # Test form validity
+#     def form_valid(self, form):
+#         # get user via self.request.user
+#         if form.is_valid():
+#             save_forms_with_tracking(self, form, formset=None, update=False)
+#             return redirect('/cellsamples/cellsubtype')
+#         else:
+#             return self.render_to_response(self.get_context_data(form=form))
+#
+#
+# class CellSubtypeUpdate(SpecificGroupRequiredMixin, UpdateView):
+#     """Update a Cell Subtype"""
+#     model = CellSubtype
+#     template_name = 'cellsamples/cellsubtype_add.html'
+#     form_class = CellSubtypeForm
+#
+#     required_group_name = 'Change Cell Samples Front'
+#
+#     def get_context_data(self, **kwargs):
+#         context = super(CellSubtypeUpdate, self).get_context_data(**kwargs)
+#         context['update'] = True
+#         return context
+#
+#     # Test form validity
+#     def form_valid(self, form):
+#         # get user via self.request.user
+#         if form.is_valid():
+#             save_forms_with_tracking(self, form, formset=None, update=True)
+#             return redirect('/cellsamples/cellsubtype')
+#         else:
+#             return self.render_to_response(self.get_context_data(form=form))

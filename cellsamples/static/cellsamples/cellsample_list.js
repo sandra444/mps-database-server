@@ -1,11 +1,11 @@
 $(document).ready(function() {
     $('#cellsamples').DataTable({
-        dom: 'B<"row">lfrtip',
+        dom: '<Bl<"row">frptip>',
         fixedHeader: {headerOffset: 50},
         responsive: true,
         "iDisplayLength": 50,
-        // Initially sort on receipt date
-        "order": [ 2, "desc" ],
+        // Initially sort on ID
+        "order": [ 1, "desc" ],
         "aoColumnDefs": [
             {
                 "bSortable": false,

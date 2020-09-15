@@ -1,24 +1,114 @@
-{% load static %}
+{% load static compress %}
+{# Putting this here is going to cause problems (it is a dependency) #}
+{% comment %} {% compress js %}
 <script src="{% static "assays/grouping_filtering.js" %}"></script>
+{% endcompress %} {% endcomment %}
 
-<div id="filtering" class="well">
-    {# Inline JS is a little risque, but expedient #}
-    <h3 class="text-center">
-        Grouping/Filtering
-    </h3>
+{# TODO MOVE #}
+<style>
+    #sidebar {
+        overflow: auto;
+        position: fixed;
+        height: 100vh;
+        min-width: 250px;
+        max-width: 250px;
+        background: #eaeaea;
+        transition: all 0.3s;
+        margin-left: -250px;
+        margin-top: -20px;
+        z-index: 1000;
+    }
 
-    <div class="padded-row padded-bottom">
-        <a role="button" onclick="$('#filtering_tables').toggle('slow');$(this).text($(this).text() === 'Show' ? 'Hide' : 'Show');" class="btn btn-info toggle-hide-button">Hide Grouping/Filtering</a>
+    #sidebar.active {
+        margin-left: 0px;
+    }
+
+    #sidebar ul.components {
+        padding: 20px 0;
+    }
+
+    #sidebar ul li a {
+        padding: 10px;
+        display: block;
+    }
+    #sidebar ul li a:hover {
+        background: #fff;
+    }
+
+    #sidebar ul li.active > a, #sidebar a[aria-expanded="true"] {
+        background: #f8f8ff;
+    }
+
+    #sidebar a[data-toggle="collapse"] {
+        position: relative;
+    }
+
+    #sidebar a[aria-expanded="false"]::before {
+        content: "\e259";
+        display: block;
+        position: absolute;
+        right: 20px;
+        font-family: "Glyphicons Halflings";
+    }
+    #sidebar a[aria-expanded="true"]::before {
+        content: "\e260";
+        display: block;
+        position: absolute;
+        right: 20px;
+        font-family: "Glyphicons Halflings";
+    }
+
+    #page {
+        min-height: 100vh;
+        transition: all 0.3s;
+    }
+
+    #page.pushed {
+        padding-left: 275px;
+        min-height: 100vh;
+        /* Removed for now, too problematic on small screens */
+        /* max-width: 90vw; */
+        transition: all 0.3s;
+    }
+
+    @media (max-width: 768px) {
+        #sidebar {
+            margin-left: -250px;
+        }
+        #sidebar.active {
+            margin-left: 0;
+        }
+        #sidebarCollapse span {
+            display: none;
+        }
+    }
+</style>
+
+<nav id="sidebar">
+    <div class="row text-center well">
+        {# Crude inline js #}
+        <input type="checkbox" name="manually_refresh" id="id_manually_refresh" class="big-checkbox" onchange="$('#refresh_section').toggle('fast');">
+        {# Crude inline style #}
+        <label for="id_manually_refresh" style="margin-left: 10px;">
+            <strong>Manually Refresh</strong>
+        </label>
     </div>
 
-    <div class="row" id="filtering_tables">
-    <div class="col-md-3">
-        <p class="text-center">
-            <label>
-                Assay Metadata
-            </label>
-        </p>
-        <div>
+    <div hidden id="refresh_section" class="row text-center">
+        <a role="button" id="refresh_plots" class="btn btn-primary btn-lg">Refresh</a>
+    </div>
+
+    {# Inline JS is a little risque, but expedient #}
+    <h3 class="text-center">
+        <u>Grouping/Filtering</u>
+    </h3>
+
+    <ul class="list-unstyled components" id="filtering_tables">
+    <li>
+        <a href="#study_metadata" class="text-center collapsed" data-toggle="collapse" aria-expanded="false">
+            Study Parameters
+        </a>
+        <div class="collapse" id="study_metadata">
             <table class="table table-bordered table-condensed bg-white">
                 <thead>
                     <tr>
@@ -28,20 +118,37 @@
                     </tr>
                 </thead>
                 <tbody>
+                    {% if not intra_flag %}
                     <tr>
                         <td>
-                            <a data-parent-model='study' data-filter-relation='id__in' role='button' class="btn btn-sm post-filter-spawn">
+                            <button data-parent-model='study' data-filter-relation='group_id__in' role='button' class="btn btn-sm post-filter-spawn">
                                 <span class="glyphicon glyphicon-filter"></span>
-                            </a>
+                            </button>
                         </td>
                         <td>
-                            {# Exclude from grouping for now #}
-{#                            <input checked type="checkbox" class="grouping-checkbox">#}
+                            <input data-group='study.group_id' data-group-relation='setup' type="checkbox" class="grouping-checkbox">
+                            <span data-group-type="treatment"></span>
+                        </td>
+                        <td>
+                            MPS User Group
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>
+                            <button data-parent-model='study' data-filter-relation='id__in' role='button' class="btn btn-sm post-filter-spawn">
+                                <span class="glyphicon glyphicon-filter"></span>
+                            </button>
+                        </td>
+                        <td>
+                            <input data-group='study_id' data-group-relation='setup' type="checkbox" class="grouping-checkbox">
+                            <span data-group-type="treatment"></span>
                         </td>
                         <td>
                             Study
                         </td>
                     </tr>
+                    {% endif %}
                     {# Subject to removal? #}
 {#                    <tr>#}
 {#                        <td>#}
@@ -59,9 +166,9 @@
                     {# Subject to removal? #}
                     <tr>
                         <td>
-                            <a data-parent-model='matrix_item' data-filter-relation='organ_model_id__in' role='button' class="btn btn-sm post-filter-spawn">
+                            <button data-parent-model='matrix_item' data-filter-relation='organ_model_id__in' role='button' class="btn btn-sm post-filter-spawn">
                                 <span class="glyphicon glyphicon-filter"></span>
-                            </a>
+                            </button>
                         </td>
                         <td>
                             <input data-group='organ_model_id' data-group-relation='setup' type="checkbox" class="grouping-checkbox">
@@ -103,13 +210,13 @@
                     <tr>
                         <td>
                             {# Subject to change #}
-                            <a data-parent-model='matrix_item' data-filter-relation='matrix_id__in' role='button' class="btn btn-sm post-filter-spawn">
+                            <button data-parent-model='matrix_item' data-filter-relation='matrix_id__in' role='button' class="btn btn-sm post-filter-spawn">
                                 <span class="glyphicon glyphicon-filter"></span>
-                            </a>
+                            </button>
                         </td>
                         <td>
-                            {# Not currently used in grouping #}
-{#                            <input type="checkbox" class="grouping-checkbox">#}
+                            <input data-group='matrix_id' data-group-relation='setup' type="checkbox" class="grouping-checkbox">
+                            <span data-group-type="treatment"></span>
                         </td>
                         <td>
 
@@ -118,9 +225,9 @@
                     </tr>
                     <tr>
                         <td>
-                            <a data-parent-model='matrix_item' data-filter-relation='id__in' role='button' class="btn btn-sm post-filter-spawn">
+                            <button data-parent-model='matrix_item' data-filter-relation='id__in' role='button' class="btn btn-sm post-filter-spawn">
                                 <span class="glyphicon glyphicon-filter"></span>
-                            </a>
+                            </button>
                         </td>
                         <td>
                         {# Not currently used in grouping #}
@@ -147,9 +254,9 @@
 {#                    </tr>#}
                     <tr>
                         <td>
-                            <a data-parent-model='assay' data-filter-relation='target_id__in' role='button' class="btn btn-sm post-filter-spawn">
+                            <button data-parent-model='assay' data-filter-relation='target_id__in' role='button' class="btn btn-sm post-filter-spawn">
                                 <span class="glyphicon glyphicon-filter"></span>
-                            </a>
+                            </button>
                         </td>
                         <td>
                         {# For the moment, Target *ALWAYS* acts as a grouping criteria #}
@@ -162,9 +269,9 @@
                     {# NOTE THAT THESE ARE SPECIAL EXCEPTIONS TO HOW GROUPING NORMALLY WORKS #}
                     <tr>
                         <td>
-                            <a data-parent-model='assay' data-filter-relation='method_id__in' role='button' class="btn btn-sm post-filter-spawn">
+                            <button data-parent-model='assay' data-filter-relation='method_id__in' role='button' class="btn btn-sm post-filter-spawn">
                                 <span class="glyphicon glyphicon-filter"></span>
-                            </a>
+                            </button>
                         </td>
                         <td>
                             <input data-group='method' data-group-relation='special' type="checkbox" class="grouping-checkbox">
@@ -177,9 +284,9 @@
                     </tr>
                     <tr>
                         <td>
-                            <a data-parent-model='data_point' data-filter-relation='sample_location_id__in' role='button' class="btn btn-sm post-filter-spawn">
+                            <button data-parent-model='data_point' data-filter-relation='sample_location_id__in' role='button' class="btn btn-sm post-filter-spawn">
                                 <span class="glyphicon glyphicon-filter"></span>
-                            </a>
+                            </button>
                         </td>
                         <td>
                             <input data-group='sample_location' data-group-relation='special' checked type="checkbox" class="grouping-checkbox">
@@ -188,6 +295,19 @@
                         <td>
 {#                            <span data-group-type="color"></span>#}
                             Sample Location
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <button data-parent-model='data_point' data-filter-relation='time__in' role='button' class="btn btn-sm post-filter-spawn">
+                                <span class="glyphicon glyphicon-filter"></span>
+                            </button>
+                        </td>
+                        <td>
+
+                        </td>
+                        <td>
+                            Sample Time
                         </td>
                     </tr>
 {#                    <tr>#}
@@ -208,16 +328,14 @@
                 </tbody>
             </table>
         </div>
-    </div>
+    </li>
 
 
-    <div class="col-md-3">
-        <p class="text-center">
-            <label>
-                Cell Metadata
-            </label>
-        </p>
-        <div>
+    <li>
+        <a href="#cell_metadata" class="text-center collapsed" data-toggle="collapse" aria-expanded="false">
+            Cell Parameters
+        </a>
+        <div class="collapse" id="cell_metadata">
             <table class="table table-bordered table-condensed bg-white">
                 <thead>
                     <tr>
@@ -229,9 +347,23 @@
                 <tbody>
                     <tr>
                         <td>
-                            <a data-parent-model='matrix_item' data-filter-relation='assaysetupcell__cell_sample__cell_type_id__in' role='button' class="btn btn-sm post-filter-spawn">
+                            <button data-parent-model='matrix_item' data-filter-relation='assaysetupcell__cell_sample_id__in'  role='button' class="btn btn-sm post-filter-spawn">
                                 <span class="glyphicon glyphicon-filter"></span>
-                            </a>
+                            </button>
+                        </td>
+                        <td>
+                            <input data-group='cell_sample_id' data-group-relation='cell' type="checkbox" class="grouping-checkbox">
+                            <span data-group-type="treatment"></span>
+                        </td>
+                        <td>
+                            Cell Sample
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <button data-parent-model='matrix_item' data-filter-relation='assaysetupcell__cell_sample__cell_type_id__in' role='button' class="btn btn-sm post-filter-spawn">
+                                <span class="glyphicon glyphicon-filter"></span>
+                            </button>
                         </td>
                         <td>
                             <input data-group='cell_sample.cell_type_id' checked data-group-relation='cell' type="checkbox" class="grouping-checkbox">
@@ -244,9 +376,9 @@
                     </tr>
                     <tr>
                         <td>
-                            <a data-parent-model='matrix_item' data-filter-relation='assaysetupcell__cell_sample__cell_subtype_id__in' role='button' class="btn btn-sm post-filter-spawn">
+                            <button data-parent-model='matrix_item' data-filter-relation='assaysetupcell__cell_sample__cell_subtype_id__in' role='button' class="btn btn-sm post-filter-spawn">
                                 <span class="glyphicon glyphicon-filter"></span>
-                            </a>
+                            </button>
                         </td>
                         <td>
                             <input data-group='cell_sample.cell_subtype_id' data-group-relation='cell' type="checkbox" class="grouping-checkbox">
@@ -257,27 +389,11 @@
                             Cell Origin
                         </td>
                     </tr>
-                    {# Maybe hide this for now... #}
-{#                    <tr>#}
-{#                        <td>#}
-{#                            <a data-filter-relation='cell_sample' role='button' class="btn btn-sm post-filter-spawn">#}
-{#                                <span class="glyphicon glyphicon-filter"></span>#}
-{#                            </a>#}
-{#                        </td>#}
-{#                        <td>#}
-{#                            <input data-group='cell_sample_id' data-group-relation='cell' type="checkbox" class="grouping-checkbox">#}
-{#                            <span data-group-type="treatment"></span>#}
-{#                        </td>#}
-{#                        <td>#}
-{#                            <span data-group-type="treatment"></span>#}
-{#                            Cell Sample (Includes Type and Origin)#}
-{#                        </td>#}
-{#                    </tr>#}
                     <tr>
                         <td>
-                            <a data-parent-model='matrix_item' data-filter-relation='assaysetupcell__biosensor_id__in' role='button' class="btn btn-sm post-filter-spawn">
+                            <button data-parent-model='matrix_item' data-filter-relation='assaysetupcell__biosensor_id__in' role='button' class="btn btn-sm post-filter-spawn">
                                 <span class="glyphicon glyphicon-filter"></span>
-                            </a>
+                            </button>
                         </td>
                         <td>
                             <input data-group='biosensor_id' data-group-relation='cell' type="checkbox" class="grouping-checkbox">
@@ -290,9 +406,9 @@
                     </tr>
                     <tr>
                         <td>
-                            <a data-parent-model='matrix_item' data-filter-relation='assaysetupcell__passage__in' role='button' class="btn btn-sm post-filter-spawn">
+                            <button data-parent-model='matrix_item' data-filter-relation='assaysetupcell__passage__in' role='button' class="btn btn-sm post-filter-spawn">
                                 <span class="glyphicon glyphicon-filter"></span>
-                            </a>
+                            </button>
                         </td>
                         <td>
                             <input data-group='passage' data-group-relation='cell' type="checkbox" class="grouping-checkbox">
@@ -305,9 +421,9 @@
                     </tr>
                     <tr>
                         <td>
-                            <a data-parent-model='matrix_item' data-filter-relation='assaysetupcell__density__in' role='button' class="btn btn-sm post-filter-spawn">
+                            <button data-parent-model='matrix_item' data-filter-relation='assaysetupcell__density__density_unit_id__in' role='button' class="btn btn-sm post-filter-spawn">
                                 <span class="glyphicon glyphicon-filter"></span>
-                            </a>
+                            </button>
                         </td>
                         <td>
                             <input data-group='density' data-group-relation='cell' type="checkbox" class="grouping-checkbox">
@@ -334,9 +450,9 @@
                     {# SHOULD ADDITION TIME BE HERE #}
                     <tr>
                         <td>
-                            <a data-parent-model='matrix_item' data-filter-relation='assaysetupcell__addition_location_id__in' role='button' class="btn btn-sm post-filter-spawn">
+                            <button data-parent-model='matrix_item' data-filter-relation='assaysetupcell__addition_location_id__in' role='button' class="btn btn-sm post-filter-spawn">
                                 <span class="glyphicon glyphicon-filter"></span>
-                            </a>
+                            </button>
                         </td>
                         <td>
                             <input data-group='addition_location_id' data-group-relation='cell' checked type="checkbox" class="grouping-checkbox">
@@ -350,17 +466,18 @@
                 </tbody>
             </table>
         </div>
-    </div>
+    </li>
 
 
-
-    <div class="col-md-3">
-        <p class="text-center">
-            <label>
-                Compound Metadata
-            </label>
-        </p>
-        <div>
+    {% if not power_analysis %}
+    <li>
+    {% else %}
+    <li hidden>
+    {% endif %}
+        <a href="#compound_metadata" class="text-center collapsed" data-toggle="collapse" aria-expanded="false">
+            Compound Parameters
+        </a>
+        <div class="collapse" id="compound_metadata">
             <table class="table table-bordered table-condensed bg-white">
                 <thead>
                     <tr>
@@ -372,9 +489,9 @@
                 <tbody>
                     <tr>
                         <td>
-                            <a data-parent-model='matrix_item' data-filter-relation='assaysetupcompound__compound_instance__compound_id__in' role='button' class="btn btn-sm post-filter-spawn">
+                            <button data-parent-model='matrix_item' data-filter-relation='assaysetupcompound__compound_instance__compound_id__in' role='button' class="btn btn-sm post-filter-spawn">
                                 <span class="glyphicon glyphicon-filter"></span>
-                            </a>
+                            </button>
                         </td>
                         <td>
                             <input data-group='compound_instance.compound_id' data-group-relation='compound' checked type="checkbox" class="grouping-checkbox">
@@ -387,9 +504,9 @@
                     </tr>
                     <tr>
                         <td>
-                            <a data-parent-model='matrix_item' data-filter-relation='assaysetupcompound__compound_instance__supplier_id__in' role='button' class="btn btn-sm post-filter-spawn">
+                            <button data-parent-model='matrix_item' data-filter-relation='assaysetupcompound__compound_instance__supplier_id__in' role='button' class="btn btn-sm post-filter-spawn">
                                 <span class="glyphicon glyphicon-filter"></span>
-                            </a>
+                            </button>
                         </td>
                         <td>
                             <input data-group='compound_instance.supplier_id' data-group-relation='compound' type="checkbox" class="grouping-checkbox">
@@ -402,9 +519,9 @@
                     </tr>
                     <tr>
                         <td>
-                            <a data-parent-model='matrix_item' data-filter-relation='assaysetupcompound__compound_instance__lot__in' role='button' class="btn btn-sm post-filter-spawn">
+                            <button data-parent-model='matrix_item' data-filter-relation='assaysetupcompound__compound_instance__lot__in' role='button' class="btn btn-sm post-filter-spawn">
                                 <span class="glyphicon glyphicon-filter"></span>
-                            </a>
+                            </button>
                         </td>
                         <td>
                             <input data-group='compound_instance.lot' data-group-relation='compound' type="checkbox" class="grouping-checkbox">
@@ -433,9 +550,9 @@
 {#                    </tr>#}
                     <tr>
                         <td>
-                            <a data-parent-model='matrix_item' data-filter-relation='assaysetupcompound__concentration__in' role='button' class="btn btn-sm post-filter-spawn">
+                            <button data-parent-model='matrix_item' data-filter-relation='assaysetupcompound__concentration__concentration_unit_id__in' role='button' class="btn btn-sm post-filter-spawn">
                                 <span class="glyphicon glyphicon-filter"></span>
-                            </a>
+                            </button>
                         </td>
                         <td>
                             <input data-group='concentration' data-group-relation='compound' checked type="checkbox" class="grouping-checkbox">
@@ -461,9 +578,9 @@
 {#                    </tr>#}
                     <tr>
                         <td>
-                            <a data-parent-model='matrix_item' data-filter-relation='assaysetupcompound__addition_time__in' role='button' class="btn btn-sm post-filter-spawn">
+                            <button data-parent-model='matrix_item' data-filter-relation='assaysetupcompound__addition_time__in' role='button' class="btn btn-sm post-filter-spawn">
                                 <span class="glyphicon glyphicon-filter"></span>
-                            </a>
+                            </button>
                         </td>
                         <td>
                             <input data-group='addition_time' data-group-relation='compound' type="checkbox" class="grouping-checkbox">
@@ -476,9 +593,9 @@
                     </tr>
                     <tr>
                         <td>
-                            <a data-parent-model='matrix_item' data-filter-relation='assaysetupcompound__duration__in' role='button' class="btn btn-sm post-filter-spawn">
+                            <button data-parent-model='matrix_item' data-filter-relation='assaysetupcompound__duration__in' role='button' class="btn btn-sm post-filter-spawn">
                                 <span class="glyphicon glyphicon-filter"></span>
-                            </a>
+                            </button>
                         </td>
                         <td>
                             <input data-group='duration' data-group-relation='compound' type="checkbox" class="grouping-checkbox">
@@ -491,9 +608,9 @@
                     </tr>
                     <tr>
                         <td>
-                            <a data-parent-model='matrix_item' data-filter-relation='assaysetupcompound__addition_location_id__in' role='button' class="btn btn-sm post-filter-spawn">
+                            <button data-parent-model='matrix_item' data-filter-relation='assaysetupcompound__addition_location_id__in' role='button' class="btn btn-sm post-filter-spawn">
                                 <span class="glyphicon glyphicon-filter"></span>
-                            </a>
+                            </button>
                         </td>
                         <td>
                             <input data-group='addition_location_id' data-group-relation='compound' checked type="checkbox" class="grouping-checkbox">
@@ -507,16 +624,13 @@
                 </tbody>
             </table>
         </div>
-    </div>
+    </li>
 
-
-    <div class="col-md-3">
-        <p class="text-center">
-            <label>
-                Setting Metadata
-            </label>
-        </p>
-        <div>
+    <li>
+        <a href="#setting_metadata" class="text-center collapsed" data-toggle="collapse" aria-expanded="false">
+            Setting Parameters
+        </a>
+        <div class="collapse" id="setting_metadata">
             <table class="table table-bordered table-condensed bg-white">
                 <thead>
                     <tr>
@@ -528,12 +642,12 @@
                 <tbody>
                     <tr>
                         <td>
-                            <a data-parent-model='matrix_item' data-filter-relation='assaysetupsetting__setting_id__in' role='button' class="btn btn-sm post-filter-spawn">
+                            <button data-parent-model='matrix_item' data-filter-relation='assaysetupsetting__setting_id__in' role='button' class="btn btn-sm post-filter-spawn">
                                 <span class="glyphicon glyphicon-filter"></span>
-                            </a>
+                            </button>
                         </td>
                         <td>
-                            <input data-group='setting_id' data-group-relation='setting' checked type="checkbox" class="grouping-checkbox">
+                            <input data-group='setting_id' data-group-relation='setting' type="checkbox" class="grouping-checkbox">
                             <span data-group-type="treatment"></span>
                         </td>
                         <td>
@@ -556,12 +670,12 @@
 {#                    </tr>#}
                     <tr>
                         <td>
-                            <a data-parent-model='matrix_item' data-filter-relation='assaysetupsetting__value__in' role='button' class="btn btn-sm post-filter-spawn">
+                            <button data-parent-model='matrix_item' data-filter-relation='assaysetupsetting__value__unit_id__in' role='button' class="btn btn-sm post-filter-spawn">
                                 <span class="glyphicon glyphicon-filter"></span>
-                            </a>
+                            </button>
                         </td>
                         <td>
-                            <input data-group='value' data-group-relation='setting' checked type="checkbox" class="grouping-checkbox">
+                            <input data-group='value' data-group-relation='setting' type="checkbox" class="grouping-checkbox">
                             <span data-group-type="treatment"></span>
                         </td>
                         <td>
@@ -571,9 +685,9 @@
                     </tr>
                     <tr>
                         <td>
-                            <a data-parent-model='matrix_item' data-filter-relation='assaysetupsetting__time__in' role='button' class="btn btn-sm post-filter-spawn">
+                            <button data-parent-model='matrix_item' data-filter-relation='assaysetupsetting__time__in' role='button' class="btn btn-sm post-filter-spawn">
                                 <span class="glyphicon glyphicon-filter"></span>
-                            </a>
+                            </button>
                         </td>
                         <td>
                             <input data-group='addition_time' data-group-relation='setting' type="checkbox" class="grouping-checkbox">
@@ -586,9 +700,9 @@
                     </tr>
                     <tr>
                         <td>
-                            <a data-parent-model='matrix_item' data-filter-relation='assaysetupsetting__duration__in' role='button' class="btn btn-sm post-filter-spawn">
+                            <button data-parent-model='matrix_item' data-filter-relation='assaysetupsetting__duration__in' role='button' class="btn btn-sm post-filter-spawn">
                                 <span class="glyphicon glyphicon-filter"></span>
-                            </a>
+                            </button>
                         </td>
                         <td>
                             <input data-group='duration' data-group-relation='setting' type="checkbox" class="grouping-checkbox">
@@ -601,12 +715,12 @@
                     </tr>
                     <tr>
                         <td>
-                            <a data-parent-model='matrix_item' data-filter-relation='assaysetupsetting__addition_location_id__in' role='button' class="btn btn-sm post-filter-spawn">
+                            <button data-parent-model='matrix_item' data-filter-relation='assaysetupsetting__addition_location_id__in' role='button' class="btn btn-sm post-filter-spawn">
                                 <span class="glyphicon glyphicon-filter"></span>
-                            </a>
+                            </button>
                         </td>
                         <td>
-                            <input data-group='addition_location_id' data-group-relation='setting' checked type="checkbox" class="grouping-checkbox">
+                            <input data-group='addition_location_id' data-group-relation='setting' type="checkbox" class="grouping-checkbox">
                             <span data-group-type="treatment"></span>
                         </td>
                         <td>
@@ -617,15 +731,68 @@
                 </tbody>
             </table>
         </div>
-    </div>
+    </li>
+</ul>
+
+{# TODO REMOVE THE BLASTED PREFIX PLEASE #}
+{% if charts == 'true' %}
+<div id="charting_sidebar_section">
+    {% include "assays/chart_options.html" with chart_prefix='charts' %}
 </div>
-<div class="row text-center">
-    <a role="button" id="refresh_plots" class="btn btn-primary btn-lg">Refresh</a>
+{% endif %}
+
+{% if repro == 'true' %}
+<div id="repro_sidebar_section">
+<h3 class="text-center">
+    <u>Reproducibility Properties</u>
+</h3>
+
+<ul class="list-unstyled components padded-bottom" id="repro_options_tables">
+    <li>
+        <div class="well" id="inter_level">
+            {# Subject to removal #}
+            <div class="radio">
+                <label class="radio-inline">
+                    <input type="radio" name="inter_level" id="inter_level_by_center" value="1" checked>
+                    By Center
+                </label>
+            </div>
+            <div class="radio">
+                <label class="radio-inline">
+                    <input type="radio" name="inter_level" id="inter_level_by_study" value="0">
+                    By Study
+                </label>
+            </div>
+        </div>
+    </li>
+    <li>
+        <div class="well" id="initial_norm_section">
+            <label for="initial_norm">
+                <input type="checkbox" name="initial_norm" id="initial_norm" />
+                Normalize by Median
+            </label>
+        </div>
+    </li>
+    <li>
+        <div class="well" id="max_interpolation_size_section">
+            <label for="max_interpolation_size">Maximum Interpolation Size</label>
+            <input id="max_interpolation_size" class="form-control" type="number" value="2">
+        </div>
+    </li>
+</ul>
 </div>
-</div>
+{% endif %}
+
+{# CRUDE PADDING #}
+<div style="margin-bottom: 250px"></div>
+
+</nav>
 
 <div hidden id="filter_popup" title="X">
-{#    <h5></h5>#}
+    <div class="padded-bottom">
+        <a id="filter_section_select_all" class="btn btn-primary">Select All</a>
+        <a id="filter_section_deselect_all" class="btn btn-danger">Deselect All</a>
+    </div>
     <table class="display table" cellspacing="0" width="100%">
         <thead>
             <tr>
@@ -637,3 +804,148 @@
         </tbody>
     </table>
 </div>
+
+{% if charts == 'true' %}
+{# Popup for showing and hiding plots #}
+<div hidden id="show_hide_plots_popup" title="Show/Hide Plots">
+  <div class="padded-bottom">
+      <a id="show_hide_plots_select_all" class="btn btn-primary">Select All</a>
+      <a id="show_hide_plots_deselect_all" class="btn btn-danger">Deselect All</a>
+  </div>
+  <table class="display table" cellspacing="0" width="100%">
+      <thead>
+          <tr>
+              <th>Select</th>
+              <th>Title</th>
+              <th>Unit</th>
+          </tr>
+      </thead>
+      <tbody>
+      </tbody>
+  </table>
+</div>
+
+{# Popup for individual chart options #}
+{# SLOPPY: ENFORCES WIDTH IN INLINE STYLE #}
+<div hidden id="individual_plot_popup" title="Individual Plot" style="width: 850px;">
+    {# How best to organize options? #}
+    {# For the moment, just show butons for each type #}
+    <div style="width: 800px; height: 425px; overflow: auto;" id="individual_plot_popup_options_section">
+
+      <div class="alert alert-info" role="info">
+          <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+          <span class="sr-only">Info:</span>
+          More options for altering this graph's properties are located in the sidebar (highlighted in light blue)
+      </div>
+
+    <div class="padded-bottom well">
+      <div class="row">
+      <div class="col-sm-4">
+      <div class="fancy-checkbox table-filter padded-bottom" align="left">
+          <input class="visibility-checkbox" type="checkbox" name="plot_is_visible" id="plot_is_visible" checked/>
+          <div class="btn-group">
+              <label for="plot_is_visible" class="btn btn-default">
+                  <span class="glyphicon glyphicon-ok"></span>
+                  <span> </span>
+              </label>
+              <label for="plot_is_visible" class="btn btn-default active">
+                  Show Plot
+              </label>
+          </div>
+      </div>
+      </div>
+
+        <div class="col-sm-4">
+        <div class="fancy-checkbox table-filter padded-bottom" align="left">
+            <input class="visibility-checkbox" type="checkbox" name="use_percent_control" id="use_percent_control"/>
+            <div class="btn-group">
+                <label for="use_percent_control" class="btn btn-default">
+                    <span class="glyphicon glyphicon-ok"></span>
+                    <span> </span>
+                </label>
+                <label for="use_percent_control" class="btn btn-default active">
+                    Percent Control
+                </label>
+            </div>
+        </div>
+        </div>
+
+        <div class="col-sm-4">
+        <div class="fancy-checkbox table-filter padded-bottom" align="left">
+            <input class="visibility-checkbox" type="checkbox" name="use_dose_response" id="use_dose_response"/>
+            <div class="btn-group">
+                <label for="use_dose_response" class="btn btn-default">
+                    <span class="glyphicon glyphicon-ok"></span>
+                    <span> </span>
+                </label>
+                <label for="use_dose_response" class="btn btn-default active">
+                    Dose-Response
+                </label>
+            </div>
+        </div>
+        </div>
+        </div>
+
+        <div class="row">
+        <div class="col-sm-4">
+          <div class="fancy-checkbox table-filter padded-bottom" align="left">
+              <input class="visibility-checkbox" type="checkbox" name="use_x_log" id="use_x_log"/>
+              <div class="btn-group">
+                  <label for="use_x_log" class="btn btn-default">
+                      <span class="glyphicon glyphicon-ok"></span>
+                      <span> </span>
+                  </label>
+                  <label for="use_x_log" class="btn btn-default active">
+                      X-axis Log Scale
+                  </label>
+              </div>
+          </div>
+        </div>
+        <div class="col-sm-4">
+          <div class="fancy-checkbox table-filter padded-bottom" align="left">
+              <input class="visibility-checkbox" type="checkbox" name="use_y_log" id="use_y_log"/>
+              <div class="btn-group">
+                  <label for="use_y_log" class="btn btn-default">
+                      <span class="glyphicon glyphicon-ok"></span>
+                      <span> </span>
+                  </label>
+                  <label for="use_y_log" class="btn btn-default active">
+                      Y-axis Log Scale
+                  </label>
+              </div>
+          </div>
+        </div>
+        <div class="col-sm-4">
+        </div>
+        </div>
+    </div>
+
+    {% comment %} <div class="row padded-bottom well">
+        <div class="col-xs-12">
+            <label>Plot Type</label>
+        </div>
+        <div class="col-xs-12">
+            <select id="id_individual_plot_type" class="form-control no-selectize">
+                <option val="scatter" selected>Scatter/Line Plot</option>
+                <option val="bar">Bar Chart</option>
+                {# Removed for now #}
+                {# <option val="box">Box Plot</option> #}
+            </select>
+        </div>
+    </div> {% endcomment %}
+    </div>
+
+    <div hidden id="individual_plot_popup_plot_section" style="width: 800px; height: 425px; overflow: auto;">
+        {# PLEASE NOTE CONTRIVANCE #}
+        {% comment %} <div class="chart-container" id="individual_plot_popup_plot_container"> {% endcomment %}
+        {# Inline style of width prevents glitch where in width changes on hover events #}
+        <div class="chart-container" id="popup_0" style="min-width: 750px; float: left; min-height: 400px;">
+        </div>
+    </div>
+</div>
+
+{# Yet another popup for manipulating the options for a popup plot #}
+<div hidden id="individual_plot_options_popup" title="Individual Plot">
+
+</div>
+{% endif %}

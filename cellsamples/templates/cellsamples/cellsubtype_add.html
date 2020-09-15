@@ -1,11 +1,12 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block load %}
+{% block load_js %}
     <script src="{% static "js/enter_override.js" %}"></script>
 {% endblock %}
 
 {% block breadcrumbs %}
+    <li><a href="{% url 'assays-studycomponents' %}">Study Components</a></li>
     <li><a href="/cellsamples/cellsubtype/">Cell Origins</a></li>
     <li class="active">
         {% if object %}
@@ -42,6 +43,21 @@
 
     <legend>Cell Origin Details</legend>
 
+    {% include 'generic_field.html' with field=form.cell_subtype %}
+
+    {% include 'generic_field.html' with field=form.cell_type %}
+
+    <div class="row padded-bottom">
+        <div class="col-sm-2"></div>
+        <div class="col-sm-10">
+            <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span>
+            <span class="text-danger">
+                Select a Cell Type ONLY if this Origin is SPECIFIC to a certain Cell Type (e.g. a cell line)
+            </span>
+        </div>
+    </div>
+
+    {% comment %}
     {% if form.cell_subtype.errors %}
         {% for error in form.cell_subtype.errors %}
             <div class="alert alert-danger" role="alert">
@@ -81,10 +97,12 @@
                 Select a Cell Type ONLY if this Origin is SPECIFIC to a certain Cell Type (e.g. a cell line)
             </span>
             <br>
-            <a href="/cellsamples/celltype">
+            <a class="popup-link" data-href="/cellsamples/celltype/add?popup=1" data-window-name="celltype">
                 <span class="glyphicon glyphicon-plus text-success" aria-hidden="true"></span>
-                Add/Edit Cell Types (Must Refresh Page to See Change)
+                Create New Cell Type
             </a>
         </div>
     </div>
+    {% endcomment %}
+    </form>
 {% endblock %}

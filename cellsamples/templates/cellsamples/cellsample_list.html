@@ -1,11 +1,12 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block load %}
+{% block load_js %}
     <script src="{% static "cellsamples/cellsample_list.js" %}"></script>
 {% endblock %}
 
 {% block breadcrumbs %}
+    <li><a href="{% url 'assays-studycomponents' %}">Study Components</a></li>
     <li class="active">Cell Samples</li>
 {% endblock %}
 
@@ -21,7 +22,7 @@
             <a href="/cellsamples/cellsample/add/" class="btn btn-lg btn-success" role="button">Add Cell Sample</a>
         </div>
 
-        <table hidden id="cellsamples" class="display" cellspacing="0" width="100%">
+        <table hidden id="cellsamples" class="display table table-striped" cellspacing="0" width="100%">
             <thead>
                 <tr>
                     <th>Edit</th>
@@ -39,12 +40,12 @@
 
             <tbody>
             {% for cellsample in object_list %}
-                <tr class="cellsample" id={{ cellsample.id }}>
+                <tr>
                     <td><a class="btn btn-primary" href="{{ cellsample.id }}">Edit</a></td>
                     {# May seem odd, but including the id can help demystify the ID that appears in add interface #}
                     <td>{{ cellsample.id }}</td>
                     {# Adding a link to this row converts it from date to HTML = Really, REALLY annoying #}
-                    <td>{{ cellsample.receipt_date|date:"M d, Y" }}</td>
+                    <td>{{ cellsample.receipt_date|date:"Y-m-d" }}</td>
                     <td>{{ cellsample.barcode }}</td>
                     <td>
                         <a href="/cellsamples/celltype/{{ cellsample.cell_type.id }}">
@@ -77,6 +78,4 @@
             </tbody>
         </table>
     </div>
-
-    <script src="{% static "js/display_datatable.js" %}"></script>
 {% endblock %}

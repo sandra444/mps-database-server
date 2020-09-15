@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block load %}
+{% block load_js %}
     <script src="{% static "assays/studyconfiguration_list.js" %}"></script>
 {% endblock %}
 
@@ -21,7 +21,7 @@
             <a href="/assays/studyconfiguration/add/" class="btn btn-lg btn-success" role="button">Add Configuration</a>
         </div>
 
-        <table hidden id="studyconfigurations" class="display" cellspacing="0" width="100%">
+        <table hidden id="studyconfigurations" class="display table table-striped" cellspacing="0" width="100%">
             <thead>
                 <tr>
                     <th>View/Edit</th>
@@ -33,7 +33,7 @@
 
             <tbody>
             {% for configuration in object_list %}
-                <tr class="studyconfiguration" id={{ configuration.id }} name={{ configuration.name }}>
+                <tr>
                     <td><a class="btn btn-primary" href="{{ configuration.id }}">View/Edit</a></td>
                     <td>{{ configuration.name }}</td>
                     <td>{{ configuration.media_composition }}</td>
@@ -43,6 +43,4 @@
             </tbody>
         </table>
     </div>
-
-    <script src="{% static "js/display_datatable.js" %}"></script>
 {% endblock %}

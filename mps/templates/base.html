@@ -1,10 +1,13 @@
 {% load static %}
+{% load compress %}
 <!DOCTYPE html>
 <html lang="en">
 
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+
+<meta name="description" content="The MPS-Db aggregates MPS data with linked preclinical and clinical databases for analysis in the context of human exposure. Built in tools enable the assessment of the reproducibility and transferability of MPS models, while computational models are being developed to enhance the value of MPS models for understanding disease mechanisms, compound toxicity, and prediction of drug pharmacokinetics (PK)">
 
 <head>
   <link rel="icon"
@@ -15,57 +18,65 @@
 
 {# <link rel="stylesheet" type="text/css" href="{% get_static_prefix %}css/default.css" > #}
 
-  {% block extrahead %}
+  {% compress css %}
+      <link rel="stylesheet" href="{% static "css/jquery-ui-1.11.2.min.css" %}">
+      <!-- Latest compiled and minified CSS -->
+      <link rel="stylesheet" href="{% static "css/bootstrap.min.css" %}">
+      <link rel="stylesheet" href="{% static "css/bootstrap-theme.min.css" %}">
+      <!-- Load c3.css -->
+      <link href="{% static "css/c3.min.css" %}" rel="stylesheet" type="text/css">
+      <!-- DataTables CSS -->
+      <!-- <link rel="stylesheet" type="text/css" href="{% static "css/jquery.dataTables.min.css" %}">
+      <link rel="stylesheet" type="text/css" href="{% static "css/fixedHeader.dataTables.min.css" %}">
+      <link rel="stylesheet" type="text/css" href="{% static "css/responsive.dataTables.min.css" %}">
+      <link rel="stylesheet" type="text/css" href="{% static "css/buttons.dataTables.min.css" %}"> -->
+
+      <link rel="stylesheet" type="text/css" href="{% static "css/datatables.min.css" %}">
+
+      <!--Selectize -->
+      <link rel="stylesheet" type="text/css" href="{% static "css/selectize.bootstrap3.css" %}" />
+
+      <!-- Custom CSS Rules -->
+      <link rel="stylesheet" href="{% static "css/bootstrap-overrides.css" %}">
+  {% endcompress %}
+
+  {% compress js %}
     <!-- Load JQuery -->
     <script src="{% static "js/jquery-1.11.2.min.js" %}"></script>
-
     <!-- Load JQuery UI-->
     <script src="{% static "js/jquery-ui-1.11.2.min.js" %}"></script>
-    <link rel="stylesheet" href="{% static "css/jquery-ui-1.11.2.min.css" %}">
 
-    <!-- Latest compiled and minified CSS -->
-    <link rel="stylesheet" href="{% static "css/bootstrap.min.css" %}">
+    {# Contains Code for (most) every page #}
+    <script src="{% static "js/base.js" %}"></script>
 
     <!-- Incorporate the Bootstrap JavaScript plugins -->
     <script src="{% static "js/bootstrap.min.js" %}"></script>
-    <link rel="stylesheet" href="{% static "css/bootstrap-theme.min.css" %}">
-
     <!-- Underscore.js Library -->
     <script src="{% static "js/underscore.js" %}"></script>
-
     <!-- d3.js Library -->
     <script src="{% static "js/d3.min.js" %}"></script>
-
-    <!-- Load c3.css -->
-    <link href="{% static "css/c3.min.css" %}" rel="stylesheet" type="text/css">
-
     <!-- Load d3.js and c3.js -->
     <script src="{% static "js/c3.min.js" %}"></script>
-
-    <!-- DataTables CSS -->
-    <link rel="stylesheet" type="text/css" href="{% static "css/jquery.dataTables.min.css" %}">
-    <link rel="stylesheet" type="text/css" href="{% static "css/fixedHeader.dataTables.min.css" %}">
-    <link rel="stylesheet" type="text/css" href="{% static "css/responsive.dataTables.min.css" %}">
-    <link rel="stylesheet" type="text/css" href="{% static "css/buttons.dataTables.min.css" %}">
-
     <!-- DataTables -->
-    <script type="text/javascript" charset="utf-8" src="{% static "js/jquery.dataTables.min.js" %}"></script>
+    <!-- <script type="text/javascript" charset="utf-8" src="{% static "js/jquery.dataTables.min.js" %}"></script>
     <script type="text/javascript" charset="utf-8" src="{% static "js/dataTables.fixedHeader.min.js" %}"></script>
     <script type="text/javascript" charset="utf-8" src="{% static "js/dataTables.responsive.min.js" %}"></script>
     <script type="text/javascript" charset="utf-8" src="{% static "js/dataTables.buttons.min.js" %}"></script>
+    <script type="text/javascript" charset="utf-8" src="{% static "js/buttons.colVis.min.js" %}"></script>
+ -->
+
+    <script type="text/javascript" charset="utf-8" src="{% static "js/datatables.min.js" %}"></script>
+
     {# We will just be using html5 for buttons (no fallback) #}
     {# <script type="text/javascript" charset="utf-8" src="{% static "js/buttons.flash.min.js" %}"></script>#}
     <script type="text/javascript" charset="utf-8" src="{% static "js/buttons.html5.min.js" %}"></script>
     <script type="text/javascript" charset="utf-8" src="{% static "js/buttons.print.min.js" %}"></script>
-
-{#    This script sets defaults for Buttons #}
+    {#    This script sets defaults for Buttons #}
 {#    Currently I exclude Excel (as it is confusingly given a csv extension) and PDF (requires heavier SWF)#}
 {#    I may add these later, however, but I will have to remember to use the PDF enabled SWF if PDFs are desired#}
     <script type="text/javascript" charset="utf-8" src="{% static "js/datatable_options.js" %}"></script>
 
-    <!-- SmartMenus jQuery plugin -->
-    {# No longer used #}
-{#    <script type="text/javascript" src="{% static "js/jquery.smartmenus.min.js" %}"></script>#}
+    <script type="text/javascript" charset="utf-8" src="{% static "js/jquery_ui_options.js" %}"></script>
 
     <script src="{% static "js/cookies.js" %}"></script>
 
@@ -73,120 +84,52 @@
     <script src="{% static "js/spin.min.js" %}"></script>
     <script src="{% static "js/mps_spinner.js" %}"></script>
 
-    {# Yes, I know this violates SOC #}
-    <script>
-      {# Smart menus removed #}
-      // always emulate touch mode
-{#      $.SmartMenus.prototype.isTouchMode = function() {#}
-{#        return true;#}
-{#      };#}
+    {# Selectize #}
+    <script type="text/javascript" src="{% static "js/selectize.js" %}" charset='UTF-8'></script>
 
-      // TODO NEEDS TO BE REVISED ALONG WITH HELP
-      // TODO MOVE THIS TO ITS OWN FILE PLEASE
-{#      // TODO MOVE THIS TO ITS OWN FILE PLEASE#}
-      $(document).ready(function () {
-        // Prevent CSS conflict with Bootstrap
-        // CRUDE
-        $.fn.button.noConflict();
+    {# Do not double include #}
+    <script src="{% static "js/inline_add.js" %}"></script>
+    <script src="{% static "js/selectize_script.js" %}"></script>
 
-{#        // Discern what anchor to add to the help URL by looking at current url#}
-        var url = window.location.href;
-        var anchor = '';
+    <!-- Load JQuery UI Touch Punch for touch support -->
+    <script src="{% static "js/jquery.ui.touch-punch.min.js" %}"></script>
+  {% endcompress %}
 
-        // TODO GET ANCHOR
-
-        $('#view_help')
-            .attr(
-                'onclick',
-                "window.open('/help/"
-                + anchor +
-                "','win','toolbars=0,width=1200,height=760,left=200,top=200,scrollbars=1,resizable=1')"
-            );
-
-        if (url.indexOf('/assaymatrix/') > -1) {
-          anchor = '#matrices'
-        }
-        else if (url.indexOf('/assaymatrixitem/') > -1) {
-          anchor = '#matrixitems'
-        }
-        else if (url.indexOf('/upload/') > -1) {
-          anchor = '#uploadingdata'
-        }
-{#        else if (url.indexOf('/assaylayout/') > -1) {#}
-{#          anchor = '#assaylayouts'#}
-{#        }#}
-        else if (url.indexOf('/assaystudyconfiguration/') > -1) {
-          anchor = '#studyconfigurations'
-        }
-        else if (url.indexOf('/model/') > -1) {
-          anchor = '#organmodels'
-        }
-        // TODO
-        // else if (url.indexOf('/diseasemodel_list/') > -1) {
-        //   anchor = '#diseasemodels'
-        // }
-        else if (url.indexOf('/microdevices/') > -1) {
-          anchor = '#microdevices'
-        }
-        else if (url.indexOf('/table/') > -1) {
-          anchor = '#bioactivities'
-        }
-        else if (url.indexOf('/drugtrials/') > -1) {
-          anchor = '#drugtrials'
-        }
-        else if (url.indexOf('adverse_events/') > -1) {
-          anchor = '#adverseevents'
-        }
-        else if (url.indexOf('/report/') > -1) {
-          anchor = '#compoundreport'
-        }
-        else if (url.indexOf('/compounds/') > -1) {
-          anchor = '#chemicaldata'
-        }
-        else if (url.indexOf('/heatmap/') > -1) {
-          anchor = '#heatmap'
-        }
-        else if (url.indexOf('/cluster/') > -1) {
-          anchor = '#cluster'
-        }
-        else if (url.indexOf('/celltype/') > -1) {
-          anchor = '#celltypes'
-        }
-        else if (url.indexOf('/cellsubtype/') > -1) {
-          anchor = '#cellsubtypes'
-        }
-        else if (url.indexOf('/cellsample/') > -1) {
-          anchor = '#cellsamples'
-        }
-
-        $('#view_help').attr('onclick',"window.open('/help/" + anchor + "','win','toolbars=0,width=1000,height=760,left=200,top=200,scrollbars=1,resizable=1')");
-
-{#       Bind a listener to the navbar that causes a collapse if it is oversized   #}
-        var navbar = $('#autocollapse');
-
-        function autocollapse() {
-            navbar.removeClass('collapsed');
-            if (navbar.innerHeight() > 51) {
-                navbar.addClass('collapsed');
-            }
-        }
-
-        $(document).on('ready', autocollapse);
-        $(window).on('resize', autocollapse);
-      });
-    </script>
-
-    <!-- Custom CSS Rules -->
-    <link rel="stylesheet" href="{% static "css/bootstrap-overrides.css" %}">
+  {% block extra_head %}
   {% endblock %}
 
-  {% block load %}{% endblock %}
+  {% compress js %}
+  {% block load_js %}
+  {% endblock %}
+  {% endcompress %}
+
+  {% compress css %}
+  {% block load_css %}
+  {% endblock %}
+  {% endcompress %}
+
+  {% if GOOGLE_ANALYTICS %}
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id={{ GOOGLE_ANALYTICS }}"></script>
+    <script>
+    window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', '{{ GOOGLE_ANALYTICS }}');
+    </script>
+  {% endif %}
 </head>
 
 <body>
   <!-- Fixed navbar -->
   <nav id="autocollapse" class="navbar navbar-default navbar-fixed-top" role="navigation">
     <div class="container">
+    {# Strip navbar in popup #}
+    {% if request.GET.popup == '1' %}
+      <a class="navbar-brand" href="#">
+        <img alt="MPS Database Logo" src="/static/img/brand.png" style="margin-top:-10px;">
+      </a>
+    {% else %}
     <div class="navbar-header">
       <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
         <span class="sr-only">Toggle navigation</span>
@@ -194,53 +137,65 @@
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
+      <button type="button" class="btn btn-primary navbar-btn collapsed toggle_sidebar_button hidden">
+        Toggle Sidebar
+      </button>
       <a title="Click to return to homepage" class="navbar-brand" href="/">
-        <img src="/static/img/brand.png" style="margin-top:-10px;">
+        <img alt="MPS Database Logo" src="/static/img/brand.png" style="margin-top:-10px;">
       </a>
     </div>
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
         <li title="Add, edit, or view assay data" class="dropdown">
         <a class="dropdown-toggle" data-toggle="dropdown">Studies<span class="caret"></span></a>
-        <ul class="dropdown-menu" role="menu">
-          <li title="Index of all the studies created by groups you are a member of">
-              <a href="/assays/assaystudy/editable_studies/">View Editable Studies</a>
-          </li>
-          <li><a href="/assays/assaystudy/">View All Studies</a></li>
-          <li><a href="/assays/studyconfiguration/">View Integrated Study Configurations</a></li>
+        <ul title="" class="dropdown-menu" role="menu">
+          <li title="" class="dropdown-header">Study Data</li>
+          <li title="Index of all the studies created by groups you are a member of"><a href="/assays/assaystudy/editable_studies/">View Editable Studies</a></li>
+          <li title="Index of all studies that have been made public or were created by groups you are a member of"><a href="/assays/assaystudy/">View All Studies</a></li>
+          <li title="Index of all study sets"><a href="/assays/assaystudyset/">View Study Sets</a></li>
+          {# <li title="Index of configurations for linking chips (for integrated studies)"><a href="/assays/studyconfiguration/">View Integrated Study Configurations</a></li> #}
+          <li title="" class="divider"></li>
+          <li title="" class="dropdown-header">Study Components</li>
+          <li title="View study components"><a href="{% url 'assays-studycomponents' %}">Study Components</a></li>
+          {# <li title="Index of target/analytes and their occurrences within visible studies"><a href="/assays/target/">View Target/Analytes</a></li> #}
+          {# <li title="Index of method/kits and their occurrences within visible studies"><a href="/assays/method/">View Method/Kits</a></li> #}
+          {# <li title="Index of PubMed references"><a href="/assays/assayreference/">View References</a></li> #}
+          {# <li title="Index of physical measurement units"><a href="/assays/unit/">View Measurement Units</a></li> #}
 {#          <li class="divider"></li>#}
 {#          <li><a href="/assays/assaychipsetup/">View Setups</a></li>#}
 {#          <li><a href="/assays/assaychipreadout/">View Readouts</a></li>#}
 {#          <li><a href="/assays/assaychiptestresult/">View Results</a></li>#}
-          <li class="divider"></li>
-          <li class="dropdown-header">Requires Permission</li>
-          <li><a href="/assays/assaystudy/add/">Add Study</a></li>
-          <li><a href="/assays/studyconfiguration/add/">Add Integrated Study Configuration</a></li>
+          <li title="" class="divider"></li>
+          <li title="" class="dropdown-header">Requires Permission</li>
+          <li title="Add a study to subsequently populate with assay data"><a href="/assays/assaystudy/add/">Add Study</a></li>
+          <li title="Add a study set"><a href="/assays/assaystudyset/add/">Add Study Set</a></li>
+          {# <li title="Add a new definition for how chips are linked together (for integrated studies)"><a href="/assays/studyconfiguration/add/">Add Integrated Study Configuration</a></li> #}
         </ul>
         </li>
         <li title="Analyze bioactivity and drugtrial data" class="dropdown">
         <a class="dropdown-toggle" data-toggle="dropdown">Analysis<span class="caret"></span></a>
-        <ul class="dropdown-menu" role="menu">
-          <li class="dropdown-header">Data Analysis</li>
+        <ul title="" class="dropdown-menu" role="menu">
+          <li title="" class="dropdown-header">Study Data Analysis</li>
+          <li title="View plots and reproducibility"><a href="/assays/graphing_reproducibility/">
+              Graphing/Reproducibility
+          </a></li>
+          <li title="" class="divider"></li>
+          <li title="" class="dropdown-header">Compound Activities</li>
           <li title="Generate a heatmap for selected bioactivity data">
               <a href="/bioactivities/heatmap/#filter">Heatmap</a>
           </li>
           <li title="Generate a dendrogram for selected compound/bioactivity data">
               <a href="/bioactivities/cluster/#filter">Cluster</a>
           </li>
-          <li title="View plots and reproducibility"><a href="/assays/graphing_reproducibility/">
-              Graphing/Reproducibility
-          </a></li>
 {#          <li title="This feature is still in development"><a href="/under_construction/">#}
 {#              <span class="glyphicon glyphicon-wrench" aria-hidden="true"></span>#}
 {#              Reproducibility#}
 {#          </a></li>#}
-          <li class="divider"></li>
-          <li class="dropdown-header">Computational Modeling</li>
-          <li title="This feature is still in development"><a href="/under_construction/">
-              <span class="glyphicon glyphicon-wrench" aria-hidden="true"></span>
-              PBPK
-          </a></li>
+          <li title="" class="divider"></li>
+          <li title="" class="dropdown-header">Computational Modeling</li>
+          <li title="Physiologically based pharmacokinetic modeling interface">
+              <a href="/assays/pbpk_filter/">PBPK</a>
+          </li>
           <li title="This feature is still in development"><a href="/bioactivities/model/">
               <span class="glyphicon glyphicon-wrench" aria-hidden="true"></span>
               Predictive Modeling
@@ -253,58 +208,84 @@
         </li>
         <li title="View/add MPS models and microdevices" class="dropdown">
         <a class="dropdown-toggle" data-toggle="dropdown">Models<span class="caret"></span></a>
-        <ul class="dropdown-menu" role="menu">
-          <li title="View MPS models"><a href="/microdevices/model">View MPS Models</a></li>
-          <li title="View microdevices"><a href="/microdevices/device">View Microdevices</a></li>
-          <li title="View disease models"><a href="/diseases/">View Diseases</a></li>
-          <li class="divider"></li>
-          <li class="dropdown-header">Requires Permission</li>
-          <li><a href="/microdevices/model/add/">Add MPS Model</a></li>
-          <li><a href="/microdevices/device/add/">Add Microdevice</a></li>
+        <ul title="" class="dropdown-menu" role="menu">
+            <li title="" class="dropdown-header">Model Data</li>
+            <li title="Index of MPS models, as well as their devices and the centers responsible for them"><a href="/microdevices/model">View MPS Models</a></li>
+            <li title="Index of diseases that may have been simulated in studies"><a href="/diseases/">View Diseases</a></li>
+            <li title="" class="divider"></li>
+            <li title="" class="dropdown-header">Model Components</li>
+            <li title="Index of microdevices, along with their manufacturer and version/catalog number"><a href="/microdevices/device">View Microdevices</a></li>
+            <li title="Index of possible compartments within represented microdevices"><a href="/assays/location/">View Microdevice Locations</a></li>
+            <li title="" class="divider"></li>
+            <li title="" class="dropdown-header">Requires Permission</li>
+            <li title="Add a new MPS model for use in studies"><a href="/microdevices/model/add/">Add MPS Model</a></li>
+            <li title="Add a new microdevice for use in MPS models"><a href="/microdevices/device/add/">Add Microdevice</a></li>
         </ul>
         </li>
         {#      <li title="View curated drug trial data"><a href="/drugtrials">Drug Trials</a></li>#}
         <li title="Curated drug trials and chemical data" class="dropdown">
         <a class="dropdown-toggle" data-toggle="dropdown">Compounds<span class="caret"></span></a>
-        <ul class="dropdown-menu" role="menu">
-          <li><a href="/compounds/">View Chemical Data</a></li>
+        <ul title="" class="dropdown-menu" role="menu">
+          <li title="" class="dropdown-header">Compound Data</li>
+          <li title="View compound information"><a href="/compounds/">View Chemical Data</a></li>
           {# TODO NOTE THAT THIS IS A REPEAT LINK! #}
-          <li><a href="/bioactivities/table/#filter">View Bioactivities</a></li>
-          <li><a href="/drugtrials/">View Drug Trials</a></li>
-          <li><a href="/adverse_events/">View Adverse Events</a></li>
-          <li class="divider"></li>
-          <li><a href="/compare_adverse_events/">Compare Adverse Events</a></li>
-          <li><a href="/compounds/report/#filter">Compound Report</a></li>
-          <li class="divider"></li>
-          <li class="dropdown-header">Requires Permission</li>
-          <li><a href="/compounds/add/">Add Compound</a></li>
+          <li title="Generate tables of information for compounds and bioactivities"><a href="/bioactivities/table/#filter">View Bioactivities</a></li>
+          <li title="An assortment of drug trials and their findings"><a href="/drugtrials/">View Drug Trials</a></li>
+          <li title="Index of adverse events and data regarding their occurrences"><a href="/adverse_events/">View Adverse Events</a></li>
+          <li title="" class="divider"></li>
+          <li title="" class="dropdown-header">Reports</li>
+          <li title="Plot data related to compounds and adverse events"><a href="/compare_adverse_events/">Compare Adverse Events</a></li>
+          <li title="Generate reports of compound properties"><a href="/compounds/report/#filter">Compound Report</a></li>
+          <li title="" class="divider"></li>
+          <li title="" class="dropdown-header">Requires Permission</li>
+          <li title="Add a new compound for usage within the database"><a href="/compounds/add/">Add Compound</a></li>
         </ul>
         </li>
         <li title="View or add cell samples and cell types" class="dropdown">
         <a class="dropdown-toggle" data-toggle="dropdown">Cell Samples<span class="caret"></span></a>
-        <ul class="dropdown-menu" role="menu">
-          <li><a href="/cellsamples/celltype/">View Cell Types</a></li>
-          <li><a href="/cellsamples/cellsubtype/">View Cell Origins</a></li>
-          <li><a href="/cellsamples/cellsample/">View Cell Samples</a></li>
-          <li class="divider"></li>
-          <li class="dropdown-header">Requires Permission</li>
-          <li><a href="/cellsamples/celltype/add/">Add Cell Type</a></li>
-          <li><a href="/cellsamples/cellsubtype/add/">Add Cell Origin</a></li>
-          <li><a href="/cellsamples/cellsample/add/">Add Cell Sample</a></li>
+        <ul title="" class="dropdown-menu" role="menu">
+          <li title="" class="dropdown-header">Cell Data</li>
+          <li title="View and edit cell types"><a href="/cellsamples/celltype/">View Cell Types</a></li>
+          <li title="View and edit cell origins"><a href="/cellsamples/cellsubtype/">View Cell Origins</a></li>
+          <li title="View and edit cell samples"><a href="/cellsamples/cellsample/">View Cell Samples</a></li>
+          <li title="" class="divider"></li>
+          <li title="" class="dropdown-header">Requires Permission</li>
+          <li title="Add cell type (i.e. hepatocyte, monocyte, immune, stellate cell)"><a href="/cellsamples/celltype/add/">Add Cell Type</a></li>
+          <li title="Add cell origin (i.e. freshly isolated primary, cryopreserved primary, cell-lines, iPS derived)"><a href="/cellsamples/cellsubtype/add/">Add Cell Origin</a></li>
+          <li title="Add cell sample (i.e. THLE-3 Human Liver Epithelial Cells (ATCC® CRL-11233™))"><a href="/cellsamples/cellsample/add/">Add Cell Sample</a></li>
         </ul>
         </li>
+        <li title="About the MPS Database" class="dropdown">
+        <a class="dropdown-toggle navbar-about" data-toggle="dropdown">About<span class="caret"></span></a>
+        <ul title="" class="dropdown-menu" role="menu">
+            <li><a href="/about/">Overview</a></li>
+            <li><a href="/about/#anchor_features">Key Features</a></li>
+            <li><a href="/about/#anchor_what_is_new">What's New</a></li>
+            <li><a href="/about/#anchor_coming_soon">Coming Soon</a></li>
+            <li><a href="/about/#anchor_recent_releases">Recently Released Studies</a></li>
+            <li><a href="/about/#anchor_releases">Studies Releasing Soon</a></li>
+            <li><a href="/about/#anchor_models_distinct">Organ Models and Centers</a></li>
+            <li><a href="/about/#anchor_faqs">FAQs</a></li>
+            <li><a href="/about/#anchor_contact">Contact Us</a></li>
+
+        </ul>
+        </li>
+
+        <!-- <li title="About the MPS Database">
+            <a class="navbar-about" href="/about/" target="_blank">About</a>
+        </li> -->
         <li title="View help">
             <a id="view_help" class="navbar-help"
                onclick="window.open('/help/',
-                 'win',
+                 'help',
                  'toolbars=0,width=1000,height=760,left=200,top=200,scrollbars=1,resizable=1')">
                  Help
             </a>
         </li>
         <li title="Give feedback, ask questions, or view the knowledge base">
             <a class="navbar-feedback"
-               onclick="window.open('/feedback/',
-                'win',
+               onclick="window.open('/feedback/submit/',
+                'feedback',
                 'toolbars=0,width=1000,height=760,left=200,top=200,scrollbars=1,resizable=1')">
                 Feedback
             </a>
@@ -315,43 +296,47 @@
           <li title="Click to log out or change password" class="dropdown">
           <a class="dropdown-toggle" data-toggle="dropdown">{{ user.username }}<span class="caret"></span></a>
           <ul class="dropdown-menu" role="menu">
-            <li><a href="/accounts/logout/">Log Out</a></li>
-            <li><a href="/password_change/">Change Password</a></li>
+            <li title="Log out of the database"><a href="/accounts/logout/">Log Out</a></li>
+            <li title="Reset password"><a href="/password_change/">Change Password</a></li>
           </ul>
           </li>
         {% else %}
         {# Added "Register" to clarify that one can Register after clicking there #}
-        <li><a href="/accounts/login/">Log In/Register</a></li>
+        <li title="Log in as an existing user or create a new account"><a href="/accounts/login/">Log In/Register</a></li>
         {% endif %}
       </ul>
     </div><!--/.nav-collapse -->
+    {% endif %}
     </div>
   </nav>
 
+  <div id="sidebar_wrapper">
+    {% block sidebar %}{% endblock %}
+  </div>
+
   <div id="page" style="margin-top: 70px;">
 
-  {# Have yet to use sidebar #}
-{#  <div id="sidebar">#}
-{#    {% block sidebar %}#}
-{#    {% endblock %}#}
-{#  </div>#}
-
   {# For most elements #}
+  {% if request.GET.popup == '1' and request.GET.close == '1' %}
+  <div id="content" class="container">
+    <div class="alert alert-success" role="alert">
+      <span class="sr-only">Success:</span>
+        <h3>
+          <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
+          Success! This window will close in 3 seconds.
+        </h3>
+    </div>
+  </div>
+  {% else %}
   <div id="content" class="container">
 
+  {# No breadcrumbs in popup #}
+  {% if request.GET.popup != '1' %}
   <ol id="breadcrumbs" class="breadcrumb">
     <li><a href="/">Home</a></li>
     {% block breadcrumbs %}{% endblock %}
   </ol>
-
-  {# Still have yet to make use of messages; should do so soon #}
-{#  {% if messages %}#}
-{#  <ul class="messages">#}
-{#    {% for message in messages %}#}
-{#    <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>#}
-{#    {% endfor %}#}
-{#  </ul>#}
-{#  {% endif %}#}
+  {% endif %}
 
   {% block content %}{% endblock %}
 
@@ -362,6 +347,7 @@
 
   {% block fluid-content %}{% endblock %}
   </div>
+  {% endif %}
 
   <div id="footer" class="container hidden-print">
     <footer>
@@ -369,10 +355,11 @@
       <div class="row">
         <div class="col-xs-9">
           <p>
-            Copyright 2012-2018 The University of Pittsburgh Drug Discovery Institute Microphysiology Database Project
+            Copyright 2012-2020 The University of Pittsburgh Drug Discovery Institute Microphysiology Database Project
           </p>
           <p>
-            <a target="_blank" href="http://www.ncats.nih.gov/research/reengineering/tissue-chip/tissue-chip.html">
+            {# <a target="_blank" href="http://www.ncats.nih.gov/research/reengineering/tissue-chip/tissue-chip.html">#}
+            <a target="_blank" href="https://ncats.nih.gov/tissuechip">
                 Funded by the National Center for Advancing Translational Sciences <b>Tissue Chips Program</b>,
             </a>
             <br>
@@ -386,17 +373,23 @@
           </p>
         </div>
         <div class="col-xs-3">
-          <span class="pull-right">
-            <a onclick="window.open('/feedback/',
-             'win',
-             'toolbars=0,width=1000,height=760,left=200,top=200,scrollbars=1,resizable=1')">
-                Give Feedback
-            </a>
-            <br>
-            <a target="_blank" href="https://github.com/UPDDI">Contribute on Github</a>
+          <div class="pull-right">
+          <a class="btn btn-default" onclick="window.open('https://forms.gle/KeCLm2H5jP3D12CCA',
+            'survey',
+            'toolbars=0,width=1000,height=760,left=200,top=200,scrollbars=1,resizable=1')">
+              Take a Survey
+          </a>
+          <br>
+          <a href="javascript:;" onclick="window.open('/feedback/submit/',
+           'feedback',
+           'toolbars=0,width=1000,height=760,left=200,top=200,scrollbars=1,resizable=1')">
+              Give Feedback
+          </a>
+          <br>
+          <a target="_blank" href="https://github.com/UPDDI">Contribute on Github</a>
 {#          Add about section later#}
 {#          <a href="#/about">About the MPS Project</a>#}
-          </span>
+          </div>
         </div>
       </div>
     </footer>

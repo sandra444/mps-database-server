@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block load_js %}
+    <script src="{% static "assays/assaytarget_list.js" %}"></script>
+{% endblock %}
+
+{% block breadcrumbs %}
+    <li><a href="{% url 'assays-studycomponents' %}">Study Components</a></li>
+    <li class="active">Targets</li>
+{% endblock %}
+
+{% block content %}
+    <div class="padded-bottom">
+        <legend>
+            <h2 class="text-center">
+                Target/Analytes
+            </h2>
+        </legend>
+
+        <div class="row text-center padded-bottom">
+            <a href="{% url 'assays-assaytarget-add' %}"  class="btn btn-lg btn-success" role="button">Add Target</a>
+        </div>
+
+        <div id="targets">
+            <table id="targets-table" class="display table table-striped" cellspacing="0" width="100%" hidden>
+                <thead>
+                    <tr>
+                        <th>View</th>
+                        <th>Edit</th>
+                        <th>Target</th>
+                        <th>Short Name</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                {% for target in object_list %}
+                     <tr>
+                        <td><a class="btn btn-primary" title="View paired method/kits." href="{{ target.get_absolute_url }}">View</a></td>
+                        <td><a class="btn btn-primary" href="{{ target.get_update_url }}">Edit</a></td>
+                        <td>{{ target.name }}</td>
+                        <td>{{ target.short_name }}</td>
+                        <td>{{ target.description }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock %}

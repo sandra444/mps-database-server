@@ -1,8 +1,8 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block load %}
-    <script src="{% static "js/project_filter.js" %}"></script>
+{% block load_js %}
+    {# <script src="{% static "js/project_filter.js" %}"></script> #}
     <script src="{% static "drugtrials/drugtrial_list.js" %}"></script>
 {% endblock %}
 
@@ -18,9 +18,10 @@
             </h2>
         </legend>
 
-        {% include 'project_filters.html' %}
+        {# Deprecated #}
+{# {% include 'project_filters.html' %} #}
 
-        <table hidden id="drugtrials" class="display" cellspacing="0" width="100%">
+        <table hidden id="drugtrials" class="display table table-striped" cellspacing="0" width="100%">
             <thead>
                 <tr>
                     <th>View</th>
@@ -34,13 +35,13 @@
                     <th>Frequency</th>
                     <th>Value</th>
                     <th>Value Units</th>
-                    <th>Project</th>
+                    {% comment %} <th>Project</th> {% endcomment %}
                 </tr>
             </thead>
 
             <tbody>
             {% for finding in object_list %}
-                <tr class="finding" id={{ finding.id }}>
+                <tr>
                     <td><a class="btn btn-primary" href="{{ finding.drug_trial.id }}">View</a></td>
                     <td>{{ finding.drug_trial.id }}</td>
                     <td>
@@ -72,7 +73,7 @@
                     <td>{{ finding.frequency|default_if_none:"" }}</td>
                     <td>{{ finding.value|default_if_none:"" }}</td>
                     <td>{{ finding.value_units|default_if_none:"" }}</td>
-                    <td>
+                    {% comment %} <td>
                         {% if finding.drug_trial.compound.mps %}
                             MPS
                         {% endif %}
@@ -85,12 +86,10 @@
                         {% if not finding.drug_trial.compound.epa and not finding.drug_trial.compound.mps and not finding.drug_trial.compound.tctc %}
                             Unassigned
                         {% endif %}
-                    </td>
+                    </td> {% endcomment %}
                 </tr>
             {% endfor %}
             </tbody>
         </table>
     </div>
-
-    <script src="{% static "js/display_datatable.js" %}"></script>
 {% endblock %}

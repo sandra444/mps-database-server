@@ -1,5 +1,5 @@
 from django import forms
-from bioactivities.models import *
+from bioactivities.models import Assay, Target
 
 
 class AssayForm(forms.ModelForm):

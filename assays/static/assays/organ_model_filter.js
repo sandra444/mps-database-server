@@ -23,13 +23,15 @@ $(document).ready(function() {
                 success: function (json) {
                     var options = json.dropdown;
                     var current_value = window.organ_model.val();
-                    window.organ_model.html(options);
+                    window.organ_model[0].selectize.clear();
+                    window.organ_model[0].selectize.clearOptions();
+                    window.organ_model[0].selectize.addOption(options);
                     if (current_value) {
-                        window.organ_model.val(current_value);
+                        window.organ_model[0].selectize.setValue(current_value);
                     }
-                    else {
-                        window.organ_model.val('');
-                    }
+                    // else {
+                    //     window.organ_model.val('');
+                    // }
 
                     organ_model_div.show('fast');
                     window.get_protocols(window.organ_model.val());
@@ -41,10 +43,10 @@ $(document).ready(function() {
         }
         else {
             // Clear selections
-            window.organ_model.html('');
-            window.organ_model.val('');
-            window.organ_model_protocol.html('');
-            window.organ_model_protocol.val('');
+            window.organ_model[0].selectize.clear();
+            window.organ_model[0].selectize.clearOptions();
+            window.organ_model_protocol[0].selectize.clear();
+            window.organ_model_protocol[0].selectize.clearOptions();
 
             // Hide
             organ_model_div.hide('fast');
@@ -67,9 +69,11 @@ $(document).ready(function() {
                 success: function (json) {
                     var options = json.dropdown;
                     var current_value = window.organ_model_protocol.val();
-                    window.organ_model_protocol.html(options);
+                    window.organ_model_protocol[0].selectize.clear();
+                    window.organ_model_protocol[0].selectize.clearOptions();
+                    window.organ_model_protocol[0].selectize.addOption(options);
                     if (current_value) {
-                        window.organ_model_protocol.val(current_value);
+                        window.organ_model_protocol[0].selectize.setValue(current_value);
                     }
 
                     if (window.organ_model_protocol.val()) {
@@ -79,7 +83,14 @@ $(document).ready(function() {
                         variance_div.hide('fast');
                     }
 
-                    protocol_div.show('fast');
+                    // Don't show an empty protocol div
+                    if (options.length <= 1) {
+                        protocol_div.hide('fast');
+                    }
+                    else {
+                        protocol_div.show('fast');
+                    }
+
                     window.display_protocol(window.organ_model_protocol.val());
                 },
                 error: function (xhr, errmsg, err) {
@@ -88,8 +99,8 @@ $(document).ready(function() {
             });
         }
         else {
-            window.organ_model_protocol.html('');
-            window.organ_model_protocol.val('');
+            window.organ_model_protocol[0].selectize.clear();
+            window.organ_model_protocol[0].selectize.clearOptions();
 
             // Hide
             protocol_div.hide('fast');

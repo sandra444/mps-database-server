@@ -86,8 +86,6 @@ $(document).ready(function() {
         height:450,
         width:450,
         modal: true,
-        closeOnEscape: true,
-        autoOpen: false,
         buttons: [
         {
             text: 'Yes',
@@ -104,15 +102,12 @@ $(document).ready(function() {
             click: function() {
                $(this).dialog("close");
             }
-        }],
-        close: function() {
-            $('body').removeClass('stop-scrolling');
-        },
-        open: function() {
-            $('body').addClass('stop-scrolling');
-        }
+        }]
     });
     sign_off_confirm.removeProp('hidden');
+
+    // Show the full container
+    $('#sign_off_container').show();
 
     mark_reviewed_button_group.click(function() {
         sign_off_confirm.dialog('open');

@@ -1,6 +1,11 @@
 from django.conf.urls import url
-# Wildcards are vile
-from .views import *
+from .views import (
+    DrugTrialList,
+    DrugTrialDetail,
+    AdverseEventsList,
+    AdverseEventDetail,
+    CompareAdverseEvents
+)
 import drugtrials.ajax
 
 urlpatterns = [

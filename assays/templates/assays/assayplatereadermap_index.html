@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+{% load static %}
+{% load custom_filters %}
+
+{% block breadcrumbs %}
+    <li><a href="/assays/assaystudy/">Studies</a></li>
+    <li><a href="{{ object.get_absolute_url }}">{{ object }}</a></li>
+    <li class="active">Assay Plate Reader Maps</li>
+{% endblock %}
+
+{% block load_js %}
+    <script src="{% static "assays/assayplatereadermap_index.js" %}"></script>
+{% endblock %}
+
+{% block content %}
+
+    {% include 'tracking.html' with study_submit='true' %}
+
+    <div class="padded-bottom">
+        <div class="well">
+            <h1 class="text-center">
+                <em><b>Assay Plate Map List</b></em>
+                <br>
+                <br>
+                Study: {{ object }}
+            </h1>
+        </div>
+
+        <div>
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-3">
+                        {# Hide setup add buttons if the study is marked reviewed #}
+                        {% if user|is_group_editor:object.group.name and not object.signed_off_by %}
+                            {% if not review %}
+                            <div>
+                                <a href="{% url 'assayplatereadermap-add' object.id %}" class="btn btn-success" role="button">Add Plate Map</a>
+                            </div>
+                            {%  endif %}
+                        {% endif %}
+                    </div>
+                    <div class="col-md-4">
+                        <div>
+                            <a href="{{ object.get_absolute_url }}summary/" class="btn btn-primary" role="button">Jump to Study Summary</a>
+                        </div>
+                    </div>
+                    <div class="col-md-5">
+                        <div>
+                {#            <a href="{% url 'assayplatereadermap-index' object.id %}" class="btn btn-primary" role="button">Jump to Assay Plate Reader Map List</a>#}
+                            <a href="{% url 'assayplatereaderfile-index' object.id %}" class="btn btn-primary" role="button">Jump to Assay Plate Reader File List</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <br>
+        {% if assayplatereadermaps %}
+            <div>
+                <div><p id="plate_map_index_tooltip"></p>
+                    <label for="plate_map_index_tooltip">Assay Plate Map List &nbsp;</label>
+                </div>
+                <table id="assayplatereadermaps" class="display table table-striped table-hover" cellspacing="0" width="100%">
+                <thead>
+                    <tr>
+                        <th>View</th>
+                        <th>Edit/Calibrate</th>
+                        <th>Assay Plate Map Name</th>
+                        <th>Plate Size</th>
+                        <th>Standard Unit</th>
+                        <th>Target, Method, Unit</th>
+                        <th>Time Unit</th>
+                        <th>Volume Unit</th>
+                        <th>Cell Count</th>
+                        <th>Description</th>
+                        <th>File Count</th>
+                        <th>Data Block Count</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for plate in assayplatereadermaps %}
+                    <tr>
+                        <td>
+                            <a class="btn btn-primary" href="{% url 'assayplatereadermap-view' plate.id  %}">View </a>
+                        </td>
+                        <td>
+                            {% if not object.signed_off_by %}
+                                {% if plate.block_count > 0 %}
+                                    <a class="btn btn-primary" href="{% url 'assayplatereadermap-update' plate.id  %}">Calibrate</a>
+                                {% else %}
+                                    <a class="btn btn-primary" href="{% url 'assayplatereadermap-update' plate.id  %}">Edit Map</a>
+                                {% endif %}
+                            {% endif %}
+                        </td>
+                        <td>{{ plate.name }}</td>
+                        <td>{{ plate.device }}</td>
+                        <td>{{ plate.standard_unit }}</td>
+                        <td>{{ plate.new_study_assay }}</td>
+                        <td>{{ plate.time_unit }}</td>
+                        <td>{{ plate.volume_unit }}</td>
+                        <td>{{ plate.cell_count }}</td>
+                        <td>{{ plate.description }}</td>
+                        <td>{{ plate.file_count }}</td>
+                        <td>{{ plate.block_count }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            </div>
+        {% else %}
+            <div class="alert alert-warning" role="alert">
+                No assay plate maps exist for this study
+            </div>
+        {% endif %}
+    </div>
+
+{% endblock %}
+

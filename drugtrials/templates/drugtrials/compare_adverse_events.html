@@ -2,10 +2,13 @@
 {% load static %}
 {% load humanize %}
 
-{% block load %}
+{% block load_js %}
     <script src="{% static "drugtrials/compare_adverse_events.js" %}"></script>
-    <link href="{% static "css/c3.min.css" %}" rel="stylesheet" type="text/css">
     <script src="{% static "js/c3.min.js" %}"></script>
+{% endblock %}
+
+{% block load_css %}
+    <link href="{% static "css/c3.min.css" %}" rel="stylesheet" type="text/css">
 {% endblock %}
 
 {% block breadcrumbs %}
@@ -49,7 +52,7 @@
 
     <div class="padded-row padded-bottom hidden-print" style="overflow:auto;">
         <div class="col-sm-6">
-            <table hidden id="adverse_events" class="display" cellspacing="0" width="100%">
+            <table hidden id="adverse_events" class="table display table-striped table-hover" cellspacing="0" width="100%">
                 <thead>
                     <tr>
                         <th>Select</th>
@@ -64,7 +67,7 @@
             </table>
         </div>
         <div class="col-sm-6">
-            <table hidden id="compounds" class="display" cellspacing="0" width="100%">
+            <table hidden id="compounds" class="table display table-striped table-hover" cellspacing="0" width="100%">
                 <thead>
                     <tr>
                         <th>Select</th>
@@ -83,8 +86,6 @@
         </div>
     </div>
     </form>
-
-    <script src="{% static "js/display_datatable.js" %}"></script>
 
     <div class="padded-row well">
         <b class="text-danger">

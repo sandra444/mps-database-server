@@ -1,14 +1,104 @@
 from django import forms
 from captcha.fields import CaptchaField
-from registration.forms import RegistrationFormUniqueEmail
+from django_registration.forms import RegistrationFormUniqueEmail
 from django.contrib.auth.forms import PasswordResetForm, UserChangeForm
 from django.contrib.auth.models import User
 from mps.settings import DEFAULT_FROM_EMAIL
 
 from django.template.loader import render_to_string
 
+# SHOULD BE IN ALL CAPS
+tracking = ('created_by', 'created_on', 'modified_on', 'modified_by', 'signed_off_by', 'signed_off_date', 'locked', 'restricted')
 
-class SignOffMixin(forms.ModelForm):
+WIDGETS_TO_ADD_FORM_CONTROL_TO = {
+    "<class 'django.forms.widgets.TextInput'>": True,
+    "<class 'django.forms.widgets.Textarea'>": True,
+    "<class 'django.forms.widgets.DateInput'>": True,
+    "<class 'django.forms.widgets.Select'>": True,
+    "<class 'django.forms.widgets.NumberInput'>": True,
+    "<class 'django.forms.widgets.URLInput'>": True,
+}
+
+DATE_INPUT_WIDGET = "<class 'django.forms.widgets.DateInput'>"
+
+FILE_INPUT_WIDGET = "<class 'django.forms.widgets.ClearableFileInput'>"
+
+WIDGETS_WITH_AUTOCOMPLETE_OFF = {
+    "<class 'django.forms.widgets.DateInput'>": True,
+}
+
+class BootstrapForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        # PLEASE NOTE: THIS WILL DISRUPT OTHER ATTEMPTS TO GET THIS KWARG
+        self.user = kwargs.pop('user', '')
+        super(BootstrapForm, self).__init__(*args, **kwargs)
+
+         # Removes : as label suffix
+        self.label_suffix = ""
+
+        for field in self.fields:
+            widget_type = str(type(self.fields[field].widget))
+
+            if widget_type in WIDGETS_TO_ADD_FORM_CONTROL_TO:
+                self.fields[field].widget.attrs['class'] = 'form-control'
+            if widget_type in WIDGETS_WITH_AUTOCOMPLETE_OFF:
+                self.fields[field].widget.attrs['autocomplete'] = 'off'
+            if widget_type == DATE_INPUT_WIDGET:
+                self.fields[field].widget.attrs['class'] += ' datepicker-input'
+            if widget_type == FILE_INPUT_WIDGET:
+                # Sloppy (doubly strange)
+                if getattr(self.fields[field], 'required', False):
+                    self.fields[field].widget.attrs['class'] = 'btn btn-lg'
+                else:
+                    self.fields[field].widget.attrs['class'] = 'btn btn-default btn-lg'
+
+            # CRUDE WAY TO INDICATE REQUIRED FIELDS
+            if getattr(self.fields[field], 'required', False):
+                # SLOPPY
+                if self.fields[field].widget.attrs.get('class', ''):
+                    self.fields[field].widget.attrs['class'] += ' required'
+                else:
+                    self.fields[field].widget.attrs['class'] = 'required'
+
+                # One way to do this
+                if self.fields[field].label:
+                    # Add asterisks to label
+                    self.fields[field].label += '*'
+
+            # Not really a good idea to use "private" attributes...
+            # A lot of stuff, I should just make a widget or something
+            if hasattr(self.fields[field], '_queryset'):
+                if hasattr(self.fields[field]._queryset, 'model'):
+                    # Usually one would use a hyphen rather than an underscore
+                    # self.fields[field].widget.attrs['data-app'] = self.fields[field]._queryset.model._meta.app_label
+                    self.fields[field].widget.attrs['data_app'] = self.fields[field]._queryset.model._meta.app_label
+
+                    # self.fields[field].widget.attrs['data-model'] = self.fields[field]._queryset.model._meta.object_name
+                    self.fields[field].widget.attrs['data_model'] = self.fields[field]._queryset.model._meta.object_name
+
+                    self.fields[field].widget.attrs['data_verbose_name'] = self.fields[field]._queryset.model._meta.verbose_name
+
+                    # DUMB
+                    # self.fields[field].widget.attrs['data_add_url'] = reverse(
+                    #     '{}-{}-add'.format(
+                    #         self.fields[field]._queryset.model._meta.app_label,
+                    #         self.fields[field]._queryset.model._meta.model_name,
+                    #     )
+                    # )
+
+                    # Possibly dumber
+                    if hasattr(self.fields[field]._queryset.model, 'get_add_url_manager'):
+                        self.fields[field].widget.attrs['data_add_url'] = self.fields[field]._queryset.model.get_add_url_manager()
+
+            # Crude way to indicate default
+            if hasattr(self.fields[field], 'initial'):
+                if self.fields[field].initial:
+                    self.fields[field].widget.attrs['data-default'] = self.fields[field].initial
+                else:
+                    self.fields[field].widget.attrs['data-default'] = ''
+
+
+class SignOffMixin(BootstrapForm):
     def __init__(self, *args, **kwargs):
         super(SignOffMixin, self).__init__(*args, **kwargs)
 
@@ -69,6 +159,13 @@ class CaptchaRegistrationForm(RegistrationFormUniqueEmail):
 
         return last_name
 
+    def clean(self):
+        cleaned_data = super(CaptchaRegistrationForm, self).clean()
+        username = cleaned_data.get('username')
+        if username and User.objects.filter(username__iexact=username).exists():
+            self.add_error('username', 'A user with that username already exists.')
+        return cleaned_data
+
     def save(self, commit=True):
         new_user = super(CaptchaRegistrationForm, self).save()
         new_user.first_name = self.cleaned_data.get('first_name')
@@ -78,7 +175,7 @@ class CaptchaRegistrationForm(RegistrationFormUniqueEmail):
         # Magic strings are in poor taste, should use a template instead
         subject = 'New User: {0} {1}'.format(new_user.first_name, new_user.last_name)
         message = render_to_string(
-            'registration/superuser_new_user_alert.txt',
+            'django_registration/superuser_new_user_alert.txt',
             {
                 'user': new_user
             }
@@ -118,3 +215,10 @@ class MyUserChangeForm(UserChangeForm):
                         '***NOTE THAT EDITORS ARE ALSO VIEWERS AND ADMINS ARE EDITORS AND VIEWERS***<br><br>',
             'user_permissions': '***THIS IS FOR THE ADMIN INTERFACE ONLY***<br>',
         }
+
+    def clean(self):
+        cleaned_data = super(MyUserChangeForm, self).clean()
+        username = cleaned_data.get('username')
+        if username and User.objects.filter(username__iexact=username).exclude(id=self.instance.id).exists():
+            self.add_error('username', 'A user with that username already exists.')
+        return cleaned_data

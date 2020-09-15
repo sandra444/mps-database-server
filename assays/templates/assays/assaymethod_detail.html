@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block load_js %}
+    <script src="{% static "assays/assaymethod_detail.js" %}"></script>
+{% endblock %}
+
+{% block breadcrumbs %}
+    <li><a href="{% url 'assays-studycomponents' %}">Study Components</a></li>
+    <li><a href="/assays/method/">Methods</a></li>
+    <li class="active">{{ object.name }}</li>
+{% endblock %}
+
+{% block content %}
+    <div class="padded-bottom">
+        <legend>
+            <h2 class="text-center">
+                Method/Kit:<br>{{ object.name }}
+            </h2>
+        </legend>
+        <div class="row">
+            <div class="col-xs-12">
+                <table class="table table-striped table-bordered table-nonfluid" style="background-color: #AAB3AB;">
+                    <tbody>
+                        {% if object.supplier %}
+                        <tr>
+                            <td style="white-space: nowrap">
+                                <b>Supplier</b>
+                            </td>
+                            <td>
+                                {{ object.supplier }}
+                            </td>
+                        </tr>
+                        {% endif %}
+                        {% if object.measurement_type %}
+                        <tr>
+                            <td style="white-space: nowrap">
+                                <b>Measurement Type</b>
+                            </td>
+                            <td>
+                                {{ object.measurement_type }}
+                            </td>
+                        </tr>
+                        {% endif %}
+                        {% if object.description %}
+                        <tr>
+                            <td>
+                                <b>Description</b>
+                            </td>
+                            <td>
+                                {{ object.description|linebreaksbr }}
+                            </td>
+                        </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <br>
+        {% if object.protocol_file %}
+            <div class="row text-center padded-bottom">
+                <a href="{{ object.protocol_file.url }}" download class="btn btn-lg btn-info" role="button">Download Protocol</a>
+            </div>
+            <br>
+        {% endif %}
+        <legend>Target/Analytes with this Method/Kit</legend>
+        <div id="assays">
+            <table id="assays-table" class="display table table-striped" cellspacing="0" width="100%" hidden>
+                <thead>
+                    <tr>
+                        <th>Target/Analyte</th>
+                        <th>Short Name</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                {% for assay in assays %}
+                     <tr>
+                        <td><a href= "/assays/target/{{ assay.1 }}/">{{ assay.0 }}</a></td>
+                        <td>{{ assay.3 }}</td>
+                        <td>{{ assay.2 }}</td>
+                    </tr>
+                {% endfor %}
+                {% for image in images %}
+                     <tr>
+                        <td><a href= "/assays/target/{{ image.1 }}/">{{ image.0 }}</a></td>
+                        <td>{{ image.3 }}</td>
+                        <td>{{ image.2 }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <br>
+        <legend>Studies Utilizing this Method/Kit</legend>
+        <div id="studies">
+            <table id="studies-table" class="display table table-striped" cellspacing="0" width="100%" hidden>
+                <thead>
+                    <tr>
+                        <th>Study</th>
+                        <th>Start Date</th>
+                        <th>Study Types <span data-toggle="tooltip" title="CC = Chip Characterization, DM = Disease Model, EFF = Efficacy, TOX = Toxicity" class="glyphicon glyphicon-question-sign" aria-hidden="true" data-placement="bottom"></span></th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                {% for study in studies %}
+                     <tr>
+                        <td><a href= "/assays/assaystudy/{{ study.id }}/">{{ study.name }}</a></td>
+                        <td>{{ study.start_date }}</td>
+                        <td>{{ study.get_study_types_string }}</td>
+                        <td>{{ study.description }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock %}

@@ -2,6 +2,7 @@
 {% load static %}
 
 {% block breadcrumbs %}
+    <li><a href="{% url 'assays-studycomponents' %}">Study Components</a></li>
     <li><a href="/microdevices/model">MPS Models</a></li>
     <li class="active">
         {% if object %}
@@ -12,11 +13,12 @@
     </li>
 {% endblock %}
 
-{% block load %}
-    <script src="{% static "js/inline_add.js" %}"></script>
+{% block load_js %}
+    {# <script src="{% static "js/inline_add.js" %}"></script>#}
     <script src="{% static "js/image_display.js" %}"></script>
     <script src="{% static "js/enter_override.js" %}"></script>
     <script src="{% static "microdevices/organmodel_add.js" %}"></script>
+    <script src="{% static "assays/reference_selection.js" %}"></script>
 {% endblock %}
 
 {% block content %}
@@ -43,8 +45,19 @@
 
     <legend>MPS Model</legend>
 
-    {% include 'generic_field.html' with field=form.name label="Model Name*" %}
+    {% include 'generic_field.html' with field=form.name %}
 
+    {% include 'generic_field.html' with field=form.alt_name %}
+
+    {% include 'generic_field.html' with field=form.center %}
+
+    {% include 'generic_field.html' with field=form.base_model %}
+
+    {% include 'generic_field.html' with field=form.organ %}
+
+    {% include 'generic_field.html' with field=form.device %}
+
+    {% comment %}
     {% if form.device.errors %}
         {% for error in form.device.errors %}
             <div class="alert alert-danger" role="alert">
@@ -61,31 +74,21 @@
         <div class="col-sm-10">
             {{ form.device }}
             <br>
-            <a href="/microdevices/device/add">
+            <a class="popup-link" data-href="/microdevices/device/add?popup=1" data-window-name="microdevice">
                 <span class="glyphicon glyphicon-plus text-success" aria-hidden="true"></span>
-                Add Microdevice (Must Refresh Page to See Change)
+                Create New Microdevice
             </a>
         </div>
     </div>
+    {% endcomment %}
 
-    {% include 'generic_field.html' with field=form.organ label="Organ*" %}
+    {% include 'generic_field.html' with field=form.model_type label="Model Type*" %}
 
-    {% include 'generic_field.html' with field=form.center label="Center*" %}
+    {# REMOVED FOR NOW #}
+    {# {% include 'generic_field.html' with field=form.disease label="Disease" %} #}
 
-    {% include 'generic_field.html' with field=form.disease label="Disease" %}
+    {# {% include 'generic_field.html' with field=form.disease_trigger label="Disease Trigger" %} #}
     {# <h6 class="text-center">Note: Leave "Disease" blank for models that are healthy at the start of a study.</h6>#}
-
-    {% include 'generic_field.html' with field=form.description label="Description" %}
-
-    {% include 'generic_field.html' with field=form.model_image label="Image" %}
-
-    <div id="image_display">
-        <div id="current_display">
-            {% if object.model_image %}
-                <img class="img-responsive center-block padded-bottom" src="/media/{{ object.model_image }}">
-            {% endif %}
-        </div>
-    </div>
 
     {# TODO REVISE #}
     <div class="form-group">
@@ -104,7 +107,20 @@
         </div>
     </div>
 
-    {% include 'generic_field.html' with field=form.references label="References" %}
+    {% include 'generic_field.html' with field=form.description label="Description" %}
+
+    {% include 'generic_field.html' with field=form.model_image label="Image" %}
+
+    <div id="image_display">
+        <div id="current_display">
+            {% if object.model_image %}
+                <img class="img-responsive center-block padded-bottom" src="/media/{{ object.model_image }}">
+            {% endif %}
+        </div>
+    </div>
+
+    {# DEPRECATED #}
+    {# {% include 'generic_field.html' with field=form.references label="References" %} #}
 
     {{ location_formset.management_form }}
     <legend>Locations</legend>
@@ -134,14 +150,19 @@
     <table class="table table-striped inlines" id="{{ location_formset.prefix }}-group" name="locations">
         <thead>
             <tr>
-                <th>Sample Location*</th>
+                <th>
+                    Location*
+                    <div>
+                        {% include 'generic_popup_link.html' with field=location_formset.0.sample_location %}
+                    </div>
+                </th>
                 <th>Notes*</th>
                 <th>Delete</th>
             </tr>
         </thead>
         <tbody>
             {% for location in location_formset %}
-                <tr class="inline" id="protocols-{{ forloop.counter0 }}">
+                <tr class="inline" id="locations-{{ forloop.counter0 }}">
                     {% if location.id.value %}
                     <td class="original" hidden>
                         <input type="hidden"
@@ -158,8 +179,72 @@
         </tbody>
     </table>
 
+    {{ cell_formset.management_form }}
+    <legend>Cell Types</legend>
+
+    {# Add new #}
+    {# {% include 'generic_popup_link.html' with field=cell_formset.0.cell_type %} #}
+    {# <br> #}
+    {# <br> #}
+
+    {% if cell_formset.non_form_errors %}
+        <div class="alert alert-danger" role="alert">
+            <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+            <span class="sr-only">Error:</span>
+            {{ cell_formset.non_form_errors }}
+        </div>
+    {% endif %}
+
+    {% if cell_formset.errors %}
+        {% for dict in cell_formset.errors %}
+            {% for key,value in dict.items %}
+                {% if key %}
+                    <div class="alert alert-danger" role="alert">
+                        <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                        <span class="sr-only">Error:</span>
+                        {{ forloop.parentloop.counter }}.) {{ key }} : {{ value }}
+                    </div>
+                {% endif %}
+            {% endfor %}
+        {% endfor %}
+    {% endif %}
+
+    <a id="add_button-{{ cell_formset.prefix }}" class="btn btn-success" role="button">Add Cell Type</a>
+    <table class="table table-striped inlines" id="{{ cell_formset.prefix }}-group" name="cells">
+        <thead>
+            <tr>
+                <th>
+                    Cell Type*
+                    <div>
+                        {% include 'generic_popup_link.html' with field=cell_formset.0.cell_type %}
+                    </div>
+                </th>
+                {# <th>Count*</th> #}
+                <th>Delete</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for cell in cell_formset %}
+                <tr class="inline" id="cells-{{ forloop.counter0 }}">
+                    {% if cell.id.value %}
+                    <td class="original" hidden>
+                        <input type="hidden"
+                               id="id_{{ cell_formset.prefix }}-{{ forloop.counter0 }}-id"
+                               name="{{ cell_formset.prefix }}-{{ forloop.counter0 }}-id"
+                               value="{{ cell.id.value }}">
+                    </td>
+                    {% endif %}
+                    <td>{{ cell.cell_type }}</td>
+                    {# HIDE FOR NOW #}
+                    {# <td>{{ cell.count }}</td> #}
+                    <td>{{ cell.DELETE }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
     {{ protocol_formset.management_form }}
-    <legend>Protocols</legend>
+    <legend>MPS Model Versions</legend>
     {% if protocol_formset.non_form_errors %}
         <div class="alert alert-danger" role="alert">
             <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
@@ -182,12 +267,13 @@
         {% endfor %}
     {% endif %}
 
-    <a id="add_button-{{ protocol_formset.prefix }}" class="btn btn-success" role="button">Add Protocol</a>
+    <a id="add_button-{{ protocol_formset.prefix }}" class="btn btn-success" role="button">Add Version</a>
     <table class="table table-striped inlines" id="{{ protocol_formset.prefix }}-group" name="protocols">
         <thead>
             <tr>
-                <th>Version*</th>
+                <th>Name*</th>
                 <th>File (PDF)*</th>
+                <th>Edit</th>
                 <th>Delete</th>
             </tr>
         </thead>
@@ -202,12 +288,21 @@
                                value="{{ protocol.id.value }}">
                     </td>
                     {% endif %}
-                    <td>{{ protocol.version }}</td>
-                    <td>{{ protocol.file }}</td>
+                    <td>{{ protocol.name }}</td>
+                    <td>{{ protocol.protocol_file }}</td>
+                    {% if protocol.id.value %}
+                    <td>
+                        <a href="{% url 'microdevices-organmodelprotocol-update' protocol.id.value %}" class="btn btn-primary">Edit</a>
+                    </td>
+                    {% else %}
+                    <td></td>
+                    {% endif %}
                     <td>{{ protocol.DELETE }}</td>
                 </tr>
             {% endfor %}
         </tbody>
     </table>
+
+    {% include 'add_reference.html' %}
     </form>
 {% endblock %}

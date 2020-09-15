@@ -1,7 +1,19 @@
 // Contains functions for making charts for data
+// TODO TODO TODO THE USE OF THE WORD "options" IS CONFUSING
+// DO NOT DESCRIBE AJAX CRITERIA *AND* CHART OPTIONS AS OPTIONS PLEASE
+
+// TODO TODO TODO REFACTOR ALL STUFF REGARDING "OPTIONS"
 
 // Global variable for charts
-window.CHARTS = {};
+window.CHARTS = {
+    study_id: '',
+    matrix_id: '',
+    matrix_item_id: '',
+    study_set_id: '',
+    filter: '{}',
+    call: '',
+    global_options: {}
+};
 
 // Load the Visualization API and the corechart package.
 // google.charts.load('current', {'packages':['corechart']});
@@ -12,27 +24,44 @@ window.CHARTS = {};
 // google.charts.setOnLoadCallback(window.CHARTS.callback);
 
 $(document).ready(function () {
-    // Heatmap stuff for later
-    // var colors = [
-    //     "rgba(0,128,0,0.4)", "rgba(26,140,0,0.4)", "rgba(51,152,0,0.4)",
-    //     "rgba(77,164,0,0.4)", "rgba(102,176,0,0.4)", "rgba(128,188,0,0.4)",
-    //     "rgba(153,200,0,0.4)", "rgba(179,212,0,0.4)", "rgba(204,224,0,0.4)",
-    //     "rgba(230,236,0,0.4)", "rgba(255,255,0,0.4)", "rgba(243,230,0,0.4)",
-    //     "rgba(231,204,0,0.4)", "rgba(219,179,0,0.4)", "rgba(207,153,0,0.4)",
-    //     "rgba(195,128,0,0.4)", "rgba(183,102,0,0.4)", "rgba(171,77,0,0.4)",
-    //     "rgba(159,51,0,0.4)", "rgba(147,26,0,0.4)", "rgba(135,0,0,0.4)"
-    // ];
-    //
-    // // Avoid magic strings for heatmap elements
-    // var heatmap_filters_selector = $('#heatmap_filters').find('select');
-    // var matrix_body_selector = $('#matrix_body');
-    // var heatmap_wrapper_selector = $('#heatmap_wrapper');
-    // // TODO TODO TODO TEMPORARILY EXPOSE
-    // var heatmap_data = {};
-
     // Charts
-    var all_charts = {};
-    var all_events = {};
+    // SUBJECT TO REVISION
+    // Maybe would be more intelligible to have a single object?
+    var all_charts = {
+        charts: [],
+        popup: []
+    };
+    var all_events = {
+        // charts: [],
+        // popup: []
+        charts: {
+            'in': [],
+            'out': []
+        },
+        popup: {
+            'in': [],
+            'out': []
+        }
+    };
+    var all_options = {
+        charts: [],
+        popup: []
+    };
+
+    var all_data = {
+        charts: [],
+        popup: []
+    };
+
+    // Contrived
+    var conversion_to_label = {
+        1: 'Time (Days)',
+        24: 'Time (Hours)',
+        1440: 'Time (Minutes)',
+    };
+
+    // BOOLEAN INDICATING WHETHER THE SIDEBAR IS FOR GLOBAL OR LOCAL
+    var side_bar_global = true;
 
     // Semi-arbitrary at the moment
     var treatment_group_table = $('#treatment_group_table');
@@ -40,24 +69,927 @@ $(document).ready(function () {
     var treatment_group_head = $('#treatment_group_head');
     var treatment_group_data_table = null;
 
+    var group_display = $('#group_display');
+    var group_display_body = $('#group_display_body');
+    var group_display_head = $('#group_display_head');
+
+    var show_hide_plots_popup = $('#show_hide_plots_popup');
+    var show_hide_plots_table = $('#show_hide_plots_popup table');
+    var show_hide_plots_body = $('#show_hide_plots_popup table tbody');
+    var show_hide_plots_data_table = null;
+
+    var chart_visibility = {};
+    var chart_filter_buffer = {};
+
+    // NOTE: At the moment superfluous, HOWEVER: will become useful if we need to keep show/hide after refresh
+    var name_to_chart = {};
+
+    function apply_show_hide() {
+        // Iterate over the charts to hide
+        chart_visibility = $.extend(true, {}, chart_filter_buffer);
+
+        $.each(chart_visibility, function(chart_name, status) {
+            var chart_id = name_to_chart[chart_name];
+            if (status) {
+                $(chart_id).show('slow');
+            }
+            else {
+                $(chart_id).hide('slow');
+            }
+        });
+    }
+
+    // Some global options of note
+    // TODO MAKE SURE REVISIONS ARE PROPER
+    window.CHARTS.global_options = {
+        // TOO SPECIFIC, OBVIOUSLY
+        // title: assay,
+        interpolateNulls: true,
+        // Changes styling and prevents flickering issue
+        // tooltip: {
+        //     isHtml: true
+        // },
+        titleTextStyle: {
+            fontSize: 18,
+            bold: true,
+            underline: true
+        },
+        // curveType: 'function',
+        legend: {
+            position: 'top',
+            maxLines: 5,
+            textStyle: {
+                // fontSize: 8,
+                bold: true
+            }
+        },
+        hAxis: {
+            // Begins empty
+            title: 'Time (Days)',
+            textStyle: {
+                bold: true
+            },
+            titleTextStyle: {
+                fontSize: 14,
+                bold: true,
+                italic: false
+            }
+            // ADD PROGRAMMATICALLY
+            // viewWindowMode:'explicit',
+            // viewWindow: {
+            //     max: current_max_x + 0.05 * current_x_range,
+            //     min: current_min_x - 0.05 * current_x_range
+            // }
+            // baselineColor: 'none',
+            // ticks: []
+        },
+        vAxis: {
+            title: '',
+            // If < 1000 and > 0.001 don't use scientific! (absolute value)
+            // y_axis_label_type
+            format: '',
+            textStyle: {
+                bold: true
+            },
+            titleTextStyle: {
+                fontSize: 14,
+                bold: true,
+                italic: false
+            },
+            // This doesn't seem to interfere with displaying negative values
+            minValue: 0,
+            viewWindowMode: 'explicit'
+            // baselineColor: 'none',
+            // ticks: []
+        },
+        pointSize: 5,
+        'chartArea': {
+            'width': '75%',
+            'height': '65%'
+        },
+        'height': min_height,
+        // Individual point tooltips, not aggregate
+        focusTarget: 'datum',
+        intervals: {
+            // style: 'bars'
+            'lineWidth': 0.75
+        },
+        tracking: {
+            is_default: true,
+            use_dose_response: false,
+            // A little too odd
+            // use_percent_control: false,
+            time_conversion: 1,
+            chart_type: 'scatter',
+            tooltip_type: 'datum',
+            revised_unit: null,
+            // Log scale
+            use_x_log: false,
+            use_y_log: false
+        },
+        ajax_data: {
+            key: 'device',
+            mean_type: 'arithmetic',
+            interval_type: 'ste',
+            number_for_interval: '1',
+            percent_control: '',
+            truncate_negative: ''
+        }
+    };
+
+    if (show_hide_plots_popup[0]) {
+        show_hide_plots_popup.dialog({
+            // Causes problems on small devices
+            width: 825,
+            close: function () {
+                // Purge the buffer
+                chart_filter_buffer = {};
+                $.ui.dialog.prototype.options.close();
+            },
+            buttons: [
+            {
+                text: 'Apply',
+                click: function() {
+                    apply_show_hide();
+                    $(this).dialog("close");
+                }
+            },
+            {
+                text: 'Cancel',
+                click: function() {
+                   $(this).dialog("close");
+                }
+            }]
+        });
+        show_hide_plots_popup.removeProp('hidden');
+    }
+
     // Probably should just have full data!
-    var group_to_data = [];
+    var group_to_data = {
+        charts: [],
+        popup: []
+    };
     var device_to_group = {};
     var all_treatment_groups = [];
 
-    window.CHARTS.prepare_chart_options = function(charts) {
-        var options = {};
+    var min_height = 400;
 
-        $.each($('#' + charts + 'chart_options').find('input'), function() {
-            if (this.checked) {
-                options[this.name.replace(charts, '')] = this.value;
+    // Conversion dictionary
+    // TERRIBLE, SPAGHETTI CODE
+    // TERRIBLE, SPAGHETTI CODE
+    // TERRIBLE, SPAGHETTI CODE
+    // AWFUL
+    // WHY DO THIS?
+    var headers = {
+        // 'device': 'Device',
+        'MPS User Group': 'MPS User Group',
+        'Study': 'Study',
+        'Matrix': 'Matrix',
+        'MPS Model': 'MPS Model',
+        'Cells': 'Cells Added',
+        'Compounds': 'Compound Treatment',
+        'Settings': 'Settings (Non-Compound Treatments)',
+        'Items with Same Treatment': 'Matrix Items (Chips/Wells) in Group'
+    };
+
+    // var filter_popup_header = filter_popup.find('h5');
+
+    // Prepare individual plot stuff
+    var current_chart = null;
+    var current_chart_id = null;
+    var current_chart_name = null;
+    // var current_chart_options = null;
+    var individual_plot_type = $('#individual_plot_type');
+    var individual_plot_popup = $('#individual_plot_popup');
+
+    var popup_chart = null;
+
+    var plot_is_visible = $('#plot_is_visible');
+    var use_percent_control = $('#use_percent_control');
+    var use_dose_response = $('#use_dose_response');
+
+    // Log scale
+    var use_x_log = $('#use_x_log');
+    var use_y_log = $('#use_y_log');
+
+    var individual_plot_popup_options_section = $('#individual_plot_popup_options_section');
+    var individual_plot_popup_plot_section = $('#individual_plot_popup_plot_section');
+    // var individual_plot_popup_plot_container = $('#individual_plot_popup_plot_container');
+    var individual_plot_popup_plot_container = $('#popup_0');
+
+    var specific_graph_properties_container = $('#specific_graph_properties_container');
+
+    // TODO NEED TO DEAL GRACEFULLY WITH REFRESH TODO
+    function refresh_preview() {
+        // Kill events
+        destroy_events('popup');
+
+        // Clear all charts
+        // OBJECTIVELY DUMB
+        all_charts['popup'] = [];
+        all_events['popup'] = {
+            'in': [],
+            'out': []
+        };
+
+        all_options['popup'] = [null];
+
+        group_to_data['popup'] = [];
+
+        individual_plot_popup_options_section.hide();
+        individual_plot_popup_plot_section.show();
+
+        // Goofy
+        all_options['popup'][0] = window.CHARTS.prepare_chart_options();
+
+        get_individual_chart('popup', individual_plot_popup_plot_container[0], all_options['popup'][0]);
+
+        $('#back_to_options_button').show('slow');
+
+        // Change button text
+        $('#view_preview_button').find('.ui-button-text').text('Refresh');
+    }
+
+    if (individual_plot_popup[0]) {
+        individual_plot_popup.dialog({
+            // Causes problems on small devices
+            width: 825,
+            close: function () {
+                $.ui.dialog.prototype.options.close();
+
+                side_bar_global = true;
+
+                // Remove bg-info from sidebar stuff
+                $('#charting_sidebar_section').removeClass('bg-info');
+                // specific_graph_properties_container.hide('slow');
+
+                // GET RID OF THE OVERLAY
+                $('#full_page_overlay').remove();
+
+                apply_options_to_sidebar(window.CHARTS.global_options, false);
+            },
+            open: function () {
+                $.ui.dialog.prototype.options.open();
+
+                var overlay_to_inject = $('<div>')
+                    .attr('id', 'full_page_overlay')
+                    .css('width', '100%')
+                    .css('height', '100%')
+                    .css('z-index', '999')
+                    .css('position', 'fixed')
+                    .css('left', '0')
+                    .css('top', '0')
+                    .css('background-color', '#3333');
+
+                $('#page').append(overlay_to_inject);
+
+                // Change title
+                var full_name = current_chart_name.split('\n');
+                var new_title = full_name[0] + ' (' + full_name[1] + ')';
+
+                $(this).dialog('option', 'title', new_title);
+
+                individual_plot_popup_options_section.show('slow');
+                individual_plot_popup_plot_section.hide('slow');
+                // Plot needs to be visible for you to, you know, see it here
+                plot_is_visible.prop('checked', true);
+                side_bar_global = false;
+
+                // Add bg-info from sidebar stuff
+                $('#charting_sidebar_section').addClass('bg-info');
+                // specific_graph_properties_container.show('slow');
+
+                $('#back_to_options_button').hide();
+
+                // Apply options to sidebar
+                apply_options_to_sidebar(all_options['charts'][current_chart_id], true);
+
+                // Change button text
+                $('#view_preview_button').find('.ui-button-text').text('View Preview');
+            },
+            buttons: [
+            {
+                // text: 'Make Popup Plot',
+                text: 'View Preview',
+                id: 'view_preview_button',
+                click: refresh_preview
+            },
+            {
+                text: 'Apply to Plot',
+                click: function() {
+                    // Kill events
+                    // $.each(all_events['charts'], function(event_type, current_events) {
+                    //     if (current_events[current_chart_id]) {
+                    //         google.visualization.events.removeListener(current_events[current_chart_id]);
+                    //         current_events[current_chart_id] = null;
+                    //     }
+                    // });
+                    // destroy_events('charts');
+
+                    // A little goofy
+                    all_options['charts'][current_chart_id] = window.CHARTS.prepare_chart_options();
+                    all_options['charts'][current_chart_id].tracking.is_default = false;
+
+                    if (!plot_is_visible.prop('checked')) {
+                        // HIDE THE CHART
+                        // A LITTLE MESSY TO MAKE SURE THAT THE SHOW/HIDE PLOTS MATCHES
+                        show_hide_plots_data_table.page.len(-1).draw();
+
+                        $('.chart-filter-checkbox[data-table-index="' + current_chart_id + '"]').trigger('click');
+
+                        apply_show_hide();
+
+                        show_hide_plots_data_table.order([[1, 'asc']]);
+                        show_hide_plots_data_table.page.len(10).draw();
+                    }
+                    else {
+                        // Tricky, may create unpleasant scenarios however...
+                        get_individual_chart('charts', current_chart, all_options['charts'][current_chart_id]);
+                    }
+
+                    // Apply new events
+                    // prep_event('charts', false, current_chart_id);
+                    // create_events('charts', false);
+
+                    $(this).dialog("close");
+                }
+            },
+            {
+                text: 'Back to Options',
+                id: 'back_to_options_button',
+                click: function() {
+                    // NOTE NOT DRY
+                    individual_plot_popup_options_section.show('slow');
+                    individual_plot_popup_plot_section.hide('slow');
+
+                    $('#back_to_options_button').hide('slow');
+
+                    $('#view_preview_button').find('.ui-button-text').text('View Preview');
+                }
+            },
+            {
+                text: 'Revert to Default',
+                id: 'revert_to_default_button',
+                click: function() {
+                    use_dose_response.prop('checked', false);
+                    use_percent_control.prop('checked', false);
+                    // CRUDE
+                    use_x_log.prop('checked', false);
+                    use_y_log.prop('checked', false);
+
+                    apply_options_to_sidebar(window.CHARTS.global_options, false);
+
+                    // Apply to the preview if the preview is up
+                    if ($('#back_to_options_button').is(':visible')) {
+                        refresh_preview();
+                    }
+                }
+            },
+            {
+                text: 'Cancel',
+                click: function() {
+                   $(this).dialog("close");
+                }
+            }]
+        });
+        individual_plot_popup.removeProp('hidden');
+    }
+
+    function get_individual_chart(charts, chart_selector, options) {
+        // DESTROY EVENTS
+        destroy_events(charts);
+
+        var index_to_use = current_chart_id;
+
+        var individual_post_filter = $.extend(true, {}, window.GROUPING.current_post_filter);
+
+        // TODO TODO TODO METHODS
+        // Modify post filter to be for only current plot
+        var current_ids_of_interest = all_data['charts'].assay_ids[current_chart_name];
+
+        individual_post_filter.assay.target_id__in = {};
+        individual_post_filter.assay.target_id__in[current_ids_of_interest.target] = '';
+
+        individual_post_filter.assay.unit_id__in = {};
+        individual_post_filter.assay.unit_id__in[current_ids_of_interest.unit] = '';
+
+        if (current_ids_of_interest.method) {
+            individual_post_filter.assay.method_id__in = {};
+            individual_post_filter.assay.method_id__in[current_ids_of_interest.method] = '';
+        }
+
+        var data = {
+            // Only for when filter is needed, but still (will never have repro intention)
+            intention: 'charting',
+            // TODO TODO TODO CHANGE CALL
+            call: window.CHARTS.call,
+            // TODO TODO TODO NEED TO GET
+            study: window.CHARTS.study_id,
+            // TODO TODO TODO MIGHT BE USING A FILTER
+            filters: JSON.stringify(window.GROUPING.filters),
+            // TODO MATRIX AND MATRIX ITEM
+            matrix: window.CHARTS.matrix_id,
+            matrix_item: window.CHARTS.matrix_item_id,
+            // TRICKY: STUDY SET
+            study_set_id: window.CHARTS.study_set_id,
+            criteria: JSON.stringify(window.GROUPING.group_criteria),
+            post_filter: JSON.stringify(individual_post_filter),
+            csrfmiddlewaretoken: window.COOKIES.csrfmiddlewaretoken
+        };
+
+        // ONLY APPLICABLE TO IN PLACE CHANGES
+        // if (!options) {
+        //     options = window.CHARTS.prepare_chart_options('charts');
+        // }
+
+        // NOTE THAT FALSE IS ACTUALY AN EMPTY STRING
+        options.ajax_data.percent_control = use_percent_control.prop('checked') ? true : '';
+
+        data = $.extend(true, data, options.ajax_data);
+
+        options.tracking.use_dose_response = use_dose_response.prop('checked');
+
+        if (options.tracking.use_dose_response) {
+            data.key = 'dose';
+            // Change hAxis title
+            options.hAxis.title = 'Dose (µM)';
+        }
+
+        // Log scale doesn't affect ajax data, but may as well put it here
+        options.tracking.use_x_log = use_x_log.prop('checked');
+        if (options.tracking.use_x_log) {
+            options.hAxis.scaleType = 'mirrorLog';
+        }
+
+        options.tracking.use_y_log = use_y_log.prop('checked');
+        if (options.tracking.use_y_log) {
+            options.vAxis.scaleType = 'mirrorLog';
+        }
+
+        // Show spinner
+        window.spinner.spin(
+            document.getElementById("spinner")
+        );
+
+        // TODO TODO TODO
+        $.ajax({
+            url: "/assays_ajax/",
+            type: "POST",
+            dataType: "json",
+            data: data,
+            success: function (json) {
+                // Stop spinner
+                window.spinner.stop();
+
+                // Empty the chart
+                $(chart_selector).empty();
+
+                // Always 0 index methinks for popup
+                if (charts === 'popup') {
+                    index_to_use = 0;
+                    // Store all data if popup
+                    all_data[charts] = $.extend(true, {}, json);
+                }
+                else {
+                    // Store just the numbers if in-place change
+                    if (json.assays && json.assays[0]) {
+                        all_data[charts].assays[index_to_use] = json.assays[0];
+                    }
+                    else {
+                        all_data[charts].assays[index_to_use] = [];
+                    }
+                }
+
+                // Not a great exception
+                if (options.ajax_data.percent_control) {
+                    var assay_unit = json.sorted_assays[0];
+                    var assay = assay_unit.split('\n')[0];
+                    var unit = assay_unit.split('\n')[1];
+                    options.tracking.revised_unit = unit;
+                }
+                else {
+                    delete options.tracking.revised_unit;
+                }
+
+                // Make the plot
+                build_individual_chart(charts, chart_selector, index_to_use, options);
+
+                create_events(charts, charts==='popup');
+            },
+            error: function (xhr, errmsg, err) {
+                // Stop spinner
+                window.spinner.stop();
+
+                console.log(xhr.status + ": " + xhr.responseText);
             }
         });
+    }
+
+    function build_individual_chart(charts, chart_selector, index, options) {
+        // Clear old chart (when applicable)
+        $(chart_selector).empty();
+
+        // Aliases
+        var sorted_assays = all_data[charts].sorted_assays;
+        // Note that this keeps the original data (to avoid refreshes etc.)
+        // var assays = JSON.parse(JSON.stringify(all_data[charts].assays));
+        var assay_data = JSON.parse(JSON.stringify(all_data[charts].assays[index]));
+
+        var assay_unit = sorted_assays[index];
+        var assay = assay_unit.split('\n')[0];
+        var unit = assay_unit.split('\n')[1];
+
+        // Don't bother if empty
+        if (assay_data[1] === undefined) {
+            chart_selector.innerHTML = '<div class="alert alert-danger" role="alert">' +
+                    '<span class="glyphicon glyphicon-warning-sign" aria-hidden="true"></span>' +
+                    '<span class="sr-only">Danger:</span>' +
+                    ' <strong>' + assay + ' ' + unit + '</strong>' +
+                    '<br>This plot doesn\'t have any valid data.' +
+                '</div>'
+            return;
+        }
+
+        if (options.tracking.revised_unit) {
+            unit = options.tracking.revised_unit;
+        }
+
+        if (!options) {
+            options = $.extend(true, {}, window.CHARTS.global_options);
+        }
+
+        all_options[charts][index] = options;
+
+        // REVISE TIME AS NECESSARY
+        $.each(assay_data, function(assay_index, row) {
+            if (assay_index) {
+                if (!options.tracking.use_dose_response) {
+                    row[0] *= options.tracking.time_conversion;
+                }
+            }
+            else {
+                row[0] = options.hAxis.title;
+            }
+        });
+
+        // Global max
+        var global_max_y = 0;
+        var global_min_y = 1e25;
+
+        // Go through y values
+        $.each(assay_data.slice(1), function(current_index, current_values) {
+            // Idiomatic way to remove NaNs
+            var trimmed_values = current_values.slice(1).filter(isNumber);
+
+            var current_max_y = Math.abs(Math.max.apply(null, trimmed_values));
+            var current_min_y = Math.abs(Math.min.apply(null, trimmed_values));
+
+            if (global_max_y < current_max_y) {
+                global_max_y = current_max_y;
+            }
+            if (global_min_y > current_min_y) {
+                global_min_y = current_min_y;
+            }
+        });
+
+        if (global_max_y > 1000 || global_max_y < 0.001 && global_max_y !== 0) {
+            options.vAxis.format = '0.0E0';
+        }
+        else if (Math.abs(global_max_y - global_min_y) < 10 && Math.abs(global_max_y - global_min_y) > 0.1 && Math.abs(global_max_y - global_min_y) !== 0) {
+            options.vAxis.format = '0.0';
+        }
+        else if (Math.abs(global_max_y - global_min_y) < 0.1 && Math.abs(global_max_y - global_min_y) !== 0) {
+            options.vAxis.format = '0.0E0';
+        }
+
+        var current_min_x = assay_data[1][0];
+        var current_max_x = assay_data[assay_data.length - 1][0];
+        var current_x_range = current_max_x - current_min_x;
+
+        // Tack on change
+        options.title = assay;
+        options.vAxis.title = unit;
+
+        // NAIVE: I shouldn't perform a whole refresh just to change the scale!
+        // if (document.getElementById('category_select').checked) {
+        //     options.focusTarget = 'category';
+        // }
+
+        // Removed for now
+/*
+        if (document.getElementById(charts + 'log_x').checked) {
+            options.hAxis.scaleType = 'log';
+        }
+        if (document.getElementById(charts + 'log_y').checked) {
+            options.vAxis.scaleType = 'log';
+        }
+*/
+
+        // Merge options with the specified changes
+        // REMOVED FOR NOW
+        // $.extend(options, changes_to_options);
+
+        // REMOVED FOR NOW
+        // Find out whether to shrink text
+        // $.each(assay_data[0], function(index, column_header) {
+        //     if (column_header.length > 12) {
+        //         options.legend.textStyle.fontSize = 10;
+        //     }
+        // });
+
+        var chart = null;
+
+        var num_colors = 0;
+        var truncated_at_index = null;
+
+        $.each(assay_data[0].slice(1), function(index, value) {
+            if (value.indexOf(window.SIGILS.INTERVAL_SIGIL) === -1) {
+                // NOTE TRUNCATE PAST 40 COLORS
+                if (num_colors >= 40) {
+                    truncated_at_index = index;
+
+                    if (assay_data[0][index + 1].indexOf(window.SIGILS.INTERVAL_SIGIL) !== -1) {
+                        truncated_at_index += 2;
+                    }
+
+                    $.each(assay_data, function(row_index, current_row) {
+                        assay_data[row_index] = current_row.slice(0, truncated_at_index + 1);
+                    });
+
+                    // Indicate truncated in title?
+                    options.title = options.title + ' {TRUNCATED}';
+
+                    return false;
+                }
+
+                num_colors++;
+            }
+        });
+
+        var data = google.visualization.arrayToDataTable(assay_data);
+
+        // Line chart if more than two time points and less than 101 colors
+        if (assay_data.length > 3) {
+            chart = new google.visualization.LineChart(chart_selector);
+
+            // Change the options
+            if (!options.hAxis.scaleType === 'mirrorLog') {
+                options.hAxis.viewWindowMode = 'explicit';
+                options.hAxis.viewWindow = {
+                    max: current_max_x + 0.1 * current_x_range,
+                    min: current_min_x - 0.1 * current_x_range
+                };
+            }
+        }
+        // No longer totally remove, just truncate instead
+        // else if (num_colors > 100) {
+        //     chart_selector.innerHTML = '<div class="alert alert-danger" role="alert">' +
+        //         '<span class="glyphicon glyphicon-warning-sign" aria-hidden="true"></span>' +
+        //         '<span class="sr-only">Danger:</span>' +
+        //         ' <strong>' + assay + ' ' + unit + '</strong>' +
+        //         '<br>This plot has too many data points, please try filtering.' +
+        //     '</div>'
+        // }
+        // Bar chart if only one time point
+        else if (assay_data.length > 1) {
+            // Crude...
+            delete options.hAxis.viewWindow;
+            // Convert to categories
+            data.insertColumn(0, 'string', data.getColumnLabel(0));
+            // copy values from column 1 (old column 0) to column 0, converted to numbers
+            for (var i = 0; i < data.getNumberOfRows(); i++) {
+                var val = data.getValue(i, 1);
+                // I don't mind this type-coercion, null, undefined (and maybe 0?) don't need to be parsed
+                if (val != null) {
+                    // PLEASE NOTE: Floats are truncated to 3 decimals
+                    data.setValue(i, 0, parseFloat(val.toFixed(3)) + ''.valueOf());
+                }
+            }
+            // remove column 1 (the old column 0)
+            data.removeColumn(1);
+
+            chart = new google.visualization.ColumnChart(chart_selector);
+        }
+
+        if (chart) {
+            var dataView = new google.visualization.DataView(data);
+
+            // Change interval columns to intervals
+            var interval_setter = [0];
+
+            i = 1;
+            while (i < data.getNumberOfColumns()) {
+                interval_setter.push(i);
+                if (i + 2 < data.getNumberOfColumns() && assay_data[0][i+1].indexOf(window.SIGILS.INTERVAL_1_SIGIL) > -1) {
+                    interval_setter.push({sourceColumn: i + 1, role: 'interval'});
+                    interval_setter.push({sourceColumn: i + 2, role: 'interval'});
+                    i += 2;
+                }
+                i += 1;
+            }
+            dataView.setColumns(interval_setter);
+
+            chart.draw(dataView, options);
+
+            chart.chart_index = index;
+
+            // SLOPPY
+            // Add new
+            if (!all_charts[charts][index]) {
+                all_charts[charts].push(chart);
+                // Add the options
+                // all_options[charts].push(options);
+            }
+            // Modify existing
+            else {
+                all_charts[charts][index] = chart;
+                // Add the options
+                // all_options[charts][index] = options;
+            }
+        }
+    }
+
+    window.CHARTS.prepare_chart_options = function() {
+        var options = $.extend(true, {}, window.CHARTS.global_options);
+
+        //$.each($('#' + charts + 'chart_options').find('input'), function() {
+        // Object extraneous as there is only one option set now
+        $.each($('#charting_options_tables').find('input'), function() {
+            // var current_category = $(this).attr('data-category');
+            var current_category = 'ajax_data';
+            // For checkboxes
+            if (this.type === 'checkbox') {
+                options[current_category][this.name] = this.checked ? 'true' : '';
+            }
+            // For radio
+            else if (this.type === 'radio' && this.checked) {
+                options[current_category][this.name] = this.value;
+            }
+            // For numeric
+            else if (this.type === 'number') {
+                options[current_category][this.name] = this.value;
+            }
+        });
+
+        options.hAxis.title = 'Time (Days)';
+        // Still need to work in dose-response
+        // if (window.CHARTS.global_options.tracking.is_dose) {
+        //     window.CHARTS.global_options.hAxis.title = 'Dose (μM)';
+        // }
+
+        var time_conversion = 1;
+        var time_label = 'Time (Days)';
+
+        // CRUDE: Perform time unit conversions
+        // GLOBALLY APPLYING THIS WILL CONFILICT WITH THE INDIVIDUAL CHART CHANGES (possibly)
+        // TODO TODO TODO MUST BE MOVED
+        time_conversion = Math.floor($('#id_chart_option_time_unit').val());
+
+        time_label = conversion_to_label[time_conversion];
+
+        if (time_conversion) {
+            options.tracking.time_conversion = time_conversion;
+            options.hAxis.title = time_label;
+        }
+
+        // NAIVE: I shouldn't perform a whole refresh just to change the scale!
+        if (document.getElementById('category_select').checked) {
+            options.focusTarget = 'category';
+        }
+        else {
+            options.focusTarget = 'datum';
+        }
 
         return options;
     };
 
+    // TODO I NEED THIS FUNCTION TO MAKE SURE THAT THE SIDEBAR MATCHES THE POPUP/GLOBAL
+    function apply_options_to_sidebar(options, popup) {
+        $.each(options.ajax_data, function(field_name, value) {
+            var current = $('input[name="' + field_name + '"][value="' + value + '"]');
+            if (current[0]) {
+                // Note that this does not trigger change
+                $('input[name="' + field_name + '"][value="' + value + '"]').prop('checked', true);
+            }
+            else {
+                current = $('input[name="' + field_name + '"]');
+                if (current.attr('type') === 'checkbox') {
+                    current.prop('checked', value);
+                }
+                else {
+                    current.val(value);
+                }
+            }
+        });
+
+        // SPECIAL EXCEPTION FOR TIMEUNIT
+        $('#id_chart_option_time_unit').find('option[value="' + options.tracking.time_conversion + '"]').prop('selected', true);
+
+        // TODO YOU ALSO NEED TO MAKE SURE THE POPUP IS CHANGED (percent control etc.)
+        if (popup) {
+            // PLEASE NOTE THAT IT IS EMPTY STRING, NOT FALSE
+            use_percent_control.prop('checked', options.ajax_data.percent_control ? true : '');
+            // Check if using dose
+            use_dose_response.prop('checked', options.tracking.use_dose_response);
+
+            // Check logs
+            use_x_log.prop('checked', options.tracking.use_x_log);
+            use_y_log.prop('checked', options.tracking.use_y_log);
+        }
+
+        // Make sure proper options are greyed out
+        restrict_error_bar_options(false);
+    }
+
     window.CHARTS.prepare_side_by_side_charts = function(json, charts) {
+        // Store all data
+        all_data[charts] = $.extend(true, {}, json);
+
+        // Clear existing charts
+        var charts_id = $('#' + charts);
+        charts_id.empty();
+
+        // If errors, report them and then terminate
+        if (json.errors) {
+            alert(json.errors);
+            return;
+        }
+
+        var sorted_assays = json.sorted_assays;
+        var assays = json.assays;
+
+        // Hide sidebar if no data
+        if (assays.length < 1) {
+            $('.toggle_sidebar_button').first().trigger('click');
+        }
+
+        // Revise show/hide plots
+        // NOTE: POPULATE THE SELECTION TABLE
+        // Clear current contents
+        if (show_hide_plots_data_table) {
+            show_hide_plots_data_table.clear();
+            show_hide_plots_data_table.destroy();
+
+            // KILL ALL LINGERING HEADERS
+            $('.fixedHeader-locked').remove();
+        }
+
+        show_hide_plots_body.empty();
+
+        var html_to_append = [];
+
+        for (var index in sorted_assays) {
+            if (assays[index].length > 1) {
+                // Populate each row
+                // SLOPPY NOT DRY
+                var row = '<tr>';
+                var full_name = sorted_assays[index];
+                var title = full_name.split('\n')[0];
+                var unit = full_name.split('\n')[1];
+
+                var current_index = html_to_append.length;
+
+                charts_id.append($('<div>')
+                    .attr('id', charts + '_' + index)
+                    .attr('data-chart-name', full_name)
+                    .addClass('col-sm-12 col-md-6 chart-container')
+                    .css('min-height', min_height)
+                );
+
+                row += '<td width="10%" class="text-center"><input data-table-index="' + current_index + '" data-obj-name="' + full_name + '" class="big-checkbox chart-filter-checkbox" type="checkbox" value="' + full_name + '" checked="checked"></td>';
+
+                // WARNING: NAIVE REPLACE
+                row += '<td>' + title + '</td>';
+                row += '<td>' + unit + '</td>';
+
+                row += '</tr>';
+
+                name_to_chart[full_name] = '#charts_' + current_index;
+
+                html_to_append.push(row);
+            }
+        }
+
+        if (!html_to_append) {
+            html_to_append.push('<tr><td></td><td>No data to display.</td></tr>');
+        }
+
+        show_hide_plots_body.html(html_to_append.join(''));
+
+        show_hide_plots_data_table = show_hide_plots_table.DataTable({
+            destroy: true,
+            dom: '<"wrapper"lfrtip>',
+            deferRender: true,
+            iDisplayLength: 10,
+            order: [1, 'asc'],
+            columnDefs: [
+                // Try to sort on checkbox
+                { "sSortDataType": "dom-checkbox", "targets": 0, "width": "10%" }
+            ]
+        });
+    };
+
+    window.CHARTS.prepare_row_by_row_charts = function(json, charts) {
         // Clear existing charts
         var charts_id = $('#' + charts);
         charts_id.empty();
@@ -74,27 +1006,18 @@ $(document).ready(function () {
         var previous = null;
         for (var index in sorted_assays) {
             if (assays[index].length > 1) {
-                if (!previous) {
-                    previous = $('<div>')
-                    //.addClass('padded-row')
-                        .css('min-height', 400);
-                    charts_id.append(previous
-                        .append($('<div>')
-                            .attr('id', charts + '_' + index)
-                            .addClass('col-sm-12 col-md-6 chart-container')
-                        )
-                    );
-                }
-                else {
-                    previous.append($('<div>')
+                new_div = $('<div>')
+                //.addClass('padded-row')
+                    .css('min-height', min_height);
+                charts_id.append(new_div
+                    .append($('<div>')
                         .attr('id', charts + '_' + index)
-                        .addClass('col-sm-12 col-md-6 chart-container')
-                    );
-                    previous = null;
-                }
+                        .addClass('chart-container')
+                    )
+                );
             }
         }
-    };
+    }
 
     // No longer in use
     window.CHARTS.prepare_charts_by_table = function(json, charts) {
@@ -138,18 +1061,12 @@ $(document).ready(function () {
             ];
         }
 
-        var headers = {
-            // 'device': 'Device',
-            'MPS Model': 'MPS Model',
-            'Cells': 'Cells',
-            'Compounds': 'Compounds',
-            'Settings': 'Settings',
-            'Items with Same Treatment': 'Chips/Wells'
-        };
-
         if (treatment_group_data_table) {
             treatment_group_table.DataTable().clear();
             treatment_group_table.DataTable().destroy();
+
+            // KILL ALL LINGERING HEADERS
+            $('.fixedHeader-locked').remove();
         }
 
         treatment_group_display.empty();
@@ -166,6 +1083,9 @@ $(document).ready(function () {
         });
 
         treatment_group_head.append(new_row);
+        // Add the header to the group display as well
+        group_display_head.empty();
+        group_display_head.append(new_row.clone().addClass('bg-warning'));
 
         $.each(treatment_groups, function(index, treatment) {
             var group_index = (index + 1);
@@ -199,7 +1119,7 @@ $(document).ready(function () {
 
         treatment_group_data_table = treatment_group_table.DataTable({
             // Cuts out extra unneeded pieces in the table
-            dom: 'B<"row">lfrtip',
+            dom: '<Bl<"row">frptip>',
             fixedHeader: {headerOffset: 50},
             responsive: true,
             // paging: false,
@@ -209,12 +1129,12 @@ $(document).ready(function () {
             // Try to get a more reasonable size for cells
             columnDefs: [
                 // Treat the group column as if it were just the number
-                { "type": "brute-numeric", "targets": 0, "width": "10%" }
-                // Poses a problem due to variable table
-                // { "width": "10%", "targets": 1 },
-                // { "width": "15%", "targets": 2 },
-                // { "width": "20%", "targets": 3 },
-                // { "width": "15%", "targets": 4 }
+                { "type": "brute-numeric", "targets": 0, "width": "10%" },
+                // Chips/wells reduced width to 25%
+                {
+                    width: '25%',
+                    targets: [-1]
+                }
             ]
         });
 
@@ -225,132 +1145,140 @@ $(document).ready(function () {
         // Reposition download/print/copy
         $('.DTTT_container').css('float', 'none');
 
-        // Recalculate responsive and fixed headers
-        $($.fn.dataTable.tables(true)).DataTable().responsive.recalc();
-        $($.fn.dataTable.tables(true)).DataTable().fixedHeader.adjust();
-
         // Make sure the header is fixed and active
         treatment_group_data_table.fixedHeader.enable();
     };
-
-    window.CHARTS.get_heatmap_dropdowns = function(starting_index) {
-        if (heatmap_data.matrices && _.keys(heatmap_data.matrices).length > 0) {
-            heatmap_wrapper_selector.show();
-
-            var current_index = 0;
-            var data_level = heatmap_data.values;
-            var current;
-
-            while (current_index < starting_index) {
-                current = heatmap_filters_selector.eq(current_index);
-                data_level = data_level[current.val()];
-                current_index++;
-            }
-
-            while (current_index < heatmap_filters_selector.length) {
-                current = heatmap_filters_selector.eq(current_index);
-                var former_value = current.val();
-
-                if (former_value === null || starting_index < current_index) {
-                    current.empty();
-                    $.each(_.sortBy(_.keys(data_level)), function (index, key) {
-                        var dropdown_text = key.split('\n')[0];
-                        current.append($('<option>').val(key).text(dropdown_text));
-                    });
-
-                    if (former_value && current.find('option[value="' + former_value + '"]').length > 0) {
-                        current.val(former_value);
-                    }
-                }
-
-                data_level = data_level[current.val()];
-                current_index++;
-            }
-
-            // Make the heatmap
-            // Get the values for the heatmap
-            var means = {};
-
-            $.each(data_level, function (key, values) {
-                means[key] = d3.mean(values);
-            });
-
-            var median = d3.median(means);
-            // Get the min
-            var min_value = _.min(means);
-            min_value -= min_value * 0.000001;
-            // Get the max
-            var max_value = _.max(means);
-            max_value += max_value * 0.000001;
-            // Get the colorscale
-            var color_scale = d3.scale.quantile()
-                .domain([min_value, median, max_value])
-                .range(colors);
-
-            // Actually display the heatmap
-            var current_matrix = heatmap_data.matrices[$('#id_heatmap_matrix').val()];
-
-            matrix_body_selector.empty();
-
-            // Check to see if new forms will be generated
-            for (var row_index = 0; row_index < current_matrix.length; row_index++) {
-                var row_id = 'row_' + row_index;
-                var current_row = $('<tr>')
-                    .attr('id', row_id);
-
-                for (var column_index = 0; column_index < current_matrix[row_index].length; column_index++) {
-                    var new_cell = $('<td>');
-
-                    var current_key = row_index + '_' + column_index;
-                    var value = data_level[current_key];
-                    var mean_value = means[current_key];
-
-                    if (value) {
-                        new_cell.html(value.join(', '));
-                        new_cell.css('background-color', color_scale(mean_value));
-                    }
-                    else {
-                        new_cell.css('background-color', '#606060');
-                    }
-
-                    // Add
-                    current_row.append(new_cell);
-                }
-
-                matrix_body_selector.append(current_row);
-            }
-        }
-        else {
-            heatmap_wrapper_selector.hide();
-        }
-    };
-
-    // window.CHARTS.make_heatmap = function() {
-    //
-    // };
 
     // TODO THIS SHOULDN'T BE REDUNDANT
     function isNumber(obj) {
         return obj !== undefined && typeof(obj) === 'number' && !isNaN(obj);
     }
 
-    window.CHARTS.make_charts = function(json, charts, changes_to_options) {
-        // post_filter setup
-        if (window.GROUPING.full_post_filter === null) {
-            window.GROUPING.full_post_filter = json.post_filter;
-            window.GROUPING.current_post_filter = JSON.parse(JSON.stringify(json.post_filter));
-        }
-
-        // Remove triggers
+    function destroy_events(charts) {
         if (all_events[charts]) {
-            $.each(all_events[charts], function(index, event) {
-                google.visualization.events.removeListener(event);
+            $.each(all_events[charts], function(event_type_index, current_events) {
+                $.each(current_events, function(event_index, event) {
+                    google.visualization.events.removeListener(event);
+                    event = null;
+                });
             });
         }
 
+        all_events[charts] = {
+            'in': [],
+            'out': []
+        };
+    }
+
+    // function revise_event(charts, is_popup, index) {
+    //     // NOT DRY NOT DRY
+    //     $.each(all_events[charts], function(event_type, current_events) {
+    //         if (current_events[index]) {
+    //             google.visualization.events.removeListener(current_events[index]);
+    //             event = null;
+    //         }
+    //     });
+    //
+    //     prep_event(charts, is_popup, index);
+    // }
+
+    // DUMB PARAMETERS
+    function modify_group_to_data(group_to_data, assays, charts, index, i, key) {
+        // Need to link EACH CHARTS values to the proper group
+        // EMPHASIS ON EACH CHART
+        // Somewhat naive
+        if (key === 'group') {
+            // NOTE -1
+            group_to_data[charts][index][i] = assays[index][0][i].split(' || ')[0].replace(/\D/g, '') - 1;
+        }
+        else {
+            var device = assays[index][0][i].split(' || ')[0];
+            group_to_data[charts][index][i] = device_to_group[device];
+        }
+    }
+
+    function prep_event(charts, is_popup, index) {
+        if (!group_to_data[charts][index]) {
+            group_to_data[charts].push({});
+        }
+
+        var assays = all_data[charts].assays;
+
+        for (i=0; i < assays[index][0].length; i++) {
+            if (assays[index][0][i].indexOf(window.SIGILS.INTERVAL_1_SIGIL) === -1 && assays[index][0][i].indexOf(window.SIGILS.INTERVAL_2_SIGIL) === -1) {
+                modify_group_to_data(group_to_data, assays, charts, index, i, all_options[charts][index].ajax_data.key);
+            }
+        }
+
+        // Makes use of a rather zany closure
+        var current_event = google.visualization.events.addListener(all_charts[charts][index], 'onmouseover', (function (charts, chart_index, is_popup) {
+            return function (entry) {
+                // Only attempts to display if there is a valid treatment group
+                if (all_treatment_groups[group_to_data[charts][chart_index][entry.column]]) {
+                    var current_pos = $(all_charts[charts][chart_index].container).position();
+
+                    var current_top = current_pos.top + 75;
+                    var current_left = $('#breadcrumbs').position().left;
+
+                    if (is_popup) {
+                        current_pos = $(all_charts[charts][chart_index].container).parent().parent().parent().position();
+                        current_top = current_pos.top + 200;
+                        current_left = current_pos.left;
+                    }
+
+                    if (entry.row === null && entry.column) {
+                        var row_clone = all_treatment_groups[group_to_data[charts][chart_index][entry.column]].clone().addClass('bg-warning');
+                        if (row_clone) {
+                            group_display_body.empty().append(row_clone);
+
+                            group_display.show()
+                                .css({top: current_top, left: current_left, position: 'absolute'});
+                        }
+                    }
+                }
+            }
+        })(charts, index, is_popup));
+        all_events[charts]['in'][index] = current_event;
+
+        current_event = google.visualization.events.addListener(all_charts[charts][index], 'onmouseout', function () {
+            group_display.hide();
+        });
+        // TODO NOTE: CONTRIVED
+        all_events[charts]['out'][index] = current_event;
+    }
+
+    function create_events(charts, is_popup) {
+        // TODO NEEDS TO BE MADE GENERIC
+        for (var index=0; index < all_charts[charts].length; index++) {
+            prep_event(charts, is_popup, index);
+        }
+    }
+
+    // PLEASE NOTE THAT THIS WILL WIPE ALL INDIVIDUAL EDITS
+    window.CHARTS.make_charts = function(json, charts, hide_sidebar) {
+        // post_filter setup
+        // NOTE: MAY HAVE SIDE EFFECTS...
+        if (json.post_filter) {
+            window.GROUPING.set_grouping_filtering(json.post_filter);
+        }
+
+        // Remove triggers
+        destroy_events(charts);
+        // if (all_events[charts]) {
+        //     $.each(all_events[charts], function(index, event) {
+        //         google.visualization.events.removeListener(event);
+        //     });
+        // }
+
         // Clear all charts
         all_charts[charts] = [];
-        all_events[charts] = [];
+        all_events[charts] = {
+            'in': [],
+            'out': []
+        };
+
+        all_options[charts] = [];
+
         group_to_data[charts] = [];
 
         // Show the chart options
@@ -362,12 +1290,14 @@ $(document).ready(function () {
         // window.CHARTS.get_heatmap_dropdowns(0);
 
         // Naive way to learn whether dose vs. time
-        var is_dose = $('#' + charts + 'dose_select').prop('checked');
+        // GLOBAL CANNOT CURRENTLY EVEN BE DOSE RESPONSE (SCRUB)
+        // window.CHARTS.global_options.tracking.is_dose = $('#dose_select').prop('checked');
 
-        var x_axis_label = 'Time (Days)';
-        if (is_dose) {
-            x_axis_label = 'Dose (μM)';
-        }
+        // window.CHARTS.global_options.hAxis.title = 'Time (Days)';
+        // Still need to work in dose-response
+        // if (window.CHARTS.global_options.tracking.is_dose) {
+        //     window.CHARTS.global_options.hAxis.title = 'Dose (μM)';
+        // }
 
         // If nothing to show
         if (!json.assays) {
@@ -378,253 +1308,196 @@ $(document).ready(function () {
         var assays = json.assays;
 
         for (index in sorted_assays) {
-            var assay_unit = sorted_assays[index];
-            var assay = assay_unit.split('\n')[0];
-            var unit = assay_unit.split('\n')[1];
-
-            var data = google.visualization.arrayToDataTable(assays[index]);
-
-            var y_axis_label_type = '';
-
-            $.each(assays[index].slice(1), function(index, current_values) {
-                // Idiomatic way to remove NaNs
-                var trimmed_values = current_values.slice(1).filter(isNumber);
-
-                var current_max = Math.abs(Math.max.apply(null, trimmed_values));
-                var current_min = Math.abs(Math.min.apply(null, trimmed_values));
-
-                if (current_max > 1000 || current_max < 0.001) {
-                    y_axis_label_type = '0.00E0';
-                    return false;
-                }
-                else if (Math.abs(current_max - current_min) < 10 && Math.abs(current_max - current_min) > 0.1 && Math.abs(current_max - current_min) !== 0) {
-                    y_axis_label_type = '0.00';
-                    return false;
-                }
-                else if (Math.abs(current_max - current_min) < 0.1 && Math.abs(current_max - current_min) !== 0) {
-                    y_axis_label_type = '0.00E0';
-                    return false;
-                }
-            });
-
-            var options = {
-                title: assay,
-                interpolateNulls: true,
-                // Changes styling and prevents flickering issue
-                // tooltip: {
-                //     isHtml: true
-                // },
-                titleTextStyle: {
-                    fontSize: 18,
-                    bold: true,
-                    underline: true
-                },
-                // curveType: 'function',
-                legend: {
-                    position: 'top',
-                    maxLines: 5,
-                    textStyle: {
-                        // fontSize: 8,
-                        bold: true
-                    }
-                },
-                hAxis: {
-                    title: x_axis_label,
-                    textStyle: {
-                        bold: true
-                    },
-                    titleTextStyle: {
-                        fontSize: 14,
-                        bold: true,
-                        italic: false
-                    }
-                    // baselineColor: 'none',
-                    // ticks: []
-                },
-                vAxis: {
-                    title: unit,
-                    // If < 1000 and > 0.001 don't use scientific! (absolute value)
-                    format: y_axis_label_type,
-                    textStyle: {
-                        bold: true
-                    },
-                    titleTextStyle: {
-                        fontSize: 14,
-                        bold: true,
-                        italic: false
-                    },
-                    // This doesn't seem to interfere with displaying negative values
-                    minValue: 0,
-                    viewWindowMode: 'explicit'
-                    // baselineColor: 'none',
-                    // ticks: []
-                },
-                pointSize: 5,
-                'chartArea': {
-                    'width': '75%',
-                    'height': '65%'
-                },
-                'height':400,
-                // Individual point tooltips, not aggregate
-                focusTarget: 'datum',
-                intervals: {
-                    // style: 'bars'
-                    'lineWidth':2, 'barWidth': 1
-                }
-            };
-
-            // NAIVE: I shouldn't perform a whole refresh just to change the scale!
-            if (document.getElementById(charts + 'category_select').checked) {
-                options.focusTarget = 'category';
-            }
-
-            if (document.getElementById(charts + 'log_x').checked) {
-                options.hAxis.scaleType = 'log';
-            }
-            if (document.getElementById(charts + 'log_y').checked) {
-                options.vAxis.scaleType = 'log';
-            }
-
-            // Merge options with the specified changes
-            $.extend(options, changes_to_options);
-
-            // REMOVED FOR NOW
-            // Find out whether to shrink text
-            // $.each(assays[index][0], function(index, column_header) {
-            //     if (column_header.length > 12) {
-            //         options.legend.textStyle.fontSize = 10;
-            //     }
-            // });
-
-            var chart = null;
-
-            var num_colors = 0;
-
-            $.each(assays[index][0].slice(1), function(index, value) {
-                if (value.indexOf(' ~@i1') === -1) {
-                    num_colors++;
-                }
-            });
-
-            // Line chart if more than one time point and less than 101 colors
-            if (assays[index].length > 2 && num_colors < 101) {
-                chart = new google.visualization.LineChart(document.getElementById(charts + '_' + index));
-
-                // If the scale is not already small
-                if (assays[index][assays[index].length-1][0] - assays[index][1][0] > 1) {
-                    // If line chart and small difference between last two numbers, make the max horizontal value one day higher than necessary
-                    if (assays[index][assays[index].length-1][0] - assays[index][assays[index].length-2][0] < 0.5) {
-                        options.hAxis.maxValue = assays[index][assays[index].length - 1][0] + 1;
-                    }
-                    // Do the same for minimum
-                    if (assays[index][2][0] - assays[index][1][0] < 0.5 ) {
-                        options.hAxis.minValue = assays[index][1][0] - 1;
-                    }
-                }
-            }
-            // Nothing if more than 100 colors
-            else if (num_colors > 100) {
-                document.getElementById(charts + '_' + index).innerHTML = '<div class="alert alert-danger" role="alert">' +
-                    '<span class="glyphicon glyphicon-warning-sign" aria-hidden="true"></span>' +
-                    '<span class="sr-only">Danger:</span>' +
-                    ' <strong>' + assay + ' ' + unit + '</strong>' +
-                    '<br>This plot has too many data points, please try filtering.' +
-                '</div>'
-            }
-            // Bar chart if only one time point
-            else if (assays[index].length > 1) {
-                // Convert to categories
-                data.insertColumn(0, 'string', data.getColumnLabel(0));
-                // copy values from column 1 (old column 0) to column 0, converted to numbers
-                for (var i = 0; i < data.getNumberOfRows(); i++) {
-                    var val = data.getValue(i, 1);
-                    // I don't mind this type-coercion, null, undefined (and maybe 0?) don't need to be parsed
-                    if (val != null) {
-                        // PLEASE NOTE: Floats are truncated to 3 decimals
-                        data.setValue(i, 0, parseFloat(val.toFixed(3)) + ''.valueOf());
-                    }
-                }
-                // remove column 1 (the old column 0)
-                data.removeColumn(1);
-
-                chart = new google.visualization.ColumnChart(document.getElementById(charts + '_' + index));
-            }
-
-            if (chart) {
-                var dataView = new google.visualization.DataView(data);
-
-                // Change interval columns to intervals
-                var interval_setter = [0];
-
-                i = 1;
-                while (i < data.getNumberOfColumns()) {
-                    interval_setter.push(i);
-                    if (i + 2 < data.getNumberOfColumns() && assays[index][0][i+1].indexOf(' ~@i1') > -1) {
-                        interval_setter.push({sourceColumn: i + 1, role: 'interval'});
-                        interval_setter.push({sourceColumn: i + 2, role: 'interval'});
-                        i += 2;
-                    }
-                    i += 1;
-                }
-                dataView.setColumns(interval_setter);
-
-                chart.draw(dataView, options);
-
-                chart.chart_index = index;
-
-                all_charts[charts].push(chart);
-            }
+            build_individual_chart('charts', document.getElementById('charts_' + index), index, window.CHARTS.global_options);
         }
 
         window.CHARTS.display_treatment_groups(json.treatment_groups, json.header_keys);
 
-        for (var index=0; index < all_charts[charts].length; index++) {
-            group_to_data[charts].push({});
+        create_events('charts');
 
-            for (i=0; i < assays[index][0].length; i++) {
-                if (assays[index][0][i].indexOf(' ~@i1') === -1 && assays[index][0][i].indexOf(' ~@i2') === -1) {
-                    // Need to link EACH CHARTS values to the proper group
-                    // EMPHASIS ON EACH CHART
-                    // Somewhat naive
-                    if (document.getElementById(charts + 'group_select').checked) {
-                        // NOTE -1
-                        group_to_data[charts][index][i] = assays[index][0][i].replace(/\D/g, '') - 1;
-                    }
-                    else {
-                        var device = assays[index][0][i].split(' || ')[0];
-                        // console.log(device);
-                        // console.log(device_to_group);
-                        group_to_data[charts][index][i] = device_to_group[device];
-                    }
-                }
-            }
-
-            // Makes use of a somewhat zany closure
-            var current_event = google.visualization.events.addListener(all_charts[charts][index], 'onmouseover', (function (charts, chart_index) {
-                return function (entry) {
-                    // Only attempts to display if there is a valid treatment group
-                    if (all_treatment_groups[group_to_data[charts][chart_index][entry.column]]) {
-                        var current_pos = $(all_charts[charts][chart_index].container).position();
-                        var current_top = current_pos.top + 75;
-                        var current_left = $('#breadcrumbs').position.left;
-                        if (entry.row === null && entry.column) {
-                            var row_clone = all_treatment_groups[group_to_data[charts][chart_index][entry.column]].clone().addClass('bg-warning');
-                            if (row_clone) {
-                                $('#group_display_body').empty().append(row_clone);
-
-                                $('#group_display').show()
-                                    .css({top: current_top, left: current_left, position: 'absolute'});
-                            }
-                        }
-                    }
-                }
-            })(charts, index));
-            all_events[charts].push(current_event);
-
-            current_event = google.visualization.events.addListener(all_charts[charts][index], 'onmouseout', function () {
-                $('#group_display').hide();
-            });
-            all_events[charts].push(current_event);
+        if (hide_sidebar && $('#sidebar').hasClass('active')) {
+            // GET RID OF SIDEBAR
+            $('.toggle_sidebar_button').first().trigger('click');
         }
     };
+
+    // TODO TODO TODO NOT DRY
+    function modify_chart_checkbox(checkbox, add_or_remove) {
+        var current_index = $(checkbox).attr('data-table-index');
+
+        // Visibly make checked
+        $(checkbox).prop('checked', add_or_remove);
+
+        if ($(checkbox).prop('checked')) {
+            $(checkbox).attr('checked', 'checked');
+
+            show_hide_plots_data_table.data()[current_index][0] = show_hide_plots_data_table.data()[current_index][0].replace('>', ' checked="checked">');
+        }
+        else {
+            $(checkbox).removeAttr('checked');
+
+            show_hide_plots_data_table.data()[current_index][0] = show_hide_plots_data_table.data()[current_index][0].replace(' checked="checked">', '>');
+        }
+
+        chart_filter_buffer[$(checkbox).val()] = $(checkbox).prop('checked');
+    }
+
+    $(document).on('click', '.chart-filter-checkbox', function() {
+        modify_chart_checkbox(this, $(this).prop('checked'));
+    });
+
+    // Triggers for select all
+    $('#show_hide_plots_select_all').click(function() {
+        show_hide_plots_data_table.page.len(-1).draw();
+
+        $('.chart-filter-checkbox').each(function() {
+            modify_chart_checkbox(this, true);
+        });
+
+        show_hide_plots_data_table.order([[1, 'asc']]);
+        show_hide_plots_data_table.page.len(10).draw();
+    });
+
+    // Triggers for deselect all
+    $('#show_hide_plots_deselect_all').click(function() {
+        show_hide_plots_data_table.page.len(-1).draw();
+
+        $('.chart-filter-checkbox').each(function() {
+            modify_chart_checkbox(this, false);
+        });
+
+        show_hide_plots_data_table.order([[1, 'asc']]);
+        show_hide_plots_data_table.page.len(10).draw();
+    });
+
+    $('.show_hide_plots').click(function() {
+        show_hide_plots_popup.dialog('open');
+    });
+
+    $('#id_make_plot_form_data').click(function() {
+        alert('TODO');
+    });
+
+    function create_popup_for_individual_plot(chart) {
+        current_chart = chart;
+        current_chart_name = $(chart).attr('data-chart-name');
+        current_chart_id = Math.floor($(chart).attr('id').split('_')[1]);
+        // Contrived
+        // current_chart_options = all_options['charts'][current_chart_id];
+
+        // Open sidebar if it is closed
+        if (!$('#sidebar').hasClass('active')) {
+            $('.toggle_sidebar_button').first().trigger('click');
+        }
+
+        individual_plot_popup.dialog('open');
+    }
+
+    // CONTEXT MENU
+    $(document).on('contextmenu.chart_context', '.chart-container', function() {
+        create_popup_for_individual_plot(this);
+    });
+
+    // TRIGGER CONTEXT MENU ON LONG PRESS
+    // ATTEMPT TO TRIGGER ON TOUCH EVENTS AS WELL
+    var long_press_timer;
+    $(document).on('mousedown.chart_context touchstart.chart_context', '.chart-container', function() {
+        var chart = this;
+        long_press_timer = setTimeout(function() {
+            create_popup_for_individual_plot(chart);
+        }, 1500);
+    });
+    $(document).on('mouseup.chart_context mouseleave.chart_context touchend.chart_context touchcancel.chart_context', '.chart-container', function() {
+        clearTimeout(long_press_timer);
+    });
+
+    // THESE ARE SPECIAL TRIGGERS TO PREVENT SELECTING MEDIAN AND STE/STD
+    // ALSO PREVENTS SELECTING MEAN AND IQR
+    // ALSO THE SELECTORS ARE NOT SO GOOD
+    var iqr_selector = $('#iqr_select');
+    var std_selector = $('#std_select');
+    var ste_selector = $('#ste_select');
+
+    var number_for_interval_selector = $('#number_for_interval');
+
+    // TODO TODO TODO IDIOTIC PLEASE FIX ASAP
+    function restrict_error_bar_options(refresh) {
+        if ($('#arithmetic_select').prop('checked') || $('#geometric_select').prop('checked')) {
+            // Enable proper options
+            std_selector.removeAttr('disabled');
+            ste_selector.removeAttr('disabled');
+
+            // At the end, see if iqr is selected, if so then default to ste
+            // (mean and iqr are forbidden together)
+            if (iqr_selector.prop('checked')) {
+                ste_selector.trigger('click');
+            }
+            else if(refresh) {
+                trigger_refresh();
+            }
+
+            // Forbid iqr
+            iqr_selector.attr('disabled', 'disabled');
+        }
+        else {
+            // Enable proper options
+            iqr_selector.removeAttr('disabled');
+
+            // At the end, see if iqr is selected, if so then default to ste
+            // (mean and iqr are forbidden together)
+            if (std_selector.prop('checked') || ste_selector.prop('checked')) {
+                iqr_selector.trigger('click');
+            }
+            else if(refresh) {
+                // Odd, perhaps innapropriate!
+                trigger_refresh();
+            }
+
+            // Forbid std and ste
+            std_selector.attr('disabled', 'disabled');
+            ste_selector.attr('disabled', 'disabled');
+        }
+
+        // Disable number for interval if not std
+        if (!std_selector.prop('checked')) {
+            number_for_interval_selector.attr('disabled', 'disabled');
+        }
+        else {
+            number_for_interval_selector.removeAttr('disabled');
+        }
+    }
+
+    $('#arithmetic_select, #geometric_select, #median_select, #std_select, #ste_select').change(function() {
+        restrict_error_bar_options(true);
+    });
+
+    // Initially, just block iqr for now
+    // SLOPPY: PLEASE NOTE PLEASE NOTE
+    iqr_selector.attr('disabled', 'disabled');
+
+    // SLOPPY: PLEASE NOTE
+    number_for_interval_selector.attr('disabled', 'disabled');
+
+    // Set up triggers all other triggers
+    function trigger_refresh() {
+        // Odd
+        if (side_bar_global) {
+            window.CHARTS.global_options = window.CHARTS.prepare_chart_options();
+
+            // Odd, perhaps innapropriate!
+            window.GROUPING.refresh_wrapper();
+        }
+        else {
+            // IF THE PREVIEW IS VISIBLE AND NOT MANUAL REFRESH, APPLY IT NOW
+            if (!document.getElementById("id_manually_refresh").checked) {
+                refresh_preview();
+            }
+        }
+    }
+
+    $('#charting_sidebar_section')
+        .find('input, select')
+        // Exceptions to refresh (manually done elsewhere)
+        .not('#arithmetic_select, #geometric_select, #median_select, #std_select, #ste_select')
+        .change(trigger_refresh);
 });

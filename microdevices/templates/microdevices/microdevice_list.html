@@ -1,11 +1,12 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block load %}
+{% block load_js %}
     <script src="{% static "microdevices/microdevice_list.js" %}"></script>
 {% endblock %}
 
 {% block breadcrumbs %}
+    <li><a href="{% url 'assays-studycomponents' %}">Study Components</a></li>
     <li class="active">Devices</li>
 {% endblock %}
 
@@ -21,7 +22,7 @@
             <a href="/microdevices/device/add/" class="btn btn-lg btn-success" role="button">Add Device</a>
         </div>
 
-        <table hidden id="microdevices" class="display" cellspacing="0" width="100%">
+        <table hidden id="microdevices" class="display table table-striped" cellspacing="0" width="100%">
             <thead>
                 <tr>
                     <th>View</th>
@@ -37,7 +38,7 @@
 
             <tbody>
             {% for device in object_list %}
-                <tr class="device" id={{ device.id }} name={{ device.name }}>
+                <tr>
                     <td><a class="btn btn-primary" href="{{ device.id }}">View</a></td>
                     <td><a class="btn btn-primary" href="{{ device.id }}/update/">Edit</a></td>
                     <td>{{ device.name }}</td>
@@ -51,6 +52,4 @@
             </tbody>
         </table>
     </div>
-
-    <script src="{% static "js/display_datatable.js" %}"></script>
 {% endblock %}

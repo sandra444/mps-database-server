@@ -1,21 +1,54 @@
+// THIS FILE NEEDS TO BE REFACTORED
+window.INLINES = {
+    default_rows: null
+};
+
 $(document).ready(function () {
     // Note that this requires certain class name, add name, inlines name
     // Note that the selector that selects TABLES (not divs) with the name inlines
     var inlines = $('.inlines');
     var default_rows = {};
 
+    window.INLINES.default_rows = default_rows;
+
     // For each inline
     inlines.each(function() {
         var title = $(this).find('.inline')[0].id.split('-')[0];
         var set_title = this.id.split('-')[0];
 
-        default_rows[set_title] = $(this).find('.inline:last').html();
+        default_rows[set_title] = $(this).find('.inline:last').clone();
+
+        default_rows[set_title].find('input:not([type="file"])').each(function() {
+            if ($(this).attr('data-default')) {
+                $(this).val($(this).attr('data-default'));
+                // DUMB
+                $(this).attr('value', $(this).attr('data-default'));
+            }
+            else {
+                $(this).val('');
+                // DUMB
+                $(this).attr('value', '');
+            }
+        });
+
+        default_rows[set_title].find('select').each(function() {
+            if ($(this).attr('data-default')) {
+                $(this).val($(this).attr('data-default'));
+                // DUMB
+                $(this).find('option[value="' + $(this).attr('data-default') + '"]').attr("selected", true);
+            }
+            else {
+                $(this).val('');
+                // DUMB
+                $(this).find('option[value=""]').attr("selected", true);
+            }
+        });
 
         $('#add_button-'+set_title).click(function() {
             var current_set_title = this.id.split('-').slice(1).join('-');
             var current_title = $('#'+current_set_title+'-group').find('.inline')[0].id.split('-')[0];
 
-            var add = default_rows[current_set_title];
+            var add = default_rows[current_set_title].html();
 
             var next_id = $('#'+current_set_title+'-group').find('.inline').length;
             var tag = '<tr class="inline" id="' + current_title + '-' + next_id + '">';
@@ -26,11 +59,18 @@ $(document).ready(function () {
             next_id += 1;
             // Set the hidden TOTAL_FORMS to be incremented, otherwise won't bother reading other inline
             $('#id_'+current_set_title+'-TOTAL_FORMS').val(""+next_id);
+            $("select").each(function(i, obj) {
+                if(!$(obj).parent().hasClass("no-selectize") && !$(obj).hasClass('no-selectize')) {
+                    $(obj).not('.selectized').selectize({
+                        diacritics: true
+                    });
+                }
+            });
         });
     });
 
     // This selector will check all items with DELETE in the name, including newly created ones
-    $("body").on("click", "[id$=-DELETE]", function(event) {
+    $("body").on("click", ".inline td input[id$=-DELETE]", function(event) {
         // Use a regex to get the desired ID number
         // var thenum = thestring.match(/\d+$/)[0];
         var id = parseInt(event.target.id.match(/\d+/)[0]);
@@ -63,25 +103,43 @@ $(document).ready(function () {
         $("#id_" + current_set_title + "-TOTAL_FORMS").val(""+next_id);
 
         var end = next_id;
-        for (var i=id+1; i<=end; i++){
+        for (var i=id+1; i<=end; i++) {
             var current = $('#' + current_title + '-' + i);
+
+            var add = $('<tr>').html(
+                default_rows[current_set_title].clone().html().replace(/\-\d+\-/g,'-'+ (i) +'-')
+            );
 
             // Need to update values before creating the replacement text
             // Add values to input
             $('#'+ current_title + '-' + i + ' input').each(function () {
                 $(this).attr("value", this.value);
+                var current_add = add.find('#' + this.id);
+                current_add.val(this.value);
+                current_add.attr('value', this.value);
             });
             // Add selected attribute to selected option of each select
             $('#'+ current_title + '-' + i + ' select').each(function (){
                 //console.log(this.id);
                 $('#' + this.id + ' option[value="' + $(this).val() + '"]').attr("selected", true);
+                var current_add = add.find('#' + this.id);
+
+                current_add.val(this.value);
+                current_add.find('option[value="' + $(this).val() + '"]').attr("selected", true);
             });
 
-            var replacement = current.html().replace(/\-\d+\-/g,'-'+ (i-1) +'-');
+            var replacement = add.html().replace(/\-\d+\-/g,'-'+ (i-1) +'-');
             var tag = '<tr class="inline" id="' + current_title + '-' + (i-1) + '">';
             $(tag).appendTo($('#'+current_set_title+'-group')).html(replacement);
             // Remove old
             current.remove();
         }
+        $("select").each(function(i, obj) {
+            if(!$(obj).parent().hasClass("no-selectize")) {
+                $(obj).not('.selectized').selectize({
+                    diacritics: true
+                });
+            }
+        });
     });
 });

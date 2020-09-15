@@ -1,4 +1,5 @@
 // This script moves the filter and length widgets for a datatable and make the table visible after it loads
+// DEPRECATED: DO NOT USE
 $(document).ready(function() {
 
     // Get URL parameters for auto search

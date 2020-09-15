@@ -5,7 +5,7 @@ import os
 import hashlib
 import csv
 
-from pandas import *
+from pandas import DataFrame, pivot_table
 from django.db import connection
 
 from mps.settings import MEDIA_ROOT
@@ -15,8 +15,9 @@ import scipy.cluster
 import numpy as np
 
 from compounds.models import Compound
-from .models import Bioactivity, PubChemBioactivity, Assay
+from .models import Bioactivity, PubChemBioactivity #, Assay
 from drugtrials.models import FindingResult
+from functools import reduce
 
 # POTENTIALLY TOO MEMORY CONSUMING; BE CAUTIOUS
 # Only uncomment this if requested
@@ -48,7 +49,7 @@ def generate_record_frequency_data(query):
 
     result_list = []
 
-    for key, value in result.iteritems():
+    for key, value in list(result.items()):
         result_list.append([key, value])
 
     return result_list
@@ -64,7 +65,7 @@ def get_compound_frequency_data(query):
 
     for element in query:
         # TODO CRUDE; REQUIRES REVISION
-        element = '|'.join([unicode(item) for item in element])
+        element = '|'.join([str(item) for item in element])
         if element:
             if element in result:
                 frequency = result.get(element)
@@ -75,7 +76,7 @@ def get_compound_frequency_data(query):
 
     result_list = []
 
-    for key, value in result.iteritems():
+    for key, value in list(result.items()):
         result_list.append([key, value])
 
     return result_list
@@ -266,8 +267,17 @@ def generate_list_of_all_drugtrials(desired_organisms):
     desired_organisms = [organisms.get(organism, '') for organism in desired_organisms]
 
     result = FindingResult.objects.filter(
-        value__isnull=False, drug_trial__species__species_name__in=desired_organisms
-    ).prefetch_related('drug_trial__species', 'finding_name').values_list('finding_name__finding_name', flat=True)
+        value__isnull=False,
+        drug_trial__species__species_name__in=desired_organisms
+    ).exclude(
+        drug_trial__compound__isnull=True
+    ).prefetch_related(
+        'drug_trial__species',
+        'finding_name'
+    ).values_list(
+        'finding_name__finding_name',
+        flat=True
+    )
 
     result = generate_record_frequency_data(result)
 
@@ -634,6 +644,8 @@ def fetch_all_standard_drugtrials_data(
             value__isnull=False,
             drug_trial__compound__name__in=desired_compounds,
             drug_trial__species__species_name__in=desired_organisms
+        ).exclude(
+            drug_trial__compound__isnull=True
         )
         #average = 0
         current_min = 999999999
@@ -778,12 +790,12 @@ def heatmap(request):
         return {'error': 'no standard bioactivities or drugtrial data'}
 
     if all_std_bioactivities:
-        bioactivities_data = pandas.DataFrame(
+        bioactivities_data = DataFrame(
             all_std_bioactivities,
             columns=['compound', 'target', 'bioactivity', 'value']
         ).fillna(0)
 
-        pivoted_data = pandas.pivot_table(
+        pivoted_data = pivot_table(
             bioactivities_data,
             values='value',
             columns=['target', 'bioactivity'],
@@ -802,10 +814,10 @@ def heatmap(request):
         rearranged_data = unwound_data[data_order]
 
     else:
-        rearranged_data = pandas.DataFrame()
+        rearranged_data = DataFrame()
 
     if all_std_drugtrial:
-        drugtrial_df = pandas.DataFrame(all_std_drugtrial, columns=['compound', 'target_bioactivity_pair', 'value'])
+        drugtrial_df = DataFrame(all_std_drugtrial, columns=['compound', 'target_bioactivity_pair', 'value'])
 
         rearranged_data = rearranged_data.append(drugtrial_df)
 
@@ -816,10 +828,11 @@ def heatmap(request):
         pass
 
     # generate a unique full path for data and rows and columns information
+    data_hash = str(len([name for name in os.listdir(os.path.join(MEDIA_ROOT, 'heatmap')) if os.path.isfile(name)]))
 
-    data_hash = hashlib.sha512(
-        str(rearranged_data)
-    ).hexdigest()[:10]
+    # data_hash = hashlib.sha512(
+    #     str(rearranged_data)
+    # ).hexdigest()[:10]
 
     fullpath_without_extension = os.path.join(
         MEDIA_ROOT,
@@ -836,8 +849,9 @@ def heatmap(request):
     # generate csv writers for each file handle
     data_csv_writer = csv.writer(data_csv_filehandle)
 
+    # NOTE THE UTF-8 BOM
     # write out our data lists into csv format
-    data_csv_writer.writerow(['compound', 'bioactivity', 'value'])
+    data_csv_writer.writerow(['\ufeffcompound', 'bioactivity', 'value'])
     data_csv_writer.writerows(rearranged_data.values.tolist())
 
     # close the csv files that we have written so far
@@ -892,8 +906,9 @@ def heatmap(request):
             for compound in valid_compounds:
                 values.append(initial_dic[compound][bioactivity])
             # Get median from list after excluding all None values
-            median = np.median(np.array([value for value in values if value is not None]))
-            maximum = max(values)
+            non_null_values = np.array([value for value in values if value is not None])
+            median = np.median(non_null_values)
+            maximum = np.max(non_null_values)
 
             # Avoid anomalies by arbitrarily putting median to 10% when max == median
             if median == maximum:
@@ -902,7 +917,7 @@ def heatmap(request):
             values = [value if value is not None else median for value in values]
             data.update({bioactivity: values})
 
-    df = pandas.DataFrame(data)
+    df = DataFrame(data)
 
     # For *Rows*
 
@@ -1010,12 +1025,12 @@ def cluster(request):
     if all_std_bioactivities or all_std_drugtrial:
 
         if all_std_bioactivities:
-            bioactivities_data = pandas.DataFrame(
+            bioactivities_data = DataFrame(
                 all_std_bioactivities,
                 columns=['compound', 'target', 'bioactivity', 'value']
             ).fillna(0)
 
-            pivoted_data = pandas.pivot_table(
+            pivoted_data = pivot_table(
                 bioactivities_data,
                 values='value',
                 columns=['target', 'bioactivity'],
@@ -1034,10 +1049,10 @@ def cluster(request):
             rearranged_data = unwound_data[data_order]
 
         else:
-            rearranged_data = pandas.DataFrame()
+            rearranged_data = DataFrame()
 
         if all_std_drugtrial:
-            drugtrial_df = pandas.DataFrame(
+            drugtrial_df = DataFrame(
                 all_std_drugtrial,
                 columns=['compound', 'target_bioactivity_pair', 'value']
             )
@@ -1083,8 +1098,9 @@ def cluster(request):
             for compound in valid_compounds:
                 values.append(initial_dic[compound][bioactivity])
             # Get median from list after excluding all None values
-            median = np.median(np.array([value for value in values if value is not None]))
-            maximum = max(values)
+            non_null_values = np.array([value for value in values if value is not None])
+            median = np.median(non_null_values)
+            maximum = np.max(non_null_values)
 
             # Avoid anomalies by arbitrarily putting median to 10% when max == median
             if median == maximum:
@@ -1105,7 +1121,7 @@ def cluster(request):
              'ro3_passes']
 
     # list of dics of compounds (creating this prevents excessive calls to the database
-    compound_data = Compound.objects.filter(name__in=valid_compounds).values()
+    compound_data = list(Compound.objects.filter(name__in=valid_compounds).values())
 
     # Update values for chemical properties (if chemical_properties)
     if chemical_properties:
@@ -1116,8 +1132,9 @@ def cluster(request):
                 # This is a rather inefficient means of acquiring data
                 values.append(compound.get(prop, None))
             # Get median from list after excluding all None values
-            median = np.median(np.array([value for value in values if value is not None]))
-            maximum = max(values)
+            non_null_values = np.array([value for value in values if value is not None])
+            median = np.median(non_null_values)
+            maximum = np.max(non_null_values)
 
             # Avoid anomalies by arbitrarily putting median to 10% when max == median
             if median == maximum:
@@ -1127,7 +1144,7 @@ def cluster(request):
             values = [value if value is not None else median for value in values]
             data.update({prop: values})
 
-    df = pandas.DataFrame(data)
+    df = DataFrame(data)
 
     # Determine distances (default is Euclidean)
     # The data frame should encompass all of the bioactivities
@@ -1146,7 +1163,7 @@ def cluster(request):
 
     # Create dictionary for labeling nodes by their IDs
     labels = list(df['compounds'])
-    id2name = dict(zip(range(len(labels)), labels))
+    id2name = dict(list(zip(list(range(len(labels))), labels)))
 
     # Create a nested dictionary from the ClusterNode's returned by SciPy
     def add_node(node, parent):
@@ -1296,14 +1313,14 @@ def table(request):
                 target = bioactivity.assay.target.name
                 organism = bioactivity.assay.target.organism
             else:
-                target = u''
+                target = ''
                 organism = bioactivity.assay.organism
         else:
             if bioactivity.target:
                 target = bioactivity.target.name
                 organism = bioactivity.target.organism
             else:
-                target = u''
+                target = ''
                 organism = bioactivity.assay.organism
 
         chemblid = bioactivity.assay.chemblid
@@ -1312,8 +1329,8 @@ def table(request):
         if pubchem:
             activity_name = bioactivity.activity_name
             standardized_value = bioactivity.value
-            operator = u''
-            standardized_units = u''
+            operator = ''
+            standardized_units = ''
         else:
             activity_name = bioactivity.standard_name
             standardized_value = bioactivity.standardized_value

@@ -1,12 +1,13 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block load %}
-    <script src="{% static "js/project_filter.js" %}"></script>
+{% block load_js %}
+    {# <script src="{% static "js/project_filter.js" %}"></script> #}
     <script src="{% static "microdevices/organmodel_list.js" %}"></script>
 {% endblock %}
 
 {% block breadcrumbs %}
+    <li><a href="{% url 'assays-studycomponents' %}">Study Components</a></li>
     <li class="active">MPS Models</li>
 {% endblock %}
 
@@ -22,33 +23,50 @@
             <a href="/microdevices/model/add/" class="btn btn-lg btn-success" role="button">Add Model</a>
         </div>
 
-        {% include 'project_filters.html' %}
+        {# Deprecated #}
+{# {% include 'project_filters.html' %} #}
 
-        <table hidden id="models" class="display" cellspacing="0" width="100%">
+        <table hidden id="models" class="display table table-striped" cellspacing="0" width="100%">
             <thead>
                 <tr>
                     <th>View</th>
                     <th>Edit</th>
                     <th>Model Name</th>
+                    <th>Center</th>
+                    <th>Base Model</th>
                     <th>Organ</th>
                     <th>Device</th>
-                    <th>Center</th>
+                    {# REMOVED FOR NOW #}
+                    {# <th>Disease</th> #}
+                    <th>Versions</th>
                     <th>Description</th>
-                    <th>Project</th>
+                    {% comment %} <th>Project</th> {% endcomment %}
                 </tr>
             </thead>
 
             <tbody>
             {% for model in object_list %}
-                <tr class="model" id={{ model.id }} name={{ model.name }}>
+                <tr>
                     <td><a class="btn btn-primary" href="{{ model.id }}">View</a></td>
                     <td><a class="btn btn-primary" href="{{ model.id }}/update/">Edit</a></td>
                     <td>{{ model.name }}</td>
+                    <td><a href="/microdevices/center/{{ model.center.id }}" target='_blank'>{{ model.center|default_if_none:"" }}</a></td>
+                    <td>
+                        {% if model.base_model %}
+                            <a href="{{ model.base_model.get_absolute_url }}">{{ model.base_model.alt_name }}</a>
+                        {% endif %}
+                    </td>
                     <td>{{ model.organ|default_if_none:"" }}</td>
                     <td><a href="/microdevices/device/{{ model.device.id }}">{{ model.device|default_if_none:"" }}</a></td>
-                    <td><a href="/microdevices/center/{{ model.center.id }}" target='_blank'>{{ model.center|default_if_none:"" }}</a></td>
-                    <td>{{ model.description }}</td>
                     <td>
+                        {% if model.organmodelprotocol_set.count %}
+                        <span class='text-success'>{{ model.organmodelprotocol_set.count }}</span>
+                        {% else %}
+                        <span class='text-danger'>{{ model.organmodelprotocol_set.count }}</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ model.description }}</td>
+                    {% comment %} <td>
                         {% if model.mps %}
                             MPS
                         {% endif %}
@@ -61,12 +79,10 @@
                         {% if not model.epa and not model.mps and not model.tctc %}
                             Unassigned
                         {% endif %}
-                    </td>
+                    </td> {% endcomment %}
                 </tr>
             {% endfor %}
             </tbody>
         </table>
     </div>
-
-    <script src="{% static "js/display_datatable.js" %}"></script>
 {% endblock %}

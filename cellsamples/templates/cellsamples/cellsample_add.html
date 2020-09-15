@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block load %}
+{% block load_js %}
     <script src="{% static "js/flag.js" %}"></script>
     <script src="{% static "js/enter_override.js" %}"></script>
     <script src="{% static "js/image_display.js" %}"></script>
@@ -9,6 +9,7 @@
 {% endblock %}
 
 {% block breadcrumbs %}
+    <li><a href="{% url 'assays-studycomponents' %}">Study Components</a></li>
     <li><a href="/cellsamples/cellsample/">Cell Samples</a></li>
     <li class="active">
         {% if object %}
@@ -46,6 +47,29 @@
 
     <legend>Cell Sample Details</legend>
 
+    {% include 'generic_field.html' with field=form.cell_type %}
+
+    {% include 'generic_field.html' with field=form.cell_subtype %}
+
+    <div class="row padded-bottom">
+        <div class="col-sm-2"></div>
+        <div class="col-sm-10">
+            <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+            If the Cell Origin is a cell line, please select the associated Cell Type first.
+        </div>
+    </div>
+
+    {% include 'generic_field.html' with field=form.receipt_date %}
+
+    <div class="row padded-bottom">
+        <div class="col-sm-2"></div>
+        <div class="col-sm-10">
+            <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+            If the Cell Origin is iPSC-derived, please specify a Receipt Date
+        </div>
+    </div>
+
+    {% comment %}
     {% if form.cell_type.errors %}
         {% for error in form.cell_type.errors %}
             <div class="alert alert-danger" role="alert">
@@ -62,9 +86,9 @@
         <div class="col-sm-10">
             {{ form.cell_type }}
             <br>
-            <a href="/cellsamples/celltype">
+            <a class="popup-link" data-href="/cellsamples/celltype/add?popup=1" data-window-name="celltype">
                 <span class="glyphicon glyphicon-plus text-success" aria-hidden="true"></span>
-                Add/Edit Cell Types (Must Refresh Page to See Change)
+                Create New Cell Type
             </a>
         </div>
     </div>
@@ -84,13 +108,14 @@
         <label for="cell_subtype" class="col-sm-2 control-label">Cell Origin*</label>
         <div class="col-sm-10">
             {{ form.cell_subtype }}
+            {# SLOPPY #}
             <br>
             <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
             If the Cell Origin is a cell line, please select the associated Cell Type first.
             <br>
-            <a href="/cellsamples/cellsubtype">
+            <a class="popup-link" data-href="/cellsamples/cellsubtype/add?popup=1" data-window-name="cellsubtype">
                 <span class="glyphicon glyphicon-plus text-success" aria-hidden="true"></span>
-                Add/Edit Cell Origins (Must Refresh Page to See Change)
+                Create New Cell Origin
             </a>
         </div>
     </div>
@@ -107,14 +132,21 @@
     {% else %}
     <div class="form-group">
     {% endif %}
-        <label for="receipt_date" class="col-sm-2 control-label">Receipt Date*</label>
+        <label for="receipt_date" class="col-sm-2 control-label">Receipt Date</label>
         <div class="col-sm-10">
           {{ form.receipt_date }}
+          <br>
+          <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+          If the Cell Origin is iPSC-derived, please specify a Receipt Date
         </div>
     </div>
+    {% endcomment %}
 
     <legend>Group Access</legend>
 
+    {% include 'generic_field.html' with field=form.group %}
+
+    {% comment %}
     {% if form.group.errors %}
         {% for error in form.group.errors %}
             <div class="alert alert-danger" role="alert">
@@ -132,9 +164,51 @@
           {{ form.group }}
         </div>
     </div>
+    {% endcomment %}
 
     <legend>Supplier Information</legend>
 
+    {% include 'generic_field.html' with field=form.supplier %}
+
+    {% include 'generic_field.html' with field=form.product_id %}
+
+    {% include 'generic_field.html' with field=form.barcode %}
+
+    {% include 'generic_field.html' with field=form.cell_image %}
+
+    <div id="image_display">
+        <div id="current_display">
+            {% if object.cell_image %}
+                <img class="img-responsive center-block padded-bottom" src="/media/{{ object.cell_image }}">
+            {% endif %}
+        </div>
+    </div>
+
+    {% include 'generic_field.html' with field=form.notes %}
+
+    <legend>Isolation Information</legend>
+
+    {% include 'generic_field.html' with field=form.isolation_datetime %}
+
+    {% include 'generic_field.html' with field=form.isolation_method %}
+
+    {% include 'generic_field.html' with field=form.isolation_notes %}
+
+    <legend>Cell Viability</legend>
+
+    {% include 'generic_field.html' with field=form.viable_count %}
+
+    {% include 'generic_field.html' with field=form.percent_viability %}
+
+    <legend>Patient Information</legend>
+
+    {% include 'generic_field.html' with field=form.patient_age %}
+
+    {% include 'generic_field.html' with field=form.patient_gender %}
+
+    {% include 'generic_field.html' with field=form.patient_condition %}
+
+    {% comment %}
     {% if form.supplier.errors %}
         {% for error in form.supplier.errors %}
             <div class="alert alert-danger" role="alert">
@@ -384,4 +458,7 @@
           {{ form.patient_condition }}
         </div>
     </div>
+    {% endcomment %}
+
+    </form>
 {% endblock %}

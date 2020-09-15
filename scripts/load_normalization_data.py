@@ -1,4 +1,4 @@
-from drugtrials.models import *
+from drugtrials.models import OpenFDACompound
 import ujson as json
 from mps.settings import PROJECT_ROOT
 
@@ -17,7 +17,7 @@ def run():
             failed.append(compound)
         compound.save()
 
-    keys = normalize.keys()
+    keys = list(normalize.keys())
 
     for compound in failed:
         compound_name = compound.compound.name

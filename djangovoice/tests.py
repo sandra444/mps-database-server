@@ -1,7 +1,7 @@
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.test import Client, TestCase
-
-from djangovoice.models import *
+from django.contrib.auth.models import User
+from djangovoice.models import Status, Type, Feedback
 
 
 class ViewTestCase(TestCase):
