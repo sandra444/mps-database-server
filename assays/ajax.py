@@ -6850,40 +6850,37 @@ def fetch_omic_method_target_unit_combos(request):
 
 
 def sub_fetch_omic_sample_info_from_upload_data_table(groupId, groupPk):
-    timemess = ""
-    locmess = ""
+    locmess = "no"
+    loc_pk = None
+    timemess = "no"
+    times = None
     day = None
     hour = None
     minute = None
-    loc_pk = None
 
     # find time if a previous instance with this group has been saved
     queryset1 = AssayOmicDataFileUpload.objects.filter(
         group_1=groupPk
     ).aggregate(Max('time_1'))['time_1__max']
+    queryset2 = AssayOmicDataFileUpload.objects.filter(
+        group_2=groupPk
+    ).aggregate(Max('time_2'))['time_2__max']
 
-    if queryset1 is not None:
+    if queryset1 is not None and queryset2 is not None:
         timemess = "found"
+        if queryset1 > queryset2:
+            times = get_split_times(queryset1)
+        else:
+            times = get_split_times(queryset2)
+    elif queryset1 is not None:
         times = get_split_times(queryset1)
+    elif queryset2 is not None:
+        times = get_split_times(queryset2)
+
+    if times is not None:
         day = times.get("day")
         hour = times.get("hour")
         minute = times.get("minute")
-    else:
-        queryset2 = AssayOmicDataFileUpload.objects.filter(
-            group_2=groupPk
-        ).aggregate(Max('time_2'))['time_2__max']
-
-        if queryset2 is not None:
-            timemess = "found"
-            times = get_split_times(queryset2)
-            day = times.get("day")
-            hour = times.get("hour")
-            minute = times.get("minute")
-        else:
-            timemess = "no"
-            day = None
-            hour = None
-            minute = None
 
     # find location if this group has previously been saved with a group
     queryset1 = AssayOmicDataFileUpload.objects.filter(
@@ -6901,8 +6898,6 @@ def sub_fetch_omic_sample_info_from_upload_data_table(groupId, groupPk):
         if queryset2 is not None:
             locmess = "found"
             loc_pk = queryset2
-        else:
-            loc_pk = None
 
     return [timemess, locmess, day, hour, minute, loc_pk]
 
