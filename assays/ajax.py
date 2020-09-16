@@ -4800,9 +4800,11 @@ def fetch_pbpk_group_table(request):
         )
 
         matrix_items.prefetch_related(
-            'assaysetupcompound_set__compound_instance',
+            # 'assaysetupcompound_set__compound_instance',
             # Need cells for discrimination later
-            'assaysetupcell_set__cell_sample__cell_type__organ',
+            # 'assaysetupcell_set__cell_sample__cell_type__organ',
+            'assaygroupcompound_set__compound_instance',
+            'assaygroupcell_set__cell_sample__cell_type__organ',
             'assaydatapoint_set__study_assay__target'
         )
 
@@ -4856,7 +4858,7 @@ def fetch_pbpk_group_table(request):
 
         # TODO: BAD, CONTRIVED
         groups = AssayGroup.objects.filter(
-            study_id=study.id
+            study_id__in=studies,
         )
 
         # Not particularly DRY
@@ -4893,6 +4895,7 @@ def fetch_pbpk_group_table(request):
         data = get_pbpk_info(
             data_points,
             matrix_items,
+            groups,
         )
 
         data.update({'post_filter': post_filter})
@@ -4905,10 +4908,11 @@ def fetch_pbpk_group_table(request):
         return HttpResponseServerError()
 
 
-def get_pbpk_info(data_points, matrix_items):
+def get_pbpk_info(data_points, matrix_items, groups):
     # Hardcoded for now:
     criteria = {
-        'setup': ['study_id', 'organ_model_id', 'device_id'],
+        # 'setup': ['study_id', 'organ_model_id', 'device_id'],
+        'setup': ['study_id', 'organ_model_id'],
         'special': ['method', 'sample_location'],
         # Maybe we'll utilize concentration unit later
         # 'compound': ['compound_instance.compound_id', 'concentration', 'concentration_unit_id']
@@ -4918,13 +4922,13 @@ def get_pbpk_info(data_points, matrix_items):
     treatment_group_representatives, setup_to_treatment_group, treatment_header_keys = get_item_groups(
         None,
         criteria,
-        matrix_items
+        groups=groups,
     )
 
     cell_group_representives, setup_to_cell_group, cell_header_keys = get_item_groups(
         None,
         {'cell': ['cell_sample_id']},
-        matrix_items
+        groups=groups,
     )
 
     matrix_item_id_to_tooltip_string = {
