@@ -6907,7 +6907,7 @@ def sub_fetch_omic_sample_info_from_upload_data_table(groupId, groupPk):
     return [timemess, locmess, day, hour, minute, loc_pk]
 
 
-def fetch_omics_data(request):
+def fetch_omics_data_for_visualization(request):
     data = {'data': {}}
 
     study = request.POST.get('study_id', '{}')
@@ -6935,10 +6935,10 @@ def fetch_omics_data(request):
     data['table'] = {}
 
     for datafile in datafiles:
-        joint_name = " vs ".join([datafile.group_1.name.split('-')[-1].strip(), datafile.group_2.name.split('-')[-1].strip()])
+        joint_name = " vs ".join([datafile.group_1.name, datafile.group_2.name])
         data['data'][joint_name] = {}
         data['file_id_to_name'][datafile.id] = joint_name
-        data['table'][joint_name] = datafile.description
+        data['table'][joint_name] = [datafile.description, datafile.id]
 
     datapoints = AssayOmicDataPoint.objects.filter(study=study).exclude(value__isnull=True)
 
@@ -6984,6 +6984,33 @@ def fetch_omics_data_for_upload_preview_prep(request):
         default_json.dumps(data),
         content_type='application/json'
     )
+
+
+def get_filtered_omics_data_as_csv(ids, data_points=None, both_assay_names=False, include_header=False, include_all=False):
+    """Returns data points as a csv in the form of a string"""
+    data = get_data_as_list_of_lists(
+        ids,
+        data_points,
+        both_assay_names,
+        include_header,
+        include_all
+    )
+
+    for index in range(len(data)):
+        current_list = list(data[index])
+        data[index] = [str(item) for item in current_list]
+
+    string_io = StringIO()
+    csv_writer = csv.writer(string_io, dialect=csv.excel)
+
+    # Add the UTF-8 BOM
+    data[0][0] = '\ufeff' + data[0][0]
+
+    # Write the lines
+    for one_line_of_data in data:
+        csv_writer.writerow(one_line_of_data)
+
+    return string_io.getvalue()
 
 
 # TODO TODO TODO
@@ -7108,8 +7135,8 @@ switch = {
     'fetch_omic_sample_info_from_upload_data_table': {
         'call': fetch_omic_sample_info_from_upload_data_table
     },
-    'fetch_omics_data': {
-        'call': fetch_omics_data
+    'fetch_omics_data_for_visualization': {
+        'call': fetch_omics_data_for_visualization
     },
     'fetch_omic_method_target_unit_combos': {
         'call': fetch_omic_method_target_unit_combos
