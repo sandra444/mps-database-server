@@ -160,8 +160,6 @@
     {% endif %}
 </head>
 
-{# TODO DRAFT VERSION -  NEEDS TO BE REVIEWED  #}
-
 <body>
 {# <body data-spy="scroll" data-target=".navbar" data-offset="80"> #}
 
@@ -186,7 +184,7 @@
                     <ul class="dropdown-menu">
                         <li><a href="#overview0">Database Background</a></li>
 {#                        <li><a href="#overview1">Study Components </a></li>#}
-                        <li><a href="#overview2">Study Data Organization</a></li>
+                        <li><a href="#overview2">Study Organization</a></li>
                         <li><a href="#overview4">Reference Data Sources</a></li>
                         <li><a href="#overview3">Database Features</a></li>
                         <li><a href="#overview5">Permission Structure </a></li>
@@ -199,7 +197,6 @@
                         <li><a href="#video_demo_8">Plate Reader Data Integration Tool (in development) - 20200521 </a></li>
                         <li><a href="#video_demo_7">Physiologically Based Pharmacokinetic (PBPK) Modeling (in development) - 20200416</a></li>
 {#                            <li><a href="#video_demo_6">Power Analysis by Larry - don't post - 20200220 </a></li>#}
-
                         <li><a href="#video_demo_5">Study Sets, Controlled Sharing, References - 20190620</a></li>
                         <li><a href="#video_demo_4">NCATS Data Sharing Workflow - 20190620 </a></li>
                         <li><a href="#video_demo_3">Looking at Kidney Study Data - 20190418</a></li>
@@ -263,6 +260,7 @@
                     </ul>
                 </li>
 
+{#            TODO update the admin information when have more time#}
                 {% if user.is_superuser %}
                 <li class="dropdown">
                     <a class="dropdown-toggle" data-toggle="dropdown" href="#">MPS Admins<span class="caret"></span></a>
@@ -330,15 +328,9 @@
 </nav>
 
 <div class="offset-help-navbar">
-{% comment %}
-    <div id="intro_section" class="container">
-        <div id="elavatordescription">
-        <br>The <b>Microphysiology Systems (MPS) Database</b> combines the loading, storage, and sharing of experimentally derived assay data and data curated from external reference sources with visualization and analysis tools to provide a powerful platform for designing experimental studies and performing computational modeling.
-        <br>
-        </div>
-    </div>
-{% endcomment %}
-{#<div id="#assay_platemap_add_anchor">sdfasdfasdf</div>#}
+    <h1>START REVIEW</h1>
+    <h2> Note: links may not work</h2>
+    <h2>Click on the box to expand the content for review</h2>
     <div id="overview_section" class="container">
 
         <h1 class="sub1-bars"> Overview of the MPS-Db </h1>
@@ -347,22 +339,14 @@
             <button name="my_buttons" class="collapsible1">Database Background</button>
             <div class="content1">
                 <div id="overview0viewer" class="viewersubtainer">
-                    <ul class="list-group">
-                        <li class="list-group-item">
-                            The Microphysiology Systems Database (MPS-Db) combines the loading, storage, and sharing of experimentally derived assay data and data curated from external reference sources with visualization and analysis tools to provide a powerful platform for designing experimental studies and performing computational modeling. The MPS-Db can store curated assay data and associated metadata from a wide variety of plate-based and microfluidic models. Data from external reference sources are brought into the MPS-Db to facilitate ease of access to those data and to support integration of data across curated data sources.
-                            <br><br>
-                            Data collected as part of experimental studies are manually curated into the MPS-Db. Data from reference data sources are manually and/or auto-curated. The MPS-Db provides tools to analyze and/or visualize data pulled from external data sources, and also provides tools to analyze curated study data in combination with reference data. Data and features available in the MPS-Db are described briefly below.
-                            <br><br>
-                            Many of the terms used in the MPS-GUI and here in the <b>Help</b> page are defined in the <b>Glossary</b>. It is recommended that users rely heavily on the <b>Glossary</b> to assist in understanding how to appropriately review, edit, and/or add data to the MPS-Db.
-                        </li>
-                    </ul>
+                    {% include 'help_overview_database_background.html' %}
                 </div>
             </div>
         </div>
 
         {% comment %}
         <div id="overview1">
-            <button name="my_buttons" class="collapsible1">Study Components</button>
+            <button name="my_buttons" class="collapsible1">Add when/if needed</button>
             <div class="content1">
                 <div id="overview1viewer" class="viewersubtainer">
                     <ul class="list-group">
@@ -376,43 +360,10 @@
         {% endcomment %}
 
         <div id="overview2">
-            <button name="my_buttons" class="collapsible1">Study Data Organization</button>
+            <button name="my_buttons" class="collapsible1">Study Organization</button>
             <div class="content1">
                 <div id="overview2viewer" class="viewersubtainer">
-                    <ul class="list-group">
-                        <li class="list-group-item">
-                            In the MPS-Db, a study contains all data and metadata associated to an experiment designed to assess MPS model response. A list of studies in the MPS-Db, with summary information about the MPS models used in the study and associated assay results, is provided on the <b>Study Index</b> page. A study can contain multiple treatment groups and a treatment group can include multiple items. Each item can have multiple data points, images and/or videos associated to it.
-                                    For more information, <a href="#intrastudy">click here</a>.</td>
-                                </tr>
-                                <tr>
-                            <table class="table table-bordered table-condensed small">
-                            <thead>
-                                <tr class="active">
-                                <th> Component </th>
-                                <th> Description </th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <td> Study Treatment Group </td>
-                                    <td> MPS models constructed and treated the same way are part of a study treatment group. The study treatment group is assigned a name during study setup. When an MPS model is constructed using a chip device, multiple chips can be assigned to the same study treatment group. When an MPS model is constructed using a plate device, wells on multiple plates can be assigned to the same study treatment group, or to different study treatment groups. </td>
-                                </tr>
-                                <tr>
-                                <td> Study Item </td>
-                                <td> An experimental MPS model consisting of one chip, one well on a plate, multiple wells on a plate that function as one MPS model, multiple substructures within an individual well on a plate (e.g., skeletal myobundle), or some other custom configuration. </td>
-                                </tr>
-                                <tr>
-                                <td> Assay Data Points </td>
-                                    <td> Measured assay targets/analyte values, for a specific time point relative to the start of an experiment, uploaded into the MPS-Db. Processed assay data can be uploaded directly to the Study Summary section of the database via the MPS Import Friendly-Columnar (MIF-C) file format. Raw assay plate reader data can be uploaded to the database, calibrated/processed using tools provided in the database, then submitted to the Study Summary via the assay plate reader data processing feature. Assay data that has been submitted to the Study Summary can be visualized/analyzed within the individual study (intra-study), across studies (inter-study), and/or in combination with curated reference data. For more information on assay data, <a href="#assaydata">click here</a>. Genomic data (e.g., log 2 fold change and associated statistic) can be uploaded and visualized via a special omic data interface. For more information on assay data, <a href="#genomicdata">click here</a>. </td>
-                                </tr>
-                                <tr>
-                                <td> Assay Images & Videos </td>
-                                    <td> Images and videos can be linked to a Study Item and displayed within a Study. Currently, images and videos must be added to the MPS-Db by the database administrators. An image/video metadata file, along with the images/videos can be provided to the database administrators through box/drive sharing.
-                                    For more information, <a href="#imagesvideos">click here</a>. </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                        </li>
-                    </ul>
+                    {% include 'help_overview_study_organization.html' %}
                 </div>
             </div>
         </div>
@@ -421,96 +372,7 @@
             <button name="my_buttons" class="collapsible1"> Reference Data Sources </button>
             <div class="content1">
                 <div id="overview4viewer" class="viewersubtainer">
-                    <ul class="list-group">
-                        <li class="list-group-item">
-                            <table class="table table-bordered table-condensed small">
-                                <thead>
-                                    <tr class="active">
-                                    <th> Source # </th>
-                                    <th> Data Source </th>
-                                    <th> Curation Method </th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                    <td> 1 </td>
-                                        <td> MPS-Db Study Data </td>
-                                    <td> Manual Curation </td>
-                                    </tr>
-                                    <tr>
-                                    <td> 2 </td>
-                                    <td> Health Canada </td>
-                                    <td> Manual Curation </td>
-                                    </tr>
-                                    <tr>
-                                    <td> 3 </td>
-                                    <td> LiverTox </td>
-                                    <td> Manual Curation </td>
-                                    </tr>
-                                    <tr>
-                                    <td> 4 </td>
-                                    <td> ToxNet </td>
-                                    <td> Manual Curation </td>
-                                    </tr>
-                                    <tr>
-                                    <td> 5 </td>
-                                    <td> European Medicines Agency (EMA) </td>
-                                    <td> Manual Curation </td>
-                                    </tr>
-                                    <tr>
-                                    <td> 6 </td>
-                                    <td> OpenFDA </td>
-                                    <td> Some data pulled dynamically and not stored (Adverse events are updated quarterly). Note: data are not intended for clinical use. </td>
-                                    </tr>
-                                    <tr>
-                                    <td> 7 </td>
-                                    <td> NAMCS/NHAMCS  </td>
-                                    <td> Auto Curation </td>
-                                    </tr>
-                                    <tr>
-                                    <td> 8 </td>
-                                    <td> PubChem </td>
-                                    <td> Auto Curation (Bioactivity data updated quarterly) </td>
-                                    </tr>
-                                    <tr>
-                                    <td> 9 </td>
-                                    <td> TogoWS  </td>
-                                    <td> Auto Curation </td>
-                                    </tr>
-                                    <tr>
-                                    <td> 10 </td>
-                                    <td> UniChem </td>
-                                    <td> Auto Curation </td>
-                                    </tr>
-                                    <tr>
-                                    <td> 11 </td>
-                                    <td> DrugBank  </td>
-                                    <td> Auto Curation (Compound data updated when compound added to MPS-Db) </td>
-                                    </tr>
-                                    <tr>
-                                    <td> 12 </td>
-                                    <td> ChEMBL </td>
-                                    <td> Auto Curation (Bioactivity data updated quarterly; Compound data updated when compound added to MPS-Db) </td>
-                                    </tr>
-                                    <tr>
-                                    <td> 13 </td>
-                                    <td> clinicaltrials.gov </td>
-                                    <td> Some data pulled dynamically and not stored </td>
-                                    </tr>
-                                    <tr>
-                                    <td> 14 </td>
-                                    <td> ctti-clinicaltrials.org </td>
-                                    <td> Some data pulled dynamically and not stored</td>
-                                    </tr>
-                                    <tr>
-                                    <td> 15 </td>
-                                    <td> Expert elicitation from open sources and publications</td>
-                                    <td> Manual Curation </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </li>
-                    </ul>
+                    {% include 'help_overview_reference_data_sources.html' %}
                 </div>
             </div>
         </div>
@@ -519,137 +381,7 @@
             <button name="my_buttons" class="collapsible1">Database Features</button>
             <div class="content1">
                 <div id="overview3viewer" class="viewersubtainer">
-                    <ul class="list-group">
-                        <li class="list-group-item">
-                            <label>Features that Use Study Data Only</label>
-                            <table class="table table-bordered table-condensed small">
-                            <thead>
-                                <tr class="active">
-                                <th> Feature </th>
-                                <th> Description </th>
-                                <th> Data Source # </th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                <td> Assay Data Visualization </td>
-                                <td> Enables custom querying and subsequent visualization of assay data.
-                                For more information on visualizing assay data, <a href="#assaydata">click here</a>.</td>
-                                <td> 1</td>
-                                </tr>
-                                <tr>
-                                <td> Genomic Data Visualization </td>
-                                <td> Enables visualization of genomic data.
-                                For more information on genomic data visualization, <a href="#geneomicdata">click here</a>.</td>
-                                <td> 1</td>
-                                </tr>
-                                <tr>
-                                <td> Power Analysis </td>
-                                <td> To Be Added.
-                                For more information on power analysis, <a href="#poweranalysis">click here</a>.</td>
-                                <td> 1</td>
-                                </tr>
-                                <tr>
-                                <td> Study Sets </td>
-                                <td> Enables multiple studies to be grouped and referenced with one URL.
-                                For more information on study sets, <a href="#studyset">click here</a>.</td>
-                                <td> 1</td>
-                                </tr>
-                            </tbody>
-                            </table>
-
-                            <label>Features that Use Study Data and Reference Data</label>
-                            <table class="table table-bordered table-condensed small">
-                            <thead>
-                                <tr class="active">
-                                <th> Feature </th>
-                                <th> Description </th>
-                                <th> Data Source # </th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                <td> References </td>
-                                <td> References to publications can be added and associated to MPS Models, Study Sets, Studies, and several other study components.
-                                For more information on references, <a href="#reference">click here</a>.</td>
-                                <td> 1</td>
-                                </tr>
-                                <tr>
-                                <td> PBPK Analysis </td>
-                                <td> To Be Added.
-                                For more information on PBPK analysis, <a href="#pbpkanalysis">click here</a>.</td>
-                                <td> 1</td>
-                                </tr>
-                                <tr>
-                                <td> Diseases </td>
-                                <td> Provides a portal connecting information from clinical trials to MPS study data. Links are made based on disease. Users can view summary information, then drill down to see additional disease-related details.
-                                For more information, <a href="#diseasemodels">click here</a>.</td>
-                                <td> 1, 13, 14, 15 </td>
-                                </tr>
-                                <tr>
-                                <td> Compound Report </td>
-                                <td> Provides a portal for viewing compound data and associated assay study data.
-                                For more information, <a href="#compoundreport">click here</a>.</td>
-                                <td> 1-5, 12 </td>
-                                </tr>
-                            </tbody>
-                            </table>
-                            <label>Features that Use Reference Data Only </label>
-                            <table class="table table-bordered table-condensed small">
-                            <thead>
-                                <tr class="active">
-                                <th> Feature </th>
-                                <th> Description </th>
-                                <th> Data Source # </th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                <td> Chemical Data </td>
-                                <td> Provides a portal for looking at chemical data from a variety of sources. Allows for searching by synonym, molecular weight, and other compound properties.
-                                For more information, <a href="#chemicaldata">click here</a>.</td>
-                                <td>  2-5, 8, 9, 10, 11, 12 </td>
-                                </tr>
-                                <tr>
-                                <td> Bioactivities </td>
-                                <td> Provides a portal for searching chemcial bioactivities from a variety of sources. Provides a <b>Quick Search</b> option to search by compound, biological target, and/or bioactivity name, and an <b>Advanced Search</b> option for selecting multiple compounds, biological targets, and/or bioactivities.
-                                For more information, <a href="#bioactivities">click here</a>.</td>
-                                <td> 8, 9, 12, manual </td>
-                                </tr>
-                                <tr>
-                                <td> Drug Trials </td>
-                                <td> Provides a portal for viewing drug trial data from a variety of sources. Trial type and trial finding are summarized in list format. Users can search by treatment compound, trial type, species, and other aspects of the trial.
-                                For more information, <a href="#drugtrials">click here</a>.</td>
-                                <td> 2-5</td>
-                                </tr>
-                                <tr>
-                                <td> Adverse Events </td>
-                                <td> Provides a portal for searching and viewing reported adverse events, including estimated number of reports normalized by estimated drug usage.
-                                For more information, <a href="#adverseevents">click here</a>.</td>
-                                <td> 6, 7</td>
-                                </tr>
-                                <tr>
-                                <td> Compare Adverse Events </td>
-                                <td> Enables comparison of multiple compounds and adverse events side-by-side.
-                                For more information, <a href="#compareadverseevents">click here</a>.</td>
-                                <td> 6, 7</td>
-                                </tr>
-                                <tr>
-                                <td> Heatmap (Bioactivities) </td>
-                                <td> Provides a heatmap visualization of relative bioactivities (e.g., bioavailability, Cmax, etc.) for one or more compounds and one or more biological targets.
-                                For more information, <a href="#heatmap">click here</a>.</td>
-                                <td> 2-5, 8, 9, 11, 12 </td>
-                                </tr>
-                                <tr>
-                                <td> Cluster Chemicals </td>
-                                <td> Provides a dendrogram of compounds clustered by their respective properties and/or bioactivities.
-                                For more information, <a href="#cluster">click here</a>.</td>
-                                <td> 2-5, 8, 9, 11, 12 </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                        </li>
-                    </ul>
+                    {% include 'help_overview_database_features.html' %}
                 </div>
             </div>
         </div>
@@ -658,47 +390,13 @@
             <button name="my_buttons" class="collapsible1">Permission Structure </button>
             <div class="content1">
                 <div id="overview5viewer" class="viewersubtainer">
-                    <ul class="list-group">
-                        <li class="list-group-item">
-                            <table class="table table-bordered table-condensed small">
-                                <thead>
-                                    <tr class="active">
-                                    <th> Role </th>
-                                    <th> Access to Data and Features </th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                    <td> Registered MPS Users with No Additional Permissions  </td>
-                                    <td> Can view all reference data and associated features. Can view study components (e.g., MPS models, devices, cell samples). Can view study data in studies that have been designated as open to all registered MPS users, including: viewing matrix item setup, study protocols, images, videos, and assay data. </td>
-                                    </tr>
-                                    <tr>
-                                    <td> Data Group Viewers and Users with Additional Permissions  </td>
-                                    <td> Have all the access of <i>registered MPS Users with No Additional Permissions</i> plus access to studies to which they have been granted special access. Special access is sometimes granted to MPS model develeopers (i.e. acknowledgement access) and/or project funders. </td>
-                                    </tr>
-                                    <tr>
-                                    <td> Data Group Editors  </td>
-                                    <td> Have all the access of <i>Data Group Viewers and Users with Additional Permissions</i> plus the ability to edit their studies, including: adding/deleting/editing studies and study details, adding/deleting/editing matrices and matrix items, uploading assay data, and validating matrices, matrix items, and studies. </td>
-                                    </tr>
-                                    <tr>
-                                    <td> Data Group Admins  </td>
-                                    <td> Have all the access of <i>Data Group Editors</i> plus the ability to sign off a study and monitor the acknowledgment status of a study (e.g., a model developer reviewed study data). </td>
-                                    </tr>
-                                    <tr>
-                                    <td> MPS-Db Administrators  </td>
-                                    <td> Have all the access of <i>Data Group Admins</i> plus the ability to add/edit/delete new controlled vocabulary (e.g., MPS models, devices, cell samples) and change user permissions, including establishing users with special access to specific studies. </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                            Note: Additional permissions can be granted in a multitude of configurations to match individual user needs. For example, any registered user could be granted permission to add/edit cell samples, compounds, MPS models, etc.
-                        </li>
-                    </ul>
+                    {% include 'help_overview_permission_structure.html' %}
                 </div>
             </div>
         </div>
 
     </div>
-
+    <h1>STOP REVIEW HERE</h1>
 
     <div id="video_presentation_section" class="container">
 
