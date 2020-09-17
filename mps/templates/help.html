@@ -183,7 +183,7 @@
                     <a class="dropdown-toggle" data-toggle="dropdown" href="#">Overview<span class="caret"></span></a>
                     <ul class="dropdown-menu">
                         <li><a href="#overview0">Database Background</a></li>
-{#                        <li><a href="#overview1">Study Components </a></li>#}
+                        <li><a href="#overview1">Study Components </a></li>
                         <li><a href="#overview2">Study Organization</a></li>
                         <li><a href="#overview4">Reference Data Sources</a></li>
                         <li><a href="#overview3">Database Features</a></li>
@@ -344,20 +344,14 @@
             </div>
         </div>
 
-        {% comment %}
         <div id="overview1">
-            <button name="my_buttons" class="collapsible1">Add when/if needed</button>
+            <button name="my_buttons" class="collapsible1">Study Components</button>
             <div class="content1">
                 <div id="overview1viewer" class="viewersubtainer">
-                    <ul class="list-group">
-                        <li class="list-group-item">
-
-                        </li>
-                    </ul>
+                    {% include 'help_overview_study_components.html' %}
                 </div>
             </div>
         </div>
-        {% endcomment %}
 
         <div id="overview2">
             <button name="my_buttons" class="collapsible1">Study Organization</button>
@@ -396,7 +390,7 @@
         </div>
 
     </div>
-    <h1>STOP REVIEW HERE</h1>
+    <h1>STOP REVIEW HERE - for now</h1>
 
     <div id="video_presentation_section" class="container">
 
@@ -582,7 +576,7 @@
                                         <li>Above search bars are options to Copy the table to the clipboard, download the table to CSV, or Print the table</li>
                                         <li>The Column visibility button can be used to turn columns on/off in the list/table </li>
                                         <li>To sort the list/table, click on the arrow in the column header   </li>
-                                        <li>To sort on multiple columns, click on the arrow on the primary sort column, then hold the shift key and click on addtional column arrows</li>
+                                        <li>To sort on multiple columns, click on the arrow on the primary sort column, then hold the shift key and click on additional column arrows</li>
                                     </ul>
                                 </li>
                             </ul>
