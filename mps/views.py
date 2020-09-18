@@ -2,7 +2,7 @@ from django.shortcuts import render
 from django.http import HttpResponseRedirect
 
 #sck added
-from django.db.models import F, ExpressionWrapper, DateField, DateTimeField, Q
+from django.db.models import F, ExpressionWrapper, DateField, DateTimeField, Q, CharField, Value
 from datetime import datetime, timedelta
 import pytz
 #from django.db.models.functions import Concat
@@ -22,7 +22,7 @@ import os
 
 from mps.settings import MEDIA_ROOT
 
-from resources.models import Definition, ComingSoonEntry, WhatIsNewEntry
+from resources.models import Definition, ComingSoonEntry, WhatIsNewEntry, DataSource, DatabaseFeature, FeatureSourceXref
 from django.views.generic.base import TemplateView
 
 from microdevices.models import MicrophysiologyCenter
@@ -134,9 +134,77 @@ def custom_search(request):
 
 
 def mps_help(request):
+    feature = DatabaseFeature.objects.all()
+    xref = FeatureSourceXref.objects.all().order_by('database_feature', 'data_source').prefetch_related(
+        'data_source',
+    )
+
+    feature_source = {}
+    list_of_sources = []
+    f = ''
+    i = 0
+
+    for each in xref:
+        sn = str(each.data_source.source_number)
+
+        # HANDY - get each field name in a queryset
+        # for field in each._meta.get_fields():
+        #     print(field)
+
+        if i > 0 and i+1 < len(xref) and f == each.database_feature:
+            # print('not first, not last, same feature')
+            # write this data source to the list of data sources for this feature
+            list_of_sources.append(sn)
+        elif i > 0 and i+1 < len(xref) and f != each.database_feature:
+            # print('not first, not last, feature changed')
+            # write the previous feature and the list so far to the dictionary
+            feature_source[f] = list_of_sources
+            # reset the list to the current source
+            list_of_sources = [sn]
+        elif i > 0 and i + 1 == len(xref) and f == each.database_feature:
+            # print('not first, IS last, same feature')
+            # write this data source to the list of data sources for this feature
+            list_of_sources.append(sn)
+            # write the previous/this feature and the list so far to the dictionary
+            feature_source[f] = list_of_sources
+            list_of_sources = []
+        elif i > 0 and i + 1 == len(xref) and f != each.database_feature:
+            # print('not first, IS, feature changed (last one is a different feature)')
+            # write this data source to the list of data sources
+            list_of_sources = [each.data_source]
+            # write the list (of one) to the dictionary of features
+            feature_source[each.database_feature] = list_of_sources
+        elif i == 0 and i+1 < len(xref):
+            # print('the first, not last')
+            # write this data source to the list of data sources for this feature
+            list_of_sources.append(sn)
+        else:
+            # print('the first and only')
+            # write this data source to the list of data sources
+            list_of_sources = [sn]
+            # write the list (of one) to the dictionary of features
+            feature_source[each.database_feature] = list_of_sources
+            list_of_sources = []
+
+        f = each.database_feature
+        i = i + 1
+
+    # HANDY - add field to queryset add a field to a queryset
+    for each in feature:
+        this_feature = each
+        this_list = feature_source.get(this_feature)
+        this_list_string = ', '.join(map(str, this_list))
+        each.feature_list = this_list_string
+
+    # print("feature ", feature)
+    # for each in feature:
+    #     print("each.feature_list ", each.feature_list)
+
     c = {
         # 'version': len(os.listdir(MEDIA_ROOT + '/excel_templates/')),
-        'glossary': Definition.objects.exclude(definition='')
+        'glossary': Definition.objects.exclude(definition=''),
+        'source': DataSource.objects.all(),
+        'feature': feature
     }
 
     return render(request, 'help.html', c)

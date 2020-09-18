@@ -55,6 +55,9 @@ class Resource(LockableModel):
 
 class Definition(LockableModel):
     """A Definition is a definition for the glossary found in Help"""
+    class Meta(object):
+        verbose_name = 'Help - Glossary'
+        verbose_name_plural = 'Help - Glossary'
     term = models.CharField(max_length=60, unique=True)
     definition = models.CharField(max_length=2500, default='')
     reference = models.URLField(default='', blank=True)
@@ -92,3 +95,59 @@ class WhatIsNewEntry(LockableModel):
 
     contents = models.TextField(default='')
     short_contents = models.TextField(default='')
+
+class DataSource(LockableModel):
+    """Data Sources (external) - for table in Help"""
+    class Meta(object):
+        verbose_name = 'Help - Data Source'
+        verbose_name_plural = 'Help - Data Sources'
+        unique_together = [
+            (
+                'name', 'source_number',
+            )
+        ]
+    name = models.CharField(max_length=60, unique=True)
+    source_number = models.IntegerField(
+        default=999,
+    )
+    description = models.CharField(max_length=2500, default='')
+    curation = models.CharField(max_length=2500, default='')
+
+    def __str__(self):
+        return '{}'.format(self.source_number)
+
+
+class DatabaseFeature(LockableModel):
+    """Database Features - for table in Help"""
+    class Meta(object):
+        verbose_name = 'Help - Database Feature'
+        verbose_name_plural = 'Help - Database Features'
+
+    name = models.CharField(max_length=60, unique=True)
+    description = models.CharField(max_length=2500, default='')
+
+    def __str__(self):
+        return self.name
+
+class FeatureSourceXref(LockableModel):
+    """Database Features - for table in Help"""
+    class Meta(object):
+        verbose_name = 'Help - Database Features & Sources'
+        verbose_name_plural = 'Help - Database Features & Sources'
+        unique_together = [
+            (
+                'database_feature', 'data_source'
+            )
+        ]
+    database_feature = models.ForeignKey(
+        DatabaseFeature,
+        blank=True,
+        default=1,
+        on_delete=models.CASCADE
+    )
+    data_source = models.ForeignKey(
+        DataSource,
+        blank=True,
+        default=1,
+        on_delete=models.CASCADE
+    )

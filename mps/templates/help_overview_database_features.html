@@ -7,137 +7,159 @@
 
 <ul class="list-group">
     <li class="list-group-item">
-         The following briefly describes the primary features that are integrated into the MPS-Db. Click on the provided links for more detailed instructions on using the feature.
+        <h3>Database Features</h3>
+        The following briefly describes the primary features that are integrated into the MPS-Db. Click on the provided links for more detailed instructions on using the feature.
         <br>
         <br>
 
-        <label>Features that Use Study Data Only</label>
-        <table class="table table-bordered table-condensed small">
+{#        <h4>Features that Use Study Data Only</h4>#}
+{#        <table class="table table-bordered table-condensed small">#}
+{#            <thead>#}
+{#                <tr class="active">#}
+{#                    <th> Feature </th>#}
+{#                    <th> Description </th>#}
+{#                    <th> Data Source # </th>#}
+{#                </tr>#}
+{#            </thead>#}
+{#            <tbody>#}
+{#                <tr>#}
+{#                    <td> Assay Data Visualization </td>#}
+{#                    <td> Enables custom querying and subsequent visualization of assay data.#}
+{#                    For more information on references, <a href="#reference">click here</a>. </td>#}
+{#                    <td> 1</td>#}
+{#                </tr>#}
+{#                <tr>#}
+{#                    <td> Genomic Data Visualization </td>#}
+{#                    <td> Enables visualization of genomic data.#}
+{#                    For more information on references, <a href="#reference">click here</a>. </td>#}
+{#                    <td> 1</td>#}
+{#                </tr>#}
+{#                <tr>#}
+{#                    <td> Power Analysis </td>#}
+{#                    <td> Used to calculate the probability that there is a difference between two groups of samples (two sample power analysis), or if there is a difference within one group of samples (one sample power analysis).#}
+{#                    For more information on references, <a href="#reference">click here</a>. </td>#}
+{#                    <td> 1 <b>(@Mark or Larry or Bert or Tongying- does this use other references - if so, what references?)</b></td>#}
+{#                </tr>#}
+{#                <tr>#}
+{#                    <td> Study Sets </td>#}
+{#                    <td> Enables multiple studies to be grouped and referenced with one URL.#}
+{#                    For more information on references, <a href="#reference">click here</a>. </td>#}
+{#                    <td> 1</td>#}
+{#                </tr>#}
+{#            </tbody>#}
+{#        </table>#}
+{##}
+{#        <h4>Features that Use Study Data and Reference Data</h4>#}
+{#        <table class="table table-bordered table-condensed small">#}
+{#            <thead>#}
+{#                <tr class="active">#}
+{#                    <th> Feature </th>#}
+{#                    <th> Description </th>#}
+{#                    <th> Data Source # </th>#}
+{#                </tr>#}
+{#            </thead>#}
+{#            <tbody>#}
+{#                <tr>#}
+{#                    <td> References </td>#}
+{#                    <td> References to publications can be added and associated to MPS models, study sets, studies, and several other study components.#}
+{#                    For more information on references, <a href="#reference">click here</a>.</td>#}
+{#                    <td> All</td>#}
+{#                </tr>#}
+{#                <tr>#}
+{#                    <td> PBPK Analysis </td>#}
+{#                    <td> Pharmacokinetics modeling can be used to computationally predict plasma level for a given dosage regimen or to predict a dosage regimen to obtain specific plasma levels.#}
+{#                    For more information on PBPK analysis, <a href="#pbpkanalysis">click here</a>.</td>#}
+{#                    <td> 1 <b>(@Mark and @Larry - what else goes here? were more sources added for this?)</b></td>#}
+{#                </tr>#}
+{#                <tr>#}
+{#                    <td> Diseases </td>#}
+{#                    <td> Provides a portal connecting information from clinical trials to MPS study data. Links are made based on disease. Users can view summary information, then drill down to see additional disease-related details.#}
+{#                    For more information, <a href="#diseasemodels">click here</a>.</td>#}
+{#                    <td> 1, 13, 14, 15 </td>#}
+{#                </tr>#}
+{#                <tr>#}
+{#                    <td> Compound Report </td>#}
+{#                    <td> Provides a portal for viewing compound data and associated assay study data.#}
+{#                    For more information, <a href="#compoundreport">click here</a>.</td>#}
+{#                    <td> 1-5, 12 </td>#}
+{#                </tr>#}
+{#            </tbody>#}
+{#        </table>#}
+{#        <h4>Features that Use Reference Data Only </h4>#}
+{#        <table class="table table-bordered table-condensed small">#}
+{#            <thead>#}
+{#                <tr class="active">#}
+{#                    <th> Feature </th>#}
+{#                    <th> Description </th>#}
+{#                    <th> Data Source # </th>#}
+{#                </tr>#}
+{#            </thead>#}
+{#            <tbody>#}
+{#                <tr>#}
+{#                    <td> Chemical Data </td>#}
+{#                    <td> Provides a portal for looking at chemical data from a variety of sources. Allows for searching by synonym, molecular weight, and other compound properties.#}
+{#                    For more information, <a href="#chemicaldata">click here</a>.</td>#}
+{#                    <td>  2-5, 8, 9, 10, 11, 12 </td>#}
+{#                </tr>#}
+{#                <tr>#}
+{#                    <td> Bioactivities </td>#}
+{#                    <td> Provides a portal for searching chemcial bioactivities from a variety of sources. The portal offers a quick search option to search by compound, biological target, and/or bioactivity name, and an advanced search option for selecting multiple compounds, biological targets, and/or bioactivities.#}
+{#                    For more information, <a href="#bioactivities">click here</a>.</td>#}
+{#                    <td> 8, 9, 12, manual </td>#}
+{#                </tr>#}
+{#                <tr>#}
+{#                    <td> Drug Trials </td>#}
+{#                    <td> Provides a portal for viewing drug trial data from a variety of sources. Trial type and trial finding are summarized in list format. Users can search by treatment compound, trial type, species, and other aspects of the trial.#}
+{#                    For more information, <a href="#drugtrials">click here</a>.</td>#}
+{#                    <td> 2-5</td>#}
+{#                </tr>#}
+{#                <tr>#}
+{#                    <td> Adverse Events </td>#}
+{#                    <td> Provides a portal for searching and viewing reported adverse events, including estimated number of reports normalized by estimated drug usage.#}
+{#                    For more information, <a href="#adverseevents">click here</a>.</td>#}
+{#                    <td> 6, 7</td>#}
+{#                </tr>#}
+{#                <tr>#}
+{#                    <td> Compare Adverse Events </td>#}
+{#                    <td> Enables comparison of multiple compounds and adverse events side-by-side.#}
+{#                    For more information, <a href="#compareadverseevents">click here</a>.</td>#}
+{#                    <td> 6, 7</td>#}
+{#                </tr>#}
+{#                <tr>#}
+{#                    <td> Heatmap (Bioactivities) </td>#}
+{#                    <td> Provides a heatmap visualization of relative bioactivities (e.g., bioavailability, Cmax, etc.) for one or more compounds and one or more biological targets.#}
+{#                    For more information, <a href="#heatmap">click here</a>.</td>#}
+{#                    <td> 2-5, 8, 9, 11, 12 </td>#}
+{#                </tr>#}
+{#                <tr>#}
+{#                    <td> Cluster Chemicals </td>#}
+{#                    <td> Provides a dendrogram of compounds clustered by their respective properties and/or bioactivities.#}
+{#                    For more information, <a href="#cluster">click here</a>.</td>#}
+{#                    <td> 2-5, 8, 9, 11, 12 </td>#}
+{#                </tr>#}
+{#            </tbody>#}
+{#        </table>#}
+
+        <table id="features_table" class="table table-bordered table-condensed small">
             <thead>
-                <tr class="active">
-                    <th> Feature </th>
-                    <th> Description </th>
-                    <th> Data Source # </th>
+                <tr>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Reference Data Source(s)</th>
                 </tr>
             </thead>
+
             <tbody>
+                {% for term in feature %}
                 <tr>
-                    <td> Assay Data Visualization </td>
-                    <td> Enables custom querying and subsequent visualization of assay data.
-                    For more information on references, <a href="#reference">click here</a>. </td>
-                    <td> 1</td>
+                    <td>{{ term.name }}</td>
+                    <td>{{ term.description }}</td>
+                    <td>{{ term.feature_list }}</td>
                 </tr>
-                <tr>
-                    <td> Genomic Data Visualization </td>
-                    <td> Enables visualization of genomic data.
-                    For more information on references, <a href="#reference">click here</a>. </td>
-                    <td> 1</td>
-                </tr>
-                <tr>
-                    <td> Power Analysis </td>
-                    <td> Used to calculate the probability that there is a difference between two groups of samples (two sample power analysis), or if there is a difference within one group of samples (one sample power analysis).
-                    For more information on references, <a href="#reference">click here</a>. </td>
-                    <td> 1 <b>(@Mark or Larry or Bert or Tongying- does this use other references - if so, what references?)</b></td>
-                </tr>
-                <tr>
-                    <td> Study Sets </td>
-                    <td> Enables multiple studies to be grouped and referenced with one URL.
-                    For more information on references, <a href="#reference">click here</a>. </td>
-                    <td> 1</td>
-                </tr>
+                {% endfor %}
             </tbody>
         </table>
 
-        <label>Features that Use Study Data and Reference Data</label>
-        <table class="table table-bordered table-condensed small">
-            <thead>
-                <tr class="active">
-                    <th> Feature </th>
-                    <th> Description </th>
-                    <th> Data Source # </th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td> References </td>
-                    <td> References to publications can be added and associated to MPS models, study sets, studies, and several other study components.
-                    For more information on references, <a href="#reference">click here</a>.</td>
-                    <td> All</td>
-                </tr>
-                <tr>
-                    <td> PBPK Analysis </td>
-                    <td> Pharmacokinetics modeling can be used to computationally predict plasma level for a given dosage regimen or to predict a dosage regimen to obtain specific plasma levels.
-                    For more information on PBPK analysis, <a href="#pbpkanalysis">click here</a>.</td>
-                    <td> 1 <b>(@Mark and @Larry - what else goes here? were more sources added for this?)</b></td>
-                </tr>
-                <tr>
-                    <td> Diseases </td>
-                    <td> Provides a portal connecting information from clinical trials to MPS study data. Links are made based on disease. Users can view summary information, then drill down to see additional disease-related details.
-                    For more information, <a href="#diseasemodels">click here</a>.</td>
-                    <td> 1, 13, 14, 15 </td>
-                </tr>
-                <tr>
-                    <td> Compound Report </td>
-                    <td> Provides a portal for viewing compound data and associated assay study data.
-                    For more information, <a href="#compoundreport">click here</a>.</td>
-                    <td> 1-5, 12 </td>
-                </tr>
-            </tbody>
-        </table>
-        <label>Features that Use Reference Data Only </label>
-        <table class="table table-bordered table-condensed small">
-            <thead>
-                <tr class="active">
-                    <th> Feature </th>
-                    <th> Description </th>
-                    <th> Data Source # </th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td> Chemical Data </td>
-                    <td> Provides a portal for looking at chemical data from a variety of sources. Allows for searching by synonym, molecular weight, and other compound properties.
-                    For more information, <a href="#chemicaldata">click here</a>.</td>
-                    <td>  2-5, 8, 9, 10, 11, 12 </td>
-                </tr>
-                <tr>
-                    <td> Bioactivities </td>
-                    <td> Provides a portal for searching chemcial bioactivities from a variety of sources. The portal offers a quick search option to search by compound, biological target, and/or bioactivity name, and an advanced search option for selecting multiple compounds, biological targets, and/or bioactivities.
-                    For more information, <a href="#bioactivities">click here</a>.</td>
-                    <td> 8, 9, 12, manual </td>
-                </tr>
-                <tr>
-                    <td> Drug Trials </td>
-                    <td> Provides a portal for viewing drug trial data from a variety of sources. Trial type and trial finding are summarized in list format. Users can search by treatment compound, trial type, species, and other aspects of the trial.
-                    For more information, <a href="#drugtrials">click here</a>.</td>
-                    <td> 2-5</td>
-                </tr>
-                <tr>
-                    <td> Adverse Events </td>
-                    <td> Provides a portal for searching and viewing reported adverse events, including estimated number of reports normalized by estimated drug usage.
-                    For more information, <a href="#adverseevents">click here</a>.</td>
-                    <td> 6, 7</td>
-                </tr>
-                <tr>
-                    <td> Compare Adverse Events </td>
-                    <td> Enables comparison of multiple compounds and adverse events side-by-side.
-                    For more information, <a href="#compareadverseevents">click here</a>.</td>
-                    <td> 6, 7</td>
-                </tr>
-                <tr>
-                    <td> Heatmap (Bioactivities) </td>
-                    <td> Provides a heatmap visualization of relative bioactivities (e.g., bioavailability, Cmax, etc.) for one or more compounds and one or more biological targets.
-                    For more information, <a href="#heatmap">click here</a>.</td>
-                    <td> 2-5, 8, 9, 11, 12 </td>
-                </tr>
-                <tr>
-                    <td> Cluster Chemicals </td>
-                    <td> Provides a dendrogram of compounds clustered by their respective properties and/or bioactivities.
-                    For more information, <a href="#cluster">click here</a>.</td>
-                    <td> 2-5, 8, 9, 11, 12 </td>
-                </tr>
-            </tbody>
-        </table>
     </li>
 </ul>
 

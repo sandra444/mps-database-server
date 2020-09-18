@@ -10,7 +10,10 @@ from resources.models import (
     ResourceSubtype,
     Definition,
     ComingSoonEntry,
-    WhatIsNewEntry
+    WhatIsNewEntry,
+    DataSource,
+    DatabaseFeature,
+    FeatureSourceXref,
 )
 from resources.forms import (
     ResourceForm,
@@ -191,3 +194,27 @@ class WhatIsNewEntryAdmin(LockableAdmin):
     list_editable = ['contents', 'short_contents']
 
 admin.site.register(WhatIsNewEntry, WhatIsNewEntryAdmin)
+
+
+class DataSourceAdmin(LockableAdmin):
+    model = DataSource
+    list_display = ['name', 'description', 'curation', 'source_number']
+    search_fields = ['name', ]
+
+admin.site.register(DataSource, DataSourceAdmin)
+
+
+class DatabaseFeatureAdmin(LockableAdmin):
+    model = DatabaseFeature
+    list_display = ['name', 'description']
+    search_fields = ['name', ]
+
+admin.site.register(DatabaseFeature, DatabaseFeatureAdmin)
+
+
+class FeatureSourceXrefAdmin(LockableAdmin):
+    model = FeatureSourceXref
+    list_display = ['database_feature', 'data_source']
+    search_fields = ['database_feature', 'data_source', ]
+
+admin.site.register(FeatureSourceXref, FeatureSourceXrefAdmin)
