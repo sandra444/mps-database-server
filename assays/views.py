@@ -46,12 +46,17 @@ from assays.models import (
     assay_plate_reader_map_info_plate_size_choices,
     assay_plate_reader_map_info_plate_size_choices_list,
     upload_file_location,
+    AssayGroup,
 )
 from assays.forms import (
     AssayStudyConfigurationForm,
     ReadyForSignOffForm,
     AssayStudyForm,
-    AssayStudyFormNew,
+    AssayStudyDetailForm,
+    AssayStudyGroupForm,
+    AssayStudyChipForm,
+    AssayStudyPlateForm,
+    AssayStudyAssaysForm,
     AssayStudySupportingDataFormSetFactory,
     AssayStudyAssayFormSetFactory,
     AssayStudyReferenceFormSetFactory,
@@ -90,6 +95,7 @@ from assays.forms import (
     AssayPlateReaderMapDataFileForm,
     AssayPlateReaderMapDataFileBlockFormSetFactory,
     AbstractClassAssayStudyAssay,
+    AssayMatrixItemForm,
 )
 
 from microdevices.models import MicrophysiologyCenter
@@ -119,6 +125,7 @@ from mps.templatetags.custom_filters import (
 
 from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import login_required, user_passes_test
+from django.urls import reverse
 
 from mps.mixins import (
     LoginRequiredMixin,
@@ -156,10 +163,16 @@ import pytz
 
 from django.apps import apps
 
-import xlsxwriter
 import io
 
 from django.db import connection
+
+# File writing
+# ???
+from io import BytesIO
+import xlsxwriter
+from assays.utils import DEFAULT_CSV_HEADER
+from mps.settings import TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX
 
 # TODO Refactor imports
 # TODO REFACTOR CERTAIN WHITTLING TO BE IN FORM AS OPPOSED TO VIEW
@@ -572,6 +585,112 @@ class AssayStudyList(ListView):
 
 class AssayStudyMixin(FormHandlerMixin):
     model = AssayStudy
+    # Study is now split into many pages, probably best to list them explicitly
+    # template_name = 'assays/assaystudy_add.html'
+    # form_class = AssayStudyForm
+
+    # formsets = (
+    #     ('study_assay_formset', AssayStudyAssayFormSetFactory),
+    #     ('supporting_data_formset', AssayStudySupportingDataFormSetFactory),
+    #     ('reference_formset', AssayStudyReferenceFormSetFactory),
+    # )
+
+    # def get_context_data(self, **kwargs):
+    #     context = super(AssayStudyMixin, self).get_context_data(**kwargs)
+
+    #     # TODO SLATED FOR REMOVAL
+    #     context.update({
+    #         'reference_queryset': AssayReference.objects.all()
+    #     })
+
+    #     return context
+
+    def get_context_data(self, **kwargs):
+        context = super(AssayStudyMixin, self).get_context_data(**kwargs)
+
+        has_chips = False
+        has_plates = False
+
+        # CRUDE: NEEDS REVISION
+        if self.object:
+            study_groups = AssayGroup.objects.filter(
+                study_id=self.object.id,
+            ).prefetch_related('organ_model__device')
+
+            has_chips = study_groups.filter(
+                organ_model__device__device_type='chip'
+            ).count() > 0
+
+            has_plates = study_groups.filter(
+                organ_model__device__device_type='plate'
+            ).count() > 0
+
+        # TODO: Check whether this Study has Chips or Plates
+        # Contrived at the moment
+        context.update({
+            'has_chips': has_chips,
+            'has_plates': has_plates,
+            'has_next_button': True,
+            'has_previous_button': True,
+            'cellsamples' : CellSample.objects.all().prefetch_related(
+                'cell_type__organ',
+                'supplier',
+                'cell_subtype__cell_type'
+            )
+        })
+
+        return context
+
+
+class AssayStudyDetailsMixin(AssayStudyMixin):
+    template_name = 'assays/assaystudy_details.html'
+    form_class = AssayStudyDetailForm
+
+    # Do we want references here?
+    formsets = (
+        ('reference_formset', AssayStudyReferenceFormSetFactory),
+    )
+
+    def get_context_data(self, **kwargs):
+        context = super(AssayStudyDetailsMixin, self).get_context_data(**kwargs)
+
+        # TODO SLATED FOR REMOVAL
+        context.update({
+            'reference_queryset': AssayReference.objects.all(),
+            'has_next_button': True,
+            'has_previous_button': False
+        })
+
+        return context
+
+
+class AssayStudyAdd(OneGroupRequiredMixin, AssayStudyDetailsMixin, CreateView):
+    # Special handling for handling next button
+    def extra_form_processing(self, form):
+        # Contact superusers
+        # Superusers to contact
+        superusers_to_be_alerted = User.objects.filter(is_superuser=True, is_active=True)
+
+        # Magic strings are in poor taste, should use a template instead
+        superuser_subject = 'Study Created: {0}'.format(form.instance)
+        superuser_message = render_to_string(
+            'assays/email/superuser_study_created_alert.txt',
+            {
+                'study': form.instance
+            }
+        )
+
+        for user_to_be_alerted in superusers_to_be_alerted:
+            user_to_be_alerted.email_user(superuser_subject, superuser_message, DEFAULT_FROM_EMAIL)
+
+        if self.request.POST.get('post_submission_url_override') == '#':
+            self.post_submission_url_override = reverse('assays-assaystudy-update-groups', args=[form.instance.pk])
+        return super(AssayStudyAdd, self).extra_form_processing(form)
+
+
+# TO BE DEPRECATED
+# Update is not sufficiently descriptive of any of the pages
+class AssayStudyUpdate(ObjectGroupRequiredMixin, AssayStudyMixin, UpdateView):
     template_name = 'assays/assaystudy_add.html'
     form_class = AssayStudyForm
 
@@ -592,12 +711,211 @@ class AssayStudyMixin(FormHandlerMixin):
         return context
 
 
-class AssayStudyAdd(OneGroupRequiredMixin, AssayStudyMixin, CreateView):
+class AssayStudyDetails(ObjectGroupRequiredMixin, AssayStudyDetailsMixin, UpdateView):
     pass
 
 
-class AssayStudyUpdate(ObjectGroupRequiredMixin, AssayStudyMixin, UpdateView):
+class AssayStudyGroups(ObjectGroupRequiredMixin, AssayStudyMixin, UpdateView):
+    template_name = 'assays/assaystudy_groups.html'
+    form_class = AssayStudyGroupForm
+
+    # Oh no! We actually need to have special handling for the "next" button
+    # TODO
+    # Special handling for handling next button
+    def extra_form_processing(self, form):
+        # If the user submitted with "next"
+        if self.request.POST.get('post_submission_url_override') == reverse('assays-assaystudy-update-assays', args=[form.instance.pk]):
+            # CRUDE: NOT DRY
+            study_groups = AssayGroup.objects.filter(
+                study_id=self.object.id,
+            ).prefetch_related('organ_model__device')
+
+            has_chips = study_groups.filter(
+                organ_model__device__device_type='chip'
+            ).count() > 0
+
+            has_plates = study_groups.filter(
+                organ_model__device__device_type='plate'
+            ).count() > 0
+
+            # If there are chip groups, go to chips
+            if has_chips:
+                self.post_submission_url_override = reverse('assays-assaystudy-update-chips', args=[form.instance.pk])
+
+            # If there are plate groups, go to plates
+            elif has_plates:
+                self.post_submission_url_override = reverse('assays-assaystudy-update-plates', args=[form.instance.pk])
+
+        # Otherwise it will just go to assays, like usual
+        return super(AssayStudyGroups, self).extra_form_processing(form)
+
+
+class AssayGroupDetail(StudyGroupMixin, DetailView):
+    # Why not have the mixin look for DetailView?
+    model = AssayGroup
+    detail = True
+    no_update = True
+
+    def get_context_data(self, **kwargs):
+        context = super(AssayGroupDetail, self).get_context_data(**kwargs)
+
+        context.update({
+            'detail': True,
+            'items': AssayMatrixItem.objects.filter(group=self.object).order_by('name')
+        })
+
+        return context
+
+
+class AssayStudyChips(ObjectGroupRequiredMixin, AssayStudyMixin, UpdateView):
+    template_name = 'assays/assaystudy_chips.html'
+    # Might end up being a formset?
+    form_class = AssayStudyChipForm
+
+    def get_context_data(self, **kwargs):
+        context = super(AssayStudyChips, self).get_context_data(**kwargs)
+
+        # TODO SLATED FOR REMOVAL
+        context.update({
+            'update': True,
+            # TODO REVISE
+            'chips': AssayMatrixItem.objects.filter(
+                device__device_type='chip',
+                study_id=self.object.id
+            )
+        })
+
+        return context
+
+
+# This is now really just a list page
+class AssayStudyPlates(ObjectGroupRequiredMixin, AssayStudyMixin, DetailView):
+    template_name = 'assays/assaystudy_plates.html'
+    form_class = AssayStudyPlateForm
+
+    # Contrived
+    def get_context_data(self, **kwargs):
+        context = super(AssayStudyPlates, self).get_context_data(**kwargs)
+
+        # TODO SLATED FOR REMOVAL
+        context.update({
+            # CONTRIVED!!!
+            'update': True,
+            # TODO REVISE
+            'plates': AssayMatrix.objects.filter(
+                # OLD
+                # device__isnull=False,
+                organ_model__isnull=False,
+                study_id=self.object.id
+            ).prefetch_related(
+                'organ_model',
+                'assaymatrixitem_set'
+            )
+        })
+
+        return context
+
+
+class AssayStudyPlateMixin(FormHandlerMixin):
+    model = AssayMatrix
+    template_name = 'assays/assaystudy_plate_add.html'
+    # Might actually be a formset or something?
+    form_class = AssayStudyPlateForm
+
+    # CRUDE: BUT PREVENTS LOOKING AT NON PLATE MATRICES
+    def get_object(self, queryset=None):
+        current_object = super(AssayStudyPlateMixin, self).get_object()
+        return get_object_or_404(AssayMatrix, pk=current_object.id, representation='plate')
+
+    def get_context_data(self, **kwargs):
+        context = super(AssayStudyPlateMixin, self).get_context_data(**kwargs)
+
+        # TODO: Check whether this Study has Chips or Plates
+        # Contrived at the moment
+        context.update({
+            # TODO
+            'has_chips': True,
+            # Necessarily True!
+            'has_plates': True,
+            'specific_plate': True,
+            'cellsamples' : CellSample.objects.all().prefetch_related(
+                'cell_type__organ',
+                'supplier',
+                'cell_subtype__cell_type'
+            ),
+            'has_next_button': True,
+            'has_previous_button': True
+        })
+
+        return context
+
+
+class AssayStudyPlateAdd(StudyGroupMixin, AssayStudyPlateMixin, CreateView):
+    def get_form(self, form_class=None):
+        form_class = self.get_form_class()
+        # Get the study
+        study = get_object_or_404(AssayStudy, pk=self.kwargs['study_id'])
+
+        # If POST
+        if self.request.method == 'POST':
+            return form_class(self.request.POST, self.request.FILES, study=study, user=self.request.user)
+        # If GET
+        else:
+            return form_class(study=study, user=self.request.user)
+
+
+class AssayStudyPlateUpdate(StudyGroupMixin, AssayStudyPlateMixin, UpdateView):
     pass
+
+
+class AssayStudyPlateDetail(StudyGroupMixin, AssayStudyPlateMixin, DetailView):
+    detail = True
+
+    def get_context_data(self, **kwargs):
+        context = super(AssayStudyPlateDetail, self).get_context_data(**kwargs)
+
+        context.update({
+            'form': AssayStudyPlateForm(instance=self.object),
+            'detail': True
+        })
+
+        return context
+
+
+
+class AssayStudyAssays(ObjectGroupRequiredMixin, AssayStudyMixin, UpdateView):
+    template_name = 'assays/assaystudy_assays.html'
+    # This will probably just be a contrived empty form
+    form_class = AssayStudyAssaysForm
+
+    formsets = (
+        ('study_assay_formset', AssayStudyAssayFormSetFactory),
+    )
+
+
+# TODO: TO BE REVISED
+class AssayStudyDataIndex(StudyViewerMixin, AssayStudyMixin, DetailView):
+    """Show all data sections for a given study"""
+    model = AssayStudy
+    template_name = 'assays/assaystudy_data_index.html'
+
+    # For permission mixin NOT AS USELESS AS IT SEEMS
+    def get_object(self, queryset=None):
+        self.study = super(AssayStudyDataIndex, self).get_object()
+        return self.study
+
+    # NOTE: bracket assignations are against PEP, one should use .update
+    def get_context_data(self, **kwargs):
+        context = super(AssayStudyDataIndex, self).get_context_data(**kwargs)
+
+        context.update({
+            # CONTRIVED!!!
+            'update': True,
+            # NECESSARILY FALSE
+            'has_next_button': False,
+        })
+
+        return context
 
 
 # class AssayStudyAdd(OneGroupRequiredMixin, CreateView):
@@ -735,6 +1053,7 @@ class AssayStudyUpdate(ObjectGroupRequiredMixin, AssayStudyMixin, UpdateView):
 #             )
 
 
+# TODO: TO BE REVISED
 class AssayStudyIndex(StudyViewerMixin, DetailView):
     """Show all chip and plate models associated with the given study"""
     model = AssayStudy
@@ -746,38 +1065,58 @@ class AssayStudyIndex(StudyViewerMixin, DetailView):
         self.study = super(AssayStudyIndex, self).get_object()
         return self.study
 
+    # NOTE: bracket assignations are against PEP, one should use .update
     def get_context_data(self, **kwargs):
         context = super(AssayStudyIndex, self).get_context_data(**kwargs)
 
-        matrices = AssayMatrix.objects.filter(
-            study_id=self.object.id
-        ).prefetch_related(
-            'assaymatrixitem_set',
-            'created_by',
-        )
+        # matrices = AssayMatrix.objects.filter(
+        #     study_id=self.object.id
+        # ).prefetch_related(
+        #     'assaymatrixitem_set',
+        #     'created_by',
+        # )
 
         items = AssayMatrixItem.objects.filter(
-            matrix_id__in=matrices
+            # matrix_id__in=matrices
+            study_id=self.object.id
         ).prefetch_related(
+            # Implicit in group
             'device',
             'created_by',
-            'matrix',
+            # 'matrix',
+            # Implicit in group
             'organ_model',
-            'assaysetupcompound_set__compound_instance__compound',
-            'assaysetupcompound_set__concentration_unit',
-            'assaysetupcompound_set__addition_location',
-            'assaysetupcell_set__cell_sample__cell_type__organ',
-            'assaysetupcell_set__cell_sample__cell_subtype',
-            'assaysetupcell_set__cell_sample__supplier',
-            'assaysetupcell_set__addition_location',
-            'assaysetupcell_set__density_unit',
-            'assaysetupsetting_set__setting',
-            'assaysetupsetting_set__unit',
-            'assaysetupsetting_set__addition_location',
+
+            # Stupid way to acquire group values, but expedient I guess
+
+            'group__assaygroupcompound_set__compound_instance__compound',
+            'group__assaygroupcompound_set__compound_instance__supplier',
+            'group__assaygroupcompound_set__concentration_unit',
+            'group__assaygroupcompound_set__addition_location',
+            'group__assaygroupcell_set__cell_sample__cell_type__organ',
+            'group__assaygroupcell_set__cell_sample__cell_subtype',
+            'group__assaygroupcell_set__cell_sample__supplier',
+            'group__assaygroupcell_set__addition_location',
+            'group__assaygroupcell_set__density_unit',
+            'group__assaygroupsetting_set__setting',
+            'group__assaygroupsetting_set__unit',
+            'group__assaygroupsetting_set__addition_location',
+
+            # 'assaysetupcompound_set__compound_instance__compound',
+            # 'assaysetupcompound_set__concentration_unit',
+            # 'assaysetupcompound_set__addition_location',
+            # 'assaysetupcell_set__cell_sample__cell_type__organ',
+            # 'assaysetupcell_set__cell_sample__cell_subtype',
+            # 'assaysetupcell_set__cell_sample__supplier',
+            # 'assaysetupcell_set__addition_location',
+            # 'assaysetupcell_set__density_unit',
+            # 'assaysetupsetting_set__setting',
+            # 'assaysetupsetting_set__unit',
+            # 'assaysetupsetting_set__addition_location',
         )
 
         # Cellsamples will always be the same
-        context['matrices'] = matrices
+        # context['matrices'] = matrices
         context['items'] = items
 
         get_user_status_context(self, context)
@@ -792,6 +1131,50 @@ class AssayStudyIndex(StudyViewerMixin, DetailView):
         ).count() == 0
 
         context['detail'] = True
+
+        # We will get the number of chips, plates, and groups of either categories
+        chip_groups = AssayGroup.objects.filter(
+            study_id=self.object.id,
+            # Messy way to ascertain plate v chip
+            # We might benefit from a field in this regard?
+            # Perhaps we ought to redundantly link the device afterall?
+            organ_model__device__device_type='chip'
+        ).prefetch_related('organ_model__device')
+        plate_groups = AssayGroup.objects.filter(
+            study_id=self.object.id,
+            # See above
+            organ_model__device__device_type='plate'
+        ).prefetch_related('organ_model__device')
+
+        # We could indicate something like the number of chips
+        number_of_chips = AssayMatrixItem.objects.filter(
+            # Theoretically, chips bound to said group are in the study
+            group_id__in=chip_groups
+        ).count()
+
+        # We assume that matrices with devices are plates
+        plates = AssayMatrix.objects.filter(
+            # WHOOPS
+            # device__isnull=False,
+            organ_model__isnull=False,
+            study_id=self.object.id
+        ).prefetch_related(
+            'organ_model',
+            'assaymatrixitem_set'
+        )
+
+        context.update({
+            'chip_groups': chip_groups,
+            'plate_groups': plate_groups,
+            'number_of_chips': number_of_chips,
+            'plates': plates,
+            'form': AssayStudyGroupForm(instance=self.object),
+            'cellsamples': CellSample.objects.all().prefetch_related(
+                'cell_type__organ',
+                'supplier',
+                'cell_subtype__cell_type'
+            )
+        })
 
         return context
 
@@ -1151,9 +1534,8 @@ class AssayStudySignOff(HistoryMixin, UpdateView):
             ))
 
 
-class AssayStudyDataUpload(HistoryMixin, ObjectGroupRequiredMixin, UpdateView):
+class AssayStudyDataUpload(AssayStudyMixin, ObjectGroupRequiredMixin, UpdateView):
     """Upload an Excel Sheet for storing multiple sets of Readout data at one"""
-    model = AssayStudy
     template_name = 'assays/assaystudy_upload.html'
     form_class = AssayStudyDataUploadForm
 
@@ -1173,7 +1555,7 @@ class AssayStudyDataUpload(HistoryMixin, ObjectGroupRequiredMixin, UpdateView):
         # TODO TODO TODO
         # context['version'] = len(os.listdir(MEDIA_ROOT + '/excel_templates/'))
 
-        context['data_file_uploads'] = get_data_file_uploads(study=self.object)
+        # context['data_file_uploads'] = get_data_file_uploads(study=self.object)
 
         if self.request.POST:
             if 'supporting_data_formset' not in context:
@@ -1181,7 +1563,13 @@ class AssayStudyDataUpload(HistoryMixin, ObjectGroupRequiredMixin, UpdateView):
         else:
             context['supporting_data_formset'] = AssayStudySupportingDataFormSetFactory(instance=self.object)
 
-        context['update'] = True
+        # context['update'] = True
+
+        context.update({
+            'data_file_uploads': get_data_file_uploads(study=self.object),
+            'update': True,
+            # 'has_next_button': False
+        })
 
         return context
 
@@ -1284,6 +1672,220 @@ class AssayStudyDelete(StudyDeletionMixin, UpdateView):
             self.object.save()
 
         return redirect(self.success_url)
+
+
+class AssayStudyTemplate(ObjectGroupRequiredMixin, DetailView):
+    model = AssayStudy
+
+    def render_to_response(self, context, **response_kwargs):
+        # The workbook is just in memory
+        current_output = BytesIO()
+        current_template = xlsxwriter.Workbook(current_output)
+
+        for assay_index, current_assay in enumerate(self.object.assaystudyassay_set.all()):
+            current_sheet = current_template.add_worksheet('Assay {}'.format(assay_index + 1))
+
+            # Set up formats
+            chip_red = current_template.add_format()
+            chip_red.set_bg_color('#ff6f69')
+            chip_green = current_template.add_format()
+            chip_green.set_bg_color('#96ceb4')
+
+            # Write the base files
+            # Some danger here, must change this and other template
+            initial = [
+                DEFAULT_CSV_HEADER,
+                [
+                    # Chip ID
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    # Target
+                    str(current_assay.target.name),
+                    None,
+                    # Method
+                    str(current_assay.method.name),
+                    # Sample
+                    None,
+                    None,
+                    # Value Unit
+                    str(current_assay.unit.unit),
+                    None,
+                    None,
+                    None,
+                    None
+                ]
+            ]
+
+            # Set the initial values
+
+            initial_format = [
+                [chip_red] * 17,
+                [
+                    chip_green,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    chip_green,
+                    None,
+                    chip_green,
+                    chip_green,
+                    None,
+                    chip_green,
+                    None,
+                    None,
+                    None,
+                    None
+                ]
+            ]
+
+            # Write out initial
+            for row_index, row in enumerate(initial):
+                for column_index, column in enumerate(row):
+                    cell_format = initial_format[row_index][column_index]
+                    current_sheet.write(row_index, column_index, column, cell_format)
+
+            # Set column widths
+            # Chip
+            current_sheet.set_column('A:A', 20)
+            current_sheet.set_column('B:B', 20)
+            current_sheet.set_column('C:C', 20)
+            current_sheet.set_column('D:D', 15)
+            current_sheet.set_column('E:E', 10)
+            current_sheet.set_column('F:F', 10)
+            current_sheet.set_column('G:G', 10)
+            current_sheet.set_column('H:H', 20)
+            current_sheet.set_column('I:I', 10)
+            current_sheet.set_column('J:J', 20)
+            current_sheet.set_column('K:K', 15)
+            current_sheet.set_column('L:L', 10)
+            current_sheet.set_column('M:M', 10)
+            current_sheet.set_column('N:N', 10)
+            current_sheet.set_column('O:O', 10)
+            current_sheet.set_column('P:P', 10)
+            current_sheet.set_column('Q:Q', 100)
+            # chip_sheet.set_column('I:I', 20)
+            # chip_sheet.set_column('J:J', 15)
+            # chip_sheet.set_column('K:K', 10)
+            # chip_sheet.set_column('L:L', 10)
+            # chip_sheet.set_column('M:M', 10)
+            # chip_sheet.set_column('N:N', 10)
+            # chip_sheet.set_column('O:O', 10)
+            # chip_sheet.set_column('P:P', 100)
+
+            current_sheet.set_column('BA:BD', 30)
+
+            # Get list of chip IDS for this study
+            chips = AssayMatrixItem.objects.filter(
+                study_id=self.object.id
+            ).order_by('name').values_list('name', flat=True)
+
+            # Get list of value units  (TODO CHANGE ORDER_BY)
+            value_units = PhysicalUnits.objects.all().order_by(
+                'base_unit__unit',
+                'scale_factor'
+            ).values_list('unit', flat=True)
+
+            # List of targets
+            targets = AssayTarget.objects.all().order_by(
+                'name'
+            ).values_list('name', flat=True)
+
+            # List of methods
+            methods = AssayMethod.objects.all().order_by(
+                'name'
+            ).values_list('name', flat=True)
+
+            # List of sample locations
+            sample_locations = AssaySampleLocation.objects.all().order_by(
+                'name'
+            ).values_list('name', flat=True)
+
+            for index, value in enumerate(chips):
+                current_sheet.write(index, TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX + 4, value)
+
+            for index, value in enumerate(sample_locations):
+                current_sheet.write(index, TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX + 3, value)
+
+            for index, value in enumerate(methods):
+                current_sheet.write(index, TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX + 2, value)
+
+            for index, value in enumerate(value_units):
+                current_sheet.write(index, TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX + 1, value)
+
+            for index, value in enumerate(targets):
+                current_sheet.write(index, TEMPLATE_VALIDATION_STARTING_COLUMN_INDEX, value)
+
+            chips_range = '=$BE$1:$BE$' + str(len(chips))
+
+            value_units_range = '=$BB$1:$BB$' + str(len(value_units))
+
+            targets_range = '=$BA$1:$BA$' + str(len(targets))
+            methods_range = '=$BC$1:$BC$' + str(len(methods))
+            sample_locations_range = '=$BD$1:$BD$' + str(len(sample_locations))
+
+
+            current_sheet.data_validation('A2', {'validate': 'list',
+                                       'source': chips_range})
+            current_sheet.data_validation('H2', {'validate': 'list',
+                                              'source': targets_range})
+            current_sheet.data_validation('J2', {'validate': 'list',
+                                       'source': methods_range})
+            current_sheet.data_validation('K2', {'validate': 'list',
+                                       'source': sample_locations_range})
+            current_sheet.data_validation('M2', {'validate': 'list',
+                                       'source': value_units_range})
+
+        current_template.close()
+
+        # Return
+        # Set response to binary
+        # For xlsx
+        response = HttpResponse(current_output.getvalue(), content_type='application/ms-excel')
+        response['Content-Disposition'] = 'attachment;filename="' + str(self.object) + '.xlsx"'
+
+        return response
+
+
+class AssayDataFileUploadList(StudyViewerMixin, DetailView):
+    # Why not have the mixin look for DetailView?
+    model = AssayStudy
+    detail = True
+
+    template_name = 'assays/assaydatafileupload_list.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(AssayDataFileUploadList, self).get_context_data(**kwargs)
+
+        context.update({
+            'detail': True,
+        })
+
+        return context
+
+
+class AssayDataFileUploadDetail(StudyGroupMixin, DetailView):
+    # Why not have the mixin look for DetailView?
+    model = AssayDataFileUpload
+    detail = True
+
+    template_name = 'assays/assaydatafileupload_detail.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(AssayDataFileUploadDetail, self).get_context_data(**kwargs)
+
+        context.update({
+            'detail': True,
+        })
+
+        return context
 
 
 def get_cell_samples_for_selection(user, setups=None):
@@ -1665,121 +2267,164 @@ class AssayMatrixDelete(StudyDeletionMixin, DeleteView):
         return self.object.study.get_absolute_url()
 
 
-# TODO PROBABLY WILL REMOVE EVENTUALLY
-class AssayMatrixItemUpdate(HistoryMixin, StudyGroupMixin, UpdateView):
+# TODO NEEDS TO BE REVISED
+class AssayMatrixItemUpdate(FormHandlerMixin, StudyGroupMixin, UpdateView):
     model = AssayMatrixItem
     template_name = 'assays/assaymatrixitem_add.html'
-    form_class = AssayMatrixItemFullForm
+    # NO, NOT THE FULL FORM
+    # form_class = AssayMatrixItemFullForm
+    form_class = AssayMatrixItemForm
 
     def get_context_data(self, **kwargs):
         context = super(AssayMatrixItemUpdate, self).get_context_data(**kwargs)
 
-        if self.request.POST:
-            context['compound_formset'] = AssaySetupCompoundInlineFormSetFactory(
-                self.request.POST,
-                instance=self.object,
-                # matrix=self.object.matrix
+        # Unfortunate, there ought to be a better way
+        context.update({
+            'cellsamples' : CellSample.objects.all().prefetch_related(
+                'cell_type__organ',
+                'supplier',
+                'cell_subtype__cell_type'
             )
-            context['cell_formset'] = AssaySetupCellInlineFormSetFactory(
-                self.request.POST,
-                instance=self.object,
-                # matrix=self.object
-            )
-            context['setting_formset'] = AssaySetupSettingInlineFormSetFactory(
-                self.request.POST,
-                instance=self.object,
-                # matrix=self.object
-            )
-        else:
-            context['compound_formset'] = AssaySetupCompoundInlineFormSetFactory(
-                instance=self.object,
-                # matrix=self.object.matrix
-            )
-            context['cell_formset'] = AssaySetupCellInlineFormSetFactory(
-                instance=self.object,
-                # matrix=self.object
-            )
-            context['setting_formset'] = AssaySetupSettingInlineFormSetFactory(
-                instance=self.object,
-                # matrix=self.object
-            )
-
-        # cellsamples = get_cell_samples_for_selection(self.request.user)
-
-        # Cellsamples will always be the same
-        context['cellsamples'] = CellSample.objects.all().prefetch_related(
-            'cell_type__organ',
-            'supplier',
-            'cell_subtype__cell_type'
-        )
-
-        context['update'] = True
+        })
 
         return context
 
-    def form_valid(self, form):
-        compound_formset = AssaySetupCompoundInlineFormSetFactory(
-            self.request.POST,
-            instance=self.object,
-            # matrix=self.object.matrix
-        )
-        cell_formset = AssaySetupCellInlineFormSetFactory(
-            self.request.POST,
-            instance=self.object,
-            # matrix=self.object
-        )
-        setting_formset = AssaySetupSettingInlineFormSetFactory(
-            self.request.POST,
-            instance=self.object,
-            # matrix=self.object
-        )
+    # Extra form processing for exclusions
+    # Really, this should be in the form itself?
+    def extra_form_processing(self, form):
+        try:
+            data_point_ids_to_update_raw = json.loads(form.data.get('dynamic_exclusion', '{}'))
+            data_point_ids_to_mark_excluded = [
+                int(id) for id, value in list(data_point_ids_to_update_raw.items()) if value
+            ]
+            data_point_ids_to_mark_included = [
+                int(id) for id, value in list(data_point_ids_to_update_raw.items()) if not value
+            ]
+            if data_point_ids_to_mark_excluded:
+                AssayDataPoint.objects.filter(
+                    matrix_item=form.instance,
+                    id__in=data_point_ids_to_mark_excluded
+                ).update(excluded=True)
+            if data_point_ids_to_mark_included:
+                AssayDataPoint.objects.filter(
+                    matrix_item=form.instance,
+                    id__in=data_point_ids_to_mark_included
+                ).update(excluded=False)
+        # EVIL EXCEPTION PLEASE REVISE
+        except:
+            pass
 
-        all_formsets = [
-            compound_formset,
-            cell_formset,
-            setting_formset,
-        ]
+    # Trash from previous iteration
+    # def get_context_data(self, **kwargs):
+    #     context = super(AssayMatrixItemUpdate, self).get_context_data(**kwargs)
 
-        all_formsets_valid =  True
+    #     # Junk: We don't need any blasted inlines
+    #     # if self.request.POST:
+    #     #     context['compound_formset'] = AssaySetupCompoundInlineFormSetFactory(
+    #     #         self.request.POST,
+    #     #         instance=self.object,
+    #     #         # matrix=self.object.matrix
+    #     #     )
+    #     #     context['cell_formset'] = AssaySetupCellInlineFormSetFactory(
+    #     #         self.request.POST,
+    #     #         instance=self.object,
+    #     #         # matrix=self.object
+    #     #     )
+    #     #     context['setting_formset'] = AssaySetupSettingInlineFormSetFactory(
+    #     #         self.request.POST,
+    #     #         instance=self.object,
+    #     #         # matrix=self.object
+    #     #     )
+    #     # else:
+    #     #     context['compound_formset'] = AssaySetupCompoundInlineFormSetFactory(
+    #     #         instance=self.object,
+    #     #         # matrix=self.object.matrix
+    #     #     )
+    #     #     context['cell_formset'] = AssaySetupCellInlineFormSetFactory(
+    #     #         instance=self.object,
+    #     #         # matrix=self.object
+    #     #     )
+    #     #     context['setting_formset'] = AssaySetupSettingInlineFormSetFactory(
+    #     #         instance=self.object,
+    #     #         # matrix=self.object
+    #     #     )
 
-        for current_formset in all_formsets:
-            if not current_formset.is_valid():
-                all_formsets_valid = False
+    #     # cellsamples = get_cell_samples_for_selection(self.request.user)
 
-        if form.is_valid() and all_formsets_valid:
-            save_forms_with_tracking(self, form, update=True, formset=all_formsets)
+    #     # Cellsamples will always be the same
+    #     # context['cellsamples'] = CellSample.objects.all().prefetch_related(
+    #     #     'cell_type__organ',
+    #     #     'supplier',
+    #     #     'cell_subtype__cell_type'
+    #     # )
 
-            # Sloppy addition of logging
-            change_message = self.construct_change_message(form, [], False)
-            self.log_change(self.request, self.object, change_message)
+    #     context['update'] = True
 
-            try:
-                data_point_ids_to_update_raw = json.loads(form.data.get('dynamic_exclusion', '{}'))
-                data_point_ids_to_mark_excluded = [
-                    int(id) for id, value in list(data_point_ids_to_update_raw.items()) if value
-                ]
-                data_point_ids_to_mark_included = [
-                    int(id) for id, value in list(data_point_ids_to_update_raw.items()) if not value
-                ]
-                if data_point_ids_to_mark_excluded:
-                    AssayDataPoint.objects.filter(
-                        matrix_item=form.instance,
-                        id__in=data_point_ids_to_mark_excluded
-                    ).update(excluded=True)
-                if data_point_ids_to_mark_included:
-                    AssayDataPoint.objects.filter(
-                        matrix_item=form.instance,
-                        id__in=data_point_ids_to_mark_included
-                    ).update(excluded=False)
-            # EVIL EXCEPTION PLEASE REVISE
-            except:
-                pass
+    #     return context
 
-            return redirect(self.object.get_post_submission_url())
-        else:
-            return self.render_to_response(self.get_context_data(
-                form=form
-            ))
+    # def form_valid(self, form):
+    #     compound_formset = AssaySetupCompoundInlineFormSetFactory(
+    #         self.request.POST,
+    #         instance=self.object,
+    #         # matrix=self.object.matrix
+    #     )
+    #     cell_formset = AssaySetupCellInlineFormSetFactory(
+    #         self.request.POST,
+    #         instance=self.object,
+    #         # matrix=self.object
+    #     )
+    #     setting_formset = AssaySetupSettingInlineFormSetFactory(
+    #         self.request.POST,
+    #         instance=self.object,
+    #         # matrix=self.object
+    #     )
+
+    #     all_formsets = [
+    #         compound_formset,
+    #         cell_formset,
+    #         setting_formset,
+    #     ]
+
+    #     all_formsets_valid =  True
+
+    #     for current_formset in all_formsets:
+    #         if not current_formset.is_valid():
+    #             all_formsets_valid = False
+
+    #     if form.is_valid() and all_formsets_valid:
+    #         save_forms_with_tracking(self, form, update=True, formset=all_formsets)
+
+    #         # Sloppy addition of logging
+    #         change_message = self.construct_change_message(form, [], False)
+    #         self.log_change(self.request, self.object, change_message)
+
+    #         try:
+    #             data_point_ids_to_update_raw = json.loads(form.data.get('dynamic_exclusion', '{}'))
+    #             data_point_ids_to_mark_excluded = [
+    #                 int(id) for id, value in list(data_point_ids_to_update_raw.items()) if value
+    #             ]
+    #             data_point_ids_to_mark_included = [
+    #                 int(id) for id, value in list(data_point_ids_to_update_raw.items()) if not value
+    #             ]
+    #             if data_point_ids_to_mark_excluded:
+    #                 AssayDataPoint.objects.filter(
+    #                     matrix_item=form.instance,
+    #                     id__in=data_point_ids_to_mark_excluded
+    #                 ).update(excluded=True)
+    #             if data_point_ids_to_mark_included:
+    #                 AssayDataPoint.objects.filter(
+    #                     matrix_item=form.instance,
+    #                     id__in=data_point_ids_to_mark_included
+    #                 ).update(excluded=False)
+    #         # EVIL EXCEPTION PLEASE REVISE
+    #         except:
+    #             pass
+
+    #         return redirect(self.object.get_post_submission_url())
+    #     else:
+    #         return self.render_to_response(self.get_context_data(
+    #             form=form
+    #         ))
 
 
 class AssayMatrixItemDetail(StudyGroupMixin, DetailView):
@@ -2197,9 +2842,19 @@ class AssayStudySetUpdate(CreatorOrSuperuserRequiredMixin, AssayStudySetMixin, U
 #             )
 
 
+# TODO TO BE DEPRECATED
 class AssayStudyAddNew(OneGroupRequiredMixin, AssayStudyMixin, CreateView):
     template_name = 'assays/assaystudy_add_new.html'
-    form_class = AssayStudyFormNew
+    form_class = AssayStudyForm
+
+    template_name = 'assays/assaystudy_add.html'
+    form_class = AssayStudyForm
+
+    formsets = (
+        ('study_assay_formset', AssayStudyAssayFormSetFactory),
+        ('supporting_data_formset', AssayStudySupportingDataFormSetFactory),
+        ('reference_formset', AssayStudyReferenceFormSetFactory),
+    )
 
     # TODO TO BE REMOVED
     def get_context_data(self, **kwargs):
@@ -2219,6 +2874,7 @@ class AssayStudyAddNew(OneGroupRequiredMixin, AssayStudyMixin, CreateView):
         })
 
         return context
+
 
     # Special handling for emailing on creation
     def extra_form_processing(self, form):
