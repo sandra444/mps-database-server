@@ -2862,7 +2862,7 @@ class AssayGroup(models.Model):
         dic = {
             # TODO May need to prefetch device (potential n+1)
             # 'Device': self.device.name,
-            'Device': 'TODO',
+            'Device': self.organ_model.device.name,
             'MPS User Group': self.study.group.name,
             'Study': self.get_hyperlinked_study(),
             'Matrix': 'TO BE REVISED TODO',
