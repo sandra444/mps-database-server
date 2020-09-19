@@ -104,18 +104,16 @@
                 <tr>
                     <th>Name</th>
                     <th>Description</th>
-                    <th>Curation</th>
-                    <th>Source Number</th>
+                    <th>Reference #</th>
                 </tr>
             </thead>
 
             <tbody>
                 {% for term in source %}
                 <tr>
-                    <td>{{ term.name }}</td>
-                    <td>{{ term.description }}</td>
-                    <td>{{ term.curation }}</td>
-                    <td>{{ term.source_number }}</td>
+                    <td>{{ term.term }}</td>
+                    <td>{{ term.definition }}</td>
+                    <td>{{ term.help_order }}</td>
                 </tr>
                 {% endfor %}
             </tbody>

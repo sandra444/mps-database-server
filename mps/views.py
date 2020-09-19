@@ -22,7 +22,7 @@ import os
 
 from mps.settings import MEDIA_ROOT
 
-from resources.models import Definition, ComingSoonEntry, WhatIsNewEntry, DataSource, DatabaseFeature, FeatureSourceXref
+from resources.models import Definition, ComingSoonEntry, WhatIsNewEntry, FeatureSourceXref
 from django.views.generic.base import TemplateView
 
 from microdevices.models import MicrophysiologyCenter
@@ -134,8 +134,11 @@ def custom_search(request):
 
 
 def mps_help(request):
-    feature = DatabaseFeature.objects.all()
-    xref = FeatureSourceXref.objects.all().order_by('database_feature', 'data_source').prefetch_related(
+    feature = Definition.objects.filter(help_category='feature').order_by('help_order')
+    xref = FeatureSourceXref.objects.all(
+    ).order_by(
+        'database_feature', 'data_source'
+    ).prefetch_related(
         'data_source',
     )
 
@@ -145,7 +148,10 @@ def mps_help(request):
     i = 0
 
     for each in xref:
-        sn = str(each.data_source.source_number)
+        sn = str(each.data_source.help_order)
+
+        # print('each.database_feature: ',each.database_feature)
+        # print('sn: ', sn)
 
         # HANDY - get each field name in a queryset
         # for field in each._meta.get_fields():
@@ -169,9 +175,11 @@ def mps_help(request):
             feature_source[f] = list_of_sources
             list_of_sources = []
         elif i > 0 and i + 1 == len(xref) and f != each.database_feature:
-            # print('not first, IS, feature changed (last one is a different feature)')
+            # print('not first, IS last, feature changed (last one is a different feature)')
+            # write the previous feature and the list so far to the dictionary
+            feature_source[f] = list_of_sources
             # write this data source to the list of data sources
-            list_of_sources = [each.data_source]
+            list_of_sources = [sn]
             # write the list (of one) to the dictionary of features
             feature_source[each.database_feature] = list_of_sources
         elif i == 0 and i+1 < len(xref):
@@ -186,24 +194,27 @@ def mps_help(request):
             feature_source[each.database_feature] = list_of_sources
             list_of_sources = []
 
+        # print('list_of_sources: ',list_of_sources)
+
         f = each.database_feature
         i = i + 1
+
+    # print('feature_source: ', feature_source)
 
     # HANDY - add field to queryset add a field to a queryset
     for each in feature:
         this_feature = each
         this_list = feature_source.get(this_feature)
         this_list_string = ', '.join(map(str, this_list))
-        each.feature_list = this_list_string
+        each.source_list = this_list_string
 
-    # print("feature ", feature)
     # for each in feature:
-    #     print("each.feature_list ", each.feature_list)
+    #     print('each.source_list: ', each.source_list)
 
     c = {
         # 'version': len(os.listdir(MEDIA_ROOT + '/excel_templates/')),
         'glossary': Definition.objects.exclude(definition=''),
-        'source': DataSource.objects.all(),
+        'source': Definition.objects.filter(help_category='source').order_by('help_order'),
         'feature': feature
     }
 

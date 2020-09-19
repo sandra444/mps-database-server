@@ -11,8 +11,6 @@ from resources.models import (
     Definition,
     ComingSoonEntry,
     WhatIsNewEntry,
-    DataSource,
-    DatabaseFeature,
     FeatureSourceXref,
 )
 from resources.forms import (
@@ -144,6 +142,8 @@ class DefinitionAdmin(LockableAdmin):
         'term',
         'definition',
         'show_url',
+        'help_category',
+        'help_order',
         'created_on',
         'modified_on'
     )
@@ -156,6 +156,8 @@ class DefinitionAdmin(LockableAdmin):
                     'term',
                     'definition',
                     'reference',
+                    'help_category',
+                    'help_order',
                 )
             }
         ),
@@ -194,22 +196,6 @@ class WhatIsNewEntryAdmin(LockableAdmin):
     list_editable = ['contents', 'short_contents']
 
 admin.site.register(WhatIsNewEntry, WhatIsNewEntryAdmin)
-
-
-class DataSourceAdmin(LockableAdmin):
-    model = DataSource
-    list_display = ['name', 'description', 'curation', 'source_number']
-    search_fields = ['name', ]
-
-admin.site.register(DataSource, DataSourceAdmin)
-
-
-class DatabaseFeatureAdmin(LockableAdmin):
-    model = DatabaseFeature
-    list_display = ['name', 'description']
-    search_fields = ['name', ]
-
-admin.site.register(DatabaseFeature, DatabaseFeatureAdmin)
 
 
 class FeatureSourceXrefAdmin(LockableAdmin):
