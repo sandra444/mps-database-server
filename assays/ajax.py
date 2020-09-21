@@ -7023,8 +7023,12 @@ def get_filtered_omics_data_as_csv(get_params):
                 "assay": assay,
                 "group_1": group_1,
                 "group_2": group_2,
-                "time_1": time_1,
-                "time_2": time_2,
+                "time_1_days": math.floor(time_1/1440),
+                "time_1_hours": math.floor(time_1/60 % 24),
+                "time_1_minutes": math.floor(time_1 % 60),
+                "time_2_days": math.floor(time_2/1440),
+                "time_2_hours": math.floor(time_2/60 % 24),
+                "time_2_minutes": math.floor(time_2 % 60),
                 "location_1": location_1,
                 "location_2": location_2
             }
@@ -7039,11 +7043,15 @@ def get_filtered_omics_data_as_csv(get_params):
             "Expression",
             "Assay",
             "Group 1",
-            "Group 2",
-            "Time 1",
-            "Time 2",
             "Location 1",
-            "Location 2"
+            "Time 1 (Days)",
+            "Time 1 (Hours)",
+            "Time 1 (Minutes)",
+            "Group 2",
+            "Location 2",
+            "Time 2 (Days)",
+            "Time 2 (Hours)",
+            "Time 2 (Minutes)"
         ]
     )
 
@@ -7098,11 +7106,15 @@ def get_filtered_omics_data_as_csv(get_params):
             expression,
             consolidated_targets[name]['assay'],
             consolidated_targets[name]['group_1'],
-            consolidated_targets[name]['group_2'],
-            consolidated_targets[name]['time_1'],
-            consolidated_targets[name]['time_2'],
             consolidated_targets[name]['location_1'],
-            consolidated_targets[name]['location_2']
+            consolidated_targets[name]['time_1_days'],
+            consolidated_targets[name]['time_1_hours'],
+            consolidated_targets[name]['time_1_minutes'],
+            consolidated_targets[name]['group_2'],
+            consolidated_targets[name]['location_2'],
+            consolidated_targets[name]['time_2_days'],
+            consolidated_targets[name]['time_2_hours'],
+            consolidated_targets[name]['time_2_minutes']
         ]
         for target in unique_targets:
             if target in consolidated_targets[name]:
