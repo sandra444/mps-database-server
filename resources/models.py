@@ -53,6 +53,15 @@ class Resource(LockableModel):
         return self.type.resource_subtype.name
 
 
+help_category_choices = [
+    ('feature', 'feature'),
+    ('source', 'source'),
+    ('component-cell', 'component-cell'),
+    ('component-assay', 'component-assay'),
+    ('component-compound', 'component-compound'),
+    ('component-model', 'component-model')
+]
+
 class Definition(LockableModel):
     """A Definition is a definition for the glossary found in Help"""
     class Meta(object):
@@ -62,9 +71,9 @@ class Definition(LockableModel):
     definition = models.CharField(max_length=2500, default='')
     reference = models.URLField(default='', blank=True)
     help_category = models.CharField(max_length=30, default='', blank=True,
-        help_text=(
-            'Used in generating help tables. Options are feature, source, component-cell, component-assay, component-compound, component-model.'
-        ),)
+        help_text=('Used in generating help tables.'),
+        choices=help_category_choices,
+        )
     help_order = models.IntegerField(default=0, blank=True,
         help_text=(
             'Used in generating help tables. Order is way they will be listed in their respective tables. Make sure they are unique within a help_category.'
@@ -79,8 +88,11 @@ class Definition(LockableModel):
            'Check to display in tables and other locations in the help page (does not apply to the glossary).'
        ), )
 
+    # def __str__(self):
+    #     return self.term
+
     def __str__(self):
-        return self.term
+        return '{0} {1}'.format(self.term, self.help_order)
 
     @mark_safe
     def show_url(self):
@@ -107,15 +119,15 @@ class Definition(LockableModel):
 
     def is_url(self):
         if len(self.reference) > 2:
-            return "Y"
+            return "TRUE"
         else:
-            return "n"
+            return "false"
 
     def is_anchor(self):
         if len(self.help_reference) > 2:
-            return "Y"
+            return "TRUE"
         else:
-            return "n"
+            return "false"
 
 class ComingSoonEntry(LockableModel):
     """An entry for the About Page's "Coming Soon" Section"""
@@ -141,6 +153,7 @@ class FeatureSourceXref(LockableModel):
     class Meta(object):
         verbose_name = 'Help - Database Features & Sources'
         verbose_name_plural = 'Help - Database Features & Sources'
+        unique_together = [('database_feature', 'data_source')]
 
     database_feature = models.ForeignKey(
         Definition,
