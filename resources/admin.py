@@ -141,11 +141,13 @@ class DefinitionAdmin(LockableAdmin):
     list_display = (
         'term',
         'definition',
-        'show_url',
         'help_category',
         'help_order',
+        'help_reference',
+        'reference',
+        'modified_on',
         'created_on',
-        'modified_on'
+        'show_url',
     )
     search_fields = ['term', 'definition', 'reference']
 
@@ -158,6 +160,7 @@ class DefinitionAdmin(LockableAdmin):
                     'reference',
                     'help_category',
                     'help_order',
+                    'help_reference',
                 )
             }
         ),

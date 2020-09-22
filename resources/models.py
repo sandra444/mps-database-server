@@ -61,14 +61,15 @@ class Definition(LockableModel):
     term = models.CharField(max_length=60, unique=True)
     definition = models.CharField(max_length=2500, default='')
     reference = models.URLField(default='', blank=True)
-    help_category = models.CharField(max_length=30, default='',
+    help_category = models.CharField(max_length=30, default='', blank=True,
         help_text=(
             'Used in generating help tables. Options are feature, source, component-cell, component-assay, component-compound, component-model.'
         ),)
-    help_order = models.IntegerField(default=1,
+    help_order = models.IntegerField(default=0, blank=True,
         help_text=(
             'Used in generating help tables. Order is way they will be listed in their respective tables. Make sure they are unique within a help_category.'
         ),)
+    help_reference = models.URLField(default='', blank=True)
 
     def __str__(self):
         return self.term
@@ -85,6 +86,16 @@ class Definition(LockableModel):
     show_url.short_description = "Ref URL"
     show_url.allow_tags = True
 
+    def show_anchor(self):
+        if self.reference:
+            return format_html(
+                "<a target='_blank' href='{url}'><span title='{url}' class='glyphicon glyphicon-link'></span></a>", url=self.help_reference
+            )
+        else:
+            return ""
+
+    show_anchor.short_description = "Ref Anchor"
+    show_anchor.allow_tags = True
 
 class ComingSoonEntry(LockableModel):
     """An entry for the About Page's "Coming Soon" Section"""

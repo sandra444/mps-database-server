@@ -104,7 +104,8 @@
                 <tr>
                     <th>Name</th>
                     <th>Description</th>
-                    <th>Reference #</th>
+                    <th>Reference Data #</th>
+                    <th>Reference Data Website</th>
                 </tr>
             </thead>
 
@@ -114,6 +115,7 @@
                     <td>{{ term.term }}</td>
                     <td>{{ term.definition }}</td>
                     <td>{{ term.help_order }}</td>
+                    <th>{{ term.show_url }}</th>
                 </tr>
                 {% endfor %}
             </tbody>

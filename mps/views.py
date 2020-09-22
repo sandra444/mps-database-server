@@ -134,7 +134,8 @@ def custom_search(request):
 
 
 def mps_help(request):
-    feature = Definition.objects.filter(help_category='feature').order_by('help_order')
+    glossary = Definition.objects.exclude(definition='')
+
     xref = FeatureSourceXref.objects.all(
     ).order_by(
         'database_feature', 'data_source'
@@ -147,6 +148,9 @@ def mps_help(request):
     f = ''
     i = 0
 
+    # make a list of the data sources associated with each feature
+    # using the xref table
+    # store in a dictionary of feature and list of data sources
     for each in xref:
         sn = str(each.data_source.help_order)
 
@@ -201,24 +205,44 @@ def mps_help(request):
 
     # print('feature_source: ', feature_source)
 
+    # add a field to the feature queryset that has the list of the data source for each queryset
+
+    feature = glossary.filter(help_category='feature').order_by('help_order')
+
     # HANDY - add field to queryset add a field to a queryset
     for each in feature:
+        # print('---each.reference ', each.reference)
+        # print('each.help_reference ', each.help_reference)
+
         this_feature = each
         this_list = feature_source.get(this_feature)
-        this_list_string = ', '.join(map(str, this_list))
+        try:
+            this_list_string = ', '.join(map(str, this_list))
+        except:
+            this_list_string = ''
         each.source_list = this_list_string
 
     # for each in feature:
     #     print('each.source_list: ', each.source_list)
 
-    c = {
+    source = glossary.filter(help_category='source').order_by('help_order')
+    component_assay = glossary.filter(help_category='component-assay').order_by('help_order')
+    component_model = glossary.filter(help_category='component-model').order_by('help_order')
+    component_compound = glossary.filter(help_category='component-compound').order_by('help_order')
+    component_cell = glossary.filter(help_category='component-cell').order_by('help_order')
+
+    data = {
         # 'version': len(os.listdir(MEDIA_ROOT + '/excel_templates/')),
-        'glossary': Definition.objects.exclude(definition=''),
-        'source': Definition.objects.filter(help_category='source').order_by('help_order'),
-        'feature': feature
+        'glossary': glossary,
+        'source': source,
+        'feature': feature,
+        'component_assay': component_assay,
+        'component_model': component_model,
+        'component_compound': component_compound,
+        'component_cell': component_cell,
     }
 
-    return render(request, 'help.html', c)
+    return render(request, 'help.html', data)
 
 
 #added sck
