@@ -140,14 +140,15 @@ class DefinitionAdmin(LockableAdmin):
     list_per_page = 300
     list_display = (
         'term',
+        'glossary_display',
+        'help_display',
         'definition',
+        'is_url',
         'help_category',
         'help_order',
-        'help_reference',
-        'reference',
+        'is_anchor',
         'modified_on',
         'created_on',
-        'show_url',
     )
     search_fields = ['term', 'definition', 'reference']
 
@@ -156,6 +157,8 @@ class DefinitionAdmin(LockableAdmin):
             None, {
                 'fields': (
                     'term',
+                    'glossary_display',
+                    'help_display',
                     'definition',
                     'reference',
                     'help_category',

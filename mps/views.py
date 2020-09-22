@@ -148,8 +148,7 @@ def mps_help(request):
     f = ''
     i = 0
 
-    # make a list of the data sources associated with each feature
-    # using the xref table
+    # make a list of the data sources associated with each feature using the xref table
     # store in a dictionary of feature and list of data sources
     for each in xref:
         sn = str(each.data_source.help_order)
@@ -205,10 +204,10 @@ def mps_help(request):
 
     # print('feature_source: ', feature_source)
 
-    # add a field to the feature queryset that has the list of the data source for each queryset
-
+    # get a subset of the features for the feature table
     feature = glossary.filter(help_category='feature').order_by('help_order')
 
+    # add a field to the feature queryset that has the list (stringified) of the data source(s) for each feature
     # HANDY - add field to queryset add a field to a queryset
     for each in feature:
         # print('---each.reference ', each.reference)
@@ -225,11 +224,15 @@ def mps_help(request):
     # for each in feature:
     #     print('each.source_list: ', each.source_list)
 
+    # get other subsets for other tables on the help page
     source = glossary.filter(help_category='source').order_by('help_order')
     component_assay = glossary.filter(help_category='component-assay').order_by('help_order')
     component_model = glossary.filter(help_category='component-model').order_by('help_order')
     component_compound = glossary.filter(help_category='component-compound').order_by('help_order')
     component_cell = glossary.filter(help_category='component-cell').order_by('help_order')
+
+    # limit the glossary to only those selected for display
+    glossary = glossary.filter(glossary_display=True)
 
     data = {
         # 'version': len(os.listdir(MEDIA_ROOT + '/excel_templates/')),

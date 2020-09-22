@@ -70,6 +70,14 @@ class Definition(LockableModel):
             'Used in generating help tables. Order is way they will be listed in their respective tables. Make sure they are unique within a help_category.'
         ),)
     help_reference = models.URLField(default='', blank=True)
+    glossary_display = models.BooleanField(default=True,
+       help_text=(
+           'Check to display in the glossary.'
+       ), )
+    help_display = models.BooleanField(default=True,
+       help_text=(
+           'Check to display in tables and other locations in the help page (does not apply to the glossary).'
+       ), )
 
     def __str__(self):
         return self.term
@@ -87,7 +95,7 @@ class Definition(LockableModel):
     show_url.allow_tags = True
 
     def show_anchor(self):
-        if self.reference:
+        if self.help_reference:
             return format_html(
                 "<a target='_blank' href='{url}'><span title='{url}' class='glyphicon glyphicon-link'></span></a>", url=self.help_reference
             )
@@ -96,6 +104,18 @@ class Definition(LockableModel):
 
     show_anchor.short_description = "Ref Anchor"
     show_anchor.allow_tags = True
+
+    def is_url(self):
+        if len(self.reference) > 2:
+            return "Y"
+        else:
+            return "n"
+
+    def is_anchor(self):
+        if len(self.help_reference) > 2:
+            return "Y"
+        else:
+            return "n"
 
 class ComingSoonEntry(LockableModel):
     """An entry for the About Page's "Coming Soon" Section"""
