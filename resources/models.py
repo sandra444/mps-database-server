@@ -119,15 +119,15 @@ class Definition(LockableModel):
 
     def is_url(self):
         if len(self.reference) > 2:
-            return "TRUE"
+            return "Y"
         else:
-            return "false"
+            return "-"
 
     def is_anchor(self):
         if len(self.help_reference) > 2:
-            return "TRUE"
+            return "Y"
         else:
-            return "false"
+            return "-"
 
 class ComingSoonEntry(LockableModel):
     """An entry for the About Page's "Coming Soon" Section"""
