@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
+
+<ul class="list-group">
+    <li class="list-group-item">
+        <h3>Database Study Components</h3>
+        The study components are entities needed when adding study data to the MPS-Db. They are the terms that are selected in dropdowns when setting up a study in the MPS-Db. All registered users can review study components <a href="#https://mps.csb.pitt.edu/studycomponents/">here</a>. Data providers (users who are assigned to, at least one, data provider group) can add new study components <a href="#https://mps.csb.pitt.edu/studycomponents/">here</a>, or by clicking the <span class="glyphicon glyphicon-plus text-success" aria-hidden="true"></span> provided throughout the study setup workflow.
+        <br>
+        <br>
+
+{#        <h4>Assay Components</h4>#}
+{#        <table class="table table-bordered table-condensed small">#}
+{#            <thead>#}
+{#                <tr class="active">#}
+{#                    <th> Component </th>#}
+{#                    <th> Description </th>#}
+{#                </tr>#}
+{#            </thead>#}
+{#            <tbody>#}
+{#                <tr>#}
+{#                    <td> Assay Targets/Analytes </td>#}
+{#                    <td> Targets/analytes used to assess the response of a MPS model. Assay targets/analytes are associated to the method/kit used to measure response. </td>#}
+{#                </tr>#}
+{#                <tr>#}
+{#                    <td> Assay Method/Kits </td>#}
+{#                    <td> Assay method/kits used to measure assay targets/analytes. </td>#}
+{#                </tr>#}
+{#                <tr>#}
+{#                    <td> Measurement Types </td>#}
+{#                    <td> The type of measurement used to acquire an assay data point. </td>#}
+{#                </tr>#}
+{#                <tr>#}
+{#                    <td> Units of Measure </td>#}
+{#                    <td> Units available for quantifying values. </td>#}
+{#                </tr>#}
+{#                <tr>#}
+{#                    <td> Locations </td>#}
+{#                    <td> Locations within a device where treatments can be added and/or samples removed. </td>#}
+{#                </tr>#}
+{#                <tr>#}
+{#                    <td> Settings </td>#}
+{#                    <td> Settings used in describing the study design (e.g., flow rate, media used, etc.). </td>#}
+{#                </tr>#}
+{#                <tr>#}
+{#                    <td> Assay Suppliers </td>#}
+{#                    <td> The supplier of the kits and/or compounds used in performing the study. </td>#}
+{#                </tr>#}
+{#                <tr>#}
+{#                    <td> References </td>#}
+{#                    <td> Publications or other sources of information used in designing and/or performing a study. </td>#}
+{#                </tr>#}
+{#            </tbody>#}
+{#        </table>#}
+{##}
+{#        <h4>Model Components</h4>#}
+{#        <table class="table table-bordered table-condensed small">#}
+{#            <thead>#}
+{#                <tr class="active">#}
+{#                    <th> Component </th>#}
+{#                    <th> Description </th>#}
+{#                </tr>#}
+{#            </thead>#}
+{#            <tbody>#}
+{#                <tr>#}
+{#                    <td> Devices </td>#}
+{#                    <td> Devices used in MPS models in the MPS-Db with the option to click on the device to view details of the device. </td>#}
+{#                </tr>#}
+{#                <tr>#}
+{#                    <td> MPS Models </td>#}
+{#                    <td> MPS Models in the MPS-Db with the option to click on the model and view details of the model's design. </td>#}
+{#                </tr>#}
+{#                <tr>#}
+{#                    <td> MPS Model Locations </td>#}
+{#                    <td> Locations within a device where treatments can be added and/or samples removed. </td>#}
+{#                </tr>#}
+{#                <tr>#}
+{#                    <td> Manufacturers </td>#}
+{#                    <td> Suppliers of MPS models and/or devices used to construct MPS Models. </td>#}
+{#                </tr>#}
+{#            </tbody>#}
+{#        </table>#}
+{##}
+{#        <h4>Compound Components</h4>#}
+{#        <table class="table table-bordered table-condensed small">#}
+{#            <thead>#}
+{#                <tr class="active">#}
+{#                    <th> Component </th>#}
+{#                    <th> Description </th>#}
+{#                </tr>#}
+{#            </thead>#}
+{#            <tbody>#}
+{#                <tr>#}
+{#                    <td> Compound </td>#}
+{#                    <td> Chemicals used in studies and/or features of the MPS-Db. Chemical properties are curated from reference sources. </td>#}
+{#                </tr>#}
+{#             </tbody>#}
+{#        </table>#}
+{##}
+{#        <h4>Cell Components</h4>#}
+{#        <table class="table table-bordered table-condensed small">#}
+{#            <thead>#}
+{#                <tr class="active">#}
+{#                    <th> Component </th>#}
+{#                    <th> Description </th>#}
+{#                </tr>#}
+{#            </thead>#}
+{#            <tbody>#}
+{#                <tr>#}
+{#                    <td> Cell Types </td>#}
+{#                    <td> The function of the cell. </td>#}
+{#                </tr>#}
+{#                <tr>#}
+{#                    <td> Cell Origins </td>#}
+{#                    <td> Indicator of hos the cells were isolated or acquired. </td>#}
+{#                </tr>#}
+{#                <tr>#}
+{#                    <td> Cell Samples </td>#}
+{#                    <td> Cell samples used in MPS models in the MPS-Db. The cell types and cell origins are included as part of the cell sample and must be added to the MPS-Db prior to adding the cell sample. </td>#}
+{#                </tr>#}
+{#                <tr>#}
+{#                    <td> Cell Biosensors </td>#}
+{#                    <td> Biosensors used in performing a study. </td>#}
+{#                </tr>#}
+{#                <tr>#}
+{#                    <td> Cell Suppliers </td>#}
+{#                    <td> The supplier of the cells used in performing the study. </td>#}
+{#                </tr>#}
+{#            </tbody>#}
+{#        </table>#}
+
+
+        <h4>Assay Components</h4>
+        <table id="source_table" class="table table-bordered table-condensed small">
+            <thead>
+                <tr>
+                    <th>Components</th>
+                    <th>Description</th>
+                    <th>Component Review</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for term in component_assay %}
+                <tr>
+                    <td>{{ term.term }}</td>
+                    <td>{{ term.definition }}</td>
+                    <th><a href="{{ term.reference }}">{{ term.reference }}</a></th>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <h4>Model Components</h4>
+        <table id="source_table" class="table table-bordered table-condensed small">
+            <thead>
+                <tr>
+                    <th>Components</th>
+                    <th>Description</th>
+                    <th>Component Review</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for term in component_model %}
+                <tr>
+                    <td>{{ term.term }}</td>
+                    <td>{{ term.definition }}</td>
+                    <th><a href="{{ term.reference }}">{{ term.reference }}</a></th>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <h4>Compound Components</h4>
+        <table id="source_table" class="table table-bordered table-condensed small">
+            <thead>
+                <tr>
+                    <th>Components</th>
+                    <th>Description</th>
+                    <th>Component Review</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for term in component_compound %}
+                <tr>
+                    <td>{{ term.term }}</td>
+                    <td>{{ term.definition }}</td>
+                    <th><a href="{{ term.reference }}">{{ term.reference }}</a></th>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <h4>Cell Components</h4>
+        <table id="source_table" class="table table-bordered table-condensed small">
+            <thead>
+                <tr>
+                    <th>Components</th>
+                    <th>Description</th>
+                    <th>Component Review</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for term in component_cell %}
+                <tr>
+                    <td>{{ term.term }}</td>
+                    <td>{{ term.definition }}</td>
+                    <th><a href="{{ term.reference }}">{{ term.reference }}</a></th>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+    </li>
+</ul>
+
+</body>
+</html>

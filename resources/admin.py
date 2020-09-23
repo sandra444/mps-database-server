@@ -162,7 +162,6 @@ class DefinitionAdmin(LockableAdmin):
                     'definition',
                     'reference',
                     'help_category',
-                    'order_numbers_already_assigned',
                     'help_order',
                     'help_reference',
                 )
