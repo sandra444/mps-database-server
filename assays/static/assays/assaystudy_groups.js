@@ -533,7 +533,8 @@ $(document).ready(function () {
 
         // ADD TO EXISTING ROWS AS EMPTY
         study_setup_body.find('tr').each(function(row_index) {
-            $(this).find('.' + prefix + '_start').last().after('<td class="' + prefix + '_start' + '">' + create_edit_button(prefix, row_index, column_index) + '</td>', false);
+            let offset_row_index = row_index + start_index;
+            $(this).find('.' + prefix + '_start').last().after('<td class="' + prefix + '_start' + '">' + create_edit_button(prefix, offset_row_index, column_index) + '</td>', false);
         });
 
         // Increment columns for this prefix
@@ -1137,6 +1138,9 @@ $(document).ready(function () {
         get_device_type(is_new);
     }
 
+    // Crude, make the start index file scope
+    let start_index = 0;
+
     function rebuild_table(data_change, new_current_page) {
         // GET RID OF ANYTHING IN THE TABLE
         study_setup_head.find('.new_column').remove();
@@ -1162,7 +1166,7 @@ $(document).ready(function () {
             // $.each(series_data, function(index, content) {
             //     spawn_row(content, false);
             // });
-            let start_index = current_page * display_length;
+            start_index = current_page * display_length;
             for (let index=0; index < display_length; index++) {
                 let row_index = index + start_index;
                 if (series_data[start_index + index]) {
