@@ -114,7 +114,18 @@ $(document).ready(function () {
     // TRICKY: We need to paginate the groups, otherwise the DOM will detonate
     let current_page = 0;
     let number_of_pages = 1;
-    const display_length = 10;
+
+    const group_table_display_length = $('#id_group_table_length');
+    let display_length = parseInt(group_table_display_length.val());
+
+    // PUT TRIGGER IN A BETTER SPOT
+    // NOTE THAT THIS IS NOT TRIGGERED INITIALLY (DO NOT WANT TO REDRAW SUPERFLUOUSLY)
+    group_table_display_length.change(function() {
+        display_length = parseInt(group_table_display_length.val());
+        // GO BACK TO THE FIRST PAGE
+        rebuild_table(false, 0);
+    });
+
     // Selector clarity
     const pagination_previous_button_selector = $('.group-table-previous');
     const pagination_next_button_selector = $('.group-table-next');
@@ -123,7 +134,7 @@ $(document).ready(function () {
     // TODO TODO TODO: WE NEED TO GENERATE THE PAGINATOR(S) BEFORE THE TABLE
     // TODO TODO TODO: Obviously we need to know the number of pages etc.
     function revise_paginator_text() {
-        number_of_pages = Math.ceil(series_data.length / 10);
+        number_of_pages = Math.ceil(series_data.length / display_length);
 
         if (number_of_pages === 0) {
             number_of_pages = 1;
@@ -853,7 +864,7 @@ $(document).ready(function () {
         // TODO LAZY
 
         // SKIP TO LAST PAGE
-        let new_current_page = Math.ceil(series_data.length / 10) - 1;
+        let new_current_page = Math.ceil(series_data.length / display_length) - 1;
 
         rebuild_table(true, new_current_page);
     });
@@ -960,7 +971,7 @@ $(document).ready(function () {
         // change_matrix_visibility();
 
         // SKIP TO LAST PAGE
-        let new_current_page = Math.ceil(series_data.length / 10) - 1;
+        let new_current_page = Math.ceil(series_data.length / display_length) - 1;
 
         // TODO LAZY
         rebuild_table(true, new_current_page);
