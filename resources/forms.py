@@ -1,4 +1,5 @@
 from django import forms
+
 from resources.models import Definition, help_category_choices
 
 class ResourceForm(forms.ModelForm):
@@ -31,7 +32,10 @@ class ResourceSubtypeForm(forms.ModelForm):
 
 class DefinitionForm(forms.ModelForm):
     """Form for Definitions"""
+
     class Meta(object):
+        model = Definition
+        fields = ('order_numbers_already_assigned',)
         widgets = {
             'term': forms.Textarea(attrs={'rows': 1, 'cols': 50}),
             'definition': forms.Textarea(attrs={'rows': 5, 'cols': 50}),

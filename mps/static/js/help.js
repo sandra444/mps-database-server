@@ -2,14 +2,6 @@ $(document).ready(function () {
     // Resolve anchors going to the incorrect location
     var offset = 60;
 
-    // $('#assayplatereadermaps').DataTable({
-    //     "iDisplayLength": 25,
-    //     "sDom": '<B<"row">lfrtip>',
-    //     fixedHeader: {headerOffset: 50},
-    //     responsive: true,
-    //     "order": [[2, "asc"]],
-    // });
-
     $(".collapsible1, .collapsible2, .collapsible3, .collapsible4").click(function() {
         var content = this.nextElementSibling;
         if ($(content).css("display") != "none") {

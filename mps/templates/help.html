@@ -160,6 +160,8 @@
     {% endif %}
 </head>
 
+{# TODO DRAFT VERSION -  NEEDS TO BE REVIEWED  #}
+
 <body>
 {# <body data-spy="scroll" data-target=".navbar" data-offset="80"> #}
 
@@ -177,52 +179,53 @@
 {#            <span class="navbar-brand navbar-help"><b>MPS Help</b></span>#}
         </div>
 
-        <div class="collapse navbar-collapse" id="myNavbar">
-            <ul class="nav navbar-nav">
-                <li class="dropdown">
-                    <a class="dropdown-toggle" data-toggle="dropdown" href="#">Overview<span class="caret"></span></a>
-                    <ul class="dropdown-menu">
-                        <li><a href="#overview0">Database Background</a></li>
-                        <li><a href="#overview1">Study Components </a></li>
-                        <li><a href="#overview2">Study Organization</a></li>
-                        <li><a href="#overview4">Reference Data Sources</a></li>
-                        <li><a href="#overview3">Database Features</a></li>
-                        <li><a href="#overview5">Permission Structure </a></li>
-                    </ul>
-                </li>
+        <div>
+            <div class="collapse navbar-collapse" id="myNavbar">
+                <ul class="nav navbar-nav">
 
-                <li class="dropdown">
-                    <a class="dropdown-toggle" data-toggle="dropdown" href="#">Presentations<span class="caret"></span></a>
-                    <ul class="dropdown-menu">
-                        <li><a href="#video_demo_8">Plate Reader Data Integration Tool (in development) - 20200521 </a></li>
-                        <li><a href="#video_demo_7">Physiologically Based Pharmacokinetic (PBPK) Modeling (in development) - 20200416</a></li>
+                    <li class="dropdown">
+                        <a class="dropdown-toggle" data-toggle="dropdown" href="#">Overview<span class="caret"></span></a>
+                        <ul class="dropdown-menu">
+                            <li><a href="#overview0">Database Background</a></li>
+                            <li><a href="#overview1">Study Component Lists </a></li>
+                            <li><a href="#overview2">Study Data Organization</a></li>
+                            <li><a href="#overview3">Database Features</a></li>
+                            <li><a href="#overview4">Data Sources</a></li>
+                            <li><a href="#overview5">Permission Structure </a></li>
+                        </ul>
+                    </li>
+
+                    <li class="dropdown">
+                        <a class="dropdown-toggle" data-toggle="dropdown" href="#">Presentations<span class="caret"></span></a>
+                        <ul class="dropdown-menu">
+                            <li><a href="#video_demo_8">Plate Reader Data Integration Tool (in development) - 20200521 </a></li>
+                            <li><a href="#video_demo_7">Physiologically Based Pharmacokinetic (PBPK) Modeling (in development) - 20200416</a></li>
 {#                            <li><a href="#video_demo_6">Power Analysis by Larry - don't post - 20200220 </a></li>#}
-                        <li><a href="#video_demo_5">Study Sets, Controlled Sharing, References - 20190620</a></li>
-                        <li><a href="#video_demo_4">NCATS Data Sharing Workflow - 20190620 </a></li>
-                        <li><a href="#video_demo_3">Looking at Kidney Study Data - 20190418</a></li>
-                        <li><a href="#video_demo_2">Reproducibility, Customized Plots - 20190221</a></li>
-                        <li><a href="#video_demo_1">Adverse Events Analysis - 20190117</a></li>
-                        <li><a href="#video_demo_0">Study Data Loading - 20181220 </a></li>
-                    </ul>
-                </li>
 
-                <li class="dropdown">
-                    <a class="dropdown-toggle" data-toggle="dropdown" href="#">Features<span class="caret"></span></a>
-                    <ul class="dropdown-menu">
-                        <li class="dropdown-header"><b>Study Data Only</b></li>
-                            <li><a href="#assaydata">Assay Data Visualization</a></li>
-                            <li><a href="#genomicdata">Genomic Data Visualization</a></li>
-                            <li><a href="#imagesvideos">Assay Data Power Analysis</a></li>
-                            <li><a href="#reproducibilityanalysis">Assay Data Reproducibility</a></li>
-                            <li><a href="#poweranalysis">Assay Data Power Analysis</a></li>
+                            <li><a href="#video_demo_5">Study Sets, Controlled Sharing, References - 20190620</a></li>
+                            <li><a href="#video_demo_4">NCATS Data Sharing Workflow - 20190620 </a></li>
+                            <li><a href="#video_demo_3">Looking at Kidney Study Data - 20190418</a></li>
+                            <li><a href="#video_demo_2">Reproducibility, Customized Plots - 20190221</a></li>
+                            <li><a href="#video_demo_1">Adverse Events Analysis - 20190117</a></li>
+                            <li><a href="#video_demo_0">Study Data Loading - 20181220 </a></li>
+                        </ul>
+                    </li>
+
+                    <li class="dropdown">
+                        <a class="dropdown-toggle" data-toggle="dropdown" href="#">Features<span class="caret"></span></a>
+                        <ul class="dropdown-menu">
+                            <li class="dropdown-header"><b>Study Data Only</b></li>
+                            <li><a href="#intrastudy">Intra-Study Analysis</a></li>
+                            <li><a href="#interstudy">Inter-Study Analysis</a></li>
+                            <li><a href="#customization"><i>Customizing Intra- and Inter-Study Analyses</i></a></li>
                             <li><a href="#studyset">Study Sets</a></li>
-                        <li class="divider"></li>
-                        <li class="dropdown-header"><b>Combining Study and Reference Data</b></li>
-                            <li><a href="#pbpkanalysis">PBPK Analysis</a></li>
+                            <li><a href="#reference">References</a></li>
+                            <li class="divider"></li>
+                            <li class="dropdown-header"><b>Combining Study and Reference Data</b></li>
                             <li><a href="#diseasemodels">Diseases and Disease Models</a></li>
                             <li><a href="#compoundreport">Compound Report</a></li>
-                        <li class="divider"></li>
-                        <li class="dropdown-header"><b>Reference Data Only</b></li>
+                            <li class="divider"></li>
+                            <li class="dropdown-header"><b>Reference Data Only</b></li>
                             <li><a href="#chemicaldata">Chemical Data</a></li>
                             <li><a href="#bioactivities">Bioactivities</a></li>
                             <li><a href="#drugtrials">Drug Trials</a></li>
@@ -230,97 +233,95 @@
                             <li><a href="#compareadverseevents">Compare Adverse Events</a></li>
                             <li><a href="#heatmap">Heatmap (Bioactivities)</a></li>
                             <li><a href="#cluster">Cluster Chemicals</a></li>
-                        <li class="dropdown-header"><b>Miscellaneous</b></li>
-                            <li><a href="#reference">References</a></li>
-                    </ul>
-                </li>
+                        </ul>
+                    </li>
 
-                <li class="dropdown">
-                    <a class="dropdown-toggle" data-toggle="dropdown" href="#">Providing Data<span class="caret"></span></a>
-                    <ul class="dropdown-menu">
-                        <li class="dropdown-header"><b>Review Components </b></li>
-                        <li><a href="#assaymts">Assays (Methods and Targets) </a></li>
-                        <li><a href="#cellsamples">Cell Samples</a></li>
-                        <li><a href="#chemicallist">Compounds</a></li>
-                        <li><a href="#devices">Devices</a></li>
-                        <li><a href="#diseaselist">Diseases</a></li>
-                        <li><a href="#mpslocations">Locations of MPS Models</a></li>
-                        <li><a href="#mpsmodels">MPS Models and Devices</a></li>
-                        <li><a href="#settings">Settings</a></li>
-                        <li><a href="#physicalunits">Units</a></li>
-                        <li class="divider"></li>
-                        <li class="dropdown-header"><b>Enter Study Data</b></li>
-                        <li><a href="#studies_editor">1. Study (Create or Edit) </a></li>
-                        <li><a href="#matrices_editor">2. Matrix(ces) (Add or Edit) </a></li>
-                        <li><a href="#matrixitems_editor">3. Matrix Items (Edit) </a></li>
-                        <li><a href="#assaydata_editor">4. Assay Data (Upload or Reupload) </a></li>
-                        <li><a href="#assayimages_editor">5. Assay Images &amp; Videos (Prepare) </a></li>
-                        <li><a href="#study_signoff_editor">6. Sign-Off a Study (Sharing Data) </a></li>
-                        <li><a href="#stakeholder_editor">7. Stakeholder Review and Acknowledgement </a></li>
-                    </ul>
-                </li>
+                    <li class="dropdown">
+                        <a class="dropdown-toggle" data-toggle="dropdown" href="#">Providing Data<span class="caret"></span></a>
+                        <ul class="dropdown-menu">
+                            <li class="dropdown-header"><b>Review Components </b></li>
+                            <li><a href="#assaymts">Assays (Methods and Targets) </a></li>
+                            <li><a href="#cellsamples">Cell Samples</a></li>
+                            <li><a href="#chemicallist">Compounds</a></li>
+                            <li><a href="#devices">Devices</a></li>
+                            <li><a href="#diseaselist">Diseases</a></li>
+                            <li><a href="#mpslocations">Locations of MPS Models</a></li>
+                            <li><a href="#mpsmodels">MPS Models and Devices</a></li>
+                            <li><a href="#settings">Settings</a></li>
+                            <li><a href="#physicalunits">Units</a></li>
+                            <li class="divider"></li>
+                            <li class="dropdown-header"><b>Enter Study Data</b></li>
+                            <li><a href="#studies_editor">1. Study (Create or Edit) </a></li>
+                            <li><a href="#matrices_editor">2. Matrix(ces) (Add or Edit) </a></li>
+                            <li><a href="#matrixitems_editor">3. Matrix Items (Edit) </a></li>
+                            <li><a href="#assaydata_editor">4. Assay Data (Upload or Reupload) </a></li>
+                            <li><a href="#assayimages_editor">5. Assay Images &amp; Videos (Prepare) </a></li>
+                            <li><a href="#study_signoff_editor">6. Sign-Off a Study (Sharing Data) </a></li>
+                            <li><a href="#stakeholder_editor">7. Stakeholder Review and Acknowledgement </a></li>
+                        </ul>
+                    </li>
 
-{#            TODO update the admin information when have more time#}
-                {% if user.is_superuser %}
-                <li class="dropdown">
-                    <a class="dropdown-toggle" data-toggle="dropdown" href="#">MPS Admins<span class="caret"></span></a>
-                    <ul class="dropdown-menu">
-                        <li class="dropdown-header"><b>Add/Edit Controlled Vocabulary</b></li>
-                        <li><a href="#methods_admin">Assay Methods</a></li>
-                        <li><a href="#targets_admin">Assay Targets</a></li>
-                        <li><a href="#cellsamples_admin">Cell Samples</a></li>
-                        <li><a href="#chemicaldata_admin">Compounds</a></li>
-                        <li><a href="#devices_admin">Devices</a></li>
-                        <li><a href="#diseaselist_admin">Diseases</a></li>
-                        <li><a href="#mpslocations_admin">Locations of MPS Models</a></li>
-                        <li><a href="#mpsmodels_admin">MPS Models</a></li>
-                        <li><a href="#settings_admin">Settings</a></li>
-                        <li><a href="#physicalunits_admin">Units</a></li>
-                        <li class="divider"></li>
-                        <li class="dropdown-header"><b>Controlling Access</b></li>
-                        <li><a href="#access_overview_admin">Sharing Study Data Overview</a></li>
-                        <li><a href="#add_groups_admin">Add Groups to Database</a></li>
-                        <li><a href="#study_groups_admin">Add Groups to Study</a></li>
-                        <li><a href="#user_groups_admin">Add Users to Group</a></li>
-                    </ul>
-                </li>
-                {% endif %}
+                    {% if user.is_superuser %}
+                    <li class="dropdown">
+                        <a class="dropdown-toggle" data-toggle="dropdown" href="#">MPS Admins<span class="caret"></span></a>
+                        <ul class="dropdown-menu">
+                            <li class="dropdown-header"><b>Add/Edit Controlled Vocabulary</b></li>
+                            <li><a href="#methods_admin">Assay Methods</a></li>
+                            <li><a href="#targets_admin">Assay Targets</a></li>
+                            <li><a href="#cellsamples_admin">Cell Samples</a></li>
+                            <li><a href="#chemicaldata_admin">Compounds</a></li>
+                            <li><a href="#devices_admin">Devices</a></li>
+                            <li><a href="#diseaselist_admin">Diseases</a></li>
+                            <li><a href="#mpslocations_admin">Locations of MPS Models</a></li>
+                            <li><a href="#mpsmodels_admin">MPS Models</a></li>
+                            <li><a href="#settings_admin">Settings</a></li>
+                            <li><a href="#physicalunits_admin">Units</a></li>
+                            <li class="divider"></li>
+                            <li class="dropdown-header"><b>Controlling Access</b></li>
+                            <li><a href="#access_overview_admin">Sharing Study Data Overview</a></li>
+                            <li><a href="#add_groups_admin">Add Groups to Database</a></li>
+                            <li><a href="#study_groups_admin">Add Groups to Study</a></li>
+                            <li><a href="#user_groups_admin">Add Users to Group</a></li>
+                        </ul>
+                    </li>
+                    {% endif %}
 
-                <li><a href="#glossary">Glossary</a></li>
+                    <li><a href="#glossary">Glossary</a></li>
 
-                <li class="dropdown">
-                    <a class="dropdown-toggle" data-toggle="dropdown" href="#">I Want To...<span class="caret"></span></a>
-                    <ul class="dropdown-menu">
-                        <li class="dropdown-header"><b>Search the Database</b></li>
-                        <li><a href="#search">Global Search</a></li>
-                        <li><a href="#searchbars">Search and Sort Tables/Lists</a></li>
-                        <li class="divider"></li>
-                        <li class="dropdown-header"><b>Design an MPS Model</b></li>
-                        <li><a href="#mpsmodels">Review MPS Models</a></li>
-                        <li><a href="#cellsamples">Review Cell Samples</a></li>
-                        <li><a href="#assaymts">Review Assays</a></li>
-                        <li class="divider"></li>
-                        <li class="dropdown-header"><b>Find Compounds to Test</b></li>
-                        <li><a href="#chemicaldata">Review Chemical Data</a></li>
-                        <li><a href="#adverseevents">Review Adverse Events</a></li>
-                        <li><a href="#compareadverseevents">Compare Adverse Events</a></li>
-                        <li class="divider"></li>
-                        <li class="dropdown-header"><b>Compare Study Data to Clinic</b></li>
-                        <li><a href="#drugtrials">Review Drug Trials</a></li>
-                        <li><a href="#diseasemodels">Review Diseases</a></li>
-                        <li><a href="#compoundreport">Review Study Data in Compound Report</a></li>
-                        <li class="divider"></li>
-                        <li class="dropdown-header"><b>Review Study Data</b></li>
-                        <li><a href="#intrastudy">Single Study (Design &amp; Data)</a></li>
-                        <li><a href="#interstudy">Multiple Studies (Data)</a></li>
-                        <li class="divider"></li>
-                        <li class="dropdown-header"><b>Contribute Study Data</b></li>
-                        <li><a href="#studies_editor">Provide Data - Getting Started </a></li>
-                        <li><a href="#stakeholder_editor">Stakeholder Review and Acknowledgement </a></li>
-                    </ul>
-                </li>
+                    <li class="dropdown">
+                        <a class="dropdown-toggle" data-toggle="dropdown" href="#">I Want To...<span class="caret"></span></a>
+                        <ul class="dropdown-menu">
+                            <li class="dropdown-header"><b>Search the Database</b></li>
+                            <li><a href="#search">Global Search</a></li>
+                            <li><a href="#searchbars">Search and Sort Tables/Lists</a></li>
+                            <li class="divider"></li>
+                            <li class="dropdown-header"><b>Design an MPS Model</b></li>
+                            <li><a href="#mpsmodels">Review MPS Models</a></li>
+                            <li><a href="#cellsamples">Review Cell Samples</a></li>
+                            <li><a href="#assaymts">Review Assays</a></li>
+                            <li class="divider"></li>
+                            <li class="dropdown-header"><b>Find Compounds to Test</b></li>
+                            <li><a href="#chemicaldata">Review Chemical Data</a></li>
+                            <li><a href="#adverseevents">Review Adverse Events</a></li>
+                            <li><a href="#compareadverseevents">Compare Adverse Events</a></li>
+                            <li class="divider"></li>
+                            <li class="dropdown-header"><b>Compare Study Data to Clinic</b></li>
+                            <li><a href="#drugtrials">Review Drug Trials</a></li>
+                            <li><a href="#diseasemodels">Review Diseases</a></li>
+                            <li><a href="#compoundreport">Review Study Data in Compound Report</a></li>
+                            <li class="divider"></li>
+                            <li class="dropdown-header"><b>Review Study Data</b></li>
+                            <li><a href="#intrastudy">Single Study (Design &amp; Data)</a></li>
+                            <li><a href="#interstudy">Multiple Studies (Data)</a></li>
+                            <li class="divider"></li>
+                            <li class="dropdown-header"><b>Contribute Study Data</b></li>
+                            <li><a href="#studies_editor">Provide Data - Getting Started </a></li>
+                            <li><a href="#stakeholder_editor">Stakeholder Review and Acknowledgement </a></li>
+                        </ul>
+                    </li>
 
-            </ul>
+                </ul>
+            </div>
         </div>
 
     </div>
@@ -328,6 +329,14 @@
 </nav>
 
 <div class="offset-help-navbar">
+{% comment %}
+    <div id="intro_section" class="container">
+        <div id="elavatordescription">
+        <br>The <b>Microphysiology Systems (MPS) Database</b> combines the loading, storage, and sharing of experimentally derived assay data and data curated from external reference sources with visualization and analysis tools to provide a powerful platform for designing experimental studies and performing computational modeling.
+        <br>
+        </div>
+    </div>
+{% endcomment %}
 
     <div id="overview_section" class="container">
 
@@ -337,34 +346,139 @@
             <button name="my_buttons" class="collapsible1">Database Background</button>
             <div class="content1">
                 <div id="overview0viewer" class="viewersubtainer">
-                    {% include 'help_overview_database_background.html' %}
+                    <ul class="list-group">
+                        <li class="list-group-item">
+                            The Microphysiology Systems Database (MPS-Db) was designed for the management and analysis of MPS data together with curated reference and clinical data. The MPS-Db can store curated assay data and associated metadata from a wide variety of plate-based and microfluidic models. Data from external reference sources are brought into the MPS-Db to facilitate ease of access to those data and to support integration of data across curated data sources.
+                            <br><br>
+                            Study data and study components (e.g., MPS Models, devices, cell samples are manually curated into the MPS-Db. Data from reference data sources are manually and/or auto-curated. The MPS-Db provides tools to analyze and/or visualize data pulled from external data sources, and also provides tools to analyze curated study data in combination with reference data. Study data, study components, and the features available in the MPS-Db are described briefly in the tables below.
+                            <br><br>
+                            Many of the terms used in the MPS-GUI and here in the <b>Help</b> page are defined in the <b>Glossary</b>. It is recommended that users rely heavily on the <b>Glossary</b> to assist in understanding how to appropriately review, edit, and/or add data to the MPS-Db.
+                        </li>
+                    </ul>
                 </div>
             </div>
         </div>
 
         <div id="overview1">
-            <button name="my_buttons" class="collapsible1">Study Components</button>
+            <button name="my_buttons" class="collapsible1">Study Components </button>
             <div class="content1">
                 <div id="overview1viewer" class="viewersubtainer">
-                    {% include 'help_overview_study_components.html' %}
+                    <ul class="list-group">
+                        <li class="list-group-item">
+                            <table class="table table-bordered table-condensed small table-components">
+                            <thead>
+                                <tr class="active">
+                                <th> Component </th>
+                                <th> Description </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                <td> Assay Method/Kits </td>
+                                    <td> Assay method/kits used to measure assay targets/analytes.
+                                    For more information, <a href="#assaymts">click here</a>.</td>
+                                </tr>
+                                <tr>
+                                <td> Assay Targets/Analytes </td>
+                                    <td> Targets/analytes used to assess the response of a MPS model. Assay targets/analytes are associated to the method/kit used to measure response.
+                                    For more information, <a href="#assaymts">click here</a>.</td>
+                                </tr>
+                                <tr>
+                                <td> Cell Samples </td>
+                                    <td> Cell samples used in MPS models in the MPS-Db. The cell types and cell origins are included as part of the cell sample.
+                                    For more information, <a href="#cellsamples">click here</a>.</td>
+                                </tr>
+                                <tr>
+                                <td> Compounds </td>
+                                    <td> Chemicals used in studies and/or features of the MPS-Db. Chemical properties are curated from reference sources.
+                                    For more information, <a href="#chemicallist">click here</a>.</td>
+                                </tr>
+
+                                <tr>
+                                <td> Devices </td>
+                                    <td> Devices used in MPS models in the MPS-Db with the option to click on the device to view details of the device.
+                                    For more information, <a href="#devices">click here</a>.</td>
+                                </tr>
+                                <tr>
+                                <td> Diseases </td>
+                                    <td> Diseases added into the MPS-Db.
+                                    For more information, <a href="#diseasemodels">click here</a>.</td>
+                                </tr>
+                                <tr>
+                                <td> Locations </td>
+                                    <td> Locations within a device where treatments can be added and/or samples removed.
+                                    For more information, <a href="#mpslocations">click here</a>.</td>
+                                </tr>
+                                <tr>
+                                <td> MPS Models </td>
+                                    <td> MPS Models in the MPS-Db with the option to click on the model and view details of the model's design.
+                                    For more information, <a href="#mpsmodels">click here</a>.</td>
+                                </tr>
+                                <tr>
+                                <td> Settings </td>
+                                    <td> Settings used in describing the study design.
+                                    For more information, <a href="#settings">click here</a>.</td>
+                                </tr>
+                                <tr>
+                                <td> Units of Measure </td>
+                                    <td> Units available for quantifying values.
+                                    For more information, <a href="#physicalunits">click here</a>.</td>
+                                </tr>
+                                <tr>
+                                <td> Other Components </td>
+                                <td> Options to view additional components of a study are currently in development. </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        </li>
+                    </ul>
                 </div>
             </div>
         </div>
 
         <div id="overview2">
-            <button name="my_buttons" class="collapsible1">Study Organization</button>
+            <button name="my_buttons" class="collapsible1">Study Data Organization</button>
             <div class="content1">
                 <div id="overview2viewer" class="viewersubtainer">
-                    {% include 'help_overview_study_organization.html' %}
-                </div>
-            </div>
-        </div>
-
-        <div id="overview4">
-            <button name="my_buttons" class="collapsible1"> Reference Data Sources </button>
-            <div class="content1">
-                <div id="overview4viewer" class="viewersubtainer">
-                    {% include 'help_overview_reference_data_sources.html' %}
+                    <ul class="list-group">
+                        <li class="list-group-item">
+                            <table class="table table-bordered table-condensed small table-components">
+                            <thead>
+                                <tr class="active">
+                                <th> Component </th>
+                                <th> Description </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                <td> Study </td>
+                                    <td> A study is a container for all data and metadata associated to an experiment designed to assess MPS model response. A list of studies in the MPS-Db, with summary information about the MPS models used in the study and associated assay results, is provided on the <b>Studies</b> list page of the MPS-GUI. Selecting a study from the list allows the user to focus on data from a single study.
+                                    For more information, <a href="#intrastudy">click here</a>.</td>
+                                </tr>
+                                <tr>
+                                <td> Matrices </td>
+                                    <td> A matrix is used to group models within a study. Matrices associated with an individual study are shown on the <b>Study Matrices and Items</b> list page of the MPS-GUI.
+                                    For more information, <a href="#intrastudy">click here</a>.</td>
+                                </tr>
+                                <tr>
+                                <td> Matrix Items </td>
+                                <td> A matrix item is the generic term for an individual MPS model. Matrix Items are assigned to a matrix within an individual study.
+                                For more information, <a href="#intrastudy">click here</a>.</td>
+                                </tr>
+                                <tr>
+                                <td> Assay Data Points </td>
+                                    <td> Measured assay targets/analyte values, for a specific time point relative to the start of an experiment, can be uploaded into the MPS-Db and assigned to an individual matrix item within a specific study. These data can be visualized/analyzed within the individual study (intra-study), across studies (inter-study), and/or in combination with curated reference data.
+                                    For more information, <a href="#intrastudy">click here</a>. </td>
+                                </tr>
+                                <tr>
+                                <td> Assay Images & Videos </td>
+                                    <td> Images and videos can be attached to a matrix item and displayed within a study.
+                                    For more information, <a href="#intrastudy">click here</a>.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        </li>
+                    </ul>
                 </div>
             </div>
         </div>
@@ -373,7 +487,197 @@
             <button name="my_buttons" class="collapsible1">Database Features</button>
             <div class="content1">
                 <div id="overview3viewer" class="viewersubtainer">
-                    {% include 'help_overview_database_features.html' %}
+                    <ul class="list-group">
+                        <li class="list-group-item">
+                            <table class="table table-bordered table-condensed small table-components">
+                            <thead>
+                                <tr class="active">
+                                <th> Feature </th>
+                                <th> Description </th>
+                                <th> Source # </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                <td> Intra-Study Analysis (Graphing/Reproducibility) </td>
+                                <td> Enables intra-study querying and subsequent visualization and analysis.
+                                For more information on intra-study assay data analysis, <a href="#intrastudy">click here</a>.</td>
+                                <td> 1</td>
+                                </tr>
+                                <tr>
+                                <td> Inter-Study Analysis (Graphing/Reproducibility) </td>
+                                <td> Enables inter-study querying and subsequent visualization and analysis.
+                                For more information on inter-study assay data analysis, <a href="#interstudy">click here</a>.</td>
+                                <td> 1</td>
+                                </tr>
+                                <tr>
+                                <td> Study Sets </td>
+                                <td> Enables multiple studies to be grouped and referenced with one URL.
+                                For more information on study sets, <a href="#studyset">click here</a>.</td>
+                                <td> 1</td>
+                                </tr>
+                                <tr>
+                                <td> References </td>
+                                <td> References to publications can be added and associated to MPS Models, Study Sets, Studies, and several other study components.
+                                For more information on references, <a href="#reference">click here</a>.</td>
+                                <td> 1</td>
+                                </tr>
+                                <tr>
+                                <td> Diseases </td>
+                                <td> Provides a portal connecting information from clinical trials to MPS study data. Links are made based on disease. Users can view summary information, then drill down to see additional disease-related details.
+                                For more information, <a href="#diseasemodels">click here</a>.</td>
+                                <td> 1, 13, 14, 15 </td>
+                                </tr>
+                                <tr>
+                                <td> Compound Report </td>
+                                <td> Provides a portal for viewing compound data and associated assay study data.
+                                For more information, <a href="#compoundreport">click here</a>.</td>
+                                <td> 1-5, 12 </td>
+                                </tr>
+                                <tr>
+                                <td> Chemical Data </td>
+                                <td> Provides a portal for looking at chemical data from a variety of sources. Allows for searching by synonym, molecular weight, and other compound properties.
+                                For more information, <a href="#chemicaldata">click here</a>.</td>
+                                <td>  2-5, 8, 9, 10, 11, 12 </td>
+                                </tr>
+                                <tr>
+                                <td> Bioactivities </td>
+                                <td> Provides a portal for searching chemcial bioactivities from a variety of sources. Provides a <b>Quick Search</b> option to search by compound, biological target, and/or bioactivity name, and an <b>Advanced Search</b> option for selecting multiple compounds, biological targets, and/or bioactivities.
+                                For more information, <a href="#bioactivities">click here</a>.</td>
+                                <td> 8, 9, 12, manual </td>
+                                </tr>
+                                <tr>
+                                <td> Drug Trials </td>
+                                <td> Provides a portal for viewing drug trial data from a variety of sources. Trial type and trial finding are summarized in list format. Users can search by treatment compound, trial type, species, and other aspects of the trial.
+                                For more information, <a href="#drugtrials">click here</a>.</td>
+                                <td> 2-5</td>
+                                </tr>
+                                <tr>
+                                <td> Adverse Events </td>
+                                <td> Provides a portal for searching and viewing reported adverse events, including estimated number of reports normalized by estimated drug usage.
+                                For more information, <a href="#adverseevents">click here</a>.</td>
+                                <td> 6, 7</td>
+                                </tr>
+                                <tr>
+                                <td> Compare Adverse Events </td>
+                                <td> Enables comparison of multiple compounds and adverse events side-by-side.
+                                For more information, <a href="#compareadverseevents">click here</a>.</td>
+                                <td> 6, 7</td>
+                                </tr>
+                                <tr>
+                                <td> Heatmap (Bioactivities) </td>
+                                <td> Provides a heatmap visualization of relative bioactivities (e.g., bioavailability, Cmax, etc.) for one or more compounds and one or more biological targets.
+                                For more information, <a href="#heatmap">click here</a>.</td>
+                                <td> 2-5, 8, 9, 11, 12 </td>
+                                </tr>
+                                <tr>
+                                <td> Cluster Chemicals </td>
+                                <td> Provides a dendrogram of compounds clustered by their respective properties and/or bioactivities.
+                                For more information, <a href="#cluster">click here</a>.</td>
+                                <td> 2-5, 8, 9, 11, 12 </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div id="overview4">
+            <button name="my_buttons" class="collapsible1">Data Sources </button>
+            <div class="content1">
+                <div id="overview4viewer" class="viewersubtainer">
+                    <ul class="list-group">
+                        <li class="list-group-item">
+                            <table class="table table-bordered table-condensed small table-components">
+                                <thead>
+                                    <tr class="active">
+                                    <th> Source # </th>
+                                    <th> Data Source </th>
+                                    <th> Curation Method </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                    <td> 1 </td>
+                                        <td> MPS-Db Study Data </td>
+                                    <td> Manual Curation </td>
+                                    </tr>
+                                    <tr>
+                                    <td> 2 </td>
+                                    <td> Health Canada </td>
+                                    <td> Manual Curation </td>
+                                    </tr>
+                                    <tr>
+                                    <td> 3 </td>
+                                    <td> LiverTox </td>
+                                    <td> Manual Curation </td>
+                                    </tr>
+                                    <tr>
+                                    <td> 4 </td>
+                                    <td> ToxNet </td>
+                                    <td> Manual Curation </td>
+                                    </tr>
+                                    <tr>
+                                    <td> 5 </td>
+                                    <td> European Medicines Agency (EMA) </td>
+                                    <td> Manual Curation </td>
+                                    </tr>
+                                    <tr>
+                                    <td> 6 </td>
+                                    <td> OpenFDA </td>
+                                    <td> Some data pulled dynamically and not stored (Adverse events are updated quarterly). Note: data are not intended for clinical use. </td>
+                                    </tr>
+                                    <tr>
+                                    <td> 7 </td>
+                                    <td> NAMCS/NHAMCS  </td>
+                                    <td> Auto Curation </td>
+                                    </tr>
+                                    <tr>
+                                    <td> 8 </td>
+                                    <td> PubChem </td>
+                                    <td> Auto Curation (Bioactivity data updated quarterly) </td>
+                                    </tr>
+                                    <tr>
+                                    <td> 9 </td>
+                                    <td> TogoWS  </td>
+                                    <td> Auto Curation </td>
+                                    </tr>
+                                    <tr>
+                                    <td> 10 </td>
+                                    <td> UniChem </td>
+                                    <td> Auto Curation </td>
+                                    </tr>
+                                    <tr>
+                                    <td> 11 </td>
+                                    <td> DrugBank  </td>
+                                    <td> Auto Curation (Compound data updated when compound added to MPS-Db) </td>
+                                    </tr>
+                                    <tr>
+                                    <td> 12 </td>
+                                    <td> ChEMBL </td>
+                                    <td> Auto Curation (Bioactivity data updated quarterly; Compound data updated when compound added to MPS-Db) </td>
+                                    </tr>
+                                    <tr>
+                                    <td> 13 </td>
+                                    <td> clinicaltrials.gov </td>
+                                    <td> Some data pulled dynamically and not stored </td>
+                                    </tr>
+                                    <tr>
+                                    <td> 14 </td>
+                                    <td> ctti-clinicaltrials.org </td>
+                                    <td> Some data pulled dynamically and not stored</td>
+                                    </tr>
+                                    <tr>
+                                    <td> 15 </td>
+                                    <td> Expert elicitation from open sources and publications</td>
+                                    <td> Manual Curation </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </li>
+                    </ul>
                 </div>
             </div>
         </div>
@@ -382,12 +686,47 @@
             <button name="my_buttons" class="collapsible1">Permission Structure </button>
             <div class="content1">
                 <div id="overview5viewer" class="viewersubtainer">
-                    {% include 'help_overview_permission_structure.html' %}
+                    <ul class="list-group">
+                        <li class="list-group-item">
+                            <table class="table table-bordered table-condensed small table-components">
+                                <thead>
+                                    <tr class="active">
+                                    <th> Role </th>
+                                    <th> Access to Data and Features </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                    <td> Registered MPS Users with No Additional Permissions  </td>
+                                    <td> Can view all reference data and associated features. Can view study components (e.g., MPS models, devices, cell samples). Can view study data in studies that have been designated as open to all registered MPS users, including: viewing matrix item setup, study protocols, images, videos, and assay data. </td>
+                                    </tr>
+                                    <tr>
+                                    <td> Data Group Viewers and Users with Additional Permissions  </td>
+                                    <td> Have all the access of <i>registered MPS Users with No Additional Permissions</i> plus access to studies to which they have been granted special access. Special access is sometimes granted to MPS model develeopers (i.e. acknowledgement access) and/or project funders. </td>
+                                    </tr>
+                                    <tr>
+                                    <td> Data Group Editors  </td>
+                                    <td> Have all the access of <i>Data Group Viewers and Users with Additional Permissions</i> plus the ability to edit their studies, including: adding/deleting/editing studies and study details, adding/deleting/editing matrices and matrix items, uploading assay data, and validating matrices, matrix items, and studies. </td>
+                                    </tr>
+                                    <tr>
+                                    <td> Data Group Admins  </td>
+                                    <td> Have all the access of <i>Data Group Editors</i> plus the ability to sign off a study and monitor the acknowledgment status of a study (e.g., a model developer reviewed study data). </td>
+                                    </tr>
+                                    <tr>
+                                    <td> MPS-Db Administrators  </td>
+                                    <td> Have all the access of <i>Data Group Admins</i> plus the ability to add/edit/delete new controlled vocabulary (e.g., MPS models, devices, cell samples) and change user permissions, including establishing users with special access to specific studies. </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            Note: Additional permissions can be granted in a multitude of configurations to match individual user needs. For example, any registered user could be granted permission to add/edit cell samples, compounds, MPS models, etc.
+                        </li>
+                    </ul>
                 </div>
             </div>
         </div>
 
     </div>
+
 
     <div id="video_presentation_section" class="container">
 
@@ -573,7 +912,7 @@
                                         <li>Above search bars are options to Copy the table to the clipboard, download the table to CSV, or Print the table</li>
                                         <li>The Column visibility button can be used to turn columns on/off in the list/table </li>
                                         <li>To sort the list/table, click on the arrow in the column header   </li>
-                                        <li>To sort on multiple columns, click on the arrow on the primary sort column, then hold the shift key and click on additional column arrows</li>
+                                        <li>To sort on multiple columns, click on the arrow on the primary sort column, then hold the shift key and click on addtional column arrows</li>
                                     </ul>
                                 </li>
                             </ul>
