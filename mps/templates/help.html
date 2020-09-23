@@ -5037,6 +5037,7 @@ Results: add a summary of the study results. </td>
             <th>Term</th>
             <th>Definition</th>
             <th>Ref</th>
+            <th>Help</th>
           </tr>
         </thead>
 
@@ -5046,6 +5047,7 @@ Results: add a summary of the study results. </td>
               <td>{{ term.term }}</td>
               <td>{{ term.definition }}</td>
               <td>{{ term.show_url }}</td>
+              <td>{{ term.show_anchor }}</td>
             </tr>
           {% endfor %}
         </tbody>

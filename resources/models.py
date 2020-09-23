@@ -117,17 +117,20 @@ class Definition(LockableModel):
     show_anchor.short_description = "Ref Anchor"
     show_anchor.allow_tags = True
 
+    # HANDY - to get a field to show green checks and red xs in an admin list
     def is_url(self):
         if len(self.reference) > 2:
-            return "TRUE"
+            return True
         else:
-            return "false"
+            return False
+    is_url.boolean = True
 
     def is_anchor(self):
         if len(self.help_reference) > 2:
-            return "TRUE"
+            return True
         else:
-            return "false"
+            return False
+    is_anchor.boolean = True
 
 class ComingSoonEntry(LockableModel):
     """An entry for the About Page's "Coming Soon" Section"""
