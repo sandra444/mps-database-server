@@ -138,9 +138,10 @@ from mps.mixins import (
     StudyViewerMixin,
     CreatorOrSuperuserRequiredMixin,
     FormHandlerMixin,
-    ListHandlerMixin,
+    ListHandlerView,
     CreatorAndNotInUseMixin,
-    HistoryMixin
+    HistoryMixin,
+    DetailHandlerView
 )
 
 from mps.base.models import save_forms_with_tracking
@@ -562,7 +563,12 @@ class AssayStudyEditableList(OneGroupRequiredMixin, ListView):
         context = super(AssayStudyEditableList, self).get_context_data(**kwargs)
 
         # Adds the word "editable" to the page
-        context['editable'] = 'Editable '
+        # context['editable'] = 'Editable '
+
+        context.update({
+            'editable': 'Editable ',
+            'title': 'Editable Studies List'
+        })
 
         return context
 
@@ -571,6 +577,15 @@ class AssayStudyList(ListView):
     """A list of all studies"""
     template_name = 'assays/assaystudy_list.html'
     model = AssayStudy
+
+    def get_context_data(self, **kwargs):
+        context = super(AssayStudyEditableList, self).get_context_data(**kwargs)
+
+        context.update({
+            'title': 'Study List'
+        })
+
+        return context
 
     def get_queryset(self):
         combined = get_user_accessible_studies(self.request.user)
@@ -705,7 +720,7 @@ class AssayStudyUpdate(ObjectGroupRequiredMixin, AssayStudyMixin, UpdateView):
 
         # TODO SLATED FOR REMOVAL
         context.update({
-            'reference_queryset': AssayReference.objects.all()
+            'reference_queryset': AssayReference.objects.all(),
         })
 
         return context
@@ -750,7 +765,7 @@ class AssayStudyGroups(ObjectGroupRequiredMixin, AssayStudyMixin, UpdateView):
         return super(AssayStudyGroups, self).extra_form_processing(form)
 
 
-class AssayGroupDetail(StudyGroupMixin, DetailView):
+class AssayGroupDetail(StudyGroupMixin, DetailHandlerView):
     # Why not have the mixin look for DetailView?
     model = AssayGroup
     detail = True
@@ -1173,7 +1188,8 @@ class AssayStudyIndex(StudyViewerMixin, DetailView):
                 'cell_type__organ',
                 'supplier',
                 'cell_subtype__cell_type'
-            )
+            ),
+            'title': 'Study Overview {}'.format(self.object),
         })
 
         return context
@@ -1893,6 +1909,7 @@ class AssayDataFileUploadDetail(StudyGroupMixin, DetailView):
 
         context.update({
             'detail': True,
+            'title': '{} Data'.format(study.object)
         })
 
         return context
@@ -3073,7 +3090,7 @@ class AssayStudySetReproducibility(StudySetViewerMixin, DetailView):
 
 # The queryset for this will be somewhat complicated...
 # TODO REVISE THE QUERYSET
-class AssayStudySetList(ListView):
+class AssayStudySetList(ListHandlerView):
     model = AssayStudySet
     template_name = 'assays/assaystudyset_list.html'
 
@@ -3187,7 +3204,7 @@ class AssayStudySetData(DetailView):
             return HttpResponse('', content_type='text/plain')
 
 
-class AssayReferenceList(ListView):
+class AssayReferenceList(ListHandlerView):
     model = AssayReference
     template_name = 'assays/assayreference_list.html'
 
@@ -3516,7 +3533,7 @@ class AssayTargetUpdateRestricted(OneGroupRequiredMixin, AssayTargetMixin, Updat
     form_class = AssayTargetRestrictedForm
 
 
-class AssayTargetList(ListView):
+class AssayTargetList(ListHandlerView):
     model = AssayTarget
     template_name = 'assays/assaytarget_list.html'
 
@@ -3578,7 +3595,7 @@ class AssayMethodUpdateRestricted(OneGroupRequiredMixin, AssayMethodMixin, Updat
     form_class = AssayMethodRestrictedForm
 
 
-class AssayMethodList(ListView):
+class AssayMethodList(ListHandlerView):
     model = AssayMethod
     template_name = 'assays/assaymethod_list.html'
 
@@ -3662,7 +3679,7 @@ class PhysicalUnitsDetail(DetailView):
     pass
 
 
-class PhysicalUnitsList(ListView):
+class PhysicalUnitsList(ListHandlerView):
     model = PhysicalUnits
     template_name = 'assays/assayunit_list.html'
 
@@ -3692,7 +3709,7 @@ class AssayMeasurementTypeDetail(AssayMeasurementTypeMixin, DetailView):
     pass
 
 
-class AssayMeasurementTypeList(ListHandlerMixin, ListView):
+class AssayMeasurementTypeList(ListHandlerView):
     model = AssayMeasurementType
 
 
@@ -3724,7 +3741,7 @@ class AssaySampleLocationUpdate(CreatorAndNotInUseMixin, AssaySampleLocationMixi
 
 
 # TODO: PERHAPS THIS SHOULD NOT BE HERE
-class AssaySampleLocationList(ListHandlerMixin, ListView):
+class AssaySampleLocationList(ListHandlerView):
     model = AssaySampleLocation
     # template_name = 'assays/assaylocation_list.html'
 
@@ -3746,7 +3763,7 @@ class AssaySettingDetail(AssaySettingMixin, DetailView):
     pass
 
 
-class AssaySettingList(ListHandlerMixin, ListView):
+class AssaySettingList(ListHandlerView):
     model = AssaySetting
 
 
@@ -3767,7 +3784,7 @@ class AssaySupplierDetail(DetailView):
     pass
 
 
-class AssaySupplierList(ListHandlerMixin, ListView):
+class AssaySupplierList(ListHandlerView):
     model = AssaySupplier
 
 

@@ -37,8 +37,8 @@ from mps.mixins import (
     FormHandlerMixin,
     OneGroupRequiredMixin,
     CreatorOrSuperuserRequiredMixin,
-    ListHandlerMixin,
-    DetailHandlerMixin,
+    ListHandlerView,
+    DetailHandlerView,
     CreatorAndNotInUseMixin
 )
 from mps.base.models import save_forms_with_tracking
@@ -309,11 +309,11 @@ class ManufacturerUpdate(CreatorAndNotInUseMixin, ManufacturerMixin, UpdateView)
     pass
 
 
-class ManufacturerDetail(DetailHandlerMixin, DetailView):
+class ManufacturerDetail(DetailHandlerView):
     pass
 
 
-class ManufacturerList(ListHandlerMixin, ListView):
+class ManufacturerList(ListHandlerView):
     model = Manufacturer
 
 
