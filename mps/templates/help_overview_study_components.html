@@ -8,11 +8,12 @@
 <ul class="list-group">
     <li class="list-group-item">
         <h1 class="sub3-bars"> Study Components </h1>
-        {{ study_component_def }}
+        {# HANDY accessing a dictionary in html dictionary python to java   #}
+        {{ all_glossary.studycomponent_def }}
         They are the terms that are selected in dropdowns when setting up a study in the MPS-Db.
-        All registered users can review study components {{ study_component_ref }}.
+        All registered users can review study components {{ all_glossary.studycomponent_ref }}.
         Data providers (users who are assigned to, at least one, data provider group) can add new study components
-        {{ study_component_ref }},
+        {{ all_glossary.studycomponent }}
         or by clicking the <span class="glyphicon glyphicon-plus text-success" aria-hidden="true"></span>
         provided throughout the study setup workflow.
         <br>

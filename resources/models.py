@@ -162,26 +162,3 @@ class WhatIsNewEntry(LockableModel):
 
     contents = models.TextField(default='')
     short_contents = models.TextField(default='')
-
-
-class FeatureSourceXref(LockableModel):
-    """Database Features - for table in Help"""
-    class Meta(object):
-        verbose_name = 'Help - Database Features & Sources'
-        verbose_name_plural = 'Help - Database Features & Sources'
-        unique_together = [('database_feature', 'data_source')]
-
-    database_feature = models.ForeignKey(
-        Definition,
-        default=1,
-        related_name='database_feature',
-        on_delete=models.CASCADE,
-        limit_choices_to={'help_category': 'feature'},
-    )
-    data_source = models.ForeignKey(
-        Definition,
-        default=1,
-        related_name='data_source',
-        on_delete=models.CASCADE,
-        limit_choices_to={'help_category': 'source'},
-    )

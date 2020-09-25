@@ -11,7 +11,6 @@ from resources.models import (
     Definition,
     ComingSoonEntry,
     WhatIsNewEntry,
-    FeatureSourceXref,
 )
 from resources.forms import (
     ResourceForm,
@@ -153,6 +152,8 @@ class DefinitionAdmin(LockableAdmin):
     )
     search_fields = ['term', 'definition', 'reference']
 
+    # HANDY m2m right side many to many admin boxes m2m right
+    filter_horizontal = ('data_sources',)
     fieldsets = (
         (
             None, {
@@ -164,7 +165,6 @@ class DefinitionAdmin(LockableAdmin):
                     'reference',
                     'help_category',
                     'data_sources',
-                    'order_numbers_already_assigned',
                     'help_order',
                     'help_reference',
                 )
@@ -205,11 +205,3 @@ class WhatIsNewEntryAdmin(LockableAdmin):
     list_editable = ['contents', 'short_contents']
 
 admin.site.register(WhatIsNewEntry, WhatIsNewEntryAdmin)
-
-
-class FeatureSourceXrefAdmin(LockableAdmin):
-    model = FeatureSourceXref
-    list_display = ['database_feature', 'data_source']
-    search_fields = ['database_feature', 'data_source', ]
-
-admin.site.register(FeatureSourceXref, FeatureSourceXrefAdmin)
