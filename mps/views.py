@@ -134,7 +134,8 @@ def custom_search(request):
 
 
 def mps_help(request):
-    glossary = Definition.objects.exclude(definition='')
+    glossary = Definition.objects.exclude(definition=''
+    ).prefetch_related('data_sources', )
 
     xref = FeatureSourceXref.objects.all(
     ).order_by(
@@ -231,6 +232,17 @@ def mps_help(request):
     component_compound = glossary.filter(help_category='component-compound').order_by('help_order')
     component_cell = glossary.filter(help_category='component-cell').order_by('help_order')
 
+    all_glossary = {}
+    for each in glossary:
+        term = each.term
+        stripped_term = ''.join(e for e in term if e.isalnum())
+        stripped_term = stripped_term.lower()
+        # print("stripped_term: ", stripped_term)
+        all_glossary[stripped_term+'_def'] = each.definition
+        all_glossary[stripped_term+'_ref'] = each.show_url
+
+    # print("all_glossary ", all_glossary)
+
     # limit the glossary to only those selected for display
     glossary = glossary.filter(glossary_display=True)
 
@@ -243,6 +255,8 @@ def mps_help(request):
         'component_model': component_model,
         'component_compound': component_compound,
         'component_cell': component_cell,
+        'study_component_def': all_glossary.get('studycomponent_def', ''),
+        'study_component_ref': all_glossary.get('studycomponent_ref', ''),
     }
 
     return render(request, 'help.html', data)

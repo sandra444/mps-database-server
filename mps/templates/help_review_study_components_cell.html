@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
+
+{% for term in component_cell %}
+
+    {% if term.term == "Cell Sample" %}
+        {# *anchor* #}
+        <div id="assay_cell_sample_anchor">
+            <button name="my_buttons" class="collapsible1">{{ term.term }}</button>
+            <div class="content1">
+                <ul class="list-group">
+                    <li class="list-group-item">
+                        <h1 class="sub3-bars"> {{ term.term }} </h1>
+                        <ul class="list-unstyled">
+                            <li>To review the list of <b>{{ term.term }}</b>:
+                                <ul class="filled-circle">
+                                    <li>Click the link {{ term.show_url }} </li>
+                                    <li>Use the <b>Search</b> bar or scroll through the list to find the <b>{{ term.term }}</b> of interest or confirm the <b>{{ term.term }}</b> is not present</li>
+                                    <li>If in the list, click on the <b>View</b> button to review the details or the <b>Edit</b> button to update </li>
+                                    <li>If not in the list, click on the <b>Add Cell Samples</b> button </li>
+                                </ul>
+                            </li>
+                            <li><br>Notes:
+                                <ul class="filled-circle">
+                                    <li>To add or edit:
+                                        <ul class="open-circle">
+                                            <li>Fill in all the required information </li>
+                                            <li>Submit to save </li>
+                                        </ul>
+                                    </li>
+                                </ul>
+                            </li>
+                            <li><br>Tips:
+                                <ul class="filled-circle">
+                                    <li>For the Group, select your data provider data group </li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+    {% endif %}
+{% endfor %}
+
+</body>
+</html>

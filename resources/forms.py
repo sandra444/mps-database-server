@@ -72,6 +72,9 @@ class DefinitionForm(forms.ModelForm):
                 category_string = category_string + '\n' + key + ': ' + this_list_string
 
         self.fields['order_numbers_already_assigned'].initial = category_string
+        help_texts = {
+            'help_order': 'Order controls order in Help page tables.<br><br>',
+        }
 
     number_cats = len(help_category_choices)
     order_numbers_already_assigned = forms.CharField(

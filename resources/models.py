@@ -87,6 +87,12 @@ class Definition(LockableModel):
        help_text=(
            'Check to display in tables and other locations in the help page (does not apply to the glossary).'
        ), )
+    data_sources = models.ManyToManyField(
+        to='self',
+        blank=True,
+        limit_choices_to={'help_category': 'source'},
+        related_name='data_sources',
+    )
 
     # def __str__(self):
     #     return self.term
@@ -131,6 +137,13 @@ class Definition(LockableModel):
         else:
             return False
     is_anchor.boolean = True
+
+    def is_data_sources(self):
+        if self.data_sources is None:
+            return True
+        else:
+            return False
+    is_data_sources.boolean = True
 
 class ComingSoonEntry(LockableModel):
     """An entry for the About Page's "Coming Soon" Section"""

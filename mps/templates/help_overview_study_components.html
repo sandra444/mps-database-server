@@ -7,10 +7,107 @@
 
 <ul class="list-group">
     <li class="list-group-item">
-        <h3>Database Study Components</h3>
-        The study components are entities needed when adding study data to the MPS-Db. They are the terms that are selected in dropdowns when setting up a study in the MPS-Db. All registered users can review study components <a href="#https://mps.csb.pitt.edu/studycomponents/">here</a>. Data providers (users who are assigned to, at least one, data provider group) can add new study components <a href="#https://mps.csb.pitt.edu/studycomponents/">here</a>, or by clicking the <span class="glyphicon glyphicon-plus text-success" aria-hidden="true"></span> provided throughout the study setup workflow.
+        <h1 class="sub3-bars"> Study Components </h1>
+        {{ study_component_def }}
+        They are the terms that are selected in dropdowns when setting up a study in the MPS-Db.
+        All registered users can review study components {{ study_component_ref }}.
+        Data providers (users who are assigned to, at least one, data provider group) can add new study components
+        {{ study_component_ref }},
+        or by clicking the <span class="glyphicon glyphicon-plus text-success" aria-hidden="true"></span>
+        provided throughout the study setup workflow.
         <br>
         <br>
+
+        <h4>Assay Components</h4>
+        <table id="source_table" class="table table-bordered table-condensed small">
+            <thead>
+                <tr>
+                    <th>Components</th>
+                    <th>Description</th>
+                    <th>Go to Component List</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for term in component_assay %}
+                <tr>
+                    <td>{{ term.term }}</td>
+                    <td>{{ term.definition }}</td>
+                    <th>{{ term.show_url }}</th>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <h4>Model Components</h4>
+        <table id="source_table" class="table table-bordered table-condensed small">
+            <thead>
+                <tr>
+                    <th>Components</th>
+                    <th>Description</th>
+                    <th>Go to Component List</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for term in component_model %}
+                <tr>
+                    <td>{{ term.term }}</td>
+                    <td>{{ term.definition }}</td>
+                    <th>{{ term.show_url }}</th>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <h4>Compound Components</h4>
+        <table id="source_table" class="table table-bordered table-condensed small">
+            <thead>
+                <tr>
+                    <th>Components</th>
+                    <th>Description</th>
+                    <th>Go to Component List</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for term in component_compound %}
+                <tr>
+                    <td>{{ term.term }}</td>
+                    <td>{{ term.definition }}</td>
+                    <th>{{ term.show_url }}</th>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <h4>Cell Components</h4>
+        <table id="source_table" class="table table-bordered table-condensed small">
+            <thead>
+                <tr>
+                    <th>Components</th>
+                    <th>Description</th>
+                    <th>Go to Component List</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for term in component_cell %}
+                <tr>
+                    <td>{{ term.term }}</td>
+                    <td>{{ term.definition }}</td>
+                    <th>{{ term.show_url }}</th>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+    </li>
+</ul>
+
+</body>
+</html>
+
 
 {#        <h4>Assay Components</h4>#}
 {#        <table class="table table-bordered table-condensed small">#}
@@ -132,93 +229,3 @@
 {#            </tbody>#}
 {#        </table>#}
 
-
-        <h4>Assay Components</h4>
-        <table id="source_table" class="table table-bordered table-condensed small">
-            <thead>
-                <tr>
-                    <th>Components</th>
-                    <th>Description</th>
-                    <th>Go to Component List</th>
-                </tr>
-            </thead>
-
-            <tbody>
-                {% for term in component_assay %}
-                <tr>
-                    <td>{{ term.term }}</td>
-                    <td>{{ term.definition }}</td>
-                    <th>{{ term.show_url }}</th>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-
-        <h4>Model Components</h4>
-        <table id="source_table" class="table table-bordered table-condensed small">
-            <thead>
-                <tr>
-                    <th>Components</th>
-                    <th>Description</th>
-                    <th>Go to Component List</th>
-                </tr>
-            </thead>
-
-            <tbody>
-                {% for term in component_model %}
-                <tr>
-                    <td>{{ term.term }}</td>
-                    <td>{{ term.definition }}</td>
-                    <th>{{ term.show_url }}</th>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-
-        <h4>Compound Components</h4>
-        <table id="source_table" class="table table-bordered table-condensed small">
-            <thead>
-                <tr>
-                    <th>Components</th>
-                    <th>Description</th>
-                    <th>Go to Component List</th>
-                </tr>
-            </thead>
-
-            <tbody>
-                {% for term in component_compound %}
-                <tr>
-                    <td>{{ term.term }}</td>
-                    <td>{{ term.definition }}</td>
-                    <th>{{ term.show_url }}</th>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-
-        <h4>Cell Components</h4>
-        <table id="source_table" class="table table-bordered table-condensed small">
-            <thead>
-                <tr>
-                    <th>Components</th>
-                    <th>Description</th>
-                    <th>Go to Component List</th>
-                </tr>
-            </thead>
-
-            <tbody>
-                {% for term in component_cell %}
-                <tr>
-                    <td>{{ term.term }}</td>
-                    <td>{{ term.definition }}</td>
-                    <th>{{ term.show_url }}</th>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-
-    </li>
-</ul>
-
-</body>
-</html>

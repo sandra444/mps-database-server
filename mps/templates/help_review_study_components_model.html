@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
+
+{% for term in component_model %}
+
+    {% if term.term == "MPS Model" %}
+        {# *anchor* #}
+        <div id="assay_model_anchor">
+            <button name="my_buttons" class="collapsible1">{{ term.term }}</button>
+            <div class="content1">
+                <ul class="list-group">
+                    <li class="list-group-item">
+                        <h1 class="sub3-bars"> {{ term.term }} </h1>
+                        <ul class="list-unstyled">
+                            <li>To review the list of <b>{{ term.term }}</b>:
+                                <ul class="filled-circle">
+                                    <li>Click the link {{ term.show_url }} </li>
+                                    <li>Use the <b>Search</b> bar or scroll through the list to find the <b>{{ term.term }}</b> of interest or confirm the <b>{{ term.term }}</b> is not present</li>
+                                    <li>If in the list, click on the <b>View</b> button to review the details or the <b>Edit</b> button to update </li>
+                                    <li>If not in the list, click on the <b>Add Model</b> button </li>
+                                </ul>
+                            </li>
+                            <li><br>Notes:
+                                <ul class="filled-circle">
+                                    <li>To add or edit:
+                                        <ul class="open-circle">
+                                            <li>Fill in all the required information </li>
+                                            <li>Submit to save </li>
+                                            <li>In the <b>{{ term.term }}</b> list, click the <b>Edit</b> button to update the model</li>
+                                            <li>Scroll to the MPS Model Versions section of the page and click the <b>Edit</b> button</li>
+                                            <li>Add all the information for the model version</li>
+                                            <li>Submit to save </li>
+                                        </ul>
+                                    </li>
+                                </ul>
+                            </li>
+                            <li><br>Tips:
+                                <ul class="filled-circle">
+                                    <li>Collect up all the metadata needed before adding or updating </li>
+                                    <li>Add references to the database prior to trying to add them to a <b>{{ term.term }}</b> </li>
+                                    <li>Add model versions to expedite study entry and data analysis </li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <button name="my_buttons" class="collapsible3">More About MPS Model Versions</button>
+                <div class="content3">
+                    <ul class="list-group">
+                        <li class="list-group-item background3">
+                            <h1 class="sub3-bars"> MPS Model Versions </h1>
+                            <ul class="list-unstyled">
+                                <li>MPS model versions are used
+                                     <ul class="filled-circle">
+                                        <li>Enter Compound = "ASPIRIN"</li>
+                                        <li>Enter Target = "Blood" </li>
+                                        <li>Enter Name = "IC50" </li>
+                                        <li>Click on the <span class="glyphicon glyphicon-search" aria-hidden="true"></span>  </li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+
+            </div>
+        </div>
+
+    {% endif %}
+{% endfor %}
+
+</body>
+</html>
