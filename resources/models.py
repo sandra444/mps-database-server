@@ -53,14 +53,53 @@ class Resource(LockableModel):
         return self.type.resource_subtype.name
 
 
+help_category_choices = [
+    ('feature', 'feature'),
+    ('source', 'source'),
+    ('component-cell', 'component-cell'),
+    ('component-assay', 'component-assay'),
+    ('component-compound', 'component-compound'),
+    ('component-model', 'component-model')
+]
+
+
 class Definition(LockableModel):
     """A Definition is a definition for the glossary found in Help"""
+    class Meta(object):
+        verbose_name = 'Help - Glossary'
+        verbose_name_plural = 'Help - Glossary'
     term = models.CharField(max_length=60, unique=True)
     definition = models.CharField(max_length=2500, default='')
     reference = models.URLField(default='', blank=True)
+    help_category = models.CharField(max_length=30, default='', blank=True,
+        help_text=('Used in generating help tables.'),
+        choices=help_category_choices,
+        )
+    help_order = models.IntegerField(default=0, blank=True,
+        help_text=(
+            'Used in generating help tables. Order is way they will be listed in their respective tables. Make sure they are unique within a help_category.'
+        ),)
+    help_reference = models.URLField(default='', blank=True)
+    glossary_display = models.BooleanField(default=True,
+       help_text=(
+           'Check to display in the glossary.'
+       ), )
+    help_display = models.BooleanField(default=True,
+       help_text=(
+           'Check to display in tables and other locations in the help page (does not apply to the glossary).'
+       ), )
+    data_sources = models.ManyToManyField(
+        to='self',
+        blank=True,
+        limit_choices_to={'help_category': 'source'},
+        related_name='data_sources',
+    )
+
+    # def __str__(self):
+    #     return self.term
 
     def __str__(self):
-        return self.term
+        return '{0} {1}'.format(self.term, self.help_order)
 
     @mark_safe
     def show_url(self):
@@ -73,6 +112,39 @@ class Definition(LockableModel):
 
     show_url.short_description = "Ref URL"
     show_url.allow_tags = True
+
+    def show_anchor(self):
+        if self.help_reference:
+            return format_html(
+                "<a target='_blank' href='{url}'><span title='{url}' class='glyphicon glyphicon-link'></span></a>", url=self.help_reference
+            )
+        else:
+            return ""
+
+    show_anchor.short_description = "Ref Anchor"
+    show_anchor.allow_tags = True
+
+    # HANDY - to get a field to show green checks and red xs in an admin list
+    def is_url(self):
+        if len(self.reference) > 2:
+            return True
+        else:
+            return False
+    is_url.boolean = True
+
+    def is_anchor(self):
+        if len(self.help_reference) > 2:
+            return True
+        else:
+            return False
+    is_anchor.boolean = True
+
+    def is_data_sources(self):
+        if self.data_sources is None:
+            return True
+        else:
+            return False
+    is_data_sources.boolean = True
 
 
 class ComingSoonEntry(LockableModel):
