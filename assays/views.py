@@ -1884,6 +1884,7 @@ class AssayDataFileUploadDetail(StudyGroupMixin, DetailView):
     # Why not have the mixin look for DetailView?
     model = AssayDataFileUpload
     detail = True
+    no_update = True
 
     template_name = 'assays/assaydatafileupload_detail.html'
 
