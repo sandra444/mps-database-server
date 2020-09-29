@@ -54,33 +54,6 @@ class Resource(LockableModel):
 
 
 help_category_choices = [
-    ('feature', 'feature'),
-    ('source', 'source'),
-    ('component-cell', 'component-cell'),
-    ('component-assay', 'component-assay'),
-    ('component-compound', 'component-compound'),
-    ('component-model', 'component-model')
-]
-
-
-class Resource(LockableModel):
-    """A Resource is a specific website or location to learn more of something"""
-    class Meta(object):
-        ordering = ['type', 'resource_name']
-
-    resource_name = models.CharField(max_length=60, unique=True, verbose_name="Name")
-    resource_website = models.URLField(blank=True, null=True)
-    description = models.CharField(max_length=400, blank=True, default='')
-    type = models.ForeignKey(ResourceType, on_delete=models.CASCADE)
-
-    def __str__(self):
-        return self.resource_name
-
-    def subtype(self):
-        return self.type.resource_subtype.name
-
-
-help_category_choices = [
     ('feature', 'Database Feature'),
     ('source', 'Reference Data Source'),
     ('component-cell', 'Cell Component'),
@@ -91,6 +64,7 @@ help_category_choices = [
     ('permission', 'Permission Structure'),
     ('organization-study', 'Study Organization')
 ]
+
 
 class Definition(LockableModel):
     """A Definition is a definition for the glossary found in Help"""
