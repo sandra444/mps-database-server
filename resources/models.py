@@ -63,6 +63,35 @@ help_category_choices = [
 ]
 
 
+class Resource(LockableModel):
+    """A Resource is a specific website or location to learn more of something"""
+    class Meta(object):
+        ordering = ['type', 'resource_name']
+
+    resource_name = models.CharField(max_length=60, unique=True, verbose_name="Name")
+    resource_website = models.URLField(blank=True, null=True)
+    description = models.CharField(max_length=400, blank=True, default='')
+    type = models.ForeignKey(ResourceType, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.resource_name
+
+    def subtype(self):
+        return self.type.resource_subtype.name
+
+
+help_category_choices = [
+    ('feature', 'Database Feature'),
+    ('source', 'Reference Data Source'),
+    ('component-cell', 'Cell Component'),
+    ('component-assay', 'Assay Component'),
+    ('component-compound', 'Compound Component'),
+    ('component-model', 'Model Component'),
+    ('component-compound', 'Compound Component'),
+    ('permission', 'Permission Structure'),
+    ('organization-study', 'Study Organization')
+]
+
 class Definition(LockableModel):
     """A Definition is a definition for the glossary found in Help"""
     class Meta(object):
@@ -95,11 +124,11 @@ class Definition(LockableModel):
         related_name='data_sources',
     )
 
-    # def __str__(self):
-    #     return self.term
-
     def __str__(self):
-        return '{0} {1}'.format(self.term, self.help_order)
+        return self.term
+
+    # def __str__(self):
+    #     return '{0} {1}'.format(self.term, self.help_order)
 
     @mark_safe
     def show_url(self):
@@ -139,12 +168,18 @@ class Definition(LockableModel):
             return False
     is_anchor.boolean = True
 
-    def is_data_sources(self):
-        if self.data_sources is None:
-            return True
-        else:
-            return False
-    is_data_sources.boolean = True
+    def count_data_sources(self):
+        # gets the queryset, good if want to make a list
+        # print("self.data_sources ", self.data_sources.all())
+        #     if self.data_sources.count() == 0:
+        #         return False
+        #     else:
+        #         return True
+        return self.data_sources.count()
+    # is_data_sources.boolean = True
+
+    def short_definition(self):
+        return self.definition[:350]+"...."
 
 
 class ComingSoonEntry(LockableModel):
