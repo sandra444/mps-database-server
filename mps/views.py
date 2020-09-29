@@ -22,7 +22,7 @@ import os
 
 from mps.settings import MEDIA_ROOT
 
-from resources.models import Definition, ComingSoonEntry, WhatIsNewEntry
+from resources.models import Definition, ComingSoonEntry, WhatIsNewEntry, help_category_choices
 from django.views.generic.base import TemplateView
 
 from microdevices.models import MicrophysiologyCenter
@@ -134,24 +134,26 @@ def custom_search(request):
 
 
 def mps_help(request):
-    glossary = Definition.objects.exclude(definition='')
-    for g in glossary:
-        print("g: ",g)
 
-    # get a subset of the features for the feature table
-    feature = glossary.filter(help_category='feature').order_by('help_order', 'data_sources')
-    for f in feature:
-        print("f: ",f)
+    # HANDY - super important - if use an order_by you make a new queryset!
+    # https://stackoverflow.com/questions/51709984/sort-queryset-by-added-field
 
-    # get other subsets for other tables on the help page
-    source = glossary.filter(help_category='source').order_by('help_order')
-    component_assay = glossary.filter(help_category='component-assay').order_by('help_order')
-    component_model = glossary.filter(help_category='component-model').order_by('help_order')
-    component_compound = glossary.filter(help_category='component-compound').order_by('help_order')
-    component_cell = glossary.filter(help_category='component-cell').order_by('help_order')
+    # HANDY get server path website address
+    # print("request.build_absolute_uri() ",request.build_absolute_uri())
+    # print("request.get_full_path() ", request.get_full_path())
+    # request.build_absolute_uri()  http://127.0.0.1:8000/help/
+    # request.get_full_path()  /help/
+
+    # convert the list of tuples to a dictionary for faster access
+    help_category_choices_dict = {}
+    for each in help_category_choices:
+        help_category_choices_dict[each[0]] = each[1]
+
+    # get the whole glossary
+    glossary_master = Definition.objects.all()
 
     all_glossary = {}
-    for each in glossary:
+    for each in glossary_master:
         term = each.term
         stripped_term = ''.join(e for e in term if e.isalnum())
         stripped_term = stripped_term.lower()
@@ -159,10 +161,39 @@ def mps_help(request):
         all_glossary[stripped_term+'_def'] = each.definition
         all_glossary[stripped_term+'_ref'] = each.show_url
 
-    # print("all_glossary ", all_glossary)
+    # for each in glossary_master:
+    #     # HANDY - get each field name in a queryset
+    #     # for field in each._meta.get_fields():
+    #     #     print(field)
+    #     print("help_category_display ", each.help_category_display)
 
-    # limit the glossary to only those selected for display
-    glossary = glossary.filter(glossary_display=True)
+    # get a subset of the features for the feature table
+    feature = glossary_master.filter(help_category='feature').filter(help_display=True).order_by('help_order')
+
+    for each in feature:
+        this_list = []
+        this_list_string = ''
+        for s in each.data_sources.all():
+            s_help_order = s.help_order
+            this_list.append(s_help_order)
+        this_list.sort()
+        this_list_string = ', '.join(map(str, this_list))
+
+        # HANDY - add field to queryset add a field to a queryset
+        # Adding a field must be the last thing you do or the field will get removed
+        each.source_list = this_list_string
+
+    glossary = glossary_master.filter(glossary_display=True).exclude(definition='')
+    for each in glossary:
+        dict_value = help_category_choices_dict.get(each.help_category, "")
+        each.help_category_display = dict_value
+
+    # get other subsets for other tables on the help page
+    source = glossary_master.filter(help_category='source').filter(help_display=True).order_by('help_order')
+    component_assay = glossary_master.filter(help_category='component-assay').filter(help_display=True).order_by('help_order')
+    component_model = glossary_master.filter(help_category='component-model').filter(help_display=True).order_by('help_order')
+    component_compound = glossary_master.filter(help_category='component-compound').filter(help_display=True).order_by('help_order')
+    component_cell = glossary_master.filter(help_category='component-cell').filter(help_display=True).order_by('help_order')
 
     data = {
         # 'version': len(os.listdir(MEDIA_ROOT + '/excel_templates/')),

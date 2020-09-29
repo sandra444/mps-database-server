@@ -13,7 +13,7 @@
         <table id="features_table" class="table table-bordered table-condensed small">
             <thead>
                 <tr>
-                    <th>Name</th>
+                    <th>Feature</th>
                     <th>Description</th>
                     <th>Reference Data Source(s)</th>
                     <th>More Help</th>
@@ -25,7 +25,8 @@
                 <tr>
                     <td>{{ term.term }}</td>
                     <td>{{ term.definition }}</td>
-                    <th>{% for source in term.data_sources.all %}{{ source }}<br/>{% endfor %}</th>
+{#                    <th>{% for source in term.data_sources.all %}{{ source }}<br/>{% endfor %}</th>#}
+                    <td>{{ term.source_list }}</td>
                     <th>{{ term.show_anchor }}</th>
                     <th>{{ term.show_url }}</th>
                 </tr>

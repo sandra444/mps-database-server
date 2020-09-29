@@ -183,12 +183,16 @@
                 <li class="dropdown">
                     <a class="dropdown-toggle" data-toggle="dropdown" href="#">Overview<span class="caret"></span></a>
                     <ul class="dropdown-menu">
-                        <li><a href="#help_overview0">Database Background</a></li>
-                        <li><a href="#help_overview1">Study Components </a></li>
-                        <li><a href="#help_overview2">Study Organization</a></li>
-                        <li><a href="#help_overview4">Reference Data Sources</a></li>
-                        <li><a href="#help_overview3">Database Features</a></li>
-                        <li><a href="#help_overview5">Permission Structure </a></li>
+                            <li><a href="#help_overview_background">Database Background</a></li>
+                            <li><a href="#help_overview_components">Study Components </a></li>
+                            <li><a href="#help_overview_organization">Study Organization</a></li>
+                            <li><a href="#help_overview_sources">Reference Data Sources</a></li>
+                            <li><a href="#help_overview_features">Database Features</a></li>
+                            <li><a href="#help_overview_permission">Permission Structure </a></li>
+                        <li class="divider"></li>
+                        <li class="dropdown-header"><b>Tools</b></li>
+                            <li><a href="#help_global_search">Global Database Search</a></li>
+                            <li><a href="#help_table_search">Table Searching and Exporting</a></li>
                     </ul>
                 </li>
 
@@ -217,10 +221,15 @@
                             <li><a href="#help_power_analysis">Assay Data Power Analysis</a></li>
                             <li><a href="#help_reproducibility_analysis">Assay Data Reproducibility</a></li>
                             <li><a href="#help_studyset">Assay Data Study Sets</a></li>
+                            <li><a href="#help_collaborator_group">Collaborator Groups</a></li>
                             <li><a href="#help_pbpk_analysis">PBPK Analysis</a></li>
                             <li><a href="#help_disease_portal">Disease Portal</a></li>
                             <li><a href="#help_compound_report">Compound Report</a></li>
                             <li><a href="#help_reference">References</a></li>
+                        <li class="divider"></li>
+                        <li class="dropdown-header"><b>Customization Options </b></li>
+                            <li><a href="#help_custom_queries">Custom Queries for Inter-Study Analysis</a></li>
+                            <li><a href="#help_custom_filtering">Custom Filtering for Data Visualization</a></li>
                     </ul>
                 </li>
 
@@ -238,20 +247,10 @@
                 </li>
 
                 <li class="dropdown">
-                    <a class="dropdown-toggle" data-toggle="dropdown" href="#">Distributed Tools<span class="caret"></span></a>
-                    <ul class="dropdown-menu">
-                        <li><a href="#help_global_search">Global Database Search</a></li>
-                        <li><a href="#help_table_search">Table Searching and Exporting</a></li>
-                        <li><a href="#help_custom_queries">Custom Queries for Inter-Study Analysis</a></li>
-                        <li><a href="#help_custom_filtering">Custom Filtering for Data Visualization</a></li>
-                    </ul>
-                </li>
-
-                <li class="dropdown">
                     <a class="dropdown-toggle" data-toggle="dropdown" href="#">Providing Data<span class="caret"></span></a>
                     <ul class="dropdown-menu">
-                        <li><a href="#help_data_group">1. Request to Join a Data Group </a></li>
-                        <li><a href="#help_study_components">2. Review/Add Study Components </a></li>
+                        <li><a href="#help_add_study">1. Request to Join a Data Group </a></li>
+                        <li><a href="#help_study_detail">2. Review Study Components </a></li>
                         <li><a href="#help_add_study">3. Add a Study </a></li>
                         <li><a href="#help_study_detail">4. Enter Study Details </a></li>
                         <li><a href="#help_study_treatment_group">5. Make Treatment Groups </a></li>
@@ -267,54 +266,31 @@
                 <li><a href="#glossary">Glossary</a></li>
 
 {#                <li class="dropdown">#}
-{#                    <a class="dropdown-toggle" data-toggle="dropdown" href="#">MPS Admins<span class="caret"></span></a>#}
+{#                    <a class="dropdown-toggle" data-toggle="dropdown" href="#">I Want To...<span class="caret"></span></a>#}
 {#                    <ul class="dropdown-menu">#}
-{#                        <li class="dropdown-header"><b>Add/Edit Controlled Vocabulary</b></li>#}
-{#                        <li><a href="#methods_admin">Assay Methods</a></li>#}
-{#                        <li><a href="#targets_admin">Assay Targets</a></li>#}
-{#                        <li><a href="#cellsamples_admin">Cell Samples</a></li>#}
-{#                        <li><a href="#chemicaldata_admin">Compounds</a></li>#}
-{#                        <li><a href="#devices_admin">Devices</a></li>#}
-{#                        <li><a href="#diseaselist_admin">Diseases</a></li>#}
-{#                        <li><a href="#mpslocations_admin">Locations of MPS Models</a></li>#}
-{#                        <li><a href="#mpsmodels_admin">MPS Models</a></li>#}
-{#                        <li><a href="#settings_admin">Settings</a></li>#}
-{#                        <li><a href="#physicalunits_admin">Units</a></li>#}
+{#                        <li class="dropdown-header"><b>Design an MPS Model</b></li>#}
+{#                        <li><a href="#help_model_components">Review MPS Models</a></li>#}
+{#                        <li><a href="#help_cell_components">Review Cell Samples</a></li>#}
+{#                        <li><a href="#help_assay_components">Review Assays</a></li>#}
 {#                        <li class="divider"></li>#}
-{#                        <li class="dropdown-header"><b>Controlling Access</b></li>#}
-{#                        <li><a href="#access_overview_admin">Sharing Study Data Overview</a></li>#}
-{#                        <li><a href="#add_groups_admin">Add Groups to Database</a></li>#}
-{#                        <li><a href="#study_groups_admin">Add Groups to Study</a></li>#}
-{#                        <li><a href="#user_groups_admin">Add Users to Group</a></li>#}
+{#                        <li class="dropdown-header"><b>Find Compounds to Test</b></li>#}
+{#                        <li><a href="#help_chemical_data">Review Chemical Data</a></li>#}
+{#                        <li><a href="#help_adverse_events">Review Adverse Events</a></li>#}
+{#                        <li><a href="#help_compare_adverse_events">Compare Adverse Events</a></li>#}
+{#                        <li class="divider"></li>#}
+{#                        <li class="dropdown-header"><b>Compare Study Data to Clinic</b></li>#}
+{#                        <li><a href="#help_drug_trials">Review Drug Trials</a></li>#}
+{#                        <li><a href="#help_disease_portal">Review Diseases</a></li>#}
+{#                        <li class="divider"></li>#}
+{#                        <li class="dropdown-header"><b>Review Study Data</b></li>#}
+{#                        <li><a href="#help_power_analysis">Perform Power Analysis</a></li>#}
+{#                        <li><a href="#help_reproducibility_analysis">Assess Reproducibility</a></li>#}
+{#                        <li class="divider"></li>#}
+{#                        <li class="dropdown-header"><b>Contribute Study Data</b></li>#}
+{#                        <li><a href="#help_data_provider">Become a Data Provider </a></li>#}
+{#                        <li><a href="#help_stakeholder">Perform Stakeholder Review </a></li>#}
 {#                    </ul>#}
 {#                </li>#}
-
-                <li class="dropdown">
-                    <a class="dropdown-toggle" data-toggle="dropdown" href="#">I Want To...<span class="caret"></span></a>
-                    <ul class="dropdown-menu">
-                        <li class="dropdown-header"><b>Design an MPS Model</b></li>
-                        <li><a href="#help_model_components">Review MPS Models</a></li>
-                        <li><a href="#help_cell_components">Review Cell Samples</a></li>
-                        <li><a href="#help_assay_components">Review Assays</a></li>
-                        <li class="divider"></li>
-                        <li class="dropdown-header"><b>Find Compounds to Test</b></li>
-                        <li><a href="#help_chemical_data">Review Chemical Data</a></li>
-                        <li><a href="#help_adverse_events">Review Adverse Events</a></li>
-                        <li><a href="#help_compare_adverse_events">Compare Adverse Events</a></li>
-                        <li class="divider"></li>
-                        <li class="dropdown-header"><b>Compare Study Data to Clinic</b></li>
-                        <li><a href="#help_drug_trials">Review Drug Trials</a></li>
-                        <li><a href="#help_disease_portal">Review Diseases</a></li>
-                        <li class="divider"></li>
-                        <li class="dropdown-header"><b>Review Study Data</b></li>
-                        <li><a href="#help_power_analysis">Perform Power Analysis</a></li>
-                        <li><a href="#help_reproducibility_analysis">Assess Reproducibility</a></li>
-                        <li class="divider"></li>
-                        <li class="dropdown-header"><b>Contribute Study Data</b></li>
-                        <li><a href="#help_data_provider">Become a Data Provider </a></li>
-                        <li><a href="#help_stakeholder">Perform Stakeholder Review </a></li>
-                    </ul>
-                </li>
 
             </ul>
         </div>
@@ -328,55 +304,52 @@
 
     <div id="overview_section" class="container">
 
+        <br><br>
         <h1 class="sub1-bars"> Overview of the MPS-Db </h1>
 
-        <div id="help_overview0">
+        <div id="help_overview_background">
             <button name="my_buttons" class="collapsible1">Database Background</button>
             <div class="content1">
                 {% include 'help_overview_database_background.html' %}
             </div>
         </div>
 
-        <div id="help_overview1">
+        <div id="help_overview_components">
             <button name="my_buttons" class="collapsible1">Study Components</button>
             <div class="content1">
                 {% include 'help_overview_study_components.html' %}
             </div>
         </div>
 
-        <div id="help_overview2">
+        <div id="help_overview_organization">
             <button name="my_buttons" class="collapsible1">Study Organization</button>
             <div class="content1">
                 {% include 'help_overview_study_organization.html' %}
             </div>
         </div>
 
-        <div id="help_overview4">
+        <div id="help_overview_sources">
             <button name="my_buttons" class="collapsible1"> Reference Data Sources </button>
             <div class="content1">
                 {% include 'help_overview_reference_data_sources.html' %}
             </div>
         </div>
 
-        <div id="help_overview3">
+        <div id="help_overview_features">
             <button name="my_buttons" class="collapsible1">Database Features</button>
             <div class="content1">
                  {% include 'help_overview_database_features.html' %}
             </div>
         </div>
 
-        <div id="help_overview5">
+        <div id="help_overview_permission">
             <button name="my_buttons" class="collapsible1">Permission Structure </button>
             <div class="content1">
                 {% include 'help_overview_permission_structure.html' %}
             </div>
         </div>
 
-    </div>
-
-    <div id="search_section" class="container">
-
-        <h1 class="sub1-bars"> Searching the MPS-Db </h1>
+        <h1 class="sub2-bars"> Tools </h1>
 
         <div id="help_global_search">
             <button name="my_buttons" class="collapsible1">Global Database Search</button>
@@ -389,6 +362,7 @@
                                 <ul class="filled-circle">
                                     <li>Go to the <b>MPS-Db Home</b> page</li>
                                     <li>Type a search term into the <b>Global</b> search bar</li>
+                                    <li>Type a space and add an additional term(s) (optional)</li>
                                     <li>Make preliminary selection (hit enter, click the blue <b>Search</b> button, or mouse down the options list to item of interest and click the left mouse button)</li>
                                     <li>Wait for a list of matching information to appear</li>
                                     <li>Click to check (or uncheck) filter boxes in the filter section to further restrict (or unrestrict) matching results (optional)</li>
@@ -421,7 +395,7 @@
                                     <li>The Column visibility button can be used to turn columns on/off in the list/table </li>
                                     <li>To sort the list/table, click on the arrow in the column header   </li>
                                     <li>To sort on multiple columns, click on the arrow on the primary sort column, then hold the shift key and click on additional column arrows</li>
-                                    <li class="dtr-control">Click the blue <i class="glyphicon glyphicon-plus-sign"></i> to see hidden fields</li>
+                                    <li class="dtr-control">Click the blue <i class="glyphicon glyphicon-plus-sign text-primary"></i> to see hidden fields</li>
                                 </ul>
                             </li>
                         </ul>
@@ -429,6 +403,7 @@
                 </ul>
             </div>
         </div>
+
 
     </div>
 
@@ -578,57 +553,43 @@
 
     </div>
 
-    <div id="component_section" class="container">
-
-        {# The tables in the next set of divs, the html, is generated using python script and SCD3 workbook#}
-        <h1 class="sub1-bars">Study Components</h1>
-        <div id="help_study_components">
-            <h1 class="sub3-bars"></h1>
-            <h4>
-                To review/add Study Components, click the link {{ study_component_ref }}.
-                <br><br>
-                Guidance and tips for adding/updating more complicated components are provided below.
-            </h4>
-        </div>
-
-        <div id="help_assay_components">
-{#            <h1 class="sub2-bars"> Assay Components </h1>#}
-            {% include 'help_review_study_components_assay.html' %}
-        </div>
-
-        <div id="help_model_components">
-{#            <h1 class="sub2-bars"> Model Components </h1>#}
-            {% include 'help_review_study_components_model.html' %}
-        </div>
-
-        <div id="help_compound_components">
-{#            <h1 class="sub2-bars"> Compound Components </h1>#}
-            {% include 'help_review_study_components_compound.html' %}
-        </div>
-
-        <div id="help_cell_components">
-{#            <h1 class="sub2-bars"> Cells Components </h1>#}
-            {% include 'help_review_study_components_cell.html' %}
-        </div>
-
-    </div>
+{#<h1>This section is current undergoing revisions and is provided here just for discussion purposes!</h1>#}
 
     <div id="study_data_feature_section" class="container">
 
         <h1 class="sub1-bars"> Database Features Based on Study Data </h1>
 
-        <div id="help_study_components_pointer">
-            <button name="my_buttons" class="collapsible1">Study Components</button>
+        <div id="help_study_component">
+            <button name="my_buttons" class="collapsible1"> Study Components </button>
             <div class="content1">
-                <ul class="list-group">
-                    <li class="list-group-item">
-                        <h1 class="sub3-bars"> Study Components </h1>
-                        <ul class="list-unstyled">
-                            <li>All registered users can review study components {{ study_component_ref }}.</li>
-                            <li>Click <a href="#help_study_components">here</a> for more help with study components </li>
-                        </ul>
-                    </li>
-                </ul>
+                <h4>
+                    To review/add Study Components, click the link {{ all_glossary.studycomponent_ref }}.
+                    <br><br>
+                    Guidance and tips for adding/updating more complicated components are provided below.
+                </h4>
+
+                <div>
+                    <div id="help_assay_components">
+            {#            <h1 class="sub2-bars"> Assay Components </h1>#}
+                        {% include 'help_review_study_components_assay.html' %}
+                    </div>
+
+                    <div id="help_model_components">
+            {#            <h1 class="sub2-bars"> Model Components </h1>#}
+                        {% include 'help_review_study_components_model.html' %}
+                    </div>
+
+                    <div id="help_compound_components">
+            {#            <h1 class="sub2-bars"> Compound Components </h1>#}
+                        {% include 'help_review_study_components_compound.html' %}
+                    </div>
+
+                    <div id="help_cell_components">
+            {#            <h1 class="sub2-bars"> Cells Components </h1>#}
+                        {% include 'help_review_study_components_cell.html' %}
+                    </div>
+                </div>
+
             </div>
         </div>
 
@@ -681,11 +642,630 @@
         </div>
 
 
+        <div id="help_omic_data_viz">omic vis </div>
+        <p>need to add some stuff</p>
+
+        <div id="help_power_analysis">
+            <button name="my_buttons" class="collapsible1"> Assay Data Power Analysis  </button>
+            <div class="content1">
+                <div id="power_analysis_viewer" class="viewersubtainer">
+                    <ul class="list-group">
+                        <li class="list-group-item background3">
+                            <p>A statistical power analysis methodology has been implemented in the MPS-Db to estimate the probability that a statistical test will find a significant difference between two different data groups, such as control and compound treatment groups (post hoc two-sample power analysis), or a significance difference from one treatment group (a priori one-sample power analysis) for an MPS model.</p>
+                            <ul class="list-unstyled">
+                                <li> To perform power analysis
+                                    <ul class="filled-circle">
+                                        <li>Click on the Show Details box next to a Target/Analyte (set) of interest</li>
+                                        <li>Scroll down and select TWO compounds for Power Analysis</li>
+                                        <li>Scroll down to see additional options (Effect Size Methods and Significance Level)
+                                        <li>Make desired changes to effective size and significance level selections (optional) </li>
+                                        <li>Click Run Analysis</li>
+                                    </ul>
+                                </li>
+                                <li><br>Notes
+                                    <ul class="filled-circle">
+                                        <li>Customized properties for power analysis are available in the MPS-Db via a "Sidebar" on the power analysis page
+                                            <ul class="open-circle">
+                                                <li>If hidden, click the <b>Toggle Sidebar</b> button to show the sidebar
+                                                <li>Make desired selections in the sidebar (for more information on overriding default grouping and filtering, <a href="#groupingfiltering">click here</a> )</li>
+                                            </ul>
+                                        </li>
+                                        <li>By default, the screen will automatically refresh, to refresh manually, check the <b>Manually Refresh</b> box, make the desired changes, then click on the <b>Refresh</b> button to apply changes </li>
+                                    </ul>
+                                </li>
+
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div id="help_reproducibility_analysis">
+            <button name="my_buttons" class="collapsible1">Assay Data Reproducibility </button>
+            <div class="content1">
+                <div id="plottingoptionsviewer" class="viewersubtainer">
+                    <ul class="list-group">
+                        <li class="list-group-item background3">
+                            <ul class="list-unstyled">
+                                <li>Customized properties for reproducibility analysis are available in the MPS-Db via a "Sidebar" on the inter-study reproducibility analysis page
+                                    <ul class="filled-circle">
+                                        <li>If hidden, click the <b>Toggle Sidebar</b> button to show the sidebar
+                                        <li>Make desired selections in the sidebar
+                                            <ul class="open-circle">
+                                            <li>Reproducibility Comparison within Selected Data Sets - By Center (Center to Center) or By Study (Study to Study)</li>
+                                            <li>Normalize by Median - helpful if trends are similar but values are on different scales </li>
+                                            <li>Maximum Interpolation Size - maximum number of data points that can be interpolated, between experimental measurements, to allow for comparison within selected data sets, center to center or study to study (shown as stars on the reproducibility plots)</li>
+                                            </ul>
+                                        </li>
+                                    </ul>
+                                </li>
+                                <li><br>Notes
+                                    <ul class="filled-circle">
+                                        <li>By default, the screen will automatically refresh, to refresh manually, check the <b>Manually Refresh</b> box, make the desired changes, then click on the <b>Refresh</b> button to apply changes </li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div id="help_studyset">
+            <button name="my_buttons" class="collapsible1">Study Sets</button>
+            <div class="content1">
+                <div id="intrastudyviewer" class="viewersubtainer">
+                    <ul class="list-group">
+                        <li class="list-group-item">
+                            <ul class="list-unstyled">
+                                <li>The <b>Study Sets</b> feature is accessed from the Studies menu
+                                    <ul class="filled-circle">
+                                        <li>To add a study set
+                                            <ul class="open-circle">
+                                                <li>Select <b>Studies</b></li>
+                                                <li>Select <b>Add Study Set</b> </li>
+                                                <li>Select the studies to include in the set</li>
+                                                <li>Fill out the form</li>
+                                                <li>Submit</li>
+                                            </ul>
+                                        </li>
+                                        <li>Study sets can only be edited by MPS-DB administrators (send an email to MPSHELP@pitt.edu with subject line "Edit Study Set").
+                                        </li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div id="help_collaborator_group">Collaborator Groups</div>
+        <p>need to add some stuff</p>
+
+        <div id="help_pbpk_analysis">pbpk</div>
+        <p>need to add some stuff</p>
+
+        <div id="help_disease_portal">
+            <button name="my_buttons" class="collapsible1">Diseases (Clinical Trials and Study Data Combined via a Disease)</button>
+            <div class="content1">
+                <div id="diseaseviewer" class="viewersubtainer">
+                    <ul class="list-group">
+                        <li class="list-group-item">
+                            <ul class="list-unstyled">
+                                <li>Select <b>View Diseases</b> from the <b>Models</b> icon or tab
+                                    <ul class="filled-circle">
+                                        <li>Scroll through the list of diseases or use the <b>Search</b> bar to find a <b>Disease</b> of interest </li>
+                                        <li>Click on the <b>View</b> button next to <b>Disease</b> of interest to see options
+                                            <ul class="open-circle">
+                                                <li>Disease Overview - disease basics </li>
+                                                <li>Disease Biology - active links to relevant biology/genomic information </li>
+                                                <li>Clinical Data - summarized findings from clinicaltrials.gov </li>
+                                                <li>Disease Models &amp; Studies - list of disease related <b>Models</b> in the MPS-Db and list of studies related to the disease  </li>
+                                            </ul>
+                                        </li>
+                                    </ul>
+                                </li>
+                                <li><br>Notes
+                                    <ul class="filled-circle">
+                                        <li>The study list on the <b>Disease Models & Studies</b> page and the summary counts on the main <b>Diseases</b> page are permission specific  </li>
+                                        <li>For more information on the reference data source(s), <a href="#help_overview_features">click here</a> </li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div id="help_compound_report">
+            <button name="my_buttons" class="collapsible1">Compound Report (Chemical Properties and Study Data Combined via a Compound)</button>
+            <div class="content1">
+                <div id="compoundviewer" class="viewersubtainer">
+                    <ul class="list-group">
+                        <li class="list-group-item">
+                            <ul class="list-unstyled">
+                                <li>Select <b>Compound Report</b> from the <b>Compounds</b> icon or tab
+                                    <ul class="filled-circle">
+                                        <li>As a precaution, click the <b>Clear Current Selections</b> button</li>
+                                        <li>Use the <b>Search</b> bar to limit the compound list </li>
+                                        <li>Check the boxes for the compounds to include</li>
+                                        <li>If desired, use the <b>Search</b> bar to get a different compound list</li>
+                                        <li>If desired, check additional compounds to include</li>
+                                        <li>Click on the button to <b>Generate Compound Report</b> </li>
+                                        <li>If a green plus sign is present, click it to see aggregated assay study data</li>
+                                    </ul>
+                                </li>
+                                <li><br>Notes
+                                    <ul class="filled-circle">
+                                        <li>Compound selections are cumulative</li>
+                                        <li>To start with a fresh <b>Search</b>, click the <b>Clear Current Selections</b> button</li>
+                                        <li>To save a complicated <b>Search</b>, click the <b>Save Selections</b> button (when returning at a later time, click <b>Load Selections</b>)</li>
+                                        <li>Only <i>normalized</i> data are shown in the aggregated assay study data plots</li>
+                                        <li>For more information on the reference data source(s), <a href="#help_overview_features">click here</a> </li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div id="help_reference">
+            <button name="my_buttons" class="collapsible1">References</button>
+            <div class="content1">
+                <div id="intrastudyviewer" class="viewersubtainer">
+                    <ul class="list-group">
+                        <li class="list-group-item">
+                            <ul class="list-unstyled">
+                                <li>References can be added to the MPS-Db
+                                    <ul class="filled-circle">
+                                        <li>To add a reference to the MPS-Db
+                                            <ul class="open-circle">
+                                                <li>Select the <b>Studies</b> icon or tab</li>
+                                                <li>Select <b>View References</b> </li>
+                                                <li>Click the <b>Add Reference</b> button</li>
+                                                <li>Fill out the form</li>
+                                                <li>Submit</li>
+                                            </ul>
+                                        </li>
+                                        <li>References can be linked to studies and/or study components (e.g., MPS models, devices) when additing or editing components
+                                        </li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div id="non_study_data_feature_section" class="container">
+
+        <h1 class="sub1-bars"> Database Features Based on Curated Reference Data </h1>
+
+        <div id="help_chemical_data">
+            {# *anchor* #}
+            <button name="my_buttons" class="collapsible1">Chemical Data</button>
+            <div class="content1">
+                <ul class="list-group">
+                    <li class="list-group-item">
+                        <h1 class="sub3-bars"> Chemical Data </h1>
+                        <ul class="list-unstyled">
+                            <li>Select <b>View Chemical Data</b> from the <b>Compounds</b> icon or tab, then:
+                                <ul class="filled-circle">
+                                    <li>Use the <b>Search</b> bar or scroll through the list to find the <b>Compound</b> of interest</li>
+                                    <li>Click on the <b>View</b> button next to the <b>Compound</b> of interest to see compound details</li>
+                                    <li>Click on the <b>Previous</b> or <b>Next</b> button to scroll through the compounds </li>
+                                </ul>
+                            </li>
+                            <li><br>Notes:
+                                <ul class="filled-circle">
+                                    <li>The "Medchem Alerts" field (in the compound details page) shows whether functional groups that are uncommon in drugs are present in the compound
+                                    <ul class="open-circle">
+                                        <li>If there are Medchem Alerts for a compound, click on the flag to see a list of the functional groups </li>
+                                    </ul>
+                                    </li>
+                                    <li>For more information on the reference data source(s), <a href="#help_overview_features">click here</a> </li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div id="help_bioactivities">
+            {# *anchor* #}
+            <button name="my_buttons" class="collapsible1">Bioactivities</button>
+            <div class="content1">
+                <ul class="list-group">
+                    <li class="list-group-item">
+                        <h1 class="sub3-bars"> Bioactivities </h1>
+                        <ul class="list-unstyled">
+                            <li>Select <b>View Bioactivities</b> from the <b>Compounds</b> icon or tab, then select an option.
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <ul class="list-group">
+                    <li class="list-group-item">
+                        <ul class="list-unstyled">
+                            <h1 class="sub3-bars"> Option 1 - Quick Search </h1>
+                            <li>To perform quick search:
+                                <ul class="filled-circle">
+                                    <li>Enter at least one search string in one of the fields (Compound, Target, and/or Name)
+                                        <ul class="open-circle">
+                                            <li>Notice that options appear, these can be selected from the dropdown </li>
+                                        </ul>
+                                        </li>
+                                    <li>Optional - Click on the buttons to Exclude and/or change data as indicated on the button  </li>
+                                    <li>Click on the <span class="glyphicon glyphicon-search" aria-hidden="true"></span> to perform the search </li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <button name="my_buttons" class="collapsible3">See A Quick Search Example</button>
+                <div class="content3">
+                    <ul class="list-group">
+                        <li class="list-group-item background3">
+                            <h1 class="sub3-bars"> Bioactivities Quick Search Example </h1>
+                            <ul class="list-unstyled">
+                                <li>Follow these steps:
+                                     <ul class="filled-circle">
+                                        <li>Enter Compound = "ASPIRIN"</li>
+                                        <li>Enter Target = "Blood" </li>
+                                        <li>Enter Name = "IC50" </li>
+                                        <li>Click on the <span class="glyphicon glyphicon-search" aria-hidden="true"></span>  </li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+
+                <ul class="list-group">
+                    <li class="list-group-item">
+                        <ul class="list-unstyled">
+                            <h1 class="sub3-bars"> Option 2 - Advanced Search </h1>
+                            <li>To perform an advanced search:
+                                <ul class="filled-circle">
+                                    <li>Optional - Click on the buttons to Exclude and/or change data as indicated on the button
+                                        <ul class="open-circle">
+                                            <li>Notice that options appear, these can be selected from the dropdown </li>
+                                        </ul>
+                                    </li>
+                                    <li>Optional - The <em>Minimum Feature Count Per Record</em> field specifies the number of bioactivities that need to be linked to a given option for it to appear
+                                        <ul class="open-circle">
+                                            <li>e.g. if the min feature count is 10, then the compound "ALDRIN" won't be an option because only 5 bioactivities link to "ALDRIN" </li>
+                                            <li>Click the "Apply" button to confirm the change to the min feature count </li>
+                                        </ul>
+                                    </li>
+                                    <li>Make sure that the boxes are check marked to indicate selections in all tables </li>
+                                    <li>Click the button to <b>Generate Table</b> </li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <button name="my_buttons" class="collapsible3">See An Advanced Search Example</button>
+                <div class="content3">
+                    <ul class="list-group">
+                        <li class="list-group-item background3">
+                            <h1 class="sub3-bars"> Bioactivities Advanced Search Example </h1>
+                            <ul class="list-unstyled">
+                                <li>Follow these steps:
+                                     <ul class="filled-circle">
+                                        <li>Select Target Types - check the box in the top left to include all </li>
+                                        <li>Select Organisms - check the box in the top left to include all </li>
+                                        <li>Filter Compounds - check all boxes, leave LogP and Molecular Weight blank </li>
+                                        <li>Bioactivities Filter - type in "IC50" </li>
+                                        <li>Select Bioactivities - check the box in the top left to include all </li>
+                                        <li>Targets Filter - type in "Blood" </li>
+                                        <li>Select Targets - check the box in the top left to include all </li>
+                                        <li>Compounds Filter - type in "ASPIRIN" </li>
+                                        <li>Select Compounds - check the box in the top left to include all </li>
+                                        <li>Click the button to <b>Generate Table</b> </li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+
+                <ul class="list-group">
+                    <li class="list-group-item">
+                        <ul class="list-unstyled">
+                            <li>Notes:
+                                <ul class="filled-circle">
+                                    <li>The <b>Data Validity</b> column of the results table/list indicates whether or not, and why, an entry was marked "questionable"</li>
+                                    <li>Not every ChEMBL entry has a corresponding PubChem entry, and vice versa </li>
+                                    <li>The following will clear <em>all</em> selections
+                                        <ul class="open-circle">
+                                            <li>Changing between ChEMBL and PubChem; Changing whether questionable results are excluded or not; Changing the min feature count; Changing the <em>Target Types</em> or <em>Organisms</em>  </li>
+                                        </ul>
+                                    </li>
+                                    <li>For more information on the reference data source(s), <a href="#help_overview_features">click here</a> </li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+
+            </div>
+        </div>
+
+        <div id="help_drug_trials">
+            {# *anchor* #}
+            <button name="my_buttons" class="collapsible1">Drug Trials</button>
+            <div class="content1">
+                <ul class="list-group">
+                    <li class="list-group-item">
+                        <h1 class="sub3-bars"> Drug Trials </h1>
+                        <ul class="list-unstyled">
+                            <li>Select <b>Drug Trials</b> from the <b>Compounds</b> icon or tab, then:
+                                <ul class="filled-circle">
+                                    <li>Use the <b>Search</b> bar or scroll through the list to find the <b>Drug Trial</b> of interest</li>
+                                    <li>Click on the <b>View</b> button next to the <b>Drug Trial</b> of interest  </li>
+                                    <li>Click on the <b>Previous</b> or <b>Next</b> button to scroll through the compounds </li>
+                                </ul>
+                            </li>
+                            <li><br>Notes:
+                                <ul class="filled-circle">
+                                    <li>For more information on the reference data source(s), <a href="#help_overview_features">click here</a> </li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div id="help_adverse_events">
+            {# *anchor* #}
+            <button name="my_buttons" class="collapsible1">Adverse Events</button>
+            <div class="content1">
+                <ul class="list-group">
+                    <li class="list-group-item">
+                        <h1 class="sub3-bars"> Adverse Events </h1>
+                        <ul class="list-unstyled">
+                            <li>Select <b>View Adverse Events</b> from the <b>Compounds</b> icon or tab, then:
+                                <ul class="filled-circle">
+                                    <li>Scroll through the list or use the <b>Search</b> bar to find a <b>Compound</b> and <b>Event</b> of interest
+                                        <ul class="open-circle">
+                                            <li>Use a space in the <b>Search</b> bar to such multiple terms (e.g, "EPINEPHRINE nausea") </li>
+                                        </ul>
+                                    </li>
+                                    <li>Click on the <b>View</b> button to see details of the <b>Compound</b> and <b>Event</b> of interest </li>
+                                    <li>Click on the <b>Toggle Plot</b> button next to an <b>Event</b> of interest to generate time plots of reported events (scroll down to see the plot)
+                                        <ul class="open-circle">
+                                            <li>Use the data boxes under the plot to control time frame of plot (Optional)</li>
+                                        </ul>
+                                    </li>
+                                    <li>Click on the <b>Previous</b> or <b>Next</b> button to scroll through the compounds </li>
+                                </ul>
+                            </li>
+                            <li><br>Notes:
+                                <ul class="filled-circle">
+                                    <li>Only top adverse events for compounds are shown in the results of the search</li>
+                                    <li>The <b>Number of Reports</b> column indicates the number of reports that list both the compound and adverse event in the row</li>
+                                    <li>The <b>Number of Reports</b> does not contain any information regarding the dose of the drug</li>
+                                    <li>A compound can be listed in a report even if it is not suspected of causing the adverse event</li>
+                                    <li>For more information on the reference data source(s), <a href="#help_overview_features">click here</a> </li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div id="help_compare_adverse_events">
+            {# *anchor* #}
+            <button name="my_buttons" class="collapsible1">Compare Adverse Events</button>
+            <div class="content1">
+                <ul class="list-group">
+                    <li class="list-group-item">
+                        <h1 class="sub3-bars"> Compare Adverse Events </h1>
+                        <ul class="list-unstyled">
+                            <li>Select <b>Compare Adverse Events</b> from the <b>Compounds</b> icon or tab, then:
+                                <ul class="filled-circle">
+                                    <li>As a precaution, click the <b>Clear Current Selections</b> button</li>
+                                    <li>Use the <b>Search</b> bar to narrow the <b>Compound</b> and <b>Event</b> lists </li>
+                                    <li>Check the boxes of the <b>Compound</b> and <b>Event</b> to include
+                                        <ul class="open-circle">
+                                            <li>At least one <b>Compound</b> and one <b>Event</b> must be selected before a graph will appear </li>
+                                        </ul>
+                                    </li>
+                                    <li>If desired, use the <b>Search</b> bar to get different lists </li>
+                                    <li>If desired, check additional compounds to include</li>
+                                    <li>Scroll down to see the graph comparing events</li>
+                                    <li>If desired, click on the <b>Show Raw Counts</b> button to toggle from Number of Reports per 10,000 Mentions </li>
+                                </ul>
+                            </li>
+                            <li><br>Notes:
+                                <ul class="filled-circle">
+                                    <li>Selections from both lists are cumulative</li>
+                                    <li>To start with a fresh <b>Search</b>, click the <b>Clear Current Selections</b> button</li>
+                                    <li>To save a complicated <b>Search</b>, click the <b>Save Selections</b> button (when returning at a later time, click <b>Load Selections</b>)</li>
+                                    <li>Hover over the circle ? to learn more about data presented </li>
+                                    <li>For more information on the reference data source(s), <a href="#help_overview_features">click here</a> </li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div id="help_heatmap_bioactivities">
+            {# *anchor* #}
+            <button name="my_buttons" class="collapsible1">Heatmap of Bioactivities</button>
+            <div class="content1">
+                <ul class="list-group">
+                    <li class="list-group-item">
+                        <h1 class="sub3-bars"> Heatmap of Bioactivities </h1>
+                        <ul class="list-unstyled">
+                            <li>Select <b>Heatmap</b> from the <b>Analysis</b> icon or tab, then:
+                                <ul class="filled-circle">
+                                    <li>Optional - Click on the buttons to Exclude and/or change data as indicated on the button
+                                        <ul class="open-circle">
+                                            <li>Notice that options appear, these can be selected from the dropdown </li>
+                                        </ul>
+                                    </li>
+                                    <li>Optional - The <em>Minimum Feature Count Per Record</em> field specifies the number of bioactivities that need to be linked to a given option for it to appear
+                                        <ul class="open-circle">
+                                            <li>e.g. if the min feature count is 10, then the compound "ALDRIN" won't be an option because only 5 bioactivities link to "ALDRIN" </li>
+                                            <li>Click the "Apply" button to confirm the change to the min feature count </li>
+                                        </ul>
+                                    </li>
+                                    <li>Make sure that the boxes are checkmarked to indicate selections in all tables </li>
+                                    <li>Click the button to <b>Generate Heatmap</b> </li>
+                                    <li>If desired, click on a row or column label to sort the heatmap such that entries in the selection are ordered from highest to lowest</li>
+                                    <li>If desired, click the button to <b>Download the Heatmap</b> (downloads data used in heatmap to csv)</li>
+                                    <li>Scroll to the bottom of the heatmap to see the legend of colors used  </li>
+                                    <li>Clicking on a specific square in the heatmap will show that particular value in a pop-up window </li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <button name="my_buttons" class="collapsible3">See An Example</button>
+                <div class="content3">
+                    <ul class="list-group">
+                        <li class="list-group-item background3">
+                            <h1 class="sub3-bars"> Heatmap of Bioactivities - Example </h1>
+                            <ul class="list-unstyled">
+                                <li>Follow these steps:
+                                    <ul class="filled-circle">
+                                        <li>Select Target Types - check the box in the top left to include all </li>
+                                        <li>Select Organisms - check the box in the top left to include all </li>
+                                        <li>Filter Compounds - check all boxes, leave LogP and Molecular Weight blank </li>
+                                        <li>Bioactivities Filter - type in "IC50" </li>
+                                        <li>Select Bioactivities - check the box in the top left to include all </li>
+                                        <li>Select Targets - check the box in the top left to include all </li>
+                                        <li>Compounds Filter - type in "ASPIRIN" </li>
+                                        <li>Select Compounds - check the box in the top left to include all </li>
+                                        <li>Select Drug Trials - check the box in the top left to include all </li>
+                                        <li>Click the button to <b>Generate Heatmap</b> </li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+
+                <ul class="list-group">
+                    <li class="list-group-item">
+                        <ul class="list-unstyled">
+                            <li>Notes:
+                                <ul class="filled-circle">
+                                    <li>Not every ChEMBL entry has a corresponding PubChem entry, and vice versa </li>
+                                    <li>The following will clear <em>all</em> selections
+                                        <ul class="open-circle">
+                                            <li>Changing between ChEMBL and PubChem; Changing whether questionable results are excluded or not; Changing the min feature count; Changing the <em>Target Types</em> or <em>Organisms</em>  </li>
+                                        </ul>
+                                    </li>
+                                    <li>For more information on the reference data source(s), <a href="#help_overview_features">click here</a> </li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div id="help_cluster_chemicals">
+            {# *anchor* #}
+            <button name="my_buttons" class="collapsible1">Compound Clustering</button>
+            <div class="content1">
+                <ul class="list-group">
+                    <li class="list-group-item">
+                        <h1 class="sub3-bars"> Compound Clustering </h1>
+                        <ul class="list-unstyled">
+                            <li>Select <b>Cluster</b> from the <b>Analysis</b> icon or tab, then:
+                                <ul class="filled-circle">
+                                    <li>Optional - Click on the buttons to Exclude and/or change data as indicated on the button
+                                        <ul class="open-circle">
+                                            <li>Notice that options appear, these can be selected from the dropdown </li>
+                                        </ul>
+                                    </li>
+                                    <li>Optional - The <em>Minimum Feature Count Per Record</em> field specifies the number of bioactivities that need to be linked to a given option for it to appear
+                                        <ul class="open-circle">
+                                            <li>e.g. if the min feature count is 10, then the compound "ALDRIN" won't be an option because only 5 bioactivities link to "ALDRIN" </li>
+                                            <li>Click the "Apply" button to confirm the change to the min feature count </li>
+                                        </ul>
+                                    </li>
+                                    <li>Make sure that the boxes are check marked to indicate selections in all tables </li>
+                                    <li>Click the button to <b>Generate Dendrogram</b> </li>
+                                    <li>The table on the left shows the bioactivities and drug trial data used in clustering</li>
+                                    <li>Click on a node to see information about the compound (click the red X button to close)</li>
+                                </ul>
+                            </li>
+                       </ul>
+                    </li>
+                </ul>
+
+                <button name="my_buttons" class="collapsible3">See An Example</button>
+                <div class="content3">
+                    <ul class="list-group">
+                        <li class="list-group-item background3">
+                            <h1 class="sub3-bars"> Compound Clustering - Example </h1>
+                            <ul class="list-unstyled">
+                                <li>Follow these steps:
+                                    <ul class="filled-circle">
+                                        <li>Select Target Types - check the box "Single Protein" </li>
+                                        <li>Select Organisms - check the box "Homo sapiens" </li>
+                                        <li>Filter Compounds - check all boxes, leave LogP and Molecular Weight blank </li>
+                                        <li>Select Bioactivities - check the box in the top left to include all </li>
+                                        <li>Select Targets - check the box "!No Target" </li>
+                                        <li>Select Compounds - check the box in the top left to include all </li>
+                                        <li>Select Drug Trials - check the box in the top left to include all </li>
+                                        <li>Click the button to <b>Generate Dendrogram</b> </li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+
+                <ul class="list-group">
+                    <li class="list-group-item">
+                        <ul class="list-unstyled">
+                            <li>Notes:
+                                <ul class="filled-circle">
+                                    <li>Not every ChEMBL entry has a corresponding PubChem entry, and vice versa </li>
+                                    <li>The following will clear <em>all</em> selections
+                                        <ul class="open-circle">
+                                            <li>Changing between ChEMBL and PubChem; Changing whether questionable results are excluded or not; Changing the min feature count; Changing the <em>Target Types</em> or <em>Organisms</em>  </li>
+                                        </ul>
+                                    </li>
+                                    <li>For more information on the reference data source(s), <a href="#help_overview_features">click here</a> </li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+    </div>
 
 
+    <div id="search_section" class="container">
 
 
-
+    </div>
 
 
 {#                                        <li>Option 2 - Click on the <b>Show Reproducibility</b> button - to see results of inter-study reproducibility analysis#}
@@ -700,9 +1280,10 @@
 {#                                        <li>Option 3 - Click on the <b>Download</b> button - to download selected data  </li>#}
 {#                                    </ul>#}
 {#                                </li>#}
-
-
+    <div id="needtoedit" class="container">
         <h1 class="sub3-bars"> Using Default Query and Plot Functions (Grouping/Filtering) </h1>
+
+
 
         <div id="studies">
             <button name="my_buttons" class="collapsible2"> Built-in Default Grouping/Filtering by Study  </button>
@@ -746,7 +1327,7 @@
                                     <ul class="filled-circle">
                                         <li>Media files (images and videos) have been altered for appearance in a web browser</li>
                                         <li>To perform comparative analysis between media files, downloading the unaltered media file is recommended </li>
-                                        <li>The studies shown in the list are tied to user permission settings (for more information on permissions, <a href="#help_overview5">click here</a>) </li>
+                                        <li>The studies shown in the list are tied to user permission settings (for more information on permissions, <a href="#help_overview_permission">click here</a>) </li>
                                         <li>For information on viewing data across studies (inter-study), <a href="#interstudy">click here</a> </li>
                                     </ul>
                                 </li>
@@ -927,613 +1508,8 @@
                 </div>
             </div>
         </div>
-
-
-        <div id="help_omic_data_viz">omic vis </div>
-        <p>need to add some stuff</p>
-
-        <div id="help_power_analysis">
-            <button name="my_buttons" class="collapsible3">Using and Overriding Default Power Analysis Options </button>
-            <div class="content3">
-                <div id="power_analysis_viewer" class="viewersubtainer">
-                    <ul class="list-group">
-                        <li class="list-group-item background3">
-                            <p>A statistical power analysis methodology has been implemented in the MPS-Db to estimate the probability that a statistical test will find a significant difference between two different data groups, such as control and compound treatment groups (post hoc two-sample power analysis), or a significance difference from one treatment group (a priori one-sample power analysis) for an MPS model.</p>
-                            <ul class="list-unstyled">
-                                <li> To perform power analysis
-                                    <ul class="filled-circle">
-                                        <li>Click on the Show Details box next to a Target/Analyte (set) of interest</li>
-                                        <li>Scroll down and select TWO compounds for Power Analysis</li>
-                                        <li>Scroll down to see additional options (Effect Size Methods and Significance Level)
-                                        <li>Make desired changes to effective size and significance level selections (optional) </li>
-                                        <li>Click Run Analysis</li>
-                                    </ul>
-                                </li>
-                                <li><br>Notes
-                                    <ul class="filled-circle">
-                                        <li>Customized properties for power analysis are available in the MPS-Db via a "Sidebar" on the power analysis page
-                                            <ul class="open-circle">
-                                                <li>If hidden, click the <b>Toggle Sidebar</b> button to show the sidebar
-                                                <li>Make desired selections in the sidebar (for more information on overriding default grouping and filtering, <a href="#groupingfiltering">click here</a> )</li>
-                                            </ul>
-                                        </li>
-                                        <li>By default, the screen will automatically refresh, to refresh manually, check the <b>Manually Refresh</b> box, make the desired changes, then click on the <b>Refresh</b> button to apply changes </li>
-                                    </ul>
-                                </li>
-
-                            </ul>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-
-        <div id="help_reproducibility_analysis">
-            <button name="my_buttons" class="collapsible3">Using and Overriding Default Reproducibility Options </button>
-            <div class="content3">
-                <div id="plottingoptionsviewer" class="viewersubtainer">
-                    <ul class="list-group">
-                        <li class="list-group-item background3">
-                            <ul class="list-unstyled">
-                                <li>Customized properties for reproducibility analysis are available in the MPS-Db via a "Sidebar" on the inter-study reproducibility analysis page
-                                    <ul class="filled-circle">
-                                        <li>If hidden, click the <b>Toggle Sidebar</b> button to show the sidebar
-                                        <li>Make desired selections in the sidebar
-                                            <ul class="open-circle">
-                                            <li>Reproducibility Comparison within Selected Data Sets - By Center (Center to Center) or By Study (Study to Study)</li>
-                                            <li>Normalize by Median - helpful if trends are similar but values are on different scales </li>
-                                            <li>Maximum Interpolation Size - maximum number of data points that can be interpolated, between experimental measurements, to allow for comparison within selected data sets, center to center or study to study (shown as stars on the reproducibility plots)</li>
-                                            </ul>
-                                        </li>
-                                    </ul>
-                                </li>
-                                <li><br>Notes
-                                    <ul class="filled-circle">
-                                        <li>By default, the screen will automatically refresh, to refresh manually, check the <b>Manually Refresh</b> box, make the desired changes, then click on the <b>Refresh</b> button to apply changes </li>
-                                    </ul>
-                                </li>
-                            </ul>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-
-        <div id="help_studyset">
-            <button name="my_buttons" class="collapsible1">Study Sets</button>
-            <div class="content1">
-                <div id="intrastudyviewer" class="viewersubtainer">
-                    <ul class="list-group">
-                        <li class="list-group-item">
-                            <ul class="list-unstyled">
-                                <li>The <b>Study Sets</b> feature is accessed from the Studies menu
-                                    <ul class="filled-circle">
-                                        <li>To add a study set
-                                            <ul class="open-circle">
-                                                <li>Select <b>Studies</b></li>
-                                                <li>Select <b>Add Study Set</b> </li>
-                                                <li>Select the studies to include in the set</li>
-                                                <li>Fill out the form</li>
-                                                <li>Submit</li>
-                                            </ul>
-                                        </li>
-                                        <li>Study sets can only be edited by MPS-DB administrators (send an email to MPSHELP@pitt.edu with subject line "Edit Study Set").
-                                        </li>
-                                    </ul>
-                                </li>
-                            </ul>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-
-        <div id="help_pbpk_analysis">pbpk</div>
-        <p>need to add some stuff</p>
-
-        <div id="help_disease_portal">
-            <button name="my_buttons" class="collapsible1">Diseases (Clinical Trials and Study Data Combined via a Disease)</button>
-            <div class="content1">
-                <div id="diseaseviewer" class="viewersubtainer">
-                    <ul class="list-group">
-                        <li class="list-group-item">
-                            <ul class="list-unstyled">
-                                <li>Select <b>View Diseases</b> from the <b>Models</b> icon or tab
-                                    <ul class="filled-circle">
-                                        <li>Scroll through the list of diseases or use the <b>Search</b> bar to find a <b>Disease</b> of interest </li>
-                                        <li>Click on the <b>View</b> button next to <b>Disease</b> of interest to see options
-                                            <ul class="open-circle">
-                                                <li>Disease Overview - disease basics </li>
-                                                <li>Disease Biology - active links to relevant biology/genomic information </li>
-                                                <li>Clinical Data - summarized findings from clinicaltrials.gov </li>
-                                                <li>Disease Models &amp; Studies - list of disease related <b>Models</b> in the MPS-Db and list of studies related to the disease  </li>
-                                            </ul>
-                                        </li>
-                                    </ul>
-                                </li>
-                                <li><br>Notes
-                                    <ul class="filled-circle">
-                                        <li>The study list on the <b>Disease Models & Studies</b> page and the summary counts on the main <b>Diseases</b> page are permission specific  </li>
-                                        <li>For more information on the reference data source(s), <a href="#help_overview3">click here</a> </li>
-                                    </ul>
-                                </li>
-                            </ul>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-
-        <div id="help_compound_report">
-            <button name="my_buttons" class="collapsible1">Compound Report (Chemical Properties and Study Data Combined via a Compound)</button>
-            <div class="content1">
-                <div id="compoundviewer" class="viewersubtainer">
-                    <ul class="list-group">
-                        <li class="list-group-item">
-                            <ul class="list-unstyled">
-                                <li>Select <b>Compound Report</b> from the <b>Compounds</b> icon or tab
-                                    <ul class="filled-circle">
-                                        <li>As a precaution, click the <b>Clear Current Selections</b> button</li>
-                                        <li>Use the <b>Search</b> bar to limit the compound list </li>
-                                        <li>Check the boxes for the compounds to include</li>
-                                        <li>If desired, use the <b>Search</b> bar to get a different compound list</li>
-                                        <li>If desired, check additional compounds to include</li>
-                                        <li>Click on the button to <b>Generate Compound Report</b> </li>
-                                        <li>If a green plus sign is present, click it to see aggregated assay study data</li>
-                                    </ul>
-                                </li>
-                                <li><br>Notes
-                                    <ul class="filled-circle">
-                                        <li>Compound selections are cumulative</li>
-                                        <li>To start with a fresh <b>Search</b>, click the <b>Clear Current Selections</b> button</li>
-                                        <li>To save a complicated <b>Search</b>, click the <b>Save Selections</b> button (when returning at a later time, click <b>Load Selections</b>)</li>
-                                        <li>Only <i>normalized</i> data are shown in the aggregated assay study data plots</li>
-                                        <li>For more information on the reference data source(s), <a href="#help_overview3">click here</a> </li>
-                                    </ul>
-                                </li>
-                            </ul>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-
-        <div id="help_reference">
-            <button name="my_buttons" class="collapsible1">References</button>
-            <div class="content1">
-                <div id="intrastudyviewer" class="viewersubtainer">
-                    <ul class="list-group">
-                        <li class="list-group-item">
-                            <ul class="list-unstyled">
-                                <li>References can be added to the MPS-Db
-                                    <ul class="filled-circle">
-                                        <li>To add a reference to the MPS-Db
-                                            <ul class="open-circle">
-                                                <li>Select the <b>Studies</b> icon or tab</li>
-                                                <li>Select <b>View References</b> </li>
-                                                <li>Click the <b>Add Reference</b> button</li>
-                                                <li>Fill out the form</li>
-                                                <li>Submit</li>
-                                            </ul>
-                                        </li>
-                                        <li>References can be linked to studies and/or study components (e.g., MPS models, devices) when additing or editing components
-                                        </li>
-                                    </ul>
-                                </li>
-                            </ul>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-
     </div>
 
-    <div id="non_study_data_feature_section" class="container">
-
-        <h1 class="sub1-bars"> Database Features Based on Curated Reference Data </h1>
-
-        <div id="help_chemical_data">
-            {# *anchor* #}
-            <button name="my_buttons" class="collapsible1">Chemical Data</button>
-            <div class="content1">
-                <ul class="list-group">
-                    <li class="list-group-item">
-                        <h1 class="sub3-bars"> Chemical Data </h1>
-                        <ul class="list-unstyled">
-                            <li>Select <b>View Chemical Data</b> from the <b>Compounds</b> icon or tab, then:
-                                <ul class="filled-circle">
-                                    <li>Use the <b>Search</b> bar or scroll through the list to find the <b>Compound</b> of interest</li>
-                                    <li>Click on the <b>View</b> button next to the <b>Compound</b> of interest to see compound details</li>
-                                    <li>Click on the <b>Previous</b> or <b>Next</b> button to scroll through the compounds </li>
-                                </ul>
-                            </li>
-                            <li><br>Notes:
-                                <ul class="filled-circle">
-                                    <li>The "Medchem Alerts" field (in the compound details page) shows whether functional groups that are uncommon in drugs are present in the compound
-                                    <ul class="open-circle">
-                                        <li>If there are Medchem Alerts for a compound, click on the flag to see a list of the functional groups </li>
-                                    </ul>
-                                    </li>
-                                    <li>For more information on the reference data source(s), <a href="#help_overview3">click here</a> </li>
-                                </ul>
-                            </li>
-                        </ul>
-                    </li>
-                </ul>
-            </div>
-        </div>
-
-        <div id="help_bioactivities">
-            {# *anchor* #}
-            <button name="my_buttons" class="collapsible1">Bioactivities</button>
-            <div class="content1">
-                <ul class="list-group">
-                    <li class="list-group-item">
-                        <h1 class="sub3-bars"> Bioactivities </h1>
-                        <ul class="list-unstyled">
-                            <li>Select <b>View Bioactivities</b> from the <b>Compounds</b> icon or tab</li>, then select an option.
-                            <li><br>Option 1 - Quick Search
-                                <ul class="filled-circle">
-                                    <li>Enter at least one search string in one of the fields (Compound, Target, and/or Name)
-                                        <ul class="open-circle">
-                                            <li>Notice that options appear, these can be selected from the dropdown </li>
-                                        </ul>
-                                        </li>
-                                    <li>Optional - Click on the buttons to Exclude and/or change data as indicated on the button  </li>
-                                    <li>Click on the <span class="glyphicon glyphicon-search" aria-hidden="true"></span> to perform the search </li>
-                                </ul>
-                            </li>
-                        </ul>
-                    </li>
-                </ul>
-
-                <button name="my_buttons" class="collapsible3">See A Quick Search Example</button>
-                <div class="content3">
-                    <ul class="list-group">
-                        <li class="list-group-item background3">
-                            <h1 class="sub3-bars"> Bioactivities Quick Search Example </h1>
-                            <ul class="list-unstyled">
-                                <li>Follow these steps:
-                                     <ul class="filled-circle">
-                                        <li>Enter Compound = "ASPIRIN"</li>
-                                        <li>Enter Target = "Blood" </li>
-                                        <li>Enter Name = "IC50" </li>
-                                        <li>Click on the <span class="glyphicon glyphicon-search" aria-hidden="true"></span>  </li>
-                                    </ul>
-                                </li>
-                            </ul>
-                        </li>
-                    </ul>
-                </div>
-
-                <ul class="list-group">
-                    <li class="list-group-item">
-                        <ul class="list-unstyled">
-                            <li>Option 2 - Advanced Search
-                                <ul class="filled-circle">
-                                    <li>Optional - Click on the buttons to Exclude and/or change data as indicated on the button
-                                        <ul class="open-circle">
-                                            <li>Notice that options appear, these can be selected from the dropdown </li>
-                                        </ul>
-                                    </li>
-                                    <li>Optional - The <em>Minimum Feature Count Per Record</em> field specifies the number of bioactivities that need to be linked to a given option for it to appear
-                                        <ul class="open-circle">
-                                            <li>e.g. if the min feature count is 10, then the compound "ALDRIN" won't be an option because only 5 bioactivities link to "ALDRIN" </li>
-                                            <li>Click the "Apply" button to confirm the change to the min feature count </li>
-                                        </ul>
-                                    </li>
-                                    <li>Make sure that the boxes are check marked to indicate selections in all tables </li>
-                                    <li>Click the button to <b>Generate Table</b> </li>
-                                </ul>
-                            </li>
-                        </ul>
-                    </li>
-                </ul>
-
-                <button name="my_buttons" class="collapsible3">See An Advanced Search Example</button>
-                <div class="content3">
-                    <ul class="list-group">
-                        <li class="list-group-item background3">
-                            <h1 class="sub3-bars"> Bioactivities Advanced Search Example </h1>
-                            <ul class="list-unstyled">
-                                <li>Follow these steps:
-                                     <ul class="filled-circle">
-                                        <li>Select Target Types - check the box in the top left to include all </li>
-                                        <li>Select Organisms - check the box in the top left to include all </li>
-                                        <li>Filter Compounds - check all boxes, leave LogP and Molecular Weight blank </li>
-                                        <li>Bioactivities Filter - type in "IC50" </li>
-                                        <li>Select Bioactivities - check the box in the top left to include all </li>
-                                        <li>Targets Filter - type in "Blood" </li>
-                                        <li>Select Targets - check the box in the top left to include all </li>
-                                        <li>Compounds Filter - type in "ASPIRIN" </li>
-                                        <li>Select Compounds - check the box in the top left to include all </li>
-                                        <li>Click the button to <b>Generate Table</b> </li>
-                                    </ul>
-                                </li>
-                            </ul>
-                        </li>
-                    </ul>
-                </div>
-
-                <ul class="list-group">
-                    <li class="list-group-item">
-                        <ul class="list-unstyled">
-                            <li>Notes:
-                                <ul class="filled-circle">
-                                    <li>The <b>Data Validity</b> column of the results table/list indicates whether or not, and why, an entry was marked "questionable"</li>
-                                    <li>Not every ChEMBL entry has a corresponding PubChem entry, and vice versa </li>
-                                    <li>The following will clear <em>all</em> selections
-                                        <ul class="open-circle">
-                                            <li>Changing between ChEMBL and PubChem; Changing whether questionable results are excluded or not; Changing the min feature count; Changing the <em>Target Types</em> or <em>Organisms</em>  </li>
-                                        </ul>
-                                    </li>
-                                    <li>For more information on the reference data source(s), <a href="#help_overview3">click here</a> </li>
-                                </ul>
-                            </li>
-                        </ul>
-                    </li>
-                </ul>
-
-            </div>
-        </div>
-
-        <div id="help_drug_trials">
-            {# *anchor* #}
-            <button name="my_buttons" class="collapsible1">Drug Trials</button>
-            <div class="content1">
-                <ul class="list-group">
-                    <li class="list-group-item">
-                        <h1 class="sub3-bars"> Drug Trials </h1>
-                        <ul class="list-unstyled">
-                            <li>Select <b>Drug Trials</b> from the <b>Compounds</b> icon or tab, then:
-                                <ul class="filled-circle">
-                                    <li>Use the <b>Search</b> bar or scroll through the list to find the <b>Drug Trial</b> of interest</li>
-                                    <li>Click on the <b>View</b> button next to the <b>Drug Trial</b> of interest  </li>
-                                    <li>Click on the <b>Previous</b> or <b>Next</b> button to scroll through the compounds </li>
-                                </ul>
-                            </li>
-                            <li><br>Notes:
-                                <ul class="filled-circle">
-                                    <li>For more information on the reference data source(s), <a href="#help_overview3">click here</a> </li>
-                                </ul>
-                            </li>
-                        </ul>
-                    </li>
-                </ul>
-            </div>
-        </div>
-
-        <div id="help_adverse_events">
-            {# *anchor* #}
-            <button name="my_buttons" class="collapsible1">Adverse Events</button>
-            <div class="content1">
-                <ul class="list-group">
-                    <li class="list-group-item">
-                        <h1 class="sub3-bars"> Adverse Events </h1>
-                        <ul class="list-unstyled">
-                            <li>Select <b>View Adverse Events</b> from the <b>Compounds</b> icon or tab, then:
-                                <ul class="filled-circle">
-                                    <li>Scroll through the list or use the <b>Search</b> bar to find a <b>Compound</b> and <b>Event</b> of interest
-                                        <ul class="open-circle">
-                                            <li>Use a space in the <b>Search</b> bar to such multiple terms (e.g, "EPINEPHRINE nausea") </li>
-                                        </ul>
-                                    </li>
-                                    <li>Click on the <b>View</b> button to see details of the <b>Compound</b> and <b>Event</b> of interest </li>
-                                    <li>Click on the <b>Toggle Plot</b> button next to an <b>Event</b> of interest to generate time plots of reported events (scroll down to see the plot)
-                                        <ul class="open-circle">
-                                            <li>Use the data boxes under the plot to control time frame of plot (Optional)</li>
-                                        </ul>
-                                    </li>
-                                    <li>Click on the <b>Previous</b> or <b>Next</b> button to scroll through the compounds </li>
-                                </ul>
-                            </li>
-                            <li><br>Notes:
-                                <ul class="filled-circle">
-                                    <li>Only top adverse events for compounds are shown in the results of the search</li>
-                                    <li>The <b>Number of Reports</b> column indicates the number of reports that list both the compound and adverse event in the row</li>
-                                    <li>The <b>Number of Reports</b> does not contain any information regarding the dose of the drug</li>
-                                    <li>A compound can be listed in a report even if it is not suspected of causing the adverse event</li>
-                                    <li>For more information on the reference data source(s), <a href="#help_overview3">click here</a> </li>
-                                </ul>
-                            </li>
-                        </ul>
-                    </li>
-                </ul>
-            </div>
-        </div>
-
-        <div id="help_compare_adverse_events">
-            {# *anchor* #}
-            <button name="my_buttons" class="collapsible1">Compare Adverse Events</button>
-            <div class="content1">
-                <ul class="list-group">
-                    <li class="list-group-item">
-                        <h1 class="sub3-bars"> Compare Adverse Events </h1>
-                        <ul class="list-unstyled">
-                            <li>Select <b>Compare Adverse Events</b> from the <b>Compounds</b> icon or tab, then:
-                                <ul class="filled-circle">
-                                    <li>As a precaution, click the <b>Clear Current Selections</b> button</li>
-                                    <li>Use the <b>Search</b> bar to narrow the <b>Compound</b> and <b>Event</b> lists </li>
-                                    <li>Check the boxes of the <b>Compound</b> and <b>Event</b> to include
-                                        <ul class="open-circle">
-                                            <li>At least one <b>Compound</b> and one <b>Event</b> must be selected before a graph will appear </li>
-                                        </ul>
-                                    </li>
-                                    <li>If desired, use the <b>Search</b> bar to get different lists </li>
-                                    <li>If desired, check additional compounds to include</li>
-                                    <li>Scroll down to see the graph comparing events</li>
-                                    <li>If desired, click on the <b>Show Raw Counts</b> button to toggle from Number of Reports per 10,000 Mentions </li>
-                                </ul>
-                            </li>
-                            <li><br>Notes:
-                                <ul class="filled-circle">
-                                    <li>Selections from both lists are cumulative</li>
-                                    <li>To start with a fresh <b>Search</b>, click the <b>Clear Current Selections</b> button</li>
-                                    <li>To save a complicated <b>Search</b>, click the <b>Save Selections</b> button (when returning at a later time, click <b>Load Selections</b>)</li>
-                                    <li>Hover over the circle ? to learn more about data presented </li>
-                                    <li>For more information on the reference data source(s), <a href="#help_overview3">click here</a> </li>
-                                </ul>
-                            </li>
-                        </ul>
-                    </li>
-                </ul>
-            </div>
-        </div>
-
-        <div id="help_heatmap_bioactivities">
-            {# *anchor* #}
-            <button name="my_buttons" class="collapsible1">Heatmap of Bioactivities</button>
-            <div class="content1">
-                <ul class="list-group">
-                    <li class="list-group-item">
-                        <h1 class="sub3-bars"> Heatmap of Bioactivities </h1>
-                        <ul class="list-unstyled">
-                            <li>Select <b>Heatmap</b> from the <b>Analysis</b> icon or tab, then:
-                                <ul class="filled-circle">
-                                    <li>Optional - Click on the buttons to Exclude and/or change data as indicated on the button
-                                        <ul class="open-circle">
-                                            <li>Notice that options appear, these can be selected from the dropdown </li>
-                                        </ul>
-                                    </li>
-                                    <li>Optional - The <em>Minimum Feature Count Per Record</em> field specifies the number of bioactivities that need to be linked to a given option for it to appear
-                                        <ul class="open-circle">
-                                            <li>e.g. if the min feature count is 10, then the compound "ALDRIN" won't be an option because only 5 bioactivities link to "ALDRIN" </li>
-                                            <li>Click the "Apply" button to confirm the change to the min feature count </li>
-                                        </ul>
-                                    </li>
-                                    <li>Make sure that the boxes are checkmarked to indicate selections in all tables </li>
-                                    <li>Click the button to <b>Generate Heatmap</b> </li>
-                                    <li>If desired, click on a row or column label to sort the heatmap such that entries in the selection are ordered from highest to lowest</li>
-                                    <li>If desired, click the button to <b>Download the Heatmap</b> (downloads data used in heatmap to csv)</li>
-                                    <li>Scroll to the bottom of the heatmap to see the legend of colors used  </li>
-                                    <li>Clicking on a specific square in the heatmap will show that particular value in a pop-up window </li>
-                                </ul>
-                            </li>
-                        </ul>
-                    </li>
-                </ul>
-
-                <button name="my_buttons" class="collapsible3">See An Example</button>
-                <div class="content3">
-                    <ul class="list-group">
-                        <li class="list-group-item background3">
-                            <h1 class="sub3-bars"> Heatmap of Bioactivities - Example </h1>
-                            <ul class="list-unstyled">
-                                <li>Follow these steps:
-                                    <ul class="filled-circle">
-                                        <li>Select Target Types - check the box in the top left to include all </li>
-                                        <li>Select Organisms - check the box in the top left to include all </li>
-                                        <li>Filter Compounds - check all boxes, leave LogP and Molecular Weight blank </li>
-                                        <li>Bioactivities Filter - type in "IC50" </li>
-                                        <li>Select Bioactivities - check the box in the top left to include all </li>
-                                        <li>Select Targets - check the box in the top left to include all </li>
-                                        <li>Compounds Filter - type in "ASPIRIN" </li>
-                                        <li>Select Compounds - check the box in the top left to include all </li>
-                                        <li>Select Drug Trials - check the box in the top left to include all </li>
-                                        <li>Click the button to <b>Generate Heatmap</b> </li>
-                                    </ul>
-                                </li>
-                            </ul>
-                        </li>
-                    </ul>
-                </div>
-
-                <ul class="list-group">
-                    <li class="list-group-item">
-                        <ul class="list-unstyled">
-                            <li>Notes:
-                                <ul class="filled-circle">
-                                    <li>Not every ChEMBL entry has a corresponding PubChem entry, and vice versa </li>
-                                    <li>The following will clear <em>all</em> selections
-                                        <ul class="open-circle">
-                                            <li>Changing between ChEMBL and PubChem; Changing whether questionable results are excluded or not; Changing the min feature count; Changing the <em>Target Types</em> or <em>Organisms</em>  </li>
-                                        </ul>
-                                    </li>
-                                    <li>For more information on the reference data source(s), <a href="#help_overview3">click here</a> </li>
-                                </ul>
-                            </li>
-                        </ul>
-                    </li>
-                </ul>
-            </div>
-        </div>
-
-        <div id="help_cluster_chemicals">
-            {# *anchor* #}
-            <button name="my_buttons" class="collapsible1">Compound Clustering</button>
-            <div class="content1">
-                <ul class="list-group">
-                    <li class="list-group-item">
-                        <h1 class="sub3-bars"> Compound Clustering </h1>
-                        <ul class="list-unstyled">
-                            <li>Select <b>Cluster</b> from the <b>Analysis</b> icon or tab, then:
-                                <ul class="filled-circle">
-                                    <li>Optional - Click on the buttons to Exclude and/or change data as indicated on the button
-                                        <ul class="open-circle">
-                                            <li>Notice that options appear, these can be selected from the dropdown </li>
-                                        </ul>
-                                    </li>
-                                    <li>Optional - The <em>Minimum Feature Count Per Record</em> field specifies the number of bioactivities that need to be linked to a given option for it to appear
-                                        <ul class="open-circle">
-                                            <li>e.g. if the min feature count is 10, then the compound "ALDRIN" won't be an option because only 5 bioactivities link to "ALDRIN" </li>
-                                            <li>Click the "Apply" button to confirm the change to the min feature count </li>
-                                        </ul>
-                                    </li>
-                                    <li>Make sure that the boxes are check marked to indicate selections in all tables </li>
-                                    <li>Click the button to <b>Generate Dendrogram</b> </li>
-                                    <li>The table on the left shows the bioactivities and drug trial data used in clustering</li>
-                                    <li>Click on a node to see information about the compound (click the red X button to close)</li>
-                                </ul>
-                            </li>
-                       </ul>
-                    </li>
-                </ul>
-
-                <button name="my_buttons" class="collapsible3">See An Example</button>
-                <div class="content3">
-                    <ul class="list-group">
-                        <li class="list-group-item background3">
-                            <h1 class="sub3-bars"> Compound Clustering - Example </h1>
-                            <ul class="list-unstyled">
-                                <li>Follow these steps:
-                                    <ul class="filled-circle">
-                                        <li>Select Target Types - check the box "Single Protein" </li>
-                                        <li>Select Organisms - check the box "Homo sapiens" </li>
-                                        <li>Filter Compounds - check all boxes, leave LogP and Molecular Weight blank </li>
-                                        <li>Select Bioactivities - check the box in the top left to include all </li>
-                                        <li>Select Targets - check the box "!No Target" </li>
-                                        <li>Select Compounds - check the box in the top left to include all </li>
-                                        <li>Select Drug Trials - check the box in the top left to include all </li>
-                                        <li>Click the button to <b>Generate Dendrogram</b> </li>
-                                    </ul>
-                                </li>
-                            </ul>
-                        </li>
-                    </ul>
-                </div>
-
-                <ul class="list-group">
-                    <li class="list-group-item">
-                        <ul class="list-unstyled">
-                            <li>Notes:
-                                <ul class="filled-circle">
-                                    <li>Not every ChEMBL entry has a corresponding PubChem entry, and vice versa </li>
-                                    <li>The following will clear <em>all</em> selections
-                                        <ul class="open-circle">
-                                            <li>Changing between ChEMBL and PubChem; Changing whether questionable results are excluded or not; Changing the min feature count; Changing the <em>Target Types</em> or <em>Organisms</em>  </li>
-                                        </ul>
-                                    </li>
-                                    <li>For more information on the reference data source(s), <a href="#help_overview3">click here</a> </li>
-                                </ul>
-                            </li>
-                        </ul>
-                    </li>
-                </ul>
-            </div>
-        </div>
-
-    </div>
 
     <div id="study_editor_section" class="container">
 
@@ -2953,10 +2929,6 @@ Results: add a summary of the study results. </td>
 
     </div>
 
-{#    {% if user.is_superuser %}#}
-{#        {% include 'help_superuser_content.html' %}#}
-{#    {% endif %}#}
-
     <div id="glossary" class="container padded-bottom">
         <h1 class="sub1-bars"> Glossary </h1>
         <table hidden id="glossary_table" class="display table table-striped" cellspacing="0" width="100%">
@@ -2966,6 +2938,7 @@ Results: add a summary of the study results. </td>
                     <th>Definition</th>
                     <th>Ref</th>
                     <th>Help</th>
+                    <th>Group</th>
                 </tr>
             </thead>
             <tbody>
@@ -2975,6 +2948,7 @@ Results: add a summary of the study results. </td>
                     <td>{{ term.definition }}</td>
                     <td>{{ term.show_url }}</td>
                     <td>{{ term.show_anchor }}</td>
+                    <td>{{ term.help_category_display }}</td>
                 </tr>
                 {% endfor %}
             </tbody>

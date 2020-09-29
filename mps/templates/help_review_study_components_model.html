@@ -10,8 +10,8 @@
     {% if term.term == "MPS Model" %}
         {# *anchor* #}
         <div id="assay_model_anchor">
-            <button name="my_buttons" class="collapsible1">{{ term.term }}</button>
-            <div class="content1">
+            <button name="my_buttons" class="collapsible3">{{ term.term }}</button>
+            <div class="content3">
                 <ul class="list-group">
                     <li class="list-group-item">
                         <h1 class="sub3-bars"> {{ term.term }} </h1>
@@ -46,28 +46,60 @@
                                 </ul>
                             </li>
                         </ul>
+
+                        <h1 class="sub3-bars"> MPS Model Version </h1>
+                        <h1>edit this for a model version.....</h1>
+                        <p><b><i>There are several options for editing Matrix Items, including editing by group, this is just one option. </i></b></p>
+                        <ul class="list-unstyled">
+                            <li>To edit a <b>Matrix Item</b>, click on the <b>View/Edit</b> button next to the <b>Matrix Item</b> of interest:
+                                <ul class="filled-circle">
+                                    <li>In the <i>Matrix Item Details</i> section
+                                        <ul class="open-circle">
+                                            <li>Add/Edit the information as appropriate (add additional details if desired) </li>
+                                            <li>If possible, add the MPS model protocol (if not added in the Matrix) </li>
+                                        </ul>
+                                    </li>
+                                    <li>In the <i>Compounds</i> section
+                                        <ul class="open-circle">
+                                            <li>Edit the information as appropriate (add additional details if desired) </li>
+                                            <li>The addition time should be since the start (time 0) of the experiment </li>
+                                            <li>The duration is the length of time of exposure (if a bolus dose, use 1 minute; if the whole experiment, use the length of the experiment) </li>
+                                            <li>If you do not know supplier or lot, enter "unspecified" (suggestions are based on your previous entries) </li>
+                                            <li>If you do not know receipt date, leave it blank </li>
+                                        </ul>
+                                    </li>
+                                    <li>In the <i>Cell Samples</i> section
+                                        <ul class="open-circle">
+                                            <li>Edit the information as appropriate (add additional details if desired)</li>
+                                            <li>When adding, click the magnifying glass to see a list of available cell samples</li>
+                                        </ul>
+                                    </li>
+                                    <li>In the <i>Settings</i> section
+                                        <ul class="open-circle">
+                                            <li>Edit the information as appropriate (add additional details if desired)</li>
+                                        </ul>
+                                    </li>
+                                    <li>After assay data have been added, the Exclude field of the tabular data can be edited (optional)
+                                        <ul class="open-circle">
+                                            <li>Review data in graphs and/or table</li>
+                                            <li>In the table, if desired, change the exclusion status of a data point (add an X to the Exclude field to omit by default, remove the X to include) </li>
+                                        </ul>
+                                    </li>
+                                    <li>Click the <b>Submit</b> button to save changes</li>
+                                </ul>
+                            </li>
+                            <li><br>Notes
+                                <ul class="filled-circle">
+                                    <li><b>Matrix Items</b>, along with the Name/ID, Test Type, Setup Date, and Organ <b>Model</b> MUST be added through the <b>Matrix</b>, but can be changed on the <b>Matrix Item Setup and Data</b> page  </li>
+                                    <li>When using scientific notation to enter values, use this format: 1e+3, 1e+10, 3e+15</li>
+                                    <li>The Exclude field, shown on the <b>Matrix Item Setup and Data</b> page is the only attribute of a data point that can be changed in the MPS-GUI</li>
+                                    <li>The individual <b>Matrix Setup and Data</b> page is the only place <b>Matrix Item</b> data are available in tabular format</li>
+                                    <li>For information on continuing to add MPS models and assay data to the <b>Study</b> (Step 4), <a href="#assaydata_editor">click here</a> </li>
+                                </ul>
+                            </li>
+                        </ul>
                     </li>
                 </ul>
-
-                <button name="my_buttons" class="collapsible3">More About MPS Model Versions</button>
-                <div class="content3">
-                    <ul class="list-group">
-                        <li class="list-group-item background3">
-                            <h1 class="sub3-bars"> MPS Model Versions </h1>
-                            <ul class="list-unstyled">
-                                <li>MPS model versions are used
-                                     <ul class="filled-circle">
-                                        <li>Enter Compound = "ASPIRIN"</li>
-                                        <li>Enter Target = "Blood" </li>
-                                        <li>Enter Name = "IC50" </li>
-                                        <li>Click on the <span class="glyphicon glyphicon-search" aria-hidden="true"></span>  </li>
-                                    </ul>
-                                </li>
-                            </ul>
-                        </li>
-                    </ul>
-                </div>
-
             </div>
         </div>
 

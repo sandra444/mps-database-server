@@ -1,6 +1,7 @@
 $(document).ready(function () {
     // Resolve anchors going to the incorrect location
-    var offset = 60;
+    // var offset = 60;
+    var offset = 100;
 
     $(".collapsible1, .collapsible2, .collapsible3, .collapsible4").click(function() {
         var content = this.nextElementSibling;

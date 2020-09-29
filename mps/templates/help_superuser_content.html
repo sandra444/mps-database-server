@@ -7,285 +7,6 @@
 
     <div id="component_admin_section" class="container">
 
-        <h1 class="sub1-bars"> MPS-Db Admins (only visible to MPS-DB Admins - Needs Updated)</h1>
-
-        <h1 class="sub2-bars"> Adding/Editing Items to Pick Lists for MPS-Db Admins </h1>
-
-        <div id="methods_admin">
-            <button name="my_buttons" class="collapsible1">Assay Methods/Kits</button>
-            <div class="content1">
-                <div id="methodssadmin" class="adminsubtainer">
-                    <ul class="list-group">
-                        <li class="list-group-item">
-                            <ul class="list-unstyled">
-                                <li>To Add/Edit, go to the MPS-Db Admin
-                                    <ul class="filled-circle">
-                                        <li>Go to the MPS ASSAYS Section</li>
-                                        <li>Click on Assay Methods </li>
-                                        <li>Search to find the method to edit or search to confirm the method needed is not already available in the MPS-Db </li>
-                                        <li>Click on the method to edit or click the <b>ADD ASSAY METHOD</b> button to add a new method </li>
-                                        <li>Provide all the requested information, including a pdf of the method </li>
-                                        <li>Click the <b>Save</b> button to save the changes </li>
-                                    </ul>
-                                </li>
-                                <li><br>Notes
-                                    <ul class="filled-circle">
-                                        <li>Be mindful that changes to controlled vocabulary may impact the ability of other users to upload data!</li>
-                                    </ul>
-                                </li>
-                            </ul>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-
-        <div id="targets_admin">
-            <button name="my_buttons" class="collapsible1">Assay Targets/Analytes</button>
-            <div class="content1">
-                <div id="targetsadmin" class="adminsubtainer">
-                    <ul class="list-group">
-                        <li class="list-group-item">
-                            <ul class="list-unstyled">
-                                <li>To Add/Edit, go to the MPS-Db Admin
-                                    <ul class="filled-circle">
-                                        <li>Go to the MPS ASSAYS Section</li>
-                                        <li>Click on Assay targets </li>
-                                        <li>Search to find the target to edit or search to confirm the target needed is not already available in the MPS-Db </li>
-                                        <li>Click on the target to edit or click the <b>ADD ASSAY TARGET</b> button to add a new target </li>
-                                        <li>Provide all the requested information </li>
-                                        <li>Click the <b>Save</b> button to save the changes </li>
-                                    </ul>
-                                </li>
-                                <li><br>Notes
-                                    <ul class="filled-circle">
-                                        <li>Be mindful that changes to controlled vocabulary may impact the ability of other users to upload data!</li>
-                                        <li>If the Target/Analyte is a Compound, use a Name that matches the Compound to facilitate joining on Compound and Target/Analyte!</li>
-                                    </ul>
-                                </li>
-                            </ul>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-
-        <div id="devices_admin">
-            <button name="my_buttons" class="collapsible1">Devices Used in MPS Models</button>
-            <div class="content1">
-                <div id="devicesadmin" class="adminsubtainer">
-                    <ul class="list-group">
-                        <li class="list-group-item">
-                            <ul class="list-unstyled">
-                                <li>To Add/Edit, select <b>View Devices/Microdevices</b> from the <b>Models</b> icon or tab
-                                    <ul class="filled-circle">
-                                        <li>To Add - click the Add Device button</li>
-                                        <li>To Edit - use the <b>Search</b> bar or scroll through the list to find the <b>Device</b> of interest</li>
-                                        <li>To Edit - click on the <b>Edit</b> button to see additional details </li>
-                                        <li>Add/Edit - fill in all the sections as completely as possible </li>
-                                        <li>Click the <b>Submit</b> button to save changes</li>
-                                    </ul>
-                                </li>
-                                <li><br>Notes
-                                    <ul class="filled-circle">
-                                        <li>In the <b>Layout</b> section, the <b>Number of Rows</b> and <b>Number of Columns</b> will be used as the dimensions of the <b>Matrix</b> when using a <b>Model</b> based on this <b>Device</b> and entering as wells in a plate </li>
-                                        <li>For information on assigning a <b>Device</b> to a <b>Matrix Item</b>, <a href="#matrixitems_editor">click here</a> </li>
-                                    </ul>
-                                </li>
-                            </ul>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-
-        <div id="diseaselist_admin">
-            <button name="my_buttons" class="collapsible1">Diseases in the MPS-Db </button>
-            <div class="content1">
-                <div id="diseaselistadmin" class="adminsubtainer">
-                    <ul class="list-group">
-                        <li class="list-group-item">
-                            <ul class="list-unstyled">
-                                <li>To Add/Edit diseases, go to the MPS-Db Admin
-                                    <ul class="filled-circle">
-                                        <li>Go to the DISEASES Section </li>
-                                        <li>Click on Diseases </li>
-                                        <li>Search for an existing name that is applicable (click <b>ADD DISEASE</b> button if need new) </li>
-                                        <li>Click Save button to save changes</li>
-                                    </ul>
-                                </li>
-                                <li><br>Notes
-                                    <ul class="filled-circle">
-                                        <li>As of 20180925, there is a lot of manual work that needs done for each new disease</li>
-                                    </ul>
-                                </li>
-                            </ul>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-
-        <div id="cellsamples_admin">
-            <button name="my_buttons" class="collapsible1">Cell Samples Used in MPS Models</button>
-            <div class="content1">
-                <div id="cellsamplesadmin" class="adminsubtainer">
-                    <ul class="list-group">
-                        <li class="list-group-item">
-                            <ul class="list-unstyled">
-                                <li>To edit, select <b>View Cell Samples</b> from the <b>Cell Samples</b> icon or tab:
-                                    <ul class="filled-circle">
-                                        <li>Use the <b>Search</b> bar or scroll through the list to find the <b>Cell Sample</b> of interest</li>
-                                        <li>Click on the <b>Edit</b> button to see additional details </li>
-                                        <li>Make the required changes</li>
-                                        <li>Click the <b>Submit</b> button to save changes</li>
-                                    </ul>
-                                </li>
-                                <li><br>Notes
-                                    <ul class="filled-circle">
-                                        <li><b>Cell Types</b> describe a variety of cells, such as <em>astrocyte</em> or <em>hepatocyte</em> )</li>
-                                        <li><b>Cell Origins</b> elaborate on the origin of the cells, for instance whether they are fresh, cryopreserved, or from a cell line </li>
-                                        <li>If the <b>Cell Origin</b> of the sample is a cell line, select the <b>Cell Type</b> first </li>
-                                        <li>Differentiating cell lots on date received and other criteria can be helpful in identifying assay data generated using specific lots of cells </li>
-                                        <li>Select a <b>Cell Type</b> ONLY if this Origin is SPECIFIC to a certain <b>Cell Type</b> (e.g., a cell line) </li>
-                                        <li>Be sure to specify the <b>Organ</b>, as many <b>Cell Types</b> differ depending on where they are located (e.g., hepatic stellate cells differ from pancreatic stellate cells </li>
-                                    </ul>
-                                </li>
-                            </ul>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-
-        <div id="chemicaldata_admin">
-            <button name="my_buttons" class="collapsible1">Chemical Data</button>
-            <div class="content1">
-                <div id="chemicaldataeditor" class="adminsubtainer">
-                    <ul class="list-group">
-                        <li class="list-group-item">
-                            <ul class="list-unstyled">
-                                <li>To Add, go to the MPS-Db Admin
-                                    <ul class="filled-circle">
-                                        <li>Go to the COMPOUND Section</li>
-                                        <li>Click on Compounds/Drugs </li>
-                                        <li>Search to confirm the Compound needed is not already available in the MPS-Db </li>
-                                        <li>Click the <b>ADD COMPOUND</b> button to add a new compound </li>
-                                        <li>Enter the ChEMBL ID of the compound to add (e.g., CHEMBL1319459) </li>
-                                        <li>Click the <b>Retrieve</b> button </li>
-                                        <li>Add additional information as available (optional) </li>
-                                        <li>Click the <b>Save</b> button to save the changes </li>
-                                    </ul>
-                                </li>
-                                <li><br>Notes
-                                    <ul class="filled-circle">
-                                        <li>Sometimes it is easier to find the ChEMBL ID on PubChem (<a href='https://www.ncbi.nlm.nih.gov/pccompound'>PubChem Compounds</a> )  </li>
-                                        <li>Or search ChEMBL (<a href='https://www.ebi.ac.uk/chembl/index.php/'>ChEMBL</a> )  </li>
-                                    </ul>
-                                </li>
-                            </ul>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-
-        <div id="mpslocations_admin">
-            <button name="my_buttons" class="collapsible1">Locations of MPS Model Devices </button>
-            <div class="content1">
-                <div id="locationadmin" class="adminsubtainer">
-                    <ul class="list-group">
-                        <li class="list-group-item">
-                            <ul class="list-unstyled">
-                                <li>To Add/Edit, go to the MPS-Db Admin
-                                    <ul class="filled-circle">
-                                        <li>Go to the MPS ASSAYS Section </li>
-                                        <li>Click on Assay Sample Locations </li>
-                                        <li>Search for an existing name that is applicable (click Add Assay Sample Location if need new) </li>
-                                        <li>Click <b>Save</b> button to save changes</li>
-                                    </ul>
-                                </li>
-                            </ul>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-
-        <div id="mpsmodels_admin">
-            <button name="my_buttons" class="collapsible1">Models in the MPS-Db</button>
-            <div class="content1">
-                <div id="mpsmodelsadmin" class="adminsubtainer">
-                    <ul class="list-group">
-                        <li class="list-group-item">
-                            <ul class="list-unstyled">
-                                <li>To Add/Edit, select <b>View MPS Models</b> from the <b>Models</b> icon or tab
-                                    <ul class="filled-circle">
-                                        <li>To Add - click the Add Model button</li>
-                                        <li>To Edit - use the <b>Search</b> bar or scroll through the list to find the <b>Model</b> of interest</li>
-                                        <li>To Edit - click on the <b>Edit</b> button to see additional details </li>
-                                        <li>Add/Edit - fill in all the sections as completely as possible </li>
-                                        <li>Click the <b>Submit</b> button to save changes</li>
-                                    </ul>
-                                </li>
-                                <li><br>Notes
-                                    <ul class="filled-circle">
-                                        <li>As of 20180925, models are available for review by all users</li>
-                                        <li>As of 20180925, the ability to add more attributes to a model (locations, settings, media, etc) are under consideration</li>
-                                        <li>As of 20190924, model versions are now able to be added and populated in the edit Model interface. Model versions included cells and settings (not compounds). Model versions are used by the Study Setup by Treatment Group feature. Currently, no help is provided on completing a model version. At this time, it is uncertian who will be adding models and model versions, so instructions for adding model versions has not yet been added to the help. We can add information as needed and as time permits.</li>
-                                    </ul>
-                                </li>
-                            </ul>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-
-        <div id="settings_admin">
-            <button name="my_buttons" class="collapsible1">Settings (Instrument Settings, Non-Compound Treatments, etcetera) </button>
-            <div class="content1">
-                <div id="settingsadmin" class="adminsubtainer">
-                    <ul class="list-group">
-                        <li class="list-group-item">
-                            <ul class="list-unstyled">
-                                <li>To Add/Edit, go to the MPS-Db Admin
-                                    <ul class="filled-circle">
-                                        <li>Go to the MPS ASSAYS Section </li>
-                                        <li>Click on Assay Settings </li>
-                                        <li>Search for an existing name that is applicable (click ADD ASSAY SAMPLE LOCATION if need new) </li>
-                                        <li>Click <b>Save</b> button to save changes</li>
-                                    </ul>
-                                </li>
-                            </ul>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-
-        <div id="physicalunits_admin">
-            <button name="my_buttons" class="collapsible1">Units Available for Compounds, Cells, Settings, and Assay Targets</button>
-            <div class="content1">
-                <div id="physicalunitsadmin" class="adminsubtainer">
-                    <ul class="list-group">
-                        <li class="list-group-item">
-                            <ul class="list-unstyled">
-                                <li>To Add/Edit, go to the MPS-Db Admin
-                                    <ul class="filled-circle">
-                                        <li>Go to the MPS ASSAYS Section </li>
-                                        <li>Click on Physical Units </li>
-                                        <li>Search for an existing name that is applicable (click ADD PHYSICAL UNITS if need new) </li>
-                                        <li>Click <b>Save</b> button to save changes</li>
-                                    </ul>
-                                </li>
-                            </ul>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-
         <h1 class="sub2-bars"> Controlling User Access </h1>
 
         <div id="access_overview_admin">
@@ -483,7 +204,68 @@
             </div>
         </div>
 
+        <div id="special_permission_admin">
+            <button name="my_buttons" class="collapsible1">Mike - this all needs edited - Adding Special Permissions </button>
+            <div class="content1">
+                <div id="accessoverviewadmin" class="adminsubtainer">
+                    <ul class="list-group">
+                        <li class="list-group-item">
+                            <ul class="list-unstyled">
+                                <li> There are now a lot of options for controlling and sharing data in the MPS-Db.</li>
+                                <li> All of the options work on a "study" (not on individual data points).</li>
+                                <li> Access is controlled by assigning permissions to users and by assigning groups to studies. </li>
+                                <li> Looking first at setting permissions to a study, in the admin, in the MPS Assays section, select Studies. Notice in the list the fields: Signed Off By, Stakeholder Display, Access Group Display, Collaboration Group Display, Restricted, Keep Private Indefinitely (Locked). These summarize if and how each study is being shared. </li>
+                                <li> <br>Examining each field:<br></li>
+                                <ul class="filled-circle">
+                                    <li> Signed Off By - If this has a user name in it, it means that the study is following the sign off, acknowledgement, embargo process. A sign off does not open the study to the public, even if there is no stakeholder. If there is no stakeholder, the study is open to Access Groups. </li>
+                                    <li> Stakeholder Display - If there is something here, it means there is a stakeholder for the study.  </li>
+                                    <li> Access Group Display - If there is something here, users in these groups can see the study after sign off (if there are not stakeholders) or after stakeholder acknowledgement. </li>
+                                    <li> Collaboration Group Display - This is a special feature that allows sharing a study, at any time, to users in these groups. </li>
+                                    <li> Restricted - Until this is unchecked, a study is closed to the public. It can be unchecked by an admin at <b>any time</b>. Studies in the embargo period (after sign off and acknowledgement) will be unchecked one year and two weeks after sign off (automated process), UNLESS the study is 'locked'. </li>
+                                    <li> Keep Private Indefinitely (Locked) - Locking a study stops the study from being released to the next level (blocks automatic migration to public access - public if acknowledged, access if stakeholders, stakeholders if signed off). </li>
+                                </ul>
+
+
+                                <li><br>Notes
+                                    <ul class="filled-circle">
+                                        <li> What happens if the 'Use in Calculations' box is check? The study becomes available in the Compound Report. </li>
+                                        <li> Collaborator groups are completely controlled by the admins (no front-end GUI).</li>
+                                        <li> To open a study to the public immediately (i.e. bypass sign off, acknowledgment, embargo) must by done by the admin (uncheck the restricted box), but data providers can check the 'Use in Calculations' box.</li>
+                                        <li> While the use is sometimes indicated in the group name, there is no real difference between groups (data, stakeholder, access, collaborator). Use caution. Even though a data group and a stakeholder group is associated with the same institution, the users in the groups maybe different. </li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
     </div>
 
 </body>
 </html>
+
+{# this would need added back to the template also....#}
+{#    {% if user.is_superuser %}#}
+{#        {% include 'help_superuser_content.html' %}#}
+{#    {% endif %}#}
+
+{#  IF ADD THIS BACK TO THE HELP, HERE IS THE NAVI BAR STUFF - WILL NEED TO PUT IT BACK #}
+{#                <li class="dropdown">#}
+{#                    <a class="dropdown-toggle" data-toggle="dropdown" href="#">MPS Admins<span class="caret"></span></a>#}
+{#                    <ul class="dropdown-menu">#}
+{#                        <li class="dropdown-header"><b>Controlling Access</b></li>#}
+{#                        <li><a href="#access_overview_admin">Sharing Study Data Overview</a></li>#}
+{#                        <li><a href="#add_groups_admin">Add Groups to Database</a></li>#}
+{#                        <li><a href="#study_groups_admin">Add Groups to Study</a></li>#}
+{#                        <li><a href="#user_groups_admin">Add Users to Group</a></li>#}
+{#                        <li><a href="#special_permission_admin">Add Special Permission </a></li>#}
+{#                        <li class="divider"></li>#}
+{#                        <li class="dropdown-header"><b>Controlling Access</b></li>#}
+{#                        <li><a href="#access_overview_admin">Sharing Study Data Overview</a></li>#}
+{#                        <li><a href="#add_groups_admin">Add Groups to Database</a></li>#}
+{#                        <li><a href="#study_groups_admin">Add Groups to Study</a></li>#}
+{#                        <li><a href="#user_groups_admin">Add Users to Group</a></li>#}
+{#                    </ul>#}
+{#                </li>#}
