@@ -6940,7 +6940,6 @@ def fetch_omics_data_for_visualization(request):
     # Second, how do you perform underscore access of FK fields whose parent's name already has underscores? (ex. group_1_name)
     group_combos = []
     for datafile in datafiles:
-        omics_token = "{}+{}".format(datafile.group_1.id, datafile.group_2.id)
         group_combos.append("{}+{}".format(datafile.group_1.id, datafile.group_2.id))
 
     for datafile in datafiles:
