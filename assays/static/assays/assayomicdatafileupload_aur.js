@@ -175,15 +175,14 @@ $(document).ready(function () {
             formData.append(index, contents);
         });
 
-        is_data = 'Y';
-
+        let is_data = true;
         if (document.getElementById("id_omic_data_file").files.length > 0) {
-            is_data = 'Y';
+            is_data = true;
         } else {
-            is_data = 'N';
+            is_data = false;
         }
 
-        if (is_data == 'Y') {
+        if (is_data) {
             window.spinner.spin(document.getElementById('spinner'));
             $.ajax({
                 url: '/assays_ajax/',
