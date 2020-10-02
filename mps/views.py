@@ -194,6 +194,8 @@ def mps_help(request):
     component_model = glossary_master.filter(help_category='component-model').filter(help_display=True).order_by('help_order')
     component_compound = glossary_master.filter(help_category='component-compound').filter(help_display=True).order_by('help_order')
     component_cell = glossary_master.filter(help_category='component-cell').filter(help_display=True).order_by('help_order')
+    permission = glossary_master.filter(help_category='permission').filter(help_display=True).order_by('help_order')
+    organization_study = glossary_master.filter(help_category='organization-study').filter(help_display=True).order_by('help_order')
 
     data = {
         # 'version': len(os.listdir(MEDIA_ROOT + '/excel_templates/')),
@@ -204,6 +206,8 @@ def mps_help(request):
         'component_model': component_model,
         'component_compound': component_compound,
         'component_cell': component_cell,
+        'permission': permission,
+        'organization_study': organization_study,
         'all_glossary': all_glossary,
         # 'study_component_def': all_glossary.get('studycomponent_def', ''),
         # 'study_component_ref': all_glossary.get('studycomponent_ref', ''),
