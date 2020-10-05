@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
+
+    <div id="help_custom_filtering_sidebar">
+        <button name="my_buttons" class="collapsible1"> Custom Filtering for Data Visualization (sidebar) </button>
+        <div class="content1">
+            <ul class="list-group">
+                <li class="list-group-item">
+                    <ul class="list-unstyled">
+                        <li>Customized grouping and filtering is available in the MPS-Db via a sidebar where data are available for review
+                            <ul class="filled-circle">
+                                <li>If hidden, click the <b>Toggle Sidebar</b> button to show the sidebar</li>
+                                <li>Click on the parameter menus (Study Parameters, Cell Parameters, Compound Parameters, Setting Parameters) to see options</li>
+                                <li>To filter - click on the filter symbol
+                                    <ul class="open-circle">
+                                    <li>To select data, check the box next to the data </li>
+                                    <li>To omit data, uncheck the box next to the data </li>
+                                    </ul>
+                                </li>
+                                <li>To group - check/uncheck the box in the Group column
+                                    <ul class="open-circle">
+                                    <li>Check the box to include parameter in grouping </li>
+                                    <li>Uncheck the box to remove parameter from grouping </li>
+                                    </ul>
+                                </li>
+                                <li>REPEAT for all attributes to override </li>
+                            </ul>
+                        </li>
+                        <li><br>Notes
+                            <ul class="filled-circle">
+                                <li>Changing groups and filters changes the way <b>Matrix Items</b> are grouped into rows in the Group table/list provided below the plots </li>
+                                <li>In general, increasing the number of parameters selected for grouping will increase the number of data groups in the summary data aggregation tables
+                                <li>By default, the screen will automatically refresh, to refresh manually, check the <b>Manually Refresh</b> box, make the desired changes, then click on the <b>Refresh</b> button to apply changes </li>
+                            </ul>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <div id="help_custom_graphing_sidebar">
+        <button name="my_buttons" class="collapsible1"> Custom Graphing for Data Visualization (sidebar) </button>
+        <div class="content1">
+            <ul class="list-group">
+                <li class="list-group-item">
+                    <ul class="list-unstyled">
+                        <li>General graph customization is available via a sidebar where graphs are displayed
+                            <ul class="filled-circle">
+                                <li>If hidden, click the <b>Toggle Sidebar</b> button to show the sidebar </li>
+                                <li>Click on the property menus (Plot Graph By, Data Aggregation, Tooltip Display, Data Display, Time Unit) to see options </li>
+                                <li>To change the <b>General Graph Properties</b>, click on the menu of the property of interest
+                                    <ul class="open-circle">
+                                        <li>Plot Graph By - select By Chips (Matrix Item), By Group, or By Compound to indicate additional aggregation grouping </li>
+                                        <li>Data Aggregation - select Arithmetic Mean, Geometric Mean, or Median (additional options available based on selection)</li>
+                                        <li>Tooltip Display - select Each Data Point or Entire Time Point (when hovering over a point on a graph) </li>
+                                        <li>Data Display - option to select Include Excluded Data and/or treat Negative Values as 0 </li>
+                                        <li>Time Unit - select Day, Hour, or Minute for time unit of X-axis</li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </li>
+                        <li><br>Notes
+                            <ul class="filled-circle">
+                                <li>By default, the screen will automatically refresh, to refresh manually, check the <b>Manually Refresh</b> box, make the desired changes, then click on the <b>Refresh</b> button to apply changes </li>
+                            </ul>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <div id="help_custom_graphing_individual">
+        <button name="my_buttons" class="collapsible1"> Customizing Individual Graphs </button>
+        <div class="content1">
+            <ul class="list-group">
+                <li class="list-group-item">
+                    <ul class="list-unstyled">
+                        <li>Individualized graphing options are available via a graph popup where graphs are displayed
+                            <ul class="filled-circle">
+                                <li>Right-click on an individual graph (on touch screen - press and hold one finger while tapping with another)
+                                <li>Select the desired individualized graph options
+                                    <ul class="open-circle">
+                                        <li>Show Plot - if uncheck and apply, graph will not be displayed on main page</li>
+                                        <li>Graph as Percent Control - when box is checked, assays and time points without associated controls are removed and the y-axis units are changed to percent control </li>
+                                        <li>Graphs as Dose-Response - changes X-axis from time to dose </li>
+                                        <li>Transform X-axis to Log Scale - transforms X-axis </li>
+                                        <li>Transform Y-axis to Log Scale - transforms Y-axis</li>
+                                    </ul>
+                                </li>
+                                <li>Click to <b>View Preview</b></li>
+                                <li>Make changes to the general graph customization features as desired (optional)</li>
+                                <li>Click <b>Apply to Plot</b> to apply changes, <b>Revert to Default</b> to remove graph specific customization, or <b>Cancel</b> to go back to the last applied version
+                            </ul>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+</body>
+</html>
