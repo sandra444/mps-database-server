@@ -21,7 +21,12 @@ from mps.templatetags.custom_filters import (
 
 from mps.base.models import save_forms_with_tracking
 
-from django.views.generic import UpdateView, ListView, DetailView
+from django.views.generic import (
+    UpdateView,
+    ListView,
+    DetailView,
+    DeleteView,
+)
 
 import urllib
 
@@ -475,12 +480,17 @@ class SuperuserRequiredMixin(object):
 
 
 class HelpAnchorMixin(object):
+    # Default title
+    title = 'MPS Database'
+
     def get_context_data(self, **kwargs):
         context = super(HelpAnchorMixin, self).get_context_data(**kwargs)
 
-        # Add model name
         context.update({
-            'help_anchor': '#{}'.format(resolve(self.request.path_info).url_name)
+            # Help anchor is always just based on the URL name
+            'help_anchor': '#{}'.format(resolve(self.request.path_info).url_name),
+            # Initial title, either from the attribute or overwritten later (classes that extend this are likely to overwrite)
+            'title': self.title
         })
 
         return context
@@ -770,3 +780,15 @@ class ListHandlerView(DefaultModelContextMixin, ListView):
 
 class DetailHandlerView(DefaultModelContextMixin, DetailView):
     template_name = 'generic_detail.html'
+
+
+class DeleteHandlerView(DefaultModelContextMixin, DeleteView):
+    def get_context_data(self, **kwargs):
+        context = super(DeleteHandlerView, self).get_context_data(**kwargs)
+
+        # Add model name
+        context.update({
+            'title': '{} Delete'.format(self.model._meta.verbose_name),
+        })
+
+        return context
