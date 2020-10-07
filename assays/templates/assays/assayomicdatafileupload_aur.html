@@ -70,28 +70,29 @@
             {% endif %}
 
             {% include "errors.html" %}
-            {% if form.errors %}
-                {% for field in form %}
-                    {% if field.errors %}
-                        {% for error in field.errors %}
-                            <div class="alert alert-danger" role="alert">
-                                <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
-                                <span class="sr-only">Error:</span>
-                                {{field.label}}: {{error}}
-                            </div>
-                        {% endfor %}
-                    {% endif %}
-                {% endfor %}
-            {% endif %}
-            {% if form.non_field_errors %}
-                <div class="alert alert-danger" role="alert">
-                    <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
-                    <span class="sr-only">Error:</span>
-                    {{ form.non_field_errors }}
-                    form.errors<br>
-                    {{ form.errors }}<br>
-                </div>
-            {% endif %}
+
+{#            {% if form.errors %}#}
+{#                {% for field in form %}#}
+{#                    {% if field.errors %}#}
+{#                        {% for error in field.errors %}#}
+{#                            <div id="form_errors" class="alert alert-danger" role="alert">#}
+{#                                <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>#}
+{#                                <span class="sr-only">Error:</span>#}
+{#                                {{field.label}}: {{error}}#}
+{#                            </div>#}
+{#                        {% endfor %}#}
+{#                    {% endif %}#}
+{#                {% endfor %}#}
+{#            {% endif %}#}
+{#            {% if form.non_field_errors %}#}
+{#                <div id="non_form_errors" class="alert alert-danger" role="alert">#}
+{#                    <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>#}
+{#                    <span class="sr-only">Error:</span>#}
+{#                    {{ form.non_field_errors }}#}
+{#                    form.errors<br>#}
+{#                    {{ form.errors }}<br>#}
+{#                </div>#}
+{#            {% endif %}#}
 
             {# main #}
 {#            <div class="container">   NO CONTAINERs   #}

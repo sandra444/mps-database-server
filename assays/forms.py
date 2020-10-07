@@ -100,7 +100,7 @@ import ujson as json
 import os
 import csv
 import re
-import copy
+import hashlib
 
 # TODO REFACTOR WHITTLING TO BE HERE IN LIEU OF VIEW
 # TODO REFACTOR FK QUERYSETS TO AVOID N+1
@@ -5203,18 +5203,107 @@ class AssayOmicDataFileUploadForm(BootstrapForm):
 
     def clean(self):
         data = super(AssayOmicDataFileUploadForm, self).clean()
+        true_to_continue = self.qc_file(save=False, calledme='clean')
+        if not true_to_continue:
+            validation_message = 'This did not pass QC.'
+            raise ValidationError(validation_message, code='invalid')
         self.process_file(save=False, calledme='clean')
         return data
 
     def save(self, commit=True):
-        new_file = super(AssayOmicDataFileUploadForm, self).save(commit=commit)
+        new_file = None
         if commit:
+            new_file = super(AssayOmicDataFileUploadForm, self).save(commit=commit)
             self.process_file(save=True, calledme='save')
         return new_file
 
-    def process_file(self, save=False, calledme='c'):
+    def qc_file(self, save=False, calledme='c'):
         true_to_continue = True
         data = self.cleaned_data
+
+        if true_to_continue and 'omic_data_file' in self.changed_data:
+            # only need to check for duplicate file name if the file was changed (or added on the add form)
+            file_name = data.get('omic_data_file').name
+            files_in_study = AssayOmicDataFileUpload.objects.filter(
+                study_id=self.instance.study.id
+            )
+
+            for each in files_in_study:
+                # print("each.omic_data_file.name ", each.omic_data_file.name)
+                if each.omic_data_file.name == each.omic_data_file.name:
+                    true_to_continue = False
+                    validation_message = 'File with this name already in this study.'
+                    raise ValidationError(validation_message, code='invalid')
+                    break
+
+        if true_to_continue and 'omic_data_file' in self.changed_data:
+            # there are a few fields, in addition to the change of the data file, that would cause the data to need replaced
+            # including analysis_method and data_type
+            file_extension = os.path.splitext(data.get('omic_data_file').name)[1]
+            if 'omic_data_file' in self.changed_data or 'analysis_method' in self.changed_data or 'data_type' in self.changed_data or self.instance.id is None:
+                # Run file extension check
+                if file_extension in ['.csv', '.tsv', '.txt', '.xls', '.xlsx']:
+                    pass
+                else:
+                    true_to_continue = False
+                    validation_message = 'Invalid file extension - must be in csv, tsv, txt, xls, or xlsx.'
+                    raise ValidationError(validation_message, code='invalid')
+
+        if true_to_continue:
+            # ONGOING - add to the list with all data types that are two groups required
+            if data['data_type'] in ['log2fc']:
+                if data['group_1'] == None or data['group_2'] == None:
+                    true_to_continue = False
+                    validation_message = 'For data type that compares two groups, both groups must be selected.'
+                    raise ValidationError(validation_message, code='invalid')
+                if data['group_1'] == data['group_2']:
+                    true_to_continue = False
+                    validation_message = 'For data type that compares two groups, the two selected groups must be different.'
+                    raise ValidationError(validation_message, code='invalid')
+
+        if true_to_continue:
+            # is there a combination of group1+location1+time1+group2+location2+time2 in for this study already?
+            group_keys_combos_left = AssayOmicDataFileUpload.objects.filter(
+                study_id=self.instance.study.id,
+                group_1=data['group_1'],
+                group_2=data['group_2'],
+                location_1=data['location_1'],
+                location_2=data['location_2'],
+                time_1=data['time_1'],
+                time_2=data['time_2']
+            )
+            group_keys_combos_right = AssayOmicDataFileUpload.objects.filter(
+                study_id=self.instance.study.id,
+                group_1=data['group_2'],
+                group_2=data['group_1'],
+                location_1=data['location_2'],
+                location_2=data['location_1'],
+                time_1=data['time_2'],
+                time_2=data['time_1']
+            )
+
+            # group_keys_combos_left = (f for f in group_keys_combos_left if f.filename() == file_name)
+            # group_keys_combos_right = (f for f in group_keys_combos_right if f.filename() == file_name)
+
+            print('group_keys_combos_left ',group_keys_combos_left)
+            print('group_keys_combos_right ', group_keys_combos_right)
+
+            if len(group_keys_combos_left) > 0 or len(group_keys_combos_right) > 0:
+                combo_metadata = '(filename: ' + file_name
+                combo_metadata = combo_metadata + ').'
+                true_to_continue = False
+                validation_message = 'There is already a combination of these groups and associated locations and times in this study ' + combo_metadata
+                raise ValidationError(validation_message, code='invalid')
+
+        # add more QC as needed with continued development
+        return true_to_continue
+
+
+    def process_file(self, save=False, calledme='c'):
+        data = self.cleaned_data
+        file_extension = os.path.splitext(data.get('omic_data_file').name)[1]
+
+        # data are changed here, so NEED to return the data
         data['time_1'] = 0
         for time_unit, conversion in list(TIME_CONVERSIONS.items()):
             if data.get('time_1_' + time_unit) is not None:
@@ -5227,45 +5316,20 @@ class AssayOmicDataFileUploadForm(BootstrapForm):
                 inttime = data.get('time_2_' + time_unit)
                 data.update({'time_2': data.get('time_2') + inttime * conversion,})
 
-        file_extension = os.path.splitext(data.get('omic_data_file').name)[1]
+        data_file_pk = self.instance.id
+        data_type = data['data_type']
+        analysis_method = data['analysis_method']
 
-        # there are a few fields, in addition to the change of the data file, that would cause the data to need replaced
-        # including analysis_method and data_type
-        if 'omic_data_file' in self.changed_data or 'analysis_method' in self.changed_data or 'data_type' in self.changed_data or self.instance.id is None:
-            # Run file extension check
-            if file_extension in ['.csv', '.tsv', '.txt', '.xls', '.xlsx']:
-                true_to_continue = True
-            else:
-                true_to_continue = False
-                raise ValidationError(
-                     'Invalid file extension - must be in csv, tsv, txt, xls, or xlsx',
-                     code='invalid'
-                )
-
-        # ONGOING - add to the list with all data types that are two groups required
-        if data['data_type'] in ['log2fc']:
-            if data['group_1'] == None or data['group_2'] == None:
-                true_to_continue = False
-                raise ValidationError(
-                     'For data type that compares two groups, both groups must be selected.',
-                     code='invalid'
-                )
-
-        if true_to_continue:
-            data_file_pk = self.instance.id
-            data_type = data['data_type']
-            analysis_method = data['analysis_method']
-
-            if calledme == 'clean':
-                # this function is in utils.py
-                # print('form clean')
-                data_file = data.get('omic_data_file')
-                a_returned = omic_data_file_process_data(save, self.study.id, data_file_pk, data_file, file_extension, calledme, data_type, analysis_method)
-            else:
-                # print('form save')
-                queryset = AssayOmicDataFileUpload.objects.get(id=data_file_pk)
-                data_file = queryset.omic_data_file.open()
-                a_returned = omic_data_file_process_data(save, self.study.id, data_file_pk, data_file, file_extension, calledme, data_type, analysis_method)
+        if calledme == 'clean':
+            # this function is in utils.py
+            # print('form clean')
+            data_file = data.get('omic_data_file')
+            a_returned = omic_data_file_process_data(save, self.study.id, data_file_pk, data_file, file_extension, calledme, data_type, analysis_method)
+        else:
+            # print('form save')
+            queryset = AssayOmicDataFileUpload.objects.get(id=data_file_pk)
+            data_file = queryset.omic_data_file.open()
+            a_returned = omic_data_file_process_data(save, self.study.id, data_file_pk, data_file, file_extension, calledme, data_type, analysis_method)
 
         return data
 
