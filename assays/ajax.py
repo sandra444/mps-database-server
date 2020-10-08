@@ -6872,7 +6872,7 @@ def sub_fetch_model_location_dictionary(this_pk):
     else:
         qs_locations = AssaySampleLocation.objects.all()
         for each in qs_locations:
-            if each.name == 'na' or each.name == 'unspecified':
+            if each.name.lower() == 'na' or each.name.lower() == 'unspecified':
                 pass
             else:
                 location_dict[each.id] = each.name
