@@ -12,6 +12,9 @@ import mps.ajax
 import mps.forms
 import django.views
 import mps.management
+# Maybe a bit odd!
+# Especially because isn't really just for mixins any longer!
+import mps.mixins
 
 # For registration
 from django_registration.backends.activation.views import ActivationView, RegistrationView
@@ -65,8 +68,9 @@ urlpatterns = [
     # Registration
     url(
         r'^activate/complete/$',
-        mps.views.TemplateView.as_view(
-            template_name='django_registration/activation_complete.html'
+        mps.mixins.TemplateHandlerView.as_view(
+            template_name='django_registration/activation_complete.html',
+            title = 'Activation Complete'
         ),
         name='django_registration_activation_complete'
     ),
@@ -86,15 +90,17 @@ urlpatterns = [
     ),
     url(
         r'^register/complete/$',
-        mps.views.TemplateView.as_view(
-            template_name='django_registration/registration_complete.html'
+        mps.mixins.TemplateHandlerView.as_view(
+            template_name='django_registration/registration_complete.html',
+            title = 'Registration Complete'
         ),
         name='django_registration_complete'
     ),
     url(
         r'^register/closed/$',
-        mps.views.TemplateView.as_view(
-            template_name='django_registration/registration_closed.html'
+        mps.mixins.TemplateHandlerView.as_view(
+            template_name='django_registration/registration_closed.html',
+            title='Registration is Closed'
         ),
         name='django_registration_disallowed'
     ),

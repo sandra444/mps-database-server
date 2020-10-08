@@ -23,11 +23,13 @@ import os
 from mps.settings import MEDIA_ROOT
 
 from resources.models import Definition, ComingSoonEntry, WhatIsNewEntry
-from django.views.generic.base import TemplateView
+# from django.views.generic.base import TemplateView
 
 from microdevices.models import MicrophysiologyCenter
 from mps.templatetags.custom_filters import ADMIN_SUFFIX, VIEWER_SUFFIX
 import html
+
+from mps.mixins import TemplateHandlerView
 
 # Spaghetti code
 from assays.views import get_queryset_with_organ_model_map
@@ -297,5 +299,7 @@ def mps_about(request):
 
 
 # TODO Consider defining this in URLS or either bringing the rest here
-class UnderConstruction(TemplateView):
+class UnderConstruction(TemplateHandlerView):
     template_name = 'under_construction.html'
+
+    title = 'Under Construction'

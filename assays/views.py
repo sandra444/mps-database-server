@@ -144,6 +144,7 @@ from mps.mixins import (
     DetailHandlerView,
     HelpAnchorMixin,
     DeleteHandlerView,
+    TemplateHandlerView,
 )
 
 from mps.base.models import save_forms_with_tracking
@@ -329,7 +330,7 @@ class AssayStudyConfigurationUpdate(OneGroupRequiredMixin, AssayStudyConfigurati
     pass
 
 # Class-based views for study configuration
-class AssayStudyConfigurationList(LoginRequiredMixin, ListView):
+class AssayStudyConfigurationList(LoginRequiredMixin, ListHandlerView):
     """Display a list of Study Configurations"""
     model = AssayStudyConfiguration
     template_name = 'assays/studyconfiguration_list.html'
@@ -481,8 +482,10 @@ def get_queryset_with_number_of_data_points(queryset):
 # TODO GET NUMBER OF DATA POINTS
 # TODO REVIEW PERMISSIONS
 # Class-based views for studies
-class AssayStudyEditableList(OneGroupRequiredMixin, HelpAnchorMixin, ListView):
+class AssayStudyEditableList(OneGroupRequiredMixin, ListHandlerView):
     """Displays all of the studies linked to groups that the user is part of"""
+    model = AssayStudy
+
     template_name = 'assays/assaystudy_list.html'
 
     title = 'Editable Studies List'
@@ -522,10 +525,10 @@ class AssayStudyEditableList(OneGroupRequiredMixin, HelpAnchorMixin, ListView):
         return context
 
 
-class AssayStudyList(HelpAnchorMixin, ListView):
+class AssayStudyList(ListHandlerView):
     """A list of all studies"""
-    template_name = 'assays/assaystudy_list.html'
     model = AssayStudy
+    template_name = 'assays/assaystudy_list.html'
 
     title = 'Study List'
 
@@ -746,7 +749,7 @@ class AssayStudyChips(ObjectGroupRequiredMixin, AssayStudyMixin, UpdateView):
 
 
 # This is now really just a list page
-class AssayStudyPlates(ObjectGroupRequiredMixin, AssayStudyMixin, DetailView):
+class AssayStudyPlates(ObjectGroupRequiredMixin, AssayStudyMixin, DetailHandlerView):
     template_name = 'assays/assaystudy_plates.html'
     form_class = AssayStudyPlateForm
 
@@ -825,7 +828,7 @@ class AssayStudyPlateUpdate(StudyGroupMixin, AssayStudyPlateMixin, UpdateView):
     pass
 
 
-class AssayStudyPlateDetail(StudyGroupMixin, AssayStudyPlateMixin, DetailView):
+class AssayStudyPlateDetail(StudyGroupMixin, AssayStudyPlateMixin, DetailHandlerView):
     detail = True
 
     def get_context_data(self, **kwargs):
@@ -851,7 +854,7 @@ class AssayStudyAssays(ObjectGroupRequiredMixin, AssayStudyMixin, UpdateView):
 
 
 # TODO: TO BE REVISED
-class AssayStudyDataIndex(StudyViewerMixin, AssayStudyMixin, DetailView):
+class AssayStudyDataIndex(StudyViewerMixin, AssayStudyMixin, DetailHandlerView):
     """Show all data sections for a given study"""
     model = AssayStudy
     template_name = 'assays/assaystudy_data_index.html'
@@ -1002,7 +1005,7 @@ class AssayStudyIndex(StudyViewerMixin, DetailHandlerView):
         return context
 
 
-class AssayStudySummary(StudyViewerMixin, HelpAnchorMixin, TemplateView):
+class AssayStudySummary(StudyViewerMixin, TemplateHandlerView):
     """Displays information for a given study
 
     Currently only shows data for chip readouts and chip/plate setups
@@ -1041,7 +1044,8 @@ class AssayStudySummary(StudyViewerMixin, HelpAnchorMixin, TemplateView):
         return context
 
 
-class AssayStudyData(StudyViewerMixin, DetailView):
+# TODO: REVISE ODD
+class AssayStudyData(StudyViewerMixin, DetailHandlerView):
     """Returns a combined file for all data in a study"""
     model = AssayStudy
 
@@ -1683,7 +1687,7 @@ class AssayStudyTemplate(ObjectGroupRequiredMixin, DetailView):
         return response
 
 
-class AssayDataFileUploadList(StudyViewerMixin, HelpAnchorMixin, DetailView):
+class AssayDataFileUploadList(StudyViewerMixin, DetailHandlerView):
     # Why not have the mixin look for DetailView?
     model = AssayStudy
     detail = True
@@ -1711,7 +1715,7 @@ class AssayDataFileUploadList(StudyViewerMixin, HelpAnchorMixin, DetailView):
         return context
 
 
-class AssayDataFileUploadDetail(StudyGroupMixin, HelpAnchorMixin, DetailView):
+class AssayDataFileUploadDetail(StudyGroupMixin, DetailHandlerView):
     # Why not have the mixin look for DetailView?
     model = AssayDataFileUpload
     detail = True
@@ -2038,7 +2042,7 @@ class AssayMatrixUpdate(HistoryMixin, StudyGroupMixin, UpdateView):
 
 
 # DEPRECATED
-class AssayMatrixDetail(StudyGroupMixin, DetailView):
+class AssayMatrixDetail(StudyGroupMixin, DetailHandlerView):
     """Details for a Matrix"""
     template_name = 'assays/assaymatrix_add.html'
     model = AssayMatrix
@@ -2107,7 +2111,7 @@ class AssayMatrixDetail(StudyGroupMixin, DetailView):
 
 
 # DEPRECATED
-class AssayMatrixDelete(StudyDeletionMixin, DeleteView):
+class AssayMatrixDelete(StudyDeletionMixin, DeleteHandlerView):
     """Delete a Setup"""
     model = AssayMatrix
     template_name = 'assays/assaymatrix_delete.html'
@@ -2180,7 +2184,7 @@ class AssayMatrixItemDelete(StudyDeletionMixin, DeleteHandlerView):
         return self.object.study.get_absolute_url()
 
 
-class AssayStudyReproducibility(StudyViewerMixin, HelpAnchorMixin, DetailView):
+class AssayStudyReproducibility(StudyViewerMixin, DetailHandlerView):
     """Returns a form and processed statistical information. """
     model = AssayStudy
     template_name = 'assays/assaystudy_reproducibility.html'
@@ -2188,7 +2192,7 @@ class AssayStudyReproducibility(StudyViewerMixin, HelpAnchorMixin, DetailView):
     title = 'Study Reproducibility'
 
 
-class AssayStudyImages(StudyViewerMixin, HelpAnchorMixin, DetailView):
+class AssayStudyImages(StudyViewerMixin, DetailHandlerView):
     """Displays all of the images linked to the current study"""
     model = AssayStudy
     template_name = 'assays/assaystudy_images.html'
@@ -2263,19 +2267,19 @@ class AssayStudyImages(StudyViewerMixin, HelpAnchorMixin, DetailView):
         return context
 
 
-class GraphingReproducibilityFilterView(HelpAnchorMixin, TemplateView):
+class GraphingReproducibilityFilterView(TemplateHandlerView):
     template_name = 'assays/assay_filter.html'
 
     title = 'Graphing and Reproducibility'
 
 
-class AssayInterStudyReproducibility(HelpAnchorMixin, TemplateView):
+class AssayInterStudyReproducibility(TemplateHandlerView):
     template_name = 'assays/assay_interstudy_reproducibility.html'
 
     title = 'Inter-Study Reproducibility'
 
 
-class AssayStudyDataPlots(HelpAnchorMixin, TemplateView):
+class AssayStudyDataPlots(TemplateHandlerView):
     template_name = 'assays/assaystudy_data_plots.html'
 
     title = 'Inter-Study Plots'
@@ -2586,7 +2590,7 @@ class StudySetViewerMixin(object):
         return super(StudySetViewerMixin, self).dispatch(*args, **kwargs)
 
 
-class AssayStudySetDataPlots(StudySetViewerMixin, HelpAnchorMixin, DetailView):
+class AssayStudySetDataPlots(StudySetViewerMixin, DetailHandlerView):
     model = AssayStudySet
     template_name = 'assays/assaystudyset_data_plots.html'
 
@@ -2614,7 +2618,7 @@ class AssayStudySetDataPlots(StudySetViewerMixin, HelpAnchorMixin, DetailView):
         return context
 
 
-class AssayStudySetReproducibility(StudySetViewerMixin, HelpAnchorMixin, DetailView):
+class AssayStudySetReproducibility(StudySetViewerMixin, DetailHandlerView):
     model = AssayStudySet
     template_name = 'assays/assaystudyset_reproducibility.html'
 
@@ -2768,7 +2772,7 @@ class AssayReferenceDelete(CreatorAndNotInUseMixin, DeleteHandlerView):
     success_url = '/assays/assayreference/'
 
 
-class AssayStudyPowerAnalysisStudy(StudyViewerMixin, HelpAnchorMixin, DetailView):
+class AssayStudyPowerAnalysisStudy(StudyViewerMixin, DetailHandlerView):
     """Displays the power analysis interface for the current study"""
     model = AssayStudy
     template_name = 'assays/assaystudy_power_analysis_study.html'
@@ -3238,8 +3242,10 @@ def get_component_display_for_model(model):
     }
 
 
-class AssayStudyComponents(TemplateView):
+class AssayStudyComponents(TemplateHandlerView):
     template_name = 'assays/assaystudycomponents.html'
+
+    title = 'Study Components'
 
     def get_context_data(self, **kwargs):
         context = super(AssayStudyComponents, self).get_context_data(**kwargs)
@@ -3456,13 +3462,13 @@ def get_current_upload_template(request):
     return response
 
 
-class PBPKFilterView(HelpAnchorMixin, TemplateView):
+class PBPKFilterView(TemplateHandlerView):
     template_name = 'assays/assay_pbpk_filter.html'
 
     title = 'PBPK Filter'
 
 
-class PBPKView(HelpAnchorMixin, TemplateView):
+class PBPKView(TemplateHandlerView):
     template_name = 'assays/assay_pbpk.html'
 
     title = 'PBPK Details'
@@ -3472,7 +3478,7 @@ class PBPKView(HelpAnchorMixin, TemplateView):
 # sck - ASSAY PLATE MAP START
 
 # Plate map list, add, update, view and delete section
-class AssayPlateReaderMapIndex(StudyViewerMixin, DetailView):
+class AssayPlateReaderMapIndex(StudyViewerMixin, DetailHandlerView):
     """Assay plate map index (list) page class """
     model = AssayStudy
     context_object_name = 'assayplatereadermap_index'
@@ -3616,7 +3622,7 @@ class AssayPlateReaderMapIndex(StudyViewerMixin, DetailView):
         return context
 
 
-class AssayPlateReaderMapAdd(StudyGroupMixin, CreateView):
+class AssayPlateReaderMapAdd(StudyGroupMixin, HistoryMixin, CreateView):
     """Assay plate map add"""
 
     model = AssayPlateReaderMap
@@ -3761,7 +3767,7 @@ class AssayPlateReaderMapAdd(StudyGroupMixin, CreateView):
             # return self.render_to_response(self.get_context_data(form=form, formset=formset))
 
 
-class AssayPlateReaderMapUpdate(StudyGroupMixin, UpdateView):
+class AssayPlateReaderMapUpdate(StudyGroupMixin, HistoryMixin, UpdateView):
     """Assay plate map update"""
 
     model = AssayPlateReaderMap
@@ -4157,7 +4163,7 @@ class AssayPlateReaderMapUpdate(StudyGroupMixin, UpdateView):
 #     return my_key
 
 
-class AssayPlateReaderMapView(StudyViewerMixin, DetailView):
+class AssayPlateReaderMapView(StudyViewerMixin, DetailHandlerView):
     """Assay plate map view"""
     model = AssayPlateReaderMap
     template_name = 'assays/assayplatereadermap_add.html'
@@ -4194,7 +4200,7 @@ class AssayPlateReaderMapView(StudyViewerMixin, DetailView):
         return context
 
 
-class AssayPlateReaderMapDelete(CreatorAndNotInUseMixin, DeleteView):
+class AssayPlateReaderMapDelete(CreatorAndNotInUseMixin, DeleteHandlerView):
     model = AssayPlateReaderMap
     template_name = 'assays/assayplatereadermap_delete.html'
 
@@ -4277,7 +4283,7 @@ class AssayPlateReaderMapDelete(CreatorAndNotInUseMixin, DeleteView):
 
 #####
 # START Plate reader file list, add, update, view and delete section
-class AssayPlateReaderMapDataFileIndex(StudyViewerMixin, DetailView):
+class AssayPlateReaderMapDataFileIndex(StudyViewerMixin, DetailHandlerView):
     """Assay plate reader file"""
 
     model = AssayStudy
@@ -4333,7 +4339,7 @@ class AssayPlateReaderMapDataFileIndex(StudyViewerMixin, DetailView):
         return context
 
 
-class AssayPlateReaderMapDataFileView(StudyViewerMixin, DetailView):
+class AssayPlateReaderMapDataFileView(StudyViewerMixin, DetailHandlerView):
     """Assay Plate Reader File Detail View"""
     model = AssayPlateReaderMapDataFile
     template_name = 'assays/assayplatereaderfile_update.html'
@@ -4361,7 +4367,7 @@ class AssayPlateReaderMapDataFileView(StudyViewerMixin, DetailView):
         return context
 
 
-class AssayPlateReaderMapDataFileDelete(CreatorAndNotInUseMixin, DeleteView):
+class AssayPlateReaderMapDataFileDelete(CreatorAndNotInUseMixin, DeleteHandlerView):
     model = AssayPlateReaderMapDataFile
     template_name = 'assays/assayplatereaderfile_delete.html'
 
@@ -4370,7 +4376,7 @@ class AssayPlateReaderMapDataFileDelete(CreatorAndNotInUseMixin, DeleteView):
 
 
 # Adding a file to the filefield on the add page
-class AssayPlateReaderMapDataFileAdd(StudyGroupMixin, CreateView):
+class AssayPlateReaderMapDataFileAdd(StudyGroupMixin, HistoryMixin, CreateView):
     """Upload an plate reader data file add"""
 
     model = AssayPlateReaderMapDataFile
@@ -4418,7 +4424,7 @@ class AssayPlateReaderMapDataFileAdd(StudyGroupMixin, CreateView):
 
 
 # the user is routed here after adding the file by a get_post_add_submission_url in the models.py
-class AssayPlateReaderMapDataFileUpdate(StudyGroupMixin, UpdateView):
+class AssayPlateReaderMapDataFileUpdate(StudyGroupMixin, HistoryMixin, UpdateView):
     """Assay Plate Reader File Update"""
     model = AssayPlateReaderMapDataFile
     template_name = 'assays/assayplatereaderfile_update.html'

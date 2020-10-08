@@ -26,6 +26,7 @@ from django.views.generic import (
     ListView,
     DetailView,
     DeleteView,
+    TemplateView,
 )
 
 import urllib
@@ -763,6 +764,7 @@ class FormHandlerMixin(HistoryMixin):
             )
 
 
+# "Handler" term chosen solely to distinguish from base Django CBVs
 # Possible
 class ListHandlerView(DefaultModelContextMixin, ListView):
     template_name = 'generic_list.html'
@@ -792,3 +794,8 @@ class DeleteHandlerView(DefaultModelContextMixin, DeleteView):
         })
 
         return context
+
+
+# Maybe a bit excessive, but clear at least
+class TemplateHandlerView(HelpAnchorMixin, TemplateView):
+    pass

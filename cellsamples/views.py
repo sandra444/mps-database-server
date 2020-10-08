@@ -42,7 +42,7 @@ class CellSampleUpdate(CreatorAndNotInUseMixin, CellSampleMixin, UpdateView):
     pass
 
 # Logged in users can look at cell samples
-class CellSampleDetail(LoginRequiredMixin, DetailView):
+class CellSampleDetail(LoginRequiredMixin, DetailHandlerView):
     model = CellSample
     template_name = 'cellsamples/cellsample_detail.html'
 
@@ -95,8 +95,9 @@ class CellSampleDetail(LoginRequiredMixin, DetailView):
 
 
 # Logged in users can see list
-class CellSampleList(LoginRequiredMixin, ListView):
+class CellSampleList(LoginRequiredMixin, ListHandlerView):
     """Displays a list of Cell Samples"""
+    model = CellSample
     template_name = 'cellsamples/cellsample_list.html'
 
     def get_queryset(self):
@@ -153,8 +154,9 @@ class CellSubtypeUpdate(CreatorAndNotInUseMixin, CellSubtypeMixin, UpdateView):
     pass
 
 
-class CellSubtypeList(ListView):
+class CellSubtypeList(ListHandlerView):
     """Display a list of Cell Subtypes"""
+    model = CellSubtype
     template_name = 'cellsamples/cellsubtype_list.html'
 
     def get_queryset(self):
