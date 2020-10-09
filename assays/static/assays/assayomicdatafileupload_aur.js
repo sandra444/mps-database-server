@@ -125,7 +125,7 @@ $(document).ready(function () {
             $('#id_group_2').next().addClass('required');
             $('.two-groups').show();
             if (called_from != 'load') {
-                get_data_for_this_file_ready_for_preview()
+                get_data_for_this_file_ready_for_preview(called_from)
             }
         } else {
             //here here to update when ready
@@ -164,7 +164,7 @@ $(document).ready(function () {
     // id="plots"
     // id="volcano-plots"
     // id="ma-plots"
-    function get_data_for_this_file_ready_for_preview() {
+    function get_data_for_this_file_ready_for_preview(called_from) {
         let data = {
             call: 'fetch_omics_data_for_upload_preview_prep',
             csrfmiddlewaretoken: window.COOKIES.csrfmiddlewaretoken
@@ -241,6 +241,15 @@ $(document).ready(function () {
                         // console.log(window.OMICS.omics_data)
                         window.OMICS.draw_plots(window.OMICS.omics_data, true, 0, 0, 0, 0, 0, 0, 0, 'upload');
                         // function(omics_data, firstTime, minPval, maxPval, minL2FC, maxL2FC, minPval_neg, maxPval_neg, L2FC_abs)
+
+                        // put here to avoid race errors
+                        if (called_from == 'data_file') {
+                            try {
+                                id_omic_data_file = $('#id_omic_data_file').val();
+                                check_file_add_update(id_omic_data_file);
+                            } catch {
+                            }
+                        }
                     }
                 },
                 error: function (xhr, errmsg, err) {
@@ -339,10 +348,10 @@ $(document).ready(function () {
       * get the first occurrence that has sample information.
     */
     function get_group_sample_info() {
-        console.log('1: '+global_omic_upload_group_pk_change)
-        console.log('2: '+global_omic_upload_group_pk_load_1)
-        console.log('3: '+global_omic_upload_group_pk_load_2)
-        console.log('4: '+global_omic_upload_called_from)
+        // console.log('1: '+global_omic_upload_group_pk_change)
+        // console.log('2: '+global_omic_upload_group_pk_load_1)
+        // console.log('3: '+global_omic_upload_group_pk_load_2)
+        // console.log('4: '+global_omic_upload_called_from)
 
         // HANDY if using js split time
         // time_in_minutes = 121
@@ -421,9 +430,9 @@ $(document).ready(function () {
             // just do the location lists to restrict to the model
         } else {
             // called from a change of one of the groups
-            $('#id_time_'+global_omic_upload_group_id_change+'_day').val(json.day);
-            $('#id_time_'+global_omic_upload_group_id_change+'_hour').val(json.hour);
-            $('#id_time_'+global_omic_upload_group_id_change+'_minute').val(json.minute);
+            $('#id_time_'+global_omic_upload_group_id_change+'_day').val(json.day1);
+            $('#id_time_'+global_omic_upload_group_id_change+'_hour').val(json.hour1);
+            $('#id_time_'+global_omic_upload_group_id_change+'_minute').val(json.minute1);
 
             // https://github.com/selectize/selectize.js/blob/master/docs/api.md
             // HANDY to set the options of selectized dropdown
@@ -432,10 +441,10 @@ $(document).ready(function () {
             let this_dict = $this_dropdown[0].selectize;
             // fill the dropdown with what brought back from ajax call
             $.each(json.location_dict1[0], function( pk, text ) {
-                console.log(" "+pk+ "  "+text)
+                // console.log(" "+pk+ "  "+text)
                 this_dict.addOption({value: pk, text: text});
             });
-            $('#id_location_'+global_omic_upload_group_id_change)[0].selectize.setValue(json.sample_location_pk);
+            $('#id_location_'+global_omic_upload_group_id_change)[0].selectize.setValue(json.sample_location_pk1);
         }
 
         //HANDY get the value from selectized
@@ -446,6 +455,51 @@ $(document).ready(function () {
         //global_omic_upload_aa = $('#id_aa')[0].selectize.options[global_omic_upload_aa]['text'];
 
     };
+
+     /**
+      * When the file is changed and is not null, check to see if the file
+      * is already in this study
+    */
+    function check_file_add_update(id_omic_data_file) {
+        if ($("#check_load").html().trim() === 'add') {
+            data_file_pk = 0;
+        } else {
+            parseInt(document.getElementById("this_file_id").innerText.trim())
+        }
+        let data = {
+            call: 'fetch_this_file_is_this_study',
+            omic_data_file: id_omic_data_file,
+            study_id: parseInt(document.getElementById("this_study_id").innerText.trim()),
+            data_file_pk: data_file_pk,
+            csrfmiddlewaretoken: window.COOKIES.csrfmiddlewaretoken
+        };
+        window.spinner.spin(document.getElementById('spinner'));
+        $.ajax({
+            url: '/assays_ajax/',
+            type: 'POST',
+            dataType: 'json',
+            data: data,
+            success: function (json) {
+                window.spinner.stop();
+                if (json.errors) {
+                    // Display errors
+                    alert(json.errors);
+                }
+                else {
+                    let exist = true;
+                    if (json.true_to_continue.toString().toLowerCase() === 'false') {
+                       alert(json.message);
+                    }
+                }
+            },
+            // error callback
+            error: function (xhr, errmsg, err) {
+                window.spinner.stop();
+                alert('An error has occurred checking the file name. ');
+                console.log(xhr.status + ': ' + xhr.responseText);
+            }
+        });
+    }
 
 });
 

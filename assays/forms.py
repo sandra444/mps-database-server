@@ -83,6 +83,7 @@ from .utils import (
     calibration_choices,
     omic_data_file_process_data,
     COLUMN_HEADERS,
+    data_quality_clean_check_for_omic_file_upload,
 )
 
 from mps.utils import (
@@ -100,7 +101,6 @@ import ujson as json
 import os
 import csv
 import re
-import hashlib
 
 # TODO REFACTOR WHITTLING TO BE HERE IN LIEU OF VIEW
 # TODO REFACTOR FK QUERYSETS TO AVOID N+1
@@ -5203,6 +5203,20 @@ class AssayOmicDataFileUploadForm(BootstrapForm):
 
     def clean(self):
         data = super(AssayOmicDataFileUploadForm, self).clean()
+
+        # data are changed here, so NEED to return the data
+        data['time_1'] = 0
+        for time_unit, conversion in list(TIME_CONVERSIONS.items()):
+            if data.get('time_1_' + time_unit) is not None:
+                inttime = (data.get('time_1_' + time_unit))
+                data.update({'time_1': data.get('time_1') + inttime * conversion,})
+
+        data['time_2'] = 0
+        for time_unit, conversion in list(TIME_CONVERSIONS.items()):
+            if data.get('time_2_' + time_unit) is not None:
+                inttime = data.get('time_2_' + time_unit)
+                data.update({'time_2': data.get('time_2') + inttime * conversion,})
+
         true_to_continue = self.qc_file(save=False, calledme='clean')
         if not true_to_continue:
             validation_message = 'This did not pass QC.'
@@ -5218,136 +5232,25 @@ class AssayOmicDataFileUploadForm(BootstrapForm):
         return new_file
 
     def qc_file(self, save=False, calledme='c'):
-        # fields that would cause a change in data pull
-        # 'omic_data_file' in self.changed_data or
-        # 'analysis_method' in self.changed_data or
-        # 'data_type' in self.changed_data or
-        # self.instance.id is None:
-
-        true_to_continue = True
         data = self.cleaned_data
+        data_file_pk = 0
+        # self.instance.id is None for the add form
+        if self.instance.id:
+            data_file_pk = self.instance.id
 
-        # this will be None if on the add form
-        data_file_pk = self.instance.id
-        file_extension = os.path.splitext(data.get('omic_data_file').name)[1]
-        file_name = data.get('omic_data_file').name
-
-        if true_to_continue and 'omic_data_file' in self.changed_data:
-            # check for file name uniqueness
-            files_in_study = AssayOmicDataFileUpload.objects.filter(
-                study_id=self.instance.study.id
-            )
-
-            for each in files_in_study:
-                # print("each.omic_data_file.name ", each.omic_data_file.name)
-                # if they changed and changed it back, it will be the same as this files pk, and we want that to pass
-                if each.omic_data_file.name == each.omic_data_file.name and not each.id == data_file_pk:
-                    true_to_continue = False
-                    validation_message = 'File with this name already in this study (in an entry other than this one).'
-                    validation_message = validation_message + "  " + file_name
-                    raise ValidationError(validation_message, code='invalid')
-                    break
-
-            # check for valid file extension
-            if file_extension in ['.csv', '.tsv', '.txt', '.xls', '.xlsx']:
-                pass
-            else:
-                true_to_continue = False
-                validation_message = 'Invalid file extension - must be in csv, tsv, txt, xls, or xlsx.'
-                validation_message = validation_message + "  " + file_name
-                raise ValidationError(validation_message, code='invalid')
-
-            # later, todo here here add file content uniqueness check
-
-        if true_to_continue:
-            # ONGOING - add to the list with all data types that are two groups required
-            if data['data_type'] in ['log2fc']:
-                if data['group_1'] is None or data['group_2'] is None:
-                    true_to_continue = False
-                    validation_message = 'For data type that compares two groups, both groups must be selected.'
-                    validation_message = validation_message + "  " + file_name
-                    raise ValidationError(validation_message, code='invalid')
-                if data['group_1'] == data['group_2']:
-                    true_to_continue = False
-                    validation_message = 'For data type that compares two groups, the two selected groups must be different.'
-                    validation_message = validation_message + "  " + file_name
-                    raise ValidationError(validation_message, code='invalid')
-                if data['location_1'] is None or data['location_2'] is None:
-                    true_to_continue = False
-                    validation_message = 'Sample locations are required for this data type.'
-                    validation_message = validation_message + "  " + file_name
-                    raise ValidationError(validation_message, code='invalid')
-                if data['time_1'] is None or data['time_2'] is None:
-                    true_to_continue = False
-                    validation_message = 'Sample times are required for this data type.'
-                    validation_message = validation_message + "  " + file_name
-                    raise ValidationError(validation_message, code='invalid')
-
-                # is there a combination of group1+location1+time1+group2+location2+time2 in for this study already?
-                # in as group 1 and group 2
-                group_keys_combos_left = AssayOmicDataFileUpload.objects.filter(
-                    study_id=self.instance.study.id,
-                    group_1=data['group_1'],
-                    group_2=data['group_2'],
-                    location_1=data['location_1'],
-                    location_2=data['location_2'],
-                    time_1=data['time_1'],
-                    time_2=data['time_2']
-                )
-                # same metadata but in as group 2 and group 1
-                group_keys_combos_right = AssayOmicDataFileUpload.objects.filter(
-                    study_id=self.instance.study.id,
-                    group_1=data['group_2'],
-                    group_2=data['group_1'],
-                    location_1=data['location_2'],
-                    location_2=data['location_1'],
-                    time_1=data['time_2'],
-                    time_2=data['time_1']
-                )
-
-                # group_keys_combos_left = (f for f in group_keys_combos_left if f.filename() == file_name)
-                # group_keys_combos_right = (f for f in group_keys_combos_right if f.filename() == file_name)
-
-                # print('group_keys_combos_left ', group_keys_combos_left)
-                # print('group_keys_combos_right ', group_keys_combos_right)
-
-                files_left = []
-                for each in groups_keys_combos_left:
-                    if not each.id == data_file_pk:
-                        files_left.append[]
-
-                if len(group_keys_combos_left) > 0 or len(group_keys_combos_right) > 0:
-                    combo_metadata = '(filename: ' + file_name
-                    combo_metadata = combo_metadata + ').'
-                    true_to_continue = False
-                    validation_message = 'There is already a combination of these groups and associated locations and times in this study. '
-                    validation_message = validation_message + "  This metadata already added for this file: " + file_name_already
-                    validation_message = validation_message + "  Trying to add metadata for this file: " + file_name
-                    raise ValidationError(validation_message, code='invalid')
-
-        # add more QC as needed with continued development
+        true_to_continue = data_quality_clean_check_for_omic_file_upload(self, data, data_file_pk)
         return true_to_continue
-
 
     def process_file(self, save=False, calledme='c'):
         data = self.cleaned_data
-        data_file_pk = self.instance.id
+        print("g ",data['time_1'])
+        print("h ", data['time_2'])
+        data_file_pk = 0
+        if self.instance.id:
+            data_file_pk = self.instance.id
         file_extension = os.path.splitext(data.get('omic_data_file').name)[1]
         data_type = data['data_type']
         analysis_method = data['analysis_method']
-
-        # data are changed here, so NEED to return the data
-        data['time_1'] = 0
-        for time_unit, conversion in list(TIME_CONVERSIONS.items()):
-            if data.get('time_1_' + time_unit) is not None:
-                inttime = (data.get('time_1_' + time_unit))
-                data.update({'time_1': data.get('time_1') + inttime * conversion,})
-
-        data['time_2'] = 0
-        for time_unit, conversion in list(TIME_CONVERSIONS.items()):
-            if data.get('time_2_' + time_unit) is not None:
-                inttime = data.get('time_2_' + time_unit)
-                data.update({'time_2': data.get('time_2') + inttime * conversion,})
 
         # HANDY for getting a file object and a file queryset when doing clean vrs save
         if calledme == 'clean':

@@ -91,6 +91,7 @@ from .utils import (
     review_plate_reader_data_file_return_file_list,
     plate_reader_data_file_process_data,
     omic_data_file_process_data,
+    this_file_same_as_another_in_this_study,
     sandrasGeneralFormatNumberFunction
 )
 
@@ -6804,6 +6805,23 @@ def fetch_omic_sample_info_from_upload_data_table(request):
     return HttpResponse(json.dumps(data), content_type="application/json")
 
 
+def fetch_this_file_is_this_study(request):
+    omic_data_file = request.POST.get('omic_data_file', '0')
+    study_id = int(request.POST.get('study_id', '0'))
+    data_file_pk = int(request.POST.get('data_file_pk', '0'))
+
+    continue_message = this_file_same_as_another_in_this_study(omic_data_file, study_id, data_file_pk)
+    true_to_continue = continue_message[0]
+    message = continue_message[1]
+
+    data = {}
+    data.update({
+        'true_to_continue': true_to_continue,
+        'message': message,
+    })
+    return HttpResponse(json.dumps(data), content_type="application/json")
+
+
 def sub_fetch_omic_sample_info_from_upload_data_table(this_pk):
     locmess = "no"
     loc_pk = None
@@ -7115,6 +7133,10 @@ switch = {
     'fetch_omics_data_for_upload_preview_prep': {
         'call': fetch_omics_data_for_upload_preview_prep
     },
+    'fetch_this_file_is_this_study': {
+        'call': fetch_this_file_is_this_study
+    },
+
 }
 
 
