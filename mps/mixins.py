@@ -27,6 +27,7 @@ from django.views.generic import (
     DetailView,
     DeleteView,
     TemplateView,
+    FormView,
 )
 
 import urllib
@@ -798,4 +799,8 @@ class DeleteHandlerView(DefaultModelContextMixin, DeleteView):
 
 # Maybe a bit excessive, but clear at least
 class TemplateHandlerView(HelpAnchorMixin, TemplateView):
+    pass
+
+
+class FormHandlerView(HelpAnchorMixin, FormView):
     pass

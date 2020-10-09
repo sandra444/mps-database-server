@@ -29,12 +29,21 @@ from microdevices.models import MicrophysiologyCenter
 from mps.templatetags.custom_filters import ADMIN_SUFFIX, VIEWER_SUFFIX
 import html
 
-from mps.mixins import TemplateHandlerView
+from mps.mixins import TemplateHandlerView, FormHandlerView
 
 # Spaghetti code
 from assays.views import get_queryset_with_organ_model_map
 
 
+class MPSMain(FormHandlerView):
+    form_class = SearchForm
+
+    def form_valid(self, form):
+        if form.is_valid():
+            return search(self.request)
+
+
+# FUNCTION VIEWS ARE DEPRECATED IN FAVOR OF CBVs
 def main(request):
     if request.method == 'POST':
         form = SearchForm(request.POST)
@@ -59,6 +68,11 @@ def main(request):
 
     return render(request, 'index.html', context)
 
+
+class MPSLoggedIn(TemplateHandlerView):
+    template_name = 'loggedin.html'
+
+    title = 'Log In Successful'
 
 def loggedin(request):
     return render(request, 'loggedin.html')
