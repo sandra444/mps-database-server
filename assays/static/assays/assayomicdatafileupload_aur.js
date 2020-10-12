@@ -5,6 +5,8 @@ window.OMICS = {
 };
 
 $(document).ready(function () {
+    //show the validation stuff
+    $('#form_errors').show()
     // Load core chart package
     google.charts.load('current', {'packages': ['corechart']});
     google.charts.load('visualization', '1', {'packages': ['imagechart']});
@@ -29,6 +31,7 @@ $(document).ready(function () {
     changed_something_important("load");
 
     let global_omic_upload_check_load = $('#check_load').html().trim();
+
     if (global_omic_upload_check_load === 'review') {
         global_omic_upload_called_from = 'load-review' 
         // HANDY - to make everything on a page read only (for review page)
@@ -41,11 +44,12 @@ $(document).ready(function () {
         global_omic_upload_group_pk_load_2 = $('#id_group_2')[0].selectize.items[0]      
         
         if (global_omic_upload_check_load === 'add') {
-            global_omic_upload_called_from = 'load-add'         
+            global_omic_upload_called_from = 'load-add'
+            get_group_sample_info('load-add')
         } else {
             global_omic_upload_called_from = 'load-update'
+            get_group_sample_info('load-update')
         }
-        get_group_sample_info()
     }
 
     // tool tip requirements
@@ -83,6 +87,13 @@ $(document).ready(function () {
     }
 
     /**
+     * A function to clear the validation errors on change of any field
+     */
+    function clear_validation_errors() {
+        $('#form_errors').hide();
+    }
+
+    /**
      * On click to toggle
     */
     // the file format details
@@ -98,6 +109,7 @@ $(document).ready(function () {
      * On change data file
     */
     $('#id_omic_data_file').on('change', function (e) {
+        clear_validation_errors();
         //when first change the file, make the preview button available
         $('#omic_preview_button_section').show();
         $('#omic_preview_the_graphs_section').show();
@@ -108,12 +120,14 @@ $(document).ready(function () {
      * On change data type, change what is required page logic
     */
     $('#id_data_type').change(function () {
+        clear_validation_errors();
         changed_something_important("data_type");
     });
     /**
      * On changes that affect the graphs/plots on the preview page
     */
     $('#id_anaylsis_method').on('change', function (e) {
+        clear_validation_errors();
         changed_something_important("analysis_method");
     });
 
@@ -266,6 +280,7 @@ $(document).ready(function () {
      * On change method
     */
     $('#id_study_assay').change(function () {
+        clear_validation_errors();
         study_assay_value = $('#id_study_assay')[0].selectize.items[0];
         try {
             study_assay_text = $('#id_study_assay')[0].selectize.options[study_assay_value]['text'];
@@ -283,6 +298,7 @@ $(document).ready(function () {
      * On change a group, call a function that gets sample info
     */
     $('#id_group_1').change(function () {
+        clear_validation_errors();
         //console.log('change 1')
         if (global_make_the_group_change) {
             if ($('#id_group_1')[0].selectize.items[0] == $('#id_group_2')[0].selectize.items[0]) {
@@ -292,12 +308,13 @@ $(document).ready(function () {
                 global_omic_upload_called_from = 'change';
                 global_omic_upload_group_id_change = 1;
                 global_omic_upload_group_pk_change = $('#id_group_1')[0].selectize.items[0];
-                get_group_sample_info();
+                get_group_sample_info('change');
             }
             global_omic_current_group1 = $('#id_group_1')[0].selectize.items[0];
         }
     });
     $('#id_group_2').change(function () {
+        clear_validation_errors();
         if (global_make_the_group_change) {
             if ($('#id_group_1')[0].selectize.items[0] == $('#id_group_2')[0].selectize.items[0]) {
                 $('#id_group_2')[0].selectize.setValue(global_omic_current_group2);
@@ -307,7 +324,7 @@ $(document).ready(function () {
                 //console.log('change 2')
                 global_omic_upload_group_id_change = 2;
                 global_omic_upload_group_pk_change = $('#id_group_2')[0].selectize.items[0];
-                get_group_sample_info();
+                get_group_sample_info('change');
             }
             global_omic_current_group2 = $('#id_group_2')[0].selectize.items[0];
         }
@@ -347,7 +364,7 @@ $(document).ready(function () {
       * When a group is changed, if that group has already been added to the data upload file
       * get the first occurrence that has sample information.
     */
-    function get_group_sample_info() {
+    function get_group_sample_info(called_from) {
         // console.log('1: '+global_omic_upload_group_pk_change)
         // console.log('2: '+global_omic_upload_group_pk_load_1)
         // console.log('3: '+global_omic_upload_group_pk_load_2)
@@ -425,9 +442,29 @@ $(document).ready(function () {
         // console.log(json.location_dict2)
 
         if (global_omic_upload_called_from == 'load-add') {
-            // just do the location lists make them null, or just leave them long until the user picks a group
+            // just do the location lists
         } else if (global_omic_upload_called_from == 'load-update') {
             // just do the location lists to restrict to the model
+            let $this_dropdown1 = $(document.getElementById('id_location_1'));
+            let pk_loc_1 = $('#id_location_1')[0].selectize.items[0];
+            $this_dropdown1.selectize()[0].selectize.clearOptions();
+            let this_dict1 = $this_dropdown1[0].selectize;
+            // fill the dropdown with what brought back from ajax call
+            $.each(json.location_dict1[0], function( pk, text ) {
+                // console.log(" "+pk+ "  "+text)
+                this_dict1.addOption({value: pk, text: text});
+            });
+            $('#id_location_1')[0].selectize.setValue(pk_loc_1);
+            let $this_dropdown2 = $(document.getElementById('id_location_2'));
+            let pk_loc_2 = $('#id_location_2')[0].selectize.items[0];
+            $this_dropdown2.selectize()[0].selectize.clearOptions();
+            let this_dict2 = $this_dropdown2[0].selectize;
+            // fill the dropdown with what brought back from ajax call
+            $.each(json.location_dict2[0], function( pk, text ) {
+                // console.log(" "+pk+ "  "+text)
+                this_dict2.addOption({value: pk, text: text});
+            });
+            $('#id_location_2')[0].selectize.setValue(pk_loc_2);
         } else {
             // called from a change of one of the groups
             $('#id_time_'+global_omic_upload_group_id_change+'_day').val(json.day1);
@@ -440,6 +477,7 @@ $(document).ready(function () {
             $this_dropdown.selectize()[0].selectize.clearOptions();
             let this_dict = $this_dropdown[0].selectize;
             // fill the dropdown with what brought back from ajax call
+            //the changed one is always returned as the first
             $.each(json.location_dict1[0], function( pk, text ) {
                 // console.log(" "+pk+ "  "+text)
                 this_dict.addOption({value: pk, text: text});

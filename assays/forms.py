@@ -5243,8 +5243,6 @@ class AssayOmicDataFileUploadForm(BootstrapForm):
 
     def process_file(self, save=False, calledme='c'):
         data = self.cleaned_data
-        print("g ",data['time_1'])
-        print("h ", data['time_2'])
         data_file_pk = 0
         if self.instance.id:
             data_file_pk = self.instance.id

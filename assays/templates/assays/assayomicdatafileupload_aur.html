@@ -69,7 +69,9 @@
                 {% include "submit.html" with flag="y" creator=object.created_by.id %}
             {% endif %}
 
-            {% include "errors.html" %}
+            <div id="form_errors" class="toggle-display-none">
+                {% include "errors.html" %}
+            </div>
 
 {#            {% if form.errors %}#}
 {#                {% for field in form %}#}
