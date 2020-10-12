@@ -491,8 +491,6 @@ $(document).ready(function () {
             $('#id_location_2')[0].selectize.setValue(pk_loc_2);
         } else {
             // called from a change of one of the groups
-            // group was changed to something other than null or should not get here
-            $('#id_group_'+global_omic_upload_group_id_change)[0].selectize.items[0];
             $('#id_time_'+global_omic_upload_group_id_change+'_day').val(json.day1);
             $('#id_time_'+global_omic_upload_group_id_change+'_hour').val(json.hour1);
             $('#id_time_'+global_omic_upload_group_id_change+'_minute').val(json.minute1);
