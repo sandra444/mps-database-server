@@ -25,7 +25,8 @@ from django.conf.urls.static import static
 admin.autodiscover()
 
 urlpatterns = [
-    url(r'^$', mps.views.main),
+    # url(r'^$', mps.views.main),
+    url(r'^$', mps.views.MPSMain.as_view()),
 
     # user auth urls
     url(
@@ -49,7 +50,8 @@ urlpatterns = [
         ),
         name='auth_logout'
     ),
-    url(r'^accounts/loggedin/$', mps.views.loggedin, name='auth_loggedin'),
+    # url(r'^accounts/loggedin/$', mps.views.loggedin, name='auth_loggedin'),
+    url(r'^accounts/loggedin/$', mps.views.MPSLoggedIn.as_view(), name='auth_loggedin'),
     url(
         r'^password_change/$',
         auth_views.PasswordChangeView.as_view(
@@ -148,7 +150,8 @@ urlpatterns = [
     url(r'^help/', mps.views.mps_help),
 
     # About
-    url(r'^about/', mps.views.mps_about),
+    # url(r'^about/', mps.views.mps_about),
+    url(r'^about/', mps.views.MPSAbout.as_view()),
 
     # Djangovoice for feedback
     url(r'^comments/', include('django_comments.urls')),
