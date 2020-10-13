@@ -240,8 +240,9 @@ $(document).ready(function () {
     // TERRIBLE, SPAGHETTI CODE
     // AWFUL
     // WHY DO THIS?
+    // Still confused by this...
     var headers = {
-        // 'device': 'Device',
+        'Device': 'Device',
         'MPS User Group': 'MPS User Group',
         'Study': 'Study',
         'Matrix': 'Matrix',
