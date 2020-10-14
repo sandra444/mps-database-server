@@ -23,7 +23,7 @@
                 Study: {{ object }}
             </h1>
             <div class="text-center">
-                <a href="{{ object.get_absolute_url }}omics/" class="btn btn-primary" role="button">Visualization</a>
+                <a href="{% url 'assays-assaystudy-omics' object.id %}" class="btn btn-primary" role="button">Visualization</a>
             </div>
         </div>
 
