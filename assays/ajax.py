@@ -1742,6 +1742,9 @@ def validate_data_file(request):
 
     # Very odd, but expedient
     studies = AssayStudy.objects.filter(id=this_study.id)
+    # Likewise: please revise get_data_points_for_charting
+    groups = AssayGroup.objects.filter(study_id=this_study.id)
+    matrix_items = AssayMatrixItem.objects.filter(study_id=this_study.id)
 
     form = AssayStudyDataUploadForm(request.POST, request.FILES, request=request, instance=this_study)
 
@@ -1763,6 +1766,8 @@ def validate_data_file(request):
             truncate_negative,
             dynamic_quality,
             study=studies,
+            groups=groups,
+            matrix_items=matrix_items,
             new_data=True,
             criteria=json.loads(request.POST.get('criteria', '{}'))
         )
