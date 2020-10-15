@@ -11,24 +11,24 @@
     {% if term.term == "Compound" %}
         {# *anchor* #}
         <div id="compound_compound_anchor">
-            <button name="my_buttons" class="collapsible3">{{ term.term }}</button>
-            <div class="content3">
+            <button name="help_button" type="button" class="btn btn-success help-collapsible">{{ term.term }}</button>
+            <div class="help-content-2">
                 <ul class="list-group">
                     <li class="list-group-item">
-                        <h1 class="sub3-bars"> {{ term.term }} </h1>
+                        <h1 class="h1-level-1"> {{ term.term }} </h1>
                         <ul class="list-unstyled">
                             <li>To review the list of <b>{{ term.term }}</b>:
-                                <ul class="filled-circle">
+                                <ul class="help-filled-circle">
                                     <li>Click the link {{ term.show_url }} </li>
                                     <li>Use the <b>Search</b> bar or scroll through the list to find the <b>{{ term.term }}</b> of interest or confirm the <b>{{ term.term }}</b> is not present</li>
                                     <li>If in the list, click on the <b>View</b> button to review the details or the <b>Edit</b> button to update </li>
                                     <li>If not in the list, click on the <b>Add Compound</b> button </li>
                                 </ul>
                             </li>
-                            <li><br>Notes:
-                                <ul class="filled-circle">
+                            <li><br>Help Notes:
+                                <ul class="help-filled-circle">
                                     <li>To add new compounds:
-                                        <ul class="open-circle">
+                                        <ul class="help-open-circle">
                                             <li>Click the <b>Search ChEMBL</b> button </li>
                                             <li>Find the ChEMBL ID for the compound needed </li>
                                             <li>Copy the ChEMBL ID into the ChEMBL ID box </li>

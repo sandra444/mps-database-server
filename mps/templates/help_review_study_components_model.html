@@ -10,24 +10,24 @@
     {% if term.term == "MPS Model" %}
         {# *anchor* #}
         <div id="assay_model_anchor">
-            <button name="my_buttons" class="collapsible3">{{ term.term }}</button>
-            <div class="content3">
+            <button name="help_button" type="button" class="btn btn-success help-collapsible">{{ term.term }}</button>
+            <div class="help-content-2">
                 <ul class="list-group">
                     <li class="list-group-item">
-                        <h1 class="sub3-bars"> {{ term.term }} </h1>
+                        <h1 class="h1-level-1"> {{ term.term }} </h1>
                         <ul class="list-unstyled">
                             <li>To review the list of <b>{{ term.term }}</b>:
-                                <ul class="filled-circle">
+                                <ul class="help-filled-circle">
                                     <li>Click the link {{ term.show_url }} </li>
                                     <li>Use the <b>Search</b> bar or scroll through the list to find the <b>{{ term.term }}</b> of interest or confirm the <b>{{ term.term }}</b> is not present</li>
                                     <li>If in the list, click on the <b>View</b> button to review the details or the <b>Edit</b> button to update </li>
                                     <li>If not in the list, click on the <b>Add Model</b> button </li>
                                 </ul>
                             </li>
-                            <li><br>Notes:
-                                <ul class="filled-circle">
+                            <li><br>Help Notes:
+                                <ul class="help-filled-circle">
                                     <li>To add or edit:
-                                        <ul class="open-circle">
+                                        <ul class="help-open-circle">
                                             <li>Fill in all the required information </li>
                                             <li>Submit to save </li>
                                             <li>In the <b>{{ term.term }}</b> list, click the <b>Edit</b> button to update the model</li>
@@ -38,8 +38,8 @@
                                     </li>
                                 </ul>
                             </li>
-                            <li><br>Tips:
-                                <ul class="filled-circle">
+                            <li><br>Help Tips:
+                                <ul class="help-filled-circle">
                                     <li>Collect up all the metadata needed before adding or updating </li>
                                     <li>Add references to the database prior to trying to add them to a <b>{{ term.term }}</b> </li>
                                     <li>Add model versions to expedite study entry and data analysis </li>
@@ -47,20 +47,20 @@
                             </li>
                         </ul>
 
-                        <h1 class="sub3-bars"> MPS Model Version </h1>
+                        <h1 class="h1-level-1"> MPS Model Version </h1>
                         <h1>edit this for a model version.....</h1>
                         <p><b><i>There are several options for editing Matrix Items, including editing by group, this is just one option. </i></b></p>
                         <ul class="list-unstyled">
                             <li>To edit a <b>Matrix Item</b>, click on the <b>View/Edit</b> button next to the <b>Matrix Item</b> of interest:
-                                <ul class="filled-circle">
+                                <ul class="help-filled-circle">
                                     <li>In the <i>Matrix Item Details</i> section
-                                        <ul class="open-circle">
+                                        <ul class="help-open-circle">
                                             <li>Add/Edit the information as appropriate (add additional details if desired) </li>
                                             <li>If possible, add the MPS model protocol (if not added in the Matrix) </li>
                                         </ul>
                                     </li>
                                     <li>In the <i>Compounds</i> section
-                                        <ul class="open-circle">
+                                        <ul class="help-open-circle">
                                             <li>Edit the information as appropriate (add additional details if desired) </li>
                                             <li>The addition time should be since the start (time 0) of the experiment </li>
                                             <li>The duration is the length of time of exposure (if a bolus dose, use 1 minute; if the whole experiment, use the length of the experiment) </li>
@@ -69,18 +69,18 @@
                                         </ul>
                                     </li>
                                     <li>In the <i>Cell Samples</i> section
-                                        <ul class="open-circle">
+                                        <ul class="help-open-circle">
                                             <li>Edit the information as appropriate (add additional details if desired)</li>
                                             <li>When adding, click the magnifying glass to see a list of available cell samples</li>
                                         </ul>
                                     </li>
                                     <li>In the <i>Settings</i> section
-                                        <ul class="open-circle">
+                                        <ul class="help-open-circle">
                                             <li>Edit the information as appropriate (add additional details if desired)</li>
                                         </ul>
                                     </li>
                                     <li>After assay data have been added, the Exclude field of the tabular data can be edited (optional)
-                                        <ul class="open-circle">
+                                        <ul class="help-open-circle">
                                             <li>Review data in graphs and/or table</li>
                                             <li>In the table, if desired, change the exclusion status of a data point (add an X to the Exclude field to omit by default, remove the X to include) </li>
                                         </ul>
@@ -88,8 +88,8 @@
                                     <li>Click the <b>Submit</b> button to save changes</li>
                                 </ul>
                             </li>
-                            <li><br>Notes
-                                <ul class="filled-circle">
+                            <li><br>Help Notes:
+                                <ul class="help-filled-circle">
                                     <li><b>Matrix Items</b>, along with the Name/ID, Test Type, Setup Date, and Organ <b>Model</b> MUST be added through the <b>Matrix</b>, but can be changed on the <b>Matrix Item Setup and Data</b> page  </li>
                                     <li>When using scientific notation to enter values, use this format: 1e+3, 1e+10, 3e+15</li>
                                     <li>The Exclude field, shown on the <b>Matrix Item Setup and Data</b> page is the only attribute of a data point that can be changed in the MPS-GUI</li>
