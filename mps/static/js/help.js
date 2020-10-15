@@ -1,10 +1,10 @@
 $(document).ready(function () {
-    var offset = 0;
-    var help_offset = 0;
+    var offset = 110;
+    var help_offset = 170;
     var global_true_if_all_are_open = false;
 
     var initial_hash = window.location.hash;
-    initial_hash = '#video_demo_w1';
+    initial_hash = '#help_download_button';
     if (initial_hash) {
         animate_scroll_hash(initial_hash);
     }
@@ -15,7 +15,7 @@ $(document).ready(function () {
         if ($(initial_hash).length)
         {
             $('html, body').animate({
-                scrollTop: $(this_hash).offset().top - help_offset
+                scrollTop: $(this_hash).offset().top - offset
             }, 500);
             $(this_hash).find('button').next().first().css("display", "block");
         }
@@ -91,8 +91,11 @@ $(document).ready(function () {
         $(".highlighted").removeClass("highlighted").removeClass("match");
         if (!searchAndHighlight($('.textSearchvalue_h').val())) {
             alert("No results found (or search box is empty)");
+            initial_hash = '#overview_section';
+            if (initial_hash) {
+                animate_scroll_hash(initial_hash);
+            }
         }
-
     });
 
     // https://www.aspforums.net/Threads/211834/How-to-search-text-on-web-page-similar-to-CTRL-F-using-jQuery/
@@ -122,13 +125,13 @@ $(document).ready(function () {
                 $(selector).html($(selector).html().replace(searchTermRegEx, "<span class='match'>" + searchTerm + "</span>"));
 
                 console.log("here")
+                console.log("mathes "+matches)
                 $('.match').each(function(index, currentElement) {
-
                     console.log(index)
                     console.log("currentElement "+currentElement)
                     console.log("currentElement.innerHTML "+currentElement.innerHTML)
                     console.log("matches[index] "+matches[index])
-                    //currentElement.replace(currentElement.innerHTML, "<span class='match'>" + matches[index] + "</span>"));
+                    //currentElement.HTMLSpanElement.replace(currentElement.innerHTML, "<span class='match'>" + matches[index] + "</span>");
                 });
                 console.log("here2")
 
@@ -195,7 +198,7 @@ $(document).ready(function () {
 
                     // console.log("animate next")
                     $('html, body').animate({
-                        scrollTop: $('.highlighted:visible:first').offset().top - (help_offset)
+                        scrollTop: $('.highlighted:visible:first').offset().top - help_offset
                     }, 400);
 
                 });
@@ -211,7 +214,7 @@ $(document).ready(function () {
 
                     // console.log("animate previous")
                     $('html, body').animate({
-                        scrollTop: $('.highlighted:visible:first').offset().top - (help_offset)
+                        scrollTop: $('.highlighted:visible:first').offset().top - help_offset
                     }, 400);
                 });
 
@@ -219,7 +222,7 @@ $(document).ready(function () {
                 if ($('.highlighted:first').length) {
                     // console.log("animate search first")
                     //if match found, scroll to where the first one appears
-                    $(window).scrollTop($('.highlighted:first').position().top - (help_offset));
+                    $(window).scrollTop($('.highlighted:first').position().top - help_offset);
                 }
                 return true;
             }
@@ -232,7 +235,7 @@ $(document).ready(function () {
         // console.log("animate a")
         if ($($(this).attr('href'))[0]) {
             $('html, body').animate({
-                scrollTop: $($(this).attr('href')).offset().top - help_offset
+                scrollTop: $($(this).attr('href')).offset().top - offset
             }, 500);
             $($(this).attr('href')).find('button').next().first().css("display", "block");
         }
