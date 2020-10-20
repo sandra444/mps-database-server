@@ -227,6 +227,15 @@
                         <a href="#glossary">Glossary</a>
                     </li>
 
+{#                </li>#}
+{#            </ul>#}
+{#        </div>#}
+{##}
+{#        <div class="collapse navbar-collapse" id="myNavbar2">#}
+{#            <ul class="nav navbar-nav">#}
+{##}
+{#                <li>#}
+
                     {# search table #}
                     <li>
                         <div class="searchContend_h">
@@ -239,30 +248,33 @@
                                 <tbody>
                                     <tr>
                                         <td>
+                                            <input type="checkbox" id="match_case" name="match_case" value="match_case" class="plate-map-bigger-radio">
+                                        </td>
+                                        <td>
+                                            <label for="match_case" class="navi-special-1"> Match Case </label>
+                                        </td>
+
+                                        <td>
                                             <div class="ui-block-a">
-                                                <input name="text-12" id="text-12" value="" type="text" class="textSearchvalue_h">
+                                                <input id="search_term" name="search_term" value="" type="text" class="textSearchvalue_h" >
                                             </div>
                                         </td>
                                         <td>
                                             <div class="ui-block-b">
-                                                <a href="#" data-role="button" data-corners="false" data-inline="true" class="searchButtonClickText_h" style="font-size:130%;">Search</a>
+                                                <a id="search_gooo" href="#" data-role="button" data-corners="false" data-inline="true" class="searchButtonClickText_h navi-special-2">Search</a>
                                             </div>
                                         </td>
                                         <td>
                                             <div class="ui-block-c">
-                                                <a href="#" data-role="button" data-corners="false" data-inline="true" class="next_h" style="font-size:130%;">Next</a>
+                                                <a id="search_next" href="#" data-role="button" data-corners="false" data-inline="true" class="next_h navi-special-2">Next</a>
                                             </div>
                                         </td>
                                         <td>
                                             <div class="ui-block-d">
-                                                <a href="#" data-role="button" data-corners="false" data-inline="true" class="previous_h" style="font-size:130%;">Previous</a>
+                                                <a id="search_prev" href="#" data-role="button" data-corners="false" data-inline="true" class="previous_h navi-special-2">Previous</a>
                                             </div>
                                         </td>
-<!--                                        <td>-->
-<!--                                            <div style="color:lightslategray;">-->
-<!--                                                (case sensitive)-->
-<!--                                            </div>-->
-<!--                                        </td>-->
+
                                     </tr>
                                 </tbody>
                                 </table>
