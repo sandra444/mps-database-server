@@ -11,6 +11,8 @@ $(document).ready(function () {
     var match_case_flag = "ig";
     var match_index = 0;
     var help_buttons = null;
+    var matches_length = 0;
+    var unique_matches = [];
 
     //this will get the anchor, if one called
     var initial_hash = window.location.hash;
@@ -87,8 +89,8 @@ $(document).ready(function () {
         }
     }
 
-    function change_search_ables(which) {
-        if (which === 'search') {
+    function change_search_ables_to_search(which) {
+        if (which) {
             $('#search_next').attr('disabled', 'disabled');
             $('#search_prev').attr('disabled', 'disabled');
             $('#search_gooo').removeAttr('disabled');
@@ -104,31 +106,37 @@ $(document).ready(function () {
     $('#search_prev').attr('disabled', 'disabled');
 
     $(document).on('click', '#match_case', function() {
-        change_search_ables('search');
+        change_search_ables_to_search(true);
     });
 
     document.getElementById("search_term").onfocus = function() {myFunction()};
     function myFunction() {
-        change_search_ables('search');
+        change_search_ables_to_search(true);
     }
 
     $(document).on('click', '#search_gooo', function() {
-        searchTerm = $('#search_term').val();
-        change_search_ables('xsearch');
+        change_search_ables_to_search(false);
          
-        matches = null;
         //remove all the old matches, if any
-        $(".highlighted").removeClass("highlighted").removeClass("match");
+        $(".highlighted").removeClass("match");
         //Remove old search highlights
         $('.highlighted').removeClass('highlighted');
-        //Remove the previous matches
+        //Remove the spans
         $span = $('#realTimeContents span');
-        $span.replaceWith($span.html());     
-        
+        $span.replaceWith($span.html());
+
+        if ($('#match_case').prop('checked')){
+            match_case_flag = "g";
+        } else {
+            match_case_flag = "ig";
+        }
+
+        searchTerm = $('#search_term').val();
         if (searchTerm.length === 0) {
             alert("Search box is empty");
-            change_search_ables('search');
+            change_search_ables_to_search(true);
         } else {
+            // open all the collapsibles if they are not already open
             if (!global_true_if_all_are_open) {
                 help_buttons = document.getElementsByName('help_button');
                 for (var i = 0; i <= help_buttons.length; i++) {
@@ -140,7 +148,7 @@ $(document).ready(function () {
                 }
             }
             // find the matches array and go to and highlighted
-            // this calls search 1 (not a call back)
+            // this calls search master outer (not a call back)
             let match_found_true = searchAndHighlight_search_master();
             if (!match_found_true) {
                 alert("No results found");
@@ -151,18 +159,22 @@ $(document).ready(function () {
 
     // https://www.aspforums.net/Threads/211834/How-to-search-text-on-web-page-similar-to-CTRL-F-using-jQuery/
     // http://jsfiddle.net/wjLmx/23/
+    //https://codeburst.io/javascript-what-the-heck-is-a-callback-aba4da2deced
     function searchAndHighlight_search_master() {
         var result = false;
-        if ($('#match_case').prop('checked')){
-            match_case_flag = "g";
-        } else {
-            match_case_flag = "ig";
-        }
         if (searchTerm) {
             searchTermRegEx = new RegExp(searchTerm, match_case_flag);
-            //call search 0 that has a call back
-            var matches_length = findMatches_search0(afterFindMatches_search1);
-            console.log("matches_length after callback "+matches_length)
+
+            console.log("matches (previous call) "+matches)
+            console.log("step 1 searchTermRegEx "+searchTermRegEx)
+            console.log("step 1 selector "+selector)
+
+             matches = null;
+
+            findMatches_search0(afterFindMatches_search1);
+
+            console.log("End - Number of matches after back from everything = "+matches_length)
+
             if (matches_length > 0) {
                 result = true;
             }
@@ -171,55 +183,53 @@ $(document).ready(function () {
     }
 
     function findMatches_search0(callback1) {
-        console.log("searchTermRegEx "+searchTermRegEx)
-        console.log("selector "+selector)
-        matches = [];
-        console.log("matches a1 "+matches)
         matches = $(selector).text().match(searchTermRegEx);
-        for (var i = 0; i <= 10000; i++) {
-            if (i === 0) {
-                console.log("i matches "+ i + " " + matches)
-            }
-            if (i % 1000 === 0) {
-                console.log("i matches "+ i + " " + matches)
-            }
-        }
-        console.warn('done')
-        console.log("matches a "+matches)
-        console.log("matches b "+matches)
-        console.log("b "+matches.length)
         callback1();
-        return matches.length;
     }
 
     function afterFindMatches_search1() {
-        var result = false;
-        if (matches != null && matches.length > 0) {
+        if (!matches) {
+            matches = [];
+        }
+        matches_length = matches.length;
+        console.log("step 1 matches "+matches)
+        console.log("step 1 number matches = "+matches_length)
+
+        if (matches != null && matches_length > 0) {
+            // unique_matches = matches.filter(function(itm, i, a) {
+            //     return i == matches.indexOf(itm);
+            // });
             if (searchTerm === "&") {
                 searchTerm = "&amp;";
                 searchTermRegEx = new RegExp(searchTerm, match_case_flag);
             }
-            //https://codeburst.io/javascript-what-the-heck-is-a-callback-aba4da2deced
+            console.log("searchTerm ",searchTerm)
             labelMatchSpan_search2(continueFunction_search3);
-            result = true;
         }
-        return result;
     }
 
     function labelMatchSpan_search2(callback2){
-        // do some asynchronous work and when the asynchronous stuff is complete
         $(selector).html($(selector).html().replace(searchTermRegEx, "<span class='match'>" + searchTerm + "</span>"));
         callback2();
     }
 
     function continueFunction_search3() {
-        // call first function and pass in a callback function which
-        // first function runs when it has completed
+        console.log("in search 3")
+        console.log("$('.match').length = "+$('.match').length)
+        console.log("matches_length = " + matches_length)
+        // the previous function replaced with the search term, fix to match the original case
+        if ($('.match').length != matches_length) {
+            alert("there is a mismatch in the counting....")
+        }
         $('.match').each(function (index, currentElement) {
+            console.log("~~~index = "+index)
+            console.log("~~~matches[index] = "+matches[index])
+            console.log("~~~currentElement.innerHTML = "+currentElement.innerHTML)
             currentElement.innerHTML = matches[index];
         });
         $('.match:first').addClass('highlighted');
         match_index = 0;
+        console.log("in search 3 - getting ready to highlight")
         // when the search is clicked - finds the first occurrence
         if ($('.highlighted:first').length) {
             //if match found, scroll to where the first one appears
