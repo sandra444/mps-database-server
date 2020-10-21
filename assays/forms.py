@@ -3156,7 +3156,7 @@ class AssayMatrixItemForm(SetupFormsMixin, SignOffMixin, BootstrapForm):
             'notebook',
             'notebook_page',
             'notes'
-        )
+        ) + flag_group
 
     def __init__(self, *args, **kwargs):
         super(AssayMatrixItemForm, self).__init__(*args, **kwargs)
