@@ -1,7 +1,12 @@
 $(document).ready(function () {
+
+    //make them disabled on load
+    $('#search_next').attr('disabled', 'disabled');
+    $('#search_prev').attr('disabled', 'disabled');
+
     var offset = 110;
     var help_offset = 200;
-    var global_true_if_all_are_open = false;
+    var if_all_are_open_true = false;
 
     var selector = "#realTimeContents";
     var searchTermRegEx = null;
@@ -12,7 +17,6 @@ $(document).ready(function () {
     var match_index = 0;
     var help_buttons = null;
     var matches_length = 0;
-    var unique_matches = [];
 
     //this will get the anchor, if one called
     var initial_hash = window.location.hash;
@@ -34,61 +38,63 @@ $(document).ready(function () {
         }
     }
 
-    $(".help-collapsible").click(function() {
-        // console.log("help-collapsible")
-        var content = this.nextElementSibling;
-        var parent_id = '';
-        try {
-            parent_id = $(this).parent().attr('id');
-        } catch {
-            parent_id = '';
-        }
-        change_display(parent_id, content, 'toggle');
-    });
-
+    // need a listener click for after the search....
     //https://api.jquery.com/click/
-    $("#expand_all").click(function(){
+    $(document).on('click', '#expand_all', function() {
+    // $("#expand_all").click(function(){
+        expand_or_close_all(selector, 'e');
+        if_all_are_open_true = true;
+    })
+    $(document).on('click', '#close_all', function() {
+    // $("#close_all").click(function(){
+        expand_or_close_all(selector, 'c');
+    })
+
+    function expand_or_close_all(selector, what_doing) {
         //https://stackoverflow.com/questions/24844566/click-all-buttons-on-page
         // Get all buttons with the name and store in a NodeList called 'buttons'
+        // console.log("selector "+selector)
+        // console.log("what_doing "+what_doing)
         var buttons = document.getElementsByName('help_button');
         // Loop through and change display of the content
         for (var i = 0; i <= buttons.length; i++) {
             try {
                 var content = buttons[i].nextElementSibling;
-                change_display('expand_all', content, 'expand');
+                change_display(content, what_doing);
             } catch {
             }
-        }
-        global_true_if_all_are_open = true;
-    })
-    $("#close_all").click(function(){
-        var buttons = document.getElementsByName('help_button');
-        // Loop through and change display of the content
-        for (var i = 0; i <= buttons.length; i++) {
-            try {
-                var content = buttons[i].nextElementSibling;
-                change_display('close_all', content, 'close');
-            } catch {
-            }
-        }
-        global_true_if_all_are_open = false;
-    })
-
-    function change_display(this_checker, content, what_doing) {
-        if (what_doing === 'toggle') {
-            if ($(content).css("display") != "none") {
-                $(content).css("display", "none");
-                global_true_if_all_are_open = false;
-            } else {
-                $(content).css("display", "block");
-            }
-        } else if (what_doing === 'expand') {
-            $(content).css("display", "block");
-        } else {
-            $(content).css("display", "none");
         }
     }
 
+    $(document).on('click', '.help-collapsible', function() {
+    // $(".help-collapsible").click(function() {
+        change_display(this.nextElementSibling, 't');
+    });
+
+    $(document).on('click', '.video-collapsible', function() {
+    // $(".help-collapsible").click(function() {
+        change_display(this.nextElementSibling, 't');
+    });
+
+    function change_display(content, what_doing) {
+        // console.log("content "+content)
+        // console.log("what_doing "+what_doing)
+        if (what_doing === 't') {
+            if ($(content).css("display") != "none") {
+                $(content).css("display", "none");
+                if_all_are_open_true = false;
+            } else {
+                $(content).css("display", "block");
+            }
+        } else if (what_doing === 'e') {
+            $(content).css("display", "block");
+        } else {
+            $(content).css("display", "none");
+            if_all_are_open_true = false;
+        }
+    }
+
+    // START SEARCH SECTION
     function change_search_ables_to_search(which) {
         if (which) {
             $('#search_next').attr('disabled', 'disabled');
@@ -101,29 +107,33 @@ $(document).ready(function () {
         }
     }
 
-    //make them disabled on load
-    $('#search_next').attr('disabled', 'disabled');
-    $('#search_prev').attr('disabled', 'disabled');
-
     $(document).on('click', '#match_case', function() {
+    // $("#match_case").click(function() {
         change_search_ables_to_search(true);
     });
-
-    document.getElementById("search_term").onfocus = function() {myFunction()};
+    
+    // consider on input
+    document.getElementById("search_term").onfocus = function() {
+        myFunction()
+    };
+    
     function myFunction() {
         change_search_ables_to_search(true);
     }
 
     $(document).on('click', '#search_gooo', function() {
+    // $("#search_gooo").click(function() {
         change_search_ables_to_search(false);
          
-        //remove all the old matches, if any
-        $(".highlighted").removeClass("match");
         //Remove old search highlights
         $('.highlighted').removeClass('highlighted');
-        //Remove the spans
-        $span = $('#realTimeContents span');
-        $span.replaceWith($span.html());
+        //Remove the spans and old matches
+        $span = $('#realTimeContents .match');
+        // NO NO NO - this does not iterate as expected, it just pulls one - $span.replaceWith($span.html());
+        // the following makes sure to iterate through
+        $span.each(function() {
+            $(this).replaceWith($(this).html());
+        });
 
         if ($('#match_case').prop('checked')){
             match_case_flag = "g";
@@ -137,15 +147,9 @@ $(document).ready(function () {
             change_search_ables_to_search(true);
         } else {
             // open all the collapsibles if they are not already open
-            if (!global_true_if_all_are_open) {
-                help_buttons = document.getElementsByName('help_button');
-                for (var i = 0; i <= help_buttons.length; i++) {
-                    try {
-                        var content = help_buttons[i].nextElementSibling;
-                        change_display('expand_all', content, 'expand');
-                    } catch {
-                    }
-                }
+            // console.log("if_all_are_open_true ", if_all_are_open_true)
+            if (!if_all_are_open_true) {
+                expand_or_close_all(selector, 'e');
             }
             // find the matches array and go to and highlighted
             // this calls search master outer (not a call back)
@@ -165,15 +169,15 @@ $(document).ready(function () {
         if (searchTerm) {
             searchTermRegEx = new RegExp(searchTerm, match_case_flag);
 
-            console.log("matches (previous call) "+matches)
-            console.log("step 1 searchTermRegEx "+searchTermRegEx)
-            console.log("step 1 selector "+selector)
+            // console.log("matches (previous call) "+matches)
+            // console.log("step 1 searchTermRegEx "+searchTermRegEx)
+            // console.log("step 1 selector "+selector)
 
-             matches = null;
+            matches = null;
 
             findMatches_search0(afterFindMatches_search1);
 
-            console.log("End - Number of matches after back from everything = "+matches_length)
+            // console.log("End - Number of matches after back from everything = "+matches_length)
 
             if (matches_length > 0) {
                 result = true;
@@ -192,8 +196,8 @@ $(document).ready(function () {
             matches = [];
         }
         matches_length = matches.length;
-        console.log("step 1 matches "+matches)
-        console.log("step 1 number matches = "+matches_length)
+        // console.log("step 1 matches "+matches)
+        // console.log("step 1 number matches = "+matches_length)
 
         if (matches != null && matches_length > 0) {
             // unique_matches = matches.filter(function(itm, i, a) {
@@ -203,7 +207,7 @@ $(document).ready(function () {
                 searchTerm = "&amp;";
                 searchTermRegEx = new RegExp(searchTerm, match_case_flag);
             }
-            console.log("searchTerm ",searchTerm)
+            // console.log("searchTerm ",searchTerm)
             labelMatchSpan_search2(continueFunction_search3);
         }
     }
@@ -214,22 +218,25 @@ $(document).ready(function () {
     }
 
     function continueFunction_search3() {
-        console.log("in search 3")
-        console.log("$('.match').length = "+$('.match').length)
-        console.log("matches_length = " + matches_length)
+        // console.log("in search 3")
+        // console.log("$('.match').length = "+$('.match').length)
+        // console.log("matches_length = " + matches_length)
         // the previous function replaced with the search term, fix to match the original case
         if ($('.match').length != matches_length) {
             alert("there is a mismatch in the counting....")
         }
+        // console.log("step right above matches "+matches)
         $('.match').each(function (index, currentElement) {
-            console.log("~~~index = "+index)
-            console.log("~~~matches[index] = "+matches[index])
-            console.log("~~~currentElement.innerHTML = "+currentElement.innerHTML)
-            currentElement.innerHTML = matches[index];
+            // console.log("~~~index = "+index)
+            // console.log("~~~matches[index] = "+matches[index])
+            // console.log("~~~currentElement.innerHTML = "+currentElement.innerHTML)
+            // console.log("~~~$(this).html() = "+$(this).html())
+            // currentElement.innerHTML = matches[index];
+            $(this).html(matches[index]);
         });
         $('.match:first').addClass('highlighted');
         match_index = 0;
-        console.log("in search 3 - getting ready to highlight")
+        // console.log("in search 3 - getting ready to highlight")
         // when the search is clicked - finds the first occurrence
         if ($('.highlighted:first').length) {
             //if match found, scroll to where the first one appears
@@ -241,8 +248,8 @@ $(document).ready(function () {
         }
     }
 
-    //These seem to work fine
     $(document).on('click', '#search_next', function () {
+    // $("#search_next").click(function() {
         // $('.next_h').off('click').on('click', function () {
         match_index =  match_index + 1;
         if (match_index >= $('.match').length) {
@@ -256,6 +263,7 @@ $(document).ready(function () {
     });
 
     $(document).on('click', '#search_prev', function () {
+    // $("#search_prev").click(function() {
         // $('.previous_h').off('click').on('click', function () {
         match_index = match_index - 1;
         if (match_index < 0) {
@@ -267,7 +275,9 @@ $(document).ready(function () {
             scrollTop: $('.highlighted:visible:first').offset().top - help_offset
         }, 400);
     });
+    // END SEARCH SECTION
 
+    // START GLOSSARY SECTION
     $('a').not("[href*='/']").click(function(event) {
         event.preventDefault();
         if ($($(this).attr('href'))[0]) {
@@ -333,233 +343,6 @@ $(document).ready(function () {
         _alphabetSearch = $(this).attr('data-letter');
         glossary_table.draw();
     });
-
+    // END GLOSSARY SECTION
 });
 
-    //just keep for now - original search but did not work like I wanted
-    // $(document).on('click', '.searchButtonClickText_h', function (event) {
-    //     searchCall_search1();
-    // });
-    //
-    // function searchCall_search1() {
-    //     console.log("g_counter1 "+g_counter1)
-    //     g_counter1=g_counter1+1;
-    //
-    //     searchTerm = $('.textSearchvalue_h').val();
-    //     selector = "#realTimeContents";
-    //     console.log("searchTerm "+searchTerm)
-    //
-    //     if (!global_true_if_all_are_open) {
-    //         buttons = document.getElementsByName('help_button');
-    //         for (var i = 0; i <= buttons.length; i++) {
-    //             try {
-    //                 var content = buttons[i].nextElementSibling;
-    //                 change_display('expand_all', content, 'expand');
-    //             } catch {
-    //             }
-    //         }
-    //     }
-    //     $(".highlighted").removeClass("highlighted").removeClass("match");
-    //
-    //     if (searchTerm.length === 0) {
-    //         alert("Search box is empty");
-    //     } else
-    //     if (!searchAndHighlight_search_master()) {
-    //         alert("No results found");
-    //         initial_hash = '#overview_section';
-    //         if (initial_hash) {
-    //             animate_scroll_hash(initial_hash);
-    //         }
-    //     }
-    // }
-    //
-    // // https://www.aspforums.net/Threads/211834/How-to-search-text-on-web-page-similar-to-CTRL-F-using-jQuery/
-    // // http://jsfiddle.net/wjLmx/23/
-    // // function searchAndHighlight_search_master(searchTerm, selector) {
-    // function searchAndHighlight_search_master() {
-    //
-    //     console.log("g_counter2 "+g_counter2)
-    //     g_counter2=g_counter2+1;
-    //
-    //     if ($('#match_case').prop('checked')){
-    //         match_case_flag = "g";
-    //     } else {
-    //         match_case_flag = "ig";
-    //     }
-    //
-    //     if (searchTerm) {
-    //         //var wholeWordOnly = new RegExp("\\g"+searchTerm+"\\g","ig"); //matches whole word only
-    //         //var anyCharacter = new RegExp("\\g["+searchTerm+"]\\g","ig"); //matches any word with any of search chars characters
-    //         // i = With this flag the search is case-insensitive: no difference between A and a (see the example below).
-    //         // g = With this flag the search looks for all matches, without it – only the first match is returned.
-    //         // selector = selector || "#realTimeContents"; //use body as selector if none provided
-    //         searchTermRegEx = new RegExp(searchTerm, match_case_flag);
-    //         matches = $(selector).text().match(searchTermRegEx);
-    //         // the matches list is case insensitive
-    //
-    //         if (matches != null && matches.length > 0) {
-    //             //Remove old search highlights
-    //             $('.highlighted').removeClass('highlighted');
-    //             //Remove the previous matches
-    //             $span = $('#realTimeContents span');
-    //             $span.replaceWith($span.html());
-    //
-    //             if (searchTerm === "&") {
-    //                 searchTerm = "&amp;";
-    //                 searchTermRegEx = new RegExp(searchTerm, match_case_flag);
-    //             }
-    //
-    //             continueFunction_search3();
-    //             return true;
-    //         }
-    //     }
-    //     return false;
-    // }
-    //
-    // function labelMatchSpan_search2(next){
-    //     // do some asynchronous work and when the asynchronous stuff is complete
-    //     $(selector).html($(selector).html().replace(searchTermRegEx, "<span class='match'>" + searchTerm + "</span>"));
-    //     next();
-    // }
-    // function continueFunction_search3(){
-    //     // call first function and pass in a callback function which
-    //     // first function runs when it has completed
-    //     labelMatchSpan_search2(function() {
-    //         $('.match').each(function(index, currentElement) {
-    //             // console.log(index)
-    //             // console.log("currentElement "+currentElement)
-    //             // console.log("currentElement.innerHTML "+currentElement.innerHTML)
-    //             // console.log("matches[index] "+matches[index])
-    //             currentElement.innerHTML= matches[index];
-    //         });
-    //
-    //         // var allListElements = $(".match");
-    //         // console.log("e "+allListElements)
-    //         // m = 0;
-    //         // allListElements.each(function() {
-    //         //     console.log("m "+m)
-    //         //     console.log(this)
-    //         //     $(this).replace("<span class='match'>" + searchTerm + "</span>", "<span class='match'>" + match[m] + "</span>");
-    //         //     m++;
-    //         // });
-    //
-    //         // var unique_matches = matches.filter(function(itm, i, a) {
-    //         //     return i == matches.indexOf(itm);
-    //         // });
-    //         //
-    //         // for (var j = 0; j < unique_matches.length; j++) {
-    //         //     if (j == 1) {
-    //         //         console.log("j " + j)
-    //         //         console.log("matches[j] " + unique_matches[j])
-    //         //         searchTerm = unique_matches[j];
-    //         //         if (searchTerm === "&") {
-    //         //             searchTerm = "&amp;";
-    //         //             searchTermRegEx = new RegExp(searchTerm, "g");
-    //         //             console.log("searchTermRegEx " + searchTermRegEx)
-    //         //         } else {
-    //         //             searchTermRegEx = new RegExp(searchTerm, "g");
-    //         //             console.log("searchTermRegEx " + searchTermRegEx)
-    //         //         }
-    //         //         $(selector).html($(selector).html().replace(searchTermRegEx, "<span class='match'>" + matches[j] + "</span>"));
-    //         //
-    //         //     }
-    //         // }
-    //
-    //         // console.log("fire 5")
-    //         $('.match:first').addClass('highlighted');
-    //
-    //         var i = 0;
-    //
-    //         $('.next_h').off('click').on('click', function () {
-    //             // console.log("fire 6")
-    //             i++;
-    //             if (i >= $('.match').length) {
-    //                 i = 0;
-    //             }
-    //             // **$('.match').removeAttr('id');
-    //             $('.match').removeClass('highlighted');
-    //             $('.match').eq(i).addClass('highlighted');
-    //             // **$('.highlighted').attr('id', 'id_high');
-    //
-    //             // var idArray = [];
-    //             // $('.highlighted').each(function () {
-    //             //     HANDY to get the text back from a nodeValue
-    //             //     console.log("i "+this.firstChild.nodeValue)
-    //             //     idArray.push(?);
-    //             // });
-    //
-    //             // **this works, but will need a lot of stop points to use it
-    //             // **var id_parents = $('#id_high').parents('.stop-point').attr('id');
-    //             // **var this_hash = '#' + id_parents;
-    //             // **animate_scroll_hash(this_hash, 'search');
-    //
-    //             // console.log("animate next")
-    //             $('html, body').animate({
-    //                 scrollTop: $('.highlighted:visible:first').offset().top - help_offset
-    //             }, 400);
-    //
-    //         });
-    //
-    //         $('.previous_h').off('click').on('click', function () {
-    //             // console.log("fire 7")
-    //             i--;
-    //             if (i < 0) {
-    //                 i = $('.match').length - 1;
-    //             }
-    //             $('.match').removeClass('highlighted');
-    //             $('.match').eq(i).addClass('highlighted');
-    //
-    //             // console.log("animate previous")
-    //             $('html, body').animate({
-    //                 scrollTop: $('.highlighted:visible:first').offset().top - help_offset
-    //             }, 400);
-    //         });
-    //
-    //         // when the search is clicked - finds the first occurance
-    //         if ($('.highlighted:first').length) {
-    //             // console.log("animate search first")
-    //             //if match found, scroll to where the first one appears
-    //             // this did not work for study summary....do not know why
-    //             // $(window).scrollTop($('.highlighted:first').position().top - help_offset);
-    //             $('html, body').animate({
-    //                 scrollTop: $('.highlighted:visible:first').offset().top - help_offset
-    //             }, 400);
-    //         }
-    //     });
-    // }
-
-
-    // did this, still got a major race issue problem
-    // function labelMatchSpan_search2(next){
-    //     // do some asynchronous work and when the asynchronous stuff is complete
-    //     console.log("matches3 "+matches)
-    //     console.log("len3 "+$('.match').length)
-    //
-    //     $(selector).html($(selector).html().replace(searchTermRegEx, "<span class='match'>" + searchTerm + "</span>"));
-    //     console.log("matches4 "+matches)
-    //     console.log("len4 "+$('.match').length)
-    //     next();
-    // }
-    //
-    // function continueFunction_search3(){
-    //     // call first function and pass in a callback function which
-    //     // first function runs when it has completed
-    //     labelMatchSpan_search2(function() {
-    //         console.log("back from 3")
-    //         $('.match').each(function(index, currentElement) {
-    //             currentElement.innerHTML= matches[index];
-    //         });
-    //         $('.match:first').addClass('highlighted');
-    //         match_index = 0;
-    //         // when the search is clicked - finds the first occurrence
-    //         if ($('.highlighted:first').length) {
-    //             console.log("search first")
-    //             //if match found, scroll to where the first one appears
-    //             // this did not work for study summary....do not know why
-    //             // $(window).scrollTop($('.highlighted:first').position().top - help_offset);
-    //             $('html, body').animate({
-    //                 scrollTop: $('.highlighted:visible:first').offset().top - help_offset
-    //             }, 400);
-    //         }
-    //     });
-    // }

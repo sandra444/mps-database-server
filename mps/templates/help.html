@@ -61,7 +61,7 @@
 
 <body>
 
-{# <body data-spy="scroll" data-target=".navbar" data-offset="80"> #}
+{#<body data-spy="scroll" data-target=".navbar" data-offset="80"> #}
 
 <nav class="navbar navbar-inverse navbar-fixed-top">
 
@@ -151,7 +151,8 @@
                             <li><a href="#help_power_analysis">Assay Data Power Analysis</a></li>
                             <li><a href="#help_reproducibility_analysis">Assay Data Reproducibility</a></li>
                             <li><a href="#help_study_set">Assay Data Study Sets</a></li>
-                            <li><a href="#help_collaborator_group">Assay Data Collaborator Groups</a></li>
+                            <li><a href="#help_collaborator_group">Assay Data Collaborators</a></li>
+                            <li><a href="#help_access_group">Assay Data Accessors</a></li>
                             <li><a href="#help_pbpk_analysis">PBPK Analysis</a></li>
                             <li><a href="#help_disease_portal">Disease Portal</a></li>
                             <li><a href="#help_compound_report">Compound Report</a></li>
@@ -198,8 +199,8 @@
                             <li><a href="#help_target_and_method">7. Add Assay Targets and Methods </a></li>
                             <li><a href="#help_data_upload">8. Upload Assay Data </a></li>
                             <li><a href="#help_image_video">9. Prepare Images and Videos </a></li>
-                            <li><a href="#help_study_signoff">10. Sign-Off a Study (optional) </a></li>
-                            <li><a href="#help_stakeholder">11. Stakeholder Review (optional) </a></li>
+                            <li><a href="#help_flags_and_notes">10. Validation, Flags and Notes (optional) </a></li>
+                            <li><a href="#help_study_signoff">11. Data Sharing - Sign-Off a Study (optional) </a></li>
 
                         </ul>
                     </li>
@@ -301,10 +302,39 @@
 
         <div id="realTimeContents">
 
+            <div id="search_help_page_section">
+{#                <h1 class="h1-level-0"> Show and Hide Help </h1>#}
+    {#            <div id="help_search_page">#}
+    {#                <button name="help_button" type="button" class="btn btn-primary help-collapsible">Show and Hide on the Help Page</button>#}
+    {#                <div class="help-content-1">#}
+                        <ul class="list-group">
+                            <li class="list-group-item">
+    {#                            <h1 class="h1-level-1"> Show and Hide on the Help Page </h1>#}
+                                {# do not name the same, do not want in colapsibles#}
+                                <button id="expand_all" type="button" class="btn btn-primary">
+                                    Click to Expand All Sections of Help</button>
+                                <button id="close_all" type="button" class="btn btn-primary">
+                                    Click to Collapse All Sections of Help</button>
+                            </li>
+                        </ul>
+    {#                </div>#}
+    {#            </div>#}
+{#                <br><br>#}
+            </div>
+
             <div id="overview_section" class="stop-point">
 
                 <h1 class="h1-level-0"> Overview of the MPS-Db </h1>
-                <p>still to do: 1)all editor content update, 2)all links check and update, 3)glossary (update case show only when click letter, make sure update, all correct things showing), 4)update all anchors (and remove initial one), 5)maybe titles of pages - add a table??, 6) overviews pulling correctly from glossary</p>
+                <p>Still to do:
+                    <br>1) editor content update for omic and raw plate reader data,
+                    <br>2) all links check and update,
+                    <br>3) glossary (make sure updated, all correct things showing in glossary and help),
+                    <br>4) update all anchors (and remove initial ones),
+                    <br>5) maybe titles of pages as a table?,
+                    <br>6) overviews pulling correctly from glossary,
+                    <br>7) what should be capitalized and what bolded,
+                    <br>8) update collaborator and access groups - maybe
+                </p>
 
                 <div id="help_overview_background">
                     <button name="help_button" type="button" class="btn btn-primary help-collapsible">Database Background</button>
@@ -447,9 +477,13 @@
 
                                 {% include 'help_webinar_20201006_qanda_table.html' %}
 
-                                <div class="myIframe">
-                                    {# in panopto, select Share, then click on Embed and copy the Embeded Code, then change the end part ...width on..#}
-                                    <iframe src="https://pitt.hosted.panopto.com/Panopto/Pages/Embed.aspx?id=e4e34656-b14a-4af5-ac43-ac4c01253690&autoplay=false&offerviewer=true&showtitle=true&showbrand=false&start=0&interactivity=all" height="405" width="720" style="border: 1px solid #464646;" allowfullscreen allow="autoplay"></iframe>
+                                <br><br>
+                                <button name="video_button" type="button" class="btn btn-default video-collapsible">Open Video Window</button>
+                                <div class="help-content-2">
+                                    <div class="myIframe">
+                                        {# in panopto, select Share, then click on Embed and copy the Embeded Code, then change the end part ...width on..#}
+                                        <iframe src="https://pitt.hosted.panopto.com/Panopto/Pages/Embed.aspx?id=e4e34656-b14a-4af5-ac43-ac4c01253690&autoplay=false&offerviewer=true&showtitle=true&showbrand=false&start=0&interactivity=all" height="405" width="720" style="border: 1px solid #464646;" allowfullscreen allow="autoplay"></iframe>
+                                    </div>
                                 </div>
 
                             </div>
@@ -473,9 +507,12 @@
                                 <h1 class="h1-level-1"> Plate Reader Data Integration Tool (20200521) </h1>
                                 UPDDI's Mark Schurdak introduces the plate reader data integration tool. This tool allows users to setup assay plate maps, upload assay data, calibrate and process data, and add data to the study summary. The demo begins at 4:30. Video was recorded on May 21, 2020 and is approximately 42 minutes long (demo is about 30 minutes). This demo was recorded using the stage/development server for the purpose of soliciting user feedback.
                                 <br><br>
-                                <div class="myIframe">
-                                    {# in panopto, select Share, then click on Embed and copy the Embeded Code, then change the end part ...width on..#}
-                                    <iframe src="https://pitt.hosted.panopto.com/Panopto/Pages/Embed.aspx?id=efa29f51-e3e9-4561-b98a-abeb0187e749&autoplay=false&offerviewer=true&showtitle=true&showbrand=false&start=0&interactivity=all" width="720" height="405" style="padding: 0px; border: 1px solid #464646;" frameborder="0" allowfullscreen allow="autoplay"></iframe>
+                                <button name="video_button" type="button" class="btn btn-default video-collapsible">Open Video Window</button>
+                                <div class="help-content-2">
+                                    <div class="myIframe">
+                                        {# in panopto, select Share, then click on Embed and copy the Embeded Code, then change the end part ...width on..#}
+                                        <iframe src="https://pitt.hosted.panopto.com/Panopto/Pages/Embed.aspx?id=efa29f51-e3e9-4561-b98a-abeb0187e749&autoplay=false&offerviewer=true&showtitle=true&showbrand=false&start=0&interactivity=all" width="720" height="405" style="padding: 0px; border: 1px solid #464646;" frameborder="0" allowfullscreen allow="autoplay"></iframe>
+                                    </div>
                                 </div>
                             </div>
                         </ul>
@@ -490,8 +527,11 @@
                                 <h1 class="h1-level-1"> PBPK Modeling (20200416) </h1>
                                 UPDDI's Mark Schurdak walks through an early version of the PBPK modeling feature that is being integrated into the MPS-Db. Video was recorded on April 16, 2020 and is approximately 21 minutes long. This demo was recorded using the stage/development server for the purpose of soliciting user feedback.
                                 <br><br>
-                                <div class="myIframe">
-                                    <iframe src="https://pitt.hosted.panopto.com/Panopto/Pages/Embed.aspx?id=13bef78f-5982-4c3a-b606-abec0111ae06&autoplay=false&offerviewer=true&showtitle=true&showbrand=false&start=0&interactivity=all" width="720" height="405" style="padding: 0px; border: 1px solid #464646;" frameborder="0" allowfullscreen allow="autoplay"></iframe>
+                                <button name="video_button" type="button" class="btn btn-default video-collapsible">Open Video Window</button>
+                                <div class="help-content-2">
+                                    <div class="myIframe">
+                                        <iframe src="https://pitt.hosted.panopto.com/Panopto/Pages/Embed.aspx?id=13bef78f-5982-4c3a-b606-abec0111ae06&autoplay=false&offerviewer=true&showtitle=true&showbrand=false&start=0&interactivity=all" width="720" height="405" style="padding: 0px; border: 1px solid #464646;" frameborder="0" allowfullscreen allow="autoplay"></iframe>
+                                    </div>
                                 </div>
                             </li>
                         </ul>
@@ -508,8 +548,11 @@
                                 <h1 class="h1-level-1"> Study Sets, Controlled Sharing, and References (20190620) </h1>
                                 UPDDI's Albert Gough shows how study sets can be used to share data with external collaborators and how study sets can be assigned URLs that can be referenced in publications. Video was recorded on June 20, 2019 and is approximately 25 minutes long.
                                 <br><br>
-                                <div class="myIframe">
-                                    <iframe src="https://pitt.hosted.panopto.com/Panopto/Pages/Embed.aspx?id=d60edd40-c668-417d-9c66-aab7016bcb36&v=1" width="720" height="405" style="padding: 0px; border: 1px solid #464646;" frameborder="0" allowfullscreen allow="autoplay"></iframe>
+                                <button name="video_button" type="button" class="btn btn-default video-collapsible">Open Video Window</button>
+                                <div class="help-content-2">
+                                    <div class="myIframe">
+                                        <iframe src="https://pitt.hosted.panopto.com/Panopto/Pages/Embed.aspx?id=d60edd40-c668-417d-9c66-aab7016bcb36&v=1" width="720" height="405" style="padding: 0px; border: 1px solid #464646;" frameborder="0" allowfullscreen allow="autoplay"></iframe>
+                                    </div>
                                 </div>
                             </div>
                         </ul>
@@ -524,8 +567,11 @@
                                 <h1 class="h1-level-1"> NCATS Data Sharing Workflow (20190620) </h1>
                                 NCATS explains their data release workflow. Video was recorded on June 20, 2019 and is approximately 3 minutes long.
                                 <br><br>
-                                <div class="myIframe">
-                                    <iframe src="https://pitt.hosted.panopto.com/Panopto/Pages/Embed.aspx?id=15ab44cb-8f16-4df4-a14f-aab7016aba8b&v=1" width="720" height="405" style="padding: 0px; border: 1px solid #464646;" frameborder="0" allowfullscreen allow="autoplay"></iframe>
+                                <button name="video_button" type="button" class="btn btn-default video-collapsible">Open Video Window</button>
+                                <div class="help-content-2">
+                                    <div class="myIframe">
+                                        <iframe src="https://pitt.hosted.panopto.com/Panopto/Pages/Embed.aspx?id=15ab44cb-8f16-4df4-a14f-aab7016aba8b&v=1" width="720" height="405" style="padding: 0px; border: 1px solid #464646;" frameborder="0" allowfullscreen allow="autoplay"></iframe>
+                                    </div>
                                 </div>
                             </li>
                         </ul>
@@ -540,8 +586,11 @@
                                 <h1 class="h1-level-1"> Exploring Kidney Study Data (20190418) </h1>
                                 UPDDI toxicologist Larry Vernetti explores data associated with kidney tissue chips. Video was recorded on April 18, 2019 and is approximately 30 minutes long.
                                 <br><br>
-                                <div class="myIframe">
-                                    <iframe src="https://pitt.hosted.panopto.com/Panopto/Pages/Embed.aspx?id=68a51114-b2a0-4d77-8b88-aab7016aba2b&v=1" width="720" height="405" style="padding: 0px; border: 1px solid #464646;" frameborder="0" allowfullscreen allow="autoplay"></iframe>
+                                <button name="video_button" type="button" class="btn btn-default video-collapsible">Open Video Window</button>
+                                <div class="help-content-2">
+                                    <div class="myIframe">
+                                        <iframe src="https://pitt.hosted.panopto.com/Panopto/Pages/Embed.aspx?id=68a51114-b2a0-4d77-8b88-aab7016aba2b&v=1" width="720" height="405" style="padding: 0px; border: 1px solid #464646;" frameborder="0" allowfullscreen allow="autoplay"></iframe>
+                                    </div>
                                 </div>
                             </li>
                         </ul>
@@ -556,8 +605,11 @@
                                 <h1 class="h1-level-1"> Reproducibility and Customized Plots (20190221) </h1>
                                 UPDDI's Albert Gough shows how to use the inter- and intra-study reproducibility feature and how to use customize queries and plots. Video was recorded on February 21, 2019 and is approximately 30 minutes long.
                                 <br><br>
-                                <div class="myIframe">
-                                    <iframe src="https://pitt.hosted.panopto.com/Panopto/Pages/Embed.aspx?id=79a38a9c-697b-49af-8c29-aab7016aba5d&v=1" width="720" height="405" style="padding: 0px; border: 1px solid #464646;" frameborder="0" allowfullscreen allow="autoplay"></iframe>
+                                <button name="video_button" type="button" class="btn btn-default video-collapsible">Open Video Window</button>
+                                <div class="help-content-2">
+                                    <div class="myIframe">
+                                        <iframe src="https://pitt.hosted.panopto.com/Panopto/Pages/Embed.aspx?id=79a38a9c-697b-49af-8c29-aab7016aba5d&v=1" width="720" height="405" style="padding: 0px; border: 1px solid #464646;" frameborder="0" allowfullscreen allow="autoplay"></iframe>
+                                    </div>
                                 </div>
                             </li>
                         </ul>
@@ -572,8 +624,11 @@
                                 <h1 class="h1-level-1"> Adverse Events Analysis (20190117) </h1>
                                 UPDDI toxicologist Larry Vernetti walks through the process of using the MPS-Db to help design an <i>in-vitro</i> toxicology study for liver toxicity. Video was recorded on January 17, 2019 and is approximately 30 minutes long.
                                 <br><br>
-                                <div class="myIframe">
-                                    <iframe src="https://pitt.hosted.panopto.com/Panopto/Pages/Embed.aspx?id=90d94705-ba7b-452e-a17a-aab7016f60ba&v=1" width="720" height="405" style="padding: 0px; border: 1px solid #464646;" frameborder="0" allowfullscreen allow="autoplay"></iframe>
+                                <button name="video_button" type="button" class="btn btn-default video-collapsible">Open Video Window</button>
+                                <div class="help-content-2">
+                                    <div class="myIframe">
+                                        <iframe src="https://pitt.hosted.panopto.com/Panopto/Pages/Embed.aspx?id=90d94705-ba7b-452e-a17a-aab7016f60ba&v=1" width="720" height="405" style="padding: 0px; border: 1px solid #464646;" frameborder="0" allowfullscreen allow="autoplay"></iframe>
+                                    </div>
                                 </div>
                             </li>
                         </ul>
@@ -588,8 +643,11 @@
                                 <h1 class="h1-level-1"> Study Data Loading (20181220) </h1>
                                 Members of the UPDDI Database Center and Texas A&M University tissue chip team demonstrate the process used to transfer and upload data into the MPS-Db used from 2016 to 2018. Video was recorded on December 20, 2018 and is approximately 40 minutes long.
                                 <br><br>
-                                <div class="myIframe">
-                                    <iframe src="https://pitt.hosted.panopto.com/Panopto/Pages/Embed.aspx?id=9e71a7c0-0349-4d10-87f2-aab7016ab9f1&v=1" width="720" height="405" style="padding: 0px; border: 1px solid #464646;" frameborder="0" allowfullscreen allow="autoplay"></iframe>
+                                <button name="video_button" type="button" class="btn btn-default video-collapsible">Open Video Window</button>
+                                <div class="help-content-2">
+                                    <div class="myIframe">
+                                        <iframe src="https://pitt.hosted.panopto.com/Panopto/Pages/Embed.aspx?id=9e71a7c0-0349-4d10-87f2-aab7016ab9f1&v=1" width="720" height="405" style="padding: 0px; border: 1px solid #464646;" frameborder="0" allowfullscreen allow="autoplay"></iframe>
+                                    </div>
                                 </div>
                             </li>
                         </ul>
@@ -873,17 +931,36 @@
                 </div>
 
                 <div id="help_collaborator_group">
-                    <button name="help_button" type="button" class="btn btn-primary help-collapsible"> Assay Data Collaborator Groups </button>
+                    <button name="help_button" type="button" class="btn btn-primary help-collapsible"> Assay Data Collaborators </button>
                     <div class="help-content-1">
                         <ul class="list-group">
                             <li class="list-group-item">
-                                <h1 class="h1-level-1"> Assay Data Collaborator Groups </h1>
+                                <h1 class="h1-level-1"> Assay Data Collaborators </h1>
                                 <ul class="list-unstyled">
-                                    <li>About Collaborator Groups:
+                                    <li>About Collaborators:
                                         <ul class="help-filled-circle">
-                                            <li>A Collaborator Group is a means of allowing data from a private study to be shared with another user who not a member of the same Data Group (e.g., someone from another lab)
+                                            <li>A Collaborator Group is a means of allowing data from a private study (a study that has not been signed off) to be shared with another user who is not a member of the same Data Group (e.g., someone from another lab)</li>
                                             <li>Using a Collaborator Group is currently the only way to allow someone from another group to see data contained in a Study prior to either signing off a Study or opening the Study to the public</li>
                                             <li>Collaborator Groups must be created and edited by an MPS Database Administrator </li>
+                                        </ul>
+                                    </li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div id="help_access_group">
+                    <button name="help_button" type="button" class="btn btn-primary help-collapsible"> Assay Data Accessors </button>
+                    <div class="help-content-1">
+                        <ul class="list-group">
+                            <li class="list-group-item">
+                                <h1 class="h1-level-1"> Assay Data Accessors </h1>
+                                <ul class="list-unstyled">
+                                    <li>About Accessor Groups:
+                                        <ul class="help-filled-circle">
+                                            <li>An Accessor Group is a means of allowing data from a study during the year embargo period (after sign off and before public release) to be shared with another user who is not a member of the same Data Group (e.g., someone from another lab)</li>
+                                            <li>Access Groups must be created and edited by an MPS Database Administrator </li>
                                         </ul>
                                     </li>
                                 </ul>
@@ -1541,1419 +1618,509 @@
                 <div id="help_join_group">
                     <button name="help_button" type="button" class="btn btn-primary help-collapsible">1. Request to Join a Data Group </button>
                     <div class="help-content-1">
-
+                        <ul class="list-group">
+                            <li class="list-group-item">
+                                <h1 class="h1-level-1"> Joining a Group </h1>
+                                <ul class="list-unstyled">
+                                    <li>Contact an MPS-Db administor to request to add a data group for your team or to be added to an existing team group.
+                                    </li>
+                                </ul>
+                            </li>
+                        </ul>
                     </div>
                 </div>
 
                 <div id="help_study_component_pointer">
                     <button name="help_button" type="button" class="btn btn-primary help-collapsible">2. Review Study Components </button>
                     <div class="help-content-1">
-                        <li><a href="#help_study_component">Go to Review Study Components </a></li>
+                        <ul class="list-group">
+                            <li class="list-group-item">
+                                <h1 class="h1-level-1"> Review Study Components </h1>
+                                <ul class="list-unstyled">
+                                    <li>Click on the link provided to learn how to review study components (<a href="#help_study_component">Click to Review Study Components</a>)
+                                    </li>
+                                    <li><br>Help Notes:
+                                        <ul class="help-filled-circle">
+                                            <li>Study components can be added in various locations in the MPS-Db by clicking on the provided plus signs
+                                            </li>
+                                        </ul>
+                                    </li>
+                                </ul>
+                            </li>
+                        </ul>
                     </div>
                 </div>
 
                 <div id="help_add_study">
-                    <button name="help_button" type="button" class="btn btn-primary help-collapsible">Adding Assay Data Step 1 - Add/Edit Study </button>
+                    <button name="help_button" type="button" class="btn btn-primary help-collapsible">3. Add a Study </button>
                     <div class="help-content-1">
-
-                        <button name="help_button" type="button" class="btn btn-success help-collapsible">See Helpful Information for New Data Providers (Reviewing/Adding Study Components and the SCD3 Workbook) </button>
-                        <div class="help-content-2">
-                            <div id="scd3Help Notes:" class="editorsubtainer">
-                                <ul class="list-group">
-                                    <li class="list-group-item">
-                                        <ul class="list-unstyled">
-
+                        <ul class="list-group">
+                            <li class="list-group-item">
+                                <h1 class="h1-level-1"> Add a Study </h1>
+                                <ul class="list-unstyled">
+                                    <li>To Add a <b>Study</b>:
+                                        <ul class="help-filled-circle">
+                                            <li>Click on the <b>Add Study</b> button
+                                                <ul class="help-open-circle">
+                                                    <li>If the study already exists, click to View All Studies, then click on the click the <b>View/Edit</b> button next to the <b>Study</b> of interest </li>
                                                 </ul>
                                             </li>
-                                            <li><br>It should be noted that there is some overlap between these categories, for example, some study design information will likely be included in the model protocol. </li>
-                                            <li><br>The Study Description, Study Design, and Study Data can be added directly to the MPS-Db by a data provider (a registered user who has been granted permission to add study data to the MPS-Db). Adding new components to the study component lists requires special permission that is not typically granted to data providers. </li>
-                                            <li><br>To learn how to review Study Components and request new components be added, click on the link to the component
-                                            <table class="table table-bordered table-condensed small table-components">
-                                            <thead>
-                                                <tr class="active">
-                                                <th> Link in Help </th>
-                                                <th> Link in MPS-Db </th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                <tr>
-                                                    <td> <a href="#assaymts">Assays (Methods/Kits) </a> </td>
-                                                    <td> <a href="https://mps.csb.pitt.edu/assays/method/#" target="_blank" >See List of Methods/Kits in MPS-Db</a> </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> <a href="#assaymts">Assays (Targets/Analytes) </a> </td>
-                                                    <td> <a href="https://mps.csb.pitt.edu/assays/target/#" target="_blank" >See List of Targets/Analytes in MPS-Db</a> </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> <a href="#cellsamples">Cell Samples </a> </td>
-                                                    <td> <a href="https://mps.csb.pitt.edu/cellsamples/cellsample/" target="_blank" >See List of Cell Samples in MPS-Db</a> </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> <a href="#chemicallist">Compounds </a> </td>
-                                                    <td> <a href="https://mps.csb.pitt.edu/compounds/" target="_blank" >See List of Compounds in MPS-Db</a> </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> <a href="#devices">Devices </a> </td>
-                                                    <td> <a href="https://mps.csb.pitt.edu/microdevices/device/" target="_blank" >See List of Devices in MPS-Db</a> </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> <a href="#diseaselist">Diseases </a> </td>
-                                                    <td> <a href="https://mps.csb.pitt.edu/diseases/" target="_blank" >See List of Diseases in MPS-Db</a> </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> <a href="#mpslocations">Location of MPS Models </a> </td>
-                                                    <td> <a href="https://mps.csb.pitt.edu/assays/location/" target="_blank" >See List of Locations in MPS-Db</a> </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> <a href="#mpsmodels">Models </a> </td>
-                                                    <td> <a href="https://mps.csb.pitt.edu/microdevices/model/" target="_blank" >See List of MPS Models in MPS-Db</a> </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> <a href="#settings">Settings </a> </td>
-                                                    <td> No list available - see link in HELP for instructions on viewing Settings </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> <a href="#physicalunits">Units </a> </td>
-                                                    <td> <a href="https://mps.csb.pitt.edu/assays/unit/" target="_blank" >See List of Units in MPS-Db</a> </td>
-                                                </tr>
-                                            </tbody>
-                                            </table>
-                                            </li>
-                                            <li><br>Help Notes:
-                                                <ul class="help-filled-circle">
-                                                    <li> The MPS-Db Center has prepared an Excel file (the SCD3 Workbook) that describes <b>Study</b> data and metadata stored in the MPS-Db </li>
-                                                    {# <li> To download the latest version of the SCD3 Workbook, <a href="/media/excel_templates/SCD3Workbook.xlsx">click here</a></li> #}
-                                                    <li> To download the latest version of the SCD3 Workbook, <a href="{% url 'assays-currentuploadtemplate' %}">click here</a></li>
-                                                    <li> We are here to help - send email to MPSHELP@pitt.edu with subject line "Help with the SCD3 Workbook" </li>
-                                                    <li> The optimal data contribution workflow
-                                                        <ul class="help-open-circle">
-                                                            <li>Data Provider registers as MPS-Db user and notifies MPS-Db Center that they wish to contribute data  </li>
-                                                            <li>MPS-Db Center makes a Data Group for the Data Provider, adds the Data Provider to the Group, and notifies the Data Provider </li>
-                                                            <li>Data Provider reviews study component lists and identifies if/what new components need added to the MPS-Db </li>
-                                                            <li>Data Provider downloads SCD3 Workbook and completes the Study Context tabs for needed new components </li>
-                                                            <li>Data Provider submits completed Study Context tabs to the MPS-Db Center </li>
-                                                            <li>MPS-Db Center adds needed components and notifies Data Provider </li>
-                                                            <li>Data Provider reviews the SCD3 Workbook and gathers/prepares information </li>
-                                                            <li>Data Provider creates a study and enters the Study Description information directly into the MPS-Db via the MPS-GUI </li>
-                                                            <li>Data Provider creates a Matrix, adds Items to the Matrix, and adds all appropriate information to each Item directly in the MPS-Db via the MPS-GUI </li>
-                                                            <li>Data Provider prepares and uploads MIF-C-assay data directly in the MPS-Db via the MPS-GUI </li>
-                                                            <li>If providing videos/images, Data Provider prepares the MIF-C-image file and submits it, along with the media files to the MPS-Db Center (via shared box)  </li>
-                                                            <li>Data Provider reviews and signs off a study </li>
+                                        </ul>
+                                    </li>
+                                    <li><br>Help Notes:
+                                        <ul class="help-filled-circle">
+                                            <li>You must be a registered user and be assigned to at least one data group to add a study</li>
+                                            <li>Everything in the <b>Study</b> can be edited until the <b>Study</b> Data Group Admin signs off the <b>Study</b> (then it is locked) </li>
+                                            <li>Data contained in files attached as <b>Supporting Data</b> are NOT available for visualization, analysis, or used in calculations within the MPS-GUI </li>
+                                            <li>To edit a study, go to the study of interest and click on the <b>Anayze/Edit</b> button and select <b>Edit This Study</b></li>
+                                        </ul>
+                                    </li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div id="help_study_detail">
+                    <button name="help_button" type="button" class="btn btn-primary help-collapsible">4. Enter Study Details </button>
+                    <div class="help-content-1">
+                        <ul class="list-group">
+                            <li class="list-group-item">
+                                <h1 class="h1-level-1"> Enter Study Details - Details Tab </h1>
+                                <ul class="list-unstyled">
+                                    <li> Add the required information as follows:
+                                        <ul class="help-filled-circle">
+                                            <li>Group – select a Data Group (the team performing the study) </li>
+                                            <li>Study Type – indicate the general purpose of the <b>Study</b> (one is required; check all that apply) </li>
+                                            <li>Study Name – use an informative name (e.g., "Kidney-Liver Vitamin C Metabolism" is more informative than "Study-1") </li>
+                                            <li>Start Date - start of experiment (typically the day the first cells are added to the device) </li>
+                                            <li>Description - informative description (purpose, methods, results)</li>
+                                            <li>Use in Calculations - checking <b>Use in Compound Report interface</b> tells the MPS-Db to use this study's data in the Compound Report Feature  </li>
+                                            <li>Protocol File – a Word or pdf file containing the <b>Study</b> protocol </li>
+                                            <li>Image to Illustrate A <b>Study</b> – recommend a picture of the setup or an illustration of the experimental protocol </li>
+                                            <!-- <li>For Integrated Chip Studies – select configuration if performing an integrated <b>Study</b>  </li> -->
+                                            <li>References - add references relating to the this study</li>
+                                            <li> Click Submit or Next to continue</li>
+                                        </ul>
+                                    </li>
+                                    <li><br>Help Notes:
+                                        <ul class="help-filled-circle">
+                                            <li>The are many options for what to display when entering the Groups (check and uncheck the Show Cells, Show Compounds, Show Settings, and Show Full Details to explore display options)</li>
+                                        </ul>
+                                    </li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div id="help_study_treatment_group">
+                    <button name="help_button" type="button" class="btn btn-primary help-collapsible">5. Make Treatment Groups </button>
+                    <div class="help-content-1">
+                        <ul class="list-group">
+                            <li class="list-group-item">
+                                <h1 class="h1-level-1"> Make Treatment Groups - Groups Tab </h1>
+                                <ul class="list-unstyled">
+                                    <li> Add the required information as follows:
+                                        <ul class="help-filled-circle">
+                                            <li> Select an MPS Model </li>
+                                            <li> Select an MPS Model Version (information about cells and settings will be pulled from the model version, if available)</li>
+                                            <li> Apply to the Group</li>
+                                            <li> The Type is set based on the device the MPS Model (plate or chip device)</li>
+                                            <li> Enter the treatment Group Name </li>
+                                            <li> Enter the Number of Chips in the group </li>
+                                            <li> Change the Test Type for each group, as needed</li>
+                                            <li> Add compounds, additional cells, and additional settings by clicking on the <b>Add Compound</b>, <b>Add Cell</b>, or <b>Add Setting</b> button, respectively</li>
+                                            <li> Click on the <b>Add Group</b> button or click the <b>Copy</b> button (in a Group) to make a new Group</li>
+                                            <li> Review differences between groups in the Group Difference Display table</li>
+                                            <li> Click Submit or Next to continue</li>
+                                        </ul>
+                                    </li>
+                                    <li><br>Help Notes:
+                                        <ul class="help-filled-circle">
+                                            <li>There are many options for the order of adding Groups (e.g., a Group can be Copied at any time as many times as needed)</li>
+                                            <li>If an MPS Model Version has not been made and/or has not been populated correctly, cells and settings will not be automatically pulled into the group setup</li>
+                                            <li>An MPS Model Version is a starting point for a treatment group (if changes are made to cells, settings, and/or compounds, a model version will not longer completely be indicative of the conditon of the chip)</li>
+                                            <li>Treatment compounds will need to be added as they are not part of the MPS model version (compounds cannot be saved as part of a model version)</li>
+                                            <li>Chips are numbered sequentially, starting from 1 (these can be changed, if necessary)</li>
+                                            <li>Add cells, settings, and/or compounds by clicking on the Add Cell, Add Setting, or Add Compound buttons, respectively</li>
+                                            <li>Remove cells, settings, and/or compounds by clicking the red X's (click on individual X's or, to remove a column, click on the red X in the column header, and to remove a row, click on the red X in the row label)</li>
+                                            <li>Enter a treatment group for each treatment condition (for wells in a plate and for chips)</li>
+                                        </ul>
+                                    </li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div id="help_chip_and_plate">
+                    <button name="help_button" type="button" class="btn btn-primary help-collapsible">6. Define Chips and Plates </button>
+                    <div class="help-content-1">
+                        <ul class="list-group">
+                            <li class="list-group-item">
+                                <h4>Chips and Plates tabs are displayed based on the Type displayed in the Groups tab.</h4>
+                                <h1 class="h1-level-1"> Define Chips and Plates - Chips Tab </h1>
+                                <ul class="list-unstyled">
+                                    <li> To edit chip names (optional):
+                                        <ul class="help-filled-circle">
+                                            <li> Click on one of the Rename Chips By buttons </li>
+                                            <li> Fill out the popup form</li>
+                                            <li> Click Apply </li>
+                                            <li> Click Submit or Next to continue</li>
+                                        </ul>
+                                    </li>
+                                    <li> To edit chip treatment group association (optional):
+                                        <ul class="help-filled-circle">
+                                            <li> Click on the dropdown in the Group column </li>
+                                            <li> Select a different group</li>
+                                            <li> Click Apply </li>
+                                            <li> Click Submit or Next to continue</li>
+                                        </ul>
+                                    </li>
+                                    <li><br>Help Notes:
+                                        <ul class="help-filled-circle">
+                                            <li>Changes can be made to the names and the groups in the same edit session</li>
+                                            <li>This is all optional</li>
+                                        </ul>
+                                    </li>
+                                </ul>
+                            </li>
+                        </ul>
+
+                        <ul class="list-group">
+                            <li class="list-group-item">
+                                <h1 class="h1-level-1"> Define Chips and Plates - Plates Tab  </h1>
+                                <ul class="list-unstyled">
+                                    <li> If one or more Type = plate treatment groups were added, wells must be added to a Plate as follows (required):
+                                        <ul class="help-filled-circle">
+                                            <li> Click the <b>Add Plate</b> button </li>
+                                            <li> Fill in the Name </li>
+                                            <li> Select the MPS Model </li>
+                                            <li> Fill in a Well Prefix (optional)</li>
+                                            <li> Drag in the plate over the wells to assign a treatment group </li>
+                                            <li> Fill in the form and click Apply</li>
+                                            <li> Rename all wells on the plate using an Apply Default button (optional) </li>
+                                            <li> Click Submit or Next to continue</li>
+                                        </ul>
+                                    </li>
+                                    <li><br>Help Notes:
+                                        <ul class="help-filled-circle">
+                                            <li>Add as many plates as needed </li>
+                                            <li>A plate can contain one or more treatment groups</li>
+                                            <li>A treatment group can span plates</li>
+                                            <li>Well names must be unique to the study, not to a plate (i.e., if A1 cannot be in more than one plate - use a prefix like P1-A1 and P2-A1)</li>
+                                        </ul>
+                                    </li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div id="help_target_and_method">
+                    <button name="help_button" type="button" class="btn btn-primary help-collapsible">7. Add Assay Targets and Methods to a Study </button>
+                    <div class="help-content-1">
+                        <ul class="list-group">
+                            <li class="list-group-item">
+                                <h1 class="h1-level-1"> Add Assay Targets and Methods to a Study - Assays Tab</h1>
+                                <ul class="list-unstyled">
+                                    <li> Add Assays to a study as follows:
+                                        <ul class="help-filled-circle">
+                                            <li> Click in the Assay Category box and select a category (optional, but narrows the choices of Targets and Methods if selected)</li>
+                                            <li> Click in the Target/Analyte box and select a target</li>
+                                            <li> Click in the Method/Kit box and select a Method</li>
+                                            <li> Click in the Readout Unit and select the unit to be used for uploading data </li>
+                                            <li> Click Submit or Next to continue</li>
+                                        </ul>
+                                    </li>
+                                    <li><br>Help Notes:
+                                        <ul class="help-filled-circle">
+                                            <li>All combinations of Method/Kit, Target/Analyte, and Unit must be listed in the <b>Assays</b> tab <b>PRIOR</b> to uploading assay data</li>
+                                        </ul>
+                                    </li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div id="help_data_upload">
+                    <button name="help_button" type="button" class="btn btn-primary help-collapsible">8. Upload Assay Data </button>
+                    <div class="help-content-1">
+                        <ul class="list-group">
+                            <li class="list-group-item">
+                                <h1 class="h1-level-1"> Upload Assay Data - Upload Data Tab</h1>
+
+                                <h4>There are multiple ways of uploading data into the MPS-Db, including, 1) processed assay data (non-omic), 2) raw data exported from a plate reader, 3) omic formatted data. These are descrided in more detail below.</h4>
+
+                                <br>
+                                <h1 class="h1-level-2"> Processed MIF-C-a Format </h1>
+
+                                <ul class="list-unstyled">
+                                    <li> To add processed data in MIF-C-a format:
+                                        <ul class="help-filled-circle">
+                                            <li>Prepare a data file (MIF-C-a) </li>
+                                            <li>Make sure that the Target, Method, Unit, and Chip and Well Ids all match, exactly, what was entered as part of the study setup </li>
+                                            <li>In the Upload Data tab, click the button to add processed data files</li>
+                                            <li>To get an example template file, <a href="{% url 'assays-currentuploadtemplate' %}">click here</a></li>
+                                        </ul>
+                                    </li>
+
+                                    <li><br>Processed Data Help Notes:
+                                        <ul class="help-filled-circle">
+                                            <li>The ONLY assay data that are editable in the MPS-GUI is the <b>Exclude</b> field (editable on the <b>Study Item</b> edit page) </li>
+                                            <li>Changes made to the <b>Exclude</b> field using the MPS-GUI will be lost when data are re-uploaded</li>
+                                            <li>To replace assay data values with new values, remove the data file from the Current Data File, then correct the values in the MIF-C-a file and re-upload that file </li>
+                                            <li>Chip and Well Ids must be unique within a <b>Study</b></li>
+                                            <li>Each file (and each workbook if using Excel) should contain data for only one <b>Study</b> </li>
+                                            <li>Data for one study may be submitted in multiple files (and/or multiple tabs of an Excel workbook) </li>
+                                            <li>If uploading an Excel workbook, workbook can contain multiple tabs</li>
+                                            <li>All files (or tabs) with correct headers (i.e. column names) will be evaluated for upload, others will be ignored</li>
+                                            <li>Correct headers must be placed in the first three rows to be considered valid</li>
+                                        </ul>
+                                    </li>
+
+                                    <button name="help_button" type="button" class="btn btn-success help-collapsible">More Details on the MIF-C File Format</button>
+                                    <div class="help-content-2">
+                                        {% include 'help_mifc_file_details_table.html' %}
+                                    </div>
+
+                                </ul>
+
+                                <br>
+                                <h1 class="h1-level-2"> Raw Plate Reader Data </h1>
+
+                                <ul class="list-unstyled">
+                                    <li> To add raw data exported from a plate reader:
+                                        <ul class="help-filled-circle">
+                                            <li>Help for raw plate reader data is coming soon</li>
+                                        </ul>
+                                    </li>
+
+                                    <li><br>Raw Plate Reader Data Help Notes:
+                                        <ul class="help-filled-circle">
+                                            <li>Help for raw plate reader data is coming soon</li>
+                                        </ul>
+                                    </li>
+
+                                    <button name="help_button" type="button" class="btn btn-success help-collapsible">More Details on Uploading Plate Reader Data</button>
+                                    <div class="help-content-2">
+                                        <li>Help for raw plate reader data is coming soon</li>
+{#                                        {% include 'xx.html' %}#}
+                                    </div>
+
+                                </ul>
+
+                                <br>
+                                <h1 class="h1-level-2"> Omic Data </h1>
+
+                                <ul class="list-unstyled">
+                                    <li> To add omic data to the MPS-Db:
+                                        <ul class="help-filled-circle">
+                                            <li>Help for omic data is coming soon</li>
+                                        </ul>
+                                    </li>
+
+                                    <li><br>Omic Data Help Notes:
+                                        <ul class="help-filled-circle">
+                                            <li>Help for omic data is coming soon</li>
+                                        </ul>
+                                    </li>
+
+                                    <button name="help_button" type="button" class="btn btn-success help-collapsible">More Details Uploading Omic Data</button>
+                                    <div class="help-content-2">
+                                        <li>Help for omic data is coming soon</li>
+{#                                        {% include 'help_mifc_file_details_table.html' %}#}
+                                    </div>
+
+                                </ul>
+
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div id="help_image_video">
+                    <button name="help_button" type="button" class="btn btn-primary help-collapsible">9. Prepare Images and Videos </button>
+                    <div class="help-content-1">
+                        <ul class="list-group">
+                            <li class="list-group-item">
+                                <h1 class="h1-level-1"> Prepare Images and Videos </h1>
+
+                                <h4>We are working on adding the ability for users to direclty upload images and videos, but, currently, images and videos must be added to the MPS-Db by MPS-Db administrators.</h4>
+                                <ul class="list-unstyled">
+                                    <li>To add images and/or videos:
+                                        <ul class="help-filled-circle">
+                                            <li>Prepare the image/video file</li>
+                                            <li>Prepare an image/video metadata file (MIF-C-i) </li>
+                                            <li>To get an example partial template file, <a href="{% url 'assays-currentuploadtemplate' %}">click here</a>
+                                            <li>Contact an MPS-Db Administrator to make arrangements for submitting the files</li>
+                                        </ul>
+                                    </li>
+                                    <li><br>Help Notes:
+                                        <ul class="help-filled-circle">
+                                            <li>To remove media files, contact an MPS-Db Administrator for assistance</li>
+                                        </ul>
+                                    </li>
+
+                                    <button name="help_button" type="button" class="btn btn-success help-collapsible">More Details on the MIF-C File Format</button>
+                                    <div class="help-content-2">
+                                        {% include 'help_mifc_file_details_table.html' %}
+                                    </div>
+
+                                </ul>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div id="help_flags_and_notes">
+                    <button name="help_button" type="button" class="btn btn-primary help-collapsible">10. Validation - Flags and Notes (optional) </button>
+                    <div class="help-content-1">
+                        <ul class="list-group">
+                            <li class="list-group-item">
+                                <h1 class="h1-level-1"> Validation, Flags and Notes (optional) </h1>
+
+                                <h4>To facilitate data review and validation,
+                                    the database offers the option to flag and add notes to a
+                                    1) Study, 2) Study Item (i.e. a chip or a well), and 3) Plate.
+                                    When a Study is flagged, a flag is display in the Review column
+                                    for that Study in the Study List (a note is displayed as a hover tip).
+                                    When a Study Item is flagged, the flag is displayed in the Review column
+                                    for that Study Item in the Study Item List.
+                                    In addition, Study Items can be 'validated'
+                                    (a check mark will show in the Review column for the Study Item in the Study Item list).</h4>
+
+                                <br>
+                                <h1 class="h1-level-2"> Study Flags and Notes </h1>
+
+                                <ul class="list-unstyled">
+                                    <li> To add flags and or notes to a Study:
+                                        <ul class="help-filled-circle">
+                                            <li>Go to the Study of interest</li>
+                                            <li>Click on the <b>Analyze/Edit</b> button</li>
+                                            <li>Select Edit This Study</li>
+                                            <li>Click on the Flag icon at the bottom of the page</li>
+                                            <li>Click on the <b>Notes</b> button to add a note (adding a note is optional)</li>
+                                            <li>Click <b>Submit</b> to save</li>
+                                        </ul>
+                                    </li>
+                                </ul>
+
+                                <br>
+                                <h1 class="h1-level-2"> Study Item Flags and Notes </h1>
+
+                                <ul class="list-unstyled">
+                                    <li> To add flags and or notes to a Study Item:
+                                        <ul class="help-filled-circle">
+                                            <li>Go to the Study of interest</li>
+                                            <li>Scroll down to the Chips and Wells section of the page </li>
+                                            <li>Click to View/Edit a Study Item (chip or well) of interest</li>
+                                            <li>Click on the Flag icon at the bottom of the page</li>
+                                            <li>Click on the <b>Notes</b> button to add a note (adding a note is optional)</li>
+                                            <li>Click <b>Submit</b> to save</li>
+                                        </ul>
+                                    </li>
+                                </ul>
+
+                                <br>
+                                <h1 class="h1-level-2"> Study Item Validation </h1>
+
+                                <ul class="list-unstyled">
+                                    <li> To add a validation check mark to a Study Item:
+                                        <ul class="help-filled-circle">
+                                            <li>Go to the Study of interest</li>
+                                            <li>Scroll down to the Chips and Wells section of the page </li>
+                                            <li>Click to View/Edit a Study Item (chip or well) of interest</li>
+                                            <li>Click on the Click Here to Mark this Entry as Validated button near the top of the page</li>
+                                            <li>Click <b>Submit</b> to save</li>
+                                        </ul>
+                                    </li>
+                                </ul>
+
+                                <ul class="list-unstyled">
+                                    <li><br>Help Notes:
+                                        <ul class="help-filled-circle">
+                                            <li>Validation check marks, flags, and notes are visible to all users who have permission to view a study</li>
+                                            <li>Validation, flags, and notes can be used during the validation process, and removed prior to sharing a study (i.e. study sign-off)</li>
+                                            <li><b>Study Item</b> validation is designed to be part of the data provider's QC process (it is optional and is NOT required to be completed prior to study sign off) </li>
+                                        </ul>
+                                    </li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div id="help_study_signoff">
+                    <button name="help_button" type="button" class="btn btn-primary help-collapsible">11. Data Sharing - Sign-Off a Study (optional) </button>
+                    <div class="help-content-1">
+                        <ul class="list-group">
+                            <li class="list-group-item">
+                                <h1 class="h1-level-1"> Data Sharing - Sign-Off a Study (optional) </h1>
+                                <h4>Data group administrators can sign-off a Study in their data group.</h4>
+                                <ul class="list-unstyled">
+                                    <li>To sign-off a <b>Study</b>:
+                                        <ul class="help-filled-circle">
+                                            <li>Go to the Study of interest</li>
+                                            <li>Click on the <b>Sign Off/Permission</b> button</li>
+                                            <li>Select View/Edit Sign Off Status of this Study</li>
+                                            <li>Add a note in the Notes box (optional)</li>
+                                            <li>Click the Click Here to Sign Off on this Study button</li>
+                                        </ul>
+                                    </li>
+                                    <li><br>Help Notes:
+                                        <ul class="help-filled-circle">
+                                            <li>Study sign off starts a one year embargo period after which the study will be open to the broader scientific community (publicly accessible)  </li>
+                                            <li>Study sign off is optional unless required by project funder </li>
+                                            <li>During the study sign off process, notes can be added that will be displayed in the study list page when hovering over the check mark in the review column</li>
+                                            <li>To learn more about options for sharing data with selected colleagues prior to study sign off, see <a href="#help_collaborator_group">Assay Data Collaborators</a></li>
+                                            <li>To learn more about options for sharing data with selected colleagues during the embargo period, see <a href="#help_access_group">Assay Data Accessors</a></li>
+                                        </ul>
+                                    </li>
+                                </ul>
+                            </li>
+
+                            <li class="list-group-item">
+                                <ul class="list-unstyled">
+                                    <button name="help_button" type="button" class="btn btn-success help-collapsible">Stakeholder Review (optional - planning to replace with Assay Data Accessors)</button>
+                                    <div class="help-content-2">
+                                        <ul class="list-group">
+                                            <li class="list-group-item">
+                                                <h1 class="h1-level-1"> Stakeholder Review </h1>
+                                                <ul class="list-unstyled">
+                                                    <li>Follow these steps:
+                                                        <ul class="help-filled-circle">
+                                                            <li>Login to the MPS-Db</li>
+                                                            <li>Go to the study list page - select Studies, then View All Studies or
+                                                                <a href='https://mps.csb.pitt.edu/assays/assaystudy'>click here</a> </li>
+                                                            <li>Look for studies with a check mark, but without an 'eye' or a 'pencil' in the Review column</li>
+                                                            <li>Click the View/Edit button next to the study to review</li>
+                                                            <li>Click the View/Edit Approval Status of this Study button near the top of the page</li>
+                                                            <li>Add a Note (optional)</li>
+                                                            <li>Click the Click Here to Approve this Study for Release button</li>
+                                                            <li>Click Yes</li>
+                                                            <li>Click Submit</li>
+                                                            <li>Click Overwrite</li>
                                                         </ul>
                                                     </li>
-                                                    <li> Assistance is available – email MPSHELP@pitt.edu with "HELP with Providing Data" in the subject line
+                                                    <li><br>Help Notes:
+                                                        <ul class="help-filled-circle">
+                                                            <li>Data providers and/or project funders designate study data stakeholder(s)</li>
+                                                            <li>Designating a study data stakeholder is optional (unless required by the funder) </li>
+                                                            <li>Stakeholders must be registered MPS-Db users to access study data</li>
+                                                        </ul>
+                                                    </li>
                                                 </ul>
                                             </li>
                                         </ul>
-                                    </li>
+                                    </div>
                                 </ul>
-                            </div>
-                        </div>
+                            </li>
 
+                        </ul>
 
-                        <div id="studieseditor" class="editorsubtainer">
-                        {#TODO: add new workflow blah blah#}
-                            <ul class="list-group">
-                                <li class="list-group-item">
-                                    <ul class="list-unstyled">
-                                        <li>To Add/Edit a <b>Study</b>
-                                            <ul class="help-filled-circle">
-                                                <li>Click on the <b>Add Study</b> button to be routed to the <b>Study Level Details</b> page, or
-                                                click the <b>View/Edit</b> button next to the <b>Study</b> of interest to be routed to the <b>Study Matrices and Items</b> list page, then
-                                                click on the <b>Edit This Study</b> button </li>
-                                                <li> Add or Edit the required information </li>
-                                                    <button name="help_button" type="button" class="btn btn-info help-collapsible">Show/Hide Video Tutorial: Add/Edit Study </button>
-                                                    <div class="help-content-3">
-                                                          <div class="myIframe">
-                                                            <iframe src="https://pitt.hosted.panopto.com/Panopto/Pages/Embed.aspx?id=8cbb6ad6-8ba6-4e06-9052-aab7016a7617&v=1" width="720" height="405" style="padding: 0px; border: 1px solid #464646;" frameborder="0" allowfullscreen allow="autoplay"></iframe>
-                                                        </div>
-                                                    </div>
-                                                    <ul class="help-open-circle">
-                                                        <li>Group – select a Data Group (the team performing the study) </li>
-                                                        <li>Study Type – indicate the general purpose of the <b>Study</b> (one is required; check all that apply) </li>
-                                                        <li>Study Name – use an informative name (e.g., "Kidney-Liver Vitamin C Metabolism" is more informative than "Study-1") </li>
-                                                        <li>Start Date - start of experiment (typically the day the first cells are added to the device) </li>
-                                                        <li>Description - informative description (purpose, methods, results)</li>
-                                                        <!--<li>Use in Calculations - checking <b>Use in Calculations</b> tells the MPS-Db to use this study's data in predictive modeling and other calculations  </li> -->
-                                                        <li>Protocol File – a Word or pdf file containing the <b>Study</b> protocol </li>
-                                                        <li>Image to Illustrate A <b>Study</b> – recommend a picture of the setup or an illustration of the experimental protocol </li>
-                                                        <!-- <li>For Integrated Chip Studies – select configuration if performing an integrated <b>Study</b>  </li> -->
-                                                        <li>Study Setup - easily add groups of chips to the study  </li>
-                                                            <button name="help_button" type="button" class="btn btn-info help-collapsible">Show/Hide Video Tutorial: Study Setup by Group </button>
-                                                            <div class="help-content-3">
-                                                                  <div class="myIframe">
-                                                                    <iframe src="https://pitt.hosted.panopto.com/Panopto/Pages/Embed.aspx?id=c651e3de-e0ec-4138-937e-aad20144e538&v=1" width="720" height="405" style="padding: 0px; border: 1px solid #464646;" frameborder="0" allowfullscreen allow="autoplay"></iframe>
-                                                                  </div>
-                                                            </div>
-                                                            <ul class="help-filled-circle">
-                                                                <li> Select an MPS Model </li>
-                                                                <li> Select an MPS Model Version (information about cells and settings will be pulled from the model version)</li>
-                                                                <li> Click on the <b>Add Setup Group</b> button</li> (repeat as needed)
-                                                                <li> Enter the Number of Chips in each group </li>
-                                                                <li> Change the Test Type for each group, as needed</li>
-                                                                <li> Add compounds, additional cells, and additional settings by clicking on the <b>Add Compound</b>, <b>Add Cell</b>, or <b>Add Setting</b> button, respectively</li>
-                                                                <li> Click on the <b>Add</b> button in the row where the new setup information is to be added</li>
-                                                                <li> Fill in the form (make sure to fill all the fields with an *)</li>
-                                                                <li> Click the <b>Apply</b> button </li>
-                                                                <li> Remove cells, settings, and/or compounds by clicking the red X's (click on individual X's or, to remove a column, click on the red X in the column header, and to remove a row, click on the red X in the row label)</li>
-                                                            </ul>
-                                                        <li>Assays – for each combination of assay Method/Kit, Target/Analyte, and Unit used, add a row  </li>
-                                                        <!--<li>Supporting Data – attach files that will assist other MPS-Db users in understanding the <b>Study</b> design and/or assay data (other than the protocol file, which is added separately)  </li> -->
-                                                    </ul>
-                                                </li>
-                                                <li>Click the <b>Submit</b> button to save changes</li>
-                                            </ul>
-                                        </li>
-                                        <li><br>Help Notes:
-                                            <ul class="help-filled-circle">
-                                                <li>IMPORTANT: The option to setup a study by treatment group is only available <b>PRIOR to the first Submit</b> of the Study (option is not available when editing a study)</li>
-                                                <li>When using Study Setup by Treatment Group, chips will be numbered sequentially, starting from 1 (these can be changed in edit mode, if necessary)</li>
-                                                <li>When using Study Setup by Treatment Group, it is recommended that all chips be added prior to the first submit (additional chips can be added to the study in edit mode, but the process is more difficult)</li>
-                                                <li>For information on continuing to add MPS models (<b>Matrix Items</b>) and assay data to the <b>Study</b> (Step 2), <a href="#matrices_editor">click here</a> </li>
-                                                 <li>When using Study Setup by Treatment Group, if an MPS model version has not been made and/or has not been populated correctly, cells and settings will not be automatically pulled into the group setup</li>
-                                                <li>When using Study Setup by Treatment Group, treatment compounds will need to be added as they are not part of the MPS model version (compounds cannot be saved as part of a model version)</li>
-                                                <li>Everything in the <b>Study</b> can be edited until the <b>Study</b> Data Group Admin signs off the <b>Study</b> (then it is locked) </li>
-                                                <!--<li>Data contained in files attached as <b>Supporting Data</b> are NOT available for visualization, analysis, or used in calculations within the MPS-GUI </li>-->
-                                                 <li>All combinations of Method/Kit, Target/Analyte, and Unit must be listed in the <b>Assays</b> Section of the <b>Study Level Details</b> page <b>PROIR</b> to uploading assay data</li>
-                                            </ul>
-                                        </li>
-                                         <li><br>Additional Video Tutorial(s)
-                                            <ul class="help-filled-circle">
-                                                <li> Returning to an existing <b>Study</b> </li>
-                                                <button name="help_button" type="button" class="btn btn-info help-collapsible">Show/Hide Video Tutorial: Returning to an Existing Study </button>
-                                                    <div class="help-content-3">
-                                                          <div class="myIframe">
-                                                            <iframe src="https://pitt.hosted.panopto.com/Panopto/Pages/Embed.aspx?id=bdf9abe6-1b45-4aab-82d3-aab7016a6c66&v=1" width="720" height="405" style="padding: 0px; border: 1px solid #464646;" frameborder="0" allowfullscreen allow="autoplay"></iframe>
-                                                        </div>
-                                                    </div>
-
-                                            </ul>
-                                        </li>
-                                    </ul>
-                                </li>
-                            </ul>
-                        </div>
-
-                        <button name="help_button" type="button" class="btn btn-success help-collapsible">See a Note About Flags</button>
-                        <div class="help-content-2">
-                            <div id="flagsHelp Notes:" class="editorsubtainer">
-                                <ul class="list-group">
-                                    <li class="list-group-item">
-                                        <ul class="list-unstyled">
-                                            <li>A <b>Study</b>, each <b>Matrix</b>, and/or each <b>Matrix Item</b> can be flagged and annotated
-                                                <ul class="help-filled-circle">
-                                                    <li> Clicking <a role='button' class="btn btn-sm" style="color:#337AB7"> <span class="glyphicon glyphicon-flag" aria-hidden="true"></span> </a> places the flag  </li>
-                                                    <li> Clicking <a role='button' class="btn btn-sm btn-warning"> Help Notes: </a> brings up an input dialog where annotations can be added </li>
-                                                </ul>
-                                            </li>
-                                            <li><br>Help Notes:
-                                                <ul class="help-filled-circle">
-                                                    <li> Flags and Help Notes: are fully reversible until a <b>Study</b> is signed off </li>
-                                                    <li> The annotation process works the same way for a <b>Study</b>, a <b>Matrix</b>, and a <b>Matrix Item</b> </li>
-                                                    <li> A <b>Study</b> is annotated at the bottom of the <b>Study Level Details</b> page </li>
-                                                    <li> A <b>Matrix</b> is annotated at the bottom of the <b>Matrix Setup and Data</b> page </li>
-                                                    <li> A <b>Matrix Item</b> is annotated at the bottom of the <b>Item Setup and Data</b> page </li>
-                                                </ul>
-                                            </li>
-                                        </ul>
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
-
-                        <!-- <button name="help_button" type="button" class="btn btn-success help-collapsible">See a Note About Integrated Studies</button>
-                        <div class="help-content-2">
-                            <div id="studyconfigurations" class="editorsubtainer">
-                                <ul class="list-group">
-                                    <li class="list-group-item">
-                                        <ul class="list-unstyled">
-                                            <li>When performing <b>Integrated Studies</b>
-                                                <ul class="help-filled-circle">
-                                                    <li>When setting up a <b>Study</b>, <b>Models</b> can be associated </li>
-                                                    <li>Each <b>Model</b> is assigned a <b>Label</b>, which can be one or two characters long </li>
-                                                    <li><b>Sequence Number</b> shows the order of input for the <b>Models</b> </li>
-                                                    <li><b>Output</b> lists all of the other <b>Models</b> the current <b>Models</b> feeds into </li>
-                                                    <li><b>Output</b>  should be a list of labels separated by dashes (e.g. "AB-CD" means the model is connected to AB and CD) </li>
-                                                    <li><b>Coupling</b> indicates whether or not the model is directly connected to the other models </li>
-                                                    <li>Click <b>Add Model</b> to add another row </li>
-                                                </ul>
-                                            </li>
-                                        </ul>
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
-                        -->
-                        <div id="studyleveldetails_editor">
-                            <button name="help_button" type="button" class="btn btn-success help-collapsible">Getting Help With Study Level Details (Example Provided) </button>
-                            <div class="help-content-2">
-                                <div id="studyleveldetailseditor" class="editorsubtainer">
-                                    <ul class="list-group">
-                                        <li class="list-group-item">
-                                        To have an <b>MPS-Db Admin</b> assist you, prepare the information shown in the table.
-                                            <table class="table table-bordered table-condensed small table-components">
-                                            <thead>
-                                                <tr class="active">
-                                                <th> Description </th>
-                                                <th> Required </th>
-                                                <th> Study 1 </th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                <tr>
-                                                    <td> MPS Model Name </td>
-                                                    <td> yes </td>
-                                                    <td> Blood-Brain Barrier (NVU) </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> Study Type(s)  (list all that apply: Toxicity, Efficacy, Disease, Chip Characterization) </td>
-                                                    <td> yes </td>
-                                                    <td> Toxicity, Chip Characterization </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> Project(s) (list all that apply: TCTC, DMET, TCD) </td>
-                                                    <td> yes </td>
-                                                    <td> TCTC </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> Study Name </td>
-                                                    <td> yes </td>
-                                                    <td> NVU_20160223 </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> Study Start Date </td>
-                                                    <td> yes </td>
-                                                    <td> 2016-02-23 00:00:00 </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> Study Description </td>
-                                                    <td> yes </td>
-                                                    <td> Purpose: add the purpose of the study (study hypothesis and/or background).
-        Methods: add the methods used in the study.
-        Results: add a summary of the study results. </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> Is it okay to use data in Calculations (MPS-Db Features)? (yes or no) </td>
-                                                    <td> yes </td>
-                                                    <td> no </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> Do you consider this a "Valid" study? (yes or no) </td>
-                                                    <td> yes </td>
-                                                    <td> yes </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> Study SOPs </td>
-                                                    <td> no </td>
-                                                    <td> provide the study "Protocol File" </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> Study Image </td>
-                                                    <td> no </td>
-                                                    <td> provide an image to "clarify this study" </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> Supporting Data </td>
-                                                    <td> no </td>
-                                                    <td> provide files that will assist users in understanding and interpreting study data </td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-
-                    </div>
-                </div>
-
-                <div id="matrices_editor">
-                    <button name="help_button" type="button" class="btn btn-primary help-collapsible">Adding Assay Data Step 2 - Matrices Setup (alternative to Study Setup by Treatment Group)</button>
-                    <div class="help-content-1">
-                        <div id="matriceseditor" class="editorsubtainer">
-                            <ul class="list-group">
-                                <li class="list-group-item">
-                                    <p><b><i>If used the Study Setup by Treatment Group feature in Step 1 (above), this step is not necessary.</i></b></p>
-                                    <ul class="list-unstyled">
-                                        <li>To Add/Edit a <b>Matrix</b>, from the <b>Study Matrices and Items</b> list page </li>
-                                                <button name="help_button" type="button" class="btn btn-info help-collapsible">Show/Hide Video Tutorial: Add/Edit a Matrix </button>
-                                                    <div class="help-content-3">
-                                                          <div class="myIframe">
-                                                            <iframe src="https://pitt.hosted.panopto.com/Panopto/Pages/Embed.aspx?id=d3b2f27a-d4fc-4791-bc34-aab7016a6552&v=1" width="720" height="405" style="padding: 0px; border: 1px solid #464646;" frameborder="0" allowfullscreen allow="autoplay"></iframe>
-                                                        </div>
-                                                    </div>
-                                            <ul class="help-filled-circle">
-                                                <li>To add - click the <b>Add Matrix</b> button</li>
-                                                <li>To edit - click on the <b>View/Edit</b> button next to the <b>Matrix</b> of interest</li>
-                                            </ul>
-                                        </li>
-                                        <li><br>In the <i>Global Section</i>
-                                            <ul class="help-filled-circle">
-                                                <li>Matrix Name – enter something descriptive</li>
-                                                <li>Help Notes: – free text field for describing the matrix</li>
-                                                <li>Representation – select from the options in the list </li>
-                                                <li>If multiple chips -  select number of Items, Rows, and Columns </li>
-                                                <button name="help_button" type="button" class="btn btn-info help-collapsible">Show/Hide Video Tutorial: Global Matrix Information </button>
-                                                    <div class="help-content-3">
-                                                          <div class="myIframe">
-                                                            <iframe src="https://pitt.hosted.panopto.com/Panopto/Pages/Embed.aspx?id=55ae8f01-201b-4eb4-bb59-aab7016a59cf&v=1" width="720" height="405" style="padding: 0px; border: 1px solid #464646;" frameborder="0" allowfullscreen allow="autoplay"></iframe>
-                                                        </div>
-                                                    </div>
-                                                <li>If Plate - select the applicable device </li>
-                                            </ul>
-                                        </li>
-                                        <li><br>In the <i>Individual Section</i>
-                                            <ul class="help-filled-circle">
-                                                <li>Click in the <i>Action</i> Box</li>
-                                                <li>Select an <i>Action</i>
-                                                    <ul class="help-filled-circle">
-                                                        <li> For each <b>Matrix Item</b>, the Name/ID, Test Type, Setup Date, and Device/Model are required </li>
-                                                             <ul class="help-open-circle">
-                                                                <li>Give each item a Name, Type, Date, and Device/Model </li>
-                                                                 <li><b>SUBMIT</b> - before continuing, submit the study to save the matrix items! This if VERY IMPORTANT.</li>
-                                                             </ul>
-                                                            <button name="help_button" type="button" class="btn btn-info help-collapsible">Show/Hide Video Tutorial: Four Required Matrix Actions </button>
-                                                                <div class="help-content-3">
-                                                                      <div class="myIframe">
-                                                                        <iframe src="https://pitt.hosted.panopto.com/Panopto/Pages/Embed.aspx?id=2be5c3f0-fc70-4892-9ff5-aab7016a3464&v=1" width="720" height="405" style="padding: 0px; border: 1px solid #464646;" frameborder="0" allowfullscreen allow="autoplay"></iframe>
-                                                                    </div>
-                                                                </div>
-                                                        <li> Adding Settings </li>
-                                                            <button name="help_button" type="button" class="btn btn-info help-collapsible">Show/Hide Video Tutorial: Add Settings </button>
-                                                                <div class="help-content-3">
-                                                                      <div class="myIframe">
-                                                                        <iframe src="https://pitt.hosted.panopto.com/Panopto/Pages/Embed.aspx?id=9b5dba11-33e0-4478-ab60-aab7016a34bb&v=1" width="720" height="405" style="padding: 0px; border: 1px solid #464646;" frameborder="0" allowfullscreen allow="autoplay"></iframe>
-                                                                      </div>
-                                                                </div>
-                                                        <li> Adding Compounds </li>
-                                                            <button name="help_button" type="button" class="btn btn-info help-collapsible">Show/Hide Video Tutorial: Add Compounds </button>
-                                                                <div class="help-content-3">
-                                                                      <div class="myIframe">
-                                                                        <iframe src="https://pitt.hosted.panopto.com/Panopto/Pages/Embed.aspx?id=2a054863-5dc9-4bb0-8f66-aab7016a34e0&v=1" width="720" height="405" style="padding: 0px; border: 1px solid #464646;" frameborder="0" allowfullscreen allow="autoplay"></iframe>
-                                                                      </div>
-                                                                </div>
-                                                        <li> Adding Cells </li>
-                                                            <button name="help_button" type="button" class="btn btn-info help-collapsible">Show/Hide Video Tutorial: Add Cells </button>
-                                                                <div class="help-content-3">
-                                                                      <div class="myIframe">
-                                                                        <iframe src="https://pitt.hosted.panopto.com/Panopto/Pages/Embed.aspx?id=56abdf20-9042-478f-a923-aab7016a348c&v=1" width="720" height="405" style="padding: 0px; border: 1px solid #464646;" frameborder="0" allowfullscreen allow="autoplay"></iframe>
-                                                                      </div>
-                                                                </div>
-                                                    </ul>
-                                                </li>
-                                                <li>Enter applicable information in the box below the <i>Action</i> </li>
-                                                <li>Click on one of the <b>Apply</b> buttons or click and drag in the <b>Matrix</b> </li>
-                                                <li>Click the <b>Submit</b> button to save changes</li>
-                                            </ul>
-                                        </li>
-                                        <li><br>Help Notes:
-                                            <ul class="help-filled-circle">
-                                                <li>Name/IDs must be unique in an individual <b>Study</b> (cannot have repeats in a <b>Matrix</b> or in two <b>Matrices</b> of the same <b>Study</b>)  </li>
-                                                <li>Test Type specifies whether the <b>Matrix Item</b> functions as a control </li>
-                                                <li>After the first Submit, <b>Matrix Items</b> can be setup and/or updated in the <b>Matrix</b> or individually (to learn more about editing individual <b>Matrix Items</b>, <a href="#matrixitems_editor">click here</a>)   </li>
-                                                <li>Adding and deleting information from multiple <b>Matrix Items</b> is generally easiest to do on the matrix edit page </li>
-                                                <li>Editing information for a single <b>Matrix Item</b> will be easiest to do on the <b>Matrix Item</b> edit page </li>
-                                                <li>For information on continuing to add MPS models (<b>Matrix Items</b>) and assay data to the <b>Study</b> (Step 3), <a href="#matrixitems_editor">click here</a> </li>
-                                                <li>Note that editing can be performed can be performed in the matrix (Edit as Matrix), or using treatment groups (Edit as Groups) </li>
-                                                <li>The toggle for switching between Edit as Matrix and Edit as Groups is located at the top of each matrix page (from the Matrix and Matrix Item list page, click View/Edit next to the Matrix of interest to be routed to the matrix page)</li>
-                                            </ul>
-                                        </li>
-                                        <li><br>Additional Video Tutorial(s)
-                                            <ul class="help-filled-circle">
-                                                <li> Removing item settings, compounds, and/or cells </li>
-                                                            <button name="help_button" type="button" class="btn btn-info help-collapsible">Show/Hide Video Tutorial: Removing Settings, Compounds, or Cells </button>
-                                                                <div class="help-content-3">
-                                                                      <div class="myIframe">
-                                                                        <iframe src="https://pitt.hosted.panopto.com/Panopto/Pages/Embed.aspx?id=a92b7779-ca88-44d8-bd3d-aab7016a45a3&v=1" width="720" height="405" style="padding: 0px; border: 1px solid #464646;" frameborder="0" allowfullscreen allow="autoplay"></iframe>
-                                                                      </div>
-                                                                </div>
-                                                <!-- <li> Removing items from a matrix <a href="https://youtu.be/" target="_blank" > (video tutorial) </a> </li>
-                                                <li> Removing a matrix from a study <a href="https://youtu.be/" target="_blank" > (video tutorial) </a> </li>  -->
-                                                <li> Options for naming items </li>
-                                                            <button name="help_button" type="button" class="btn btn-info help-collapsible">Show/Hide Video Tutorial: Exploring Shortcuts for Naming Chips </button>
-                                                                <div class="help-content-3">
-                                                                      <div class="myIframe">
-                                                                        <iframe src="https://pitt.hosted.panopto.com/Panopto/Pages/Embed.aspx?id=a643b676-5f4e-42a2-8e44-aab7016a503f&v=1" width="720" height="405" style="padding: 0px; border: 1px solid #464646;" frameborder="0" allowfullscreen allow="autoplay"></iframe>
-                                                                      </div>
-                                                                </div>
-
-                                            </ul>
-                                        </li>
-                                    </ul>
-                                </li>
-                            </ul>
-                        </div>
-
-                        <div id="matricessetupdetails_editor">
-                            <button name="help_button" type="button" class="btn btn-success help-collapsible">Getting Help With Matrix and Matrix Item Setup (Example Provided) </button>
-                            <div class="help-content-2">
-                                <div id="studyleveldetailseditor" class="editorsubtainer">
-                                    <ul class="list-group">
-                                        <li class="list-group-item">
-                                            To have an <b>MPS-Db Admin</b> assist you with setting up <b>Matrix Items</b>, prepare the information shown in the tables.
-                                            <br><br><b><em>Media Setup Data and Metadata</em></b>
-
-                                            <table class="table table-bordered table-condensed small table-components">
-                                            <thead>
-                                                <tr class="active">
-                                                <th> Description </th>
-                                                <th> Required </th>
-                                                <th> Model Media Setup 1 </th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                <tr>
-                                                    <td> MPS Model Name </td>
-                                                    <td> yes </td>
-                                                    <td> Blood-Brain Barrier (NVU) </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> Media Setup Name </td>
-                                                    <td> yes </td>
-                                                    <td> Media 5% </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> Media Name </td>
-                                                    <td> yes </td>
-                                                    <td> DMSO </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> Media Value </td>
-                                                    <td> yes </td>
-                                                    <td> 5 </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> Media Value Unit </td>
-                                                    <td> yes </td>
-                                                    <td> % </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> Media Location </td>
-                                                    <td> yes </td>
-                                                    <td> Influent-Vascular </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> Addition Day </td>
-                                                    <td> yes </td>
-                                                    <td> 0 </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> Addition Hour </td>
-                                                    <td> yes </td>
-                                                    <td> 0 </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> Addition Minute </td>
-                                                    <td> yes </td>
-                                                    <td> 0 </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> Duration Day </td>
-                                                    <td> yes </td>
-                                                    <td> 24 </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> Duration Hour </td>
-                                                    <td> yes </td>
-                                                    <td> 0 </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> Duration Minute </td>
-                                                    <td> yes </td>
-                                                    <td> 0 </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> Media Name </td>
-                                                    <td> yes </td>
-                                                    <td> DMSO </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> Media Value </td>
-                                                    <td> yes </td>
-                                                    <td> 5 </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> Media Value Unit </td>
-                                                    <td> yes </td>
-                                                    <td> % </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> Media Location </td>
-                                                    <td> yes </td>
-                                                    <td> Influent-Brain </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> Addition Day </td>
-                                                    <td> yes </td>
-                                                    <td> 0 </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> Addition Hour </td>
-                                                    <td> yes </td>
-                                                    <td> 0 </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> Addition Minute </td>
-                                                    <td> yes </td>
-                                                    <td> 0 </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> Duration Day </td>
-                                                    <td> yes </td>
-                                                    <td> 24 </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> Duration Hour </td>
-                                                    <td> yes </td>
-                                                    <td> 0 </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> Duration Minute </td>
-                                                    <td> yes </td>
-                                                    <td> 0 </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> (add more as needed) </td>
-                                                    <td>   </td>
-                                                    <td>   </td>
-                                                </tr>
-                                            </tbody>
-                                            </table>
-
-                                            <br><b><em>Setting Setup Data and Metadata</em></b>
-
-                                            <table class="table table-bordered table-condensed small table-components">
-                                            <thead>
-                                                <tr class="active">
-                                                <th> Description </th>
-                                                <th> Required </th>
-                                                <th> Model Setting Setup 1 </th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                <tr>
-                                                    <td> MPS Model Name </td>
-                                                    <td> yes </td>
-                                                    <td> Blood-Brain Barrier (NVU) </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> Setting Setup Name </td>
-                                                    <td> yes </td>
-                                                    <td> Setting Flowrate = 5 </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> Settings Name </td>
-                                                    <td> yes </td>
-                                                    <td> Pump Type </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> Settings Category or Value </td>
-                                                    <td> yes </td>
-                                                    <td> Syringe </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> Settings Value Unit (use "category" for categories) </td>
-                                                    <td> yes </td>
-                                                    <td> category </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> Setting Location </td>
-                                                    <td> yes </td>
-                                                    <td> Influent-Vascular </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> Addition Day </td>
-                                                    <td> yes </td>
-                                                    <td> 0 </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> Addition Hour </td>
-                                                    <td> yes </td>
-                                                    <td> 0 </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> Addition Minute </td>
-                                                    <td> yes </td>
-                                                    <td> 0 </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> Duration Day </td>
-                                                    <td> yes </td>
-                                                    <td> 24 </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> Duration Hour </td>
-                                                    <td> yes </td>
-                                                    <td> 0 </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> Duration Minute </td>
-                                                    <td> yes </td>
-                                                    <td> 0 </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> Settings Name </td>
-                                                    <td> yes </td>
-                                                    <td> Flowrate </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> Settings Category or Value </td>
-                                                    <td> yes </td>
-                                                    <td> 5 </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> Settings Value Unit (use "category" for categories) </td>
-                                                    <td> yes </td>
-                                                    <td> μL/minute </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> Setting Location </td>
-                                                    <td> yes </td>
-                                                    <td> Influent-Vascular </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> Addition Day </td>
-                                                    <td> yes </td>
-                                                    <td> 0 </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> Addition Hour </td>
-                                                    <td> yes </td>
-                                                    <td> 0 </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> Addition Minute </td>
-                                                    <td> yes </td>
-                                                    <td> 0 </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> Duration Day </td>
-                                                    <td> yes </td>
-                                                    <td> 24 </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> Duration Hour </td>
-                                                    <td> yes </td>
-                                                    <td> 0 </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> Duration Minute </td>
-                                                    <td> yes </td>
-                                                    <td> 0 </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> (add more as needed) </td>
-                                                    <td> no </td>
-                                                    <td> add when needed </td>
-                                                </tr>
-                                            </tbody>
-                                            </table>
-
-                                            <br><b><em>Cell Setup Data and Metadata</em></b>
-
-                                            <table class="table table-bordered table-condensed small table-components">
-                                            <thead>
-                                                <tr class="active">
-                                                <th> Description </th>
-                                                <th> Required </th>
-                                                <th> Model Cell Setup 1 </th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                <tr>
-                                                    <td> MPS Model Name </td>
-                                                    <td> yes </td>
-                                                    <td> Blood-Brain Barrier (NVU) </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> Cell Setup Name </td>
-                                                    <td> yes </td>
-                                                    <td> 3 Cell Combo </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> Cell Sample ID# or Reference </td>
-                                                    <td> yes </td>
-                                                    <td> 43 - HBVP pericyte (Human Vasculature) (ScienCell Research Laboratories) </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> Cell Biosensor Name </td>
-                                                    <td> yes </td>
-                                                    <td> none </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> Cell Seeding Density </td>
-                                                    <td> yes </td>
-                                                    <td> 1000 </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> Cell Seeding Density Unit </td>
-                                                    <td> yes </td>
-                                                    <td> cells/µL </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> Cell Estimated # that Stick </td>
-                                                    <td> yes </td>
-                                                    <td> 5000 </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> Cell Addition Location </td>
-                                                    <td> yes </td>
-                                                    <td> Vascular </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> Addition Day </td>
-                                                    <td> yes </td>
-                                                    <td> 0 </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> Addition Hour </td>
-                                                    <td> yes </td>
-                                                    <td> 0 </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> Addition Minute </td>
-                                                    <td> yes </td>
-                                                    <td> 0 </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> Duration Day </td>
-                                                    <td> yes </td>
-                                                    <td> 0 </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> Duration Hour </td>
-                                                    <td> yes </td>
-                                                    <td> 0 </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> Duration Minute </td>
-                                                    <td> yes </td>
-                                                    <td> 1 </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> Cell Sample ID# or Reference </td>
-                                                    <td> yes </td>
-                                                    <td> 42 - SVG p12 astrocyte (Human Brain) (ATCC) </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> Cell Biosensor Name </td>
-                                                    <td> yes </td>
-                                                    <td> none </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> Cell Seeding Density </td>
-                                                    <td> yes </td>
-                                                    <td> 1000 </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> Cell Seeding Density Unit </td>
-                                                    <td> yes </td>
-                                                    <td> cells/µL </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> Cell Estimated # that Stick </td>
-                                                    <td> yes </td>
-                                                    <td> 5000 </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> Cell Addition Location </td>
-                                                    <td> yes </td>
-                                                    <td> Brain </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> Addition Day </td>
-                                                    <td> yes </td>
-                                                    <td> 0 </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> Addition Hour </td>
-                                                    <td> yes </td>
-                                                    <td> 0 </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> Addition Minute </td>
-                                                    <td> yes </td>
-                                                    <td> 0 </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> Duration Day </td>
-                                                    <td> yes </td>
-                                                    <td> 0 </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> Duration Hour </td>
-                                                    <td> yes </td>
-                                                    <td> 0 </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> Duration Minute </td>
-                                                    <td> yes </td>
-                                                    <td> 1 </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> Cell Sample ID# or Reference </td>
-                                                    <td> yes </td>
-                                                    <td> 44 - primary-cryopreserved endothelial (Human Vasculature) (CellSystems-376.01.04.01.03) </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> Cell Biosensor Name </td>
-                                                    <td> yes </td>
-                                                    <td> none </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> Cell Seeding Density </td>
-                                                    <td> yes </td>
-                                                    <td> 1000 </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> Cell Seeding Density Unit </td>
-                                                    <td> yes </td>
-                                                    <td> cells/µL </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> Cell Estimated # that Stick </td>
-                                                    <td> yes </td>
-                                                    <td> 5000 </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> Cell Addition Location </td>
-                                                    <td> yes </td>
-                                                    <td> Vascular </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> Addition Day </td>
-                                                    <td> yes </td>
-                                                    <td> 0 </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> Addition Hour </td>
-                                                    <td> yes </td>
-                                                    <td> 0 </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> Addition Minute </td>
-                                                    <td> yes </td>
-                                                    <td> 0 </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> Duration Day </td>
-                                                    <td> yes </td>
-                                                    <td> 0 </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> Duration Hour </td>
-                                                    <td> yes </td>
-                                                    <td> 0 </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> Duration Minute </td>
-                                                    <td> yes </td>
-                                                    <td> 1 </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> (add more as needed) </td>
-                                                    <td> no </td>
-                                                    <td> add when needed </td>
-                                                </tr>
-                                            </tbody>
-                                            </table>
-
-                                            <br><b><em>Compound Setup Data and Metadata</em></b>
-
-                                            <table class="table table-bordered table-condensed small table-components">
-                                            <thead>
-                                                <tr class="active">
-                                                <th> Description </th>
-                                                <th> Required </th>
-                                                <th> Model Compound Setup 1 </th>
-                                                <th> Model Compound Setup 2 </th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                <tr>
-                                                    <td> MPS Model Name </td>
-                                                    <td> yes </td>
-                                                    <td> Blood-Brain Barrier (NVU) </td>
-                                                    <td> Blood-Brain Barrier (NVU) </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> Compound Setup Name </td>
-                                                    <td> yes </td>
-                                                    <td> Terfenadine </td>
-                                                    <td> Fexofenadine </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> Compound Name </td>
-                                                    <td> yes </td>
-                                                    <td> TERFENADINE </td>
-                                                    <td> FEXOFENADINE </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> Compound Manufacturer </td>
-                                                    <td> yes </td>
-                                                    <td> Sigma-Aldrich  </td>
-                                                    <td> Sigma-Aldrich </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> Compound Catalog # </td>
-                                                    <td> no </td>
-                                                    <td> T9652 </td>
-                                                    <td> F9427 </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> Compound Lot/Batch </td>
-                                                    <td> no </td>
-                                                    <td> MKBX6318V </td>
-                                                    <td> 035M4734 </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> Compound Help Notes: </td>
-                                                    <td> no </td>
-                                                    <td>   </td>
-                                                    <td>   </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> Treatment Dose </td>
-                                                    <td> yes </td>
-                                                    <td> 10 </td>
-                                                    <td> 10 </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> Treatment Dose Unit </td>
-                                                    <td> yes </td>
-                                                    <td> μM </td>
-                                                    <td> μM </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> Compound Addition Location </td>
-                                                    <td> yes </td>
-                                                    <td> Influent-Vascular </td>
-                                                    <td> Influent-Vascular </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> Addition Day </td>
-                                                    <td> yes </td>
-                                                    <td> 24 </td>
-                                                    <td> 24 </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> Addition Hour </td>
-                                                    <td> yes </td>
-                                                    <td> 0 </td>
-                                                    <td> 0 </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> Addition Minute </td>
-                                                    <td> yes </td>
-                                                    <td> 0 </td>
-                                                    <td> 0 </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> Duration Day </td>
-                                                    <td> yes </td>
-                                                    <td> 0 </td>
-                                                    <td> 0 </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> Duration Hour </td>
-                                                    <td> yes </td>
-                                                    <td> 2 </td>
-                                                    <td> 2 </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> Duration Minute </td>
-                                                    <td> yes </td>
-                                                    <td> 30 </td>
-                                                    <td> 30 </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> Treatment Volume Total (provide if relevant) </td>
-                                                    <td> no </td>
-                                                    <td>   </td>
-                                                    <td>   </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> Treatment Volume Total Unit (provide if relevant) </td>
-                                                    <td> no </td>
-                                                    <td>   </td>
-                                                    <td>   </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> (add more as needed) </td>
-                                                    <td> no </td>
-                                                    <td> add when needed </td>
-                                                    <td> add when needed </td>
-                                                </tr>
-                                            </tbody>
-                                            </table>
-
-                                            <br><b><em>Matrix Item Setup (Combining the Media, Setting, Cell, and Compound Setup)</em></b>
-
-                                            <table class="table table-bordered table-condensed small table-components">
-                                            <thead>
-                                                <tr class="active">
-                                                <th> Matrix Item Name </th>
-                                                <th> Matrix Name </th>
-                                                <th> Type (Media Control, Vehicle Control, or Compound) </th>
-                                                <th> Model Setup Version Name </th>
-                                                <th> Media Setup Name </th>
-                                                <th> Setting Setup Name </th>
-                                                <th> Cell Setup Name </th>
-                                                <th> Compound Setup Name </th>
-                                                <th> Total Life (days) </th>
-                                                <th> Chip Help Notes: (if a chip "failed" indicate why) </th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                <tr>
-                                                    <td> chip1 </td>
-                                                    <td> 3D TERFENADINE treated </td>
-                                                    <td> Compound </td>
-                                                    <td> Blood-Brain Barrier (NVU) </td>
-                                                    <td> Media 5% </td>
-                                                    <td> Setting Flowrate = 5 </td>
-                                                    <td> 3 cell combo </td>
-                                                    <td> Terfenadine </td>
-                                                    <td> 16.0 </td>
-                                                    <td> contamination </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> chip2 </td>
-                                                    <td> 3D TERFENADINE treated </td>
-                                                    <td> Compound </td>
-                                                    <td> Blood-Brain Barrier (NVU) </td>
-                                                    <td> Media 5% </td>
-                                                    <td> Setting Flowrate = 5 </td>
-                                                    <td> 3 cell combo </td>
-                                                    <td> Terfenadine </td>
-                                                    <td> 16.0 </td>
-                                                    <td> contamination </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> chip3 </td>
-                                                    <td> 3D TERFENADINE treated </td>
-                                                    <td> Compound </td>
-                                                    <td> Blood-Brain Barrier (NVU) </td>
-                                                    <td> Media 5% </td>
-                                                    <td> Setting Flowrate = 5 </td>
-                                                    <td> 3 cell combo </td>
-                                                    <td> Terfenadine </td>
-                                                    <td> 16.0 </td>
-                                                    <td> back pressure </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> chip4 </td>
-                                                    <td> 3D TERFENADINE treated </td>
-                                                    <td> Compound </td>
-                                                    <td> Blood-Brain Barrier (NVU) </td>
-                                                    <td> Media 5% </td>
-                                                    <td> Setting Flowrate = 5 </td>
-                                                    <td> 3 cell combo </td>
-                                                    <td> Fexofenadine </td>
-                                                    <td> 24.0 </td>
-                                                    <td> none </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> chip5 </td>
-                                                    <td> 3D TERFENADINE treated </td>
-                                                    <td> Compound </td>
-                                                    <td> Blood-Brain Barrier (NVU) </td>
-                                                    <td> Media 5% </td>
-                                                    <td> Setting Flowrate = 5 </td>
-                                                    <td> 3 cell combo </td>
-                                                    <td> Fexofenadine </td>
-                                                    <td> 24.0 </td>
-                                                    <td> none </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> chip6 </td>
-                                                    <td> 3D TERFENADINE treated </td>
-                                                    <td> Compound </td>
-                                                    <td> Blood-Brain Barrier (NVU) </td>
-                                                    <td> Media 5% </td>
-                                                    <td> Setting Flowrate = 5 </td>
-                                                    <td> 3 cell combo </td>
-                                                    <td> Fexofenadine </td>
-                                                    <td> 24.0 </td>
-                                                    <td> none </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> chip7 </td>
-                                                    <td> 3D TERFENADINE treated </td>
-                                                    <td> Media Control </td>
-                                                    <td> Blood-Brain Barrier (NVU) </td>
-                                                    <td> Media 5% </td>
-                                                    <td> Setting Flowrate = 5 </td>
-                                                    <td> 3 cell combo </td>
-                                                    <td> none </td>
-                                                    <td> 16.0 </td>
-                                                    <td> contamination </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> chip8 </td>
-                                                    <td> 3D TERFENADINE treated </td>
-                                                    <td> Media Control </td>
-                                                    <td> Blood-Brain Barrier (NVU) </td>
-                                                    <td> Media 5% </td>
-                                                    <td> Setting Flowrate = 5 </td>
-                                                    <td> 3 cell combo </td>
-                                                    <td> none </td>
-                                                    <td> 16.0 </td>
-                                                    <td> back  pressure </td>
-                                                </tr>
-                                                <tr>
-                                                    <td> chip9 </td>
-                                                    <td> 3D TERFENADINE treated </td>
-                                                    <td> Media Control </td>
-                                                    <td> Blood-Brain Barrier (NVU) </td>
-                                                    <td> Media 5% </td>
-                                                    <td> Setting Flowrate = 5 </td>
-                                                    <td> 3 cell combo </td>
-                                                    <td> none </td>
-                                                    <td> 24.0 </td>
-                                                    <td> none </td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-
-                                        </li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-
-                    </div>
-                </div>
-
-                <div id="matrixitems_editor">
-                    <button name="help_button" type="button" class="btn btn-primary help-collapsible">Adding Assay Data Step 3 - Matrix Items Update (Optional)</button>
-                    <div class="help-content-1">
-                        <div id="matrixitemseditor" class="editorsubtainer">
-                            <ul class="list-group">
-                                <li class="list-group-item">
-                                    <p><b><i>There are several options for editing Matrix Items, including editing by group, this is just one option. </i></b></p>
-                                    <ul class="list-unstyled">
-                                        <li>To edit a <b>Matrix Item</b>, click on the <b>View/Edit</b> button next to the <b>Matrix Item</b> of interest:
-                                            <ul class="help-filled-circle">
-                                                <li>In the <i>Matrix Item Details</i> section
-                                                    <ul class="help-open-circle">
-                                                        <li>Add/Edit the information as appropriate (add additional details if desired) </li>
-                                                        <li>If possible, add the MPS model protocol (if not added in the Matrix) </li>
-                                                    </ul>
-                                                </li>
-                                                <li>In the <i>Compounds</i> section
-                                                    <ul class="help-open-circle">
-                                                        <li>Edit the information as appropriate (add additional details if desired) </li>
-                                                        <li>The addition time should be since the start (time 0) of the experiment </li>
-                                                        <li>The duration is the length of time of exposure (if a bolus dose, use 1 minute; if the whole experiment, use the length of the experiment) </li>
-                                                        <li>If you do not know supplier or lot, enter "unspecified" (suggestions are based on your previous entries) </li>
-                                                        <li>If you do not know receipt date, leave it blank </li>
-                                                    </ul>
-                                                </li>
-                                                <li>In the <i>Cell Samples</i> section
-                                                    <ul class="help-open-circle">
-                                                        <li>Edit the information as appropriate (add additional details if desired)</li>
-                                                        <li>When adding, click the magnifying glass to see a list of available cell samples</li>
-                                                    </ul>
-                                                </li>
-                                                <li>In the <i>Settings</i> section
-                                                    <ul class="help-open-circle">
-                                                        <li>Edit the information as appropriate (add additional details if desired)</li>
-                                                    </ul>
-                                                </li>
-                                                <li>After assay data have been added, the Exclude field of the tabular data can be edited (optional)
-                                                    <ul class="help-open-circle">
-                                                        <li>Review data in graphs and/or table</li>
-                                                        <li>In the table, if desired, change the exclusion status of a data point (add an X to the Exclude field to omit by default, remove the X to include) </li>
-                                                    </ul>
-                                                </li>
-                                                <li>Click the <b>Submit</b> button to save changes</li>
-                                            </ul>
-                                        </li>
-                                        <li><br>Help Notes:
-                                            <ul class="help-filled-circle">
-                                                <li><b>Matrix Items</b>, along with the Name/ID, Test Type, Setup Date, and Organ <b>Model</b> MUST be added through the <b>Matrix</b>, but can be changed on the <b>Matrix Item Setup and Data</b> page  </li>
-                                                <li>When using scientific notation to enter values, use this format: 1e+3, 1e+10, 3e+15</li>
-                                                <li>The Exclude field, shown on the <b>Matrix Item Setup and Data</b> page is the only attribute of a data point that can be changed in the MPS-GUI</li>
-                                                <li>The individual <b>Matrix Setup and Data</b> page is the only place <b>Matrix Item</b> data are available in tabular format</li>
-                                                <li>For information on continuing to add MPS models and assay data to the <b>Study</b> (Step 4), <a href="#assaydata_editor">click here</a> </li>
-                                            </ul>
-                                        </li>
-                                    </ul>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-
-                <div id="assaydata_editor">
-                    <button name="help_button" type="button" class="btn btn-primary help-collapsible">Adding Assay Data Step 4 - Upload Assay Data</button>
-                    <div class="help-content-1">
-                        <div id="assaydataeditor" class="editorsubtainer">
-                            <ul class="list-group">
-                                <li class="list-group-item">
-                                    <ul class="list-unstyled">
-                                        <li>To add/edit assay data
-                                            <ul class="help-filled-circle">
-                                                <li>Prepare a data file (MIF-C-a) </li>
-                                                <li>Select a <b>Study</b></li>
-                                                <li>Click no Edit Study</li>
-                                                <li>Confirm that all combinations of Method/Kit, Target/Analyte, and Unit must be included in the <i>Assays</i> section of the <b>Study Level Details</b> page PRIOR to uploading assay data points for that combination</li>
-
-                                                <li>Click on the <b>Upload Data</b> button </li>
-                                                <li>Click on the <b>Submit</b> button to save data to the MPS-Db </li>
-                                            </ul>
-                                        </li>
-                                        <li><br>Help Notes:
-                                            <ul class="help-filled-circle">
-                                                <li>The ONLY assay data that are editable in the MPS-GUI is the <b>Exclude</b> field (editable on the <b>Matrix Item</b> edit page) </li>
-                                                <li>Contact an MPS-Db Administrator for guidance on preparing data files</li>
-                                                <li>To replace assay data values with new values, correct the values in the MIF-C-a file and re-upload
-                                                <ul class="help-open-circle">
-                                                    <li>Changes made to the <b>Exclude</b> field using the MPS-GUI will be lost when data are re-uploaded</li>
-                                                </ul>
-                                                </li>
-                                                <li>To replace assay data and make changes to key fields (e.g., sample location, sample time), there are a few options
-                                                <ul class="help-open-circle">
-                                                    <li>Delete the Method/Kit, Target/Analyte, and Unit combination from the study, submit, then re-add the Method/Kit, Target/Analyte, and Unit combination to the study and re-upload ALL data for this combination </li>
-                                                    <li>Go to the <b>Upload Data</b> page and scroll down to the <i>Current Data Files</i> section, click in the box(es) next to the Data File(s) to remove, click submit, re-upload the corrected data </li>
-                                                </ul>
-                                                </li>
-                                            </ul>
-                                        </li>
-                                    </ul>
-                                </li>
-                            </ul>
-                        </div>
-
-                        <button name="help_button" type="button" class="btn btn-success help-collapsible">Assay Data File Formats</button>
-                        <div class="help-content-2">
-                            <div id="uploadingdata" class="editorsubtainer">
-                                <ul class="list-group">
-                                    <li class="list-group-item">
-                                        <ul class="list-unstyled">
-                                            {# <li>To get an example template file, <a href="/media/excel_templates/chip_template-{{ version }}.xlsx">click here</a> #}
-                                            <li>To get an example template file, <a href="{% url 'assays-currentuploadtemplate' %}">click here</a>
-                                                <ul class="help-filled-circle">
-                                                    <li>If uploading an Excel workbook, workbook can contain multiple tabs</li>
-                                                    <li>All files (or tabs) with correct headers (i.e. column names) will be evaluated for upload, others will be ignored</li>
-                                                    <li>Correct headers must be placed in the first three rows to be considered valid</li>
-                                                </ul>
-                                            </li>
-                                        </ul>
-                                    </li>
-
-                                    <li class="list-group-item">
-                                        <ul class="list-unstyled">
-                                            <li>Specifications for generating valid MPS Import Friendly-Columnar (MIF-C-a and MIF-C-i) files
-                                                <ul class="help-filled-circle">
-                                                    <li>Chip ID must be unique within a <b>Study</b></li>
-                                                    <li>Each file (and each workbook if using Excel) should contain data for only one <b>Study</b> </li>
-                                                    <li>Data for one study may be submitted in multiple files (and/or multiple tabs of an Excel workbook) </li>
-                                                </ul>
-                                            </li>
-                                        </ul>
-                                        {% include 'help_mifc_file_details_table.html' %}
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
-
-                    </div>
-                </div>
-
-                <div id="assayimages_editor">
-                    <button name="help_button" type="button" class="btn btn-primary help-collapsible">Adding Assay Data Step 5 -  Adding Assay Images and Videos</button>
-                    <div class="help-content-1">
-                        <div id="imageseditor" class="editorsubtainer">
-                            <ul class="list-group">
-                                <li class="list-group-item">
-                                    <ul class="list-unstyled">
-                                        <li>To add images and/or videos
-                                            <ul class="help-filled-circle">
-                                                <li>Prepare the image/video file</li>
-                                                <li>Prepare an image/video metadata file (MIF-C-i) </li>
-                                                <li>Contact an MPS-Db Administrator to make arrangements for submitting the files</li>
-                                            </ul>
-                                        </li>
-                                        <li><br>Help Notes:
-                                            <ul class="help-filled-circle">
-                                                <li>Contact an MPS-Db Administrator for guidance on preparing media metadata files</li>
-                                                <li>For details on the required file format of the media metadata file, <a href="#assaydata_editor">click here</a> and click to view the detailed specifications for MIF-C-a and MIF-C-i files </li>
-                                                <li>To remove media files, contact an MPS-Db Administrator for assistance</li>
-                                            </ul>
-                                        </li>
-                                    </ul>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-
-                <div id="study_signoff_editor">
-                    <button name="help_button" type="button" class="btn btn-primary help-collapsible">Adding Assay Data Step 6 -  Sign-Off a Study (Sharing Data)</button>
-                    <div class="help-content-1">
-                        <div id="validation" class="editorsubtainer">
-                            <ul class="list-group">
-                                <li class="list-group-item">
-                                    <ul class="list-unstyled">
-                                        <li>A <b>Study</b> can be "signed off" and each <b>Matrix</b> and/or each <b>Matrix Item</b> can be validated
-                                            <ul class="help-filled-circle">
-                                                <li> <b>Study</b> sign off is done by the Data Group Admin by clicking the <b>View/Edit Sign Off Status of this Study</b> button on the <b>Study Matrices and Items</b> list page </li>
-                                                <li> A <b>Matrix</b> is validated from the <b>Matrix Setup and Data</b> page </li>
-                                                <li> A <b>Matrix Item</b> is validated from the <b>Item Setup and Data</b> page </li>
-                                            </ul>
-                                        </li>
-                                        <li><br>Help Notes:
-                                            <ul class="help-filled-circle">
-                                                <li>Study sign off is the first step in sharing data with the broader scientific community  </li>
-                                                <li>Study sign off is optional unless required by project funder </li>
-                                                <li><b>Matrix</b> and <b>Matrix Item</b> validation is designed to be part of the data provider's QC process (it is optional and is NOT required to be completed prior to study sign off) </li>
-                                                <li>As part of the validation process for matrices and matrix items, flags can be added that will be diplayed when the times are listed </li>
-                                                <li>During the study sign off process, Help Notes: can be added that will be displayed in the study list page when hovering over the check mark in the review column</li>
-                                            </ul>
-                                        </li>
-                                    </ul>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-
-                <div id="stakeholder_editor">
-                    <button name="help_button" type="button" class="btn btn-primary help-collapsible">Adding Assay Data Step 7 -   Stakeholder Review and Acknowledgement</button>
-                    <div class="help-content-1">
-                        <div id="stakeholdereditor" class="editorsubtainer">
-                            <ul class="list-group">
-                                <li class="list-group-item">
-                                    <ul class="list-unstyled">
-                                        <li>To review and acknowledge study data
-                                            <ul class="help-filled-circle">
-                                                <li>Login to the MPS-Db</li>
-                                                <li>Go to the study list page - select Studies, then View All Studies or
-                                                    <a href='https://mps.csb.pitt.edu/assays/assaystudy'>click here</a> </li>
-                                                <li>Look for studies with a check mark, but without an 'eye' or a 'pencil' in the Review column</li>
-                                                <li>Click the View/Edit button next to the study to review</li>
-                                                <li>Click the View/Edit Approval Status of this Study button near the top of the page</li>
-                                                <li>Add a Note (optional)</li>
-                                                <li>Click the Click Here to Approve this Study for Release button</li>
-                                                <li>Click Yes</li>
-                                                <li>Click Submit</li>
-                                                <li>Click Overwrite</li>
-                                            </ul>
-                                        </li>
-                                        <li><br>Help Notes:
-                                            <ul class="help-filled-circle">
-                                                <li>Data providers and/or project funders designate study data stakeholder(s)</li>
-                                                <li>Designating a study data stakeholder is optional (unless required by the funder) </li>
-                                                <li>Stakeholders must be registered MPS-Db users to access study data</li>
-                                            </ul>
-                                        </li>
-                                    </ul>
-                                </li>
-                            </ul>
-                        </div>
                     </div>
                 </div>
 
@@ -2997,26 +2164,6 @@
 
         </div>
 
-        <div id="search_help_page_section">
-            <h1 class="h1-level-0"> Show and Hide Help </h1>
-{#            <div id="help_search_page">#}
-{#                <button name="help_button" type="button" class="btn btn-primary help-collapsible">Show and Hide on the Help Page</button>#}
-{#                <div class="help-content-1">#}
-                    <ul class="list-group">
-                        <li class="list-group-item">
-{#                            <h1 class="h1-level-1"> Show and Hide on the Help Page </h1>#}
-                            {# do not name the same, do not want in colapsibles#}
-                            <button id="expand_all" type="button" class="btn btn-default help-collapsible-half">
-                                Expand All Sections of Help</button>
-                            <button id="close_all" type="button" class="btn btn-default help-collapsible-half">
-                                Close All Sections of Help</button>
-                        </li>
-                    </ul>
-{#                </div>#}
-{#            </div>#}
-            <br><br>
-        </div>
-
     </div>
 
 </div>
@@ -3025,3 +2172,31 @@
 
 
 </html>
+
+
+{#                        <button name="help_button" type="button" class="btn btn-success help-collapsible">See a Note About Flags</button>#}
+{#                        <div class="help-content-2">#}
+{#                            <div id="flagsHelp Notes:" class="editorsubtainer">#}
+{#                                <ul class="list-group">#}
+{#                                    <li class="list-group-item">#}
+{#                                        <ul class="list-unstyled">#}
+{#                                            <li>A <b>Study</b>, each <b>Matrix</b>, and/or each <b>Matrix Item</b> can be flagged and annotated#}
+{#                                                <ul class="help-filled-circle">#}
+{#                                                    <li> Clicking <a role='button' class="btn btn-sm" style="color:#337AB7"> <span class="glyphicon glyphicon-flag" aria-hidden="true"></span> </a> places the flag  </li>#}
+{#                                                    <li> Clicking <a role='button' class="btn btn-sm btn-warning"> Help Notes: </a> brings up an input dialog where annotations can be added </li>#}
+{#                                                </ul>#}
+{#                                            </li>#}
+{#                                            <li><br>Help Notes:#}
+{#                                                <ul class="help-filled-circle">#}
+{#                                                    <li> Flags and Help Notes: are fully reversible until a <b>Study</b> is signed off </li>#}
+{#                                                    <li> The annotation process works the same way for a <b>Study</b>, a <b>Matrix</b>, and a <b>Matrix Item</b> </li>#}
+{#                                                    <li> A <b>Study</b> is annotated at the bottom of the <b>Study Level Details</b> page </li>#}
+{#                                                    <li> A <b>Matrix</b> is annotated at the bottom of the <b>Matrix Setup and Data</b> page </li>#}
+{#                                                    <li> A <b>Matrix Item</b> is annotated at the bottom of the <b>Item Setup and Data</b> page </li>#}
+{#                                                </ul>#}
+{#                                            </li>#}
+{#                                        </ul>#}
+{#                                    </li>#}
+{#                                </ul>#}
+{#                            </div>#}
+{#                        </div>#}
