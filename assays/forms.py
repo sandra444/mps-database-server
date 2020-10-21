@@ -111,6 +111,12 @@ restricted = ('restricted',)
 # Group
 group = ('group',)
 
+# For flagging
+flag_group = (
+    'flagged',
+    'reason_for_flag'
+)
+
 
 def get_dic_for_custom_choice_field(form, filters=None):
     dic = {}
@@ -711,7 +717,7 @@ class AssayStudyDetailForm(SignOffMixin, BootstrapForm):
             'flow_rate',
             'name',
             'description',
-        )
+        ) + flag_group
 
     def clean(self):
         """Checks for at least one study type"""
@@ -805,7 +811,7 @@ class AssayStudyGroupForm(SetupFormsMixin, SignOffMixin, BootstrapForm):
             'compound_supplier_text',
             'compound_lot_text',
             'compound_receipt_date',
-        )
+        ) + flag_group
 
     def __init__(self, *args, **kwargs):
         super(AssayStudyGroupForm, self).__init__(*args, **kwargs)
@@ -1753,7 +1759,7 @@ class AssayStudyChipForm(SetupFormsMixin, SignOffMixin, BootstrapForm):
             'series_data',
             'organ_model_full',
             'organ_model_protocol_full'
-        )
+        ) + flag_group
 
     def __init__(self, *args, **kwargs):
         super(AssayStudyChipForm, self).__init__(*args, **kwargs)
@@ -1898,7 +1904,8 @@ class AssayStudyPlateForm(SetupFormsMixin, SignOffMixin, BootstrapForm):
             'number_of_rows',
             # TODO
             'series_data',
-        )
+        ) + flag_group
+
         widgets = {
             'name': forms.Textarea(attrs={'rows': 1}),
             'notes': forms.Textarea(attrs={'rows': 10}),
@@ -2154,7 +2161,7 @@ class AssayStudyAssaysForm(BootstrapForm):
     class Meta(object):
         model = AssayStudy
         # Since we are splitting into multiple forms, includes are safer
-        fields = []
+        fields = flag_group
 
 
 class AssayStudyFormAdmin(BootstrapForm):
