@@ -21,7 +21,7 @@ $(document).ready(function () {
     //this will get the anchor, if one called
     var initial_hash = window.location.hash;
     //just for testing, use this hash
-    initial_hash = '#help_download_button';
+    // initial_hash = '#help_download_button';
     if (initial_hash) {
         animate_scroll_hash(initial_hash);
     }

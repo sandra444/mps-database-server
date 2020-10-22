@@ -322,19 +322,19 @@
 {#                <br><br>#}
             </div>
 
-            <div id="overview_section" class="stop-point">
-
-                <h1 class="h1-level-0"> Overview of the MPS-Db </h1>
                 <p>Still to do:
                     <br>1) editor content update for omic and raw plate reader data,
                     <br>2) all links check and update,
                     <br>3) glossary (make sure updated, all correct things showing in glossary and help),
-                    <br>4) update all anchors (and remove initial ones),
-                    <br>5) maybe titles of pages as a table?,
-                    <br>6) overviews pulling correctly from glossary,
-                    <br>7) what should be capitalized and what bolded,
-                    <br>8) update collaborator and access groups - maybe
+                    <br>4) update all anchors (coordinate with Luke),
+                    <br>5) make sure overviews pulling correctly from glossary terms,
+                    <br>6) update collaborator and access groups - maybe - depending on what the status is of those,
+                    <br>7) one more look at the admin stuff (maybe need changes - add groups to centers prior to being collaborator or accessor groups)
                 </p>
+
+            <div id="overview_section" class="stop-point">
+
+                <h1 class="h1-level-0"> Overview of the MPS-Db </h1>
 
                 <div id="help_overview_background">
                     <button name="help_button" type="button" class="btn btn-primary help-collapsible">Database Background</button>
@@ -391,10 +391,10 @@
                             <li class="list-group-item">
                                 <h1 class="h1-level-1"> Global Database Search </h1>
                                 <ul class="list-unstyled">
-                                    <li>Use a <b>Global Database Search</b> to search the whole MPS-Db from the Home page. To search:
+                                    <li>Use a <b>Global Database Search</b> tool to search the whole MPS-Db from the Home page. To search:
                                         <ul class="help-filled-circle">
-                                            <li>Go to the <b>MPS-Db Home</b> page</li>
-                                            <li>Type a search term into the <b>Global</b> search bar</li>
+                                            <li>Go to the MPS-Db <b>Home</b> page</li>
+                                            <li>Type a search term into the global search bar</li>
                                             <li>Type a space and add an additional term(s) (optional)</li>
                                             <li>Make preliminary selection (hit enter, click the blue <b>Search</b> button, or mouse down the options list to item of interest and click the left mouse button)</li>
                                             <li>Wait for a list of matching information to appear</li>
@@ -419,14 +419,14 @@
                                         <ul class="help-filled-circle">
                                             <li>Type a search term in the search bar</li>
                                             <li>Type a space and add an additional term(s) (optional)</li>
-                                            <li>From the list, click on button to <b>View/Edit</b> or click an active link to be routed to desired location</li>
+                                            <li>From the list, click on the <b>View/Edit</b> button or click an active link to be routed to desired location</li>
                                         </ul>
                                     </li>
                                     <br>
                                     <li>Help Notes:
                                         <ul class="help-filled-circle">
-                                            <li>Above search bars are options to Copy the table to the clipboard, download the table to CSV, or Print the table</li>
-                                            <li>The Column visibility button can be used to turn columns on/off in the list/table </li>
+                                            <li>Above search bars are options to copy the table to the clipboard, download the table to CSV, or print the table</li>
+                                            <li>The <b>Column visibility</b> button can be used to turn columns on/off in the list/table </li>
                                             <li>To sort the list/table, click on the arrow in the column header   </li>
                                             <li>To sort on multiple columns, click on the arrow on the primary sort column, then hold the shift key and click on additional column arrows</li>
                                             <li class="dtr-control">Click the blue <i class="glyphicon glyphicon-plus-sign text-primary"></i> to see hidden fields</li>
@@ -445,9 +445,9 @@
                             <li class="list-group-item">
                                 <h1 class="h1-level-1"> Download Data Button </h1>
                                 <ul class="list-unstyled">
-                                    <li>There are many locations in the database where a Download data button is provided. To download:
+                                    <li>There are many locations in the database where a <b>Download</b> button is provided. To download:
                                         <ul class="help-filled-circle">
-                                            <li>Click the Download Data button to download data </li>
+                                            <li>Click the <b>Download</b> button to download data </li>
                                             <li>If shown, check/uncheck box for changing data filtering options (optional)</li>
                                             <li>Use options for filtering, if provided (optional)</li>
                                         </ul>
@@ -470,10 +470,10 @@
                         <ul class="list-group">
                             <div class="list-group-item">
                                 <h1 class="h1-level-1"> Introduction to the Microphysiology Systems Database (20201006) </h1>
-                                UPDDI's Mark Schurdak presents an Introduction to the Microphysiology Systems Database (MPS-Db) - A Critical Tool for Managing, Analyzing, and Modeling MPS Experimental Data.
+                                UPDDI's Mark Schurdak presents the webinar, <i>Introduction to the Microphysiology Systems Database (MPS-Db) - A Critical Tool for Managing, Analyzing, and Modeling MPS Experimental Data</i>.
                                 This video is a great place to start for new MPS-Db users and those considering using the MPS-Db.
                                 Video was recorded on October 6, 2020 and is approximately 60 minutes long.
-                                Questions asked during the webinar, along with answers, are available by clicking the button below.
+                                Questions asked during the webinar, along with answers, are available below.
 
                                 {% include 'help_webinar_20201006_qanda_table.html' %}
 
@@ -496,8 +496,8 @@
             <div id="video_presentation_section" class="stop-point">
 
                 <h1 class="h1-level-0"> Recorded Videos Demonstrating Database Features </h1>
-                <h4>Due to ongoing development of the MPS-Db, older recordings may diverge from the current version of the MPS-Db.
-                </h4>
+                <p class="h1-level-3">Due to ongoing development of the MPS-Db, older recordings may diverge from the current version of the MPS-Db.
+                </p>
 
                 <div id="video_demo_8">
                     <button name="help_button" type="button" class="btn btn-primary help-collapsible">Plate Reader Data Integration Tool - recorded 20200521 using Stage/Development Server</button>
@@ -666,12 +666,12 @@
                         <ul class="list-group">
                             <li class="list-group-item">
                                 <h1 class="h1-level-1"> Study Components </h1>
-                                <h4>
+                                <p class="h1-level-3">
                                     {{ all_glossary.studycomponent_def }}
                                     To review/add Study Components, click the link {{ all_glossary.studycomponent_ref }}.
                                     <br><br>
-                                    Guidance and Help Tips: for adding/updating more complicated components are provided below.
-                                </h4>
+                                    Guidance on adding/updating more complicated components (Target, Method, MPS Model and Model Version, Cell Sample, Compound) are provided below.
+                                </p>
 
                                 <div id="help_assay_components">
                                     {% include 'help_review_study_components_assay.html' %}
@@ -700,80 +700,71 @@
                         <ul class="list-group">
                             <li class="list-group-item">
                                 <h1 class="h1-level-1"> Assay Data Visualization (Intra-Study) </h1>
+                                <p class="h1-level-3">The <b>Assay Data Visualization (Intra-Study)</b> feature is accessed from
+                                    within an individual study, pre-filtered as follows:
+                                    <br>1) each treatment group,
+                                    <br>2) each plate (if using a plate),
+                                    <br>3) each chip or well, and
+                                    <br>4) the whole study.</p>
                                 <ul class="list-unstyled">
-                                    <li>The <b>Assay Data Visualization (Intra-Study)</b> features are accessed from within an individual study, pre-filtered as follows:
-                                        <ul class="help-filled-circle">
-                                            <li>Each treatment group</li>
-                                            <li>Each plate (if using a plate based MPS Model)</li>
-                                            <li>Each chip or well (with data table of Assay Data Points)</li>
-                                            <li>The whole Study</li>
-                                        </ul>
-                                    </li>
-                                    <br>
                                     <li>Assay Data Visualization - Each Treatment Group:
                                         <ul class="help-filled-circle">
-                                            <li>Select a Study from the <b>Study List</b> page</li>
-                                            <li>Click to View a group </li>
-                                            <li>Review metadata and Assay Data Point graphs </li>
+                                            <li>Go to the <b>Studies</b> tab/icon</li>
+                                            <li>Click on the <b>View/Edit</b> button next to the study of interest</li>
+                                            <li>Click on the  <b>View</b> button next to the group of interest </li>
+                                            <li>Review metadata and, if displayed, the assay data point graphs </li>
                                         </ul>
                                     </li>
                                     <br>
                                     <li>Assay Data Visualization - Each Plate:
                                         <ul class="help-filled-circle">
-                                            <li>Select a Study from the <b>Study List</b> page</li>
-                                            <li>Scroll down to the Plates section and click to View a plate </li>
-                                            <li>Review metadata and Assay Data Point graphs </li>
+                                            <li>Go to the <b>Studies</b> tab/icon</li>
+                                            <li>Click on the <b>View/Edit</b> button next to the study of interest</li>
+                                            <li>Scroll down to the <b>Plates</b> section and click on the  <b>View/Edit</b> button next to the plate of interest </li>
+                                            <li>Review metadata and, if displayed, the assay data point graphs </li>
                                         </ul>
                                     </li>
                                     <br>
                                     <li>Assay Data Visualization - Each Chip or Well:
                                         <ul class="help-filled-circle">
-                                            <li>Select a Study from the <b>Study List</b> page</li>
-                                            <li>Scroll down to the Chips and Wells section and click to View a chip/well </li>
-                                            <li>Review metadata and Assay Data Point graphs </li>
-                                            <li>Review Assay Data Point table </li>
-                                            <li>Note: The Assay Data Point table provides the Data Group editor or admin of this Study with the ability to include/exclude Assay Data Points from being included/excluded from graphs and analyses</li>
+                                            <li>Go to the <b>Studies</b> tab/icon</li>
+                                            <li>Click on the <b>View/Edit</b> button next to the study of interest</li>
+                                            <li>Scroll down to the <b>Chips and Wells</b> section and click on the <b>View/Edit</b> button next to the chip/well of interest </li>
+                                            <li>Review metadata and, if displayed, the assay data point graphs  </li>
+                                            <li>Review assay data point table </li>
+                                            <li>Note: The assay data point table offers the data group editor and data group administrator of the study the ability to include/exclude assay data points from being included/excluded from graphs and analyses</li>
                                         </ul>
                                     </li>
                                     <br>
                                     <li>Assay Data Visualization - Whole Study:
                                         <ul class="help-filled-circle">
-                                            <li>Select a Study from the <b>Study List</b> page</li>
-                                            <li>Click the Analyze/Edit button and select Study Summary to be routed to the <b>Study Summary</b> page </li>
-                                            <li>Review metadata and Assay Data Point graphs for the Assay Data Points </li>
+                                            <li>Go to the <b>Studies</b> tab/icon</li>
+                                            <li>Click on the <b>View/Edit</b> button next to the study of interest</li>
+                                            <li>Click the <b>Analyze/Edit</b> button and select the <b>Study Summary</b> option </li>
+                                            <li>Review metadata and, if displayed, the assay data point graphs </li>
                                         </ul>
                                     </li>
                                     {% include 'help_customization_group_filter_links.html' %}
                                 </ul>
 
-                                <br>
                                 <h1 class="h1-level-1"> Assay Data Visualization (Inter-Study) </h1>
                                 <ul class="list-unstyled">
-                                    <li>The <b>Assay Data Visualization (Inter-Study)</b> features are available in the <b>Data Analysis</b> tab/icon. Select <b>Graphing/Reproducibility</b> on the <b>Data Analysis</b> icon or tab, then:
+                                    <li>To perform inter-study visualization:
                                         <ul class="help-filled-circle">
-                                            <li>Check <b>at least</b> one box in each list (work left to right, top to bottom)
+                                            <li>Go to the <b>Data Analysis</b> tab/icon</li>
+                                            <li>Select the <b>Graphing/Reproducibility</b> option </li>
+                                            <li>Check at least one box in each list (work left to right, top to bottom)
                                                 <ul class="help-open-circle">
-                                                    <li>Notice how checking and unchecking boxes changes the Number of Points (Assay Data Points) selected for inclusion </li>
+                                                    <li>Notice how checking and unchecking boxes changes the number of points (assay data points) that are selected for inclusion </li>
                                                 </ul>
                                             </li>
-                                            <li>Option 1 - Click on the <b>Show Plots</b> button - to view plots
-                                                <ul class="help-open-circle">
-                                                    <li>Scroll down the page to see plots data</li>
-                                                    <li>Keep scrolling down the page for group metadata </li>
-                                                    <li>Note: this page works similarly to <a href="#help_assay_data_viz">Assay Data Visualization</a></li></li>
-                                                </ul>
-                                            </li>
-                                            <li>Option 2 - Click on the <b>Show Reproducibility</b> button - to view plots
-                                                <ul class="help-open-circle">
-                                                    <li>Use the <a href="#help_custom_filtering_sidebar">Custom Filtering for Data Visualization (sidebar)</a> to change grouping or filtering of data</li>
-                                                    <li>Check the Show Details box of the results of interest</li>
-                                                    <li>Scroll down page to detailed results section of interest (including chips, studies and each study's reproducibility status, Max CV, ICC, and graphs</li>
-                                                    <li>Explore the Reproducibility Properties options in the sidebar (optional)</li>
-                                                    <li>Note: this page works similarly to <a href="#help_reproducibility_analysis">Assay Data Reproducibility</a></li></li>
-                                                </ul>
+                                            <li>Click on the <b>Show Plots</b> button </li>
+                                                <li>Scroll down the page to see plots data </li>
+                                                <li>Keep scrolling down the page to see the group metadata </li>
                                             </li>
                                         </ul>
                                     </li>
+                                    {% include 'help_customization_group_filter_links.html' %}
                                 </ul>
                             </li>
                         </ul>
@@ -786,13 +777,14 @@
                         <ul class="list-group">
                             <li class="list-group-item">
                                 <h1 class="h1-level-1"> Assay Omic Data Visualization </h1>
-                                <p>The database provides an options to visualize intra-study differential expressed genomic data.</p>
+                                <p class="h1-level-3">The database provides an option to visualize intra-study differential expressed genomic data.</p>
                                 <ul class="list-unstyled">
                                     <li> To visualize differential expressed genomic data:
                                         <ul class="help-filled-circle">
-                                            <li>Select a Study from the <b>Study List</b> page</li>
-                                            <li>Click on the Analyze/Edit button</li>
-                                            <li>Select Gene Expression Analysis
+                                            <li>Go to the <b>Studies</b> tab/icon</li>
+                                            <li>Click on the <b>View/Edit</b> button next to the study of interest</li>
+                                            <li>Click on the <b>Analyze/Edit</b> button </li>
+                                            <li>Select <b>Gene Expression Analysis</b> option
                                             <li>Use the sidebar to change plot type, thresholds, and/or filters (optional)</li>
                                         </ul>
                                     </li>
@@ -811,10 +803,11 @@
                                 <ul class="list-unstyled">
                                     <li> To view images and video upload to a study:
                                         <ul class="help-filled-circle">
-                                            <li>Select a Study from the <b>Study List</b> page</li>
-                                            <li>Click on the Analyze/Edit button</li>
-                                            <li>Select Images & Video (videos have a 'play' icon)
-                                            <li>To see metadata, play a video, or download an unaltered media file, click on the thumbnail of interest  (optional)</li>
+                                            <li>Go to the <b>Studies</b> tab/icon</li>
+                                            <li>Click on the <b>View/Edit</b> button next to the study of interest</li>
+                                            <li>Click on the <b>Analyze/Edit</b> button</li>
+                                            <li>Select the <b>Images and Video</b> option </li>
+                                            <li>To see metadata, play a video, or download an unaltered media file, click on the thumbnail of interest (videos have a 'play' icon on the thumbnail) </li>
                                         </ul>
                                     </li>
                                     <br>
@@ -836,26 +829,31 @@
                         <ul class="list-group">
                             <li class="list-group-item">
                                 <h1 class="h1-level-1"> Assay Data Power Analysis </h1>
-                                <p>A statistical power analysis methodology has been implemented in the MPS-Db to estimate the probability that a statistical test will find a significant difference between two different data groups, such as control and compound treatment groups (post hoc two-sample power analysis), or a significance difference from one treatment group (a priori one-sample power analysis) for an MPS model.</p>
+                                <p class="h1-level-3">A statistical power analysis methodology has been implemented in the MPS-Db to estimate the probability that a statistical test will find a significant difference between two different data groups, such as control and compound treatment groups (post hoc two-sample power analysis), or a significant difference from one treatment group (a priori one-sample power analysis) for an MPS model.</p>
                                 <ul class="list-unstyled">
                                     <li> To perform power analysis:
                                         <ul class="help-filled-circle">
-                                            <li>Click on the Show Details box next to a Target/Analyte (set) of interest</li>
-                                            <li>Scroll down and select TWO compounds for Power Analysis</li>
+                                            <li>Go to the <b>Studies</b> tab/icon</li>
+                                            <li>Click on the <b>View/Edit</b> button next to the study of interest</li>
+                                            <li>Click on the <b>Analyze/Edit</b> button</li>
+                                            <li>Select the <b>Power Analysis</b> option </li>
+                                            <li>Use the <a href="#help_custom_filtering_sidebar">Custom Filtering for Data Visualization (sidebar)</a> to change grouping or filtering of data</li>
+                                            <li>Check the box next to the set of interest to see the results of interest</li>
+                                            <li>Select one or two sample power analysis</li>
+                                            <li>Scroll down and select two compound groups for two sample or one compound group for one sample</li>
                                             <li>Scroll down to see additional options (Effect Size Methods and Significance Level)
                                             <li>Make desired changes to effective size and significance level selections (optional) </li>
-                                            <li>Click Run Analysis</li>
+                                            <li>Click the <b>Run Analysis</b> button </li>
                                         </ul>
                                     </li>
-                                    <li><br>Help Notes:
+                                    <br>
+                                    <li>Help Notes:
                                         <ul class="help-filled-circle">
                                             <li>Customized properties for power analysis are available in the MPS-Db via a sidebar on the power analysis page
                                                 <ul class="help-open-circle">
-                                                    <li>If hidden, click the <b>Toggle Sidebar</b> button to show the sidebar
-                                                    <li>Make desired selections in the sidebar (for more information on overriding default grouping and filtering, <a href="#groupingfiltering">click here</a> )</li>
+                                                    <li>If the <b>Run Analysis</b> button is disabled, read the page prompts to see if a required selection has been omitted </li>
                                                 </ul>
                                             </li>
-                                            <li>By default, the screen will automatically refresh, to refresh manually, check the <b>Manually Refresh</b> box, make the desired changes, then click on the <b>Refresh</b> button to apply changes </li>
                                         </ul>
                                     </li>
                                 </ul>
@@ -869,26 +867,56 @@
                     <div class="help-content-1">
                         <ul class="list-group">
                             <li class="list-group-item">
-                                <h1 class="h1-level-1"> Assay Data Reproducibility </h1>
+                                <h1 class="h1-level-1"> Assay Data Reproducibility (Intra-Study) </h1>
                                 <ul class="list-unstyled">
-                                    <li>Customized properties for reproducibility analysis are available in the MPS-Db via a sidebar on the inter-study reproducibility analysis page. To perform reproducibility analysis:
+                                    <li>To perform intra-study reproducibility analysis:
                                         <ul class="help-filled-circle">
-                                            <li>If hidden, click the <b>Toggle Sidebar</b> button to show the sidebar
-                                            <li>Make desired selections in the sidebar
+                                            <li>Go to the <b>Studies</b> tab/icon</li>
+                                            <li>Click on the <b>View/Edit</b> button next to the study of interest</li>
+                                            <li>Click the <b>Analyze/Edit</b> button and select the <b>Reproducibility</b> option </li>
+                                            <li>Use the <a href="#help_custom_filtering_sidebar">Custom Filtering for Data Visualization (sidebar)</a> to change grouping or filtering of data</li>
+                                            <li>Check the box next to the set of interest to see the results of interest</li>
+                                            <li>Scroll down page to detailed results section of interest (including chips, studies and each study's reproducibility status, Max CV, ICC, and graphs</li>
+                                        </ul>
+                                    </li>
+                                </ul>
+
+                                <br>
+                                <h1 class="h1-level-1"> Assay Data Reproducibility (Inter-Study) </h1>
+                                <ul class="list-unstyled">
+                                    <li>To perform inter-study reproducibility analysis:
+                                        <ul class="help-filled-circle">
+                                            <li>Go to the <b>Data Analysis</b> tab/icon</li>
+                                            <li>Select the <b>Graphing/Reproducibility</b> option </li>
+                                            <li>Check at least one box in each list (work left to right, top to bottom)
                                                 <ul class="help-open-circle">
-                                                <li>Reproducibility Comparison within Selected Data Sets - By Center (Center to Center) or By Study (Study to Study)</li>
-                                                <li>Normalize by Median - helpful if trends are similar but values are on different scales </li>
-                                                <li>Maximum Interpolation Size - maximum number of data points that can be interpolated, between experimental measurements, to allow for comparison within selected data sets, center to center or study to study (shown as stars on the reproducibility plots)</li>
+                                                    <li>Notice how checking and unchecking boxes changes the number of points (assay data points) that are selected for inclusion </li>
+                                                </ul>
+                                            </li>
+                                            <li>Click on the <b>Show Reproducibility</b> button </li>
+                                            <li>Use the <a href="#help_custom_filtering_sidebar">Custom Filtering for Data Visualization (sidebar)</a> to change grouping or filtering of data</li>
+                                            <li>Check the box next to the set of interest to see the results of interest</li>
+                                            <li>Scroll down page to detailed results section of interest (including chips, studies and each study's reproducibility status, Max CV, ICC, and graphs</li>
+                                            <li>Explore the <b>Reproducibility Properties</b> options in the sidebar (optional)</li>
+                                            <li>Customized properties for reproducibility analysis are available in the MPS-Db via a sidebar on the inter-study reproducibility analysis page. To perform reproducibility analysis:
+                                                <ul class="help-open-circle">
+                                                    <li>Reproducibility Comparison within Selected Data Sets - By Center (Center to Center) or By Study (Study to Study)</li>
+                                                    <li>Normalize by Median - helpful if trends are similar but values are on different scales </li>
+                                                    <li>Maximum Interpolation Size - maximum number of data points that can be interpolated, between experimental measurements, to allow for comparison within selected data sets, center to center or study to study (shown as stars on the reproducibility plots)</li>
                                                 </ul>
                                             </li>
                                         </ul>
                                     </li>
-                                    <li><br>Help Notes:
+                                </ul>
+                                <br>
+                                <ul class="list-unstyled">
+                                    <li>Help Notes:
                                         <ul class="help-filled-circle">
                                             <li>By default, the screen will automatically refresh, to refresh manually, check the <b>Manually Refresh</b> box, make the desired changes, then click on the <b>Refresh</b> button to apply changes </li>
                                         </ul>
                                     </li>
                                 </ul>
+
                             </li>
                         </ul>
                     </div>
@@ -901,27 +929,28 @@
                             <li class="list-group-item">
                                 <h1 class="h1-level-1"> Assay Data Study Sets </h1>
                                 <ul class="list-unstyled">
-                                    <li>The <b>Study Sets</b> feature is accessed from the Studies menu. To add a study set:
+                                    <li>To add a study set:
                                         <ul class="help-filled-circle">
-                                            <li>Select <b>Studies</b></li>
-                                            <li>Select <b>Add Study Set</b> </li>
-                                            <li>Select the studies to include in the set</li>
-                                            <li>Click Continue</li>
+                                            <li>Go to the <b>Studies</b> tab/icon</li>
+                                            <li>Select the <b>Add Study Set</b> option </li>
+                                            <li>Select the studies to include in the set by putting a check mark in the box </li>
+                                            <li>Click the <b>Continue</b> button</li>
                                             <li>Fill out the form</li>
-                                            <li>Click the Select Assays button to limit data to include in the Study Set (optional)</li>
-                                            <li>Submit</li>
+                                            <li>Click the <b>Select Assays</b> button to limit data to include in the study set (optional)</li>
+                                            <li>Click the <b>Submit</b> button to save </li>
                                         </ul>
                                     </li>
-                                    <li><br>Help Notes:
+                                    <br>
+                                    <li>Help Notes:
                                         <ul class="help-filled-circle">
-                                            <li>A Study Set is conceptually similar to an inter-study analysis, with the added options to:
+                                            <li>A study set is conceptually similar to an inter-study analysis, with the added functionality to:
                                                 <ul class="help-open-circle">
-                                                    <li>Save the selection of the Study Set for later retrieval</li>
-                                                    <li>Assign the Study Set a URL for easy sharing (e.g., inclusion in a publication)</li>
-                                                    <li>Data from each Study in the Study Set can be limited to a subset of assays</li>
+                                                    <li>Save the selection of the study set for later retrieval</li>
+                                                    <li>Assign the study set a URL for easy sharing (e.g., inclusion in a publication)</li>
+                                                    <li>Data from each study in the study set can be limited to a subset of one or more assays</li>
                                                 </ul>
                                             </li>
-                                            <li>Viewers of a Study Set created by another user will only see data from Studies to which they have access (i.e. a Study Set does NOT override existing permissions to Studies)</li>
+                                            <li>Viewers of a study set created by another user will only see data from studies to which they have access (i.e. a study set does NOT override existing permissions to studies)</li>
                                         </ul>
                                     </li>
                                 </ul>
@@ -937,11 +966,12 @@
                             <li class="list-group-item">
                                 <h1 class="h1-level-1"> Assay Data Collaborators </h1>
                                 <ul class="list-unstyled">
-                                    <li>About Collaborators:
+                                    <li>
                                         <ul class="help-filled-circle">
-                                            <li>A Collaborator Group is a means of allowing data from a private study (a study that has not been signed off) to be shared with another user who is not a member of the same Data Group (e.g., someone from another lab)</li>
-                                            <li>Using a Collaborator Group is currently the only way to allow someone from another group to see data contained in a Study prior to either signing off a Study or opening the Study to the public</li>
-                                            <li>Collaborator Groups must be created and edited by an MPS Database Administrator </li>
+                                            <li>A collaborator group is a means of allowing data from a private study (a study that has not been signed off) to be shared with another user who is not a member of the same data group (e.g., someone from another lab)</li>
+                                            <li>Using a collaborator group is currently the only way to allow someone from another data team to see data contained in a study prior to either signing off a study (after sign off, the <b>Assay Data Accessors</b> feature can be used) or opening the study to the public</li>
+                                            <li>Coming soon - data providers will be able to share data with selected colleagues without assistance from MPS-Db administrators</li>
+                                            <li>Currently, data are shared using collaborator groups that are managed by MPS-Db administrators</li>
                                         </ul>
                                     </li>
                                 </ul>
@@ -959,8 +989,8 @@
                                 <ul class="list-unstyled">
                                     <li>About Accessor Groups:
                                         <ul class="help-filled-circle">
-                                            <li>An Accessor Group is a means of allowing data from a study during the year embargo period (after sign off and before public release) to be shared with another user who is not a member of the same Data Group (e.g., someone from another lab)</li>
-                                            <li>Access Groups must be created and edited by an MPS Database Administrator </li>
+                                            <li>An accessor group is a means of allowing data from a study during the year embargo period (after sign off and before public release) to be shared with selected colleagues who are not members of the same data group (e.g., someone from another lab)</li>
+                                            <li>Currently, access groups must be created and edited by an MPS-Db administrator </li>
                                         </ul>
                                     </li>
                                 </ul>
@@ -976,17 +1006,19 @@
                             <li class="list-group-item">
                                 <h1 class="h1-level-1"> PBPK Analysis </h1>
                                 <ul class="list-unstyled">
-                                    <li>The <b>PBPK Analysis</b> feature is accessed from the Analysis menu
+                                    <li>To perform PBPK analysis:
                                         <ul class="help-filled-circle">
-                                            <li>Check <b>at least</b> one box in each list (work left to right, top to bottom)
+                                            <li>Go to the <b>Data Analysis</b> tab/icon</li>
+                                            <li>Select the <b>PBPK</b> option </li>
+                                            <li>Check at least one box in each list (work left to right, top to bottom)
                                                 <ul class="help-open-circle">
-                                                    <li>Notice how checking and unchecking boxes changes the Number of Points (Assay Data Points) selected for inclusion </li>
+                                                    <li>Notice how checking and unchecking boxes changes the number of assay data points selected for inclusion </li>
                                                 </ul>
                                             </li>
-                                            <li>Click the Show PBPK button</li>
+                                            <li>Click the <b>Show PBPK</b> button</li>
                                             <li>Use the <a href="#help_custom_filtering_sidebar">Custom Filtering for Data Visualization (sidebar)</a> to change filtering of data (optional) </li>
-                                            <li>Check a Select box to see details and perform an analysis</li>
-                                            <li>The primary analyses that can be performed are:
+                                            <li>Check the box next to the set of interest to see the results of interest</li>
+                                            <li>The analyses that can be performed are:
                                                 <ul class="help-open-circle">
                                                     <li>Calculate the clearance of a compound</li>
                                                     <li>Predict the plasma concentration given a dose and dose interval</li>
@@ -995,11 +1027,13 @@
                                             </li>
                                         </ul>
                                     </li>
-                                    <li><br>Help Notes:
+                                    <br>
+                                    <li>Help Notes:
                                         <ul class="help-filled-circle">
-                                            <li>A significant amount of the information used in the PBPK is manually curated into the database</li>
+                                            <li>A significant amount of the information used in the PBPK analysis is manually curated into the database</li>
                                             <li>Currently, the required parameters and rates have been added to the database for the liver</li>
                                             <li>Parameters and rates in yellow can be changed while performing an analysis</li>
+                                            <li>Depending on the analysis being performed, some yellow boxes can remain empty</li>
                                         </ul>
                                     </li>
                                 </ul>
@@ -1015,20 +1049,24 @@
                             <li class="list-group-item">
                                 <h1 class="h1-level-1"> Disease Portal (Clinical Trials and Study Data Combined via a Disease) </h1>
                                 <ul class="list-unstyled">
-                                    <li>To access <b>Disease Portal</b>, select <b>View Diseases</b> from the <b>Models</b> icon or tab, then:
+                                    <li>To access the disease portal:
                                         <ul class="help-filled-circle">
-                                            <li>Scroll through the list of diseases or use the <b>Search</b> bar to find a <b>Disease</b> of interest </li>
-                                            <li>Click on the <b>View</b> button next to <b>Disease</b> of interest to see options
+                                            <li>Go to the <b>Models</b> tab/icon</li>
+                                            <li>Select the <b>View Diseases</b> option </li>
+                                            <li>Click on the <b>View</b> button next to the disease of interest</li>
+                                            <li>Review the table that summarizes disease related information available in the MPS-Db</li>
+                                            <li>Click on one of the options for more information about the disease
                                                 <ul class="help-open-circle">
                                                     <li>Disease Overview - disease basics </li>
                                                     <li>Disease Biology - active links to relevant biology/genomic information </li>
-                                                    <li>Clinical Data - summarized findings from clinicaltrials.gov </li>
-                                                    <li>Disease Models &amp; Studies - list of disease related <b>Models</b> in the MPS-Db and list of studies related to the disease  </li>
+                                                    <li>Clinical Data - summarized findings from clinical trials.gov </li>
+                                                    <li>Disease Models &amp; Studies - list of disease related models and studies related to the disease that are in the MPS-Db </li>
                                                 </ul>
                                             </li>
                                         </ul>
                                     </li>
-                                    <li><br>Help Notes:
+                                    <br>
+                                    <li>Help Notes:
                                         <ul class="help-filled-circle">
                                             <li>The study list on the <b>Disease Models & Studies</b> page and the summary counts on the main <b>Diseases</b> page are permission specific  </li>
                                             <li>For more information on the reference data source(s), <a href="#help_overview_features">click here</a> </li>
@@ -1047,23 +1085,26 @@
                             <li class="list-group-item">
                                 <h1 class="h1-level-1"> Compound Report (Chemical Properties and Study Data Combined via a Compound) </h1>
                                 <ul class="list-unstyled">
-                                    <li>To access the <b>Compound Report</b> feature, select <b>Compound Report</b> from the <b>Compounds</b> icon or tab, then:
+                                    <li>To access a compound report:
                                         <ul class="help-filled-circle">
+                                            <li>Go to the <b>Compounds</b> tab/icon</li>
+                                            <li>Select the <b>Compound Report</b> option </li>
                                             <li>As a precaution, click the <b>Clear Current Selections</b> button</li>
-                                            <li>Use the <b>Search</b> bar to limit the compound list </li>
+                                            <li>Use the search box to limit the compound list (optional)</li>
                                             <li>Check the boxes for the compounds to include</li>
-                                            <li>If desired, use the <b>Search</b> bar to get a different compound list</li>
+                                            <li>If desired, use the search bar to get a different compound list</li>
                                             <li>If desired, check additional compounds to include</li>
-                                            <li>Click on the button to <b>Generate Compound Report</b> </li>
-                                            <li>If a green plus sign is present, click it to see aggregated assay study data</li>
+                                            <li>Click <b>Generate Compound Report</b> button</li>
+                                            <li>If a blue plus sign is present, click it to see aggregated assay study data</li>
                                         </ul>
                                     </li>
-                                    <li><br>Help Notes:
+                                    <br>
+                                    <li>Help Notes:
                                         <ul class="help-filled-circle">
                                             <li>Compound selections are cumulative</li>
-                                            <li>To start with a fresh <b>Search</b>, click the <b>Clear Current Selections</b> button</li>
-                                            <li>To save a complicated <b>Search</b>, click the <b>Save Selections</b> button (when returning at a later time, click <b>Load Selections</b>)</li>
-                                            <li>Only <i>normalized</i> data are shown in the aggregated assay study data plots</li>
+                                            <li>To start with a fresh search, click the <b>Clear Current Selections</b> button</li>
+                                            <li>To save compound selections, click the <b>Save Selections</b> button (when returning at a later time, click <b>Load Selections</b> button)</li>
+                                            <li>Only studies that have been checked for inclusion in the compound report will be included in the aggregation</li>
                                             <li>For more information on the reference data source(s), <a href="#help_overview_features">click here</a> </li>
                                         </ul>
                                     </li>
@@ -1079,14 +1120,15 @@
                         <ul class="list-group">
                             <li class="list-group-item">
                                 <h1 class="h1-level-1"> References </h1>
+                                <p class="h1-level-3">References can be added to the MPS-Db and then linked to studies and/or study components (e.g., MPS models, devices).</p>
                                 <ul class="list-unstyled">
-                                    <li>References can be linked to studies and/or study components (e.g., MPS models, devices). To add a reference to the MPS-Db:
+                                    <li>To add a reference to the MPS-Db:
                                         <ul class="help-filled-circle">
-                                            <li>Select the <b>Studies</b> icon or tab</li>
-                                            <li>Select <b>View References</b> </li>
-                                            <li>Click the <b>Add Reference</b> button</li>
+                                            <li>Go to the <b>Studies</b> tab/icon</li>
+                                            <li>Select the <b>Study Components</b> option </li>
+                                            <li>Click the <b>Add References</b> button</li>
                                             <li>Fill out the form</li>
-                                            <li>Submit</li>
+                                            <li>Click the <b>Submit</b> button to save </li>
                                         </ul>
                                     </li>
                                 </ul>
@@ -1094,13 +1136,12 @@
                         </ul>
                     </div>
                 </div>
-
             </div>
 
             <div id="study_data_customization_section" class="stop-point">
 
                 <h1 class="h1-level-0"> Assay Data Customization Options</h1>
-
+                <p class="h1-level-3">Graph customization is not saved, it lasts only until the user navigates away from the page.</p>
                 <div id="help_custom_filtering_sidebar">
                     <button name="help_button" type="button" class="btn btn-primary help-collapsible"> Custom Grouping and Filtering (sidebar) </button>
                     <div class="help-content-1">
@@ -1117,19 +1158,20 @@
                                                 <li>To omit data, uncheck the box next to the data </li>
                                                 </ul>
                                             </li>
-                                            <li>To group - check/uncheck the box in the Group column
+                                            <li>To group - check/uncheck the box in the <b>Group</b> column
                                                 <ul class="help-open-circle">
                                                 <li>Check the box to include parameter in grouping </li>
                                                 <li>Uncheck the box to remove parameter from grouping </li>
                                                 </ul>
                                             </li>
-                                            <li>REPEAT for all attributes to override </li>
+                                            <li>Repeat for all attributes to override </li>
                                         </ul>
                                     </li>
-                                    <li><br>Help Notes:
+                                    <br>
+                                    <li>Help Notes:
                                         <ul class="help-filled-circle">
-                                            <li>Changing groups and filters changes the way <b>Matrix Items</b> are grouped into rows in the Group table/list provided below the plots </li>
-                                            <li>In general, increasing the number of parameters selected for grouping will increase the number of data groups in the summary data aggregation tables
+                                            <li>In general, increasing the number of parameters selected for grouping will increase the number of data groups in the summary data aggregation table</li>
+                                            <li>In general, increasing the number of filters will decrease the number of data groups in the summary data aggregation tables (or decrease the size of the group)</li>
                                             <li>By default, the screen will automatically refresh, to refresh manually, check the <b>Manually Refresh</b> box, make the desired changes, then click on the <b>Refresh</b> button to apply changes </li>
                                         </ul>
                                     </li>
@@ -1148,19 +1190,20 @@
                                     <li>General graph customization is available via a sidebar where graphs are displayed. To customize:
                                         <ul class="help-filled-circle">
                                             <li>If hidden, click the <b>Toggle Sidebar</b> button to show the sidebar </li>
-                                            <li>Click on the property menus (Plot Graph By, Data Aggregation, Tooltip Display, Data Display, Time Unit) to see options </li>
-                                            <li>To change the <b>General Graph Properties</b>, click on the menu of the property of interest
+                                            <li>Click on the property menus to see options </li>
+                                            <li>To change the general graph properties, click on the menu of the property of interest in the <b>General Graph Properties</b> section</b>
                                                 <ul class="help-open-circle">
-                                                    <li>Plot Graph By - select By Chips (Matrix Item), By Group, or By Compound to indicate additional aggregation grouping </li>
+                                                    <li>Plot Graph By - select By Chips (chips and wells), By Group (groups as defined based on choices made in the <b>Grouping/Filtering</b> section), or By Compound to indicate how to aggregate assay data </li>
                                                     <li>Data Aggregation - select Arithmetic Mean, Geometric Mean, or Median (additional options available based on selection)</li>
                                                     <li>Tooltip Display - select Each Data Point or Entire Time Point (when hovering over a point on a graph) </li>
                                                     <li>Data Display - option to select Include Excluded Data and/or treat Negative Values as 0 </li>
-                                                    <li>Time Unit - select Day, Hour, or Minute for time unit of X-axis</li>
+                                                    <li>Time Unit - select Day, Hour, or Minute for time unit of x-axis</li>
                                                 </ul>
                                             </li>
                                         </ul>
                                     </li>
-                                    <li><br>Help Notes:
+                                    <br>
+                                    <li>Help Notes:
                                         <ul class="help-filled-circle">
                                             <li>By default, the screen will automatically refresh, to refresh manually, check the <b>Manually Refresh</b> box, make the desired changes, then click on the <b>Refresh</b> button to apply changes </li>
                                         </ul>
@@ -1183,17 +1226,18 @@
                                             <li>Select the desired individualized graph options
                                                 <ul class="help-open-circle">
                                                     <li>Show Plot - if uncheck and apply, graph will not be displayed on main page</li>
-                                                    <li>Graph as Percent Control - when box is checked, assays and time points without associated controls are removed and the y-axis units are changed to percent control </li>
-                                                    <li>Graphs as Dose-Response - changes X-axis from time to dose </li>
-                                                    <li>Transform X-axis to Log Scale - transforms X-axis </li>
-                                                    <li>Transform Y-axis to Log Scale - transforms Y-axis</li>
+                                                    <li>Percent Control - when box is checked, assays and time points without associated controls are removed and the y-axis units are changed to percent control </li>
+                                                    <li>Dose-Response - changes x-axis from time to dose </li>
+                                                    <li>X-axis to Log Scale - transforms x-axis </li>
+                                                    <li>Y-axis to Log Scale - transforms y-axis</li>
                                                 </ul>
                                             </li>
-                                            <li>Click to <b>View Preview</b></li>
+                                            <li>Click the <b>View Preview</b> button</li>
                                             <li>Make changes to the general graph customization features as desired (optional)</li>
-                                            <li>Click <b>Apply to Plot</b> to apply changes, <b>Revert to Default</b> to remove graph specific customization, or <b>Cancel</b> to go back to the last applied version
+                                            <li>Click the <b>Apply to Plot</b> button to apply changes, the <b>Revert to Default</b> button to remove graph specific customization, or the <b>Cancel</b> to go back to the last applied version
                                         </ul>
                                     </li>
+
                                 </ul>
                             </li>
                         </ul>
@@ -1213,20 +1257,20 @@
                             <li class="list-group-item">
                                 <h1 class="h1-level-1"> Chemical Data </h1>
                                 <ul class="list-unstyled">
-                                    <li>Select <b>View Chemical Data</b> from the <b>Compounds</b> icon or tab, then:
+                                    <li>To view chemical data:
                                         <ul class="help-filled-circle">
-                                            <li>Use the <b>Search</b> bar or scroll through the list to find the <b>Compound</b> of interest</li>
-                                            <li>Click on the <b>View</b> button next to the <b>Compound</b> of interest to see compound details</li>
-                                            <li>Click on the <b>Previous</b> or <b>Next</b> button to scroll through the compounds </li>
+                                            <li>Go to the <b>Compounds</b> tab/icon</li>
+                                            <li>Select the <b>View Chemical Data</b> option </li>
+                                            <li>Use the search box to limit the compound list (optional)</li>
+                                            <li>Click on the <b>View</b> button next to the compound of interest to see compound details</li>
+                                            <li>Click on the <b>Previous</b> button or the <b>Next</b> button to scroll through the compounds (optional) </li>
                                         </ul>
                                     </li>
-                                    <li><br>Help Notes:
+                                    <br>
+                                    <li>Help Notes:
                                         <ul class="help-filled-circle">
-                                            <li>The "Medchem Alerts" field (in the compound details page) shows whether functional groups that are uncommon in drugs are present in the compound
-                                            <ul class="help-open-circle">
-                                                <li>If there are Medchem Alerts for a compound, click on the flag to see a list of the functional groups </li>
-                                            </ul>
-                                            </li>
+                                            <li>Medchem Alerts - indicates whether functional groups that are uncommon in drugs are present in the compound</li>
+                                            <li>If there are Medchem Alerts for a compound, click on the flag to see a list of the functional groups </li>
                                             <li>For more information on the reference data source(s), <a href="#help_overview_features">click here</a> </li>
                                         </ul>
                                     </li>
@@ -1243,7 +1287,11 @@
                             <li class="list-group-item">
                                 <h1 class="h1-level-1"> Bioactivities </h1>
                                 <ul class="list-unstyled">
-                                    <li>To explore bioactivities, select <b>View Bioactivities</b> from the <b>Compounds</b> icon or tab, then select an option.
+                                    <li>To view bioactivities:
+                                        <ul class="help-filled-circle">
+                                            <li>Go to the <b>Compounds</b> tab/icon</li>
+                                            <li>Select the <b>View Bioactivities</b> option </li>
+                                        </ul>
                                     </li>
                                 </ul>
                             </li>
@@ -1257,11 +1305,11 @@
                                         <ul class="help-filled-circle">
                                             <li>Enter at least one search string in one of the fields (Compound, Target, and/or Name)
                                                 <ul class="help-open-circle">
-                                                    <li>Notice that options appear, these can be selected from the dropdown </li>
+                                                    <li>Notice that options appear as you type in the boxes, these can be selected from the dropdown </li>
                                                 </ul>
                                                 </li>
-                                            <li>Optional - Click on the buttons to Exclude and/or change data as indicated on the button  </li>
-                                            <li>Click on the <span class="glyphicon glyphicon-search" aria-hidden="true"></span> to perform the search </li>
+                                            <li>Click on the <b>Exclude ... </b> buttons to change data selection as indicated on the button (optional) </li>
+                                            <li>Click on the <span class="glyphicon glyphicon-search" aria-hidden="true"></span> button to perform the search </li>
                                         </ul>
                                     </li>
                                 </ul>
@@ -1293,19 +1341,10 @@
                                     <h1 class="h1-level-2"> Option 2 - Advanced Search </h1>
                                     <li>To perform an advanced search:
                                         <ul class="help-filled-circle">
-                                            <li>Optional - Click on the buttons to Exclude and/or change data as indicated on the button
-                                                <ul class="help-open-circle">
-                                                    <li>Notice that options appear, these can be selected from the dropdown </li>
-                                                </ul>
-                                            </li>
-                                            <li>Optional - The <em>Minimum Feature Count Per Record</em> field specifies the number of bioactivities that need to be linked to a given option for it to appear
-                                                <ul class="help-open-circle">
-                                                    <li>e.g. if the min feature count is 10, then the compound "ALDRIN" won't be an option because only 5 bioactivities link to "ALDRIN" </li>
-                                                    <li>Click the "Apply" button to confirm the change to the min feature count </li>
-                                                </ul>
-                                            </li>
-                                            <li>Make sure that the boxes are check marked to indicate selections in all tables </li>
-                                            <li>Click the button to <b>Generate Table</b> </li>
+                                            <li>Click on the <b>Exclude ... </b> button or the <b>Use PubChem...</b> button to change data selection as indicated on the button (optional)</li>
+                                            <li>Enter a search string in one or more of the filters (Bioactivities, Targets, Compounds) (optional)</li>
+                                            <li>Check all the boxes needed to indicate desired selections </li>
+                                            <li>Click the <b>Generate Table</b> button</li>
                                         </ul>
                                     </li>
                                 </ul>
@@ -1346,7 +1385,13 @@
                                             <li>Not every ChEMBL entry has a corresponding PubChem entry, and vice versa </li>
                                             <li>The following will clear <em>all</em> selections
                                                 <ul class="help-open-circle">
-                                                    <li>Changing between ChEMBL and PubChem; Changing whether questionable results are excluded or not; Changing the min feature count; Changing the <em>Target Types</em> or <em>Organisms</em>  </li>
+                                                    <li>Changing between ChEMBL and PubChem; Changing whether questionable results are excluded or not; Changing the min feature count; Changing the Target Types or Organisms </li>
+                                                </ul>
+                                            </li>
+                                            <li>The <b>Minimum Feature Count Per Record</b> field specifies the number of bioactivities that need to be linked to a given option for it to appear
+                                                <ul class="help-open-circle">
+                                                    <li>e.g. if the min feature count is 10, then the compound "ALDRIN" will not be an option because only 5 bioactivities link to "ALDRIN" </li>
+                                                    <li>Click the <b>Apply</b> button to confirm the change to the min feature count </li>
                                                 </ul>
                                             </li>
                                             <li>For more information on the reference data source(s), <a href="#help_overview_features">click here</a> </li>
@@ -1365,14 +1410,17 @@
                             <li class="list-group-item">
                                 <h1 class="h1-level-1"> Drug Trials </h1>
                                 <ul class="list-unstyled">
-                                    <li>Select <b>Drug Trials</b> from the <b>Compounds</b> icon or tab, then:
+                                    <li>To view drug trials data:
                                         <ul class="help-filled-circle">
-                                            <li>Use the <b>Search</b> bar or scroll through the list to find the <b>Drug Trial</b> of interest</li>
-                                            <li>Click on the <b>View</b> button next to the <b>Drug Trial</b> of interest  </li>
-                                            <li>Click on the <b>Previous</b> or <b>Next</b> button to scroll through the compounds </li>
+                                            <li>Go to the <b>Compounds</b> tab/icon</li>
+                                            <li>Select the <b>View Drug Trials</b> option </li>
+                                            <li>Use the search box to limit the list (optional)</li>
+                                            <li>Click on the <b>View</b> button next to the drug trial of interest to see compound details</li>
+                                            <li>Click on the <b>Previous</b> button or the <b>Next</b> button to scroll through the drug trials (optional) </li>
                                         </ul>
                                     </li>
-                                    <li><br>Help Notes:
+                                    <br>
+                                    <li>Help Notes:
                                         <ul class="help-filled-circle">
                                             <li>For more information on the reference data source(s), <a href="#help_overview_features">click here</a> </li>
                                         </ul>
@@ -1390,27 +1438,31 @@
                             <li class="list-group-item">
                                 <h1 class="h1-level-1"> Adverse Events </h1>
                                 <ul class="list-unstyled">
-                                    <li>Select <b>View Adverse Events</b> from the <b>Compounds</b> icon or tab, then:
+                                    <li>To view adverse events:
                                         <ul class="help-filled-circle">
-                                            <li>Scroll through the list or use the <b>Search</b> bar to find a <b>Compound</b> and <b>Event</b> of interest
+                                            <li>Go to the <b>Compounds</b> tab/icon</li>
+                                            <li>Select the <b>View Adverse Events</b> option </li>
+                                            <li>Use the search box to limit the list (optional)
                                                 <ul class="help-open-circle">
-                                                    <li>Use a space in the <b>Search</b> bar to such multiple terms (e.g, "EPINEPHRINE nausea") </li>
+                                                    <li>Use a space in the search to include multiple terms (e.g, "EPINEPHRINE nausea") </li>
                                                 </ul>
                                             </li>
-                                            <li>Click on the <b>View</b> button to see details of the <b>Compound</b> and <b>Event</b> of interest </li>
-                                            <li>Click on the <b>Toggle Plot</b> button next to an <b>Event</b> of interest to generate time plots of reported events (scroll down to see the plot)
+                                            <li>Click on the <b>View</b> button to see details of the compound and event of interest </li>
+                                            <li>Click on the <b>Toggle Plot</b> button next to an event of interest to generate time plots of reported events
                                                 <ul class="help-open-circle">
-                                                    <li>Use the data boxes under the plot to control time frame of plot (Optional)</li>
+                                                    <li>Scroll down to the bottom of the page to see the plot</li>
+                                                    <li>Use the data boxes under the plot to control time frame of plot (optional)</li>
                                                 </ul>
                                             </li>
-                                            <li>Click on the <b>Previous</b> or <b>Next</b> button to scroll through the compounds </li>
+                                            <li>Click on the <b>Previous</b> button or <b>Next</b> button to scroll through the compounds (optional) </li>
                                         </ul>
                                     </li>
-                                    <li><br>Help Notes:
+                                    <br>
+                                    <li>Help Notes:
                                         <ul class="help-filled-circle">
                                             <li>Only top adverse events for compounds are shown in the results of the search</li>
                                             <li>The <b>Number of Reports</b> column indicates the number of reports that list both the compound and adverse event in the row</li>
-                                            <li>The <b>Number of Reports</b> does not contain any information regarding the dose of the drug</li>
+                                            <li>The number of reports does not contain any information regarding the dose of the drug</li>
                                             <li>A compound can be listed in a report even if it is not suspected of causing the adverse event</li>
                                             <li>For more information on the reference data source(s), <a href="#help_overview_features">click here</a> </li>
                                         </ul>
@@ -1428,27 +1480,31 @@
                             <li class="list-group-item">
                                 <h1 class="h1-level-1"> Compare Adverse Events </h1>
                                 <ul class="list-unstyled">
-                                    <li>Select <b>Compare Adverse Events</b> from the <b>Compounds</b> icon or tab, then:
+                                    <li>To compare adverse events:
                                         <ul class="help-filled-circle">
+                                            <li>Go to the <b>Compounds</b> tab/icon</li>
+                                            <li>Select the <b>Compare Adverse Events</b> option </li>
                                             <li>As a precaution, click the <b>Clear Current Selections</b> button</li>
-                                            <li>Use the <b>Search</b> bar to narrow the <b>Compound</b> and <b>Event</b> lists </li>
-                                            <li>Check the boxes of the <b>Compound</b> and <b>Event</b> to include
+                                            <li>Use the search box to limit the list (optional)</li>
+                                            <li>Check the boxes of the events to include</li>
+                                            <li>Check the boxes of the compounds to include</li>
                                                 <ul class="help-open-circle">
-                                                    <li>At least one <b>Compound</b> and one <b>Event</b> must be selected before a graph will appear </li>
+                                                    <li>At least one compound and one event must be selected before data will show on the graph </li>
                                                 </ul>
                                             </li>
-                                            <li>If desired, use the <b>Search</b> bar to get different lists </li>
-                                            <li>If desired, check additional compounds to include</li>
+                                            <li>If desired, use the search bar to get different lists </li>
+                                            <li>If desired, check additional compounds and/or events to include</li>
                                             <li>Scroll down to see the graph comparing events</li>
-                                            <li>If desired, click on the <b>Show Raw Counts</b> button to toggle from Number of Reports per 10,000 Mentions </li>
+                                            <li>If desired, click on the <b>Show Raw Counts/Hide Raw Counts</b> button to toggle from Number of Reports and Number of Reports per 10,000 Mentions </li>
                                         </ul>
                                     </li>
-                                    <li><br>Help Notes:
+                                    <br>
+                                    <li>Help Notes:
                                         <ul class="help-filled-circle">
-                                            <li>Selections from both lists are cumulative</li>
-                                            <li>To start with a fresh <b>Search</b>, click the <b>Clear Current Selections</b> button</li>
-                                            <li>To save a complicated <b>Search</b>, click the <b>Save Selections</b> button (when returning at a later time, click <b>Load Selections</b>)</li>
-                                            <li>Hover over the circle ? to learn more about data presented </li>
+                                            <li>Selections are cumulative</li>
+                                            <li>To start with a fresh search, click the <b>Clear Current Selections</b> button</li>
+                                            <li>To save selections, click the <b>Save Selections</b> button (when returning at a later time, click <b>Load Selections</b> button)</li>
+                                            <li>Hover over the <span class="glyphicon glyphicon-question-sign" aria-hidden="true"></span> to learn more about data presented </li>
                                             <li>For more information on the reference data source(s), <a href="#help_overview_features">click here</a> </li>
                                         </ul>
                                     </li>
@@ -1465,24 +1521,22 @@
                             <li class="list-group-item">
                                 <h1 class="h1-level-1"> Heatmap of Bioactivities </h1>
                                 <ul class="list-unstyled">
-                                    <li>Select <b>Heatmap</b> from the <b>Analysis</b> icon or tab, then:
+                                    <li>To generate a heatmap:
                                         <ul class="help-filled-circle">
-                                            <li>Optional - Click on the buttons to Exclude and/or change data as indicated on the button
+                                            <li>Go to the <b>Data Analysis</b> tab/icon</li>
+                                            <li>Select the <b>Heatmap</b> option </li>
+                                            <li>Click on the <b>Exclude ... </b> button or the <b>Use PubChem...</b> button to change data selection as indicated on the button (optional)</li>
+                                            <li>Enter a search string in one or more of the filters (Bioactivities, Targets, Compounds, Drug Trials) (optional)</li>
+                                            <li>Check all the boxes needed to indicate desired selections </li>
+                                            <li>The <b>Minimum Feature Count Per Record</b> field specifies the number of bioactivities that need to be linked to a given option for it to appear
                                                 <ul class="help-open-circle">
-                                                    <li>Notice that options appear, these can be selected from the dropdown </li>
+                                                    <li>e.g. if the min feature count is 10, then the compound "ALDRIN" will not be an option because only 5 bioactivities link to "ALDRIN" </li>
+                                                    <li>Click the <b>Apply</b> button to confirm the change to the min feature count </li>
                                                 </ul>
                                             </li>
-
-                                            <li>Optional - The <em>Minimum Feature Count Per Record</em> field specifies the number of bioactivities that need to be linked to a given option for it to appear
-                                                <ul class="help-open-circle">
-                                                    <li>e.g. if the min feature count is 10, then the compound "ALDRIN" won't be an option because only 5 bioactivities link to "ALDRIN" </li>
-                                                    <li>Click the "Apply" button to confirm the change to the min feature count </li>
-                                                </ul>
-                                            </li>
-                                            <li>Make sure that the boxes are checkmarked to indicate selections in all tables </li>
                                             <li>Click the button to <b>Generate Heatmap</b> </li>
                                             <li>If desired, click on a row or column label to sort the heatmap such that entries in the selection are ordered from highest to lowest</li>
-                                            <li>If desired, click the button to <b>Download the Heatmap</b> (downloads data used in heatmap to csv)</li>
+                                            <li>If desired, click the <b>Download the Heatmap</b> button (downloads data used in heatmap to csv)</li>
                                             <li>Scroll to the bottom of the heatmap to see the legend of colors used  </li>
                                             <li>Clicking on a specific square in the heatmap will show that particular value in a pop-up window </li>
                                         </ul>
@@ -1506,7 +1560,7 @@
                                                         <li>Compounds Filter - type in "ASPIRIN" </li>
                                                         <li>Select Compounds - check the box in the top left to include all </li>
                                                         <li>Select Drug Trials - check the box in the top left to include all </li>
-                                                        <li>Click the button to <b>Generate Heatmap</b> </li>
+                                                        <li>Click the <b>Generate Heatmap</b> button</li>
                                                     </ul>
                                                 </li>
                                             </ul>
@@ -1522,9 +1576,9 @@
                                     <li>Help Notes:
                                         <ul class="help-filled-circle">
                                             <li>Not every ChEMBL entry has a corresponding PubChem entry, and vice versa </li>
-                                            <li>The following will clear <em>all</em> selections
+                                            <li>The following will clear all selections
                                                 <ul class="help-open-circle">
-                                                    <li>Changing between ChEMBL and PubChem; Changing whether questionable results are excluded or not; Changing the min feature count; Changing the <em>Target Types</em> or <em>Organisms</em>  </li>
+                                                    <li>Changing between ChEMBL and PubChem; Changing whether questionable results are excluded or not; Changing the min feature count; Changing the Target Types or Organisms  </li>
                                                 </ul>
                                             </li>
                                             <li>For more information on the reference data source(s), <a href="#help_overview_features">click here</a> </li>
@@ -1543,23 +1597,22 @@
                             <li class="list-group-item">
                                 <h1 class="h1-level-1"> Compound Clustering </h1>
                                 <ul class="list-unstyled">
-                                    <li>Select <b>Cluster</b> from the <b>Analysis</b> icon or tab, then:
+                                    <li>To perform compound clustering:
                                         <ul class="help-filled-circle">
-                                            <li>Optional - Click on the buttons to Exclude and/or change data as indicated on the button
+                                            <li>Go to the <b>Data Analysis</b> tab/icon</li>
+                                            <li>Select the <b>Cluster</b> option </li>
+                                            <li>Click on the <b>Exclude ... </b> button or the <b>Use PubChem...</b> button to change data selection as indicated on the button (optional)</li>
+                                            <li>Enter a search string in one or more of the filters (Bioactivities, Targets, Compounds, Drug Trials) (optional)</li>
+                                            <li>Check all the boxes needed to indicate desired selections </li>
+                                            <li>The <b>Minimum Feature Count Per Record</b> field specifies the number of bioactivities that need to be linked to a given option for it to appear
                                                 <ul class="help-open-circle">
-                                                    <li>Notice that options appear, these can be selected from the dropdown </li>
+                                                    <li>e.g. if the min feature count is 10, then the compound "ALDRIN" will not be an option because only 5 bioactivities link to "ALDRIN" </li>
+                                                    <li>Click the <b>Apply</b> button to confirm the change to the min feature count </li>
                                                 </ul>
                                             </li>
-                                            <li>Optional - The <em>Minimum Feature Count Per Record</em> field specifies the number of bioactivities that need to be linked to a given option for it to appear
-                                                <ul class="help-open-circle">
-                                                    <li>e.g. if the min feature count is 10, then the compound "ALDRIN" won't be an option because only 5 bioactivities link to "ALDRIN" </li>
-                                                    <li>Click the "Apply" button to confirm the change to the min feature count </li>
-                                                </ul>
-                                            </li>
-                                            <li>Make sure that the boxes are check marked to indicate selections in all tables </li>
-                                            <li>Click the button to <b>Generate Dendrogram</b> </li>
-                                            <li>The table on the left shows the bioactivities and drug trial data used in clustering</li>
-                                            <li>Click on a node to see information about the compound (click the red X button to close)</li>
+                                            <li>Click the <b>Generate Dendrogram</b> button </li>
+                                            <li>The table on the left shows the bioactivities and drug trial data used in clustering (optional) </li>
+                                            <li>Click on a node to see information about the compound (click the red X button to close) (optional)</li>
                                         </ul>
                                     </li>
 
@@ -1578,7 +1631,7 @@
                                                             <li>Select Targets - check the box "!No Target" </li>
                                                             <li>Select Compounds - check the box in the top left to include all </li>
                                                             <li>Select Drug Trials - check the box in the top left to include all </li>
-                                                            <li>Click the button to <b>Generate Dendrogram</b> </li>
+                                                            <li>Click the <b>Generate Dendrogram</b> button</li>
                                                         </ul>
                                                     </li>
                                                 </ul>
@@ -1595,9 +1648,9 @@
                                     <li>Help Notes:
                                         <ul class="help-filled-circle">
                                             <li>Not every ChEMBL entry has a corresponding PubChem entry, and vice versa </li>
-                                            <li>The following will clear <em>all</em> selections
+                                            <li>The following will clear all selections
                                                 <ul class="help-open-circle">
-                                                    <li>Changing between ChEMBL and PubChem; Changing whether questionable results are excluded or not; Changing the min feature count; Changing the <em>Target Types</em> or <em>Organisms</em>  </li>
+                                                    <li>Changing between ChEMBL and PubChem; Changing whether questionable results are excluded or not; Changing the min feature count; Changing the Target Types or Organisms  </li>
                                                 </ul>
                                             </li>
                                             <li>For more information on the reference data source(s), <a href="#help_overview_features">click here</a> </li>
@@ -1622,8 +1675,37 @@
                             <li class="list-group-item">
                                 <h1 class="h1-level-1"> Joining a Group </h1>
                                 <ul class="list-unstyled">
-                                    <li>Contact an MPS-Db administor to request to add a data group for your team or to be added to an existing team group.
+                                    <li>To join an existing data group:
+                                        <ul class="help-filled-circle">
+                                            <li>Contact the data group administrator (your team data leader) and ask them to request you be added to a data group</li>
+                                        </ul>
                                     </li>
+                                    <br>
+                                    <li>A data group must be associated to a Center. If your Center is not on the list (<a href="#help_study_component">Study Components</a>), contact the MPS-Db administrator and ask for your center to be added (provide the following information):
+                                        <ul class="help-filled-circle">
+                                            <li>Center Name - University of Pittsburgh Drug Discovery Institute</li>
+                                            <li>Center ID - UPDDI</li>
+                                            <li>Institution - University of Pittsburgh</li>
+                                            <li>Description of Center (optional) </li>
+                                            <li>Contact Person</li>
+                                            <li>Contact Email</li>
+                                            <li>Project PI (optional) </li>
+                                            <li>PI Email (optional) </li>
+                                            <li>Contact Webpage</li>
+                                            <li>Center Webpage</li>
+                                        </ul>
+                                    </li>
+                                    <br>
+                                    <li>Have a new data group added to the MPS-Db, contact the MPS-Db administrator and ask for your data group to be added (provide the following information):
+                                        <ul class="help-filled-circle">
+                                            <li>Data Group Name - Taylor_MPS</li>
+                                            <li>Data Group Viewers - list of users</li>
+                                            <li>Data Group Editors - list of users</li>
+                                            <li>Data Group Administrators - list of users</li>
+                                        </ul>
+                                    </li>
+                                    <br>
+                                    <li>For more information on data group roles, <a href="help_overview_permission">click here</a></li>
                                 </ul>
                             </li>
                         </ul>
@@ -1637,9 +1719,9 @@
                             <li class="list-group-item">
                                 <h1 class="h1-level-1"> Review Study Components </h1>
                                 <ul class="list-unstyled">
-                                    <li>Click on the link provided to learn how to review study components (<a href="#help_study_component">Click to Review Study Components</a>)
-                                    </li>
-                                    <li><br>Help Notes:
+                                    <li>To review study components, <a href="#help_study_component">click here</a> </li>
+                                    <br>
+                                    <li>Help Notes:
                                         <ul class="help-filled-circle">
                                             <li>Study components can be added in various locations in the MPS-Db by clicking on the provided plus signs
                                             </li>
@@ -1658,21 +1740,22 @@
                             <li class="list-group-item">
                                 <h1 class="h1-level-1"> Add a Study </h1>
                                 <ul class="list-unstyled">
-                                    <li>To Add a <b>Study</b>:
+                                    <li>To add a study:
                                         <ul class="help-filled-circle">
                                             <li>Click on the <b>Add Study</b> button
                                                 <ul class="help-open-circle">
-                                                    <li>If the study already exists, click to View All Studies, then click on the click the <b>View/Edit</b> button next to the <b>Study</b> of interest </li>
+                                                    <li>If the study already exists, click the <b>View All Studies</b> option, then click on the <b>View/Edit</b> button next to the study of interest </li>
                                                 </ul>
                                             </li>
                                         </ul>
                                     </li>
-                                    <li><br>Help Notes:
+                                    <br>
+                                    <li>Help Notes:
                                         <ul class="help-filled-circle">
                                             <li>You must be a registered user and be assigned to at least one data group to add a study</li>
-                                            <li>Everything in the <b>Study</b> can be edited until the <b>Study</b> Data Group Admin signs off the <b>Study</b> (then it is locked) </li>
-                                            <li>Data contained in files attached as <b>Supporting Data</b> are NOT available for visualization, analysis, or used in calculations within the MPS-GUI </li>
-                                            <li>To edit a study, go to the study of interest and click on the <b>Anayze/Edit</b> button and select <b>Edit This Study</b></li>
+                                            <li>Everything in the study can be edited until the study data group administrator signs off the study (after sign off, a study is locked) </li>
+                                            <li>Data contained in files attached as Supporting Data (as opposed to data uploaded into the database from files listed in the Data File Uploads or the Current Data Files) are not available for visualization, analysis, or used in calculations within the MPS-GUI </li>
+                                            <li>To edit a study, go to the study of interest and click on the <b>Analyze/Edit</b> button and select <b>Edit This Study</b></li>
                                         </ul>
                                     </li>
                                 </ul>
@@ -1691,23 +1774,24 @@
                                     <li> Add the required information as follows:
                                         <ul class="help-filled-circle">
                                             <li>Group – select a Data Group (the team performing the study) </li>
-                                            <li>Study Type – indicate the general purpose of the <b>Study</b> (one is required; check all that apply) </li>
+                                            <li>Study Type – indicate the general purpose of the study (one is required; check all that apply) </li>
                                             <li>Study Name – use an informative name (e.g., "Kidney-Liver Vitamin C Metabolism" is more informative than "Study-1") </li>
                                             <li>Start Date - start of experiment (typically the day the first cells are added to the device) </li>
                                             <li>Description - informative description (purpose, methods, results)</li>
-                                            <li>Use in Calculations - checking <b>Use in Compound Report interface</b> tells the MPS-Db to use this study's data in the Compound Report Feature  </li>
-                                            <li>Protocol File – a Word or pdf file containing the <b>Study</b> protocol </li>
-                                            <li>Image to Illustrate A <b>Study</b> – recommend a picture of the setup or an illustration of the experimental protocol </li>
+                                            <li>Use in Compound Report - checking this box tells the MPS-Db to use this study's data in the <b>Compound Report</b> feature  </li>
+                                            <li>Protocol File – a Word or pdf file containing the study protocol </li>
+                                            <li>Image to Illustrate A Study – recommend a picture of the setup or an illustration of the experimental protocol </li>
                                             <!-- <li>For Integrated Chip Studies – select configuration if performing an integrated <b>Study</b>  </li> -->
                                             <li>References - add references relating to the this study</li>
-                                            <li> Click Submit or Next to continue</li>
+                                            <li>Click the <b>Submit</b> button to save or the <b>Next</b> button to continue</li>
                                         </ul>
                                     </li>
-                                    <li><br>Help Notes:
-                                        <ul class="help-filled-circle">
-                                            <li>The are many options for what to display when entering the Groups (check and uncheck the Show Cells, Show Compounds, Show Settings, and Show Full Details to explore display options)</li>
-                                        </ul>
-                                    </li>
+{#                                    <br>#}
+{#                                    <li>Help Notes:#}
+{#                                        <ul class="help-filled-circle">#}
+{#                                            <li></li>#}
+{#                                        </ul>#}
+{#                                    </li>#}
                                 </ul>
                             </li>
                         </ul>
@@ -1726,26 +1810,27 @@
                                             <li> Select an MPS Model </li>
                                             <li> Select an MPS Model Version (information about cells and settings will be pulled from the model version, if available)</li>
                                             <li> Apply to the Group</li>
-                                            <li> The Type is set based on the device the MPS Model (plate or chip device)</li>
+                                            <li> The Type is set based on the device used in the MPS Model (plate or chip device)</li>
                                             <li> Enter the treatment Group Name </li>
                                             <li> Enter the Number of Chips in the group </li>
                                             <li> Change the Test Type for each group, as needed</li>
                                             <li> Add compounds, additional cells, and additional settings by clicking on the <b>Add Compound</b>, <b>Add Cell</b>, or <b>Add Setting</b> button, respectively</li>
                                             <li> Click on the <b>Add Group</b> button or click the <b>Copy</b> button (in a Group) to make a new Group</li>
                                             <li> Review differences between groups in the Group Difference Display table</li>
-                                            <li> Click Submit or Next to continue</li>
+                                            <li> Click the <b>Submit</b> button to save or the <b>Next</b> button to continue</li>
                                         </ul>
                                     </li>
-                                    <li><br>Help Notes:
+                                    <br>
+                                    <li>Help Notes:
                                         <ul class="help-filled-circle">
-                                            <li>There are many options for the order of adding Groups (e.g., a Group can be Copied at any time as many times as needed)</li>
+                                            <li>There are many options for the order of adding Groups (e.g., a Group can be copied at any time as many times as needed)</li>
                                             <li>If an MPS Model Version has not been made and/or has not been populated correctly, cells and settings will not be automatically pulled into the group setup</li>
-                                            <li>An MPS Model Version is a starting point for a treatment group (if changes are made to cells, settings, and/or compounds, a model version will not longer completely be indicative of the conditon of the chip)</li>
+                                            <li>An MPS Model Version is a starting point for a treatment group (if changes are made to cells, settings, and/or compounds, a model version will no longer fully describe the condition of the chip)</li>
                                             <li>Treatment compounds will need to be added as they are not part of the MPS model version (compounds cannot be saved as part of a model version)</li>
                                             <li>Chips are numbered sequentially, starting from 1 (these can be changed, if necessary)</li>
-                                            <li>Add cells, settings, and/or compounds by clicking on the Add Cell, Add Setting, or Add Compound buttons, respectively</li>
                                             <li>Remove cells, settings, and/or compounds by clicking the red X's (click on individual X's or, to remove a column, click on the red X in the column header, and to remove a row, click on the red X in the row label)</li>
                                             <li>Enter a treatment group for each treatment condition (for wells in a plate and for chips)</li>
+                                            <li>Treatment groups will be applied to plates (if a plate device was selected) in subsequent steps </li>
                                         </ul>
                                     </li>
                                 </ul>
@@ -1759,7 +1844,6 @@
                     <div class="help-content-1">
                         <ul class="list-group">
                             <li class="list-group-item">
-                                <h4>Chips and Plates tabs are displayed based on the Type displayed in the Groups tab.</h4>
                                 <h1 class="h1-level-1"> Define Chips and Plates - Chips Tab </h1>
                                 <ul class="list-unstyled">
                                     <li> To edit chip names (optional):
@@ -1767,49 +1851,54 @@
                                             <li> Click on one of the Rename Chips By buttons </li>
                                             <li> Fill out the popup form</li>
                                             <li> Click Apply </li>
-                                            <li> Click Submit or Next to continue</li>
+                                            <li>Click the <b>Submit</b> button to save or the <b>Next</b> button to continue</li>
                                         </ul>
                                     </li>
+                                    <br>
                                     <li> To edit chip treatment group association (optional):
                                         <ul class="help-filled-circle">
-                                            <li> Click on the dropdown in the Group column </li>
+                                            <li> Click on the dropdown in the <b>Group</b> column </li>
                                             <li> Select a different group</li>
                                             <li> Click Apply </li>
-                                            <li> Click Submit or Next to continue</li>
+                                            <li>Click the <b>Submit</b> button to save or the <b>Next</b> button to continue</li>
                                         </ul>
                                     </li>
-                                    <li><br>Help Notes:
+                                    <br>
+                                    <li>Help Notes:
                                         <ul class="help-filled-circle">
                                             <li>Changes can be made to the names and the groups in the same edit session</li>
+                                            <li>A Chip Tab is displayed only if a device Type = Chip was selected in the Groups Tab</li>
                                             <li>This is all optional</li>
                                         </ul>
                                     </li>
                                 </ul>
                             </li>
                         </ul>
-
+                        <br>
                         <ul class="list-group">
                             <li class="list-group-item">
                                 <h1 class="h1-level-1"> Define Chips and Plates - Plates Tab  </h1>
                                 <ul class="list-unstyled">
-                                    <li> If one or more Type = plate treatment groups were added, wells must be added to a Plate as follows (required):
+                                    <li> If one or more Type = Plate was selected in the Groups tab, wells must be added to a plate as follows (required):
                                         <ul class="help-filled-circle">
                                             <li> Click the <b>Add Plate</b> button </li>
-                                            <li> Fill in the Name </li>
+                                            <li> Fill in the plate Name </li>
                                             <li> Select the MPS Model </li>
                                             <li> Fill in a Well Prefix (optional)</li>
                                             <li> Drag in the plate over the wells to assign a treatment group </li>
-                                            <li> Fill in the form and click Apply</li>
+                                            <li> Fill in the form and click the <b>Apply</b> button </li>
                                             <li> Rename all wells on the plate using an Apply Default button (optional) </li>
-                                            <li> Click Submit or Next to continue</li>
+                                            <li> Click the <b>Submit</b> button to save or the <b>Next</b> button to continue</li>
                                         </ul>
                                     </li>
-                                    <li><br>Help Notes:
+                                    <br>
+                                    <li>Help Notes:
                                         <ul class="help-filled-circle">
+                                            <li>A Plate Tab is displayed only if a device Type = Plate was selected in the Groups Tab</li>
                                             <li>Add as many plates as needed </li>
                                             <li>A plate can contain one or more treatment groups</li>
                                             <li>A treatment group can span plates</li>
-                                            <li>Well names must be unique to the study, not to a plate (i.e., if A1 cannot be in more than one plate - use a prefix like P1-A1 and P2-A1)</li>
+                                            <li>Well names must be unique to the study, not to a plate (i.e., well A1 cannot exist on more than one plate in a study - use a prefix like P1-A1 and P2-A1)</li>
                                         </ul>
                                     </li>
                                 </ul>
@@ -1829,14 +1918,15 @@
                                         <ul class="help-filled-circle">
                                             <li> Click in the Assay Category box and select a category (optional, but narrows the choices of Targets and Methods if selected)</li>
                                             <li> Click in the Target/Analyte box and select a target</li>
-                                            <li> Click in the Method/Kit box and select a Method</li>
+                                            <li> Click in the Method/Kit box and select a method</li>
                                             <li> Click in the Readout Unit and select the unit to be used for uploading data </li>
-                                            <li> Click Submit or Next to continue</li>
+                                            <li> Click the <b>Submit</b> button to save or the <b>Next</b> button to continue</li>
                                         </ul>
                                     </li>
-                                    <li><br>Help Notes:
+                                    <br>
+                                    <li>Help Notes:
                                         <ul class="help-filled-circle">
-                                            <li>All combinations of Method/Kit, Target/Analyte, and Unit must be listed in the <b>Assays</b> tab <b>PRIOR</b> to uploading assay data</li>
+                                            <li>All combinations of Method/Kit, Target/Analyte, and Unit must be listed proir to uploading assay data</li>
                                         </ul>
                                     </li>
                                 </ul>
@@ -1852,7 +1942,11 @@
                             <li class="list-group-item">
                                 <h1 class="h1-level-1"> Upload Assay Data - Upload Data Tab</h1>
 
-                                <h4>There are multiple ways of uploading data into the MPS-Db, including, 1) processed assay data (non-omic), 2) raw data exported from a plate reader, 3) omic formatted data. These are descrided in more detail below.</h4>
+                                <p class="h1-level-3">There are multiple ways of uploading data into the MPS-Db, including:
+                                    <br>1) uploading a MIF-C file of processed assay data (non-omic),
+                                    <br>2) uploading raw data exported from a plate reader, and
+                                    <br>3) uploading omic formatted data in specific omic data format(s).
+                                </p>
 
                                 <br>
                                 <h1 class="h1-level-2"> Processed MIF-C-a Format </h1>
@@ -1866,14 +1960,14 @@
                                             <li>To get an example template file, <a href="{% url 'assays-currentuploadtemplate' %}">click here</a></li>
                                         </ul>
                                     </li>
-
-                                    <li><br>Processed Data Help Notes:
+                                    <br>
+                                    <li>Processed Data Help Notes:
                                         <ul class="help-filled-circle">
-                                            <li>The ONLY assay data that are editable in the MPS-GUI is the <b>Exclude</b> field (editable on the <b>Study Item</b> edit page) </li>
+                                            <li>The ONLY assay data that are editable in the MPS-GUI is the <b>Exclude</b> field (editable on the study item edit page) </li>
                                             <li>Changes made to the <b>Exclude</b> field using the MPS-GUI will be lost when data are re-uploaded</li>
-                                            <li>To replace assay data values with new values, remove the data file from the Current Data File, then correct the values in the MIF-C-a file and re-upload that file </li>
-                                            <li>Chip and Well Ids must be unique within a <b>Study</b></li>
-                                            <li>Each file (and each workbook if using Excel) should contain data for only one <b>Study</b> </li>
+                                            <li>To replace assay data values with new values, remove the data file from the Current Data Files, then correct the values in the MIF-C-a file and re-upload that file </li>
+                                            <li>Chip and well Ids must be unique within a study</li>
+                                            <li>Each file (and each workbook if using Excel) should contain data for only one study </li>
                                             <li>Data for one study may be submitted in multiple files (and/or multiple tabs of an Excel workbook) </li>
                                             <li>If uploading an Excel workbook, workbook can contain multiple tabs</li>
                                             <li>All files (or tabs) with correct headers (i.e. column names) will be evaluated for upload, others will be ignored</li>
@@ -1897,8 +1991,8 @@
                                             <li>Help for raw plate reader data is coming soon</li>
                                         </ul>
                                     </li>
-
-                                    <li><br>Raw Plate Reader Data Help Notes:
+                                    <br>
+                                    <li>Raw Plate Reader Data Help Notes:
                                         <ul class="help-filled-circle">
                                             <li>Help for raw plate reader data is coming soon</li>
                                         </ul>
@@ -1921,8 +2015,8 @@
                                             <li>Help for omic data is coming soon</li>
                                         </ul>
                                     </li>
-
-                                    <li><br>Omic Data Help Notes:
+                                    <br>
+                                    <li>Omic Data Help Notes:
                                         <ul class="help-filled-circle">
                                             <li>Help for omic data is coming soon</li>
                                         </ul>
@@ -1948,19 +2042,20 @@
                             <li class="list-group-item">
                                 <h1 class="h1-level-1"> Prepare Images and Videos </h1>
 
-                                <h4>We are working on adding the ability for users to direclty upload images and videos, but, currently, images and videos must be added to the MPS-Db by MPS-Db administrators.</h4>
+                                <p class="h1-level-3">We are working on adding the ability for users to direclty upload images and videos, but, currently, images and videos must be added to the MPS-Db by MPS-Db administrators.</p>
                                 <ul class="list-unstyled">
                                     <li>To add images and/or videos:
                                         <ul class="help-filled-circle">
                                             <li>Prepare the image/video file</li>
                                             <li>Prepare an image/video metadata file (MIF-C-i) </li>
                                             <li>To get an example partial template file, <a href="{% url 'assays-currentuploadtemplate' %}">click here</a>
-                                            <li>Contact an MPS-Db Administrator to make arrangements for submitting the files</li>
+                                            <li>Contact an MPS-Db administrator to make arrangements for submitting the files</li>
                                         </ul>
                                     </li>
-                                    <li><br>Help Notes:
+                                    <br>
+                                    <li>Help Notes:
                                         <ul class="help-filled-circle">
-                                            <li>To remove media files, contact an MPS-Db Administrator for assistance</li>
+                                            <li>To remove media files, contact an MPS-Db administrator for assistance</li>
                                         </ul>
                                     </li>
 
@@ -1982,27 +2077,27 @@
                             <li class="list-group-item">
                                 <h1 class="h1-level-1"> Validation, Flags and Notes (optional) </h1>
 
-                                <h4>To facilitate data review and validation,
+                                <p class="h1-level-3">To facilitate data review and validation,
                                     the database offers the option to flag and add notes to a
-                                    1) Study, 2) Study Item (i.e. a chip or a well), and 3) Plate.
-                                    When a Study is flagged, a flag is display in the Review column
-                                    for that Study in the Study List (a note is displayed as a hover tip).
-                                    When a Study Item is flagged, the flag is displayed in the Review column
-                                    for that Study Item in the Study Item List.
+                                    1) study, 2) study item (i.e. a chip or a well), and 3) plate.
+                                    When a study is flagged, a flag is display in the <b>Review</b> column
+                                    for that study in the study list (a note is displayed as a hover tip).
+                                    When a study item is flagged, the flag is displayed in the <b>Review</b> column
+                                    for that study item in the study item list.
                                     In addition, Study Items can be 'validated'
-                                    (a check mark will show in the Review column for the Study Item in the Study Item list).</h4>
+                                    (a check mark will show in the <b>Review</b> column for the Study Item in the Study Item list).</p>
 
                                 <br>
                                 <h1 class="h1-level-2"> Study Flags and Notes </h1>
 
                                 <ul class="list-unstyled">
-                                    <li> To add flags and or notes to a Study:
+                                    <li> To add flags and or notes to a study:
                                         <ul class="help-filled-circle">
-                                            <li>Go to the Study of interest</li>
-                                            <li>Click on the <b>Analyze/Edit</b> button</li>
-                                            <li>Select Edit This Study</li>
-                                            <li>Click on the Flag icon at the bottom of the page</li>
-                                            <li>Click on the <b>Notes</b> button to add a note (adding a note is optional)</li>
+                                            <li> Go to the study of interest </li>
+                                            <li> Click the <b>Analyze/Edit</b> button </li>
+                                            <li> Select the <b>Edit This Study</b> option </li>
+                                            <li> Click on the <span class="glyphicon glyphicon-flag" aria-hidden="true"></span> at the bottom of the page (the Details Tab)</li>
+                                            <li> Click on the <b>Notes</b> button to add a note (adding a note is optional)</li>
                                             <li>Click <b>Submit</b> to save</li>
                                         </ul>
                                     </li>
@@ -2012,12 +2107,12 @@
                                 <h1 class="h1-level-2"> Study Item Flags and Notes </h1>
 
                                 <ul class="list-unstyled">
-                                    <li> To add flags and or notes to a Study Item:
+                                    <li> To add flags and or notes to a study item:
                                         <ul class="help-filled-circle">
-                                            <li>Go to the Study of interest</li>
-                                            <li>Scroll down to the Chips and Wells section of the page </li>
-                                            <li>Click to View/Edit a Study Item (chip or well) of interest</li>
-                                            <li>Click on the Flag icon at the bottom of the page</li>
+                                            <li>Go to the study of interest</li>
+                                            <li>Scroll down to the <b>Chips and Wells</b> section of the page </li>
+                                            <li>Click the <b>View/Edit</b> button for the study item (chip or well) of interest</li>
+                                            <li>Click on the <span class="glyphicon glyphicon-flag" aria-hidden="true"></span> at the bottom of the page</li>
                                             <li>Click on the <b>Notes</b> button to add a note (adding a note is optional)</li>
                                             <li>Click <b>Submit</b> to save</li>
                                         </ul>
@@ -2028,23 +2123,23 @@
                                 <h1 class="h1-level-2"> Study Item Validation </h1>
 
                                 <ul class="list-unstyled">
-                                    <li> To add a validation check mark to a Study Item:
+                                    <li> To add a validation check mark to a study item:
                                         <ul class="help-filled-circle">
-                                            <li>Go to the Study of interest</li>
-                                            <li>Scroll down to the Chips and Wells section of the page </li>
-                                            <li>Click to View/Edit a Study Item (chip or well) of interest</li>
-                                            <li>Click on the Click Here to Mark this Entry as Validated button near the top of the page</li>
+                                            <li>Go to the study of interest</li>
+                                            <li>Scroll down to the <b>Chips and Wells</b> section of the page </li>
+                                            <li>Click the <b>View/Edit</b> button for the study item (chip or well) of interest</li>
+                                            <li>Click on the <b>Click Here to Mark this Entry as Validated</b> button near the top of the page</li>
                                             <li>Click <b>Submit</b> to save</li>
                                         </ul>
                                     </li>
                                 </ul>
-
+                                <br>
                                 <ul class="list-unstyled">
-                                    <li><br>Help Notes:
+                                    <li>Help Notes:
                                         <ul class="help-filled-circle">
                                             <li>Validation check marks, flags, and notes are visible to all users who have permission to view a study</li>
                                             <li>Validation, flags, and notes can be used during the validation process, and removed prior to sharing a study (i.e. study sign-off)</li>
-                                            <li><b>Study Item</b> validation is designed to be part of the data provider's QC process (it is optional and is NOT required to be completed prior to study sign off) </li>
+                                            <li>Study item validation is designed to be part of the data provider's QC process (it is optional and is not required to be completed prior to study sign off) </li>
                                         </ul>
                                     </li>
                                 </ul>
@@ -2059,22 +2154,23 @@
                         <ul class="list-group">
                             <li class="list-group-item">
                                 <h1 class="h1-level-1"> Data Sharing - Sign-Off a Study (optional) </h1>
-                                <h4>Data group administrators can sign-off a Study in their data group.</h4>
+                                <p class="h1-level-3">Data group administrators can sign-off a study in their data group.</p>
                                 <ul class="list-unstyled">
                                     <li>To sign-off a <b>Study</b>:
                                         <ul class="help-filled-circle">
-                                            <li>Go to the Study of interest</li>
+                                            <li>Go to the study of interest</li>
                                             <li>Click on the <b>Sign Off/Permission</b> button</li>
-                                            <li>Select View/Edit Sign Off Status of this Study</li>
+                                            <li>Select the <b>View/Edit Sign Off Status of this Study</b> option </li>
                                             <li>Add a note in the Notes box (optional)</li>
-                                            <li>Click the Click Here to Sign Off on this Study button</li>
+                                            <li>Click the <b>Click Here to Sign Off on this Study</b> button</li>
                                         </ul>
                                     </li>
-                                    <li><br>Help Notes:
+                                    <br>
+                                    <li>Help Notes:
                                         <ul class="help-filled-circle">
                                             <li>Study sign off starts a one year embargo period after which the study will be open to the broader scientific community (publicly accessible)  </li>
                                             <li>Study sign off is optional unless required by project funder </li>
-                                            <li>During the study sign off process, notes can be added that will be displayed in the study list page when hovering over the check mark in the review column</li>
+                                            <li>During the study sign off process, notes can be added that will be displayed in the study list page when hovering over the check mark in the <b>Review</b> column</li>
                                             <li>To learn more about options for sharing data with selected colleagues prior to study sign off, see <a href="#help_collaborator_group">Assay Data Collaborators</a></li>
                                             <li>To learn more about options for sharing data with selected colleagues during the embargo period, see <a href="#help_access_group">Assay Data Accessors</a></li>
                                         </ul>
@@ -2093,19 +2189,19 @@
                                                     <li>Follow these steps:
                                                         <ul class="help-filled-circle">
                                                             <li>Login to the MPS-Db</li>
-                                                            <li>Go to the study list page - select Studies, then View All Studies or
-                                                                <a href='https://mps.csb.pitt.edu/assays/assaystudy'>click here</a> </li>
-                                                            <li>Look for studies with a check mark, but without an 'eye' or a 'pencil' in the Review column</li>
-                                                            <li>Click the View/Edit button next to the study to review</li>
-                                                            <li>Click the View/Edit Approval Status of this Study button near the top of the page</li>
+                                                            <li>Go to the <b>Studies</b> tab/icon and click on the <b>View/Edit</b> button next to the study of interest or <a href='https://mps.csb.pitt.edu/assays/assaystudy'>click here</a> </li>
+                                                            <li>Look for studies with a check mark, but without an 'eye' or a 'pencil' in the <b>Review</b> column</li>
+                                                            <li>Click the <b>View/Edit</b> button next to the study to review</li>
+                                                            <li>Click the <b>View/Edit Approval Status of this Study</b> button near the top of the page</li>
                                                             <li>Add a Note (optional)</li>
-                                                            <li>Click the Click Here to Approve this Study for Release button</li>
+                                                            <li>Click the <b>Click Here to Approve this Study for Release</b> button</li>
                                                             <li>Click Yes</li>
                                                             <li>Click Submit</li>
                                                             <li>Click Overwrite</li>
                                                         </ul>
                                                     </li>
-                                                    <li><br>Help Notes:
+                                                    <br>
+                                                    <li>Help Notes:
                                                         <ul class="help-filled-circle">
                                                             <li>Data providers and/or project funders designate study data stakeholder(s)</li>
                                                             <li>Designating a study data stakeholder is optional (unless required by the funder) </li>
@@ -2126,14 +2222,14 @@
 
             </div>
 
-        </div>
+            {% if user.is_superuser %}
+                <div id="component_admin_section">
+                    <h1 class="h1-level-0"> Information for MPS Database Administrators </h1>
+                    {% include 'help_superuser_content.html' %}
+                </div>
+            {% endif %}
 
-        {% if user.is_superuser %}
-            <div id="component_admin_section">
-                <h1 class="h1-level-0"> Information for MPS Database Administrators </h1>
-                {% include 'help_superuser_content.html' %}
-            </div>
-        {% endif %}
+        </div>
 
         <div id="glossary" class="padded-bottom">
 
@@ -2170,33 +2266,5 @@
 
 </body>
 
-
 </html>
 
-
-{#                        <button name="help_button" type="button" class="btn btn-success help-collapsible">See a Note About Flags</button>#}
-{#                        <div class="help-content-2">#}
-{#                            <div id="flagsHelp Notes:" class="editorsubtainer">#}
-{#                                <ul class="list-group">#}
-{#                                    <li class="list-group-item">#}
-{#                                        <ul class="list-unstyled">#}
-{#                                            <li>A <b>Study</b>, each <b>Matrix</b>, and/or each <b>Matrix Item</b> can be flagged and annotated#}
-{#                                                <ul class="help-filled-circle">#}
-{#                                                    <li> Clicking <a role='button' class="btn btn-sm" style="color:#337AB7"> <span class="glyphicon glyphicon-flag" aria-hidden="true"></span> </a> places the flag  </li>#}
-{#                                                    <li> Clicking <a role='button' class="btn btn-sm btn-warning"> Help Notes: </a> brings up an input dialog where annotations can be added </li>#}
-{#                                                </ul>#}
-{#                                            </li>#}
-{#                                            <li><br>Help Notes:#}
-{#                                                <ul class="help-filled-circle">#}
-{#                                                    <li> Flags and Help Notes: are fully reversible until a <b>Study</b> is signed off </li>#}
-{#                                                    <li> The annotation process works the same way for a <b>Study</b>, a <b>Matrix</b>, and a <b>Matrix Item</b> </li>#}
-{#                                                    <li> A <b>Study</b> is annotated at the bottom of the <b>Study Level Details</b> page </li>#}
-{#                                                    <li> A <b>Matrix</b> is annotated at the bottom of the <b>Matrix Setup and Data</b> page </li>#}
-{#                                                    <li> A <b>Matrix Item</b> is annotated at the bottom of the <b>Item Setup and Data</b> page </li>#}
-{#                                                </ul>#}
-{#                                            </li>#}
-{#                                        </ul>#}
-{#                                    </li>#}
-{#                                </ul>#}
-{#                            </div>#}
-{#                        </div>#}

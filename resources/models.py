@@ -60,7 +60,6 @@ help_category_choices = [
     ('component-assay', 'Assay Component'),
     ('component-compound', 'Compound Component'),
     ('component-model', 'Model Component'),
-    ('component-compound', 'Compound Component'),
     ('permission', 'Permission Structure'),
     ('organization-study', 'Study Organization')
 ]

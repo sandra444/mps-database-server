@@ -16,10 +16,10 @@
                     <li class="list-group-item">
                         <h1 class="h1-level-1"> {{ term.term }} </h1>
                         <ul class="list-unstyled">
-                            <li>To review the list of <b>{{ term.term }}</b>:
+                            <li>To review the {{ term.term }} list:
                                 <ul class="help-filled-circle">
                                     <li>Click the link {{ term.show_url }} </li>
-                                    <li>Use the <b>Search</b> bar or scroll through the list to find the <b>{{ term.term }}</b> of interest or confirm the <b>{{ term.term }}</b> is not present</li>
+                                    <li>Use the search bar or scroll through the list to find the {{ term.term }} of interest or confirm the {{ term.term }} is not present</li>
                                     <li>If in the list, click on the <b>View</b> button to review the details or the <b>Edit</b> button to update </li>
                                     <li>If not in the list, click on the <b>Add Target</b> button </li>
                                 </ul>
@@ -29,10 +29,10 @@
                                     <li>To add or edit:
                                         <ul class="help-open-circle">
                                             <li>Fill in all the required information </li>
-                                            <li>Add all methods that apply to the <b>{{ term.term }}</b> </li>
-                                            <li>Add all categories that apply to the <b>{{ term.term }}</b> </li>
-                                            <li>Confirm an <b>{{ term.term }}</b> is not in the list before adding a new one  </li>
-                                            <li>Submit to save </li>
+                                            <li>Add all methods that apply to the {{ term.term }} </li>
+                                            <li>Add all categories that apply to the {{ term.term }} </li>
+                                            <li>Confirm an {{ term.term }} is not in the list before adding a new one  </li>
+                                            <li>Click the <b>Submit</b> button to save </li>
                                         </ul>
                                     </li>
                                 </ul>
@@ -51,48 +51,48 @@
 
     {% else %}
 
-    {% if term.term == "Assay Method" %}
-        {# *anchor* #}
-        <div id="assay_method_anchor">
-            <button name="help_button" type="button" class="btn btn-success help-collapsible">{{ term.term }}</button>
-            <div class="help-content-2">
-                <ul class="list-group">
-                    <li class="list-group-item">
-                        <h1 class="h1-level-1"> {{ term.term }} </h1>
-                        <ul class="list-unstyled">
-                            <li>To review the list of <b>{{ term.term }}</b>:
-                                <ul class="help-filled-circle">
-                                    <li>Click the link {{ term.show_url }} </li>
-                                    <li>Use the <b>Search</b> bar or scroll through the list to find the <b>{{ term.term }}</b> of interest or confirm the <b>{{ term.term }}</b> is not present</li>
-                                    <li>If in the list, click on the <b>View</b> button to review the details or the <b>Edit</b> button to update </li>
-                                    <li>If not in the list, click on the <b>Add Method</b> button </li>
-                                </ul>
-                            </li>
-                            <li><br>Help Notes:
-                                <ul class="help-filled-circle">
-                                    <li>To add or edit:
-                                        <ul class="help-open-circle">
-                                            <li>Fill in all the required information </li>
-                                            <li>Add all targets that apply to the <b>{{ term.term }}</b> </li>
-                                            <li>Confirm an <b>{{ term.term }}</b> is not in the list before adding a new one  </li>
-                                            <li>Submit to save </li>
-                                        </ul>
-                                    </li>
-                                </ul>
-                            </li>
-                            <li><br>Help Tips:
-                                <ul class="help-filled-circle">
-                                    <li>Collect up all the metadata needed before adding or updating </li>
-                                    <li>Make sure to add all the targets needed </li>
-                                </ul>
-                            </li>
-                        </ul>
-                    </li>
-                </ul>
+        {% if term.term == "Assay Method" %}
+            {# *anchor* #}
+            <div id="assay_method_anchor">
+                <button name="help_button" type="button" class="btn btn-success help-collapsible">{{ term.term }}</button>
+                <div class="help-content-2">
+                    <ul class="list-group">
+                        <li class="list-group-item">
+                            <h1 class="h1-level-1"> {{ term.term }} </h1>
+                            <ul class="list-unstyled">
+                                <li>To review the {{ term.term }} list:
+                                    <ul class="help-filled-circle">
+                                        <li>Click the link {{ term.show_url }} </li>
+                                        <li>Use the search bar or scroll through the list to find the {{ term.term }} of interest or confirm the {{ term.term }} is not present</li>
+                                        <li>If in the list, click on the <b>View</b> button to review the details or the <b>Edit</b> button to update </li>
+                                        <li>If not in the list, click on the <b>Add Method</b> button </li>
+                                    </ul>
+                                </li>
+                                <li><br>Help Notes:
+                                    <ul class="help-filled-circle">
+                                        <li>To add or edit:
+                                            <ul class="help-open-circle">
+                                                <li>Fill in all the required information </li>
+                                                <li>Add all targets that apply to the {{ term.term }} </li>
+                                                <li>Confirm an {{ term.term }} is not in the list before adding a new one  </li>
+                                                <li>Click the <b>Submit</b> button to save </li>
+                                            </ul>
+                                        </li>
+                                    </ul>
+                                </li>
+                                <li><br>Help Tips:
+                                    <ul class="help-filled-circle">
+                                        <li>Collect up all the metadata needed before adding or updating </li>
+                                        <li>Make sure to add all the targets needed </li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
             </div>
-        </div>
 
-    {% endif %}
+        {% endif %}
     {% endif %}
 {% endfor %}
 
