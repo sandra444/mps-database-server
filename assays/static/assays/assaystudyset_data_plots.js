@@ -127,19 +127,19 @@ $(document).ready(function() {
                 },
                 {
                     "type": "numeric-comma",
-                    "targets": [5, 6, 7, 8, 9, 10]
+                    "targets": [6, 7, 8, 9, 10, 11]
                 },
                 {
                     'visible': false,
-                    'targets': [7, 8, 9, 10, 14, 16, 17]
+                    'targets': [5, 8, 9, 10, 11, 15, 17, 18]
                 },
                 {
                     'className': 'none',
-                    'targets': [11]
+                    'targets': [12]
                 },
                 {
                     'sortable': false,
-                    'targets': [12]
+                    'targets': [13]
                 }
             ],
             initComplete: function() {
@@ -176,6 +176,7 @@ $(document).ready(function() {
             filters: JSON.stringify(window.GROUPING.filters),
             criteria: JSON.stringify(window.GROUPING.get_grouping_filtering()),
             post_filter: JSON.stringify(window.GROUPING.current_post_filter),
+            full_post_filter: JSON.stringify(window.GROUPING.full_post_filter),
             csrfmiddlewaretoken: window.COOKIES.csrfmiddlewaretoken
         };
 
