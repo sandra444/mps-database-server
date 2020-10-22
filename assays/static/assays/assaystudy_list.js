@@ -106,19 +106,19 @@ $(document).ready(function() {
                 },
                 {
                     "type": "numeric-comma",
-                    "targets": [5, 6, 7, 8, 9, 10]
+                    "targets": [6, 7, 8, 9, 10, 11]
                 },
                 {
                     'visible': false,
-                    'targets': [7, 8, 9, 10, 14, 16, 17]
+                    'targets': [5, 8, 9, 10, 11, 15, 17, 18]
                 },
                 {
                     'className': 'none',
-                    'targets': [11]
+                    'targets': [12]
                 },
                 {
                     'sortable': false,
-                    'targets': [12]
+                    'targets': [13]
                 }
             ],
             initComplete: function() {
@@ -128,15 +128,6 @@ $(document).ready(function() {
                     studies_table.DataTable().column(10).visible(false);
                 }
             },
-            drawCallback: function () {
-                // Show when done
-                studies_table.show('slow');
-                // Swap positions of filter and length selection; clarify filter
-                $('.dataTables_filter').css('float', 'left').prop('title', 'Separate terms with a space to search multiple fields');
-                $('.dataTables_length').css('float', 'right');
-                // Reposition download/print/copy
-                $('.DTTT_container').css('float', 'none');
-            }
         });
     }
 });
