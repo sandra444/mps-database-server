@@ -14,6 +14,13 @@ $(document).ready(function () {
     var study_id = Math.floor(window.location.href.split('/')[5]);
 
     var get_params, visible_charts = {};
+    var present_groups = [];
+    var hovered_groups = [];
+
+    // Container that shows up to reveal what a group contains
+    var omics_contents_hover = $('#omics_contents_hover');
+    // The row to add the group data to
+    var omics_contents_hover_body = $('#omics_contents_hover_body');
 
     function fetchOmicsData(){
         window.spinner.spin(
@@ -40,6 +47,12 @@ $(document).ready(function () {
                 for (var chart in data['table']) {
                     visible_charts[data['table'][chart][1]] = true;
                 }
+
+                // Make Difference Table, generate list of groups to aid in hover displays
+                window.GROUPS.make_difference_table();
+                $('#difference_table_body').find('tr').each(function() {
+                    present_groups.push($(this).data('group-name'));
+                });
             } else {
                 console.log(data['error']);
                 // Stop spinner
@@ -92,4 +105,44 @@ $(document).ready(function () {
 
         window.open(window.location.href + "download/?" + $.param(get_params), "_blank")
     });
+
+    function generate_row_html(hovered_groups) {
+        // (these divs are contrivances)
+        var name_row = $('<div>').append(
+            $('#difference_table_body').find('[data-group-name="' + hovered_groups[0] + '"]').clone().append(
+                $('#difference_table_body').find('[data-group-name="' + hovered_groups[1] + '"]').clone()
+            )
+        );
+
+        var full_row = $('<div>');
+
+        return name_row.html() + full_row.html();
+    }
+
+    $(document).on('mouseover', '.omics-groups-hover, svg > g', function() {
+        hovered_groups = [];
+
+        for (group in present_groups) {
+            if ($(this).text().includes(present_groups[group])) {
+                hovered_groups.push(present_groups[group]);
+            }
+        }
+
+        omics_contents_hover.show();
+        // Hard value for left (TODO: Probably better to set to left of the matrix?)
+        var left = $('#omics_table').position().left - 15;
+        // Place slightly below current label
+        var top = $(this).offset().top + 50;
+        omics_contents_hover.offset({left: left, top: top});
+
+        omics_contents_hover_body.empty();
+        omics_contents_hover_body.html(
+            generate_row_html(hovered_groups)
+        );
+    });
+
+    $(document).on('mouseout', '.omics-groups-hover, svg > g', function() {
+        omics_contents_hover.hide();
+    });
+
 });
