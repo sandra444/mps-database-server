@@ -841,7 +841,13 @@ def get_item_groups(study, criteria, groups=None, matrix_items=None, compound_pr
         'assaygroupcompound_set__concentration_unit',
         'assaygroupcompound_set__addition_location',
         # SOMEWHAT FOOLISH
-        'study__group__microphysiologycenter_set'
+        'study__group__microphysiologycenter_set',
+    )
+
+    # Again, a bit foolish
+    matrix_items = matrix_items.prefetch_related(
+        'matrix__study',
+        'device',
     )
 
     if not criteria:
@@ -855,6 +861,10 @@ def get_item_groups(study, criteria, groups=None, matrix_items=None, compound_pr
         }
 
     # TODO TODO TODO REVISE THESE MAGIC KEYS
+    if criteria.get('item', ''):
+        # Could get this from group in theory
+        if 'device_id' in criteria.get('item'):
+            header_keys.append('Device')
     if criteria.get('setup', ''):
         # Could get device here
         # if 'organ_model__device_id' in criteria.get('setup'):
@@ -875,8 +885,8 @@ def get_item_groups(study, criteria, groups=None, matrix_items=None, compound_pr
         if 'matrix_id' in criteria.get('item'):
             header_keys.append('Matrix')
         # Could get this from group in theory
-        if 'device_id' in criteria.get('item'):
-            header_keys.append('Device')
+        # if 'device_id' in criteria.get('item'):
+        #     header_keys.append('Device')
     if criteria.get('compound', ''):
         header_keys.append('Compounds')
     if criteria.get('cell', ''):
