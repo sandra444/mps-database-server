@@ -3295,6 +3295,7 @@ def apply_post_filter(full_post_filter, post_filter, studies, assays, groups, ma
     matrix_item_divergence = check_if_filters_diverge(full_post_filter, post_filter, 'matrix_item')
 
     if study_divergence or group_divergence:
+        matrix_item_divergence = True
         matrix_items = matrix_items.filter(group_id__in=groups)
 
     if matrix_item_divergence:
@@ -3330,7 +3331,7 @@ def apply_post_filter(full_post_filter, post_filter, studies, assays, groups, ma
         data_points = data_points.filter(
             study_assay_id__in=assays,
         )
-    if matrix_item_divergence:
+    if matrix_item_divergence or group_divergence:
         data_points = data_points.filter(
             matrix_item_id__in=matrix_items,
         )
