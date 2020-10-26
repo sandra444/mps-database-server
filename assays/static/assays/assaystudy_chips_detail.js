@@ -1,46 +1,35 @@
+// TODO refactor
 $(document).ready(function() {
-    // Load core chart package
     google.charts.load('current', {'packages':['corechart']});
     // Set the callback
-    google.charts.setOnLoadCallback(get_readouts);
-
-    window.GROUPING.refresh_function = get_readouts;
-
-    var charts = $('#charts');
-    var study_id = Math.floor(window.location.href.split('/')[5]);
-
-    window.CHARTS.call = 'fetch_data_points';
-    window.CHARTS.study_id = study_id;
+    google.charts.setOnLoadCallback(get_data);
 
     // Name for the charts for binding events etc
     var charts_name = 'charts';
+    var first_run = true;
 
-    // Datatable for assays
-    $('#assay_table').DataTable({
-        dom: '<Bl<"row">frptip>',
-        fixedHeader: {headerOffset: 50},
-        responsive: true,
-        "iDisplayLength": 10,
-        // Initially sort on target (ascending)
-        "order": [ 0, "asc" ]
-    });
+    let matrix_id = Math.floor(window.location.href.split('/')[5]);
+
+    window.GROUPING.refresh_function = get_data;
+
+    window.CHARTS.call = 'fetch_data_points';
+    window.CHARTS.matrix_id = matrix_id;
 
     // PROCESS GET PARAMS INITIALLY
     window.GROUPING.process_get_params();
     // window.GROUPING.generate_get_params();
 
-    function get_readouts() {
+    function get_data() {
         var data = {
             // TODO TODO TODO CHANGE CALL
-            call: window.CHARTS.call,
-            study: study_id,
+            call: 'fetch_data_points',
+            matrix: matrix_id,
             criteria: JSON.stringify(window.GROUPING.group_criteria),
             post_filter: JSON.stringify(window.GROUPING.current_post_filter),
             full_post_filter: JSON.stringify(window.GROUPING.full_post_filter),
             csrfmiddlewaretoken: window.COOKIES.csrfmiddlewaretoken
         };
 
-        // ODD
         window.CHARTS.global_options = window.CHARTS.prepare_chart_options();
         var options = window.CHARTS.global_options.ajax_data;
 
@@ -61,13 +50,17 @@ $(document).ready(function() {
                 window.spinner.stop();
 
                 window.CHARTS.prepare_side_by_side_charts(json, charts_name);
-                window.CHARTS.make_charts(json, charts_name);
+                window.CHARTS.make_charts(json, charts_name, first_run);
 
                 // Recalculate responsive and fixed headers
                 $($.fn.dataTable.tables(true)).DataTable().responsive.recalc();
                 $($.fn.dataTable.tables(true)).DataTable().fixedHeader.adjust();
+
+                first_run = false;
             },
             error: function (xhr, errmsg, err) {
+                first_run = false;
+
                 // Stop spinner
                 window.spinner.stop();
 
@@ -75,20 +68,4 @@ $(document).ready(function() {
             }
         });
     }
-
-    $('#include_all').change(function() {
-        var export_button = $('#export_button');
-        if ($(this).prop('checked')) {
-            export_button.attr('href', export_button.attr('href') + '?include_all=true');
-        }
-        else {
-            export_button.attr('href', export_button.attr('href').split('?')[0]);
-        }
-
-        $('#export_include_all').prop('checked', $(this).prop('checked'));
-    }).trigger('change');
-
-    $('#export_include_all').change(function() {
-        $('#include_all').trigger('click');
-    });
 });

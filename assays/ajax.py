@@ -816,67 +816,77 @@ def get_item_groups(study, criteria, groups=None, matrix_items=None, compound_pr
     setup_to_treatment_group = {}
     header_keys = []
 
-    # By pulling the setups for the study, I avoid problems with preview data
-    # NOTE THAT STUDY CAN BE MULTIPLE STUDIES, HENCE DIFFERENT FILTER
-    # if matrix_items is None:
-    #     matrix_items = AssayMatrixItem.objects.filter(
-    #         study_id__in=study
-    #     )
+    # In theory, we could generate the tuple for each item
+    # It would be more efficient to generate the group comparison tuples separately, however
+    # An interesting, albeit maybe not all that terrible, consequence is that we will stitch together the groups quick dictionary and the matrix_items
+    # The Group cannot acquire the Matrix, after all
+    group_treatment_groups = {}
+    group_id_to_setup_tuple = {}
 
-    # setups = matrix_items.prefetch_related(
-    #     'matrix',
-    #     'organ_model',
-    #     'assaysetupsetting_set__setting',
-    #     'assaysetupsetting_set__addition_location',
-    #     'assaysetupsetting_set__unit',
-    #     'assaysetupcell_set__cell_sample__cell_subtype',
-    #     'assaysetupcell_set__cell_sample__cell_type__organ',
-    #     'assaysetupcell_set__density_unit',
-    #     'assaysetupcell_set__addition_location',
-    #     'assaysetupcompound_set__compound_instance__compound',
-    #     'assaysetupcompound_set__concentration_unit',
-    #     'assaysetupcompound_set__addition_location',
-    #     # SOMEWHAT FOOLISH
-    #     'study__group__microphysiologycenter_set'
-    # )
+    setups = groups.prefetch_related(
+        # Needed if we are going to get device from group in lieu of item
+        # 'organ_model__device',
+        # Prefetch to acquire names quickly
+        'organ_model',
+        'organ_model_protocol',
+        'assaygroupsetting_set__setting',
+        'assaygroupsetting_set__addition_location',
+        'assaygroupsetting_set__unit',
+        'assaygroupcell_set__cell_sample__cell_subtype',
+        'assaygroupcell_set__cell_sample__cell_type__organ',
+        'assaygroupcell_set__density_unit',
+        'assaygroupcell_set__addition_location',
+        'assaygroupcompound_set__compound_instance__compound',
+        'assaygroupcompound_set__compound_instance__supplier',
+        'assaygroupcompound_set__concentration_unit',
+        'assaygroupcompound_set__addition_location',
+        # SOMEWHAT FOOLISH
+        'study__group__microphysiologycenter_set',
+    )
 
-    if groups:
-        setups = groups.prefetch_related(
-            # Needed?
-            # 'organ_model',
-            'assaygroupsetting_set__setting',
-            'assaygroupsetting_set__addition_location',
-            'assaygroupsetting_set__unit',
-            'assaygroupcell_set__cell_sample__cell_subtype',
-            'assaygroupcell_set__cell_sample__cell_type__organ',
-            'assaygroupcell_set__density_unit',
-            'assaygroupcell_set__addition_location',
-            'assaygroupcompound_set__compound_instance__compound',
-            'assaygroupcompound_set__compound_instance__supplier',
-            'assaygroupcompound_set__concentration_unit',
-            'assaygroupcompound_set__addition_location',
-            # SOMEWHAT FOOLISH
-            'study__group__microphysiologycenter_set'
-        )
+    # Again, a bit foolish
+    matrix_items = matrix_items.prefetch_related(
+        'matrix__study',
+        'device',
+    )
 
     if not criteria:
         criteria = {
             'setup': DEFAULT_SETUP_CRITERIA,
             'setting': DEFAULT_SETTING_CRITERIA,
             'compound': DEFAULT_COMPOUND_CRITERIA,
-            'cell': DEFAULT_CELL_CRITERIA
+            'cell': DEFAULT_CELL_CRITERIA,
+            # CONTRIVED
+            'item': []
         }
 
     # TODO TODO TODO REVISE THESE MAGIC KEYS
+    if criteria.get('item', ''):
+        # Could get this from group in theory
+        if 'device_id' in criteria.get('item'):
+            header_keys.append('Device')
     if criteria.get('setup', ''):
+        # Could get device here
+        # if 'organ_model__device_id' in criteria.get('setup'):
+        #     header_keys.append('Device')
         if 'organ_model_id' in criteria.get('setup'):
             header_keys.append('MPS Model')
+        if 'organ_model_protocol_id' in criteria.get('setup'):
+            header_keys.append('MPS Model Version')
         if 'study.group_id' in criteria.get('setup'):
             header_keys.append('MPS User Group')
         if 'study_id' in criteria.get('setup'):
             header_keys.append('Study')
-        if 'matrix_id' in criteria.get('setup'):
+    # Item has redundant fields
+    # Interestingly, only the Item has a device for the moment
+    # BE SURE THE TWO DO NOT BECOME DIVORCED
+    if criteria.get('item', ''):
+        # This one is non-negotiable, we can't have matrix come from a group
+        if 'matrix_id' in criteria.get('item'):
             header_keys.append('Matrix')
+        # Could get this from group in theory
+        # if 'device_id' in criteria.get('item'):
+        #     header_keys.append('Device')
     if criteria.get('compound', ''):
         header_keys.append('Compounds')
     if criteria.get('cell', ''):
@@ -887,30 +897,45 @@ def get_item_groups(study, criteria, groups=None, matrix_items=None, compound_pr
     header_keys.append('Items with Same Treatment')
 
     setup_attribute_getter = tuple_attrgetter(*criteria.get('setup', ['']))
+    item_attribute_getter = tuple_attrgetter(*criteria.get('item', ['']))
 
     for setup in setups:
-        treatment_group_tuple = ()
+        treatment_group_tuple = []
 
         if criteria.get('setup', ''):
-            treatment_group_tuple = setup_attribute_getter(setup)
+            treatment_group_tuple.append(setup_attribute_getter(setup))
+        else:
+            treatment_group_tuple.append(())
 
         if criteria.get('setting', ''):
-            treatment_group_tuple += setup.devolved_settings(criteria.get('setting'))
+            treatment_group_tuple.append(setup.devolved_settings(criteria.get('setting')))
+        else:
+            treatment_group_tuple.append(())
 
         if criteria.get('compound', ''):
-            treatment_group_tuple += setup.devolved_compounds(criteria.get('compound'))
+            treatment_group_tuple.append(setup.devolved_compounds(criteria.get('compound')))
+        else:
+            treatment_group_tuple.append(())
 
         if criteria.get('cell', ''):
-            treatment_group_tuple += setup.devolved_cells(criteria.get('cell'))
+            treatment_group_tuple.append(setup.devolved_cells(criteria.get('cell')))
+        else:
+            treatment_group_tuple.append(())
 
-        current_representative = treatment_groups.get(treatment_group_tuple, None)
+        treatment_group_tuple = tuple(treatment_group_tuple)
+
+        current_representative = group_treatment_groups.get(treatment_group_tuple, None)
 
         if current_representative is None:
             current_representative = setup.quick_dic(compound_profile=compound_profile,
             matrix_item_compound_post_filters=matrix_item_compound_post_filters, criteria=criteria)
-            treatment_groups.update({
+            group_treatment_groups.update({
                 treatment_group_tuple: current_representative
             })
+
+        group_id_to_setup_tuple.update({
+            setup.id: treatment_group_tuple
+        })
 
         # current_representative.get('Items with Same Treatment').append(
             # TODO TODO TODO
@@ -918,18 +943,54 @@ def get_item_groups(study, criteria, groups=None, matrix_items=None, compound_pr
         # )
 
         # BAD: INEFFICIENT
-        for matrix_item in setup.assaymatrixitem_set.all():
-            current_representative.get('Items with Same Treatment').append(
-                matrix_item.get_hyperlinked_name()
+        # for matrix_item in setup.assaymatrixitem_set.all():
+        #     current_representative.get('Items with Same Treatment').append(
+        #         matrix_item.get_hyperlinked_name()
+        #     )
+        #     current_representative.get('item_ids').append(
+        #         matrix_item.id
+        #     )
+        #     current_representative.setdefault('names for items', []).append(
+        #         matrix_item.name
+        #     )
+        #     # NOTE: Not a great idea
+        #     setup_to_treatment_group.update({matrix_item.id: current_representative})
+
+    for matrix_item in matrix_items:
+        current_group_setup_tuple = group_id_to_setup_tuple.get(matrix_item.group_id)
+        current_group_quick_dic = group_treatment_groups.get(current_group_setup_tuple)
+
+        # Somewhat contrived
+        if criteria.get('item', ''):
+            item_treatment_group_tuple = item_attribute_getter(matrix_item)
+        else:
+            item_treatment_group_tuple = ()
+
+        # CONCATENATING TUPLES *SHOULD* MAKE A NEW TUPLE
+        treatment_group_tuple = current_group_setup_tuple + item_treatment_group_tuple
+
+        current_representative = treatment_groups.get(treatment_group_tuple, None)
+
+        if current_representative is None:
+            current_representative = matrix_item.quick_dic(
+                current_group_quick_dic
             )
-            current_representative.get('item_ids').append(
-                matrix_item.id
-            )
-            current_representative.setdefault('names for items', []).append(
-                matrix_item.name
-            )
-            # NOTE: Not a great idea
-            setup_to_treatment_group.update({matrix_item.id: current_representative})
+            treatment_groups.update({
+                treatment_group_tuple: current_representative
+            })
+
+        current_representative.get('Items with Same Treatment').append(
+            matrix_item.get_hyperlinked_name()
+        )
+        current_representative.get('item_ids').append(
+            matrix_item.id
+        )
+        current_representative.setdefault('names for items', []).append(
+            matrix_item.name
+        )
+
+        # NOTE: Not a great idea
+        setup_to_treatment_group.update({matrix_item.id: current_representative})
 
     # Attempt to sort reasonably
     # TODO SHOULD STUDY BE PLACED HERE?
@@ -937,6 +998,7 @@ def get_item_groups(study, criteria, groups=None, matrix_items=None, compound_pr
         list(treatment_groups.values()), key=lambda x: (
             x.get('Compounds'),
             x.get('MPS Model'),
+            x.get('MPS Model Version'),
             x.get('Cells'),
             x.get('Settings'),
             x.get('Matrix'),
@@ -1526,6 +1588,7 @@ def fetch_data_points(request):
     pre_filter = {}
 
     post_filter = json.loads(request.POST.get('post_filter', '{}'))
+    full_post_filter = json.loads(request.POST.get('full_post_filter', '{}'))
 
     if request.POST.get('matrix_item', ''):
         matrix_items = AssayMatrixItem.objects.filter(pk=int(request.POST.get('matrix_item')))
@@ -1625,7 +1688,7 @@ def fetch_data_points(request):
         post_filter = acquire_post_filter(studies, assays, groups, matrix_items, data_points)
     else:
         studies, assays, groups, matrix_items, data_points = apply_post_filter(
-            post_filter, studies, assays, groups, matrix_items, data_points
+            full_post_filter, post_filter, studies, assays, groups, matrix_items, data_points
         )
 
     data = get_data_points_for_charting(
@@ -1696,6 +1759,9 @@ def validate_data_file(request):
 
     # Very odd, but expedient
     studies = AssayStudy.objects.filter(id=this_study.id)
+    # Likewise: please revise get_data_points_for_charting
+    groups = AssayGroup.objects.filter(study_id=this_study.id)
+    matrix_items = AssayMatrixItem.objects.filter(study_id=this_study.id)
 
     form = AssayStudyDataUploadForm(request.POST, request.FILES, request=request, instance=this_study)
 
@@ -1717,6 +1783,8 @@ def validate_data_file(request):
             truncate_negative,
             dynamic_quality,
             study=studies,
+            groups=groups,
+            matrix_items=matrix_items,
             new_data=True,
             criteria=json.loads(request.POST.get('criteria', '{}'))
         )
@@ -1747,6 +1815,7 @@ def fetch_assay_study_reproducibility(request):
     data = {}
 
     post_filter = json.loads(request.POST.get('post_filter', '{}'))
+    full_post_filter = json.loads(request.POST.get('full_post_filter', '{}'))
     criteria = json.loads(request.POST.get('criteria', '{}'))
 
     item_id_filter = json.loads(request.POST.get('item_ids', '[]'))
@@ -1784,6 +1853,10 @@ def fetch_assay_study_reproducibility(request):
         study_id=study.id
     )
 
+    # If there are item filters, they must have a upstream effect on groups
+    if item_id_filter and any(item_id_filter):
+        groups = groups.filter(assaymatrixitem__id__in=matrix_items).distinct()
+
     data_points = AssayDataPoint.objects.filter(
         study_id=study.id
     ).prefetch_related(
@@ -1802,6 +1875,13 @@ def fetch_assay_study_reproducibility(request):
         value__isnull=False
     )
 
+    # CRUDE
+    # In theory, these things could be accomplished by modifying the post_filter?
+    # Must apply matrix item filter
+    if item_id_filter and any(item_id_filter):
+        data_points = data_points.filter(matrix_item_id__in=matrix_items)
+    if target_id_filter or method_id_filter:
+        data_points = data_points.filter(study_assay_id__in=assays)
     if sample_location_id_filter:
         data_points = data_points.filter(sample_location_id=sample_location_id_filter)
 
@@ -1813,17 +1893,26 @@ def fetch_assay_study_reproducibility(request):
 
         post_filter = acquire_post_filter(studies, assays, groups, matrix_items, data_points)
 
-        if item_id_filter or target_id_filter:
-            studies, assays, groups, matrix_items, data_points = apply_post_filter(
-                post_filter, studies, assays, groups, matrix_items, data_points
-            )
-            # DUMB BUT EXPEDIENT
-            # TODO REVISE
-            # WHY DO I DO THIS? BECAUSE APPLYING FILTER DESTROYS PARTS OF THE POST FILTER
-            post_filter = acquire_post_filter(studies, assays, groups, matrix_items, data_points)
+        # SEE KLUDGE ABOVE
+        # THIS IS FOR JUMPING TO A STUDY FROM INTERSTUDY REPRO
+        # THE IDEA IS THAT IT IS SUPPOSED TO TRIM TO THE "RELEVENT" DATA
+        # Obviously, one needs to make sure it is not superfluously run
+        # if item_id_filter or target_id_filter:
+        #     # CONTRIVANCE
+        #     full_post_filter = copy.deepcopy(post_filter)
+
+        #     studies, assays, groups, matrix_items, data_points = apply_post_filter(
+        #         full_post_filter, post_filter, studies, assays, groups, matrix_items, data_points
+        #     )
+        #     # DUMB BUT EXPEDIENT
+        #     # TODO REVISE
+        #     # WHY DO I DO THIS? BECAUSE APPLYING FILTER DESTROYS PARTS OF THE POST FILTER
+        #     # post_filter = acquire_post_filter(studies, assays, groups, matrix_items, data_points)
+        #     # Deep copy the deep copy
+        #     post_filter = copy.deepcopy(full_post_filter)
     else:
         studies, assays, groups, matrix_items, data_points = apply_post_filter(
-            post_filter, studies, assays, groups, matrix_items, data_points
+            full_post_filter, post_filter, studies, assays, groups, matrix_items, data_points
         )
 
     # Boolean
@@ -1837,6 +1926,7 @@ def fetch_assay_study_reproducibility(request):
         None,
         criteria,
         groups=groups,
+        matrix_items=matrix_items,
     )
 
     repro_data = []
@@ -2306,6 +2396,7 @@ def fetch_pre_submission_filters(request):
 
 # TODO RATHER VERBOSE
 # TODO: MAKE SURE GROUP STUFF WORKS CORRECTLY
+# Would have been a good idea to have methods for each model defining this
 def acquire_post_filter(studies, assays, groups, matrix_items, data_points):
     # Table -> Filter -> value -> [name, in_use]
     post_filter = {}
@@ -2313,6 +2404,9 @@ def acquire_post_filter(studies, assays, groups, matrix_items, data_points):
     studies = studies.prefetch_related(
         'group__microphysiologycenter_set'
     )
+
+    # Used downstream for variable displays
+    studies_count = studies.count()
 
     for study in studies:
         current = post_filter.setdefault(
@@ -2407,12 +2501,38 @@ def acquire_post_filter(studies, assays, groups, matrix_items, data_points):
     for group in groups:
         current = post_filter.setdefault('group', {})
 
+        # We really ought not manually add these
         current.setdefault(
             'organ_model_id__in', {}
         ).update({
             group.organ_model_id: group.organ_model.name
         })
 
+        # Maybe this is better in items?
+        # Rather ugly, to be honest (not even workable with a "getter")
+        # current.setdefault(
+        #     'organ_model__device_id__in', {}
+        # ).update({
+        #     group.organ_model__device_id: group.organ_model__device.name
+        # })
+
+        # THE TRICKY PART OF THIS IS THAT NOT ALL GROUPS HAVE PROTOCOLS
+        # Worse still, the definition of a protocol is likely in flux
+        if group.organ_model_protocol:
+            current.setdefault(
+                'organ_model_protocol_id__in', {}
+            ).update({
+                group.organ_model_protocol_id: group.organ_model_protocol.name
+            })
+        else:
+            current.setdefault(
+                'organ_model_protocol_id__in', {}
+            ).update({
+                # AVOID MAGIC STRINGS, PLEASE
+                0: '-No MPS Model Version-'
+            })
+
+        # Begin iteration of components
         for compound in group.assaygroupcompound_set.all():
             current.setdefault(
                 'assaygroupcompound__compound_instance__compound_id__in', {}
@@ -2594,37 +2714,57 @@ def acquire_post_filter(studies, assays, groups, matrix_items, data_points):
             })
 
     matrix_items = matrix_items.prefetch_related(
-        # Nah!
-        # 'assaysetupcompound_set__compound_instance__compound',
-        # 'assaysetupcompound_set__compound_instance__supplier',
-        # 'assaysetupcompound_set__concentration_unit',
-        # 'assaysetupcompound_set__addition_location',
-        # 'assaysetupcell_set__cell_sample__cell_type',
-        # 'assaysetupcell_set__cell_sample__cell_subtype',
-        # 'assaysetupcell_set__addition_location',
-        # 'assaysetupcell_set__biosensor',
-        # 'assaysetupcell_set__density_unit',
-        # 'assaysetupsetting_set__setting',
-        # 'assaysetupsetting_set__addition_location',
-        # 'assaysetupsetting_set__unit',
-        'organ_model',
+        # Interesting and unfortunate prefetch
+        # Don't want to cause an N+1
+        'study',
         'matrix',
-        'study'
+        'device',
     )
 
     for matrix_item in matrix_items:
         current = post_filter.setdefault('matrix_item', {})
 
-        current.setdefault(
-            'id__in', {}
-        ).update({
-            matrix_item.id: '{} ({})'.format(matrix_item.name, matrix_item.study.name)
-        })
+        # Only show the study name if necessary
+        if studies_count > 1:
+            current.setdefault(
+                'id__in', {}
+            ).update({
+                matrix_item.id: '{} ({})'.format(matrix_item.name, matrix_item.study.name)
+            })
+        else:
+            current.setdefault(
+                'id__in', {}
+            ).update({
+                matrix_item.id: '{}'.format(matrix_item.name)
+            })
+
+        # Surely a more elegant way to do this
+        # If is a plate and there are more than one study, specify the study it is from
+        if matrix_item.matrix.representation == 'plate' and studies_count > 1:
+            current.setdefault(
+                'matrix_id__in', {}
+            ).update({
+                matrix_item.matrix_id: '{} ({})'.format(matrix_item.matrix.name, matrix_item.study.name)
+            })
+        # If it is a plate and there is just one study
+        elif matrix_item.matrix.representation == 'plate':
+            current.setdefault(
+                'matrix_id__in', {}
+            ).update({
+                matrix_item.matrix_id: '{}'.format(matrix_item.matrix.name)
+            })
+        # If it is a chip set
+        else:
+            current.setdefault(
+                'matrix_id__in', {}
+            ).update({
+                matrix_item.matrix_id: 'Chips for {}'.format(matrix_item.study.name)
+            })
 
         current.setdefault(
-            'matrix_id__in', {}
+            'device_id__in', {}
         ).update({
-            matrix_item.matrix_id: '{} ({})'.format(matrix_item.matrix.name, matrix_item.study.name)
+            matrix_item.device_id: matrix_item.device.name
         })
 
         # REMOVED
@@ -2840,7 +2980,25 @@ def acquire_post_filter(studies, assays, groups, matrix_items, data_points):
     return post_filter
 
 
-def apply_post_filter(post_filter, studies, assays, groups, matrix_items, data_points):
+def check_if_filters_diverge(full_post_filter, post_filter, parent_key, keys_to_check=None):
+    # Superfluous variable, just for clarity
+    divergence = False
+
+    if keys_to_check:
+        for key in keys_to_check:
+            if len(post_filter.get(parent_key, {}).get(key, [])) != len(full_post_filter.get(parent_key, {}).get(key, [])):
+                divergence = True
+                return divergence
+    else:
+        for key in full_post_filter.get(parent_key, []):
+            if len(post_filter.get(parent_key, {}).get(key, [])) != len(full_post_filter.get(parent_key, {}).get(key, [])):
+                divergence = True
+                return divergence
+
+    return divergence
+
+
+def apply_post_filter(full_post_filter, post_filter, studies, assays, groups, matrix_items, data_points):
     # Not very elegant...
     study_post_filters = {
         current_filter: [
@@ -2848,9 +3006,15 @@ def apply_post_filter(post_filter, studies, assays, groups, matrix_items, data_p
         ] for current_filter in post_filter.get('study', {})
     }
 
-    studies = studies.filter(
-        **study_post_filters
-    )
+    study_divergence = check_if_filters_diverge(full_post_filter, post_filter, 'study')
+
+    if study_divergence:
+        studies = studies.filter(
+            **study_post_filters
+        )
+        groups = groups.filter(
+            study_id__in=studies
+        )
 
     assay_post_filters = {
         current_filter: [
@@ -2858,17 +3022,27 @@ def apply_post_filter(post_filter, studies, assays, groups, matrix_items, data_p
         ] for current_filter in post_filter.get('assay', {})
     }
 
-    assays = assays.filter(
-        study_id__in=studies
-    ).filter(
-        **assay_post_filters
-    )
+    assay_divergence = check_if_filters_diverge(full_post_filter, post_filter, 'assay')
 
-    # REVISED
+    # We might as well chain the filters
+    # This way we don't need really awful conditionals
+    if assay_divergence:
+        assays = assays.filter(
+            **assay_post_filters
+        )
+    if study_divergence:
+        assays = assays.filter(
+            study_id__in=studies
+        )
 
-    groups = groups.filter(
-        study_id__in=studies
-    )
+    # TEST FOR GROUP DIVERGENCES *BEFORE* CHANGING THEM
+    compound_divergence = check_if_filters_diverge(full_post_filter, post_filter, 'group', [key for key in post_filter.get('group', {}).keys() if key.startswith('assaygroupcompound__')])
+
+    cell_divergence = check_if_filters_diverge(full_post_filter, post_filter, 'group', [key for key in post_filter.get('group', {}).keys() if key.startswith('assaygroupcell__')])
+
+    setting_divergence = check_if_filters_diverge(full_post_filter, post_filter, 'group', [key for key in post_filter.get('group', {}).keys() if key.startswith('assaygroupsetting__')])
+
+    group_divergence = check_if_filters_diverge(full_post_filter, post_filter, 'group', [key for key in post_filter.get('group', {}).keys() if not key.startswith('assaygroup')])
 
     # Special exceptions for combined filters
     combined_compounds_data = post_filter.setdefault('group', {}).setdefault(
@@ -2995,97 +3169,119 @@ def apply_post_filter(post_filter, studies, assays, groups, matrix_items, data_p
         ] for current_filter in post_filter.get('group', {}) if current_filter.startswith('assaygroupsetting__')
     }
 
-    groups = groups.filter(study__in=studies)
+    if group_divergence:
+        # We remove the organ_model_protocol_id first because it can have nulls
+        # IT IS POSSIBLE: To instead have a contrive "-No MPS Model Version-" entry, but this could cause further complications
+        # This was made under the assumption that all fields would be non-NULL, which unfortunately was not the case
+        organ_model_protocol_id_filter = post_filter.get('group', {}).get('organ_model_protocol_id__in', {})
+        # Contrived, somewhat inappropriate
+        del group_post_filters['organ_model_protocol_id__in']
 
-    groups = groups.filter(
-        **group_post_filters
-    )
+        groups = groups.filter(
+            **group_post_filters
+        )
+
+        # SPECIAL EXCEPTION FOR MPS MODEL VERSION
+        # SHOULD BE HANDLED MORE ELEGANTLY
+        if organ_model_protocol_id_filter.get('0'):
+            groups = groups.filter(organ_model_protocol_id__in=organ_model_protocol_id_filter) | groups.filter(organ_model_protocol__isnull=True)
+        else:
+            groups = groups.filter(organ_model_protocol_id__in=organ_model_protocol_id_filter)
 
     # COMBINED FIELDS IF NECESSARY
     # TODO TODO TODO
     # INEFFICIENT REVISE
     # ODD AND CONTRIVED: VIOLATES RO3
     # Compounds
-    compound_total = None
-    if compound_concentration_filters:
-        compound_total = AssayGroup.objects.none()
-        for index in range(len(compound_concentration_filters)):
-            compound_total = compound_total | groups.filter(
-                assaygroupcompound__concentration=compound_concentration_filters[index],
-                assaygroupcompound__concentration_unit_id=compound_unit_filters[index]
-            )
+    if compound_divergence:
+        group_divergence = True
 
-    if post_filter.get('group', {}).get('assaygroupcompound__compound_instance__compound_id__in', {}).get(
-            '0', None
-    ):
-        if compound_total is not None:
-            groups = compound_total.filter(
-                **group_compound_post_filters
-            ) | groups.filter(assaygroupcompound__isnull=True)
+        compound_total = None
+        if compound_concentration_filters:
+            compound_total = AssayGroup.objects.none()
+            for index in range(len(compound_concentration_filters)):
+                compound_total = compound_total | groups.filter(
+                    assaygroupcompound__concentration=compound_concentration_filters[index],
+                    assaygroupcompound__concentration_unit_id=compound_unit_filters[index]
+                )
+
+        if post_filter.get('group', {}).get('assaygroupcompound__compound_instance__compound_id__in', {}).get(
+                '0', None
+        ):
+            if compound_total is not None:
+                groups = compound_total.filter(
+                    **group_compound_post_filters
+                ) | groups.filter(assaygroupcompound__isnull=True)
+            else:
+                groups = groups.filter(
+                    **group_compound_post_filters
+                ) | groups.filter(assaygroupcompound__isnull=True)
         else:
+            if compound_total is not None:
+                groups = compound_total
+
             groups = groups.filter(
                 **group_compound_post_filters
-            ) | groups.filter(assaygroupcompound__isnull=True)
-    else:
-        if compound_total is not None:
-            groups = compound_total
-
-        groups = groups.filter(
-            **group_compound_post_filters
-        )
-
-    cell_total = None
-    if cell_density_filters:
-        cell_total = AssayGroup.objects.none()
-        for index in range(len(cell_density_filters)):
-            cell_total = cell_total | groups.filter(
-                assaygroupcell__density=cell_density_filters[index],
-                assaygroupcell__density_unit_id=cell_unit_filters[index]
             )
 
-    if post_filter.get('group', {}).get('assaygroupcell__cell_sample_id__in', {}).get('0', None):
-        if cell_total is not None:
-            groups = cell_total.filter(
-                **group_cell_post_filters
-            ) | groups.filter(assaygroupcell__isnull=True)
+    if cell_divergence:
+        group_divergence = True
 
+        cell_total = None
+        if cell_density_filters:
+            cell_total = AssayGroup.objects.none()
+            for index in range(len(cell_density_filters)):
+                cell_total = cell_total | groups.filter(
+                    assaygroupcell__density=cell_density_filters[index],
+                    assaygroupcell__density_unit_id=cell_unit_filters[index]
+                )
+
+        if post_filter.get('group', {}).get('assaygroupcell__cell_sample_id__in', {}).get('0', None):
+            if cell_total is not None:
+                groups = cell_total.filter(
+                    **group_cell_post_filters
+                ) | groups.filter(assaygroupcell__isnull=True)
+
+            else:
+                groups = groups.filter(
+                    **group_cell_post_filters
+                ) | groups.filter(assaygroupcell__isnull=True)
         else:
+            if cell_total is not None:
+                groups = cell_total
+
             groups = groups.filter(
                 **group_cell_post_filters
-            ) | groups.filter(assaygroupcell__isnull=True)
-    else:
-        if cell_total is not None:
-            groups = cell_total
-
-        groups = groups.filter(
-            **group_cell_post_filters
-        )
-
-    setting_total = None
-    if setting_value_filters:
-        setting_total = AssayGroup.objects.none()
-        for index in range(len(setting_value_filters)):
-            setting_total = setting_total | groups.filter(
-                assaygroupsetting__value=setting_value_filters[index],
-                assaygroupsetting__unit_id=setting_unit_filters[index]
             )
 
-    if post_filter.get('group', {}).get('assaygroupsetting__setting_id__in', {}).get('0', None):
-        if setting_total is not None:
-            groups = setting_total.filter(
-                **group_setting_post_filters
-            ) | groups.filter(assaygroupsetting__isnull=True)
+    if setting_divergence:
+        group_divergence = True
+
+        setting_total = None
+        if setting_value_filters:
+            setting_total = AssayGroup.objects.none()
+            for index in range(len(setting_value_filters)):
+                setting_total = setting_total | groups.filter(
+                    assaygroupsetting__value=setting_value_filters[index],
+                    assaygroupsetting__unit_id=setting_unit_filters[index]
+                )
+
+        if post_filter.get('group', {}).get('assaygroupsetting__setting_id__in', {}).get('0', None):
+            if setting_total is not None:
+                groups = setting_total.filter(
+                    **group_setting_post_filters
+                ) | groups.filter(assaygroupsetting__isnull=True)
+            else:
+                groups = groups.filter(
+                    **group_setting_post_filters
+                ) | groups.filter(assaygroupsetting__isnull=True)
         else:
+            if setting_total is not None:
+                groups = setting_total
+
             groups = groups.filter(
                 **group_setting_post_filters
-            ) | groups.filter(assaygroupsetting__isnull=True)
-    else:
-        if setting_total is not None:
-            groups = setting_total
-
-        groups = groups.filter(
-            **group_setting_post_filters
-        )
+            )
 
     groups = groups.distinct()
 
@@ -3096,11 +3292,15 @@ def apply_post_filter(post_filter, studies, assays, groups, matrix_items, data_p
         ] for current_filter in post_filter.get('matrix_item', {}) if not current_filter.startswith('assaysetup')
     }
 
-    matrix_items = matrix_items.filter(group_id__in=groups)
+    matrix_item_divergence = check_if_filters_diverge(full_post_filter, post_filter, 'matrix_item')
 
-    matrix_items = matrix_items.filter(
-        **matrix_item_post_filters
-    )
+    if study_divergence or group_divergence:
+        matrix_items = matrix_items.filter(group_id__in=groups)
+
+    if matrix_item_divergence:
+        matrix_items = matrix_items.filter(
+            **matrix_item_post_filters
+        )
 
     data_point_post_filters = {
         current_filter: [
@@ -3108,13 +3308,32 @@ def apply_post_filter(post_filter, studies, assays, groups, matrix_items, data_p
         ] for current_filter in post_filter.get('data_point', {})
     }
 
-    data_points = data_points.filter(
-        study_id__in=studies,
-        study_assay_id__in=assays,
-        matrix_item_id__in=matrix_items,
-    ).filter(
-        **data_point_post_filters
-    )
+    data_point_divergence = check_if_filters_diverge(full_post_filter, post_filter, 'data_point')
+
+    # data_points = data_points.filter(
+    #     study_id__in=studies,
+    #     study_assay_id__in=assays,
+    #     matrix_item_id__in=matrix_items,
+    # ).filter(
+    #     **data_point_post_filters
+    # )
+
+    if data_point_divergence:
+        data_points = data_points.filter(
+            **data_point_post_filters
+        )
+    if study_divergence:
+        data_points = data_points.filter(
+            study_id__in=studies,
+        )
+    if assay_divergence:
+        data_points = data_points.filter(
+            study_assay_id__in=assays,
+        )
+    if matrix_item_divergence:
+        data_points = data_points.filter(
+            matrix_item_id__in=matrix_items,
+        )
 
     return studies, assays, groups, matrix_items, data_points
 
@@ -3123,6 +3342,7 @@ def fetch_data_points_from_filters(request):
     intention = request.POST.get('intention', 'charting')
 
     post_filter = json.loads(request.POST.get('post_filter', '{}'))
+    full_post_filter = json.loads(request.POST.get('full_post_filter', '{}'))
 
     pre_filter = {}
     if request.POST.get('filters', ''):
@@ -3244,7 +3464,7 @@ def fetch_data_points_from_filters(request):
             post_filter = acquire_post_filter(studies, assays, groups, matrix_items, data_points)
         else:
             studies, assays, groups, matrix_items, data_points = apply_post_filter(
-                post_filter, studies, assays, groups, matrix_items, data_points
+                full_post_filter, post_filter, studies, assays, groups, matrix_items, data_points
             )
 
         if intention == 'charting':
@@ -3300,6 +3520,7 @@ def fetch_data_points_from_study_set(request):
     intention = request.POST.get('intention', 'charting')
 
     post_filter = json.loads(request.POST.get('post_filter', '{}'))
+    full_post_filter = json.loads(request.POST.get('full_post_filter', '{}'))
 
     study_set_id = int(request.POST.get('study_set_id', 0))
 
@@ -3351,7 +3572,7 @@ def fetch_data_points_from_study_set(request):
             post_filter = acquire_post_filter(studies, assays, groups, matrix_items, data_points)
         else:
             studies, assays, groups, matrix_items, data_points = apply_post_filter(
-                post_filter, studies, assays, groups, matrix_items, data_points
+                full_post_filter, post_filter, studies, assays, groups, matrix_items, data_points
             )
 
         if intention == 'charting':
@@ -3417,6 +3638,7 @@ def get_inter_study_reproducibility(
         None,
         criteria,
         groups=groups,
+        matrix_items=matrix_items,
     )
 
     matrix_item_id_to_tooltip_string = {
@@ -4119,6 +4341,7 @@ def fetch_power_analysis_group_table(request):
     data = {}
 
     post_filter = json.loads(request.POST.get('post_filter', '{}'))
+    full_post_filter = json.loads(request.POST.get('full_post_filter', '{}'))
     criteria = json.loads(request.POST.get('criteria', '{}'))
     # GET RID OF COMPOUND FOR SAKE OF POWER ANALYSIS' INITIAL TABLE
     compound_criteria = criteria.pop('compound')
@@ -4163,7 +4386,7 @@ def fetch_power_analysis_group_table(request):
         post_filter = acquire_post_filter(studies, assays, groups, matrix_items, data_points)
     else:
         studies, assays, groups, matrix_items, data_points = apply_post_filter(
-            post_filter, studies, assays, groups, matrix_items, data_points
+            full_post_filter, post_filter, studies, assays, groups, matrix_items, data_points
         )
 
     # OLD
@@ -4173,6 +4396,7 @@ def fetch_power_analysis_group_table(request):
         None,
         criteria,
         groups=groups,
+        matrix_items=matrix_items,
     )
 
     data_point_treatment_groups = {}
@@ -4742,6 +4966,7 @@ def clone_study(request):
 def fetch_pbpk_group_table(request):
     data = {}
     post_filter = json.loads(request.POST.get('post_filter', '{}'))
+    full_post_filter = json.loads(request.POST.get('full_post_filter', '{}'))
     pre_filter = {}
 
     if request.POST.get('filters', ''):
@@ -4873,7 +5098,7 @@ def fetch_pbpk_group_table(request):
             post_filter = acquire_post_filter(studies, assays, groups, matrix_items, data_points)
         else:
             studies, assays, groups, matrix_items, data_points = apply_post_filter(
-                post_filter, studies, assays, groups, matrix_items, data_points
+                full_post_filter, post_filter, studies, assays, groups, matrix_items, data_points
             )
 
         data = get_pbpk_info(
@@ -4907,12 +5132,14 @@ def get_pbpk_info(data_points, matrix_items, groups):
         None,
         criteria,
         groups=groups,
+        matrix_items=matrix_items,
     )
 
     cell_group_representives, setup_to_cell_group, cell_header_keys = get_item_groups(
         None,
         {'cell': ['cell_sample_id']},
         groups=groups,
+        matrix_items=matrix_items,
     )
 
     matrix_item_id_to_tooltip_string = {

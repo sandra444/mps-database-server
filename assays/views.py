@@ -387,6 +387,8 @@ class AssayStudyConfigurationList(LoginRequiredMixin, ListView):
 
 
 # BEGIN NEW
+# REALLY OUGHT TO USE AGGREGATION AND SUCH INSTEAD
+# ITERATING OVER STUDIES CREATES A NEW QUERY EVERY TIME!
 def get_queryset_with_organ_model_map(queryset):
     """Takes a queryset and returns it with a organ model map"""
     # Not DRY
@@ -407,6 +409,7 @@ def get_queryset_with_organ_model_map(queryset):
     )
 
     organ_model_map = {}
+    model_type_map = {}
 
     for setup in setups:
         organ_model_map.setdefault(
@@ -416,12 +419,23 @@ def get_queryset_with_organ_model_map(queryset):
                 setup.organ_model.name: True
             }
         )
+        # Crude
+        model_type_map.setdefault(
+            setup.study_id, {}
+        ).update(
+            {
+                setup.organ_model.get_model_type_display(): True
+            }
+        )
 
     for study in queryset:
         study.organ_models = ',\n'.join(
             sorted(organ_model_map.get(study.id, {}).keys())
         )
-
+        # Crude
+        study.model_types = ',\n'.join(
+            sorted(model_type_map.get(study.id, {}).keys())
+        )
 
 def get_queryset_with_number_of_data_points(queryset):
     """Add number of data points to each object in an Assay Study querysey"""
@@ -783,6 +797,26 @@ class AssayStudyChips(ObjectGroupRequiredMixin, AssayStudyMixin, UpdateView):
                 device__device_type='chip',
                 study_id=self.object.id
             )
+        })
+
+        return context
+
+
+# WE NEED A VIEW PAGE FOR ALL OF A STUDY'S CHIPS
+class AssayStudyChipsDetail(StudyGroupMixin, DetailView):
+    # Why not have the mixin look for DetailView?
+    model = AssayMatrix
+    detail = True
+    no_update = True
+
+    template_name = 'assays/assaystudy_chips_detail.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(AssayStudyChipsDetail, self).get_context_data(**kwargs)
+
+        context.update({
+            'detail': True,
+            'items': AssayMatrixItem.objects.filter(matrix=self.object).order_by('name')
         })
 
         return context
@@ -1534,8 +1568,9 @@ class AssayStudySignOff(HistoryMixin, UpdateView):
             ))
 
 
-class AssayStudyDataUpload(AssayStudyMixin, ObjectGroupRequiredMixin, UpdateView):
+class AssayStudyDataUpload(ObjectGroupRequiredMixin, FormHandlerMixin, UpdateView):
     """Upload an Excel Sheet for storing multiple sets of Readout data at one"""
+    model = AssayStudy
     template_name = 'assays/assaystudy_upload.html'
     form_class = AssayStudyDataUploadForm
 

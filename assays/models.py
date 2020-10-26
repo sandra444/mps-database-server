@@ -31,6 +31,8 @@ from django.urls import reverse
 from django.contrib.postgres.fields import JSONField
 
 import ujson as json
+# Copying dictionaries and the like
+import copy
 
 
 # These are here to avoid potentially messy imports, may change later
@@ -2264,8 +2266,15 @@ class AssayMatrix(FlaggableModel):
     # REMOVE ASAP
     # plate_data = JSONField(default=dict, blank=True)
 
+    # def __str__(self):
+    #     return '{0}'.format(self.name)
+
+    # ALTERNATIVE TO BEING DONE EXPLICITLY
     def __str__(self):
-        return '{0}'.format(self.name)
+        if self.representation == 'plate':
+            return '{0}'.format(self.name)
+        else:
+            return 'Chips for {}'.format(self.study.name)
 
     # def get_organ_models(self):
     #     organ_models = []
@@ -2283,7 +2292,12 @@ class AssayMatrix(FlaggableModel):
         # return '/assays/assaymatrix/{}/'.format(self.id)
         # Not update! Detail will redirect anyway
         # return reverse('assays-assaymatrix-plate-update', args=[self.pk])
-        return reverse('assays-assaymatrix-plate-detail', args=[self.pk])
+        # If this is a plate
+        if self.representation == 'plate':
+            return reverse('assays-assaymatrix-plate-detail', args=[self.pk])
+        # Otherwise
+        else:
+            return reverse('assays-assaymatrix-chips-detail', args=[self.pk])
 
     def get_post_submission_url(self):
         # return self.study.get_post_submission_url()
@@ -2860,11 +2874,14 @@ class AssayGroup(models.Model):
         dic = {
             # TODO May need to prefetch device (potential n+1)
             # 'Device': self.device.name,
-            'Device': self.organ_model.device.name,
+            # ???
+            # 'Device': self.organ_model.device.name,
             'MPS User Group': self.study.group.name,
             'Study': self.get_hyperlinked_study(),
-            'Matrix': 'TO BE REVISED TODO',
-            'MPS Model': self.get_hyperlinked_model_or_device(),
+            # We don't get the matrix here, we cram it in from the matrix item
+            # 'Matrix': 'TO BE REVISED TODO',
+            'MPS Model': self.get_hyperlinked_model(),
+            'MPS Model Version': self.get_hyperlinked_protocol(),
             'Compounds': self.stringify_compounds(criteria.get('compound', None)),
             'Cells': self.stringify_cells(criteria.get('cell', None)),
             'Settings': self.stringify_settings(criteria.get('setting', None)),
@@ -2884,11 +2901,15 @@ class AssayGroup(models.Model):
         return dic
 
     # TODO THESE ARE NOT DRY
-    def get_hyperlinked_model_or_device(self):
-        if not self.organ_model:
-            return '<a target="_blank" href="{0}">{1} (No MPS Model)</a>'.format(self.device.get_absolute_url(), self.device.name)
+    # We can be sure that there will always be a Model
+    def get_hyperlinked_model(self):
+        return '<a target="_blank" href="{0}">{1}</a>'.format(self.organ_model.get_absolute_url(), self.organ_model.name)
+
+    def get_hyperlinked_protocol(self):
+        if self.organ_model_protocol:
+            return '<a target="_blank" href="{0}">{1}</a>'.format(self.organ_model_protocol.get_absolute_url(), self.organ_model_protocol.name)
         else:
-            return '<a target="_blank" href="{0}">{1}</a>'.format(self.organ_model.get_absolute_url(), self.organ_model.name)
+            return '-No MPS Model Version-'
 
     def get_hyperlinked_study(self):
         return '<a target="_blank" href="{0}">{1}</a>'.format(self.study.get_absolute_url(), self.study.name)
@@ -2969,7 +2990,7 @@ class AssayGroupSetting(AbstractSetupSetting):
 # SUBJECT TO REMOVAL (MAY JUST USE ASSAY SETUP)
 class AssayMatrixItem(FlaggableModel):
     class Meta(object):
-        verbose_name = 'Matrix Item'
+        verbose_name = 'Study Item'
         # TODO Should this be by study or by matrix?
         unique_together = [
             ('study', 'name'),
@@ -3255,36 +3276,53 @@ class AssayMatrixItem(FlaggableModel):
 
     # SPAGHETTI CODE
     # TERRIBLE, BLOATED
+    # def quick_dic(
+    #     self,
+    #     compound_profile=False,
+    #     matrix_item_compound_post_filters=None,
+    #     criteria=None
+    # ):
+    #     if not criteria:
+    #         criteria = {}
+    #     dic = {
+    #         # TODO May need to prefetch device (potential n+1)
+    #         'Device': self.device.name,
+    #         'MPS User Group': self.study.group.name,
+    #         'Study': self.get_hyperlinked_study(),
+    #         'Matrix': self.get_hyperlinked_matrix(),
+    #         'MPS Model': self.get_hyperlinked_model_or_device(),
+    #         'Compounds': self.stringify_compounds(criteria.get('compound', None)),
+    #         'Cells': self.stringify_cells(criteria.get('cell', None)),
+    #         'Settings': self.stringify_settings(criteria.get('setting', None)),
+    #         'Trimmed Compounds': self.stringify_compounds({
+    #             'compound_instance.compound_id': True,
+    #             'concentration': True
+    #         }),
+    #         'Items with Same Treatment': [],
+    #         'item_ids': []
+    #     }
+
+    #     if compound_profile:
+    #         dic.update({
+    #             'compound_profile': self.get_compound_profile(matrix_item_compound_post_filters)
+    #         })
+
+    #     return dic
+
+    # Basically, stitch together the groups dictionary and the matrix's dictionary with this
+    # A suboptimal approach: Revise when possible
+    # Strictly speaking, we only *really* need the matrix
+    # But perhaps something else will come up?
     def quick_dic(
         self,
-        compound_profile=False,
-        matrix_item_compound_post_filters=None,
-        criteria=None
+        group_dic
     ):
-        if not criteria:
-            criteria = {}
-        dic = {
-            # TODO May need to prefetch device (potential n+1)
+        dic = copy.deepcopy(group_dic)
+        dic.update({
+            # Ought this be here? Should it likewise be a hyperlink?
             'Device': self.device.name,
-            'MPS User Group': self.study.group.name,
-            'Study': self.get_hyperlinked_study(),
             'Matrix': self.get_hyperlinked_matrix(),
-            'MPS Model': self.get_hyperlinked_model_or_device(),
-            'Compounds': self.stringify_compounds(criteria.get('compound', None)),
-            'Cells': self.stringify_cells(criteria.get('cell', None)),
-            'Settings': self.stringify_settings(criteria.get('setting', None)),
-            'Trimmed Compounds': self.stringify_compounds({
-                'compound_instance.compound_id': True,
-                'concentration': True
-            }),
-            'Items with Same Treatment': [],
-            'item_ids': []
-        }
-
-        if compound_profile:
-            dic.update({
-                'compound_profile': self.get_compound_profile(matrix_item_compound_post_filters)
-            })
+        })
 
         return dic
 
@@ -3302,7 +3340,9 @@ class AssayMatrixItem(FlaggableModel):
         return '<a target="_blank" href="{0}">{1}</a>'.format(self.study.get_absolute_url(), self.study.name)
 
     def get_hyperlinked_matrix(self):
-        return '<a target="_blank" href="{0}">{1}</a>'.format(self.matrix.get_absolute_url(), self.matrix.name)
+        # Go to either the plate details or chip details
+        # This is built-in to the absolute url
+        return '<a target="_blank" href="{0}">{1}</a>'.format(self.matrix.get_absolute_url(), str(self.matrix))
 
     # TODO TODO TODO CHANGE
     def get_absolute_url(self):

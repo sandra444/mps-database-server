@@ -240,12 +240,14 @@ $(document).ready(function () {
     // TERRIBLE, SPAGHETTI CODE
     // AWFUL
     // WHY DO THIS?
+    // Still confused by this...
     var headers = {
-        // 'device': 'Device',
+        'Device': 'Device',
         'MPS User Group': 'MPS User Group',
         'Study': 'Study',
-        'Matrix': 'Matrix',
+        'Matrix': 'All Study Chips OR Plate',
         'MPS Model': 'MPS Model',
+        'MPS Model Version': 'MPS Model Version',
         'Cells': 'Cells Added',
         'Compounds': 'Compound Treatment',
         'Settings': 'Settings (Non-Compound Treatments)',
