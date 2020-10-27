@@ -39,9 +39,11 @@
                         {% endif %}
                     </div>
                     <div class="col-md-4">
+                        {% if datafiles.count %}
                         <div>
                             <a href="{{ object.get_absolute_url }}omics/" class="btn btn-primary" role="button">Jump to Volcano Plots</a>
                         </div>
+                        {% endif %}
                     </div>
                     <div class="col-md-4">
                     </div>
@@ -122,4 +124,3 @@
     </div>
 
 {% endblock %}
-
