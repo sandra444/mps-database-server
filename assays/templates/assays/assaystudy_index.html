@@ -98,7 +98,11 @@
                         {% else %}
                         <li class="disabled" title="This study has no images or videos."><a href="images">Images and Videos</a></li>
                         {% endif %}
+                        {% if object.assayomicdatafileupload_set.count %}
                         <li><a href="omics">Gene Expression Analysis</a></li>
+                        {% else %}
+                        <li class="disabled" title="This study has no omic data."><a href="omics">Gene Expression Analysis</a></li>
+                        {% endif %}
 
                         {% if user_is_group_editor %}
                             <li role="separator" class="divider"></li>
