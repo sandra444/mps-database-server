@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block extra_head %}
+    <script src="//www.google.com/jsapi"></script>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+{% endblock %}
+
+{% block load_js %}
+    <script src="{% static "assays/grouping_filtering.js" %}"></script>
+    <script src="{% static "assays/assay_shared_omics.js" %}"></script>
+    <script src="{% static "assays/assaystudy_omics.js" %}"></script>
+{% endblock %}
+
+{% block breadcrumbs %}
+    <li><a href="{{ object.get_list_url }}">All Studies</a></li>
+    <li><a href="{{ object.get_absolute_url }}">{{ object }}</a></li>
+    <li class="active">Gene Expression Analysis</li>
+{% endblock %}
+
+{% block sidebar %}
+    {% include 'assays/grouping_filtering.html' with omics="true"%}
+{% endblock %}
+
+{% block content %}
+    <div class="well">
+        <div class="row text-center">
+            <h1>
+                Gene Expression Analysis for:<br>
+                <em>{{ object }}</em>
+            </h1>
+        </div>
+        <div class="row text-center small-padding-top">
+            <a href="{{ object.get_summary_url }}" class="btn btn-primary" role="button">Study Summary</a>
+            <a href="#" id="download-filtered-data" class="btn btn-info" role="button">Download Filtered Data</a>
+        </div>
+    </div>
+
+    <table id="omics_table" class="table table-bordered" hidden>
+        <thead>
+            <tr>
+                <td>
+                    <label>Show/Hide</label>
+                </td>
+                <td>
+                    <label>Treatment Group</label>
+                </td>
+                <td>
+                    <label>Data Description</label>
+                </td>
+            </tr>
+        </thead>
+        <tbody id="omics_table_body">
+        </tbody>
+    </table>
+
+    <div id="plots">
+        <div id="volcano-plots">
+        </div>
+        <div id="ma-plots" style="display: none">
+        </div>
+    </div>
+
+    {# Just a spacer (and yes, inline styles are ugly)#}
+    <div style="padding-bottom: 250px;"></div>
+{% endblock %}

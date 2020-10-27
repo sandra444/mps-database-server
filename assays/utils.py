@@ -37,6 +37,12 @@ from .models import (
     assay_plate_reader_map_info_shape_row_dict,
     assay_plate_reader_map_info_plate_size_choices,
     assay_plate_reader_map_info_plate_size_choices_list,
+    AssayOmicDataPoint,
+    AssayOmicAnalysisTarget,
+    AssayOmicDataFileUpload,
+)
+from microdevices.models import (
+    OrganModelLocation,
 )
 
 from mps.templatetags.custom_filters import VIEWER_SUFFIX, ADMIN_SUFFIX
@@ -70,6 +76,8 @@ import re
 import time
 from django.db.models import Q
 from scipy.optimize import leastsq
+import hashlib
+from django.core.exceptions import NON_FIELD_ERRORS, ValidationError
 
 # from sklearn.linear_model import LinearRegression
 # from sklearn import metrics
@@ -237,7 +245,6 @@ for item in CALIBRATION_CURVE_MASTER_DICT.items():
     calibration_choices.append(item)
     calibration_keys_list.append(item[0])
 calibration_keys_list.pop(0)
-
 
 # STRINGS FOR WHEN NONE OF THE ENTITY IN QUESTION
 NO_COMPOUNDS_STRING = '-No Compounds-'
@@ -6482,3 +6489,741 @@ def sandrasGeneralFormatNumberFunction(this_number_in):
             formatted_number = '{:.3e}'.format(x)
 
         return formatted_number
+
+
+# sck called from forms.py when save or change omic data file
+def omic_data_file_process_data(save, study_id, omic_data_file_id, data_file, file_extension,
+                                          called_from, data_type, analysis_method):
+    """
+    Assay Omics Data File Add or Change the file (utility).
+    """
+
+    error_message = ''
+    continue_outer_if_true = True
+    # if there is more than one Excel sheet, will need a loop, check for number of sheets.
+    looper = 1
+    sheet_index = 0
+    workbook = None
+    # construct here so can use this name anywhere
+    df = pd.DataFrame(columns=['one'])
+    # if there are multiple sheets, they can all be added to one bulk file
+    # that means only need one list_of_instances for all the sheets
+    list_of_instances = []
+    instance_counter = 0
+    analysis_target_name_to_pk_dict = {}
+    analysis_target_pk_to_sc_target_pk_dict = {}
+    sc_target_pk_to_name_dict = {}
+    omic_target_text_header_list = []
+    # data_dicts is all about the preview from the upload page
+    data_dicts = {'data': {}}
+    data_dicts['file_id_to_name'] = {}
+    data_dicts['table'] = {}
+    joint_name = "New/Changed File Preview"
+    data_dicts['data'][joint_name] = {}
+    data_dicts['file_id_to_name'][1] = joint_name
+    data_dicts['table'][joint_name] = ['Preview Chosen File', omic_data_file_id]
+    data_dicts['target_name_to_id'] = {}
+
+    if data_type == 'log2fc':
+        pass
+        # print("~continue ", save)
+    else:
+        error_message = error_message + 'Currently only working for data type log2fc'
+        raise forms.ValidationError(error_message)
+        continue_outer_if_true = False
+
+    if continue_outer_if_true:
+        # fill omic_target_text_header_list = [] and target_pk_list = []
+        # pull from the AssayOmicAnalysisTarget
+        # where file_header is true and data_type matches data_type and analysis_method matches analysis_method
+        # HANDY combine filters with commas in queryset
+        target_matches = AssayOmicAnalysisTarget.objects.filter(
+            data_type=data_type,
+            method=analysis_method
+        )
+        analysis_target_name_to_pk_dict = {target.name: target.id for target in target_matches}
+        analysis_target_pk_to_sc_target_pk_dict = {target.id: target.target_id for target in target_matches}
+        if len(analysis_target_name_to_pk_dict) == 0:
+            error_message = error_message + 'No option for this combination of data type and analysis method has been programmed. Contact the MPS Database Admins (AssayOmicAnalysisTargets not found).'
+            raise forms.ValidationError(error_message)
+            continue_outer_if_true = False
+        else:
+            omic_target_text_header_list = list(analysis_target_name_to_pk_dict.keys())
+            sc_target_pk_header_list = list(analysis_target_pk_to_sc_target_pk_dict.values())
+            sc_target_matches = AssayTarget.objects.filter(
+                id__in=sc_target_pk_header_list
+            )
+            sc_target_pk_to_name_dict = {target.id: target.name for target in sc_target_matches}
+
+    # print("~dict ",analysis_target_name_to_pk_dict)
+    # {'padj': 1, 'baseMean': 2, 'lfcSE': 3, 'stat': 4, 'log2FoldChange': 5, 'pvalue': 6}
+    # print("~text ",omic_target_text_header_list)
+
+    if continue_outer_if_true:
+        # get the number of sheets need to loop through and check to see if valid
+        if file_extension in ['.xls', '.xlsx']:
+            try:
+                file_data = data_file.read()
+                workbook = xlrd.open_workbook(file_contents=file_data)
+                looper = len(workbook.sheet_names())
+            except:
+                continue_outer_if_true = False
+                error_message = error_message + 'Has and Excel extension but file could not be opened.'
+                raise forms.ValidationError(error_message)
+
+    if continue_outer_if_true:
+        # each sheet will be checked for data
+        # not all sheets need to be valid, a sheet can be skipped and others imported
+        while sheet_index < looper:
+            # when working with count data, will need metadata, not sure what yet????
+            matrix_item_pk_list = []
+
+            # Guts of opening the file or sheet and find and return the dataframe
+            # same for all data import types - no splitting by data type is needed
+            find_dataframe = data_file_to_data_frame(data_file, file_extension, workbook, sheet_index)
+            continue_this_sheet_if_true = find_dataframe[0]
+            error_message = error_message + find_dataframe[1]
+            df = find_dataframe[2]
+            # avoid problems with leading or trailing spaces
+            df.columns = df.columns.str.strip()
+            # save these in a list, because, need for some data (headers are chip ID names, sample names, group names)
+            df_column_headers_stripped = df.columns
+            # does the file have a column named 'gene' or 'name'?
+            gene_id_field_header_plus = omic_determine_if_field_with_header_for_gene(df_column_headers_stripped)
+            continue_this_sheet_if_true = gene_id_field_header_plus[0]
+            gene_id_field_header = gene_id_field_header_plus[1]
+
+            # print("~gene ",gene_id_field_header)
+
+            if continue_this_sheet_if_true:
+                qc_each_file_or_worksheet_level = []
+                # Guts of the QC for the omics data point file
+                # functions should return continue and error message (and other stuff if needed for data type)
+                qc_each_file_or_worksheet_level = omic_qc_data_file(df, omic_target_text_header_list, data_type)
+                continue_this_sheet_if_true = qc_each_file_or_worksheet_level[0]
+                error_message = error_message + qc_each_file_or_worksheet_level[1]
+                list_of_relevant_headers_in_file = qc_each_file_or_worksheet_level[2]
+
+                # print("~match headers ",list_of_relevant_headers_in_file)
+                # to be compatible with the graphing, need this dict
+                data_dicts['target_name_to_id'] = {y: analysis_target_name_to_pk_dict[y] for y in list_of_relevant_headers_in_file}
+
+            if continue_this_sheet_if_true:
+                # Guts of data loading for omic data file
+                # functions should return continue, error message, and a list of instances and an instance counter
+                if data_type == 'log2fc':
+                    data_loaded_to_list_of_instances = omic_two_group_data_to_list_of_instances(
+                        list_of_instances, instance_counter, df,
+                        study_id, omic_data_file_id, analysis_target_name_to_pk_dict,
+                        sc_target_pk_to_name_dict, analysis_target_pk_to_sc_target_pk_dict,
+                        list_of_relevant_headers_in_file, called_from, gene_id_field_header,
+                        data_dicts['data'][joint_name])
+                    continue_this_sheet_if_true = data_loaded_to_list_of_instances[0]
+                    error_message = data_loaded_to_list_of_instances[1]
+                    list_of_instances = data_loaded_to_list_of_instances[2]
+                    instance_counter = data_loaded_to_list_of_instances[3]
+                    data_dicts['data'][joint_name] = data_loaded_to_list_of_instances[4]
+                    # max_fold_change = data_loaded_to_list_of_instances[5]
+                    # max_pvalue = data_loaded_to_list_of_instances[6]
+                    # min_fold_change = data_loaded_to_list_of_instances[7]
+                    # min_pvalue = data_loaded_to_list_of_instances[8]
+                    # data_dicts['max_fold_change'] = max_fold_change
+                    # data_dicts['max_pvalue'] = max_pvalue
+                    # data_dicts['min_fold_change'] = min_fold_change
+                    # data_dicts['min_pvalue'] = min_pvalue
+
+                    # print("~max_pvalue returned ", max_pvalue)
+                    # print("~max_fold_change returned ", max_fold_change)
+                    # print("~list_of_instances ",list_of_instances)
+
+                elif data_type == 'normcounts' or data_type == 'rawcounts':
+                    pass
+                    # data_loaded_to_list_of_instances = omic_metadata_data_to_list_of_instances(
+                    #     list_of_instances, instance_counter, df,
+                    #     study_id, omic_data_file_id, analysis_target_name_to_pk_dict,
+                    #                         sc_target_pk_to_name_dict, analysis_target_pk_to_sc_target_pk_dict,
+                    #     matrix_item_pk_list, called_from, gene_id_field_name_if_app)
+                else:
+                    continue_this_sheet_if_true = False
+
+            sheet_index = sheet_index + 1
+
+    if instance_counter == 0:
+        error_message = error_message + 'There were no records in the file to upload. '
+        raise forms.ValidationError(error_message)
+        continue_outer_if_true = False
+
+    if called_from == 'save' and continue_outer_if_true:
+        omic_data_upload_remove_and_add(omic_data_file_id, list_of_instances, error_message)
+
+    # the returned is ONLY used for the preview on the upload page
+    # can change it to whatever is needed for the graph preview
+    # print(data_dicts)
+    return data_dicts
+
+
+def omic_determine_if_field_with_header_for_gene(df_column_headers_stripped):
+    continue_this_sheet_if_true = True
+    # may need other options here (eg probe_id, refseq name, etc), but these will do for now
+    gene_id_field_name = ''
+    if 'gene' in df_column_headers_stripped:
+        gene_id_field_name = 'gene'
+    elif 'name' in df_column_headers_stripped:
+        gene_id_field_name = 'name'
+    elif 'gene reference' in df_column_headers_stripped:
+        gene_id_field_name = 'gene reference'
+    else:
+        # for this sheet or file, the HEADER for the target field could not be found, skip this sheet
+        continue_this_sheet_if_true = False
+    return [continue_this_sheet_if_true, gene_id_field_name]
+
+
+def omic_qc_data_file(df, omic_target_text_header_list, data_type):
+    error_message = ''
+    continue_this_sheet_if_true = True
+
+    list_of_relevant_headers_in_file = []
+    found_foldchange_true = False
+    for file_header in df.columns:
+        if file_header in omic_target_text_header_list:
+            list_of_relevant_headers_in_file.append(file_header)
+        # only required field is the fold change field - if not found, ignore this sheet
+        if data_type == 'log2fc':
+            if file_header.find('fc') >= 0 or file_header.find('fold') >= 0 or file_header.find(
+                    'FC') >= 0 or file_header.find('Fold') >= 0:
+                found_foldchange_true = True
+
+    if found_foldchange_true:
+        pass
+    else:
+        continue_this_sheet_if_true = False
+        error_message = error_message + ' Required header containing "fc" or "fold" or "FC" or "Fold" is missing. '
+
+    # todo when ready to deal with count data or more qc for other data
+    # if data_type != 'log2fc':
+    #     matrix_item_name_to_pk = {matrix_item.name: matrix_item.id for matrix_item in AssayMatrixItem.objects.filter(study_id=study_id)}
+    #
+    #     matrix_item_pk_list = []
+    #     i = 0
+    #     for each in df.columns:
+    #         pk = matrix_item_name_to_pk.get(each, 0)
+    #         matrix_item_pk_list.append(pk)
+    #         if pk == 0 and i > 0:
+    #             # build the error string just in case NONE of the fields are valid, but otherwise, just ignore them
+    #             # continue_this_sheet_if_true = False
+    #             error_message = error_message + ' Chip/Well Name ' + each + ' not found in this study. '
+    #         i = i + 1
+
+    return [continue_this_sheet_if_true, error_message, list_of_relevant_headers_in_file]
+
+
+# two group data only
+def omic_two_group_data_to_list_of_instances(
+    list_of_instances, instance_counter, df,
+    study_id, omic_data_file_id, analysis_target_name_to_pk_dict,
+    sc_target_pk_to_name_dict, analysis_target_pk_to_sc_target_pk_dict,
+    list_of_relevant_headers_in_file, called_from, gene_id_field_header,
+    data_dict):
+
+    error_message = ''
+    continue_this_sheet_if_true = True
+
+    # these are for the preview and might not be needed...checking with Quinn to see if needed
+    # max_fold_change_r = -999.0
+    # max_pvalue_r = -999.0
+    # max_fold_change = -999.0
+    # max_pvalue = -999.0
+    # min_fold_change_r = 9999999.0
+    # min_pvalue_r = 9999999.0
+    # min_fold_change = 9999999.0
+    # min_pvalue = 9999999.0
+
+    for index, row in df.iterrows():
+        name = row[gene_id_field_header]
+        # for the preview of the graphs
+        # testing
+        # if name.find('MZ') >= 0:
+        if 0 == 0:
+            data_dict[name] = {}
+            for each in list_of_relevant_headers_in_file:
+                target_pk = analysis_target_name_to_pk_dict[each]
+                value = row[each]
+                if np.isnan(value):
+                    value = None
+                else:
+                    value = float(value)
+
+                # if value != None:
+                #
+                #     if each.find('val') >= 0:
+                #         if value > max_pvalue:
+                #             max_pvalue = value
+                #         if value < min_pvalue:
+                #             min_pvalue = value
+                #
+                #     if each.find('fold') >= 0 or each.find('fc') >= 0 or each.find('FC') >= 0 or each.find('Fold') >= 0:
+                #         if value > max_fold_change:
+                #             max_fold_change = value
+                #         if value < min_fold_change:
+                #             min_fold_change = value
+
+                # print("instance_counter ",instance_counter)
+                # print("~each ", each)
+                # print("~target_pk ", target_pk)
+                # print("~value ", value)
+
+                # creating an instance causes an error in the clean since there is no pk for this file on the add form
+                # but we want the rest to go through the save AND we want to make sure instances are being counted in the clean
+                if called_from == 'save':
+                    instance = AssayOmicDataPoint(
+                        study_id=study_id,
+                        omic_data_file_id=omic_data_file_id,
+                        name=name,
+                        analysis_target_id=target_pk,
+                        value=value
+                    )
+                    # add this list to the list of lists
+                    list_of_instances.append(instance)
+                else:
+                    # this will be for the preview on the page when the file is changed
+                    # gene name, analysis target pk, header,
+                    # study component target pk, study component target name, value
+                    # sc_target_pk = analysis_target_pk_to_sc_target_pk_dict.get(target_pk)
+                    # sc_target_name = sc_target_pk_to_name_dict.get(sc_target_pk)
+                    # listance = [name, target_pk, each, sc_target_pk, sc_target_name, value]
+                    # list_of_instances.append(listance)
+
+                    # This if for the graph preview on the upload page
+                     data_dict[name][target_pk] = value
+
+                instance_counter = instance_counter + 1
+
+        # max_fold_change_r = max_fold_change
+        # max_pvalue_r = max_pvalue
+        # min_fold_change_r = min_fold_change
+        # min_pvalue_r = min_pvalue
+
+    # return [continue_this_sheet_if_true, error_message, list_of_instances, instance_counter, data_dict, max_fold_change_r, max_pvalue_r, min_fold_change_r, min_pvalue_r]
+    return [continue_this_sheet_if_true, error_message, list_of_instances, instance_counter, data_dict]
+
+
+# one group data only
+def omic_metadata_data_to_list_of_instances(
+    list_of_instances, instance_counter, df,
+    study_id, omic_data_file_id, target_pk_list,
+    matrix_item_pk_list, called_from, gene_id_field_name_if_app
+    ):
+    # TODO fix this
+
+    error_message = ''
+    continue_this_sheet_if_true = True
+
+    if len(matrix_item_pk_list) != len(df.columns):
+        error_message = 'There is a problem with finding the list of matrix items. Notify the MPS Database Admins.'
+        continue_this_sheet_if_true = False
+        print(error_message)
+    else:
+        target = int(target_pk_list[0])
+        data_cols = []
+        i = 0
+        for each in df.columns:
+            if i > 0:
+                data_cols.append(each)
+            i = i + 1
+
+        for index, row in df.iterrows():
+
+            # assume for now there will be only one header row and it was row 0 and we specified a header row so it is not called here
+            # if there are additional header rows, deal with them here ....
+
+            name = row[gene_id_field_name_if_app]
+            # print('name for this row ',name)
+            c = 0
+
+            while c < len(data_cols):
+                # print('c ', c, ' data_cols[c] ', data_cols[c])
+                value = row[data_cols[c]]
+                # note the +1 because the first one was not popped off as the data_cols was
+                this_matrix_item = int(matrix_item_pk_list[c + 1])
+                # print('index ',index,'  instance_counter ', instance_counter ,'  i ',i,'  name ',name,'  target ',target, '  value ',value)
+
+                # creating an instance causes an error in the clean since there is no pk for this file on the add form
+                # but we want the rest to go through the save AND we want to make sure instances are being counted in the clean
+
+                if called_from == 'save' and this_matrix_item > 0:
+                    instance = AssayOmicDataPoint(
+                        study_id=study_id,
+                        omic_data_file_id=omic_data_file_id,
+                        name=name,
+                        target_id=target,
+                        value=value
+                        # , matrix_item_id=this_matrix_item
+                        #     may want a group id or a cross reference, depends on what team decides
+                    )
+                    # add this list to the list of lists
+                    list_of_instances.append(instance)
+                else:
+                    # this will be for the preview on the page when the file is changed
+                    listance = [name, target, value]
+                    list_of_instances.append(listance)
+
+                instance_counter = instance_counter + 1
+                c = c + 1
+
+    return [continue_this_sheet_if_true, error_message, list_of_instances, instance_counter]
+
+
+def omic_data_upload_remove_and_add(data_file_pk, list_of_instances, error_message):
+    # Guts of removing old and saving the data to the DataPoint Table.
+    # double check that there are data ready to add to the DataPoint table before continuing
+    if len(list_of_instances) > 0:
+        try:
+            # if there are data in the omic data point table related to this file, remove them all
+            instance = AssayOmicDataPoint.objects.filter(omic_data_file=data_file_pk)
+            instance.delete()
+        except:
+            # if found none
+            pass
+        # Add the data to the omic data point table
+        AssayOmicDataPoint.objects.bulk_create(list_of_instances)
+    else:
+        # This should not happen - should be screened out in the clean - here just in case
+        error_message = error_message + ' During the save, found no records in the file to upload. Should have received and error message during data cleaning. '
+        raise forms.ValidationError(error_message)
+
+
+def data_file_to_data_frame(data_file, file_extension, workbook=None, sheet_index=None):
+    # should be able to use this for all data to data frame
+
+    # being called for each text file or each workbook sheet
+    # make a default data frame
+    df = pd.DataFrame(columns=['one'])
+
+    # print("df empty")
+    # print(df)
+
+    try_again = False
+    true_if_dataframe_found = True
+    error_message = ''
+
+    if file_extension == '.csv':
+        try:
+            df = pd.read_csv(data_file, header=0)
+        except:
+            try_again = True
+    elif file_extension == '.tsv':
+        try:
+            df = pd.read_csv(data_file, sep='\t', header=0)
+        except:
+            try_again = True
+    elif file_extension in ['.xls', '.xlsx']:
+        try:
+            df = pd.read_excel(workbook, sheet_name=sheet_index)
+        except:
+            try_again = True
+    else:
+        try_again = True
+
+    if try_again:
+        # try the python file type sniffer
+        try:
+            df = pd.read_csv(data_file, header=0)
+        except:
+            error_message = 'ERROR - file was not in a recognized format.'
+            true_if_dataframe_found = False
+
+    # print("df loaded")
+    # print(df)
+
+    return [true_if_dataframe_found, error_message, df]
+
+
+# sck for clean omic upload and some ajax of subs
+def data_quality_clean_check_for_omic_file_upload(self, data, data_file_pk):
+    # fields that would cause a change in data pull
+    # 'omic_data_file' in self.changed_data or
+    # 'analysis_method' in self.changed_data or
+    # 'data_type' in self.changed_data or
+
+    true_to_continue = True
+    file_name = data.get('omic_data_file').name
+
+    if true_to_continue and 'omic_data_file' in self.changed_data:
+
+        # check for valid file extension
+        file_extension = os.path.splitext(data.get('omic_data_file').name)[1]
+        if file_extension not in ['.csv', '.tsv', '.txt', '.xls', '.xlsx']:
+            true_to_continue = False
+            validation_message = 'Invalid file extension - must be in csv, tsv, txt, xls, or xlsx.'
+            validation_message = validation_message + "  " + file_name
+            raise ValidationError(validation_message, code='invalid')
+
+    if true_to_continue and 'omic_data_file' in self.changed_data:
+        true_to_continue = this_file_is_the_same_hash_as_another_in_this_study(self, data, data_file_pk)
+
+    if true_to_continue:
+        # ONGOING - add to the list with all data types that are two groups required
+        if data['data_type'] in ['log2fc']:
+            true_to_continue = qc_for_log2fc_omic_upload(self, data, data_file_pk)
+    return true_to_continue
+
+
+def qc_for_log2fc_omic_upload(self, data, data_file_pk):
+    true_to_continue = True
+    file_name = data.get('omic_data_file').name
+
+    if data['group_1'] is None or data['group_2'] is None:
+        true_to_continue = False
+        validation_message = 'For data type that compares two groups, both groups must be selected.'
+        validation_message = validation_message + "  " + file_name
+        raise ValidationError(validation_message, code='invalid')
+    if data['group_1'] == data['group_2']:
+        true_to_continue = False
+        validation_message = 'For data type that compares two groups, the two selected groups must be different.'
+        validation_message = validation_message + "  " + file_name
+        raise ValidationError(validation_message, code='invalid')
+    if data['location_1'] is None or data['location_2'] is None:
+        true_to_continue = False
+        validation_message = 'Sample locations are required for this data type.'
+        validation_message = validation_message + "  " + file_name
+        raise ValidationError(validation_message, code='invalid')
+    if data['time_1'] is None or data['time_2'] is None:
+        true_to_continue = False
+        validation_message = 'Sample times are required for this data type.'
+        validation_message = validation_message + "  " + file_name
+        raise ValidationError(validation_message, code='invalid')
+
+    if true_to_continue:
+
+        # print('-', self.instance.study.id)
+        # print('-', data['analysis_method'])
+        # print('-', data['group_1'])
+        # print('-', data['group_2'])
+        # print('-', data['location_1'])
+        # print('-', data['location_2'])
+        # print('-', data['time_1'])
+        # print('-', data['time_2'])
+
+        if ('analysis_method' in self.changed_data or
+                'group_1' in self.changed_data or
+                'group_2' in self.changed_data or
+                'location_1' in self.changed_data or
+                'location_2' in self.changed_data or
+                'time_1' in self.changed_data or
+                'time_2' in self.changed_data):
+            # is there a combination of group1+location1+time1+group2+location2+time2 already in study
+            # in as group 1 and group 2
+            group_keys_combos_left = AssayOmicDataFileUpload.objects.filter(
+                study_id=self.instance.study.id,
+                analysis_method_id=data['analysis_method'],
+                group_1=data['group_1'],
+                group_2=data['group_2'],
+                location_1=data['location_1'],
+                location_2=data['location_2'],
+                time_1=data['time_1'],
+                time_2=data['time_2']
+            )
+            # in as group 2 and group 1
+            group_keys_combos_right = AssayOmicDataFileUpload.objects.filter(
+                study_id=self.instance.study.id,
+                analysis_method_id=data['analysis_method'],
+                group_1=data['group_2'],
+                group_2=data['group_1'],
+                location_1=data['location_2'],
+                location_2=data['location_1'],
+                time_1=data['time_2'],
+                time_2=data['time_1']
+            )
+
+            # group_keys_combos_left = (f for f in group_keys_combos_left if f.filename() == file_name)
+            # group_keys_combos_right = (f for f in group_keys_combos_right if f.filename() == file_name)
+
+            # print('-------')
+            # print('group_keys_combos_left ', group_keys_combos_left)
+            # print('group_keys_combos_right ', group_keys_combos_right)
+            #
+            # print('group_keys_combos_left-len ', len(group_keys_combos_left))
+            # print('group_keys_combos_right-len ', len(group_keys_combos_right))
+
+            files_left_list = []
+            files_right_list = []
+
+            for each in group_keys_combos_left:
+                fame = each.omic_data_file.name
+                if each.id != data_file_pk:
+                    file_name2 = ''
+                    file_name2_as_list = []
+                    if fame.find('/') >= 0:
+                        file_name2_as_list = fame.split('/')
+                    else:
+                        file_name2_as_list = fame.split('\\')
+
+                    file_name2 = file_name2_as_list[len(file_name2_as_list) - 1]
+                    true_to_continue = False
+                    files_left_list.append(file_name2)
+
+            for each in group_keys_combos_right:
+                fame = each.omic_data_file.name
+                if each.id != data_file_pk:
+                    file_name2 = ''
+                    file_name2_as_list = []
+                    if fame.find('/') >= 0:
+                        file_name2_as_list = fame.split('/')
+                    else:
+                        file_name2_as_list = fame.split('\\')
+
+                    file_name2 = file_name2_as_list[len(file_name2_as_list) - 1]
+                    true_to_continue = False
+                    files_right_list.append(file_name2)
+
+            files_left_list_str = ', '.join(files_left_list)
+            files_right_list_str = ', '.join(files_right_list)
+
+            if len(files_left_list) > 0 or len(files_right_list) > 0:
+                if len(files_left_list) > 0 and len(files_right_list) > 0:
+                    files_list_str = files_left_list_str + ', ' + files_right_list_str
+                elif len(files_left_list) > 0:
+                    files_list_str = files_left_list_str
+                else:
+                    files_list_str = files_right_list_str
+                true_to_continue = False
+                validation_message = 'The combination of assay, groups, locations, and times selected have ALREADY BEEN USED in this study. '
+                validation_message = validation_message + 'The combination was used in files: ' + files_list_str + '. '
+                validation_message = validation_message + 'You must use a different combination for the file you just tried to upload: ' + file_name
+                raise ValidationError(validation_message, code='invalid')
+
+    return true_to_continue
+
+
+def this_file_is_the_same_hash_as_another_in_this_study(self, data, data_file_pk):
+    true_to_continue = True
+    message = ''
+    file_name = ''
+    file_name_as_list = []
+    if data.get('omic_data_file').name.find('/') >= 0:
+        file_name_as_list = data.get('omic_data_file').name.split('/')
+    else:
+        file_name_as_list = data.get('omic_data_file').name.split('\\')
+
+    file_name = file_name_as_list[len(file_name_as_list)-1]
+    study_id = self.instance.study.id
+    this_file_hash = hashlib.sha1(data.get('omic_data_file').read()).hexdigest()
+    data.get('omic_data_file').seek(0)
+
+    # https://stackoverflow.com/questions/15885201/django-uploads-discard-uploaded-duplicates-use-existing-file-md5-based-check
+    # https://josephmosby.com/2015/05/13/preventing-file-dupes-in-django.html
+    files_in_study = AssayOmicDataFileUpload.objects.filter(
+        study_id=study_id
+    )
+    potential_dup_list = []
+
+    # print("\nfile_name ", file_name, "  hash ", this_file_hash)
+    for each in files_in_study:
+        fame = each.omic_data_file.name
+        # print("fame ", fame)
+        each_file_hash = hashlib.sha1(each.omic_data_file.read()).hexdigest()
+        # print("each hash  ", each_file_hash)
+        each.omic_data_file.seek(0)
+
+        if this_file_hash == each_file_hash:
+            if each.id != data_file_pk:
+                file_name2 = ''
+                file_name2_as_list = []
+                if fame.find('/') >= 0:
+                    file_name2_as_list = fame.split('/')
+                else:
+                    file_name2_as_list = fame.split('\\')
+
+                file_name2 = file_name2_as_list[len(file_name2_as_list) - 1]
+
+                true_to_continue = False
+                potential_dup_list.append(file_name2)
+
+    if not true_to_continue:
+        potential_dup_string = ', '.join(potential_dup_list)
+        message = 'This file ' + file_name + ' appears to be a duplicate of ' + potential_dup_string + '. To change the metadata for this file, exit this page select to Edit ' + potential_dup_string + '.'
+        validation_message = message
+        raise ValidationError(validation_message, code='invalid')
+
+    return true_to_continue
+
+
+# this is called from the ajax.py to pick up the subs as needed
+def this_file_same_as_another_in_this_study(omic_data_file, study_id, data_file_pk):
+    # 'same' is determined here by what subs are called
+    true_to_continue = True
+    message = ''
+
+    if true_to_continue:
+        similar = this_file_name_is_similar_to_another_in_this_study(omic_data_file, study_id, data_file_pk)
+        true_to_continue = similar[0]
+        message = message + " " + similar[1]
+
+    return [true_to_continue, message]
+
+
+def this_file_name_is_similar_to_another_in_this_study(omic_data_file, study_id, data_file_pk):
+    true_to_continue = True
+    message = ''
+    file_name = ''
+    file_name_as_list = []
+    if omic_data_file.find('/') >= 0:
+        file_name_as_list = omic_data_file.split('/')
+    else:
+        file_name_as_list = omic_data_file.split('\\')
+
+    file_name = file_name_as_list[len(file_name_as_list)-1]
+
+    file_name_as_list_2 = file_name.split('.')
+    # file_name_as_list_2 = file_name_as_list_2[:len(file_name_as_list_2)-1]
+    file_name_as_list_2 = file_name_as_list_2[:1]
+    file_name_no_extension = ''.join(file_name_as_list_2)
+    files_in_study = AssayOmicDataFileUpload.objects.filter(
+        study_id=study_id
+    )
+    potential_dup_list = []
+
+    for each in files_in_study:
+        fame = each.omic_data_file.name
+        if fame.find(file_name_no_extension) >= 0:
+            if each.id != data_file_pk:
+                file_name2 = ''
+                file_name2_as_list = []
+                if fame.find('/') >= 0:
+                    file_name2_as_list = fame.split('/')
+                else:
+                    file_name2_as_list = fame.split('\\')
+
+                file_name2 = file_name2_as_list[len(file_name2_as_list) - 1]
+
+                true_to_continue = False
+                potential_dup_list.append(file_name2)
+
+    if not true_to_continue:
+        potential_dup_string = ', '.join(potential_dup_list)
+        message = 'Similar file names already in this study [' + potential_dup_string + ']. Make sure you are uploading the correct file.'
+
+    return [true_to_continue, message]
+
+
+def get_model_location_dictionary(this_model_pk):
+    location_dict = {}
+
+    qs_locations = OrganModelLocation.objects.filter(
+        organ_model_id=this_model_pk
+    ).prefetch_related(
+        'sample_location'
+    )
+    if len(qs_locations) > 0:
+        for each in qs_locations:
+            location_dict[each.sample_location.id] = each.sample_location.name
+    else:
+        qs_locations = AssaySampleLocation.objects.all()
+        for each in qs_locations:
+            if each.name.lower() == 'na' or each.name.lower() == 'unspecified':
+                pass
+            else:
+                location_dict[each.id] = each.name
+
+    # print('location_dict ', location_dict)
+    return location_dict

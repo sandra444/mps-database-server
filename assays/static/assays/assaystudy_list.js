@@ -106,11 +106,11 @@ $(document).ready(function() {
                 },
                 {
                     "type": "numeric-comma",
-                    "targets": [6, 7, 8, 9, 10, 11]
+                    "targets": [6, 7, 8, 9, 10, 11, 12]
                 },
                 {
                     'visible': false,
-                    'targets': [5, 8, 9, 10, 11, 15, 17, 18]
+                    'targets': [5, 9, 10, 11, 12, 16, 18, 19]
                 },
                 {
                     'className': 'none',
