@@ -49,4 +49,16 @@
         <a href="{% url 'assayplatereadermap-index' object.id %}" class="btn btn-lg btn-primary" role="button">View, Add, Remove, or Edit an Assay Plate Map or Calibrate Uploaded Data</a>
         <a href="{% url 'assayplatereaderfile-index' object.id %}" class="btn btn-lg btn-primary" role="button">View, Add or Remove Assay Plate Reader Data Files</a>
     </div>
+
+    <div class="well">
+        <h3>
+            {% include 'plural_include.html' with label="Omic Data File" count=log2fold_files.count %}
+            {% if log2fold_files.count %}
+                with {% include 'plural_include.html' with label="Data Point" count=log2fold_points.count %}
+            {% endif %}
+            <br>
+            <small>Omic data that will use the MPS-Db Omic visualization and analysis tools (i.e. fold change, normalized counts, raw counts). Data to be uploaded must be formatted specifically as omic data in the file format corresponding to the type of omic data being uploaded.</small>
+        </h3>
+        <a href="{% url 'assayomicdatafileupload-index' object.id %}" class="btn btn-lg btn-primary" role="button">View, Add or Remove Omic Data File or Update File Metadata</a>
+    </div>
 {% endblock %}
