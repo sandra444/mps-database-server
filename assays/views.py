@@ -5404,6 +5404,11 @@ class AssayStudyOmics(StudyViewerMixin, DetailView):
         context = super(AssayStudyOmics, self).get_context_data(**kwargs)
         context.update({
             'form': AssayStudyGroupForm(instance=self.object),
+            'cellsamples' : CellSample.objects.all().prefetch_related(
+                'cell_type__organ',
+                'supplier',
+                'cell_subtype__cell_type'
+            ),
         })
 
         return context

@@ -49,9 +49,20 @@ $(document).ready(function () {
                 }
 
                 // Make Difference Table, generate list of groups to aid in hover displays
+                // Maybe I should make a way to just get the tds?
                 window.GROUPS.make_difference_table();
-                $('#difference_table_body').find('tr').each(function() {
-                    present_groups.push($(this).data('group-name'));
+
+                // GET THE PRESENT GROUPS
+                // $('#difference_table_body').find('tr').each(function() {
+                //     present_groups.push($(this).data('group-name'));
+                // });
+
+                // TEMPORARY
+                // GET THE GROUP NAMES
+                let full_series_data = JSON.parse($('#id_series_data').val());
+
+                $.each(full_series_data.series_data, function(index, group) {
+                    present_groups.push(group.name);
                 });
             } else {
                 console.log(data['error']);
@@ -106,39 +117,86 @@ $(document).ready(function () {
         window.open(window.location.href + "download/?" + $.param(get_params), "_blank")
     });
 
-    function generate_row_html(hovered_groups) {
-        // (these divs are contrivances)
-        var name_row = $('<div>').append(
-            $('#difference_table_body').find('[data-group-name="' + hovered_groups[0] + '"]').clone().append(
-                $('#difference_table_body').find('[data-group-name="' + hovered_groups[1] + '"]').clone()
-            )
-        );
+    // function generate_row_html(hovered_groups) {
+    //     // (these divs are contrivances)
+    //     var name_row = $('<div>').append(
+    //         $('#difference_table_body').find('[data-group-name="' + hovered_groups[0] + '"]').clone().append(
+    //             $('#difference_table_body').find('[data-group-name="' + hovered_groups[1] + '"]').clone()
+    //         )
+    //     );
 
+    //     var full_row = $('<div>');
+
+    //     return name_row.html() + full_row.html();
+    // }
+
+    // NOT DRY
+    function generate_row_html(current_groups) {
         var full_row = $('<div>');
 
-        return name_row.html() + full_row.html();
+        // SUBJECT TO CHANGE
+        // Just draws from the difference table
+        // Be careful with conditionals! Zero has the truthiness of *false*!
+        $.each(current_groups, function(index, group_name) {
+            let name_row = $('<tr>').append($('<td>').text(group_name));
+
+            full_row.append(name_row);
+
+            let content_row = $('<tr>');
+
+            // NOT VERY ELEGANT
+            let current_stored_tds = window.GROUPS.difference_table_displays[group_name];
+
+            // Determine row hiding
+            // NOT DRY
+            let columns_to_check = [
+                'model',
+                'test_type',
+                'cell',
+                'compound',
+                'setting'
+            ];
+
+            $.each(columns_to_check, function(index, key) {
+                if (!window.GROUPS.hidden_columns[key]) {
+                    content_row.append(
+                        current_stored_tds[key].clone(),
+                    )
+                }
+            });
+
+            full_row.append(content_row);
+        });
+
+        return full_row.html();
     }
 
     $(document).on('mouseover', '.omics-groups-hover, svg > g', function() {
         hovered_groups = [];
 
-        for (group in present_groups) {
-            if ($(this).text().includes(present_groups[group])) {
-                hovered_groups.push(present_groups[group]);
+        if ($(this).text()) {
+            // THIS CAN CAUSE COLLISIONS IN THE CASE OF SUBSTRINGS
+            // (ie. Group 1 and Group 12 are both matched)
+            for (group in present_groups) {
+                if ($(this).text().includes(present_groups[group])) {
+                    hovered_groups.push(present_groups[group]);
+                }
+            }
+
+            if (hovered_groups.length) {
+                omics_contents_hover.show();
+                // Hard value for left (TODO: Probably better to set to left of the matrix?)
+                var left = $('#omics_table').position().left - 15;
+                // Place slightly below current label
+                var top = $(this).offset().top + 50;
+                omics_contents_hover.offset({left: left, top: top});
+
+                omics_contents_hover_body.empty();
+                omics_contents_hover_body.html(
+                    generate_row_html(hovered_groups)
+                );
             }
         }
-
-        omics_contents_hover.show();
-        // Hard value for left (TODO: Probably better to set to left of the matrix?)
-        var left = $('#omics_table').position().left - 15;
-        // Place slightly below current label
-        var top = $(this).offset().top + 50;
-        omics_contents_hover.offset({left: left, top: top});
-
-        omics_contents_hover_body.empty();
-        omics_contents_hover_body.html(
-            generate_row_html(hovered_groups)
-        );
     });
 
     $(document).on('mouseout', '.omics-groups-hover, svg > g', function() {
