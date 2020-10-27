@@ -2,6 +2,7 @@
 import ujson as json
 # Ask if folks mind the pvalues getting truncated, non-U-json fixes this
 import json as default_json
+import math
 # from collections import defaultdict
 from django.http import (
     HttpResponse,
@@ -7188,24 +7189,51 @@ def fetch_omics_data_for_visualization(request):
     data['file_id_to_name'] = {}
     data['table'] = {}
 
+    # Account for multiple files with the same groups
+    # First, this is abysmally inefficient, there has to be a better way.
+    # Second, how do you perform underscore access of FK fields whose parent's name already has underscores? (ex. group_1_name)
+    group_combos = []
     for datafile in datafiles:
-        joint_name = " vs ".join([datafile.group_1.name, datafile.group_2.name])
-        data['data'][joint_name] = {}
-        data['file_id_to_name'][datafile.id] = joint_name
-        data['table'][joint_name] = [datafile.description, datafile.id]
+        if datafile.group_1 is not None and datafile.group_2 is not None:
+            group_combos.append("{}+{}".format(datafile.group_1.id, datafile.group_2.id))
+
+    for datafile in datafiles:
+        if datafile.group_1 is not None and datafile.group_2 is not None and datafile.data_type == "log2fc":
+            omics_token = "{}+{}".format(datafile.group_1.id, datafile.group_2.id)
+            if group_combos.count(omics_token) > 1:
+                split_times_1 = get_split_times(datafile.time_1)
+                split_times_2 = get_split_times(datafile.time_2)
+                if datafile.location_1 is not None and datafile.location_2 is not None:
+                    joint_name = " vs ".join([
+                        datafile.group_1.name + "(" + datafile.location_1.name + ") @ D:" + str(split_times_1['day']) + " H:" + str(split_times_1['hour']) + " M:" + str(split_times_1['minute']),
+                        datafile.group_2.name + "(" + datafile.location_2.name + ") @ D:" + str(split_times_2['day']) + " H:" + str(split_times_2['hour']) + " M:" + str(split_times_2['minute'])
+                    ])
+                else:
+                    joint_name = " vs ".join([
+                        datafile.group_1.name + " @ D:" + str(split_times_1['day']) + " H:" + str(split_times_1['hour']) + " M:" + str(split_times_1['minute']),
+                        datafile.group_2.name + " @ D:" + str(split_times_2['day']) + " H:" + str(split_times_2['hour']) + " M:" + str(split_times_2['minute'])
+                    ])
+            else:
+                joint_name = " vs ".join([datafile.group_1.name, datafile.group_2.name])
+            data['data'][joint_name] = {}
+            data['file_id_to_name'][datafile.id] = joint_name
+            data['table'][joint_name] = [datafile.description, datafile.id]
 
     datapoints = AssayOmicDataPoint.objects.filter(study=study).exclude(value__isnull=True)
 
     target_ids = {}
 
     for datapoint in datapoints:
-        if datapoint.name not in data['data'][data['file_id_to_name'][datapoint.omic_data_file_id]]:
-            data['data'][data['file_id_to_name'][datapoint.omic_data_file_id]][datapoint.name] = {}
-        data['data'][data['file_id_to_name'][datapoint.omic_data_file_id]][datapoint.name][datapoint.analysis_target_id] = datapoint.value
+        try:
+            if datapoint.name not in data['data'][data['file_id_to_name'][datapoint.omic_data_file_id]]:
+                data['data'][data['file_id_to_name'][datapoint.omic_data_file_id]][datapoint.name] = {}
+            data['data'][data['file_id_to_name'][datapoint.omic_data_file_id]][datapoint.name][datapoint.analysis_target_id] = datapoint.value
 
-        target_ids.update({
-            datapoint.analysis_target_id: True
-        })
+            target_ids.update({
+                datapoint.analysis_target_id: True
+            })
+        except KeyError:
+            continue
 
     data['target_name_to_id'] = {target.name: target.id for target in AssayOmicAnalysisTarget.objects.filter(id__in=target_ids)}
 
@@ -7240,15 +7268,146 @@ def fetch_omics_data_for_upload_preview_prep(request):
     )
 
 
-def get_filtered_omics_data_as_csv(ids, data_points=None, both_assay_names=False, include_header=False, include_all=False):
+def get_filtered_omics_data_as_csv(get_params):
     """Returns data points as a csv in the form of a string"""
-    data = get_data_as_list_of_lists(
-        ids,
-        data_points,
-        both_assay_names,
-        include_header,
-        include_all
+    ids = AssayOmicDataFileUpload.objects.filter(
+        id__in=get_params['visible_charts']
     )
+
+    data_points = AssayOmicDataPoint.objects.prefetch_related(
+        'omic_data_file',
+        'analysis_target__target',
+    ).filter(
+        omic_data_file__id__in=ids,
+    )
+
+    consolidated_targets = {}
+    unique_targets = []
+    data = []
+
+    for data_point in data_points:
+        name = data_point.name
+        target = data_point.analysis_target.name
+        value = data_point.value
+        if value is None:
+            continue
+        if name not in consolidated_targets:
+            datafile = data_point.omic_data_file
+            assay = str(datafile.study_assay)
+            group_1 = datafile.group_1.name
+            group_2 = datafile.group_2.name
+            time_1 = datafile.time_1
+            time_1_dict = get_split_times(time_1)
+            time_2 = datafile.time_2
+            time_2_dict = get_split_times(time_2)
+            location_1 = datafile.location_1
+            location_2 = datafile.location_2
+            consolidated_targets[name] = {
+                "assay": assay,
+                "group_1": group_1,
+                "group_2": group_2,
+                "time_1_days": time_1_dict['day'],
+                "time_1_hours": time_1_dict['hour'],
+                "time_1_minutes": time_1_dict['minute'],
+                "time_2_days": time_2_dict['day'],
+                "time_2_hours": time_2_dict['hour'],
+                "time_2_minutes": time_2_dict['minute'],
+                "location_1": location_1,
+                "location_2": location_2
+            }
+        consolidated_targets[name][target] = value
+        if target not in unique_targets:
+            unique_targets.append(target)
+
+    # Header Row
+    data.append(
+        [
+            "Probe ID",
+            "Gene Name",
+            "Expression",
+            "Assay",
+            "Group 1",
+            "Location 1",
+            "Time 1 (Days)",
+            "Time 1 (Hours)",
+            "Time 1 (Minutes)",
+            "Group 2",
+            "Location 2",
+            "Time 2 (Days)",
+            "Time 2 (Hours)",
+            "Time 2 (Minutes)"
+        ]
+    )
+
+    for target in unique_targets:
+        data[0].append(target)
+
+    expression_text = {
+        'over_expressed': "Over Expressed",
+        'under_expressed': "Under Expressed",
+        'neither_expressed': "General"
+    }
+
+    # Add filtered data
+    for name in consolidated_targets:
+        if "pvalue" not in consolidated_targets[name] or "log2FoldChange" not in consolidated_targets[name]:
+            continue
+        expression = ''
+
+        # PValue Filters
+        if get_params["negative_log10_pvalue"]:
+            if not ((-math.log10(consolidated_targets[name]["pvalue"]) >= get_params["min_negative_log10_pvalue"]) and (-math.log10(consolidated_targets[name]["pvalue"]) <= get_params["max_negative_log10_pvalue"])):
+                continue
+        else:
+            if not ((consolidated_targets[name]["pvalue"] >= get_params["min_pvalue"]) and (consolidated_targets[name]["pvalue"] <= get_params["max_pvalue"])):
+                continue
+
+        # Log2FoldChange Filters
+        if get_params["absolute_log2_foldchange"]:
+            if not ((consolidated_targets[name]["log2FoldChange"] >= -get_params["abs_log2_foldchange"]) and (consolidated_targets[name]["log2FoldChange"] <= get_params["abs_log2_foldchange"])):
+                continue
+        else:
+            if not ((consolidated_targets[name]["log2FoldChange"] >= get_params["min_log2_foldchange"]) and (consolidated_targets[name]["log2FoldChange"] <= get_params["max_log2_foldchange"])):
+                continue
+
+        # Determine Expression
+        if (consolidated_targets[name]["log2FoldChange"] >= get_params["threshold_log2_foldchange"]) and (consolidated_targets[name]["pvalue"] <= get_params["threshold_pvalue"]):
+            expression = 'over_expressed'
+        elif (consolidated_targets[name]["log2FoldChange"] <= -get_params["threshold_log2_foldchange"]) and (consolidated_targets[name]["pvalue"] <= get_params["threshold_pvalue"]):
+            expression = 'under_expressed'
+        else:
+            expression = 'neither_expressed'
+
+        # Expression Filter
+        if not get_params[expression]:
+            continue
+        else:
+            expression = expression_text[expression]
+
+        # Append any data that has made it this far
+        to_append = [
+            name,
+            name.split("_")[0],
+            expression,
+            consolidated_targets[name]['assay'],
+            consolidated_targets[name]['group_1'],
+            consolidated_targets[name]['location_1'],
+            consolidated_targets[name]['time_1_days'],
+            consolidated_targets[name]['time_1_hours'],
+            consolidated_targets[name]['time_1_minutes'],
+            consolidated_targets[name]['group_2'],
+            consolidated_targets[name]['location_2'],
+            consolidated_targets[name]['time_2_days'],
+            consolidated_targets[name]['time_2_hours'],
+            consolidated_targets[name]['time_2_minutes']
+        ]
+        for target in unique_targets:
+            if target in consolidated_targets[name]:
+                to_append.append(consolidated_targets[name][target])
+            else:
+                to_append.append('')
+
+        data.append(to_append)
 
     for index in range(len(data)):
         current_list = list(data[index])

@@ -59,18 +59,20 @@ $(document).ready(function () {
             2: { color: $("#color-not-significant").val() }
         };
 
-        // Draw filtered plots
-        window.OMICS.draw_plots(
-            window.OMICS.omics_data,
-            false,
-            $("#slider-range-pvalue").slider("option", "values")[0],
-            $("#slider-range-pvalue").slider("option", "values")[1],
-            $("#slider-range-log2foldchange").slider("option", "values")[0],
-            $("#slider-range-log2foldchange").slider("option", "values")[1],
-            $("#slider-range-pvalue-neg").slider("option", "values")[0],
-            $("#slider-range-pvalue-neg").slider("option", "values")[1],
-            $("#slider-log2foldchange-abs").slider("option", "value")
-        );
+        setTimeout(function(){
+            // Draw filtered plots
+            window.OMICS.draw_plots(
+                window.OMICS.omics_data,
+                false,
+                $("#slider-range-pvalue").slider("option", "values")[0],
+                $("#slider-range-pvalue").slider("option", "values")[1],
+                $("#slider-range-log2foldchange").slider("option", "values")[0],
+                $("#slider-range-log2foldchange").slider("option", "values")[1],
+                $("#slider-range-pvalue-neg").slider("option", "values")[0],
+                $("#slider-range-pvalue-neg").slider("option", "values")[1],
+                $("#slider-log2foldchange-abs").slider("option", "value")
+            );
+        }, 500);
     })
 
     function createSliders() {
@@ -156,7 +158,7 @@ $(document).ready(function () {
 
             // Create Omics info table on first pass
             if (firstTime && called_from === "analysis") {
-                $("#omics_table_body").html($("#omics_table_body").html()+"<tr><td class='dt-center'><input type='checkbox' class='big-checkbox' data-checkbox-id='" + omics_data['table'][x][1] + "' checked></td><td>" + x + "</td><td>" + omics_data['table'][x][0] + "</td></tr>")
+                $("#omics_table_body").html($("#omics_table_body").html()+"<tr><td class='dt-center'><input type='checkbox' class='big-checkbox' data-checkbox-id='" + omics_data['table'][x][1] + "' checked></td><td class='omics-groups-hover'>" + x + "</td><td>" + omics_data['table'][x][0] + "</td></tr>")
             }
 
             // For each gene probe ID
@@ -214,14 +216,14 @@ $(document).ready(function () {
                 if (firstTime || ((pvalue_filter) && (l2fc_filter))) {
                     // Threshold determination and point addition.
                 	if (check_over && (log2fc >= log2fc_threshold && pvalue <= pvalue_threshold)) {
-                		chartData[x]['volcano'].push([log2fc, neglog10pvalue, null, 'Probe ID: ' + y + '\n-Log10(pvalue): ' + neglog10pvalue.toFixed(3) + '\nLog2(FoldChange): ' + log2fc.toFixed(3) + '\nStat: ' + stat.toFixed(3) + '\nAdjusted P-Value: ' + padj.toFixed(3), null, null, '', null, null, '']);
-                		chartData[x]['ma'].push([baseMean, log2fc, null, 'Probe ID: ' + y + '\nLog2(FoldChange): ' + log2fc.toFixed(3) + '\nBaseMean: ' + baseMean.toFixed(3) + '\nStat: ' + stat.toFixed(3) + '\nAdjusted P-Value: ' + padj.toFixed(3), null, null, '', null, null, '']);
+                		chartData[x]['volcano'].push([log2fc, neglog10pvalue, null, 'Probe ID: ' + y + '\nGene Name: ' + y.split("_")[0] + '\nP-Value: ' + pvalue.toFixed(3) + '\n-Log10(P-Value): ' + neglog10pvalue.toFixed(3) + '\nLog2(FoldChange): ' + log2fc.toFixed(3) + '\nAdjusted P-Value: ' + padj.toFixed(3), null, null, '', null, null, '']);
+                		chartData[x]['ma'].push([baseMean, log2fc, null, 'Probe ID: ' + y + '\nGene Name: ' + y.split("_")[0] + '\nP-Value: ' + pvalue.toFixed(3) + '\nLog2(FoldChange): ' + log2fc.toFixed(3) + '\nBaseMean: ' + baseMean.toFixed(3) + '\nAdjusted P-Value: ' + padj.toFixed(3), null, null, '', null, null, '']);
                 	} else if (check_under && (log2fc <= -log2fc_threshold && pvalue <= pvalue_threshold)) {
-                		chartData[x]['volcano'].push([log2fc, null, null, '', neglog10pvalue, null, 'Probe ID: ' + y + '\n-Log10(pvalue): ' + neglog10pvalue.toFixed(3) + '\nLog2(FoldChange): ' + log2fc.toFixed(3) + '\nStat: ' + stat.toFixed(3) + '\nAdjusted P-Value: ' + padj.toFixed(3), null, null, '']);
-                		chartData[x]['ma'].push([baseMean, null, null, '', log2fc, null, 'Probe ID: ' + y + '\nLog2(FoldChange): ' + log2fc.toFixed(3) + '\nBaseMean: ' + baseMean.toFixed(3) + '\nStat: ' + stat.toFixed(3) + '\nAdjusted P-Value: ' + padj.toFixed(3), null, null, '']);
+                		chartData[x]['volcano'].push([log2fc, null, null, '', neglog10pvalue, null, 'Probe ID: ' + y + '\nGene Name: ' + y.split("_")[0] + '\nP-Value: ' + pvalue.toFixed(3) + '\n-Log10(P-Value): ' + neglog10pvalue.toFixed(3) + '\nLog2(FoldChange): ' + log2fc.toFixed(3) + '\nAdjusted P-Value: ' + padj.toFixed(3), null, null, '']);
+                		chartData[x]['ma'].push([baseMean, null, null, '', log2fc, null, 'Probe ID: ' + y + '\nGene Name: ' + y.split("_")[0] + '\nP-Value: ' + pvalue.toFixed(3) + '\nLog2(FoldChange): ' + log2fc.toFixed(3) + '\nBaseMean: ' + baseMean.toFixed(3) + '\nAdjusted P-Value: ' + padj.toFixed(3), null, null, '']);
                 	} else if (check_neither && !(log2fc >= log2fc_threshold && pvalue <= pvalue_threshold) && !(log2fc <= -log2fc_threshold && pvalue <= pvalue_threshold)) {
-                		chartData[x]['volcano'].push([log2fc, null, null, '', null, null, '', neglog10pvalue, null, 'Probe ID: ' + y + '\n-Log10(pvalue): ' + neglog10pvalue.toFixed(3) + '\nLog2(FoldChange): ' + log2fc.toFixed(3) + '\nStat: ' + stat.toFixed(3) + '\nAdjusted P-Value: ' + padj.toFixed(3)]);
-                		chartData[x]['ma'].push([baseMean, null, null, '', null, null, '', log2fc, null, 'Probe ID: ' + y + '\nLog2(FoldChange): ' + log2fc.toFixed(3) + '\nBaseMean: ' + baseMean.toFixed(3) + '\nStat: ' + stat.toFixed(3) + '\nAdjusted P-Value: ' + padj.toFixed(3)]);
+                		chartData[x]['volcano'].push([log2fc, null, null, '', null, null, '', neglog10pvalue, null, 'Probe ID: ' + y + '\nGene Name: ' + y.split("_")[0] + '\nP-Value: ' + pvalue.toFixed(3) + '\n-Log10(P-Value): ' + neglog10pvalue.toFixed(3) + '\nLog2(FoldChange): ' + log2fc.toFixed(3) + '\nAdjusted P-Value: ' + padj.toFixed(3)]);
+                		chartData[x]['ma'].push([baseMean, null, null, '', null, null, '', log2fc, null, 'Probe ID: ' + y + '\nGene Name: ' + y.split("_")[0] + '\nP-Value: ' + pvalue.toFixed(3) + '\nLog2(FoldChange): ' + log2fc.toFixed(3) + '\nBaseMean: ' + baseMean.toFixed(3) + '\nAdjusted P-Value: ' + padj.toFixed(3)]);
                 	}
                 }
             }
@@ -253,13 +255,25 @@ $(document).ready(function () {
         // $('#volcano-plots').append("<div class='row'>");
         // $('#ma-plots').append("<div class='row'>");
         for (const prop in chartData) {
-            console.log(omics_data['table'][prop][1])
             volcano_chart_row.append("<div class='col-lg-6'><div id='volcano-" + omics_data['table'][prop][1] + "'></div></div>");
             ma_chart_row.append("<div class='col-lg-6'><div id='ma-" + omics_data['table'][prop][1] + "'></div></div>");
         }
 
         $('#volcano-plots').html(volcano_chart_row);
         $('#ma-plots').append(ma_chart_row);
+
+        var hide_ma = $("#ma-plots").css("display") == "none";
+        $("#volcano-plots").css("display", "block");
+        $("#ma-plots").css("display", "block");
+
+        if (called_from === "analysis" && window.OMICS.chart_visiblity !== null) {
+            for (chart in window.OMICS.chart_visiblity) {
+                if (window.OMICS.chart_visiblity[chart] == false) {
+                    $("#ma-"+chart).parent().css("display", "block");
+                    $("#volcano-"+chart).parent().css("display", "block");
+                }
+            }
+        }
 
         for (const prop in chartData) {
             volcanoData = google.visualization.arrayToDataTable(chartData[prop]['volcano']);
@@ -273,6 +287,25 @@ $(document).ready(function () {
 
             volcanoChart.draw(volcanoData, volcanoOptions);
             maChart.draw(maData, maOptions);
+        }
+
+        if (firstTime) {
+            $("#ma-plots").css("display", "none");
+        } else {
+            if (hide_ma) {
+                $("#ma-plots").css("display", "none");
+            } else {
+                $("#volcano-plots").css("display", "none");
+            }
+        }
+
+        if (called_from === "analysis" && window.OMICS.chart_visiblity !== null) {
+            for (chart in window.OMICS.chart_visiblity) {
+                if (window.OMICS.chart_visiblity[chart] == false) {
+                    $("#ma-"+chart).parent().css("display", "none");
+                    $("#volcano-"+chart).parent().css("display", "none");
+                }
+            }
         }
 
         // Stop spinner
