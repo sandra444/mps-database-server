@@ -7,8 +7,9 @@
 
 <ul class="list-group">
     <li class="list-group-item">
-        <h1 class="h1-level-1"> Database Features </h1>
-        The following briefly describes the primary features that are integrated into the MPS-Db. Click on the provided links for more detailed instructions on using the feature.
+        The following briefly describes the primary features that are integrated into the
+        <span class="glst">MPS-Db</span>.
+        Click on the provided links for more detailed instructions on using the feature.
         <br><br>
         <table id="features_table" class="table table-bordered table-condensed small">
             <thead>
@@ -23,12 +24,12 @@
             <tbody>
                 {% for term in feature %}
                 <tr>
-                    <td>{{ term.term }}</td>
-                    <td>{{ term.definition }}</td>
+                    <td class="gse0">{{ term.term }}</td>
+                    <td class="gse1">{{ term.definition }}</td>
 {#                    <th>{% for source in term.data_sources.all %}{{ source }}<br/>{% endfor %}</th>#}
-                    <td>{{ term.source_list }}</td>
-                    <th>{{ term.show_anchor }}</th>
-                    <th>{{ term.show_url }}</th>
+                    <td class="gse1">{{ term.source_list }}</td>
+                    <td class="gse1">{{ term.show_anchor }}</td>
+                    <td class="gse1">{{ term.show_url }}</td>
                 </tr>
                 {% endfor %}
             </tbody>
@@ -89,7 +90,7 @@
 {#            <tbody>#}
 {#                <tr>#}
 {#                    <td>  5 References </td>#}
-{#                    <td> References to publications can be added and associated to MPS models, study sets, studies, and several other study components.#}
+{#                    <td> References to publications can be added and associated to <span class="glst">MPS models</span>, study sets, studies, and several other study components.#}
 {#                    For more information on references, <a href="#reference">click here</a>.</td>#}
 {#                    <td> All</td>#}
 {#                </tr>#}

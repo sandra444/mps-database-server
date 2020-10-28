@@ -7,8 +7,11 @@
 
 <ul class="list-group">
     <li class="list-group-item">
-        <h1 class="h1-level-1"> Permission Structure </h1>
-        The following briefly describes the permission structure available in the MPS-Db. There are a variety of options available, including keeping data access limited to only members of a specific group, to sharing with a few select colleagues, to open access.
+        <h1 class="h1-level-1">Permission Structure</h1>
+        The following briefly describes the permission structure available in the
+        <span class="glst">MPS-Db</span>.
+        There are a variety of options available, including keeping data access limited to only
+        members of a specific group, to sharing with a few select colleagues, to open access.
         <br>
         <br>
 
@@ -22,7 +25,7 @@
 
             <tbody>
                 {% for term in permission %}
-                <tr>
+                <tr class="gse0">
                     <td>{{ term.term }}</td>
                     <td>{{ term.definition }}</td>
                 </tr>
@@ -51,11 +54,11 @@
 {#            <tbody>#}
 {#                <tr>#}
 {#                    <td> Registered MPS Users with No Additional Permissions  </td>#}
-{#                    <td> Can view all reference data and associated features. Can view study components (e.g., MPS models, devices, cell samples). Can view study data in studies that have been designated as open to all registered MPS users, including: viewing study setup information, study protocols, images, videos, and study assay data. </td>#}
+{#                    <td> Can view all reference data and associated features. Can view study components (e.g., <span class="glst">MPS models</span>, devices, cell samples). Can view study data in studies that have been designated as open to all registered MPS users, including: viewing study setup information, study protocols, images, videos, and study assay data. </td>#}
 {#                </tr>#}
 {#                <tr>#}
 {#                    <td> Data Group Viewers and Users with Additional Permissions  </td>#}
-{#                    <td> Have all the access of <i>Registered MPS Users with No Additional Permissions</i> plus access to studies to which they have been granted access. Special access is sometimes granted to MPS model developers (i.e. acknowledgement access) and/or project funders. </td>#}
+{#                    <td> Have all the access of <i>Registered MPS Users with No Additional Permissions</i> plus access to studies to which they have been granted access. Special access is sometimes granted to <span class="glst">MPS model</span> developers (i.e. acknowledgement access) and/or project funders. </td>#}
 {#                </tr>#}
 {#                <tr>#}
 {#                    <td> Data Group Editors  </td>#}
@@ -63,7 +66,7 @@
 {#                </tr>#}
 {#                <tr>#}
 {#                    <td> Data Group Admins  </td>#}
-{#                    <td> Have all the access of <i>Data Group Editors</i> plus the ability to sign off a study and monitor the acknowledgment status of a study (e.g., a model developer reviewed study data). </td>#}
+{#                    <td> Have all the access of <i>Data Group Editors</i> plus the ability to sign-off a study and monitor the acknowledgment status of a study (e.g., a model developer reviewed study data). </td>#}
 {#                </tr>#}
 {#                <tr>#}
 {#                    <td> MPS-Db Administrators  </td>#}

@@ -1,43 +1,85 @@
 $(document).ready(function () {
 
-    //make them disabled on load
-    $('#search_next').attr('disabled', 'disabled');
-    $('#search_prev').attr('disabled', 'disabled');
+    // a cross reference between hashes (anchors)
+    // make Lukes hashes the key then pull the value (Help page links)
+    var anchor_xref = {
+        // {# overview #}
+        "": "#overview_section",
+        // "": "#help_overview_background",
+        "": "#help_overview_components",
+        "": "#help_overview_organization",
+        "": "#help_overview_sources",
+        "": "#help_overview_features",
+        "": "#help_overview_permission",
 
-    var offset = 110;
-    var help_offset = 200;
-    var if_all_are_open_true = false;
+        "": "#global_database_tools_section",
+        "": "#help_global_search",
+        "": "#help_table_search",
+        "": "#help_download_button",
 
-    var selector = "#realTimeContents";
-    var searchTermRegEx = null;
-    var searchTerm = null;
-    var matches = null;
-    var buttons = null;
-    var match_case_flag = "ig";
-    var match_index = 0;
-    var help_buttons = null;
-    var matches_length = 0;
+        "": "#video_webinar_section",
+        "": "#video_presentation_section",
 
-    //this will get the anchor, if one called
+        // {# features using study data #}
+        "": "#study_data_feature_section",
+        "": "#help_study_component",
+        "": "#help_assay_data_viz",
+        "": "#help_omic_data_viz",
+        "": "#help_image_and_video",
+        "": "#help_power_analysis",
+        "": "#help_reproducibility_analysis",
+        "": "#help_study_set",
+        "": "#help_collaborator_group",
+        "": "#help_access_group",
+        "": "#help_pbpk_analysis",
+        "": "#help_disease_portal",
+        "": "#help_compound_report",
+        "": "#help_reference",
+
+        "": "#study_data_customization_section",
+        "": "#help_custom_filtering_sidebar",
+        "": "#help_custom_graphing_sidebar",
+        "": "#help_custom_graphing_individual",
+
+        // {# reference data #}
+        "": "#non_study_data_feature_section",
+        "": "#help_chemical_data",
+        "": "#help_bioactivities",
+        "": "#help_drug_trials",
+        "": "#help_adverse_events",
+        "": "#help_compare_adverse_events",
+        "": "#help_heatmap_bioactivities",
+        "": "#help_cluster_chemicals",
+
+        // {# providing data #}
+        "": "#study_editor_section",
+        "": "#help_join_group",
+        "": "#help_study_component_pointer",
+        "": "#help_add_study",
+        "": "#help_study_detail",
+        "": "#help_study_treatment_group",
+        "": "#help_chip_and_plate",
+        "": "#help_target_and_method",
+        "": "#help_data_upload",
+        "": "#help_image_video",
+        "": "#help_flags_and_notes",
+        "": "#help_study_signoff",
+
+        "": "#component_admin_section",
+        "": "#glossary",
+
+        // {# if all null, grabs last one #}
+        "": "#help_overview_background",
+
+    };
+
     var initial_hash = window.location.hash;
-    //just for testing, use this hash
-    // initial_hash = '#help_download_button';
-    if (initial_hash) {
-        animate_scroll_hash(initial_hash);
+    var initial_hash_help = anchor_xref[initial_hash];
+    if (!initial_hash_help) {
+        initial_hash_help = '#help_overview_background';
     }
 
-    function animate_scroll_hash(this_hash) {
-        // if the anchor is NOT on the page, do not cause and error in the console
-        // this error causes the glossary NOT to display!!!
-        if ($(initial_hash).length)
-        {
-            $('html, body').animate({
-                scrollTop: $(this_hash).offset().top - offset
-            }, 500);
-            $(this_hash).find('button').next().first().css("display", "block");
-        }
-    }
-
+    var if_all_are_open_true = false;
     // need a listener click for after the search....
     //https://api.jquery.com/click/
     $(document).on('click', '#expand_all', function() {
@@ -95,6 +137,15 @@ $(document).ready(function () {
     }
 
     // START SEARCH SECTION
+
+    var selector = "#realTimeContents";
+    var searchTerm = null;
+
+    // mark.js and https://jsfiddle.net/julmot/973gdh8g/
+    //make them disabled on load
+    $('#search_next').attr('disabled', 'disabled');
+    $('#search_prev').attr('disabled', 'disabled');
+
     function change_search_ables_to_search(which) {
         if (which) {
             $('#search_next').attr('disabled', 'disabled');
@@ -107,177 +158,156 @@ $(document).ready(function () {
         }
     }
 
-    $(document).on('click', '#match_case', function() {
-    // $("#match_case").click(function() {
+    $(document).on('click', '#caseSensitive', function() {
+    // $("#caseSensitive").click(function() {
         change_search_ables_to_search(true);
+        if (searchTerm) {
+            // not null
+            gooo();
+        }
     });
-    
+
     // consider on input
     document.getElementById("search_term").onfocus = function() {
         myFunction()
     };
-    
+
     function myFunction() {
         change_search_ables_to_search(true);
     }
 
-    $(document).on('click', '#search_gooo', function() {
-    // $("#search_gooo").click(function() {
-        change_search_ables_to_search(false);
-         
-        //Remove old search highlights
-        $('.highlighted').removeClass('highlighted');
-        //Remove the spans and old matches
-        $span = $('#realTimeContents .match');
-        // NO NO NO - this does not iterate as expected, it just pulls one - $span.replaceWith($span.html());
-        // the following makes sure to iterate through
-        $span.each(function() {
-            $(this).replaceWith($(this).html());
-        });
+    // mark.js and https://www.jquery-az.com/jquery/demo.php?ex=153.0_3
+    // the input field
+    var $input = $("input[type='search']");
+    // clear button
+    var $clearBtn = $("button[data-search='clear']");
+    // prev button
+    var $prevBtn = $("button[data-search='prev']");
+    // next button
+    var $nextBtn = $("button[data-search='next']");
+    // the context where to search
+    var $content = $(".content");
+    // jQuery object to save <mark> elements
+    var $results;
+    // the class that will be appended to the current
+    // focused element
+    var currentClass = "current";
+    // top offset for the jump (the search bar)
+    var offsetTop = 200;
+    // the current index of the focused element
+    var currentIndex = 0;
 
-        if ($('#match_case').prop('checked')){
-            match_case_flag = "g";
-        } else {
-            match_case_flag = "ig";
+    /**
+    * Jumps to the element matching the currentIndex
+    */
+    function jumpTo() {
+        if ($results.length) {
+            var position;
+            var $current = $results.eq(currentIndex);
+            $results.removeClass(currentClass);
+            if ($current.length) {
+                $current.addClass(currentClass);
+                position = $current.offset().top - offsetTop;
+                window.scrollTo(0, position);
+            }
+        }
+    }
+
+    /**
+    * Searches for the entered keyword in the
+    * specified context on input
+    */
+    // $input.on("input", function() {
+    $(document).on('click', '#search_gooo', function() {
+        gooo();
+    });
+
+    function gooo() {
+        change_search_ables_to_search(false);
+
+        var caseSensitive = false;
+        if ($('#caseSensitive').prop('checked')){
+            caseSensitive = true;
         }
 
-        searchTerm = $('#search_term').val();
+        searchTerm = $("input[name='keyword']").val();
+
+        // console.log("searchTerm ", searchTerm)
+
         if (searchTerm.length === 0) {
-            alert("Search box is empty");
             change_search_ables_to_search(true);
-        } else {
+            removeOldHighlights();
+            alert("Search box is empty");
+        }
+        else {
             // open all the collapsibles if they are not already open
             // console.log("if_all_are_open_true ", if_all_are_open_true)
             if (!if_all_are_open_true) {
                 expand_or_close_all(selector, 'e');
             }
-            // find the matches array and go to and highlighted
-            // this calls search master outer (not a call back)
-            let match_found_true = searchAndHighlight_search_master();
-            if (!match_found_true) {
-                alert("No results found");
-                animate_scroll_hash('#overview_section');
+
+            // when acrossElements = true, the count of mark tags might be greater than actual # matches
+            // because multiple <mark> tags are created to keep tags opening and closing correctly
+            // var searchVal = this.value;
+            var searchVal = searchTerm
+            $content.unmark({
+                done: function () {
+                    $content.mark(searchVal, {
+                        separateWordSearch: false,
+                        caseSensitive: caseSensitive,
+                        acrossElements: true,
+                        done: function () {
+                            $results = $content.find("mark");
+                            currentIndex = 0;
+                            jumpTo();
+                        }
+                    });
+                }
+            });
+            if ($results.length == 0) {
+                alert("Could not find a match");
+                change_search_ables_to_search(true);
             }
+        }
+    }
+
+    function removeOldHighlights() {
+        change_search_ables_to_search(true);
+        $content.unmark();
+        $input.val("").focus();
+    }
+
+    /**
+    * Clears the search
+    */
+    $clearBtn.on("click", function() {
+        change_search_ables_to_search(true);
+        $content.unmark();
+        $input.val("").focus();
+    });
+
+    /**
+    * Next and previous search jump to
+    */
+    $nextBtn.add($prevBtn).on("click", function() {
+        change_search_ables_to_search(false);
+        if ($results.length) {
+            currentIndex += $(this).is($prevBtn) ? -1 : 1;
+            if (currentIndex < 0) {
+                currentIndex = $results.length - 1;
+            }
+            if (currentIndex > $results.length - 1) {
+                currentIndex = 0;
+            }
+            jumpTo();
         }
     });
 
-    // https://www.aspforums.net/Threads/211834/How-to-search-text-on-web-page-similar-to-CTRL-F-using-jQuery/
-    // http://jsfiddle.net/wjLmx/23/
-    //https://codeburst.io/javascript-what-the-heck-is-a-callback-aba4da2deced
-    function searchAndHighlight_search_master() {
-        var result = false;
-        if (searchTerm) {
-            searchTermRegEx = new RegExp(searchTerm, match_case_flag);
-
-            // console.log("matches (previous call) "+matches)
-            // console.log("step 1 searchTermRegEx "+searchTermRegEx)
-            // console.log("step 1 selector "+selector)
-
-            matches = null;
-
-            findMatches_search0(afterFindMatches_search1);
-
-            // console.log("End - Number of matches after back from everything = "+matches_length)
-
-            if (matches_length > 0) {
-                result = true;
-            }
-        }
-        return result;
-    }
-
-    function findMatches_search0(callback1) {
-        matches = $(selector).text().match(searchTermRegEx);
-        callback1();
-    }
-
-    function afterFindMatches_search1() {
-        if (!matches) {
-            matches = [];
-        }
-        matches_length = matches.length;
-        // console.log("step 1 matches "+matches)
-        // console.log("step 1 number matches = "+matches_length)
-
-        if (matches != null && matches_length > 0) {
-            // unique_matches = matches.filter(function(itm, i, a) {
-            //     return i == matches.indexOf(itm);
-            // });
-            if (searchTerm === "&") {
-                searchTerm = "&amp;";
-                searchTermRegEx = new RegExp(searchTerm, match_case_flag);
-            }
-            // console.log("searchTerm ",searchTerm)
-            labelMatchSpan_search2(continueFunction_search3);
-        }
-    }
-
-    function labelMatchSpan_search2(callback2){
-        $(selector).html($(selector).html().replace(searchTermRegEx, "<span class='match'>" + searchTerm + "</span>"));
-        callback2();
-    }
-
-    function continueFunction_search3() {
-        // console.log("in search 3")
-        // console.log("$('.match').length = "+$('.match').length)
-        // console.log("matches_length = " + matches_length)
-        // the previous function replaced with the search term, fix to match the original case
-        if ($('.match').length != matches_length) {
-            alert("there is a mismatch in the counting....")
-        }
-        // console.log("step right above matches "+matches)
-        $('.match').each(function (index, currentElement) {
-            // console.log("~~~index = "+index)
-            // console.log("~~~matches[index] = "+matches[index])
-            // console.log("~~~currentElement.innerHTML = "+currentElement.innerHTML)
-            // console.log("~~~$(this).html() = "+$(this).html())
-            // currentElement.innerHTML = matches[index];
-            $(this).html(matches[index]);
-        });
-        $('.match:first').addClass('highlighted');
-        match_index = 0;
-        // console.log("in search 3 - getting ready to highlight")
-        // when the search is clicked - finds the first occurrence
-        if ($('.highlighted:first').length) {
-            //if match found, scroll to where the first one appears
-            // this did not work for study summary....do not know why
-            // $(window).scrollTop($('.highlighted:first').position().top - help_offset);
-            $('html, body').animate({
-                scrollTop: $('.highlighted:visible:first').offset().top - help_offset
-            }, 400);
-        }
-    }
-
-    $(document).on('click', '#search_next', function () {
-    // $("#search_next").click(function() {
-        // $('.next_h').off('click').on('click', function () {
-        match_index =  match_index + 1;
-        if (match_index >= $('.match').length) {
-            match_index = 0;
-        }
-        $('.match').removeClass('highlighted');
-        $('.match').eq(match_index).addClass('highlighted');
-        $('html, body').animate({
-            scrollTop: $('.highlighted:visible:first').offset().top - help_offset
-        }, 400);
-    });
-
-    $(document).on('click', '#search_prev', function () {
-    // $("#search_prev").click(function() {
-        // $('.previous_h').off('click').on('click', function () {
-        match_index = match_index - 1;
-        if (match_index < 0) {
-            match_index = $('.match').length - 1;
-        }
-        $('.match').removeClass('highlighted');
-        $('.match').eq(match_index).addClass('highlighted');
-        $('html, body').animate({
-            scrollTop: $('.highlighted:visible:first').offset().top - help_offset
-        }, 400);
-    });
     // END SEARCH SECTION
 
     // START GLOSSARY SECTION
+    var offset = 110;
+
     $('a').not("[href*='/']").click(function(event) {
         event.preventDefault();
         if ($($(this).attr('href'))[0]) {
@@ -344,5 +374,145 @@ $(document).ready(function () {
         glossary_table.draw();
     });
     // END GLOSSARY SECTION
+
+    // after the page is loaded, change location on page
+
+    console.log("ih ", initial_hash)
+    console.log("ihh ", initial_hash_help)
+    animate_scroll_hash(initial_hash_help);
+    function animate_scroll_hash(anchor) {
+        // if the anchor is NOT on the page, do not cause and error in the console
+        // this error causes the glossary NOT to display!!!
+        console.log("h ",anchor)
+        if ($(anchor).length)
+        {
+            $('html, body').animate({
+                scrollTop: $(anchor).offset().top - offset
+            }, 500);
+            $(anchor).find('button').next().first().css("display", "block");
+        }
+    }
 });
 
+
+//HANDY - iterate vrs first - keep for reference
+    // //Remove the spans and old matches
+    // $span = $('#realTimeContents .match');
+    // // NO NO NO - this does not iterate as expected, it just pulls one - $span.replaceWith($span.html());
+    // // the following makes sure to iterate through
+    // $span.each(function() {
+    //     $(this).replaceWith($(this).html());
+    // });
+
+    //var help_offset = 200;
+    // var buttons = null;
+    // var searchTermRegEx = null;
+    // var caseSensitive_flag = "ig";
+    // var help_buttons = null;
+    // var matches = null;
+    // var match_index = 0;
+    // var matches_length = 0;
+
+// HANDY - Some references that ended up not using, but keep in case need again
+// https://www.aspforums.net/Threads/211834/How-to-search-text-on-web-page-similar-to-CTRL-F-using-jQuery/
+// http://jsfiddle.net/wjLmx/23/
+
+// HANDY - References for making a callback
+// https://www.aspforums.net/Threads/211834/How-to-search-text-on-web-page-similar-to-CTRL-F-using-jQuery/
+// http://jsfiddle.net/wjLmx/23/
+// https://codeburst.io/javascript-what-the-heck-is-a-callback-aba4da2deced
+
+    // function findMatches_search0(callback1) {
+    //     // console.log("searchTermRegEx "+searchTermRegEx)
+    //
+    //     // matches = $(selector).text().match(searchTermRegEx);
+    //     $('.mark-content').mark(searchTerm, options);
+    //     matches = $(".mark").map(function() {
+    //         return this.innerHTML;
+    //     }).get();
+    //
+    //     callback1();
+    // }
+    //
+    // function afterFindMatches_search1() {
+    //     if (!matches) {
+    //         matches = [];
+    //     }
+    //     matches_length = matches.length;
+    //     // console.log("step 1 matches "+matches)
+    //     // console.log("step 1 number matches = "+matches_length)
+    //
+    //     if (matches != null && matches_length > 0) {
+    //         // unique_matches = matches.filter(function(itm, i, a) {
+    //         //     return i == matches.indexOf(itm);
+    //         // });
+    //         // if (searchTerm === "&") {
+    //         //     searchTerm = "&amp;";
+    //         //     searchTermRegEx = new RegExp(searchTerm, caseSensitive_flag);
+    //         // }
+    //         // console.log("searchTerm ",searchTerm)
+    //         labelMatchSpan_search2(continueFunction_search3);
+    //     }
+    // }
+
+    //
+    // function continueFunction_search3() {
+    //     // the previous function replaced with the search term, fix to match the original case
+    //     // if ($('.match').length != matches_length) {
+    //     //     alert("there is a mismatch in the counting....")
+    //     // }
+    //     if ($('.mark').length != matches_length) {
+    //         alert("there is a mismatch in the counting....")
+    //     }
+    //     $('.match').each(function (index, currentElement) {
+    //         currentElement.innerHTML = matches[index];
+    //         $(this).html(matches[index]);
+    //     });
+    //     // $('.match:first').addClass('highlighted');
+    //     $('.match:first').addClass('mark');
+    //     match_index = 0;
+    //     // console.log("in search 3 - getting ready to highlight")
+    //     // when the search is clicked - finds the first occurrence
+    //     // if ($('.highlighted:first').length) {
+    //     if ($('.mark:first').length) {
+    //         //if match found, scroll to where the first one appears
+    //         // this did not work for study summary....do not know why
+    //         // $(window).scrollTop($('.highlighted:first').position().top - help_offset);
+    //         $('html, body').animate({
+    //             // scrollTop: $('.highlighted:visible:first').offset().top - help_offset
+    //             // scrollTop: $('.mark:visible:first').offset().top - help_offset
+    //             $current = $('.match').eq(match_index);
+    //             position = $current.offset().top - offsetTop;
+    //             window.scrollTo(0, position);
+    //         }, 400);
+    //     }
+    // }
+    //
+    // $(document).on('click', '#search_next', function () {
+    // // $("#search_next").click(function() {
+    //     // $('.next_h').off('click').on('click', function () {
+    //     match_index =  match_index + 1;
+    //     if (match_index >= $('.match').length) {
+    //         match_index = 0;
+    //     }
+    //     $('.match').removeClass('highlighted');
+    //     $('.match').eq(match_index).addClass('highlighted');
+    //     $('html, body').animate({
+    //         // scrollTop: $('.highlighted:visible:first').offset().top - help_offset
+    //         scrollTop: $('.mark:visible:first').offset().top - help_offset
+    //     }, 400);
+    // });
+    //
+    // $(document).on('click', '#search_prev', function () {
+    // // $("#search_prev").click(function() {
+    //     // $('.previous_h').off('click').on('click', function () {
+    //     match_index = match_index - 1;
+    //     if (match_index < 0) {
+    //         match_index = $('.match').length - 1;
+    //     }
+    //     $('.match').removeClass('highlighted');
+    //     $('.match').eq(match_index).addClass('highlighted');
+    //     $('html, body').animate({
+    //         scrollTop: $('.highlighted:visible:first').offset().top - help_offset
+    //     }, 400);
+    // });

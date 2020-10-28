@@ -7,8 +7,12 @@
 
 <ul class="list-group">
     <li class="list-group-item">
-        <h1 class="h1-level-1"> Reference Data Sources </h1>
-        The following briefly describes the sources of data used in the MPS-Db and how those data are obtained.
+        <h1 class="h1-level-1">Reference Data Sources</h1>
+        The following briefly describes the
+        <span class="glst">reference data sources</span>
+        used in the
+        <span class="glst">MPS-Db</span>
+        and how those data are obtained.
         <br>
         <br>
 
@@ -25,10 +29,10 @@
             <tbody>
                 {% for term in source %}
                 <tr>
-                    <td>{{ term.term }}</td>
-                    <td>{{ term.definition }}</td>
-                    <td>{{ term.help_order }}</td>
-                    <th>{{ term.show_url }}</th>
+                    <td class="gse0">{{ term.term }}</td>
+                    <td class="gse1">{{ term.definition }}</td>
+                    <td class="gse1">{{ term.help_order }}</td>
+                    <td class="gse1">{{ term.show_url }}</td>
                 </tr>
                 {% endfor %}
             </tbody>

@@ -26,8 +26,8 @@
                             <ul class="help-filled-circle">
                                 <li> The <b>Change Tracking</b> section:
                                     <ul class="help-open-circle">
-                                        <li> Signed Off By - If this has a user name in it, it means that the study is following the sign off, acknowledgement, embargo process</li>
-                                        <li> A sign off does not open the study to the public, even if there is no stakeholder</li>
+                                        <li> Signed Off By - If this has a user name in it, it means that the study is following the sign-off, acknowledgement, embargo process</li>
+                                        <li> A sign-off does not open the study to the public, even if there is no stakeholder</li>
                                         <li> If there is no stakeholder, the study is open to Access Groups </li>
                                     </ul>
                                 </li>
@@ -38,9 +38,9 @@
                                         <li> Data Group - This is the team that can add/edit/remove a Study (until the Data Group Administrator signs off the Study) </li>
                                         <li> When adding/editing a Study in the front-end, a user who has been added to one or more Data Groups (by an MPS Admin) can select the Data Group for the Study (selection options will be limited to the Editing Groups to which the user is a member).</li>
                                         <li> Restricted - Until this is unchecked, a study is closed to the public (it can be unchecked by an admin at any time)</li>
-                                        <li> Studies in the embargo period (after sign off and acknowledgement) will be unchecked one year and two weeks after sign off (automated process), UNLESS the study is 'locked' </li>
+                                        <li> Studies in the embargo period (after sign-off and acknowledgement) will be unchecked one year and two weeks after sign-off (automated process), UNLESS the study is 'locked' </li>
                                         <li> Keep Private Indefinitely (Locked) - Locking a study stops the study from being released to the next level (blocks automatic migration to public access - public if acknowledged, access if stakeholders, stakeholders if signed off). </li>
-                                        <li> Access Groups - Any Groups in the 'Choosen Access Groups' box can see the study after stakeholder acknowledgement, or after sign off if there are no stakeholders </li>
+                                        <li> Access Groups - Any Groups in the 'Choosen Access Groups' box can see the study after stakeholder acknowledgement, or after sign-off if there are no stakeholders </li>
                                         <li> Collaborator Groups - Any Groups in the 'Chosen Collaborator Groups' box can see this study, at any time</li>
                                         <li>Collaborator Groups are a SPECIAL feature that allows sharing a study regardless of where the study is in the sign-off and embargo process (it is the ONLY feature, currently in the database, that overrides other permissions)!!!!</li>
                                     </ul>
@@ -59,7 +59,7 @@
                             <ul class="help-filled-circle">
                                 <li> What happens if the 'Use in Calculations' box is check? The study becomes available in the Compound Report. </li>
                                 <li> Collaborator groups are completely controlled by the admins (no front-end GUI).</li>
-                                <li> To open a study to the public immediately (i.e. bypass sign off, acknowledgment, embargo) must by done by the admin (uncheck the restricted box), but data providers can check the 'Use in Calculations' box.</li>
+                                <li> To open a study to the public immediately (i.e. bypass sign-off, acknowledgment, embargo) must by done by the admin (uncheck the restricted box), but data providers can check the 'Use in Calculations' box.</li>
                                 <li> While the use is sometimes indicated in the group name, there is no real difference between groups (data, stakeholder, access, collaborator). Use caution. Even though a data group and a stakeholder group is associated with the same institution, the users in the groups maybe different. </li>
                             </ul>
                         </li>
@@ -81,8 +81,8 @@
                         <li> A <b>Group</b> (Data, Stakeholder, Access) is actually a trio of groups. The following is an example for <b>Data Group Rusyn_TAMU</b>
                             <ul class="help-filled-circle">
                                 <li> <b>Rusyn_TAMU</b> - this is the editor group, sometimes referred to as the group proper </li>
-                                <li> <b>Rusyn_TAMU Admin</b> - admins can edit and sign off (or acknowledge for TCD groups) studies</li>
-                                <li> <b>Rusyn_TAMU Viewer</b> - can view studies prior to sign off (or acknowledgement for TCD groups) </li>
+                                <li> <b>Rusyn_TAMU Admin</b> - admins can edit and sign-off (or acknowledge for TCD groups) studies</li>
+                                <li> <b>Rusyn_TAMU Viewer</b> - can view studies prior to sign-off (or acknowledgement for TCD groups) </li>
                             </ul>
                         </li>
                         <br>
@@ -183,6 +183,7 @@
     </div>
 
     <div id="user_groups_admin">
+
         <button name="help_button" type="button" class="btn btn-primary help-collapsible">Assigning Users To Groups</button>
         <div class="help-content-1">
 
@@ -211,8 +212,8 @@
                         <li> <br> The term <b>Data Group</b> actually refers to three groups, one group for each role. The following is an example for <b>Data Group Rusyn_TAMU</b> group
                             <ul class="help-filled-circle">
                                 <li> <b>Rusyn_TAMU</b> - this is the editor group, sometimes referred to as the group proper </li>
-                                <li> <b>Rusyn_TAMU Admin</b> - admins can edit and sign off studies</li>
-                                <li> <b>Rusyn_TAMU Viewer</b> - can view studies prior to sign off</li>
+                                <li> <b>Rusyn_TAMU Admin</b> - admins can edit and sign-off studies</li>
+                                <li> <b>Rusyn_TAMU Viewer</b> - can view studies prior to sign-off</li>
                             </ul>
                         </li>
                         <li> <br> The term <b>Stakeholder Group</b> also refers to three groups, one group for each role. The following is an example for <b>TCD_BBB_Vandy</b> group
@@ -273,6 +274,46 @@
                         <li><br>Editing Help Notes:
                             <ul class="help-filled-circle">
                                 <li> Some components, like Methods and Targets, have a 'limited' interface to allow for binding Target and Methods to each other, regardless of who created the specific study component or whether the specific study component is in use</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </li>
+
+            </ul>
+
+        </div>
+    </div>
+
+
+    <div id="add_new_center">
+        <button name="help_button" type="button" class="btn btn-primary help-collapsible">Add New Center </button>
+        <div class="help-content-1">
+
+            <ul class="list-group">
+                <li class="list-group-item">
+                    <h1 class="h1-level-1"> Add New Center </h1>
+                    <ul class="list-unstyled">
+                        <li>Go to the admin and pick Microphysiology Centers - Add and add the following info</li>
+                        <li></li>
+                            <ul class="help-filled-circle">
+                                <li>Center Name - University of Pittsburgh Drug Discovery Institute</li>
+                                <li>Center ID - UPDDI</li>
+                                <li>Institution - University of Pittsburgh</li>
+                                <li>Description of Center (optional) </li>
+                                <li>Contact Person</li>
+                                <li>Contact Email</li>
+                                <li>Project PI (optional) </li>
+                                <li>PI Email (optional) </li>
+                                <li>Contact Webpage</li>
+                                <li>Center Webpage</li>
+                                <li>A Data Group - the group proper (e.g., the editor group)</li>
+                            </ul>
+                        </li>
+
+                        <li><br>Help Notes:
+                            <ul class="help-filled-circle">
+                                <li> It is very easy to forget to attach the group proper to a center. If you forget, you will not be able to use the group. </li>
+                                <li> Although Groups are classified into three different types, each Group is fundamentally the same in the backend. The differences are purely functional based on where a Group is used. </li>
                             </ul>
                         </li>
                     </ul>

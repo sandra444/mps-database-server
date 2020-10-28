@@ -8,53 +8,93 @@
 {% for term in component_model %}
 
     {% if term.term == "MPS Model" %}
-        {# *anchor* #}
-        <div id="assay_model_anchor">
-            <button name="help_button" type="button" class="btn btn-success help-collapsible">{{ term.term }}</button>
-            <div class="help-content-2">
-                <ul class="list-group">
-                    <li class="list-group-item">
-                        <h1 class="h1-level-1"> {{ term.term }} </h1>
-                        <ul class="list-unstyled">
-                            <li>To review the {{ term.term }} list:
-                                <ul class="help-filled-circle">
-                                    <li>Click the link {{ term.show_url }} </li>
-                                    <li>Use the search bar or scroll through the list to find the {{ term.term }} of interest or confirm the {{ term.term }} is not present</li>
-                                    <li>If in the list, click on the <b>View</b> button to review the details or the <b>Edit</b> button to update </li>
-                                    <li>If not in the list, click on the <b>Add Model</b> button </li>
-                                </ul>
-                            </li>
-                            <li><br>Help Notes:
-                                <ul class="help-filled-circle">
-                                    <li>To add or edit:
-                                        <ul class="help-open-circle">
-                                            <li>Fill in all the required information </li>
-                                            <li>Submit to save (a model must be saved before a version can be added)</li>
-                                            <li>In the {{ term.term }} list, click the <b>Edit</b> button to update the model</li>
-                                            <li>Scroll to the <b>MPS Model Versions</b> section of the page and click the <b>Edit</b> button to setup a model version</li>
-                                            <li>Add all the information for the model version</li>
-                                            <li>Click the <b>Submit</b> button to save </li>
-                                        </ul>
-                                    </li>
-                                </ul>
-                            </li>
-                            <li><br>Help Tips:
-                                <ul class="help-filled-circle">
-                                    <li>Collect up all the metadata needed before adding or updating </li>
-                                    <li>Add references to the database prior to trying to add them to a {{ term.term }} </li>
-                                    <li>Add Model Versions to expedite study entry
-                                        <ul class="help-open-circle">
-                                            <li>Model versions include the information about cells and settings </li>
-                                            <li>Model versions are a starting point for setting up study treatment groups</li>
-                                            <li>Model versions, correctly completed, can significantly expedite the study entry process</li>
-                                        </ul>
-                                    </li>
-                                </ul>
-                            </li>
-                        </ul>
-                    </li>
-                </ul>
-            </div>
+        <button name="help_button" type="button" class="btn btn-success help-collapsible">{{ term.term }}</button>
+        <div class="help-content-2">
+            <ul class="list-group">
+                <li class="list-group-item">
+                    <h1 class="h1-level-1">
+                        <span class="gse0">{{ term.term }}</span>
+                    </h1>
+                    <ul class="list-unstyled">
+                        <li>To review the
+                            <span class="gse0">{{ term.term }}</span>
+                            list:
+                            <ul class="help-filled-circle">
+                                <li>Click the link {{ term.show_url }}</li>
+                                <li>Use the search bar or scroll through the list to find the
+                                    <span class="gse0">{{ term.term }}</span>
+                                    of interest or confirm the
+                                    <span class="gse0">{{ term.term }}</span>
+                                    is not present
+                                </li>
+                                <li>If in the list, click on the
+                                    <b>View</b> button to review the details or the
+                                    <b>Edit</b> button to update
+                                </li>
+                                <li>If not in the list, click on the
+                                    <b>Add Model</b> button
+                                </li>
+                            </ul>
+                        </li>
+                        <li><br>Help Notes:
+                            <ul class="help-filled-circle">
+                                <li>To add or edit:
+                                    <ul class="help-open-circle">
+                                        <li>Fill in all the required information </li>
+                                        <li>Submit to save (an
+                                            <span class="glst">MPS model</span> must be saved before an
+                                            <span class="glst">MPS model version</span>
+                                            can be added)
+                                        </li>
+                                        <li>In the
+                                            <span class="gse0">{{ term.term }}</span>
+                                            list, click the <b>Edit</b> button to update the model
+                                        </li>
+                                        <li>Scroll to the
+                                            <b>MPS Model Versions</b>
+                                            section of the page and click the
+                                            <b>Edit</b> button to set up a
+                                            <span class="glst">MPS model version</span>
+                                        </li>
+                                        <li>Add all the information for the
+                                            <span class="glst">MPS model version</span>
+                                        </li>
+                                        <li>Click the <b>Submit</b> button to save </li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </li>
+                        <li><br>Help Tips:
+                            <ul class="help-filled-circle">
+                                <li>Collect up all the metadata needed before adding or updating </li>
+                                <li>Add
+                                    <span class="glst">references</span>
+                                    to the database prior to trying to add them to a
+                                    <span class="gse0">{{ term.term }}</span>
+                                </li>
+                                <li>Add Model Versions to expedite study entry
+                                    <ul class="help-open-circle">
+                                        <li>
+                                            <span class="glst">MPS model version</span>
+                                            include the information about cells and settings
+                                        </li>
+                                        <li>
+                                            <span class="glst">MPS model version</span>
+                                            are a starting point for setting up
+                                            <span class="glst">study treatment groups</span>
+                                        </li>
+                                        <li>
+                                            <span class="glst">MPS model version</span>,
+                                            correctly completed, can significantly expedite the
+                                            <span class="glst">study setup</span> process
+                                        </li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
         </div>
 
     {% endif %}
