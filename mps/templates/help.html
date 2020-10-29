@@ -63,7 +63,11 @@
 
 <body>
 {#<body data-spy="scroll" data-target=".navbar" data-offset="80">#}
-
+{#The help is set up to pull from the glossary as much as possible#}
+{#{{ all_glossary.assaytarget_term }}#}
+{#note that, if Assay Target gets changed to, for example Target Assay, global search and replace all the help html files as shown above#}
+{#a few had to be entered manually, eg Assay Categories, since the glossary term is Assay Category and I could not just add the s#}
+{#watch the singler and plural studycomponent vrs studycomponents #}
 <nav class="navbar navbar-inverse navbar-fixed-top">
 
     {# HANDY Open class container - use Ctrl+Shift+M to jump to close#}
@@ -84,14 +88,14 @@
 
                     {# home icon #}
                     <li>
-                        <a class="navbar-brand" href="https://mps.csb.pitt.edu/">
+                        <a class="navbar-brand" href={{ all_glossary.mpsdb_naked_ref }}>
                             <img alt="MPS Database Logo" src="/static/img/brand.png" style="margin-top:-10px;">
                         </a>
                     </li>
 
                     {# home text #}
                     <li>
-                        <a href="https://mps.csb.pitt.edu/">Home</a>
+                        <a href={{ all_glossary.mpsdb_naked_ref }}>Home</a>
                     </li>
 
                     {# overview #}
@@ -250,15 +254,14 @@
                                 </thead>
                                 <tbody>
                                     <tr>
-{# this does not work with the capitization is done using a class, so I disabled it for now#}
-{#                                        <td>#}
-{#                                            <input id="caseSensitive" type="checkbox" name="opt[]" value="caseSensitive" class="plate-map-bigger-radio" >#}
-{#                                        </td>#}
-{#                                        <td>#}
-{#                                            <label for="caseSensitive" class="navi-special-1">Match Case</label>#}
-{#                                        </td>#}
                                         <td>
-                                            <input id="search_term" type="search" name="keyword" class="form-control input-sm" placeholder="Lorem ipsum...">
+                                            <input id="caseSensitive" type="checkbox" name="opt[]" value="caseSensitive" class="plate-map-bigger-radio" >
+                                        </td>
+                                        <td>
+                                            <label for="caseSensitive" class="navi-special-1">Match Case</label>
+                                        </td>
+                                        <td>
+                                            <input id="search_term" type="search" name="keyword" class="form-control input-sm" placeholder="enter search term...">
                                         </td>
                                         <td>
                                             <button id="search_gooo" type="button" class="btn btn-primary">Search</button>
@@ -327,6 +330,10 @@
                         <br>9) settle on classes to the terms and to the glossary export stuff,
                         <br>10) consider capitalizing the glossary terms in the html (not the class) so can use case sensitive search (also consider ignoring, for prev and next, the second or more occurrence if /mark mark in present),
                         <br>11) add the new Clinical Trials feature (currently only on stage)
+                        <br>12) update the model version section,
+                        <br>13) replace all the typed in glossary terms with glossary extracted terms,
+                        <br>14) add more model version information,
+                        <br>15) check the <br><li>Help Note.....</li>
                     </p>
 
 
@@ -386,11 +393,11 @@
                                 <h1 class="h1-level-1">Global Database Search</h1>
                                 <ul class="list-unstyled">
                                     <li>Use a <b>Global Database Search</b> tool to search the whole 
-                                        <span class="glst">MPS-Db</span>
+                                        <span class="gse0">{{ all_glossary.mpsdb_term }}</span>
                                         from the <b>Home</b> page. To search:
                                         <ul class="help-filled-circle">
                                             <li>Go to the 
-                                                <span class="glst">MPS-Db</span>
+                                                <span class="gse0">{{ all_glossary.mpsdb_term }}</span>
                                                 <b>Home</b> page
                                             </li>
                                             <li>Type a search term into the global search bar</li>
@@ -473,10 +480,10 @@
                             <div class="list-group-item">
                                 <h1 class="h1-level-1">Introduction to the Microphysiology Systems Database (20201006) </h1>
                                 UPDDI's Mark Schurdak presents the webinar, <i>Introduction to the Microphysiology Systems Database 
-                                (<span class="glst">MPS-Db</span>)
+                                (<span class="gse0">{{ all_glossary.mpsdb_term }}</span>)
                                 - A Critical Tool for Managing, Analyzing, and Modeling MPS Experimental Data</i>.
                                 This video is a great place to start for new 
-                                <span class="glst">MPS-Db</span>
+                                <span class="gse0">{{ all_glossary.mpsdb_term }}</span>
                                 users and those considering using the MPS-Db.
                                 Video was recorded on October 6, 2020 and is approximately 60 minutes long.
                                 Questions asked during the webinar, along with answers, are available below.
@@ -513,9 +520,9 @@
                             <div class="list-group-item">
                                 <h1 class="h1-level-1">Plate Reader Data Integration Tool (20200521) </h1>
                                 UPDDI's Mark Schurdak introduces the
-                                <span class="glst">plate reader data</span>
+                                <span class="gse0">{{ all_glossary.platereaderdata_term }}</span>
                                 integration tool. This tool allows users to setup assay plate maps, upload assay data, calibrate and process data, and add data to the
-                                <span class="glst">study summary</span>.
+                                <span class="gse0">{{ all_glossary.studysummary_term }}</span>.
                                 The demo begins at 4:30. Video was recorded on May 21, 2020 and is approximately 42 minutes long (demo is about 30 minutes). This demo was recorded using the stage/development server for the purpose of soliciting user feedback.
                                 <br><br>
                                 <button name="video_button" type="button" class="btn btn-default video-collapsible">Open Video Window</button>
@@ -537,9 +544,9 @@
                             <li class="list-group-item">
                                 <h1 class="h1-level-1">PBPK Modeling (20200416) </h1>
                                 UPDDI's Mark Schurdak walks through an early version of the
-                                <span class="glst">PBPK Analysis</span>
+                                <span class="gse0">{{ all_glossary.pbpkanalysis_term }}</span>
                                 feature that is being integrated into the
-                                <span class="glst">MPS-Db</span>.
+                                <span class="gse0">{{ all_glossary.mpsdb_term }}</span>.
                                 Video was recorded on April 16, 2020 and is approximately 21 minutes long. This demo was recorded using the stage/development server for the purpose of soliciting user feedback.
                                 <br><br>
                                 <button name="video_button" type="button" class="btn btn-default video-collapsible">Open Video Window</button>
@@ -562,9 +569,9 @@
                             <div class="list-group-item">
                                 <h1 class="h1-level-1">Study Sets, Controlled Sharing, and References (20190620) </h1>
                                 UPDDI's Albert Gough shows how
-                                <span class="glst">study sets</span>
+                                <span class="gse0">{{ all_glossary.studyset_term }}s</span>
                                 can be used to share data with external collaborators and how
-                                <span class="glst">study sets</span>
+                                <span class="gse0">{{ all_glossary.studyset_term }}s</span>
                                 can be assigned URLs that can be referenced in publications. Video was recorded on June 20, 2019 and is approximately 25 minutes long.
                                 <br><br>
                                 <button name="video_button" type="button" class="btn btn-default video-collapsible">Open Video Window</button>
@@ -623,7 +630,7 @@
                             <li class="list-group-item">
                                 <h1 class="h1-level-1">Reproducibility and Customized Plots (20190221) </h1>
                                 UPDDI's Albert Gough shows how to use the inter- and intra-study
-                                <span class="glst">reproducibility analysis</span>
+                                <span class="gse0">{{ all_glossary.reproducibilityanaylsis_term }}</span>
                                 feature and how to use customize queries and plots. Video was recorded on February 21, 2019 and is approximately 30 minutes long.
                                 <br><br>
                                 <button name="video_button" type="button" class="btn btn-default video-collapsible">Open Video Window</button>
@@ -644,7 +651,7 @@
                             <li class="list-group-item">
                                 <h1 class="h1-level-1">Adverse Events Analysis (20190117) </h1>
                                 UPDDI toxicologist Larry Vernetti walks through the process of using the 
-                                <span class="glst">MPS-Db</span>
+                                <span class="gse0">{{ all_glossary.mpsdb_term }}</span>
                                 to help design an <i>in-vitro</i>toxicology study for liver toxicity. Video was recorded on January 17, 2019 and is approximately 30 minutes long.
                                 <br><br>
                                 <button name="video_button" type="button" class="btn btn-default video-collapsible">Open Video Window</button>
@@ -665,7 +672,7 @@
                             <li class="list-group-item">
                                 <h1 class="h1-level-1">Study Data Loading (20181220) </h1>
                                 Members of the UPDDI Database Center and Texas A&M University tissue chip team demonstrate the process used to transfer and upload data into the 
-                                <span class="glst">MPS-Db</span>
+                                <span class="gse0">{{ all_glossary.mpsdb_term }}</span>
                                 used from 2016 to 2018. Video was recorded on December 20, 2018 and is approximately 40 minutes long.
                                 <br><br>
                                 <button name="video_button" type="button" class="btn btn-default video-collapsible">Open Video Window</button>
@@ -694,18 +701,18 @@
                                 <p class="h1-level-3">
                                     <span class="gse1">{{ all_glossary.studycomponent_def }}</span>
                                     To review/add
-                                    <span class="glst">study components</span>,
+                                    <span class="gse0">{{ all_glossary.studycomponents_term }}</span>,
                                     click the link
                                     {{ all_glossary.studycomponent_ref }}.
                                     <br><br>
                                     Guidance on adding/updating more complicated components
-                                    (<span class="glst">assay target</span>,
-                                    <span class="glst">assay method</span>,
-                                    <span class="glst">MPS model</span>,
+                                    (<span class="gse0">{{ all_glossary.assaytarget_term }}</span>,
+                                    <span class="gse0">{{ all_glossary.assaymethod_term }}</span>,
+                                    <span class="gse0">{{ all_glossary.mpsmodel_term }}</span>,
                                     and
-                                    <span class="glst">MPS model version</span>,
-                                    <span class="glst">cell sample</span>,
-                                    <span class="glst">compound</span>)
+                                    <span class="gse0">{{ all_glossary.mpsmodelversion_term }}</span>,
+                                    <span class="gse0">{{ all_glossary.cellsample_term }}</span>,
+                                    <span class="gse0">{{ all_glossary.compound_term }}</span>)
                                     are provided below.
                                 </p>
 
@@ -744,26 +751,26 @@
                                 <h1 class="h1-level-2">Assay Data Visualization (Intra-Study) </h1>
                                 <p class="h1-level-3">The <b>Assay Data Visualization (Intra-Study)</b> feature is accessed from
                                     within an individual
-                                    <span class="glst">study</span>,
+                                    <span class="gse0">{{ all_glossary.study_term }}</span>,
                                     pre-filtered as follows:
                                     <br>1) each 
-                                    <span class="glst">study treatment group</span>,
+                                    <span class="gse0">{{ all_glossary.studytreatmentgroup_term }}</span>,
                                     <br>2) each plate (if using a plate),
                                     <br>3) each chip or well, and
                                     <br>4) the whole 
-                                    <span class="glst">study</span>.
+                                    <span class="gse0">{{ all_glossary.study_term }}</span>.
                                 </p>
                                 <ul class="list-unstyled">
                                     <li>Assay Data Visualization - Each Treatment Group:
                                         <ul class="help-filled-circle">
                                             <li>Go to the <b>Studies</b> tab/icon</li>
                                             <li>Click on the <b>View/Edit</b> button next to the 
-                                                <span class="glst">study</span>
+                                                <span class="gse0">{{ all_glossary.study_term }}</span>
                                                 of interest
                                             </li>
                                             <li>Click on the  <b>View</b> button next to the group of interest</li>
                                             <li>Review metadata and, if displayed, the
-                                                <span class="glst">assay data points (excluding omic)</span>
+                                                <span class="gse0">{{ all_glossary.assaydatapoints_term }}</span>
                                                 graphs 
                                             </li>
                                         </ul>
@@ -773,12 +780,12 @@
                                         <ul class="help-filled-circle">
                                             <li>Go to the <b>Studies</b> tab/icon</li>
                                             <li>Click on the <b>View/Edit</b> button next to the 
-                                                <span class="glst">study</span>
+                                                <span class="gse0">{{ all_glossary.study_term }}</span>
                                                 of interest
                                             </li>
                                             <li>Scroll down to the <b>Plates</b> section and click on the  <b>View/Edit</b> button next to the plate of interest</li>
                                             <li>Review metadata and, if displayed, the
-                                                <span class="glst">assay data points (excluding omic)</span>
+                                                <span class="gse0">{{ all_glossary.assaydatapoints_term }}</span>
                                                 graphs 
                                             </li>
                                         </ul>
@@ -788,28 +795,28 @@
                                         <ul class="help-filled-circle">
                                             <li>Go to the <b>Studies</b> tab/icon</li>
                                             <li>Click on the <b>View/Edit</b> button next to the 
-                                                <span class="glst">study</span>
+                                                <span class="gse0">{{ all_glossary.study_term }}</span>
                                                 of interest
                                             </li>
                                             <li>Scroll down to the <b>Chips and Wells</b> section and click on the <b>View/Edit</b> button next to the chip/well of interest</li>
                                             <li>Review metadata and, if displayed, the
-                                                <span class="glst">assay data points (excluding omic)</span>
+                                                <span class="gse0">{{ all_glossary.assaydatapoints_term }}</span>
                                                 graphs 
                                             </li>
                                             <li>Review the
-                                                <span class="glst">assay data point</span>
+                                                <span class="gse0">{{ all_glossary.assaydatapoint_term }}</span>
                                                 table
                                             </li>
                                             <li>Note: The
-                                                <span class="glst">assay data point</span>
+                                                <span class="gse0">{{ all_glossary.assaydatapoint_term }}</span>
                                                 table offers the
-                                                <span class="glst">data group editor</span>
+                                                <span class="gse0">{{ all_glossary.datagroupeditor_term }}</span>
                                                 and
-                                                <span class="glst">data group administrator</span>
+                                                <span class="gse0">{{ all_glossary.datagroupadministrator_term }}</span>
                                                 of the
-                                                <span class="glst">study</span>
+                                                <span class="gse0">{{ all_glossary.study_term }}</span>
                                                 the ability to include/exclude
-                                                <span class="glst">assay data points (excluding omic)</span>
+                                                <span class="gse0">{{ all_glossary.assaydatapoints_term }}</span>
                                                 from being included/excluded from graphs and analyses by default
                                             </li>
                                         </ul>
@@ -819,12 +826,12 @@
                                         <ul class="help-filled-circle">
                                             <li>Go to the <b>Studies</b> tab/icon</li>
                                             <li>Click on the <b>View/Edit</b> button next to the 
-                                                <span class="glst">study</span>
+                                                <span class="gse0">{{ all_glossary.study_term }}</span>
                                                 of interest
                                             </li>
                                             <li>Click the <b>Analyze/Edit</b> button and select the <b>Study Summary</b> option</li>
                                             <li>Review metadata and, if displayed, the
-                                                <span class="glst">assay data points (excluding omic)</span>
+                                                <span class="gse0">{{ all_glossary.assaydatapoints_term }}</span>
                                                 graphs 
                                             </li>
                                         </ul>
@@ -841,7 +848,7 @@
                                             <li>Check at least one box in each list (work left to right, top to bottom)
                                                 <ul class="help-open-circle">
                                                     <li>Notice how checking and unchecking boxes changes the number of points
-                                                        (<span class="glst">assay data points (excluding omic)</span>)
+                                                        (<span class="gse0">{{ all_glossary.assaydatapoints_term }}</span>)
                                                         that are selected for inclusion 
                                                     </li>
                                                 </ul>
@@ -875,7 +882,7 @@
                                         <ul class="help-filled-circle">
                                             <li>Go to the <b>Studies</b> tab/icon</li>
                                             <li>Click on the <b>View/Edit</b> button next to the 
-                                                <span class="glst">study</span>
+                                                <span class="gse0">{{ all_glossary.study_term }}</span>
                                                 of interest
                                             </li>
                                             <li>Click on the <b>Analyze/Edit</b> button</li>
@@ -896,11 +903,11 @@
                             <li class="list-group-item">
                                 <h1 class="h1-level-1">Assay Images and Video</h1>
                                 <p class="h1-level-3">
-                                    <span class="glst">assay images</span>
+                                    <span class="gse1">{{ all_glossary.assayimages_term }}
                                     -
                                     <span class="gse1">{{ all_glossary.assayimages_def }}</span>
                                     <br>
-                                    <span class="glst">assay videos</span>
+                                    <span class="gse1">{{ all_glossary.assayvideos_term }}
                                     -
                                     <span class="gse1">{{ all_glossary.assayvideos_def }}</span>
                                 </p>
@@ -908,11 +915,11 @@
 
                                 <ul class="list-unstyled">
                                     <li>To view images and video uploaded to a
-                                        <span class="glst">study</span>:
+                                        <span class="gse0">{{ all_glossary.study_term }}</span>:
                                         <ul class="help-filled-circle">
                                             <li>Go to the <b>Studies</b> tab/icon</li>
                                             <li>Click on the <b>View/Edit</b> button next to the 
-                                                <span class="glst">study</span>
+                                                <span class="gse0">{{ all_glossary.study_term }}</span>
                                                 of interest
                                             </li>
                                             <li>Click on the <b>Analyze/Edit</b> button</li>
@@ -945,24 +952,24 @@
                                 <br>
 
 {#                                <p class="h1-level-3">A statistical power analysis methodology has been implemented in the #}
-{#                                    <span class="glst">MPS-Db</span>#}
+{#                                    <span class="gse0">{{ all_glossary.mpsdb_term }}</span>#}
 {#                                    to estimate the probability that a statistical test will find a significant difference between two different#}
-{#                                    <span class="glst">data groups</span>,#}
+{#                                    <span class="gse0">{{ all_glossary.datagroup_term }}s</span>,#}
 {#                                    such as control and#}
-{#                                    <span class="glst">compound</span>#}
+{#                                    <span class="gse0">{{ all_glossary.compound_term }}</span>#}
 {#                                    treatment groups (post hoc two-sample#}
-{#                                    <span class="glst">power analysis</span>),#}
+{#                                    span class="gse0">{{ all_glossary.poweranalysis_term }}),#}
 {#                                    or a significant difference from one treatment group (a priori one-sample#}
-{#                                    <span class="glst">power analysis</span>)#}
+{#                                    span class="gse0">{{ all_glossary.poweranalysis_term }})#}
 {#                                    for an#}
-{#                                    <span class="glst">MPS model</span>.#}
+{#                                    <span class="gse0">{{ all_glossary.mpsmodel_term }}</span>.#}
 {#                                </p>#}
                                 <ul class="list-unstyled">
                                     <li>To perform power analysis:
                                         <ul class="help-filled-circle">
                                             <li>Go to the <b>Studies</b> tab/icon</li>
                                             <li>Click on the <b>View/Edit</b> button next to the 
-                                                <span class="glst">study</span>
+                                                <span class="gse0">{{ all_glossary.study_term }}</span>
                                                 of interest
                                             </li>
                                             <li>Click on the <b>Analyze/Edit</b> button</li>
@@ -973,12 +980,12 @@
                                             </li>
                                             <li>Check the box next to the set of interest to see the results of interest</li>
                                             <li>Select one or two sample
-                                                <span class="glst">power analysis</span>
+                                                <span class="gse0">{{ all_glossary.poweranalysis_term }}</span>
                                             </li>
                                             <li>Scroll down and select two
-                                                <span class="glst">compound</span>
+                                                <span class="gse0">{{ all_glossary.compound_term }}</span>
                                                 groups for two sample or one
-                                                <span class="glst">compound</span>
+                                                <span class="gse0">{{ all_glossary.compound_term }}</span>
                                                 group for one sample
                                             </li>
                                             <li>Scroll down to see additional options (Effect Size Methods and Significance Level)
@@ -990,11 +997,11 @@
                                     <li>Help Notes:
                                         <ul class="help-filled-circle">
                                             <li>Customized properties for
-                                                <span class="glst">power analysis</span>
+                                                <span class="gse0">{{ all_glossary.poweranalysis_term }}</span>
                                                 are available in the
-                                                <span class="glst">MPS-Db</span>
+                                                <span class="gse0">{{ all_glossary.mpsdb_term }}</span>
                                                 via a sidebar on the
-                                                <span class="glst">power analysis</span>
+                                                <span class="gse0">{{ all_glossary.poweranalysis_term }} </span>
                                                 page
                                                 <ul class="help-open-circle">
                                                     <li>If the <b>Run Analysis</b> button is disabled, read the page prompts to see if a required selection has been omitted</li>
@@ -1024,7 +1031,7 @@
                                         <ul class="help-filled-circle">
                                             <li>Go to the <b>Studies</b> tab/icon</li>
                                             <li>Click on the <b>View/Edit</b> button next to the 
-                                                <span class="glst">study</span>
+                                                <span class="gse0">{{ all_glossary.study_term }}</span>
                                                 of interest
                                             </li>
                                             <li>Click the <b>Analyze/Edit</b> button and select the <b>Reproducibility</b> option</li>
@@ -1048,7 +1055,7 @@
                                             <li>Check at least one box in each list (work left to right, top to bottom)
                                                 <ul class="help-open-circle">
                                                     <li>Notice how checking and unchecking boxes changes the number of
-                                                        <span class="glst">assay data points</span>
+                                                        <span class="gse0">{{ all_glossary.assaydatapoint_term }}s</span>
                                                         selected for inclusion 
                                                     </li>
                                                 </ul>
@@ -1062,13 +1069,13 @@
                                             <li>Scroll down page to detailed results section of interest (including chips, studies and each study's reproducibility status, Max CV, ICC, and graphs)</li>
                                             <li>Explore the <b>Reproducibility Properties</b> options in the sidebar (optional)</li>
                                             <li>Customized properties for
-                                                <span class="glst">reproducibility analysis</span>
+                                                <span class="gse0">{{ all_glossary.reproducibilityanalysis_term }}</span>
                                                 are available in the
-                                                <span class="glst">MPS-Db</span>
+                                                <span class="gse0">{{ all_glossary.mpsdb_term }}</span>
                                                 via a sidebar on the inter-study
-                                                <span class="glst">reproducibility analysis</span>
+                                                <span class="gse0">{{ all_glossary.reproducibilityanalysis_term }}</span>
                                                 page. To perform
-                                                <span class="glst">reproducibility analysis</span>:
+                                                <span class="gse0">{{ all_glossary.reproducibilityanalysis_term }}</span>:
                                                 <ul class="help-open-circle">
                                                     <li>Reproducibility Comparison within Selected Data Sets - By Center (Center to Center) or By Study (Study to Study)</li>
                                                     <li>Normalize by Median - helpful if trends are similar but values are on different scales</li>
@@ -1104,7 +1111,7 @@
                                 <br>
                                 <ul class="list-unstyled">
                                     <li>To add a 
-                                        <span class="glst">study set</span>:
+                                        <span class="gse0">{{ all_glossary.studyset_term }}</span>:
                                         <ul class="help-filled-circle">
                                             <li>Go to the <b>Studies</b> tab/icon</li>
                                             <li>Select the <b>Add Study Set</b> option</li>
@@ -1112,7 +1119,7 @@
                                             <li>Click the <b>Continue</b> button</li>
                                             <li>Fill out the form</li>
                                             <li>Click the <b>Select Assays</b> button to limit data to include in the
-                                                <span class="glst">study set</span>
+                                                <span class="gse0">{{ all_glossary.studyset_term }}</span>
                                                 (optional)
                                             </li>
                                             <li>Click the <b>Submit</b> button to save</li>
@@ -1124,23 +1131,23 @@
                                             <li>A study set is conceptually similar to an inter-study analysis, with the added functionality to:
                                                 <ul class="help-open-circle">
                                                     <li>Save the selection of the
-                                                        <span class="glst">study set</span>
+                                                        <span class="gse0">{{ all_glossary.studyset_term }}</span>
                                                         for later retrieval
                                                     </li>
                                                     <li>Assign the
-                                                        <span class="glst">study set</span>
+                                                        <span class="gse0">{{ all_glossary.studyset_term }}</span>
                                                         a URL for easy sharing (e.g., inclusion in a publication)
                                                     </li>
                                                     <li>Data from each study in the
-                                                        <span class="glst">study set</span>
+                                                        <span class="gse0">{{ all_glossary.studyset_term }}</span>
                                                         can be limited to a subset of one or more assays
                                                     </li>
                                                 </ul>
                                             </li>
                                             <li>Viewers of a
-                                                <span class="glst">study set</span>
+                                                <span class="gse0">{{ all_glossary.studyset_term }}</span>
                                                 created by another user will only see data from studies to which they have access (i.e. a
-                                                <span class="glst">study set</span>
+                                                <span class="gse0">{{ all_glossary.studyset_term }}</span>
                                                 does NOT override existing permissions to studies)
                                             </li>
                                         </ul>
@@ -1165,34 +1172,34 @@
                                     <li>
                                         <ul class="help-filled-circle">
                                             <li>A
-                                                <span class="glst">collaborator group</span>
+                                                <span class="gse0">{{ all_glossary.collaboratorgroup_term }}</span>
                                                 is a means of allowing data from a private
-                                                <span class="glst">study</span>
+                                                <span class="gse0">{{ all_glossary.study_term }}</span>
                                                 (a
-                                                <span class="glst">study</span>
+                                                <span class="gse0">{{ all_glossary.study_term }}</span>
                                                 that has not been signed off) to be shared with another user who is not a member of the same
-                                                <span class="glst">data group</span>
+                                                <span class="gse0">{{ all_glossary.datagroup_term }}</span>
                                                 (e.g., someone from another lab)
                                             </li>
                                             <li>Using a
-                                                <span class="glst">collaborator group</span>
+                                                <span class="gse0">{{ all_glossary.collaboratorgroup_term }}</span>
                                                 is currently the only way to allow someone from another data team to see data contained in a
-                                                <span class="glst">study</span>
+                                                <span class="gse0">{{ all_glossary.study_term }}</span>
                                                 prior to either signing off a
-                                                <span class="glst">study</span>
+                                                <span class="gse0">{{ all_glossary.study_term }}</span>
                                                 (after sign-off, the <b>Assay Data Accessors</b> feature can be used) or opening the
-                                                <span class="glst">study</span>
+                                                <span class="gse0">{{ all_glossary.study_term }}</span>
                                                 to the public
                                             </li>
                                             <li>Coming soon -
-                                                <span class="glst">data providers</span>
+                                                <span class="gse0">{{ all_glossary.dataprovider_term }}s</span>
                                                 will be able to share data with selected colleagues without assistance from
-                                                <span class="glst">MPS database administrators</span>
+                                                <span class="gse0">{{ all_glossary.mpsdbadministrator_term }}s</span>
                                             </li>
                                             <li>Currently, data are shared using
-                                                <span class="glst">collaborator groups</span>
+                                                <span class="gse0">{{ all_glossary.collaboratorgroup_term }}s</span>
                                                 that are managed by
-                                                <span class="glst">MPS database administrators</span>
+                                                <span class="gse0">{{ all_glossary.mpsdbadministrator_term }}s</span>
                                             </li>
                                         </ul>
                                     </li>
@@ -1214,20 +1221,20 @@
                                 <br>
                                 <ul class="list-unstyled">
                                     <li>About
-                                        <span class="glst">Accessor Groups</span>:
+                                        <span class="gse0">{{ all_glossary.accessorgroup_term }}s</span>:
                                         <ul class="help-filled-circle">
                                             <li>An
-                                                <span class="glst">accessor group</span>
+                                                <span class="gse0">{{ all_glossary.accessorgroup_term }}</span>
                                                 is a means of allowing data from a
-                                                <span class="glst">study</span>
+                                                <span class="gse0">{{ all_glossary.study_term }}</span>
                                                 during the year embargo period (after sign-off and before public release) to be shared with selected colleagues who are not members of the same
-                                                <span class="glst">data group</span>
+                                                <span class="gse0">{{ all_glossary.datagroup_term }}</span>
                                                 (e.g., someone from another lab)
                                             </li>
                                             <li>Currently,
-                                                <span class="glst">accessor groups</span>
+                                                <span class="gse0">{{ all_glossary.accessorgroup_term }}s</span>
                                                 must be created and edited by an
-                                                <span class="glst">MPS database administrator</span>
+                                                <span class="gse0">{{ all_glossary.mpsdbadministrator_term }}
                                             </li>
                                         </ul>
                                     </li>
@@ -1249,14 +1256,14 @@
                                 <br>
                                 <ul class="list-unstyled">
                                     <li>To perform
-                                        <span class="glst">PBPK analysis</span>:
+                                        <span class="gse0">{{ all_glossary.pbpkanalysis_term }}</span>:
                                         <ul class="help-filled-circle">
                                             <li>Go to the <b>Data Analysis</b> tab/icon</li>
                                             <li>Select the <b>PBPK</b> option</li>
                                             <li>Check at least one box in each list (work left to right, top to bottom)
                                                 <ul class="help-open-circle">
                                                     <li>Notice how checking and unchecking boxes changes the number of
-                                                        <span class="glst">assay data points</span>
+                                                        <span class="gse0">{{ all_glossary.assaydatapoint_term }}s</span>
                                                         selected for inclusion 
                                                     </li>
                                                 </ul>
@@ -1270,7 +1277,7 @@
                                             <li>The analyses that can be performed are:
                                                 <ul class="help-open-circle">
                                                     <li>Calculate the clearance of a
-                                                        <span class="glst">compound</span>
+                                                        <span class="gse0">{{ all_glossary.compound_term }}</span>
                                                     </li>
                                                     <li>Predict the plasma concentration given a dose and dose interval</li>
                                                     <li>Predict the dose and dose interval to reach a specific plasma level</li>
@@ -1282,7 +1289,7 @@
                                     <li>Help Notes:
                                         <ul class="help-filled-circle">
                                             <li>A significant amount of the information used in the
-                                                <span class="glst">PBPK analysis</span>
+                                                <span class="gse0">{{ all_glossary.pbpkanalysis_term }}</span>
                                                 is manually curated into the database
                                             </li>
                                             <li>Currently, the required parameters and rates have been added to the database for the liver</li>
@@ -1307,13 +1314,13 @@
 
                                 <ul class="list-unstyled">
                                     <li>To access the
-                                        <span class="glst">disease portal</span>:
+                                        <span class="gse0">{{ all_glossary.diseaseportal_term }}</span>:
                                         <ul class="help-filled-circle">
                                             <li>Go to the <b>Models</b> tab/icon</li>
                                             <li>Select the <b>View Diseases</b> option</li>
                                             <li>Click on the <b>View</b> button next to the disease of interest</li>
                                             <li>Review the table that summarizes disease related information available in the
-                                                <span class="glst">MPS-Db</span>
+                                                <span class="gse0">{{ all_glossary.mpsdb_term }}</span>
                                             </li>
                                             <li>Click on one of the options for more information about the disease
                                                 <ul class="help-open-circle">
@@ -1321,7 +1328,7 @@
                                                     <li>Disease Biology - active links to relevant biology/genomic information</li>
                                                     <li>Clinical Data - summarized findings from clinical trials.gov</li>
                                                     <li>Disease Models &amp; Studies - list of disease related models and studies related to the disease that are in the
-                                                        <span class="glst">MPS-Db</span>
+                                                        <span class="gse0">{{ all_glossary.mpsdb_term }}</span>
                                                     </li>
                                                 </ul>
                                             </li>
@@ -1332,7 +1339,7 @@
                                         <ul class="help-filled-circle">
                                             <li>The study list on the <b>Disease Models & Studies</b> page and the summary counts on the main <b>Diseases</b> page are permission specific  </li>
                                             <li>For more information on
-                                                <span class="glst">reference data sources</span>,
+                                                <span class="gse0">{{ all_glossary.referencedatasource_term }}s</span>,
                                                 <a href="#help_overview_features">click here</a>
                                             </li>
                                         </ul>
@@ -1355,22 +1362,22 @@
                                 <br>
                                 <ul class="list-unstyled">
                                     <li>To access a
-                                        <span class="glst">compound report</span>:
+                                        <span class="gse0">{{ all_glossary.compound_term }} report</span>:
                                         <ul class="help-filled-circle">
                                             <li>Go to the <b>Compounds</b> tab/icon</li>
                                             <li>Select the <b>Compound Report</b> option</li>
                                             <li>As a precaution, click the <b>Clear Current Selections</b> button</li>
                                             <li>Use the search box to limit the
-                                                <span class="glst">compound</span>list (optional)
+                                                <span class="gse0">{{ all_glossary.compound_term }}</span>list (optional)
                                             </li>
                                             <li>Check the boxes for the
-                                                <span class="glst">compounds</span>to include
+                                                <span class="gse0">{{ all_glossary.compound_term }}s</span>to include
                                             </li>
                                             <li>If desired, use the search bar to get a different
-                                                <span class="glst">compound</span>list
+                                                <span class="gse0">{{ all_glossary.compound_term }}</span>list
                                             </li>
                                             <li>If desired, check additional
-                                                <span class="glst">compounds</span>to include
+                                                <span class="gse0">{{ all_glossary.compound_term }}s</span>to include
                                             </li>
                                             <li>Click <b>Generate Compound Report</b> button</li>
                                             <li>If a blue plus sign is present, click it to see aggregated assay study data</li>
@@ -1380,18 +1387,18 @@
                                     <li>Help Notes:
                                         <ul class="help-filled-circle">
                                             <li>
-                                                <span class="glst">Compound</span>selections are cumulative
+                                                <span class="gse0">{{ all_glossary.compound_term }}</span> selections are cumulative
                                             </li>
                                             <li>To start with a fresh search, click the <b>Clear Current Selections</b> button</li>
                                             <li>To save 
-                                                <span class="glst">compound</span>
+                                                <span class="gse0">{{ all_glossary.compound_term }}</span>
                                                 selections, click the <b>Save Selections</b> button (when returning at a later time, click <b>Load Selections</b> button)
                                             </li>
                                             <li>Only studies that have been checked for inclusion in the
-                                                <span class="glst">compound report</span>will be included in the aggregation
+                                                <span class="gse0">{{ all_glossary.compound_term }} report</span>will be included in the aggregation
                                             </li>
                                             <li>For more information on
-                                                <span class="glst">reference data sources</span>,
+                                                <span class="gse0">{{ all_glossary.referencedatasource_term }}s</span>,
                                                 <a href="#help_overview_features">click here</a>
                                             </li>
                                         </ul>
@@ -1413,15 +1420,15 @@
                                 </p>
                                 <br>
                                 <p class="h1-level-3">References can be added to the
-                                    <span class="glst">MPS-Db</span>and then linked to studies and/or study components (e.g.,
-                                    <span class="glst">MPS models</span>,
-                                    <span class="glst">devices</span>).
+                                    <span class="gse0">{{ all_glossary.mpsdb_term }}</span>and then linked to studies and/or study components (e.g.,
+                                    <span class="gse0">{{ all_glossary.mpsmodel_term }}s,
+                                    <span class="gse0">{{ all_glossary.device_term }}s).
                                 </p>
                                 <ul class="list-unstyled">
                                     <li>To add a 
-                                        <span class="glst">reference</span>
+                                        <span class="gse0">{{ all_glossary.reference_term }}</span>
                                         to the
-                                        <span class="glst">MPS-Db</span>:
+                                        <span class="gse0">{{ all_glossary.mpsdb_term }}</span>:
                                         <ul class="help-filled-circle">
                                             <li>Go to the <b>Studies</b> tab/icon</li>
                                             <li>Select the <b>Study Components</b> option</li>
@@ -1448,15 +1455,15 @@
                             <li class="list-group-item">
                                 <ul class="list-unstyled">
                                     <li>Customized grouping and filtering is available in the 
-                                        <span class="glst">MPS-Db</span>
+                                        <span class="gse0">{{ all_glossary.mpsdb_term }}</span>
                                         via a sidebar where data are available for review. To customize:
                                         <ul class="help-filled-circle">
                                             <li>If hidden, click the <b>Toggle Sidebar</b> button to show the sidebar</li>
                                             <li>Click on the parameter menus
-                                                (<span class="glst">Study Parameters</span>,
-                                                <span class="glst">Cell Parameters</span>,
-                                                <span class="glst">Compound Parameters</span>,
-                                                <span class="glst">Setting Parameters</span>)
+                                                (Study Parameters,
+                                                Cell Parameters,
+                                                Compound Parameters,
+                                                Setting Parameters)
                                                 to see options
                                             </li>
                                             <li>To filter - click on the filter symbol
@@ -1478,19 +1485,19 @@
                                     <li>Help Notes:
                                         <ul class="help-filled-circle">
                                             <li>In general, increasing the number of parameters selected for grouping will increase the number of
-                                                <span class="glst">dynamic data groups</span>
+                                                <span class="gse0">{{ all_glossary.dynamicdatagroup_term }}s</span>
                                                 in the
-                                                <span class="glst">dynamic data group</span>
+                                                <span class="gse0">{{ all_glossary.dynamicdatagroup_term }}</span>
                                                 table 
                                             </li>
                                             <li>In general, increasing the number of filters will decrease the number of
-                                                <span class="glst">dynamic data groups</span>
+                                                <span class="gse0">{{ all_glossary.dynamicdatagroup_term }}s</span>
                                                 in the
-                                                <span class="glst">dynamic data group</span>
+                                                <span class="gse0">{{ all_glossary.dynamicdatagroup_term }}</span>
                                                 table (or decrease the number of
-                                                <span class="glst">assay data points (excluding omic)</span>
+                                                <span class="gse0">{{ all_glossary.assaydatapoints_term }}</span>
                                                 in a
-                                                <span class="glst">dynamic data group</span>)
+                                                <span class="gse0">{{ all_glossary.dynamicdatagroup_term }}</span>)
                                             </li>
                                             <li>By default, the screen will automatically refresh, to refresh manually, check the <b>Manually Refresh</b> box, make the desired changes, then click on the <b>Refresh</b> button to apply changes</li>
                                         </ul>
@@ -1586,17 +1593,17 @@
                                             <li>Go to the <b>Compounds</b> tab/icon</li>
                                             <li>Select the <b>View Chemical Data</b> option</li>
                                             <li>Use the search box to limit the
-                                                <span class="glst">compound</span>
+                                                <span class="gse0">{{ all_glossary.compound_term }}</span>
                                                 list (optional)
                                             </li>
                                             <li>Click on the <b>View</b> button next to the
-                                                <span class="glst">compound</span>
+                                                <span class="gse0">{{ all_glossary.compound_term }}</span>
                                                 of interest to see
-                                                <span class="glst">compound</span>
+                                                <span class="gse0">{{ all_glossary.compound_term }}</span>
                                                 details
                                             </li>
                                             <li>Click on the <b>Previous</b> button or the <b>Next</b> button to scroll through the
-                                                <span class="glst">compounds</span>
+                                                <span class="gse0">{{ all_glossary.compound_term }}s</span>
                                                 (optional)
                                             </li>
                                         </ul>
@@ -1605,14 +1612,14 @@
                                     <li>Help Notes:
                                         <ul class="help-filled-circle">
                                             <li>Medchem Alerts - indicates whether functional groups that are uncommon in drugs are present in the
-                                            <span class="glst">compound</span>
+                                            <span class="gse0">{{ all_glossary.compound_term }}</span>
                                             </li>
                                             <li>If there are Medchem Alerts for a
-                                                <span class="glst">compound</span>,
+                                                <span class="gse0">{{ all_glossary.compound_term }}</span>,
                                                 click on the flag to see a list of the functional groups 
                                             </li>
                                             <li>For more information on
-                                                <span class="glst">reference data sources</span>,
+                                                <span class="gse0">{{ all_glossary.referencedatasource_term }}s</span>,
                                                 <a href="#help_overview_features">click here</a>
                                             </li>
                                         </ul>
@@ -1747,7 +1754,7 @@
                                                 </ul>
                                             </li>
                                             <li>For more information on
-                                                <span class="glst">reference data sources</span>,
+                                                <span class="gse0">{{ all_glossary.referencedatasource_term }}s</span>,
                                                 <a href="#help_overview_features">click here</a>
                                             </li>
                                         </ul>
@@ -1775,7 +1782,7 @@
                                             <li>Select the <b>View Drug Trials</b> option</li>
                                             <li>Use the search box to limit the list (optional)</li>
                                             <li>Click on the <b>View</b> button next to the drug trial of interest to see
-                                                <span class="glst">compound</span>
+                                                <span class="gse0">{{ all_glossary.compound_term }}</span>
                                                 details
                                             </li>
                                             <li>Click on the <b>Previous</b> button or the <b>Next</b> button to scroll through the drug trials (optional) </li>
@@ -1785,7 +1792,7 @@
                                     <li>Help Notes:
                                         <ul class="help-filled-circle">
                                             <li>For more information on
-                                                <span class="glst">reference data sources</span>,
+                                                <span class="gse0">{{ all_glossary.referencedatasource_term }}s</span>,
                                                 <a href="#help_overview_features">click here</a>
                                             </li>
                                         </ul>
@@ -1817,7 +1824,7 @@
                                                 </ul>
                                             </li>
                                             <li>Click on the <b>View</b> button to see details of the
-                                                <span class="glst">compound</span>
+                                                <span class="gse0">{{ all_glossary.compound_term }}</span>
                                                 and event of interest
                                             </li>
                                             <li>Click on the <b>Toggle Plot</b> button next to an event of interest to generate time plots of reported events
@@ -1827,7 +1834,7 @@
                                                 </ul>
                                             </li>
                                             <li>Click on the <b>Previous</b> button or <b>Next</b> button to scroll through the
-                                                <span class="glst">compounds</span>
+                                                <span class="gse0">{{ all_glossary.compound_term }}s</span>
                                                 (optional) 
                                             </li>
                                         </ul>
@@ -1836,20 +1843,20 @@
                                     <li>Help Notes:
                                         <ul class="help-filled-circle">
                                             <li>Only top adverse events for
-                                                <span class="glst">compounds</span>
+                                                <span class="gse0">{{ all_glossary.compound_term }}s</span>
                                                 are shown in the results of the search
                                             </li>
                                             <li>The <b>Number of Reports</b> column indicates the number of reports that list both the
-                                                <span class="glst">compound</span>
+                                                <span class="gse0">{{ all_glossary.compound_term }}</span>
                                                 and adverse event in the row
                                             </li>
                                             <li>The number of reports does not contain any information regarding the dose of the drug</li>
                                             <li>A
-                                                <span class="glst">compound</span>
+                                                <span class="gse0">{{ all_glossary.compound_term }}</span>
                                                 can be listed in a report even if it is not suspected of causing the adverse event
                                             </li>
                                             <li>For more information on
-                                                <span class="glst">reference data sources</span>,
+                                                <span class="gse0">{{ all_glossary.referencedatasource_term }}s</span>,
                                                 <a href="#help_overview_features">click here</a>
                                             </li>
                                         </ul>
@@ -1879,18 +1886,18 @@
                                             <li>Use the search box to limit the list (optional)</li>
                                             <li>Check the boxes of the events to include</li>
                                             <li>Check the boxes of the
-                                                <span class="glst">compounds</span>
+                                                <span class="gse0">{{ all_glossary.compound_term }}s</span>
                                                 to include
                                                 <ul class="help-open-circle">
                                                     <li>At least one
-                                                        <span class="glst">compound</span>
+                                                        <span class="gse0">{{ all_glossary.compound_term }}</span>
                                                         and one event must be selected before data will show on the graph 
                                                     </li>
                                                 </ul>
                                             </li>
                                             <li>If desired, use the search bar to get different lists</li>
                                             <li>If desired, check additional
-                                                <span class="glst">compounds</span>
+                                                <span class="gse0">{{ all_glossary.compound_term }}s</span>
                                                 and/or events to include
                                             </li>
                                             <li>Scroll down to see the graph comparing events</li>
@@ -1908,7 +1915,7 @@
                                                 to learn more about data presented 
                                             </li>
                                             <li>For more information on
-                                                <span class="glst">reference data sources</span>,
+                                                <span class="gse0">{{ all_glossary.referencedatasource_term }}s</span>,
                                                 <a href="#help_overview_features">click here</a>
                                             </li>
                                         </ul>
@@ -1991,7 +1998,7 @@
                                                 </ul>
                                             </li>
                                             <li>For more information on
-                                                <span class="glst">reference data sources</span>,
+                                                <span class="gse0">{{ all_glossary.referencedatasource_term }}s</span>,
                                                 <a href="#help_overview_features">click here</a>
                                             </li>
                                         </ul>
@@ -2014,7 +2021,7 @@
                                 <br>
                                 <ul class="list-unstyled">
                                     <li>To perform 
-                                        <span class="glst">compound clustering</span>:
+                                        <span class="gse0">{{ all_glossary.compound_term }} clustering</span>:
                                         <ul class="help-filled-circle">
                                             <li>Go to the <b>Data Analysis</b> tab/icon</li>
                                             <li>Select the <b>Cluster</b> option</li>
@@ -2030,7 +2037,7 @@
                                             <li>Click the <b>Generate Dendrogram</b> button</li>
                                             <li>The table on the left shows the bioactivities and drug trial data used in clustering (optional) </li>
                                             <li>Click on a node to see information about the
-                                                <span class="glst">compound</span>
+                                                <span class="gse0">{{ all_glossary.compound_term }}</span>
                                                 (click the red X button to close) (optional)
                                             </li>
                                         </ul>
@@ -2074,7 +2081,7 @@
                                                 </ul>
                                             </li>
                                             <li>For more information on
-                                                <span class="glst">reference data sources</span>,
+                                                <span class="gse0">{{ all_glossary.referencedatasource_term }}s</span>,
                                                 <a href="#help_overview_features">click here</a>
                                             </li>
                                         </ul>
@@ -2103,52 +2110,52 @@
                                 <br>
 
                                 <p class="h1-level-3">To enter study data, you must be a member of a
-                                    <span class="glst">data group</span>
+                                    <span class="gse0">{{ all_glossary.datagroup_term }}</span>
                                     and your
-                                    <span class="glst">data group</span>
+                                    <span class="gse0">{{ all_glossary.datagroup_term }}</span>
                                     must be linked to your center.
                                 </p>
 
                                 <ul class="list-unstyled">
                                     <li>To join an existing
-                                        <span class="glst">data group</span>:
+                                        <span class="gse0">{{ all_glossary.datagroup_term }}</span>:
                                         <ul class="help-filled-circle">
                                             <li>Contact the
-                                                <span class="glst">data group administrator</span>
+                                                <span class="gse0">{{ all_glossary.datagroupadministrator_term }}</span>
                                                 (your team data leader) and ask them to request you be added to their
-                                                <span class="glst">data group</span>
+                                                <span class="gse0">{{ all_glossary.datagroup_term }}</span>
                                             </li>
                                         </ul>
                                     </li>
                                     <br>
                                     <li>To have a new
-                                        <span class="glst">data group</span>
+                                        <span class="gse0">{{ all_glossary.datagroup_term }}</span>
                                         added to the
-                                        <span class="glst">MPS-Db</span>,
+                                        <span class="gse0">{{ all_glossary.mpsdb_term }}</span>,
                                         contact an 
-                                        <span class="glst">MPS-Db administrator</span>
+                                        <span class="gse0">{{ all_glossary.mpsdbadministrator_term }}</span>
                                         and ask for your
-                                        <span class="glst">data group</span>
+                                        <span class="gse0">{{ all_glossary.datagroup_term }}</span>
                                         to be added (provide the following information):
                                         <ul class="help-filled-circle">
                                             <li>Data Group Name - Taylor_MPS</li>
                                             <li>
-                                                <span class="glst">Data Group Viewers</span>
+                                                <span class="gse0">{{ all_glossary.datagroupviewer_term }}s</span>
                                                 - list of users
                                             </li>
                                             <li>
-                                                <span class="glst">Data Group Editors</span>
+                                                <span class="gse0">{{ all_glossary.datagroupeditor_term }}s</span>
                                                 - list of users
                                             </li>
                                             <li>
-                                                <span class="glst">Data Group Administrators</span>
+                                                <span class="gse0">{{ all_glossary.datagroupadministrator_term }}s</span>
                                                 - list of users
                                             </li>
                                         </ul>
                                     </li>
                                     <br>
                                     <li>To have a new center added to the database, contact an
-                                        <span class="glst">MPS-Db administrator</span>
+                                        <span class="gse0">{{ all_glossary.mpsdbadministrator_term }}</span>
                                         and ask for your center to be added (provide the following information):
                                         <ul class="help-filled-circle">
                                             <li>Center Name - University of Pittsburgh Drug Discovery Institute</li>
@@ -2165,7 +2172,7 @@
                                     </li>
                                     <br>
                                     <li>For more information on
-                                        <span class="glst">data group</span>
+                                        <span class="gse0">{{ all_glossary.datagroup_term }}</span>
                                         roles, 
                                         <a href="help_overview_permission">click here</a>
                                     </li>
@@ -2187,16 +2194,16 @@
                                 <br>
                                 <ul class="list-unstyled">
                                     <li>To review
-                                        <span class="glst">study components</span>,
+                                        <span class="gse0">{{ all_glossary.studycomponent_term }}s,
                                         <a href="#help_study_component">click here</a>
                                     </li>
                                     <br>
                                     <li>Help Notes:
                                         <ul class="help-filled-circle">
                                             <li>
-                                                <span class="glst">Study components</span>
+                                                <span class="gse0">{{ all_glossary.studycomponent_term }}s
                                                 can be added in various locations in the
-                                                <span class="glst">MPS-Db</span>
+                                                <span class="gse0">{{ all_glossary.mpsdb_term }}</span>
                                                 by clicking on the provided plus signs
                                             </li>
                                         </ul>
@@ -2220,12 +2227,12 @@
                                 <br>
                                 <ul class="list-unstyled">
                                     <li>To add a
-                                        <span class="glst">study</span>:
+                                        <span class="gse0">{{ all_glossary.study_term }}</span>:
                                         <ul class="help-filled-circle">
                                             <li>Click on the <b>Add Study</b> button
                                                 <ul class="help-open-circle">
                                                     <li>If the
-                                                        <span class="glst">study</span>
+                                                        <span class="gse0">{{ all_glossary.study_term }}</span>
                                                         already exists, click the <b>View All Studies</b> option, then click on the <b>View/Edit</b> button next to the  
                                                     </li>
                                                 </ul>
@@ -2236,26 +2243,26 @@
                                     <li>Help Notes:
                                         <ul class="help-filled-circle">
                                             <li>You must be a registered user and be assigned to at least one
-                                                <span class="glst">data group</span>
+                                                <span class="gse0">{{ all_glossary.datagroup_term }}</span>
                                                 to add a
-                                                <span class="glst">study</span>
+                                                <span class="gse0">{{ all_glossary.study_term }}</span>
                                             </li>
                                             <li>Everything in the
-                                                <span class="glst">study</span>
+                                                <span class="gse0">{{ all_glossary.study_term }}</span>
                                                 can be edited until the
-                                                <span class="glst">study</span>
-                                                <span class="glst">data group administrator</span>
+                                                <span class="gse0">{{ all_glossary.study_term }}</span>
+                                                <span class="gse0">{{ all_glossary.datagroupadministrator_term }}</span>
                                                 signs off the
-                                                <span class="glst">study</span>
+                                                <span class="gse0">{{ all_glossary.study_term }}</span>
                                                 (after sign-off, a study is locked) 
                                             </li>
                                             <li>Data contained in files attached as Supporting Data (as opposed to data uploaded into the database from files listed in the Data File Uploads or the Current Data Files) are not available for visualization, analysis, or used in calculations within the
-                                                <span class="glst">MPS-GUI</span>
+                                                <span class="gse0">{{ all_glossary.mpsgui_term }}</span>
                                             </li>
                                             <li>To edit a
-                                                <span class="glst">study</span>,
+                                                <span class="gse0">{{ all_glossary.study_term }}</span>,
                                                 go to the
-                                                <span class="glst">study</span>
+                                                <span class="gse0">{{ all_glossary.study_term }}</span>
                                                 of interest and click on the <b>Analyze/Edit</b> button and select <b>Edit This Study</b>
                                             </li>
                                         </ul>
@@ -2273,7 +2280,7 @@
                             <li class="list-group-item">
                                 <h1 class="h1-level-1">Enter Study Details - Details Tab</h1>
                                 <p class="h1-level-3">
-                                    <span class="glst">study details</span>
+                                    <span class="gse0">{{ all_glossary.studydetails_term }}</span>
                                     -
                                     <span class="gse1">{{ all_glossary.studydetails_def }}</span>
                                 </p>
@@ -2285,24 +2292,24 @@
                                             <li>Study Type – indicate the general purpose of the study (one is required; check all that apply) </li>
                                             <li>Study Name – use an informative name (e.g., "Kidney-Liver Vitamin C Metabolism" is more informative than "Study-1") </li>
                                             <li>Start Date - start of experiment (typically the day the first cells are added to the
-                                                <span class="glst">device</span>)
+                                                <span class="gse0">{{ all_glossary.device_term }}</span>)
                                             </li>
                                             <li>Description - informative description (purpose, methods, results)</li>
                                             <li>Use in
-                                                <span class="glst">Compound Report</span>
+                                                <span class="gse0">{{ all_glossary.compound_term }} Report</span>
                                                 - checking this box tells the 
-                                                <span class="glst">MPS-Db</span>
+                                                <span class="gse0">{{ all_glossary.mpsdb_term }}</span>
                                                 to use this
-                                                <span class="glst">study's</span>
+                                                <span class="gse0">{{ all_glossary.studydetails_term }}'s</span>
                                                 data in the
-                                                <span class="glst">Compound Report</span>
+                                                <span class="gse0">{{ all_glossary.compoundreport_term }}</span>
                                                 feature  
                                             </li>
                                             <li>Protocol File – a Word or pdf file containing the study protocol</li>
                                             <li>Image to Illustrate A Study – recommend a picture of the setup or an illustration of the experimental protocol</li>
                                             <!-- <li>For Integrated Chip Studies – select configuration if performing an integrated <b>Study</b> </li>-->
                                             <li>References - add references relating to the this
-                                                <span class="glst">study</span>
+                                                <span class="gse0">{{ all_glossary.study_term }}</span>
                                             </li>
                                             <li>Click the <b>Submit</b> button to save or the <b>Next</b> button to continue</li>
                                         </ul>
@@ -2326,7 +2333,7 @@
                             <li class="list-group-item">
                                 <h1 class="h1-level-1">Make Study Treatment Groups - Groups Tab</h1>
                                 <p class="h1-level-3">
-                                    <span class="glst">study treatment group</span>
+                                    <span class="gse0">{{ all_glossary.studytreatmentgroup_term }}</span>
                                     -
                                     <span class="gse1">{{ all_glossary.studytreatmentgroup_def }}</span>
                                 </p>
@@ -2335,35 +2342,35 @@
                                     <li>Add the required information as follows:
                                         <ul class="help-filled-circle">
                                             <li>Select an 
-                                                <span class="glst">MPS model</span>
+                                                <span class="gse0">{{ all_glossary.mpsmodel_term }}</span>
                                             </li>
                                             <li>Select an 
-                                                <span class="glst">MPS model version</span>
+                                                <span class="gse0">{{ all_glossary.mpsmodelversion_term }}</span>
                                                 (information about cells and settings will be pulled from the
-                                                <span class="glst">MPS model version</span>,
+                                                <span class="gse0">{{ all_glossary.mpsmodelversion_term }}</span>,
                                                 if available)
                                             </li>
                                             <li>Apply to the Group</li>
                                             <li>The Type is set based on the
-                                                <span class="glst">device</span>
+                                                <span class="gse0">{{ all_glossary.device_term }}
                                                 used in the
-                                                <span class="glst">MPS model</span>
+                                                <span class="gse0">{{ all_glossary.mpsmodel_term }}</span>
                                                 (plate or chip device)
                                             </li>
                                             <li>Enter the
-                                                <span class="glst">study treatment group</span>
+                                                <span class="gse0">{{ all_glossary.studytreatmentgroup_term }}</span>
                                                 Name
                                             </li>
                                             <li>Enter the Number of Chips in the
-                                                <span class="glst">study treatment group</span>
+                                                <span class="gse0">{{ all_glossary.studytreatmentgroup_term }}</span>
                                             </li>
                                             <li>Change the Test Type for each
-                                                <span class="glst">study treatment group</span>,
+                                                <span class="gse0">{{ all_glossary.studytreatmentgroup_term }}</span>,
                                                 as needed
                                             </li>
                                             <li>Add compounds, additional cells, and additional settings by clicking on the <b>Add Compound</b>, <b>Add Cell</b>, or <b>Add Setting</b> button, respectively</li>
                                             <li>Click on the <b>Add Group</b> button or click the <b>Copy</b> button (in a Group) to make a new
-                                                <span class="glst">study treatment group</span>
+                                                <span class="gse0">{{ all_glossary.studytreatmentgroup_term }}</span>
                                             </li>
                                             <li>Review differences between groups in the <b>Group Difference Display</b> table</li>
                                             <li>Click the <b>Submit</b> button to save or the <b>Next</b> button to continue</li>
@@ -2373,43 +2380,43 @@
                                     <li>Help Notes:
                                         <ul class="help-filled-circle">
                                             <li>There are many options for the order of adding
-                                                <span class="glst">study treatment group</span>
+                                                <span class="gse0">{{ all_glossary.studytreatmentgroup_term }}</span>
                                                 (e.g., a
-                                                <span class="glst">study treatment group</span>
+                                                <span class="gse0">{{ all_glossary.studytreatmentgroup_term }}</span>
                                                 can be copied at any time as many times as needed)
                                             </li>
                                             <li>If an
-                                                <span class="glst">MPS model version</span>has not been made and/or has not been populated correctly, cells and settings will not be automatically pulled into the
-                                                <span class="glst">study treatment group</span>
+                                                <span class="gse0">{{ all_glossary.mpsmodelversion_term }}</span>has not been made and/or has not been populated correctly, cells and settings will not be automatically pulled into the
+                                                <span class="gse0">{{ all_glossary.studytreatmentgroup_term }}</span>
                                                 setup
                                             </li>
                                             <li>An 
-                                                <span class="glst">MPS model version</span>
+                                                <span class="gse0">{{ all_glossary.mpsmodelversion_term }}</span>
                                                 is a starting point for a
-                                                <span class="glst">study treatment group</span>
+                                                <span class="gse0">{{ all_glossary.studytreatmentgroup_term }}</span>
                                                 (if changes are made to cells, settings, and/or compounds, an
-                                                <span class="glst">MPS model version</span>
+                                                <span class="gse0">{{ all_glossary.mpsmodelversion_term }}</span>
                                                 will no longer fully describe the condition of the chip)
                                             </li>
                                             <li>Treatment
-                                                <span class="glst">compounds</span>
+                                                <span class="gse0">{{ all_glossary.compound_term }}s</span>
                                                 will need to be added as they are not part of the
-                                                <span class="glst">MPS model version</span>
-                                                (<span class="glst">compounds</span>
+                                                <span class="gse0">{{ all_glossary.mpsmodelversion_term }}</span>
+                                                (<span class="gse0">{{ all_glossary.compound_term }}s</span>
                                                 cannot be saved as part of a
-                                                <span class="glst">MPS model version</span>)
+                                                <span class="gse0">{{ all_glossary.mpsmodelversion_term }}</span>)
                                             </li>
                                             <li>Chips are numbered sequentially, starting from 1 (these can be changed, if necessary)</li>
                                             <li>Remove cells, settings, and/or
-                                                <span class="glst">compounds</span>
+                                                <span class="gse0">{{ all_glossary.compound_term }}s</span>
                                                 by clicking the red X's (click on individual X's or, to remove a column, click on the red X in the column header, and to remove a row, click on the red X in the row label)
                                             </li>
                                             <li>Enter a
-                                                <span class="glst">study treatment group</span>
+                                                <span class="gse0">{{ all_glossary.studytreatmentgroup_term }}</span>
                                                 for each treatment condition (for wells in a plate and for chips)
                                             </li>
                                             <li>
-                                                <span class="glst">study treatment groups</span>
+                                                <span class="gse0">{{ all_glossary.studytreatmentgroup_term }}s</span>
                                                 will be applied to plates (if a plate device was selected) in subsequent steps 
                                             </li>
                                         </ul>
@@ -2427,7 +2434,7 @@
                             <li class="list-group-item">
                                 <h1 class="h1-level-2">Define Chips and Plates (Study Items)</h1>
                                 <p class="h1-level-3">
-                                    <span class="glst">study item</span>
+                                    <span class="gse0">{{ all_glossary.studyitem_term }}</span>
                                     -
                                     <span class="gse1">{{ all_glossary.studyitem_def }}</span>
                                 </p>
@@ -2444,12 +2451,12 @@
                                     </li>
                                     <br>
                                     <li>To edit chip
-                                        <span class="glst">study treatment group</span>
+                                        <span class="gse0">{{ all_glossary.studytreatmentgroup_term }}</span>
                                         association (optional):
                                         <ul class="help-filled-circle">
                                             <li>Click on the dropdown in the <b>Group</b> column</li>
                                             <li>Select a different
-                                                <span class="glst">study treatment group</span>
+                                                <span class="gse0">{{ all_glossary.studytreatmentgroup_term }}</span>
                                             </li>
                                             <li>Click Apply</li>
                                             <li>Click the <b>Submit</b> button to save or the <b>Next</b> button to continue</li>
@@ -2459,7 +2466,7 @@
                                     <li>Help Notes:
                                         <ul class="help-filled-circle">
                                             <li>Changes can be made to the names and the
-                                                <span class="glst">study treatment group</span>
+                                                <span class="gse0">{{ all_glossary.studytreatmentgroup_term }}</span>
                                                 in the same edit session</li>
                                             <li>A Chip Tab is displayed only if a device Type = Chip was selected in the Groups Tab</li>
                                             <li>This is all optional</li>
@@ -2478,7 +2485,7 @@
                                             <li>Click the <b>Add Plate</b> button</li>
                                             <li>Fill in the plate Name</li>
                                             <li>Select the 
-                                                <span class="glst">MPS Model</span>
+                                                <span class="gse0">{{ all_glossary.mpsmodel_term }}</span>
                                             </li>
                                             <li>Fill in a Well Prefix (optional)</li>
                                             <li>Drag in the plate over the wells to assign a treatment group</li>
@@ -2493,16 +2500,16 @@
                                             <li>A Plate Tab is displayed only if a device Type = Plate was selected in the Groups Tab</li>
                                             <li>Add as many plates as needed</li>
                                             <li>A plate can contain one or more
-                                                <span class="glst">study treatment groups</span>
+                                                <span class="gse0">{{ all_glossary.studytreatmentgroup_term }}s</span>
                                             </li>
                                             <li>A 
-                                                <span class="glst">study treatment group</span>
+                                                <span class="gse0">{{ all_glossary.studytreatmentgroup_term }}</span>
                                                 can span plates
                                             </li>
                                             <li>Well names must be unique to the
-                                                <span class="glst">study</span>,
+                                                <span class="gse0">{{ all_glossary.study_term }}</span>,
                                                 not to a plate (i.e., well A1 cannot exist on more than one plate in a
-                                                <span class="glst">study</span>
+                                                <span class="gse0">{{ all_glossary.study_term }}</span>
                                                 - use a prefix like P1-A1 and P2-A1)
                                             </li>
                                         </ul>
@@ -2520,11 +2527,11 @@
                             <li class="list-group-item">
                                 <h1 class="h1-level-1">Add Assay Targets and Assay Methods to a Study - Assays Tab</h1>
                                 <p class="h1-level-3">
-                                    <span class="glst">assay target</span>
+                                    <span class="gse0">{{ all_glossary.assaytarget_term }}</span>
                                     -
                                     <span class="gse1">{{ all_glossary.assaytarget_def }}</span>
                                     <br>
-                                    <span class="glst">assay method</span>
+                                    <span class="gse0">{{ all_glossary.assaymethod_term }}</span>
                                     -
                                     <span class="gse1">{{ all_glossary.assaymethod_def }}</span>
                                 </p>
@@ -2533,29 +2540,29 @@
                                     <li>Add Assays to a study as follows:
                                         <ul class="help-filled-circle">
                                             <li>Click in the
-                                                <span class="glst">Assay Category</span>
+                                                <span class="gse0">{{ all_glossary.assaycategory_term }}
                                                 box and select an
-                                                <span class="glst">assay category</span>
+                                                <span class="gse0">{{ all_glossary.assaycategory_term }}
                                                 (optional, but narrows the choices of
-                                                <span class="glst">assay targets</span>
+                                                <span class="gse0">{{ all_glossary.assaytarget_term }}s</span>
                                                 and
-                                                <span class="glst">assay methods</span>
+                                                <span class="gse0">{{ all_glossary.assaymethod_term }}s</span>
                                                 if selected)
                                             </li>
                                             <li>Click in the
-                                                <span class="glst">Assay Target</span>
+                                                <span class="gse0">{{ all_glossary.assaytarget_term }}</span>
                                                 box and select a
-                                                <span class="glst">assay target</span>
+                                                <span class="gse0">{{ all_glossary.assaytarget_term }}</span>
                                             </li>
                                             <li>Click in the
-                                                <span class="glst">Assay Method</span>
+                                                <span class="gse0">{{ all_glossary.assaymethod_term }}</span>
                                                 box and select a
-                                                <span class="glst">assay method</span>
+                                                <span class="gse0">{{ all_glossary.assaymethod_term }}</span>
                                             </li>
                                             <li>Click in the
-                                                <span class="glst">Readout Unit</span>
+                                                <span class="gse0">{{ all_glossary.readoutunit_term }}</span>
                                                 and select the
-                                                <span class="glst">assay unit</span>
+                                                <span class="gse0">{{ all_glossary.assayunit_term }}</span>
                                                 to be used for uploading data 
                                             </li>
                                             <li>Click the <b>Submit</b> button to save or the <b>Next</b> button to continue</li>
@@ -2565,9 +2572,9 @@
                                     <li>Help Notes:
                                         <ul class="help-filled-circle">
                                             <li>All combinations of
-                                                <span class="glst">assay method</span>,
-                                                <span class="glst">assay target</span>, and
-                                                <span class="glst">assay unit</span>
+                                                <span class="gse0">{{ all_glossary.assaymethod_term }}</span>,
+                                                <span class="gse0">{{ all_glossary.assaytarget_term }}</span>, and
+                                                <span class="gse0">{{ all_glossary.assayunit_term }}</span>
                                                 must be listed prior to uploading assay data
                                             </li>
                                         </ul>
@@ -2586,9 +2593,9 @@
                                 <h1 class="h1-level-1">Upload Assay Data - Upload Data Tab</h1>
 
                                 <p class="h1-level-3">There are multiple ways of uploading data into the 
-                                    <span class="glst">MPS-Db</span>, including:
+                                    <span class="gse0">{{ all_glossary.mpsdb_term }}</span>, including:
                                     <br>1) uploading a 
-                                    <span class="glst">MIF-C</span>
+                                    <span class="gse0">{{ all_glossary.mifc_term }}</span>
                                     file of processed assay data (non-omic),
                                     <br>2) uploading raw data exported from a plate reader, and
                                     <br>3) uploading omic formatted data in specific omic data format(s).
@@ -2597,7 +2604,7 @@
                                 <br>
                                 <h1 class="h1-level-2">Processed MIF-C-a Format</h1>
                                 <p class="h1-level-3">
-                                    <span class="glst">mif-c</span>
+                                    <span class="gse0">{{ all_glossary.mifc_term }}</span>
                                     -
                                     <span class="gse1">{{ all_glossary.mifc_def }}</span>
                                 </p>
@@ -2605,18 +2612,18 @@
 
                                 <ul class="list-unstyled">
                                     <li>To add processed data in
-                                        <span class="glst">MIF-C</span>-a
+                                        <span class="gse0">{{ all_glossary.mifc_term }}</span>-a
                                         format:
                                         <ul class="help-filled-circle">
                                             <li>Prepare a data file
-                                                (<span class="glst">MIF-C</span>-a)
+                                                (<span class="gse0">{{ all_glossary.mifc_term }}</span>-a)
                                             </li>
                                             <li>Make sure that the
-                                                <span class="glst">assay method</span>,
-                                                <span class="glst">assay target</span>,
-                                                <span class="glst">assay unit</span>,
+                                                <span class="gse0">{{ all_glossary.assaymethod_term }}</span>,
+                                                <span class="gse0">{{ all_glossary.assaytarget_term }}</span>,
+                                                <span class="gse0">{{ all_glossary.assayunit_term }}</span>,
                                                 and Chip and Well Ids all match, exactly, what was entered as part of the
-                                                <span class="glst">study setup</span>
+                                                <span class="gse0">{{ all_glossary.studyset_term }}up</span>
                                             </li>
                                             <li>In the Upload Data tab, click the button to add processed data files</li>
                                             <li>To get an example template file,
@@ -2628,25 +2635,25 @@
                                     <li>Processed Data Help Notes:
                                         <ul class="help-filled-circle">
                                             <li>The ONLY assay data that are editable in the
-                                                <span class="glst">MPS-GUI</span>
+                                                <span class="gse0">{{ all_glossary.mpsgui_term }}</span>
                                                 is the <b>Exclude</b>field (editable on the study item edit page) 
                                             </li>
                                             <li>Changes made to the <b>Exclude</b>field using the
-                                                <span class="glst">MPS-GUI</span>
+                                                <span class="gse0">{{ all_glossary.mpsgui_term }}</span>
                                                 will be lost when data are re-uploaded
                                             </li>
                                             <li>To replace assay data values with new values, remove the data file from the Current Data Files, then correct the values in the
-                                                <span class="glst">MIF-C</span>-a
+                                                <span class="gse0">{{ all_glossary.mifc_term }}</span>-a
                                                 file and re-upload that file 
                                             </li>
                                             <li>Chip and well Ids must be unique within a
-                                                <span class="glst">study</span>
+                                                <span class="gse0">{{ all_glossary.study_term }}</span>
                                             </li>
                                             <li>Each file (and each workbook if using Excel) should contain data for only one
-                                                <span class="glst">study</span>
+                                                <span class="gse0">{{ all_glossary.study_term }}</span>
                                             </li>
                                             <li>Data for one
-                                                <span class="glst">study</span>
+                                                <span class="gse0">{{ all_glossary.study_term }}</span>
                                                 may be submitted in multiple files (and/or multiple tabs of an Excel workbook) </li>
                                             <li>If uploading an Excel workbook, workbook can contain multiple tabs</li>
                                             <li>All files (or tabs) with correct headers (i.e. column names) will be evaluated for upload, others will be ignored</li>
@@ -2664,7 +2671,7 @@
                                 <br>
                                 <h1 class="h1-level-2">Raw Plate Reader Data</h1>
                                 <p class="h1-level-3">
-                                    <span class="glst">plate reader data</span>
+                                    <span class="gse0">{{ all_glossary.platereaderdata_term }}</span>
                                     -
                                     <span class="gse1">{{ all_glossary.platereaderdata_def }}</span>
                                 </p>
@@ -2672,7 +2679,7 @@
 
                                 <ul class="list-unstyled">
                                     <li>To add raw
-                                        <span class="glst">plate reader data</span>
+                                        <span class="gse0">{{ all_glossary.platereaderdata_term }}</span>
                                         exported from directly from a plate reader:
                                         <ul class="help-filled-circle">
                                             <li>Help for raw plate reader data is coming soon</li>
@@ -2696,16 +2703,16 @@
                                 <br>
                                 <h1 class="h1-level-2">Omic Data</h1>
                                 <p class="h1-level-3">
-                                    <span class="glst">omic data</span>
+                                    <span class="gse0">{{ all_glossary.omicdata_term }}</span>
                                     -
                                     <span class="gse1">{{ all_glossary.omicdata_def }}</span>
                                 </p>
                                 <br>
                                 <ul class="list-unstyled">
                                     <li>To add
-                                        <span class="glst">omic data</span>
+                                        <span class="gse0">{{ all_glossary.omicdata_term }}</span>
                                         to the
-                                        <span class="glst">MPS-Db</span>:
+                                        <span class="gse0">{{ all_glossary.mpsdb_term }}</span>:
                                         <ul class="help-filled-circle">
                                             <li>Help for omic data is coming soon</li>
                                         </ul>
@@ -2737,33 +2744,33 @@
                             <li class="list-group-item">
                                 <h1 class="h1-level-1">Prepare Images and Videos</h1>
                                 <p class="h1-level-3">
-                                    <span class="glst">assay images</span>
+                                    <span class="gse0">{{ all_glossary.assayimages_term }}</span>
                                     -
                                     <span class="gse1">{{ all_glossary.assayimages_def }}</span>
                                     <br>
-                                    <span class="glst">assay videos</span>
+                                    <span class="gse0">{{ all_glossary.assayvideos_term }}</span>
                                     -
                                     <span class="gse1">{{ all_glossary.assayvideos_def }}</span>
                                 </p>
                                 <br>
 
                                 <p class="h1-level-3">We are working on adding the ability for users to directly upload images and videos, but, currently, images and videos must be added to the
-                                    <span class="glst">MPS-Db</span>
+                                    <span class="gse0">{{ all_glossary.mpsdb_term }}</span>
                                     by
-                                    <span class="glst">MPS-Db administrators</span>.
+                                    <span class="gse0">{{ all_glossary.mpsdbadministrator_term }}s</span>.
                                 </p>
                                 <ul class="list-unstyled">
                                     <li>To add images and/or videos:
                                         <ul class="help-filled-circle">
                                             <li>Prepare the image/video file</li>
                                             <li>Prepare an image/video metadata file
-                                                (<span class="glst">MIF-C</span>-i)
+                                                (<span class="gse0">{{ all_glossary.mifc_term }}</span>-i)
                                             </li>
                                             <li>To get an example partial template file, 
                                                 <a href="{% url 'assays-currentuploadtemplate' %}">click here</a>
                                             </li>
                                             <li>Contact an
-                                                <span class="glst">MPS-Db administrator</span>
+                                                <span class="gse0">{{ all_glossary.mpsdbadministrator_term }}</span>
                                                 to make arrangements for submitting the files
                                             </li>
                                         </ul>
@@ -2772,7 +2779,7 @@
                                     <li>Help Notes:
                                         <ul class="help-filled-circle">
                                             <li>To remove media files, contact an
-                                                <span class="glst">MPS-Db administrator</span>
+                                                <span class="gse0">{{ all_glossary.mpsdbadministrator_term }}</span>
                                                 for assistance
                                             </li>
                                         </ul>
@@ -2799,33 +2806,33 @@
                                 <p class="h1-level-3">To facilitate data review and validation,
                                     the database offers the option to flag and add notes to a
                                     1) 
-                                    <span class="glst">study</span>,
+                                    <span class="gse0">{{ all_glossary.study_term }}</span>,
                                     2) 
-                                    <span class="glst">study item</span>
+                                    <span class="gse0">{{ all_glossary.studyitem_term }}</span>
                                     (i.e. a chip or a well), and 3) plate.
                                     When a 
-                                    <span class="glst">study</span>
+                                    <span class="gse0">{{ all_glossary.study_term }}</span>
                                     is flagged, a flag is display in the <b>Review</b> column
                                     for that 
-                                    <span class="glst">study</span>
+                                    <span class="gse0">{{ all_glossary.study_term }}</span>
                                     in the 
-                                    <span class="glst">study</span>
+                                    <span class="gse0">{{ all_glossary.study_term }}</span>
                                     list (the note is displayed as a hover tip).
                                     When a 
-                                    <span class="glst">study item</span>
+                                    <span class="gse0">{{ all_glossary.studyitem_term }}</span>
                                     is flagged, the flag is displayed in the <b>Review</b> column
                                     for that 
-                                    <span class="glst">study item</span>
+                                    <span class="gse0">{{ all_glossary.studyitem_term }}</span>
                                     in the 
-                                    <span class="glst">study item</span>
+                                    <span class="gse0">{{ all_glossary.studyitem_term }}</span>
                                     list.
                                     In addition, a
-                                    <span class="glst">study item</span>
+                                    <span class="gse0">{{ all_glossary.studyitem_term }}</span>
                                     can be 'validated'
                                     (a check mark will show in the <b>Review</b> column for the 
-                                    <span class="glst">study item</span>
+                                    <span class="gse0">{{ all_glossary.studyitem_term }}</span>
                                     in the 
-                                    <span class="glst">study item</span>
+                                    <span class="gse0">{{ all_glossary.studyitem_term }}</span>
                                     list).
                                 </p>
 
@@ -2834,10 +2841,10 @@
 
                                 <ul class="list-unstyled">
                                     <li>To add flags and or notes to a 
-                                        <span class="glst">study</span>:
+                                        <span class="gse0">{{ all_glossary.study_term }}</span>:
                                         <ul class="help-filled-circle">
                                             <li>Go to the 
-                                                <span class="glst">study</span>
+                                                <span class="gse0">{{ all_glossary.study_term }}</span>
                                                 of interest 
                                             </li>
                                             <li>Click the <b>Analyze/Edit</b> button</li>
@@ -2859,15 +2866,15 @@
 
                                 <ul class="list-unstyled">
                                     <li>To add flags and or notes to a 
-                                        <span class="glst">study item</span>:
+                                        <span class="gse0">{{ all_glossary.studyitem_term }}</span>:
                                         <ul class="help-filled-circle">
                                             <li>Go to the 
-                                                <span class="glst">study</span>
+                                                <span class="gse0">{{ all_glossary.study_term }}</span>
                                                 of interest
                                             </li>
                                             <li>Scroll down to the <b>Chips and Wells</b> section of the page</li>
                                             <li>Click the <b>View/Edit</b> button for the 
-                                                <span class="glst">study item</span>
+                                                <span class="gse0">{{ all_glossary.studyitem_term }}</span>
                                                 (chip or well) of interest
                                             </li>
                                             <li>Click on the 
@@ -2887,15 +2894,15 @@
 
                                 <ul class="list-unstyled">
                                     <li>To add a validation check mark to a
-                                        <span class="glst">study item</span>:
+                                        <span class="gse0">{{ all_glossary.studyitem_term }}</span>:
                                         <ul class="help-filled-circle">
                                             <li>Go to the 
-                                                <span class="glst">study</span>
+                                                <span class="gse0">{{ all_glossary.study_term }}</span>
                                                 of interest
                                             </li>
                                             <li>Scroll down to the <b>Chips and Wells</b> section of the page</li>
                                             <li>Click the <b>View/Edit</b> button for the
-                                                <span class="glst">study item</span>
+                                                <span class="gse0">{{ all_glossary.studyitem_term }}</span>
                                                 (chip or well) of interest
                                             </li>
                                             <li>Click on the <b>Click Here to Mark this Entry as Validated</b> button near the top of the page</li>
@@ -2910,19 +2917,19 @@
                                     <li>Help Notes:
                                         <ul class="help-filled-circle">
                                             <li>Validation check marks, flags, and notes are visible to all users who have permission to view a
-                                                <span class="glst">study</span>
+                                                <span class="gse0">{{ all_glossary.study_term }}</span>
                                             </li>
                                             <li>Validation, flags, and notes can be used during the validation process, and removed prior to sharing a
-                                                <span class="glst">study</span>
+                                                <span class="gse0">{{ all_glossary.study_term }}</span>
                                                 (i.e.
-                                                <span class="glst">study sign-off</span>)
+                                                <span class="gse0">{{ all_glossary.studysignoff_term }}</span>)
                                             </li>
                                             <li>
-                                                <span class="glst">Study item</span>
+                                                <span class="gse0">{{ all_glossary.studyitem_term }}</span>
                                                 validation is designed to be part of the
-                                                <span class="glst">data provider's</span>
+                                                <span class="gse0">{{ all_glossary.dataprovider_term }}'s</span>
                                                 QC process (it is optional and is not required to be completed prior to
-                                                <span class="glst">study sign-off</span>)
+                                                <span class="gse0">{{ all_glossary.studysignoff_term }}</span>)
                                             </li>
                                         </ul>
                                     </li>
@@ -2939,24 +2946,24 @@
                             <li class="list-group-item">
                                 <h1 class="h1-level-1">Data Sharing - Sign-Off a Study (optional)</h1>
                                 <p class="h1-level-3">
-                                    <span class="glst">study sign-off</span>
+                                    <span class="gse0">{{ all_glossary.studysignoff_term }}</span>
                                     -
                                     <span class="gse1">{{ all_glossary.studysignoff_def }}</span>
                                 </p>
                                 <br>
                                 <p class="h1-level-3">
-                                    <span class="glst">Data group administrators</span>
+                                    <span class="gse0">{{ all_glossary.datagroupadministrator_term }}s</span>
                                     can sign-off a
-                                    <span class="glst">study</span>
+                                    <span class="gse0">{{ all_glossary.study_term }}</span>
                                     in their
-                                    <span class="glst">data group</span>.
+                                    <span class="gse0">{{ all_glossary.datagroup_term }}</span>.
                                 </p>
                                 <ul class="list-unstyled">
                                     <li>To sign-off a
-                                        <span class="glst">study</span>:
+                                        <span class="gse0">{{ all_glossary.study_term }}</span>:
                                         <ul class="help-filled-circle">
                                             <li>Go to the 
-                                                <span class="glst">study</span>
+                                                <span class="gse0">{{ all_glossary.study_term }}</span>
                                                 of interest
                                             </li>
                                             <li>Click on the <b>Sign Off/Permission</b> button</li>
@@ -2969,17 +2976,17 @@
                                     <li>Help Notes:
                                         <ul class="help-filled-circle">
                                             <li> 
-                                                <span class="glst">study sign-off</span>
+                                                <span class="gse0">{{ all_glossary.studysignoff_term }}</span>
                                                 starts a one year embargo period after which the 
-                                                <span class="glst">study</span>
+                                                <span class="gse0">{{ all_glossary.study_term }}</span>
                                                 will be open to the broader scientific community (publicly accessible)  
                                             </li>
                                             <li>
-                                                <span class="glst">study sign-off</span>
+                                                <span class="gse0">{{ all_glossary.studysignoff_term }}</span>
                                                 is optional unless required by project funder
                                             </li>
                                             <li>During the 
-                                                <span class="glst">study sign-off</span>
+                                                <span class="gse0">{{ all_glossary.studysignoff_term }}</span>
                                                 process, notes can be added that will be displayed in the study list when hovering over the check mark in the <b>Review</b> column</li>
                                             <li>To learn more about options for sharing data with selected colleagues prior to study sign off, see 
                                                 <a href="#help_collaborator_group">Assay Data Collaborators</a>
@@ -3000,18 +3007,18 @@
                                             <li class="list-group-item">
                                                 <h1 class="h1-level-1">Stakeholder Review</h1>
                                                 <p class="h1-level-3">
-                                                    <span class="glst">stakeholder</span>
+                                                    <span class="gse0">{{ all_glossary.stakeholder_term }}</span>
                                                     -
                                                     <span class="gse1">{{ all_glossary.stakeholder_def }}</span>
                                                 </p>
                                                 <p>Stakehold groups are managed by
-                                                    <span class="glst">MPS-Db administrators</span>,
+                                                    <span class="gse0">{{ all_glossary.mpsdbadministrator_term }}s</span>,
                                                     however, moving forward,
-                                                    <span class="glst">data providers</span>
+                                                    <span class="gse0">{{ all_glossary.dataprovider_term }}s</span>
                                                     will manage access to their data using
-                                                    <span class="glst">collaborator groups</span>
+                                                    <span class="gse0">{{ all_glossary.collaboratorgroup_term }}s</span>
                                                     and
-                                                    <span class="glst">accessor groups</span>.
+                                                    <span class="gse0">{{ all_glossary.accessorgroup_term }}s</span>.
                                                 </p>
                                                 <br>
                                                 <ul class="list-unstyled">
@@ -3019,9 +3026,9 @@
                                                         <ul class="help-filled-circle">
                                                             <li>Login to the MPS-Db</li>
                                                             <li>Go to the <b>Studies</b> tab/icon and click on the <b>View/Edit</b> button next to the 
-                                                                <span class="glst">study</span>
+                                                                <span class="gse0">{{ all_glossary.study_term }}</span>
                                                                 of interest or 
-                                                                <a href='https://mps.csb.pitt.edu/assays/assaystudy'>click here</a>
+                                                                <a href={{ all_glossary.study_naked_ref }}>click here</a>
                                                             </li>
                                                             <li>Look for studies with a check mark, but without an 'eye' or a 'pencil' in the <b>Review</b> column</li>
                                                             <li>Click the <b>View/Edit</b> button next to the study to review</li>
@@ -3037,21 +3044,21 @@
                                                     <li>Help Notes:
                                                         <ul class="help-filled-circle">
                                                             <li>
-                                                                <span class="glst">Data providers</span>
+                                                                <span class="gse0">{{ all_glossary.dataprovider_term }}s</span>
                                                                 and/or project funders designate
-                                                                <span class="glst">stakeholders</span>
+                                                                <span class="gse0">{{ all_glossary.stakeholder_term }}s</span>
                                                             </li>
                                                             <li>
                                                                 Designating a
-                                                                <span class="glst">stakeholder</span>
+                                                                <span class="gse0">{{ all_glossary.stakeholder_term }}</span>
                                                                 is optional (unless required by the funder)
                                                             </li>
                                                             <li>
-                                                                <span class="glst">Stakeholders</span>
+                                                                <span class="gse0">{{ all_glossary.stakeholder_term }}s</span>
                                                                 must be
                                                                 registered MPS-Db users
                                                                 with permission to access to the
-                                                                <span class="glst">study</span>
+                                                                <span class="gse0">{{ all_glossary.study_term }}</span>
                                                                 data
                                                             </li>
                                                         </ul>

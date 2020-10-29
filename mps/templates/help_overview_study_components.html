@@ -11,21 +11,22 @@
         {# HANDY accessing a dictionary in html dictionary python to java   #}
         <span class="gse1">{{ all_glossary.studycomponent_def }}</span>
         They are the terms that are selected in dropdowns when setting up a study in the
-        <span class="glst">MPS-Db</span>.
+        <span class="gse0">{{ all_glossary.mpsdb_term }}</span>.
         All registered users can review
-        <span class="glst">study components</span>
+        <span class="gse0">{{ all_glossary.studycomponent_term }}s</span>
         at this link
         <span class="gse1">{{ all_glossary.studycomponent_ref }}</span>.
-        <span class="glst">Data providers</span>
+        <span class="gse0">{{ all_glossary.dataprovider_term }}s</span>
         (users who are assigned to, at least one,
-        <span class="glst">data group</span>)
+        <span class="gse0">{{ all_glossary.datagroup_term }}</span>)
         can add new
-        <span class="glst">study components</span>
-        <span class="gse0">{{ all_glossary.studycomponent }}</span>
-        at this link or by clicking the
+        <span class="gse0">{{ all_glossary.studycomponent_term }}s</span>
+        at this link
+        <span class="gse0">{{ all_glossary.studycomponent_ref }}</span>,
+        or by clicking the
         <span class="glyphicon glyphicon-plus text-success" aria-hidden="true"></span>
         provided throughout the
-        <span class="glst">study setup</span>
+        <span class="gse0">{{ all_glossary.studysetup_term }}</span>
         workflow.
         <br>
         <br>
@@ -191,7 +192,7 @@
 {#                    <td> <span class="glst">MPS models</span> in the MPS-Db with the option to click on the model and view details of the model's design. </td>#}
 {#                </tr>#}
 {#                <tr>#}
-{#                    <td> <span class="glst">MPS Model</span> Locations </td>#}
+{#                    <td> <span class="gse0">{{ all_glossary.mpsmodel }}</span> Locations </td>#}
 {#                    <td> Locations within a device where treatments can be added and/or samples removed. </td>#}
 {#                </tr>#}
 {#                <tr>#}

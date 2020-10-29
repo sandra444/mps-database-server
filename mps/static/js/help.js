@@ -160,11 +160,11 @@ $(document).ready(function () {
 
     $(document).on('click', '#caseSensitive', function() {
     // $("#caseSensitive").click(function() {
-        change_search_ables_to_search(true);
         if (searchTerm) {
             // not null
             gooo();
         }
+        change_search_ables_to_search(true);
     });
 
     // consider on input

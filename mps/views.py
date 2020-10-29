@@ -158,8 +158,10 @@ def mps_help(request):
         stripped_term = ''.join(e for e in term if e.isalnum())
         stripped_term = stripped_term.lower()
         # print("stripped_term: ", stripped_term)
+        all_glossary[stripped_term + '_term'] = each.term
         all_glossary[stripped_term+'_def'] = each.definition
         all_glossary[stripped_term+'_ref'] = each.show_url
+        all_glossary[stripped_term + '_naked_ref'] = each.reference
 
     # for each in glossary_master:
     #     # HANDY - get each field name in a queryset
@@ -212,6 +214,9 @@ def mps_help(request):
         # 'study_component_def': all_glossary.get('studycomponent_def', ''),
         # 'study_component_ref': all_glossary.get('studycomponent_ref', ''),
     }
+
+    # for each in all_glossary:
+    #     print(each)
 
     return render(request, 'help.html', data)
 

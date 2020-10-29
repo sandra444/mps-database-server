@@ -9,23 +9,30 @@
     <li class="list-group-item">
         <h1 class="h1-level-1">Study Organization</h1>
         In the
-        <span class="glst">MPS-Db</span>, a
-        <span class="glst">study</span>
+        <span class="gse0">{{ all_glossary.mpsdb_term }}</span>, a
+        <span class="gse0">{{ all_glossary.study_term }}</span>
         contains all data and metadata associated to an experiment designed to assess
-        <span class="glst">MPS model</span> response. A list of studies in the
-        <span class="glst">MPS-Db</span>, with summary information about the
-        <span class="glst">MPS models</span> used in the
-        <span class="glst">study</span> and associated assay results, is provided on the
+        <span class="gse0">{{ all_glossary.mpsmodel_term }}</span> response. A list of studies in the
+        <span class="gse0">{{ all_glossary.mpsdb_term }}</span>, with summary information about the
+        <span class="gse0">{{ all_glossary.mpsmodel_term }}s</span> used in the
+        <span class="gse0">{{ all_glossary.study_term }}</span>
+        and associated assay results, is provided on the
         <b>Study List</b> page. A
-        <span class="glst">study</span> can contain multiple
-        <span class="glst">study treatment groups</span> and a
-        <span class="glst">study treatment group</span> can include multiple
-        <span class="glst">study items</span>. Each
-        <span class="glst">study item</span> can have multiple
-        <span class="glst">assay data points</span>,
-        <span class="glst">assay images</span>,
+        <span class="gse0">{{ all_glossary.study_term }}</span>
+        can contain multiple
+        <span class="gse0">{{ all_glossary.studytreatmentgroup_term }}s</span>
+        and a
+        <span class="gse0">{{ all_glossary.studytreatmentgroup_term }}</span>
+        can include multiple
+        <span class="gse0">{{ all_glossary.studyitem_term }}s</span>.
+        Each
+        <span class="gse0">{{ all_glossary.studyitem_term }}</span>
+        can have multiple
+        <span class="gse0">{{ all_glossary.assaydatapoint_term }}s</span>,
+        <span class="gse0">{{ all_glossary.assayimage_term }}s</span>,
         and/or
-        <span class="glst">assay videos</span> associated to it.
+        <span class="gse0">{{ all_glossary.assayvideo_term }}s</span>
+        associated to it.
         <br>
         <br>
 
@@ -58,11 +65,11 @@
 {#            <tbody>#}
 {#                <tr>#}
 {#                    <td> Study Treatment Group </td>#}
-{#                    <td> <span class="glst">MPS models</span> constructed and treated the same way are part of a study treatment group. The study treatment group is assigned a name during study setup. When an <span class="glst">MPS model</span> is constructed using a chip device, multiple chips can be assigned to the same study treatment group. When an <span class="glst">MPS model</span> is constructed using a plate device, wells from one or more plates can be assigned to the same study treatment group, or to different study treatment groups. </td>#}
+{#                    <td> <span class="glst">MPS models</span> constructed and treated the same way are part of a study treatment group. The study treatment group is assigned a name during study setup. When an <span class="gse0">{{ all_glossary.mpsmodel }}</span> is constructed using a chip device, multiple chips can be assigned to the same study treatment group. When an <span class="gse0">{{ all_glossary.mpsmodel }}</span> is constructed using a plate device, wells from one or more plates can be assigned to the same study treatment group, or to different study treatment groups. </td>#}
 {#                </tr>#}
 {#                <tr>#}
 {#                    <td> Study Item </td>#}
-{#                    <td> An experimental <span class="glst">MPS model</span> consisting of one chip, one well on a plate, multiple wells on a plate that function as one MPS model, multiple substructures within an individual well on a plate (e.g., skeletal myobundle), or some other custom configuration. </td>#}
+{#                    <td> An experimental <span class="gse0">{{ all_glossary.mpsmodel }}</span> consisting of one chip, one well on a plate, multiple wells on a plate that function as one MPS model, multiple substructures within an individual well on a plate (e.g., skeletal myobundle), or some other custom configuration. </td>#}
 {#                </tr>#}
 {#                <tr>#}
 {#                    <td> Assay Data Points (non-omic data) </td>#}
