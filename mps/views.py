@@ -144,7 +144,7 @@ def mps_help(request):
     # request.build_absolute_uri()  http://127.0.0.1:8000/help/
     # request.get_full_path()  /help/
 
-    # convert the list of tuples to a dictionary for faster access
+    # convert the list (that is in the models.py) of tuples to a dictionary for faster access
     help_category_choices_dict = {}
     for each in help_category_choices:
         help_category_choices_dict[each[0]] = each[1]
@@ -152,15 +152,21 @@ def mps_help(request):
     # get the whole glossary
     glossary_master = Definition.objects.all()
 
+    # take the glossary master and make a new glossary with terms that are needed for the html
     all_glossary = {}
     for each in glossary_master:
+        # here is the place to force something to a new line, if needed
+        #
         term = each.term
+        # stripped term is used to access the terms etc in the template
         stripped_term = ''.join(e for e in term if e.isalnum())
         stripped_term = stripped_term.lower()
         # print("stripped_term: ", stripped_term)
         all_glossary[stripped_term + '_term'] = each.term
         all_glossary[stripped_term+'_def'] = each.definition
+        # the glif link
         all_glossary[stripped_term+'_ref'] = each.show_url
+        # the actual link to use in an href
         all_glossary[stripped_term + '_naked_ref'] = each.reference
 
     # for each in glossary_master:
@@ -169,9 +175,10 @@ def mps_help(request):
     #     #     print(field)
     #     print("help_category_display ", each.help_category_display)
 
-    # get a subset of the features for the feature table
+    # get a subset of the features for the feature table (in order as specified in the glossary)
     feature = glossary_master.filter(help_category='feature').filter(help_display=True).order_by('help_order')
 
+    # get the data sources for each feature and add them to the feature
     for each in feature:
         this_list = []
         this_list_string = ''
@@ -191,6 +198,7 @@ def mps_help(request):
         each.help_category_display = dict_value
 
     # get other subsets for other tables on the help page
+    # note: these pull terms and associated metadata in loops in the html, so do not need the stripped reference term in these
     source = glossary_master.filter(help_category='source').filter(help_display=True).order_by('help_order')
     component_assay = glossary_master.filter(help_category='component-assay').filter(help_display=True).order_by('help_order')
     component_model = glossary_master.filter(help_category='component-model').filter(help_display=True).order_by('help_order')
