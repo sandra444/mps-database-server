@@ -960,11 +960,21 @@ class AssayStudyDataIndex(StudyViewerMixin, AssayStudyMixin, DetailView):
     def get_context_data(self, **kwargs):
         context = super(AssayStudyDataIndex, self).get_context_data(**kwargs)
 
+        # SUBJECT TO CHANGE
+        log2fold_files = AssayOmicDataFileUpload.objects.filter(
+            study_id=self.object.id,
+            data_type='log2fc'
+        )
+
         context.update({
             # CONTRIVED!!!
             'update': True,
             # NECESSARILY FALSE
             'has_next_button': False,
+            'log2fold_files': log2fold_files,
+            'log2fold_points': AssayOmicDataPoint.objects.filter(
+                omic_data_file__in=log2fold_files
+            ),
         })
 
         return context
