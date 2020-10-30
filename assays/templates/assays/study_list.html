@@ -18,6 +18,7 @@
             <th>MPS Models</th>
             <th>Model Types</th>
             <th>Data Points</th>
+            <th>Data Points (omic)</th>
             <th>Images</th>
             <th>Videos</th>
             <th>Plate Maps</th>
@@ -58,6 +59,11 @@
 {#                    <td>{{ study.study_configuration }}</td>#}
             {% if study.data_points %}
                 <td class="text-success">{{ study.data_points|intcomma }}</td>
+            {% else %}
+                <td class="text-danger">0</td>
+            {% endif %}
+            {% if study.omic_data_points %}
+                <td class="text-success">{{ study.omic_data_points|intcomma }}</td>
             {% else %}
                 <td class="text-danger">0</td>
             {% endif %}

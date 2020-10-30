@@ -54,6 +54,11 @@ from assays.models import (
     AssayPlateReaderMapDataFile,
     AssayPlateReaderMapDataFileBlock,
     AssayPlateReaderMapItemValue,
+    # AssayOmicDataGroup,
+    AssayOmicDataFileUpload,
+    AssayOmicDataPoint,
+    AssayOmicAnalysisTarget,
+    # AssayOmicSampleMetadata,
 )
 from microdevices.models import MicrophysiologyCenter
 # from compounds.models import Compound
@@ -577,6 +582,17 @@ class AssayStudySupportingDataInline(admin.TabularInline):
     )
     extra = 1
 
+# class AssayOmicDataGroupInline(admin.TabularInline):
+#     """Inline for Studies"""
+#     model = AssayOmicDataGroup
+#     verbose_name = 'Assay Omic Data Group - Temporary Group Options'
+#     fields = (
+#         (
+#             'name', 'number'
+#         ),
+#     )
+#     extra = 1
+
 
 # TODO REMAKE FOR ASSAY STUDY
 class AssayStudyStakeholderInline(admin.TabularInline):
@@ -638,7 +654,7 @@ class AssayStudyAdmin(LockableAdmin):
         (
             'Study', {
                 'fields': (
-                    ('toxicity', 'efficacy', 'disease', 'cell_characterization'),
+                    ('toxicity', 'efficacy', 'disease', 'cell_characterization', 'omics'),
                     'study_configuration',
                     'start_date',
                     'name',
@@ -687,6 +703,7 @@ class AssayStudyAdmin(LockableAdmin):
         ),
     )
 
+    # inlines = [AssayStudyStakeholderInline, AssayStudyAssayInline, AssayStudySupportingDataInline, AssayStudyReferenceInline, AssayOmicDataGroupInline]
     inlines = [AssayStudyStakeholderInline, AssayStudyAssayInline, AssayStudySupportingDataInline, AssayStudyReferenceInline]
 
     def get_queryset(self, request):
@@ -1303,3 +1320,43 @@ class AssayPlateReaderMapDataFileBlockAdmin(ImportExportModelAdmin):
     search_fields = ('data_block',)
 
 admin.site.register(AssayPlateReaderMapDataFileBlock, AssayPlateReaderMapDataFileBlockAdmin)
+
+# class AssayOmicDataGroupAdmin(ImportExportModelAdmin):
+#     model = AssayOmicDataGroup
+#     list_display = ('name', 'number', 'study')
+#     search_fields = ('name', 'study')
+#
+# admin.site.register(AssayOmicDataGroup, AssayOmicDataGroupAdmin)
+
+class AssayOmicDataFileUploadAdmin(ImportExportModelAdmin):
+    model = AssayOmicDataFileUpload
+    list_display = ('description', 'study', 'omic_data_file', 'study_assay', 'analysis_method', 'data_type',
+                    'group_1', 'group_2', 'time_1', 'time_2', 'location_1', 'location_2', 'name_reference')
+    search_fields = ('description', )
+
+admin.site.register(AssayOmicDataFileUpload, AssayOmicDataFileUploadAdmin)
+
+class AssayOmicDataPointAdmin(ImportExportModelAdmin):
+    model = AssayOmicDataPoint
+    list_display = ('study', 'omic_data_file', 'name', 'analysis_target', 'value')
+    search_fields = ('name', 'analysis_target', 'study', 'omic_data_file')
+
+admin.site.register(AssayOmicDataPoint, AssayOmicDataPointAdmin)
+
+class AssayOmicAnalysisTargetAdmin(ImportExportModelAdmin):
+    """Admin for Analysis Targets"""
+    model = AssayOmicAnalysisTarget
+    list_display = ('name', 'target', 'data_type', 'method', 'unit')
+    search_fields = ('name', 'target', 'data_type', 'method', 'unit')
+
+    list_editable = ('target', 'data_type', 'method', 'unit')
+
+admin.site.register(AssayOmicAnalysisTarget, AssayOmicAnalysisTargetAdmin)
+
+# class AssayOmicSampleMetadataAdmin(ImportExportModelAdmin):
+#     """Admin for Sample Metadata"""
+#     model = AssayOmicSampleMetadata
+#     list_display = ('study', 'cross_reference', 'matrix_item', 'sample_location', 'time', 'replicate','assay_well_id')
+#     search_fields = ('study', 'matrix_item', 'sample_location', 'time')
+#
+# admin.site.register(AssayOmicSampleMetadata, AssayOmicSampleMetadataAdmin)

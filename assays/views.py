@@ -46,6 +46,8 @@ from assays.models import (
     assay_plate_reader_map_info_plate_size_choices,
     assay_plate_reader_map_info_plate_size_choices_list,
     upload_file_location,
+    AssayOmicDataFileUpload,
+    AssayOmicDataPoint,
     AssayGroup,
 )
 from assays.forms import (
@@ -95,6 +97,7 @@ from assays.forms import (
     AssayPlateReaderMapDataFileForm,
     AssayPlateReaderMapDataFileBlockFormSetFactory,
     AbstractClassAssayStudyAssay,
+    AssayOmicDataFileUploadForm,
     AssayMatrixItemForm,
 )
 
@@ -102,7 +105,7 @@ from microdevices.models import MicrophysiologyCenter
 from django import forms
 
 # TODO REVISE SPAGHETTI CODE
-from assays.ajax import get_data_as_csv, fetch_data_points_from_filters
+from assays.ajax import get_data_as_csv, fetch_data_points_from_filters, get_filtered_omics_data_as_csv
 from assays.utils import (
     AssayFileProcessor,
     get_user_accessible_studies,
@@ -483,6 +486,20 @@ def get_queryset_with_number_of_data_points(queryset):
             plate_reader_file.study_id: current_value + 1
         })
 
+    omic_data_points = AssayOmicDataPoint.objects.filter(
+        study_id__in=study_ids
+    ).only('id', 'study_id')
+
+    omic_data_points_map = {}
+
+    for omic_data_point in omic_data_points:
+        current_value = omic_data_points_map.setdefault(
+            omic_data_point.study_id, 0
+        )
+        omic_data_points_map.update({
+            omic_data_point.study_id: current_value + 1
+        })
+
     images = AssayImage.objects.filter(
         setting__study_id__in=study_ids
     ).prefetch_related(
@@ -541,6 +558,7 @@ def get_queryset_with_number_of_data_points(queryset):
         study.supporting_data = supporting_data_map.get(study.id, 0)
         study.plate_maps = plate_maps_map.get(study.id, 0)
         study.plate_reader_files = plate_reader_files_map.get(study.id, 0)
+        study.omic_data_points = omic_data_points_map.get(study.id, 0)
 
 
 # TODO GET NUMBER OF DATA POINTS
@@ -942,11 +960,21 @@ class AssayStudyDataIndex(StudyViewerMixin, AssayStudyMixin, DetailView):
     def get_context_data(self, **kwargs):
         context = super(AssayStudyDataIndex, self).get_context_data(**kwargs)
 
+        # SUBJECT TO CHANGE
+        log2fold_files = AssayOmicDataFileUpload.objects.filter(
+            study_id=self.object.id,
+            data_type='log2fc'
+        )
+
         context.update({
             # CONTRIVED!!!
             'update': True,
             # NECESSARILY FALSE
             'has_next_button': False,
+            'log2fold_files': log2fold_files,
+            'log2fold_points': AssayOmicDataPoint.objects.filter(
+                omic_data_file__in=log2fold_files
+            ),
         })
 
         return context
@@ -5248,3 +5276,196 @@ class AssayPlateReaderMapDataFileUpdate(StudyGroupMixin, UpdateView):
 
 #####
 # END Plate reader file list, add, update, view and HOLD section
+
+##### Start the omic data section
+
+class AssayOmicDataFileUploadIndex(StudyViewerMixin, DetailView):
+    """Assay Omic Data file"""
+
+    model = AssayStudy
+    context_object_name = 'assayomicdatafileupload_index'
+    template_name = 'assays/assayomicdatafileupload_index.html'
+
+    # For permission mixin
+    def get_object(self, queryset=None):
+        self.study = super(AssayOmicDataFileUploadIndex, self).get_object()
+        return self.study
+
+    def get_context_data(self, **kwargs):
+        context = super(AssayOmicDataFileUploadIndex, self).get_context_data(**kwargs)
+
+        # get files
+        datafiles = AssayOmicDataFileUpload.objects.filter(
+            study=self.object.id
+        )
+        # get and put short file name into queryset
+        for file in datafiles:
+            file.name_short = os.path.basename(str(file.omic_data_file))
+
+        # find count of genomic data points associated to each file
+        data_point_count = AssayOmicDataPoint.objects.filter(
+            study=self.object.id
+        ).values('omic_data_file').annotate(
+            point_count=Count('omic_data_file')
+        )
+        # put point counts in a dictionary
+        point_count_dict = {}
+        for each in data_point_count.iterator():
+            point_count_dict.update({each.get('omic_data_file'): each.get('point_count')})
+
+        # put the counts into the queryset
+        for file in datafiles:
+            file.point_count = point_count_dict.get(int(file.id))
+
+        context['datafiles'] = datafiles
+        return context
+
+
+class AssayOmicDataFileUploadDelete(CreatorAndNotInUseMixin, DeleteView):
+    model = AssayOmicDataFileUpload
+    template_name = 'assays/assayomicdatafileupload_delete.html'
+
+    def get_success_url(self):
+        return self.object.get_post_submission_url()
+
+
+class AssayOmicDataFileUploadAdd(StudyGroupMixin, CreateView):
+    """Views Add Upload an AssayOmicDataFileUpload file """
+
+    model = AssayOmicDataFileUpload
+    template_name = 'assays/assayomicdatafileupload_aur.html'
+    form_class = AssayOmicDataFileUploadForm
+
+    # For permission mixin
+    def get_object(self, queryset=None):
+        self.study = super(AssayOmicDataFileUploadAdd, self).get_object()
+        return self.study
+
+    def get_form(self, form_class=None):
+        form_class = self.get_form_class()
+        study = get_object_or_404(AssayStudy, pk=self.kwargs['study_id'])
+
+        if self.request.method == 'POST':
+            return form_class(self.request.POST, self.request.FILES, study=study)
+        else:
+            return form_class(study=study)
+
+    def get_context_data(self, **kwargs):
+        context = super(AssayOmicDataFileUploadAdd, self).get_context_data(**kwargs)
+        context['add'] = True
+        context['page_called'] = 'add'
+        return context
+
+    def form_valid(self, form):
+        if form.is_valid():
+            save_forms_with_tracking(self, form, update=True)
+            return redirect(self.object.get_post_submission_url())
+        else:
+            return self.render_to_response(self.get_context_data(form=form, ))
+
+class AssayOmicDataFileUploadUpdate(StudyGroupMixin, UpdateView):
+    """Views View Upload an AssayOmicDataFileUpload file """
+
+    model = AssayOmicDataFileUpload
+    template_name = 'assays/assayomicdatafileupload_aur.html'
+    form_class = AssayOmicDataFileUploadForm
+
+    def get_context_data(self, **kwargs):
+        context = super(AssayOmicDataFileUploadUpdate, self).get_context_data(**kwargs)
+        context['update'] = True
+        context['page_called'] = 'update'
+        return context
+
+    def form_valid(self, form):
+        if form.is_valid():
+            save_forms_with_tracking(self, form, update=True)
+            return redirect(self.object.get_post_submission_url())
+        else:
+            return self.render_to_response(self.get_context_data(form=form, ))
+
+class AssayOmicDataFileUploadView(StudyGroupMixin, DetailView):
+    """Views View Upload an AssayOmicDataFileUpload file """
+
+    model = AssayOmicDataFileUpload
+    template_name = 'assays/assayomicdatafileupload_aur.html'
+    form_class = AssayOmicDataFileUploadForm
+
+    def get_context_data(self, **kwargs):
+        context = super(AssayOmicDataFileUploadView, self).get_context_data(**kwargs)
+        context['review'] = True
+        context['page_called'] = 'review'
+
+        # HANDY to use DetailView in a View view and trick Django into getting the form
+        context.update({
+            'form': AssayOmicDataFileUploadForm(instance=self.object),
+        })
+
+        return context
+
+# END omic data file list, add, update, view and delete section
+
+
+class AssayStudyOmics(StudyViewerMixin, DetailView):
+    """Displays the omics interface for the current study"""
+    model = AssayStudy
+    template_name = 'assays/assaystudy_omics.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(AssayStudyOmics, self).get_context_data(**kwargs)
+        context.update({
+            'form': AssayStudyGroupForm(instance=self.object),
+            'cellsamples' : CellSample.objects.all().prefetch_related(
+                'cell_type__organ',
+                'supplier',
+                'cell_subtype__cell_type'
+            ),
+        })
+
+        return context
+
+
+class AssayStudyOmicsDownload(StudyViewerMixin, DetailView):
+    """Returns a CSV of the filtered Omics Data for a study"""
+    model = AssayStudy
+
+    def render_to_response(self, context, **response_kwargs):
+        # Make sure that the study exists, then continue
+        if self.object:
+            get_params = {
+                'negative_log10_pvalue': self.request.GET.get("negative_log10_pvalue") == "true",
+                'absolute_log2_foldchange': self.request.GET.get("absolute_log2_foldchange") == "true",
+                'over_expressed': self.request.GET.get("over_expressed") == "true",
+                'under_expressed': self.request.GET.get("under_expressed") == "true",
+                'neither_expressed': self.request.GET.get("neither_expressed") == "true",
+                'threshold_pvalue': float(self.request.GET.get("threshold_pvalue")),
+                'threshold_log2_foldchange': float(self.request.GET.get("threshold_log2_foldchange")),
+                'min_pvalue': float(self.request.GET.get("min_pvalue")),
+                'max_pvalue': float(self.request.GET.get("max_pvalue")),
+                'min_negative_log10_pvalue': float(self.request.GET.get("min_negative_log10_pvalue")),
+                'max_negative_log10_pvalue': float(self.request.GET.get("max_negative_log10_pvalue")),
+                'min_log2_foldchange': float(self.request.GET.get("min_log2_foldchange")),
+                'max_log2_foldchange': float(self.request.GET.get("max_log2_foldchange")),
+                'abs_log2_foldchange': float(self.request.GET.get("abs_log2_foldchange")),
+                'visible_charts': self.request.GET.get("visible_charts").split("+")
+            }
+
+            data = ''
+            if len(get_params['visible_charts']) > 0 and not (get_params['over_expressed'] == False and get_params['under_expressed'] == False and get_params['neither_expressed'] == False):
+                data = get_filtered_omics_data_as_csv(get_params)
+            else:
+                return HttpResponse('', content_type='text/plain')
+
+            # For specifically text
+            response = HttpResponse(data, content_type='text/csv', charset='utf-8')
+            response['Content-Disposition'] = 'attachment;filename="' + str(self.object) + '.csv"'
+
+            return response
+        # Return nothing otherwise
+        else:
+            return HttpResponse('', content_type='text/plain')
+
+
+class AssayStudyOmicsHeatmap(StudyViewerMixin, DetailView):
+    """Displays the omics interface for the current study"""
+    model = AssayStudy
+    template_name = 'assays/assaystudy_omics_heatmap.html'

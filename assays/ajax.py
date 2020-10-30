@@ -1,5 +1,8 @@
 # coding=utf-8
 import ujson as json
+# Ask if folks mind the pvalues getting truncated, non-U-json fixes this
+import json as default_json
+import math
 # from collections import defaultdict
 from django.http import (
     HttpResponse,
@@ -44,7 +47,11 @@ from .models import (
     assay_plate_reader_map_info_shape_row_dict,
     assay_plate_reader_map_info_plate_size_choices_list,
     PhysicalUnits,
+    AssayOmicDataFileUpload,
+    AssayOmicDataPoint,
+    AssayOmicAnalysisTarget,
     AssayGroup,
+    AssaySampleLocation,
 )
 from microdevices.models import (
     MicrophysiologyCenter,
@@ -53,6 +60,7 @@ from microdevices.models import (
     OrganModelProtocol,
     OrganModelProtocolCell,
     OrganModelProtocolSetting,
+    OrganModelLocation,
 )
 from compounds.models import (
     Compound
@@ -86,6 +94,9 @@ from .utils import (
     get_the_plate_layout_info_for_assay_plate_map,
     review_plate_reader_data_file_return_file_list,
     plate_reader_data_file_process_data,
+    omic_data_file_process_data,
+    this_file_same_as_another_in_this_study,
+    get_model_location_dictionary,
     sandrasGeneralFormatNumberFunction
 )
 
@@ -6982,6 +6993,446 @@ def fetch_data_processing_for_plate_map_integration(request):
         })
     return HttpResponse(json.dumps(data), content_type="application/json")
 
+
+# sck omic data find sample information if group already in the upload file
+def fetch_omic_sample_info_from_upload_data_table(request):
+    """
+        Assay Omic Data File get the sample info if the group previously added to upload table
+    """
+
+    # if changing a group, need to get all the updated info
+    # if an add page, need to call to clear out the location list
+    # if update page, need to get the model location list
+
+    # if called_from a load, have to do both (did them here to avoid race errors)
+    called_from = request.POST.get('called_from', '0')
+    # could be called from change, load-add, load-update
+    groupIDc = int(request.POST.get('groupIDc', '0'))
+    groupPkc = int(request.POST.get('groupPkc', '0'))
+    groupID1 = int(request.POST.get('groupID1', '0'))
+    groupPk1 = int(request.POST.get('groupPk1', '0'))
+    groupId2 = int(request.POST.get('groupId2', '0'))
+    groupPk2 = int(request.POST.get('groupPk2', '0'))
+
+    # when called from is a change, we are only working with ONE, the groupIDc and groupPkc
+    # note that the ID is the id of the changed group (could be first or second on the form)
+    # or the IDs on the form (1 and 2 - for the load-add and load-update)
+
+    # these will hold the change results or form group 1
+    timemess1 = ""
+    locmess1 = ""
+    day1 = None
+    hour1 = None
+    minute1 = None
+    loc_pk1 = None
+    location_dict1 = {}
+    # these are the group 2 form defaults
+    timemess2 = ""
+    locmess2 = ""
+    day2 = None
+    hour2 = None
+    minute2 = None
+    loc_pk2 = None
+    location_dict2 = {}
+
+    if called_from == 'change' and groupPkc > 0:
+        sample_info = sub_fetch_omic_sample_info_from_upload_data_table(groupPkc)
+        timemess1 = sample_info[0]
+        locmess1 = sample_info[1]
+        day1 = sample_info[2]
+        hour1 = sample_info[3]
+        minute1 = sample_info[4]
+        loc_pk1 = sample_info[5]
+
+        model_row = AssayGroup.objects.only('organ_model').get(pk=groupPkc).organ_model
+        this_model_pk = model_row.id
+        location_dict1 = sub_fetch_model_location_dictionary(this_model_pk)
+
+    if called_from == 'load-update' and groupPk1 > 0:
+        # loading an update page, get the correct list for group1
+        model_row = AssayGroup.objects.only('organ_model').get(pk=groupPk1).organ_model
+        this_model_pk = model_row.id
+        location_dict1 = sub_fetch_model_location_dictionary(this_model_pk)
+
+    if called_from == 'load-update' and groupPk2 > 0:
+        # loading an update page, get the correct list for group2
+        model_row = AssayGroup.objects.only('organ_model').get(pk=groupPk2).organ_model
+        this_model_pk = model_row.id
+        location_dict2 = sub_fetch_model_location_dictionary(this_model_pk)
+
+    # print("l1 ",location_dict1)
+    # print("l2 ", location_dict2)
+
+    # if the mess is found, the replace will happen in the form field in the html file
+    data = {}
+    data.update({
+        'timemess1': timemess1,
+        'day1': day1,
+        'hour1': hour1,
+        'minute1': minute1,
+        'locmess1': locmess1,
+        'sample_location_pk1': loc_pk1,
+        'location_dict1': location_dict1,
+        'timemess2': timemess2,
+        'day2': day2,
+        'hour2': hour2,
+        'minute2': minute2,
+        'locmess2': locmess2,
+        'sample_location_pk2': loc_pk2,
+        'location_dict2': location_dict2,
+    })
+
+    # print(data)
+    return HttpResponse(json.dumps(data), content_type="application/json")
+
+
+def fetch_this_file_is_this_study(request):
+    omic_data_file = request.POST.get('omic_data_file', '0')
+    study_id = int(request.POST.get('study_id', '0'))
+    data_file_pk = int(request.POST.get('data_file_pk', '0'))
+
+    continue_message = this_file_same_as_another_in_this_study(omic_data_file, study_id, data_file_pk)
+    true_to_continue = continue_message[0]
+    message = continue_message[1]
+
+    data = {}
+    data.update({
+        'true_to_continue': true_to_continue,
+        'message': message,
+    })
+    return HttpResponse(json.dumps(data), content_type="application/json")
+
+
+def sub_fetch_omic_sample_info_from_upload_data_table(this_pk):
+    locmess = "no"
+    loc_pk = None
+    timemess = "no"
+    times = None
+    day = None
+    hour = None
+    minute = None
+
+    # find time if a previous instance with this group has been saved
+    # note that, must search when saved as EITHER a group 1 or a group 2
+    queryset1 = AssayOmicDataFileUpload.objects.filter(
+        group_1=this_pk
+    ).aggregate(Max('time_1'))['time_1__max']
+    queryset2 = AssayOmicDataFileUpload.objects.filter(
+        group_2=this_pk
+    ).aggregate(Max('time_2'))['time_2__max']
+
+    if queryset1 is not None and queryset2 is not None:
+        timemess = "found"
+        if queryset1 > queryset2:
+            times = get_split_times(queryset1)
+        else:
+            times = get_split_times(queryset2)
+    elif queryset1 is not None:
+        times = get_split_times(queryset1)
+    elif queryset2 is not None:
+        times = get_split_times(queryset2)
+
+    if times is not None:
+        day = times.get("day")
+        hour = times.get("hour")
+        minute = times.get("minute")
+
+    # find location if this group has previously been saved with a group
+    queryset1 = AssayOmicDataFileUpload.objects.filter(
+        group_1=this_pk
+    ).aggregate(Max('location_1'))['location_1__max']
+
+    if queryset1 is not None:
+        locmess = "found"
+        loc_pk = queryset1
+    else:
+        queryset2 = AssayOmicDataFileUpload.objects.filter(
+            group_2=this_pk
+        ).aggregate(Max('location_2'))['location_2__max']
+
+        if queryset2 is not None:
+            locmess = "found"
+            loc_pk = queryset2
+
+    return [timemess, locmess, day, hour, minute, loc_pk]
+
+
+def sub_fetch_model_location_dictionary(this_model_pk):
+    location_dict = get_model_location_dictionary(this_model_pk)
+    return [location_dict]
+
+
+def fetch_omics_data_for_visualization(request):
+    data = {'data': {}}
+
+    study = request.POST.get('study_id', '{}')
+
+    try:
+        study = int(study)
+    except TypeError:
+        data = {'error': 'There was a problem acquiring the study ID.'}
+        return HttpResponse(
+            json.dumps(data),
+            content_type='application/json'
+        )
+
+    datafiles = AssayOmicDataFileUpload.objects.filter(study_id=study)
+
+    if datafiles.count() == 0:
+        data = {'error': 'There is no omics data for this study.'}
+        return HttpResponse(
+            json.dumps(data),
+            content_type='application/json'
+        )
+
+    # TODO - Put this in loop below
+    data['file_id_to_name'] = {}
+    data['table'] = {}
+
+    # Account for multiple files with the same groups
+    # First, this is abysmally inefficient, there has to be a better way.
+    # Second, how do you perform underscore access of FK fields whose parent's name already has underscores? (ex. group_1_name)
+    group_combos = []
+    for datafile in datafiles:
+        if datafile.group_1 is not None and datafile.group_2 is not None:
+            group_combos.append("{}+{}".format(datafile.group_1.id, datafile.group_2.id))
+
+    for datafile in datafiles:
+        if datafile.group_1 is not None and datafile.group_2 is not None and datafile.data_type == "log2fc":
+            omics_token = "{}+{}".format(datafile.group_1.id, datafile.group_2.id)
+            if group_combos.count(omics_token) > 1:
+                split_times_1 = get_split_times(datafile.time_1)
+                split_times_2 = get_split_times(datafile.time_2)
+                if datafile.location_1 is not None and datafile.location_2 is not None:
+                    joint_name = " vs ".join([
+                        datafile.group_1.name + "(" + datafile.location_1.name + ") @ D:" + str(split_times_1['day']) + " H:" + str(split_times_1['hour']) + " M:" + str(split_times_1['minute']),
+                        datafile.group_2.name + "(" + datafile.location_2.name + ") @ D:" + str(split_times_2['day']) + " H:" + str(split_times_2['hour']) + " M:" + str(split_times_2['minute'])
+                    ])
+                else:
+                    joint_name = " vs ".join([
+                        datafile.group_1.name + " @ D:" + str(split_times_1['day']) + " H:" + str(split_times_1['hour']) + " M:" + str(split_times_1['minute']),
+                        datafile.group_2.name + " @ D:" + str(split_times_2['day']) + " H:" + str(split_times_2['hour']) + " M:" + str(split_times_2['minute'])
+                    ])
+            else:
+                joint_name = " vs ".join([datafile.group_1.name, datafile.group_2.name])
+            data['data'][joint_name] = {}
+            data['file_id_to_name'][datafile.id] = joint_name
+            data['table'][joint_name] = [datafile.description, datafile.id]
+
+    datapoints = AssayOmicDataPoint.objects.filter(study=study).exclude(value__isnull=True)
+
+    target_ids = {}
+
+    for datapoint in datapoints:
+        try:
+            if datapoint.name not in data['data'][data['file_id_to_name'][datapoint.omic_data_file_id]]:
+                data['data'][data['file_id_to_name'][datapoint.omic_data_file_id]][datapoint.name] = {}
+            data['data'][data['file_id_to_name'][datapoint.omic_data_file_id]][datapoint.name][datapoint.analysis_target_id] = datapoint.value
+
+            target_ids.update({
+                datapoint.analysis_target_id: True
+            })
+        except KeyError:
+            continue
+
+    data['target_name_to_id'] = {target.name: target.id for target in AssayOmicAnalysisTarget.objects.filter(id__in=target_ids)}
+
+    return HttpResponse(
+        default_json.dumps(data),
+        content_type='application/json'
+    )
+
+
+def fetch_omics_data_for_upload_preview_prep(request):
+
+    save = False
+    study_id = request.POST.get('study_id', '{}')
+    # the data file pk does not exist yet for preview, and, it is not used for preview, use 1
+    data_file_pk = request.POST.get('file_id', '{}')
+    data_file = request.FILES.get('omic_data_file', '{}')
+    file_extension = os.path.splitext(data_file.name)[1]
+    calledme = 'clean'
+    data_type = request.POST.get('data_type', '{}')
+    analysis_method = request.POST.get('analysis_method', '{}')
+    group_1 = request.POST.get('group_1', '{}')
+    group_2 = request.POST.get('group_2', '{}')
+    description = request.POST.get('description', '{}')
+
+    data_dicts = omic_data_file_process_data(save, study_id, data_file_pk, data_file, file_extension, calledme, data_type, analysis_method)
+
+    data = data_dicts
+
+    return HttpResponse(
+        default_json.dumps(data),
+        content_type='application/json'
+    )
+
+
+def get_filtered_omics_data_as_csv(get_params):
+    """Returns data points as a csv in the form of a string"""
+    ids = AssayOmicDataFileUpload.objects.filter(
+        id__in=get_params['visible_charts']
+    )
+
+    data_points = AssayOmicDataPoint.objects.prefetch_related(
+        'omic_data_file',
+        'analysis_target__target',
+    ).filter(
+        omic_data_file__id__in=ids,
+    )
+
+    consolidated_targets = {}
+    unique_targets = []
+    data = []
+
+    for data_point in data_points:
+        name = data_point.name
+        target = data_point.analysis_target.name
+        value = data_point.value
+        if value is None:
+            continue
+        if name not in consolidated_targets:
+            datafile = data_point.omic_data_file
+            # assay = str(datafile.study_assay)
+            assay_target = datafile.study_assay.target.name
+            assay_method = datafile.study_assay.method.name
+            group_1 = datafile.group_1.name
+            group_2 = datafile.group_2.name
+            time_1 = datafile.time_1
+            time_1_dict = get_split_times(time_1)
+            time_2 = datafile.time_2
+            time_2_dict = get_split_times(time_2)
+            location_1 = datafile.location_1
+            location_2 = datafile.location_2
+            consolidated_targets[name] = {
+                # "assay": assay,
+                "target": assay_target,
+                "method": assay_method,
+                "group_1": group_1,
+                "group_2": group_2,
+                "time_1_days": time_1_dict['day'],
+                "time_1_hours": time_1_dict['hour'],
+                "time_1_minutes": time_1_dict['minute'],
+                "time_2_days": time_2_dict['day'],
+                "time_2_hours": time_2_dict['hour'],
+                "time_2_minutes": time_2_dict['minute'],
+                "location_1": location_1,
+                "location_2": location_2
+            }
+        consolidated_targets[name][target] = value
+        if target not in unique_targets:
+            unique_targets.append(target)
+
+    # Header Row
+    data.append(
+        [
+            "Probe ID",
+            "Gene Name",
+            "Expression",
+            "Assay Target",
+            "Assay Method",
+            "Group 1",
+            "Location 1",
+            "Time 1 (Days)",
+            "Time 1 (Hours)",
+            "Time 1 (Minutes)",
+            "Group 2",
+            "Location 2",
+            "Time 2 (Days)",
+            "Time 2 (Hours)",
+            "Time 2 (Minutes)"
+        ]
+    )
+
+    for target in unique_targets:
+        data[0].append(target)
+
+    expression_text = {
+        'over_expressed': "Over Expressed",
+        'under_expressed': "Under Expressed",
+        'neither_expressed': "General"
+    }
+
+    # Add filtered data
+    for name in consolidated_targets:
+        if "pvalue" not in consolidated_targets[name] or "log2FoldChange" not in consolidated_targets[name]:
+            continue
+        expression = ''
+
+        # PValue Filters
+        if get_params["negative_log10_pvalue"]:
+            if not ((-math.log10(consolidated_targets[name]["pvalue"]) >= get_params["min_negative_log10_pvalue"]) and (-math.log10(consolidated_targets[name]["pvalue"]) <= get_params["max_negative_log10_pvalue"])):
+                continue
+        else:
+            if not ((consolidated_targets[name]["pvalue"] >= get_params["min_pvalue"]) and (consolidated_targets[name]["pvalue"] <= get_params["max_pvalue"])):
+                continue
+
+        # Log2FoldChange Filters
+        if get_params["absolute_log2_foldchange"]:
+            if not ((consolidated_targets[name]["log2FoldChange"] >= -get_params["abs_log2_foldchange"]) and (consolidated_targets[name]["log2FoldChange"] <= get_params["abs_log2_foldchange"])):
+                continue
+        else:
+            if not ((consolidated_targets[name]["log2FoldChange"] >= get_params["min_log2_foldchange"]) and (consolidated_targets[name]["log2FoldChange"] <= get_params["max_log2_foldchange"])):
+                continue
+
+        # Determine Expression
+        if (consolidated_targets[name]["log2FoldChange"] >= get_params["threshold_log2_foldchange"]) and (consolidated_targets[name]["pvalue"] <= get_params["threshold_pvalue"]):
+            expression = 'over_expressed'
+        elif (consolidated_targets[name]["log2FoldChange"] <= -get_params["threshold_log2_foldchange"]) and (consolidated_targets[name]["pvalue"] <= get_params["threshold_pvalue"]):
+            expression = 'under_expressed'
+        else:
+            expression = 'neither_expressed'
+
+        # Expression Filter
+        if not get_params[expression]:
+            continue
+        else:
+            expression = expression_text[expression]
+
+        # Append any data that has made it this far
+        to_append = [
+            name,
+            name.split("_")[0],
+            expression,
+            # consolidated_targets[name]['assay'],
+            consolidated_targets[name]['target'],
+            consolidated_targets[name]['method'],
+            consolidated_targets[name]['group_1'],
+            consolidated_targets[name]['location_1'],
+            consolidated_targets[name]['time_1_days'],
+            consolidated_targets[name]['time_1_hours'],
+            consolidated_targets[name]['time_1_minutes'],
+            consolidated_targets[name]['group_2'],
+            consolidated_targets[name]['location_2'],
+            consolidated_targets[name]['time_2_days'],
+            consolidated_targets[name]['time_2_hours'],
+            consolidated_targets[name]['time_2_minutes']
+        ]
+        for target in unique_targets:
+            if target in consolidated_targets[name]:
+                to_append.append(consolidated_targets[name][target])
+            else:
+                to_append.append('')
+
+        data.append(to_append)
+
+    for index in range(len(data)):
+        current_list = list(data[index])
+        data[index] = [str(item) for item in current_list]
+
+    string_io = StringIO()
+    csv_writer = csv.writer(string_io, dialect=csv.excel)
+
+    # Add the UTF-8 BOM
+    data[0][0] = '\ufeff' + data[0][0]
+
+    # Write the lines
+    for one_line_of_data in data:
+        csv_writer.writerow(one_line_of_data)
+
+    return string_io.getvalue()
+
+
 # TODO TODO TODO
 switch = {
     'fetch_center_id': {'call': fetch_center_id},
@@ -7101,6 +7552,19 @@ switch = {
     'fetch_data_processing_for_plate_map_integration': {
         'call': fetch_data_processing_for_plate_map_integration
     },
+    'fetch_omic_sample_info_from_upload_data_table': {
+        'call': fetch_omic_sample_info_from_upload_data_table
+    },
+    'fetch_omics_data_for_visualization': {
+        'call': fetch_omics_data_for_visualization
+    },
+    'fetch_omics_data_for_upload_preview_prep': {
+        'call': fetch_omics_data_for_upload_preview_prep
+    },
+    'fetch_this_file_is_this_study': {
+        'call': fetch_this_file_is_this_study
+    },
+
 }
 
 
