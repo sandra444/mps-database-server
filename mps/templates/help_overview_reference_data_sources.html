@@ -29,8 +29,8 @@
             <tbody>
                 {% for term in source %}
                 <tr>
-                    <td class="gse0">{{ term.term }}</td>
-                    <td class="gse1">{{ term.definition }}</td>
+                    <td class="gse1">{{ term.term }}</td>
+                    <td class="gse1">{{ term.definition|linebreaks }}</td>
                     <td class="gse1">{{ term.help_order }}</td>
                     <td class="gse1">{{ term.show_url }}</td>
                 </tr>

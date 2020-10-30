@@ -24,8 +24,8 @@
             <tbody>
                 {% for term in feature %}
                 <tr>
-                    <td class="gse0">{{ term.term }}</td>
-                    <td class="gse1">{{ term.definition }}</td>
+                    <td class="gse1">{{ term.term }}</td>
+                    <td class="gse1">{{ term.definition|linebreaks }}</td>
 {#                    <th>{% for source in term.data_sources.all %}{{ source }}<br/>{% endfor %}</th>#}
                     <td class="gse1">{{ term.source_list }}</td>
                     <td class="gse1">{{ term.show_anchor }}</td>
@@ -90,7 +90,7 @@
 {#            <tbody>#}
 {#                <tr>#}
 {#                    <td>  5 References </td>#}
-{#                    <td> References to publications can be added and associated to <span class="glst">MPS models</span>, study sets, studies, and several other study components.#}
+{#                    <td> References to publications can be added and associated to MPS models, study sets, studies, and several other study components.#}
 {#                    For more information on references, <a href="#reference">click here</a>.</td>#}
 {#                    <td> All</td>#}
 {#                </tr>#}

@@ -27,7 +27,7 @@
                 {% for term in permission %}
                 <tr class="gse0">
                     <td>{{ term.term }}</td>
-                    <td>{{ term.definition }}</td>
+                    <td>{{ term.definition|linebreaks }}</td>
                 </tr>
                 {% endfor %}
             </tbody>
@@ -54,7 +54,7 @@
 {#            <tbody>#}
 {#                <tr>#}
 {#                    <td> Registered MPS Users with No Additional Permissions  </td>#}
-{#                    <td> Can view all reference data and associated features. Can view study components (e.g., <span class="glst">MPS models</span>, devices, cell samples). Can view study data in studies that have been designated as open to all registered MPS users, including: viewing study setup information, study protocols, images, videos, and study assay data. </td>#}
+{#                    <td> Can view all reference data and associated features. Can view study components (e.g., MPS models, devices, cell samples). Can view study data in studies that have been designated as open to all registered MPS users, including: viewing study setup information, study protocols, images, videos, and study assay data. </td>#}
 {#                </tr>#}
 {#                <tr>#}
 {#                    <td> Data Group Viewers and Users with Additional Permissions  </td>#}

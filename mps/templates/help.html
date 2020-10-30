@@ -320,26 +320,26 @@
 
                 <h1 class="h1-level-1"><b>STILL TO DO</b></h1>
                     <p>Still to do in getting the new help ready to go:
-                        <br>1) add editor content update for omic and raw plate reader data,
-                        <br>2) all links check and update,
-                        <br>3) glossary (make sure updated, all correct things showing in glossary and help),
-                        <br>4) update all anchors (coordinate with Luke),
+                        <br>1) add editor content update for omic AND raw plate reader data AND MPS Model Version,
+                        <br>2) all links check and update (all but the download template are extracted from the glossary),
+                        <br>3) update the glossary,
+                        <br>4) update all anchors (coordinate with Luke and fill the cross reference in the .js file),
                         <br>5) make sure overviews pulling correctly from glossary terms,
                         <br>6) update collaborator and access groups - maybe - depending on what the status is of those,
-                        <br>7) one more look at the admin only section (maybe need changes - add groups to centers prior to being collaborator or accessor groups)
-                        <br>9) settle on classes to the terms and to the glossary export stuff,
-                        <br>10) consider capitalizing the glossary terms in the html (not the class) so can use case sensitive search (also consider ignoring, for prev and next, the second or more occurrence if /mark mark in present),
-                        <br>11) add the new Clinical Trials feature (currently only on stage)
-                        <br>12) update the model version section,
-                        <br>13) replace all the typed in glossary terms with glossary extracted terms,
-                        <br>14) add more model version information,
-                        <br>15) check the <br><li>Help Note.....</li>
+                        <br>7) one more look at the admin only section (maybe need changes - add groups to centers prior to being collaborator or access groups)
+                        <br>8) settle on classes to the terms and to the glossary content (red right now - dark green? no color difference?),
+                        <br>9) add the new Clinical Trials feature (currently only on stage),
+                        <br>10) change tagging of other glossary terms if change color and want them changed too
                     </p>
 
 
                 <div id="help_overview_background">
                     <button name="help_button" type="button" class="btn btn-primary help-collapsible">Database Background</button>
                     <div class="help-content-1">
+                        ww
+                        <span class="gse0">{{ all_glossary.databasebackground_term }}</span>.
+                        <span class="gse1">{{ all_glossary.databasebackground_def|linebreaks }}</span>.
+                        ww
                         {% include 'help_overview_database_background.html' %}
                     </div>
                 </div>
@@ -699,9 +699,9 @@
                             <li class="list-group-item">
                                 <h1 class="h1-level-1">Study Components</h1>
                                 <p class="h1-level-3">
-                                    <span class="gse1">{{ all_glossary.studycomponent_def }}</span>
+                                    <span class="gse1">{{ all_glossary.studycomponent_def|linebreaks }}</span>
                                     To review/add
-                                    <span class="gse0">{{ all_glossary.studycomponents_term }}</span>,
+                                    <span class="gse0">{{ all_glossary.studycomponent_term }}s</span>,
                                     click the link
                                     {{ all_glossary.studycomponent_ref }}.
                                     <br><br>
@@ -709,9 +709,9 @@
                                     (<span class="gse0">{{ all_glossary.assaytarget_term }}</span>,
                                     <span class="gse0">{{ all_glossary.assaymethod_term }}</span>,
                                     <span class="gse0">{{ all_glossary.mpsmodel_term }}</span>,
-                                    and
                                     <span class="gse0">{{ all_glossary.mpsmodelversion_term }}</span>,
                                     <span class="gse0">{{ all_glossary.cellsample_term }}</span>,
+                                    and
                                     <span class="gse0">{{ all_glossary.compound_term }}</span>)
                                     are provided below.
                                 </p>
@@ -744,7 +744,7 @@
                             <li class="list-group-item">
                                 <h1 class="h1-level-1">Assay Data Visualization</h1>
                                 <p class="h1-level-3">
-                                    <span class="gse1">{{ all_glossary.assaydatavisualization_def }}</span>
+                                    <span class="gse1">{{ all_glossary.assaydatavisualization_def|linebreaks }}</span>
                                 </p>
                                 <br>
 
@@ -873,7 +873,7 @@
                             <li class="list-group-item">
                                 <h1 class="h1-level-1">Assay Omic Data Visualization</h1>
                                 <p class="h1-level-3">
-                                    <span class="gse1">{{ all_glossary.omicdatavisualization_def }}</span>
+                                    <span class="gse1">{{ all_glossary.omicdatavisualization_def|linebreaks }}</span>
                                 </p>
                                 <br>
 
@@ -903,13 +903,13 @@
                             <li class="list-group-item">
                                 <h1 class="h1-level-1">Assay Images and Video</h1>
                                 <p class="h1-level-3">
-                                    <span class="gse1">{{ all_glossary.assayimages_term }}
+                                    <span class="gse1">{{ all_glossary.assayimages_term }}</span>
                                     -
-                                    <span class="gse1">{{ all_glossary.assayimages_def }}</span>
+                                    <span class="gse1">{{ all_glossary.assayimages_def|linebreaks }}</span>
                                     <br>
-                                    <span class="gse1">{{ all_glossary.assayvideos_term }}
+                                    <span class="gse1">{{ all_glossary.assayvideos_term }}</span>
                                     -
-                                    <span class="gse1">{{ all_glossary.assayvideos_def }}</span>
+                                    <span class="gse1">{{ all_glossary.assayvideos_def|linebreaks }}</span>
                                 </p>
                                 <br>
 
@@ -947,7 +947,7 @@
                             <li class="list-group-item">
                                 <h1 class="h1-level-1">Assay Data Power Analysis</h1>
                                 <p class="h1-level-3">
-                                    <span class="gse1">{{ all_glossary.poweranalysis_def }}</span>
+                                    <span class="gse1">{{ all_glossary.poweranalysis_def|linebreaks }}</span>
                                 </p>
                                 <br>
 
@@ -1022,7 +1022,7 @@
                             <li class="list-group-item">
                                 <h1 class="h1-level-1">Assay Data Reproducibility Analysis </h1>
                                 <p class="h1-level-3">
-                                    <span class="gse1">{{ all_glossary.reproducibilityanalysis_def }}</span>
+                                    <span class="gse1">{{ all_glossary.reproducibilityanalysis_def|linebreaks }}</span>
                                 </p>
                                 <br>
                                 <h1 class="h1-level-2">Assay Data Reproducibility Analysis (Intra-Study) </h1>
@@ -1106,7 +1106,7 @@
                             <li class="list-group-item">
                                 <h1 class="h1-level-1">Assay Data Study Sets</h1>
                                 <p class="h1-level-3">
-                                    <span class="gse1">{{ all_glossary.studyset_def }}</span>
+                                    <span class="gse1">{{ all_glossary.studyset_def|linebreaks }}</span>
                                 </p>
                                 <br>
                                 <ul class="list-unstyled">
@@ -1165,7 +1165,7 @@
                             <li class="list-group-item">
                                 <h1 class="h1-level-1">Assay Data Collaborators</h1>
                                 <p class="h1-level-3">
-                                    <span class="gse1">{{ all_glossary.collaboratorgroup_def }}</span>
+                                    <span class="gse1">{{ all_glossary.collaboratorgroup_def|linebreaks }}</span>
                                 </p>
                                 <br>
                                 <ul class="list-unstyled">
@@ -1216,15 +1216,15 @@
                             <li class="list-group-item">
                                 <h1 class="h1-level-1">Assay Data Accessors</h1>
                                 <p class="h1-level-3">
-                                    <span class="gse1">{{ all_glossary.accessorgroup_def }}</span>
+                                    <span class="gse1">{{ all_glossary.accessgroup_def|linebreaks }}</span>
                                 </p>
                                 <br>
                                 <ul class="list-unstyled">
                                     <li>About
-                                        <span class="gse0">{{ all_glossary.accessorgroup_term }}s</span>:
+                                        <span class="gse0">{{ all_glossary.accessgroup_term }}s</span>:
                                         <ul class="help-filled-circle">
                                             <li>An
-                                                <span class="gse0">{{ all_glossary.accessorgroup_term }}</span>
+                                                <span class="gse0">{{ all_glossary.accessgroup_term }}</span>
                                                 is a means of allowing data from a
                                                 <span class="gse0">{{ all_glossary.study_term }}</span>
                                                 during the year embargo period (after sign-off and before public release) to be shared with selected colleagues who are not members of the same
@@ -1232,9 +1232,9 @@
                                                 (e.g., someone from another lab)
                                             </li>
                                             <li>Currently,
-                                                <span class="gse0">{{ all_glossary.accessorgroup_term }}s</span>
+                                                <span class="gse0">{{ all_glossary.accessgroup_term }}s</span>
                                                 must be created and edited by an
-                                                <span class="gse0">{{ all_glossary.mpsdbadministrator_term }}
+                                                <span class="gse0">{{ all_glossary.mpsdbadministrator_term }}</span>
                                             </li>
                                         </ul>
                                     </li>
@@ -1251,7 +1251,7 @@
                             <li class="list-group-item">
                                 <h1 class="h1-level-1">PBPK Analysis</h1>
                                 <p class="h1-level-3">
-                                    <span class="gse1">{{ all_glossary.pbpkanalysis_def }}</span>
+                                    <span class="gse1">{{ all_glossary.pbpkanalysis_def|linebreaks }}</span>
                                 </p>
                                 <br>
                                 <ul class="list-unstyled">
@@ -1309,7 +1309,7 @@
                         <ul class="list-group">
                             <li class="list-group-item">
                                 <h1 class="h1-level-1">Disease Portal</h1>
-                                <span class="gse1">{{ all_glossary.diseaseportal_def }}</span>
+                                <span class="gse1">{{ all_glossary.diseaseportal_def|linebreaks }}</span>
                                 <br>
 
                                 <ul class="list-unstyled">
@@ -1357,7 +1357,7 @@
                             <li class="list-group-item">
                                 <h1 class="h1-level-1">Compound Report</h1>
                                 <p class="h1-level-3">
-                                    <span class="gse1">{{ all_glossary.compoundreport_def }}</span>
+                                    <span class="gse1">{{ all_glossary.compoundreport_def|linebreaks }}</span>
                                 </p>
                                 <br>
                                 <ul class="list-unstyled">
@@ -1368,16 +1368,20 @@
                                             <li>Select the <b>Compound Report</b> option</li>
                                             <li>As a precaution, click the <b>Clear Current Selections</b> button</li>
                                             <li>Use the search box to limit the
-                                                <span class="gse0">{{ all_glossary.compound_term }}</span>list (optional)
+                                                <span class="gse0">{{ all_glossary.compound_term }}</span>
+                                                list (optional)
                                             </li>
                                             <li>Check the boxes for the
-                                                <span class="gse0">{{ all_glossary.compound_term }}s</span>to include
+                                                <span class="gse0">{{ all_glossary.compound_term }}s</span>
+                                                to include
                                             </li>
                                             <li>If desired, use the search bar to get a different
-                                                <span class="gse0">{{ all_glossary.compound_term }}</span>list
+                                                <span class="gse0">{{ all_glossary.compound_term }}</span>
+                                                list
                                             </li>
                                             <li>If desired, check additional
-                                                <span class="gse0">{{ all_glossary.compound_term }}s</span>to include
+                                                <span class="gse0">{{ all_glossary.compound_term }}s</span>
+                                                to include
                                             </li>
                                             <li>Click <b>Generate Compound Report</b> button</li>
                                             <li>If a blue plus sign is present, click it to see aggregated assay study data</li>
@@ -1395,7 +1399,7 @@
                                                 selections, click the <b>Save Selections</b> button (when returning at a later time, click <b>Load Selections</b> button)
                                             </li>
                                             <li>Only studies that have been checked for inclusion in the
-                                                <span class="gse0">{{ all_glossary.compound_term }} report</span>will be included in the aggregation
+                                                <span class="gse0">{{ all_glossary.compound_term }} report</span> will be included in the aggregation
                                             </li>
                                             <li>For more information on
                                                 <span class="gse0">{{ all_glossary.referencedatasource_term }}s</span>,
@@ -1416,13 +1420,13 @@
                             <li class="list-group-item">
                                 <h1 class="h1-level-1">References</h1>
                                 <p class="h1-level-3">
-                                    <span class="gse1">{{ all_glossary.references_def }}</span>
+                                    <span class="gse1">{{ all_glossary.references_def|linebreaks }}</span>
                                 </p>
                                 <br>
                                 <p class="h1-level-3">References can be added to the
                                     <span class="gse0">{{ all_glossary.mpsdb_term }}</span>and then linked to studies and/or study components (e.g.,
-                                    <span class="gse0">{{ all_glossary.mpsmodel_term }}s,
-                                    <span class="gse0">{{ all_glossary.device_term }}s).
+                                    <span class="gse0">{{ all_glossary.mpsmodel_term }}s</span>,
+                                    <span class="gse0">{{ all_glossary.device_term }}s)</span>.
                                 </p>
                                 <ul class="list-unstyled">
                                     <li>To add a 
@@ -1584,7 +1588,7 @@
                             <li class="list-group-item">
                                 <h1 class="h1-level-1">Chemical Data</h1>
                                 <p class="h1-level-3">
-                                    <span class="gse1">{{ all_glossary.chemicaldata_def }}</span>
+                                    <span class="gse1">{{ all_glossary.chemicaldata_def|linebreaks }}</span>
                                 </p>
                                 <br>
                                 <ul class="list-unstyled">
@@ -1637,7 +1641,7 @@
                             <li class="list-group-item">
                                 <h1 class="h1-level-1">Bioactivities</h1>
                                 <p class="h1-level-3">
-                                    <span class="gse1">{{ all_glossary.bioactivities_def }}</span>
+                                    <span class="gse1">{{ all_glossary.bioactivities_def|linebreaks }}</span>
                                 </p>
                                 <br>
                                 <ul class="list-unstyled">
@@ -1772,7 +1776,7 @@
                             <li class="list-group-item">
                                 <h1 class="h1-level-1">Drug Trials</h1>
                                 <p class="h1-level-3">
-                                    <span class="gse1">{{ all_glossary.drugtrials_def }}</span>
+                                    <span class="gse1">{{ all_glossary.drugtrials_def|linebreaks }}</span>
                                 </p>
                                 <br>
                                 <ul class="list-unstyled">
@@ -1810,7 +1814,7 @@
                             <li class="list-group-item">
                                 <h1 class="h1-level-1">Adverse Events</h1>
                                 <p class="h1-level-3">
-                                    <span class="gse1">{{ all_glossary.adverseevents_def }}</span>
+                                    <span class="gse1">{{ all_glossary.adverseevents_def|linebreaks }}</span>
                                 </p>
                                 <br>
                                 <ul class="list-unstyled">
@@ -1874,7 +1878,7 @@
                             <li class="list-group-item">
                                 <h1 class="h1-level-1">Compare Adverse Events</h1>
                                 <p class="h1-level-3">
-                                    <span class="gse1">{{ all_glossary.compareadverseevents_def }}</span>
+                                    <span class="gse1">{{ all_glossary.compareadverseevents_def|linebreaks }}</span>
                                 </p>
                                 <br>
                                 <ul class="list-unstyled">
@@ -1933,7 +1937,7 @@
                             <li class="list-group-item">
                                 <h1 class="h1-level-1">Heatmap of Bioactivities</h1>
                                 <p class="h1-level-3">
-                                    <span class="gse1">{{ all_glossary.heatmapofbioactivities_def }}</span>
+                                    <span class="gse1">{{ all_glossary.heatmapofbioactivities_def|linebreaks }}</span>
                                 </p>
                                 <br>
                                 <ul class="list-unstyled">
@@ -2016,7 +2020,7 @@
                             <li class="list-group-item">
                                 <h1 class="h1-level-1">Cluster Chemicals</h1>
                                 <p class="h1-level-3">
-                                    <span class="gse1">{{ all_glossary.clusterchemicals_def }}</span>
+                                    <span class="gse1">{{ all_glossary.clusterchemicals_def|linebreaks }}</span>
                                 </p>
                                 <br>
                                 <ul class="list-unstyled">
@@ -2105,7 +2109,7 @@
                             <li class="list-group-item">
                                 <h1 class="h1-level-1">Join a Data Group</h1>
                                 <p class="h1-level-3">
-                                    <span class="gse1">{{ all_glossary.datagroup_def }}</span>
+                                    <span class="gse1">{{ all_glossary.datagroup_def|linebreaks }}</span>
                                 </p>
                                 <br>
 
@@ -2189,19 +2193,19 @@
                             <li class="list-group-item">
                                 <h1 class="h1-level-1">Review Study Components</h1>
                                 <p class="h1-level-3">
-                                    <span class="gse1">{{ all_glossary.studycomponents_def }}</span>
+                                    <span class="gse1">{{ all_glossary.studycomponents_def|linebreaks }}</span>
                                 </p>
                                 <br>
                                 <ul class="list-unstyled">
                                     <li>To review
-                                        <span class="gse0">{{ all_glossary.studycomponent_term }}s,
+                                        <span class="gse0">{{ all_glossary.studycomponent_term }}s,</span>
                                         <a href="#help_study_component">click here</a>
                                     </li>
                                     <br>
                                     <li>Help Notes:
                                         <ul class="help-filled-circle">
                                             <li>
-                                                <span class="gse0">{{ all_glossary.studycomponent_term }}s
+                                                <span class="gse0">{{ all_glossary.studycomponent_term }}s</span>
                                                 can be added in various locations in the
                                                 <span class="gse0">{{ all_glossary.mpsdb_term }}</span>
                                                 by clicking on the provided plus signs
@@ -2222,7 +2226,7 @@
                                 <h1 class="h1-level-1">Add a Study</h1>
                                 <p class="h1-level-3">
                                     A Study -
-                                    <span class="gse1">{{ all_glossary.study_def }}</span>
+                                    <span class="gse1">{{ all_glossary.study_def|linebreaks }}</span>
                                 </p>
                                 <br>
                                 <ul class="list-unstyled">
@@ -2282,7 +2286,7 @@
                                 <p class="h1-level-3">
                                     <span class="gse0">{{ all_glossary.studydetails_term }}</span>
                                     -
-                                    <span class="gse1">{{ all_glossary.studydetails_def }}</span>
+                                    <span class="gse1">{{ all_glossary.studydetails_def|linebreaks }}</span>
                                 </p>
                                 <br>
                                 <ul class="list-unstyled">
@@ -2335,7 +2339,7 @@
                                 <p class="h1-level-3">
                                     <span class="gse0">{{ all_glossary.studytreatmentgroup_term }}</span>
                                     -
-                                    <span class="gse1">{{ all_glossary.studytreatmentgroup_def }}</span>
+                                    <span class="gse1">{{ all_glossary.studytreatmentgroup_def|linebreaks }}</span>
                                 </p>
                                 <br>
                                 <ul class="list-unstyled">
@@ -2352,7 +2356,7 @@
                                             </li>
                                             <li>Apply to the Group</li>
                                             <li>The Type is set based on the
-                                                <span class="gse0">{{ all_glossary.device_term }}
+                                                <span class="gse0">{{ all_glossary.device_term }}</span>
                                                 used in the
                                                 <span class="gse0">{{ all_glossary.mpsmodel_term }}</span>
                                                 (plate or chip device)
@@ -2436,7 +2440,7 @@
                                 <p class="h1-level-3">
                                     <span class="gse0">{{ all_glossary.studyitem_term }}</span>
                                     -
-                                    <span class="gse1">{{ all_glossary.studyitem_def }}</span>
+                                    <span class="gse1">{{ all_glossary.studyitem_def|linebreaks }}</span>
                                 </p>
                                 <br>
                                 <h1 class="h1-level-2">Define Chips and Plates - Chips Tab</h1>
@@ -2529,20 +2533,20 @@
                                 <p class="h1-level-3">
                                     <span class="gse0">{{ all_glossary.assaytarget_term }}</span>
                                     -
-                                    <span class="gse1">{{ all_glossary.assaytarget_def }}</span>
+                                    <span class="gse1">{{ all_glossary.assaytarget_def|linebreaks }}</span>
                                     <br>
                                     <span class="gse0">{{ all_glossary.assaymethod_term }}</span>
                                     -
-                                    <span class="gse1">{{ all_glossary.assaymethod_def }}</span>
+                                    <span class="gse1">{{ all_glossary.assaymethod_def|linebreaks }}</span>
                                 </p>
                                 <br>
                                 <ul class="list-unstyled">
                                     <li>Add Assays to a study as follows:
                                         <ul class="help-filled-circle">
                                             <li>Click in the
-                                                <span class="gse0">{{ all_glossary.assaycategory_term }}
+                                                <span class="gse0">{{ all_glossary.assaycategory_term }}</span>
                                                 box and select an
-                                                <span class="gse0">{{ all_glossary.assaycategory_term }}
+                                                <span class="gse0">{{ all_glossary.assaycategory_term }}</span>
                                                 (optional, but narrows the choices of
                                                 <span class="gse0">{{ all_glossary.assaytarget_term }}s</span>
                                                 and
@@ -2606,7 +2610,7 @@
                                 <p class="h1-level-3">
                                     <span class="gse0">{{ all_glossary.mifc_term }}</span>
                                     -
-                                    <span class="gse1">{{ all_glossary.mifc_def }}</span>
+                                    <span class="gse1">{{ all_glossary.mifc_def|linebreaks }}</span>
                                 </p>
                                 <br>
 
@@ -2673,7 +2677,7 @@
                                 <p class="h1-level-3">
                                     <span class="gse0">{{ all_glossary.platereaderdata_term }}</span>
                                     -
-                                    <span class="gse1">{{ all_glossary.platereaderdata_def }}</span>
+                                    <span class="gse1">{{ all_glossary.platereaderdata_def|linebreaks }}</span>
                                 </p>
                                 <br>
 
@@ -2705,7 +2709,7 @@
                                 <p class="h1-level-3">
                                     <span class="gse0">{{ all_glossary.omicdata_term }}</span>
                                     -
-                                    <span class="gse1">{{ all_glossary.omicdata_def }}</span>
+                                    <span class="gse1">{{ all_glossary.omicdata_def|linebreaks }}</span>
                                 </p>
                                 <br>
                                 <ul class="list-unstyled">
@@ -2746,11 +2750,11 @@
                                 <p class="h1-level-3">
                                     <span class="gse0">{{ all_glossary.assayimages_term }}</span>
                                     -
-                                    <span class="gse1">{{ all_glossary.assayimages_def }}</span>
+                                    <span class="gse1">{{ all_glossary.assayimages_def|linebreaks }}</span>
                                     <br>
                                     <span class="gse0">{{ all_glossary.assayvideos_term }}</span>
                                     -
-                                    <span class="gse1">{{ all_glossary.assayvideos_def }}</span>
+                                    <span class="gse1">{{ all_glossary.assayvideos_def|linebreaks }}</span>
                                 </p>
                                 <br>
 
@@ -2948,7 +2952,7 @@
                                 <p class="h1-level-3">
                                     <span class="gse0">{{ all_glossary.studysignoff_term }}</span>
                                     -
-                                    <span class="gse1">{{ all_glossary.studysignoff_def }}</span>
+                                    <span class="gse1">{{ all_glossary.studysignoff_def|linebreaks }}</span>
                                 </p>
                                 <br>
                                 <p class="h1-level-3">
@@ -3009,7 +3013,7 @@
                                                 <p class="h1-level-3">
                                                     <span class="gse0">{{ all_glossary.stakeholder_term }}</span>
                                                     -
-                                                    <span class="gse1">{{ all_glossary.stakeholder_def }}</span>
+                                                    <span class="gse1">{{ all_glossary.stakeholder_def|linebreaks }}</span>
                                                 </p>
                                                 <p>Stakehold groups are managed by
                                                     <span class="gse0">{{ all_glossary.mpsdbadministrator_term }}s</span>,
@@ -3018,7 +3022,7 @@
                                                     will manage access to their data using
                                                     <span class="gse0">{{ all_glossary.collaboratorgroup_term }}s</span>
                                                     and
-                                                    <span class="gse0">{{ all_glossary.accessorgroup_term }}s</span>.
+                                                    <span class="gse0">{{ all_glossary.accessgroup_term }}s</span>.
                                                 </p>
                                                 <br>
                                                 <ul class="list-unstyled">
@@ -3103,8 +3107,8 @@
                 <tbody>
                     {% for term in glossary %}
                     <tr>
-                        <td class="gse0">{{ term.term }}</td>
-                        <td class="gse1">{{ term.definition }}</td>
+                        <td class="gse1">{{ term.term }}</td>
+                        <td class="gse1">{{ term.definition|linebreaks }}</td>
                         <td class="gse1">{{ term.show_url }}</td>
                         <td class="gse1">{{ term.show_anchor }}</td>
                         <td class="gse1">{{ term.help_category_display }}</td>

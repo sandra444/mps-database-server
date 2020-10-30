@@ -9,7 +9,7 @@
     <li class="list-group-item">
         <h1 class="h1-level-1">Study Components</h1>
         {# HANDY accessing a dictionary in html dictionary python to java   #}
-        <span class="gse1">{{ all_glossary.studycomponent_def }}</span>
+        <span class="gse1">{{ all_glossary.studycomponent_def|linebreaks }}</span>
         They are the terms that are selected in dropdowns when setting up a study in the
         <span class="gse0">{{ all_glossary.mpsdb_term }}</span>.
         All registered users can review
@@ -45,8 +45,8 @@
             <tbody>
                 {% for term in component_assay %}
                 <tr>
-                    <td class="gse0">{{ term.term }}</td>
-                    <td class="gse1">{{ term.definition }}</td>
+                    <td class="gse1">{{ term.term }}</td>
+                    <td class="gse1">{{ term.definition|linebreaks }}</td>
                     <th class="gse1">{{ term.show_url }}</th>
                     <th class="gse1">{{ term.show_anchor }}</th>
                 </tr>
@@ -68,8 +68,8 @@
             <tbody>
                 {% for term in component_model %}
                 <tr>
-                    <td class="gse0">{{ term.term }}</td>
-                    <td class="gse1">{{ term.definition }}</td>
+                    <td class="gse1">{{ term.term }}</td>
+                    <td class="gse1">{{ term.definition|linebreaks }}</td>
                     <th class="gse1">{{ term.show_url }}</th>
                     <th class="gse1">{{ term.show_anchor }}</th>
                 </tr>
@@ -91,8 +91,8 @@
             <tbody>
                 {% for term in component_compound %}
                 <tr>
-                    <td class="gse0">{{ term.term }}</td>
-                    <td class="gse1">{{ term.definition }}</td>
+                    <td class="gse1">{{ term.term }}</td>
+                    <td class="gse1">{{ term.definition|linebreaks }}</td>
                     <th class="gse1">{{ term.show_url }}</th>
                     <th class="gse1">{{ term.show_anchor }}</th>
                 </tr>
@@ -114,8 +114,8 @@
             <tbody>
                 {% for term in component_cell %}
                 <tr>
-                    <td class="gse0">{{ term.term }}</td>
-                    <td class="gse1">{{ term.definition }}</td>
+                    <td class="gse1">{{ term.term }}</td>
+                    <td class="gse1">{{ term.definition|linebreaks }}</td>
                     <td class="gse1">{{ term.show_url }}</td>
                     <td class="gse1">{{ term.show_anchor }}</td>
                 </tr>
@@ -185,11 +185,11 @@
 {#            <tbody>#}
 {#                <tr>#}
 {#                    <td> Devices </td>#}
-{#                    <td> Devices used in <span class="glst">MPS models</span> in the MPS-Db with the option to click on the device to view details of the device. </td>#}
+{#                    <td> Devices used in MPS models in the MPS-Db with the option to click on the device to view details of the device. </td>#}
 {#                </tr>#}
 {#                <tr>#}
-{#                    <td> <span class="glst">MPS models</span> </td>#}
-{#                    <td> <span class="glst">MPS models</span> in the MPS-Db with the option to click on the model and view details of the model's design. </td>#}
+{#                    <td> MPS models </td>#}
+{#                    <td> MPS models in the MPS-Db with the option to click on the model and view details of the model's design. </td>#}
 {#                </tr>#}
 {#                <tr>#}
 {#                    <td> <span class="gse0">{{ all_glossary.mpsmodel }}</span> Locations </td>#}
@@ -197,7 +197,7 @@
 {#                </tr>#}
 {#                <tr>#}
 {#                    <td> Manufacturers </td>#}
-{#                    <td> Suppliers of <span class="glst">MPS models</span> and/or devices used to construct <span class="glst">MPS models</span>. </td>#}
+{#                    <td> Suppliers of MPS models and/or devices used to construct MPS models. </td>#}
 {#                </tr>#}
 {#            </tbody>#}
 {#        </table>#}
@@ -237,7 +237,7 @@
 {#                </tr>#}
 {#                <tr>#}
 {#                    <td> Cell Samples </td>#}
-{#                    <td> Cell samples used in <span class="glst">MPS models</span> in the MPS-Db. The cell types and cell origins are included as part of the cell sample and must be added to the MPS-Db prior to adding the cell sample. </td>#}
+{#                    <td> Cell samples used in MPS models in the MPS-Db. The cell types and cell origins are included as part of the cell sample and must be added to the MPS-Db prior to adding the cell sample. </td>#}
 {#                </tr>#}
 {#                <tr>#}
 {#                    <td> Cell Biosensors </td>#}
