@@ -21,7 +21,14 @@ from mps.templatetags.custom_filters import (
 
 from mps.base.models import save_forms_with_tracking
 
-from django.views.generic import UpdateView
+from django.views.generic import (
+    UpdateView,
+    ListView,
+    DetailView,
+    DeleteView,
+    TemplateView,
+    FormView,
+)
 
 import urllib
 
@@ -32,6 +39,8 @@ from django.contrib.admin.utils import (
 )
 
 from django.contrib.contenttypes.models import ContentType
+
+from django.urls import resolve
 
 # Unsemantic! Breaks PEP! BAD!
 def PermissionDenied(request, message, log_in_link=True):
@@ -176,6 +185,8 @@ class StudyGroupMixin(object):
     update_redirect_url - where to to redirect in the case of detail redirect
     """
     detail = False
+    # Stupid, should use a try catch or something
+    no_update = False
     # Default value for url to redirect to
     update_redirect_url = 'update/'
 
@@ -213,7 +224,7 @@ class StudyGroupMixin(object):
             if is_group_editor(self.request.user, study.group.name) and not study.signed_off_by:
                 # Redirects either to url + update or the specified url + object ID (as an attribute)
                 # This is a little tricky if you don't look for {} in update_redirect_url
-                if self.detail:
+                if self.detail and not self.no_update:
                     return redirect(self.update_redirect_url.format(current_object.id))
                 else:
                     return super(StudyGroupMixin, self).dispatch(*args, **kwargs)
@@ -470,7 +481,40 @@ class SuperuserRequiredMixin(object):
         return super(SuperuserRequiredMixin, self).dispatch(*args, **kwargs)
 
 
-class HistoryMixin(object):
+class HelpAnchorMixin(object):
+    # Default title
+    title = 'MPS Database'
+
+    def get_context_data(self, **kwargs):
+        context = super(HelpAnchorMixin, self).get_context_data(**kwargs)
+
+        context.update({
+            # Help anchor is always just based on the URL name
+            'help_anchor': '#{}'.format(resolve(self.request.path_info).url_name),
+            # Initial title, either from the attribute or overwritten later (classes that extend this are likely to overwrite)
+            'title': self.title
+        })
+
+        return context
+
+
+# This is to get default titles and help anchors
+class DefaultModelContextMixin(HelpAnchorMixin):
+    def get_context_data(self, **kwargs):
+        context = super(DefaultModelContextMixin, self).get_context_data(**kwargs)
+
+        # Add model name
+        context.update({
+            'model_verbose_name': self.model._meta.verbose_name,
+            'model_verbose_name_plural': self.model._meta.verbose_name_plural,
+            'title': '{} Detail'.format(self.model._meta.verbose_name),
+            # 'help_anchor': '#{}'.format(self.model._meta.verbose_name.lower().replace(' ', ''))
+        })
+
+        return context
+
+
+class HistoryMixin(DefaultModelContextMixin):
     def get_context_data(self, **kwargs):
         context = super(HistoryMixin, self).get_context_data(**kwargs)
 
@@ -531,6 +575,11 @@ class FormHandlerMixin(HistoryMixin):
     # Default to generic_form template
     template_name = 'generic_form.html'
 
+    # This attribute overrides the objects post_submission_url
+    # It is primarily used for moving between study tabs at the moment
+    # The default is the empty string to avoid an override
+    post_submission_url_override = ''
+
     def __init__(self, *args, **kwargs):
         super(FormHandlerMixin, self).__init__(*args, **kwargs)
 
@@ -567,6 +616,15 @@ class FormHandlerMixin(HistoryMixin):
             'model_verbose_name': self.model._meta.verbose_name,
             'model_verbose_name_plural': self.model._meta.verbose_name_plural
         })
+
+        if self.is_update:
+            context.update({
+                'title': 'Edit {}'.format(self.model._meta.verbose_name)
+            })
+        else:
+            context.update({
+                'title': 'Add {}'.format(self.model._meta.verbose_name)
+            })
 
         for formset_name, formset_factory in self.formsets:
             data_for_factory = []
@@ -609,6 +667,10 @@ class FormHandlerMixin(HistoryMixin):
 
     def form_valid(self, form):
         is_popup = self.request.GET.get('popup', 0) == '1'
+
+        # Basically, next/previous set a form field to the next url to visit
+        if not self.post_submission_url_override and self.request.POST.get('post_submission_url_override'):
+            self.post_submission_url_override = self.request.POST.get('post_submission_url_override')
 
         all_formsets = []
         self.all_forms = {
@@ -657,6 +719,8 @@ class FormHandlerMixin(HistoryMixin):
             else:
                 self.log_change(self.request, self.object, change_message)
 
+            # Popups only use post_submission_url
+            # Mostly because it doesn't matter, it should just be the confirmation page after a success
             if is_popup:
                 if self.object.id:
                     if hasattr(self.object, 'get_string_for_processing'):
@@ -686,9 +750,14 @@ class FormHandlerMixin(HistoryMixin):
                         )
                     )
             else:
-                return redirect(
-                    self.object.get_post_submission_url()
-                )
+                if self.post_submission_url_override:
+                    return redirect(
+                        self.post_submission_url_override
+                    )
+                else:
+                    return redirect(
+                        self.object.get_post_submission_url()
+                    )
         else:
             # Need to have the forms processed so that they have errors
             return self.render_to_response(
@@ -696,21 +765,42 @@ class FormHandlerMixin(HistoryMixin):
             )
 
 
+# "Handler" term chosen solely to distinguish from base Django CBVs
 # Possible
-class ListHandlerMixin(object):
+class ListHandlerView(DefaultModelContextMixin, ListView):
     template_name = 'generic_list.html'
 
     def get_context_data(self, **kwargs):
-        context = super(ListHandlerMixin, self).get_context_data(**kwargs)
+        context = super(ListHandlerView, self).get_context_data(**kwargs)
 
         # Add model name
         context.update({
-            'model_verbose_name': self.model._meta.verbose_name,
-            'model_verbose_name_plural': self.model._meta.verbose_name_plural
+            'title': '{} List'.format(self.model._meta.verbose_name),
         })
 
         return context
 
 
-class DetailHandlerMixin(object):
+class DetailHandlerView(DefaultModelContextMixin, DetailView):
     template_name = 'generic_detail.html'
+
+
+class DeleteHandlerView(DefaultModelContextMixin, DeleteView):
+    def get_context_data(self, **kwargs):
+        context = super(DeleteHandlerView, self).get_context_data(**kwargs)
+
+        # Add model name
+        context.update({
+            'title': '{} Delete'.format(self.model._meta.verbose_name),
+        })
+
+        return context
+
+
+# Maybe a bit excessive, but clear at least
+class TemplateHandlerView(HelpAnchorMixin, TemplateView):
+    pass
+
+
+class FormHandlerView(HelpAnchorMixin, FormView):
+    pass

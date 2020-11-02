@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block load_js %}
+    <script src="{% static "js/enter_override.js" %}"></script>
+    {# Need for calendar #}
+    <script src="{% static "js/calendar.js" %}"></script>
+    <script src="{% static "assays/compound_instances.js" %}"></script>
+    {# Should any page be flaggable? #}
+    {# <script src="{% static "js/flag.js" %}"></script> #}
+    <script src="{% static "assays/assaystudy_tabs.js" %}"></script>
+    {# Respective page's script here #}
+    <script src="{% static "assays/cell_sample_selection.js" %}"></script>
+    <script src="{% static "js/split_time.js" %}"></script>
+    <script src="{% static "assays/organ_model_filter.js" %}"></script>
+    <script src="{% static "assays/group_display.js" %}"></script>
+    <script src="{% static "assays/assaystudy_groups.js" %}"></script>
+{% endblock %}
+
+{% block breadcrumbs %}
+    <li><a href="/assays/assaystudy/editable_studies/">Editable Studies</a></li>
+    <li>
+        <a href="{{ object.get_absolute_url }}">{{ object }}</a>
+    </li>
+    <li class="active">
+            Edit <em>{{ object }}</em>
+    </li>
+{% endblock %}
+
+{% block content %}
+
+{# Get the tabs #}
+{% include 'assays/assaystudy_tabs.html' with study=object %}
+
+<form enctype="multipart/form-data" class="form-horizontal" method="post">
+    <h1>
+        Edit <em>{{ object }}</em> Groups
+    <br>
+    {% csrf_token %}
+    </h1>
+
+    {% include "submit.html" with flag="y" group=form.instance.group.name %}
+
+    {% include 'errors.html' %}
+
+    {% include 'tracking.html' %}
+
+    <legend>Study Groups</legend>
+
+    {% include 'assays/group_visibility_section.html' %}
+
+    {# Set of buttons for adding cells, compounds, settings etc. #}
+    <div class="row padded-bottom">
+    <div class="col-sm-6">
+    <a role="button" class="btn btn-success" id="add_series_button"><span class="glyphicon glyphicon-plus-sign"></span>Add Group</a>
+    </div>
+
+    <div class="col-sm-6">
+    <div style="float: right;">
+        <label>
+            Show
+            <select id="id_group_table_length" name="group_table_length" aria-controls="difference_table" class="input-sm no-selectize">
+                <option value="10">10</option>
+                <option value="25">25</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+            </select>
+            entries
+        </label>
+    </div>
+    </div>
+    </div>
+
+    <div class="row padded-bottom">
+    <div class="col-sm-6">
+    <a role="button" class="btn btn-success" data-add-new-button="true" data-prefix="cell">Add Cell</a>
+    <a role="button" class="btn btn-success" data-add-new-button="true" data-prefix="compound">Add Compound</a>
+    {# Probably will be renamed #}
+    <a role="button" class="btn btn-success" data-add-new-button="true" data-prefix="setting">Add Setting</a>
+    </div>
+
+    <div class="row-sm-6">
+    {% include 'default_paginator.html' with paginator_id='group-table' %}
+    </div>
+
+    </div>
+
+    {# Avoid inline styles #}
+    <div class="overflow-auto" style="margin-bottom: 25px;">
+    {# Contrived inline style #}
+    <table style="min-width: 1000px; margin-bottom: 0px;" class="table table-striped table-bordered" id="study_setup_table">
+        <thead>
+            <th>Group</th>
+            <th>MPS Model</th>
+            <th>Type</th>
+            <th>Group Name</th>
+            <th>Number of Chips</th>
+            <th>Test Type</th>
+            <th hidden class="cell_start"></th>
+            <th hidden class="compound_start"></th>
+            <th hidden class="setting_start"></th>
+        </thead>
+        <tbody></tbody>
+    </table>
+    </div>
+
+    <div class="row padded-bottom">
+    <div class="row-xs-12">
+    {% include 'default_paginator.html' with paginator_id='group-table' %}
+    </div>
+    </div>
+
+    {% include 'assays/group_difference_table.html' %}
+
+    {# HIDDEN FOR Groups #}
+    <div hidden>
+        {# TODO: LIKELY TO BE REVISED #}
+        {# Cram errors here #}
+        <div id="setup_table_errors">
+            {{ form.errors.series_data }}
+        </div>
+        {{ form.series_data }}
+
+        {# contrived #}
+        <textarea type="text" id="id_group_name" name="group_name" class="form-control name" data-default="" rows="1" style="min-width: 100px;"></textarea>
+
+        <input type="number" id="id_number_of_items" name="number_of_items" class="form-control number-of-items" data-default="">
+
+        {# {{ form.group_name }} #}
+        {# {{ form.number_of_items }} #}
+        {# {{ form.test_type }} #}
+        {# {{ form.organ_model_full }} #}
+        {# {{ form.organ_model_protocol_full }} #}
+    </div>
+
+    <div hidden id="version_dialog" title="Choose a MPS Model Version">
+        {% include 'generic_field.html' with field=form.organ_model %}
+
+        {# Use the show/hide from organ_model_filtering #}
+        <div id="protocol_div">
+        {% include 'generic_field.html' with field=form.organ_model_protocol %}
+        </div>
+
+        <div class="row">
+        <div class="col-xs-12">
+        <table class="table table-striped table-bordered table-nonfluid" id="series_table_preview">
+        </table>
+        </div>
+        </div>
+    </div>
+
+    {# For displaying cells etc. #}
+    {% include 'assays/component_displays.html' %}
+</form>
+{% endblock %}

@@ -35,7 +35,9 @@ class DefinitionForm(forms.ModelForm):
 
     class Meta(object):
         model = Definition
+
         # fields = ('order_numbers_already_assigned',)
+
         exclude = ('',)
         widgets = {
             'term': forms.Textarea(attrs={'rows': 1, 'cols': 50}),
@@ -78,6 +80,7 @@ class DefinitionForm(forms.ModelForm):
     #         attrs={'rows': number_cats+2, 'cols': 75, 'readonly': 'readonly'}
     #     )
     # )
-#     plate-label
-# map-label
-# , 'class': 'plate-map-special-well'
+    #     plate-label
+    # map-label
+    # , 'class': 'plate-map-special-well'
+

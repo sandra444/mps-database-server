@@ -9,6 +9,18 @@ from assays.views import (
     AssayStudyDataUpload,
     AssayStudyList,
     AssayStudyAdd,
+    AssayStudyDetails,
+    AssayStudyGroups,
+    AssayStudyChips,
+    AssayStudyPlates,
+    AssayStudyPlateAdd,
+    AssayStudyPlateUpdate,
+    AssayStudyPlateDetail,
+    AssayStudyAssays,
+    AssayStudyDataIndex,
+    AssayGroupDetail,
+    AssayDataFileUploadDetail,
+    AssayDataFileUploadList,
     AssayMatrixItemDetail,
     AssayMatrixItemUpdate,
     AssayMatrixItemDelete,
@@ -82,17 +94,24 @@ from assays.views import (
     AssayPlateReaderMapDataFileIndex,
     AssayPlateReaderMapDataFileView,
     AssayPlateReaderMapDataFileDelete,
+    AssayStudyTemplate,
 )
 import assays.ajax
+
+from django.views.generic import RedirectView
+
 
 # TODO: WHY ARE THERE TWO DIFFERENT APPROACHES TO NAMES
 urlpatterns = [
     # User can view all Editable Studies
     url(r'^assays/assaystudy/editable_studies/$', AssayStudyEditableList.as_view(), name='assays-editable-study-list'),
     # The main page for a study
+    # TODO TO BE DEPRECATED
     url(r'^assays/assaystudy/(?P<pk>[0-9]+)/$', AssayStudyIndex.as_view(), name='assays-assaystudy-index'),
     # Update page for studies
-    url(r'^assays/assaystudy/(?P<pk>[0-9]+)/update/$', AssayStudyUpdate.as_view(), name='assays-assaystudy-update'),
+    # TO BE DEPRECATED
+    # url(r'^assays/assaystudy/(?P<pk>[0-9]+)/update/$', AssayStudyUpdate.as_view(), name='assays-assaystudy-update'),
+
     # Delete view for studies
     url(r'^assays/assaystudy/(?P<pk>[0-9]+)/delete/$', AssayStudyDelete.as_view(), name='assays-assaystudy-delete'),
     # Summary view for studies
@@ -102,6 +121,9 @@ urlpatterns = [
     # # Bulk Readout Upload for Studies
     url(r'^assays/assaystudy/(?P<pk>[0-9]+)/upload/$', AssayStudyDataUpload.as_view(), name='assays-assaystudy-upload'),
 
+    # Template for upload
+    url(r'^assays/assaystudy/(?P<pk>[0-9]+)/upload/template/$', AssayStudyTemplate.as_view(), name='assays-assaystudy-upload-template'),
+
     url(r'^assays/assaystudy/(?P<pk>[0-9]+)/sign_off/$', AssayStudySignOff.as_view(), name='assays-assaystudy-sign-off'),
 
     url(r'^assays/assaystudy/(?P<pk>[0-9]+)/reproducibility/$', AssayStudyReproducibility.as_view(), name='assays-assaystudy-reproducibility'),
@@ -109,9 +131,33 @@ urlpatterns = [
     # Images
     url(r'^assays/assaystudy/(?P<pk>[0-9]+)/images/$', AssayStudyImages.as_view(), name='assays-assaystudy-images'),
 
+    # The multiple study forms
+    url(r'^assays/assaystudy/(?P<pk>[0-9]+)/details/$', AssayStudyDetails.as_view(), name='assays-assaystudy-update-details'),
+    url(r'^assays/assaystudy/(?P<pk>[0-9]+)/groups/$', AssayStudyGroups.as_view(), name='assays-assaystudy-update-groups'),
+    url(r'^assays/assaystudy/(?P<pk>[0-9]+)/chips/$', AssayStudyChips.as_view(), name='assays-assaystudy-update-chips'),
+    url(r'^assays/assaystudy/(?P<pk>[0-9]+)/plates/$', AssayStudyPlates.as_view(), name='assays-assaystudy-update-plates'),
+    url(r'^assays/assaystudy/(?P<pk>[0-9]+)/assays/$', AssayStudyAssays.as_view(), name='assays-assaystudy-update-assays'),
+
+    url(r'^assays/assaystudy/(?P<pk>[0-9]+)/data_index/$', AssayStudyDataIndex.as_view(), name='assays-assaystudy-data-index'),
+
+    url(r'^assays/assaystudy/(?P<pk>[0-9]+)/data_files/$', AssayDataFileUploadList.as_view(), name='assays-assaydatafileupload-list'),
+
+    url(r'^assays/assaydatafileupload/(?P<pk>[0-9]+)/$', AssayDataFileUploadDetail.as_view(), name='assays-assaydatafileupload-detail'),
+
+    # Just redirect for now
+    url(r'^assays/assaystudy/(?P<pk>[0-9]+)/update/$', RedirectView.as_view(pattern_name='assays-assaystudy-update-details', permanent=True), name='assays-assaystudy-update'),
+
+    url(r'^assays/assaystudy/(?P<study_id>[0-9]+)/assayplate/add/$', AssayStudyPlateAdd.as_view(), name='assays-assaymatrix-plate-add'),
+    url(r'^assays/assayplate/(?P<pk>[0-9]+)/plate/$', AssayStudyPlateDetail.as_view(), name='assays-assaymatrix-plate-detail'),
+    url(r'^assays/assayplate/(?P<pk>[0-9]+)/plate/update/$', AssayStudyPlateUpdate.as_view(), name='assays-assaymatrix-plate-update'),
+    url(r'^assays/assayplate/(?P<pk>[0-9]+)/plate/delete/$', AssayMatrixDelete.as_view(), name='assays-assaymatrix-plate-delete'),
+
+    # Group detail
+    url(r'^assays/assaygroup/(?P<pk>[0-9]+)/$', AssayGroupDetail.as_view(), name='assays-assaygroup-detail'),
+
     # NEW_TO_BE_REVISED
     url(r'^assays/assaystudy/$', AssayStudyList.as_view(), name='assays-assaystudy-list'),
-    url(r'^assays/assaystudy/add/$', AssayStudyAddNew.as_view(), name='assays-assaystudy-add'),
+    url(r'^assays/assaystudy/add/$', AssayStudyAdd.as_view(), name='assays-assaystudy-add'),
 
     url(r'^assays/assaymatrixitem/(?P<pk>[0-9]+)/$', AssayMatrixItemDetail.as_view(), name='assays-assaymatrixitem-detail'),
     url(r'^assays/assaymatrixitem/(?P<pk>[0-9]+)/update/$', AssayMatrixItemUpdate.as_view(), name='assays-assaymatrixitem-update'),
@@ -121,6 +167,7 @@ urlpatterns = [
     url(r'^assays/studyconfiguration/add/$', AssayStudyConfigurationAdd.as_view(), name='assays-assaystudyconfiguration-add'),
     url(r'^assays/studyconfiguration/(?P<pk>[0-9]+)/$', AssayStudyConfigurationUpdate.as_view(), name='assays-assaystudyconfiguration-update'),
 
+    # TO BE DEPRECATED
     # Add a matrix
     url(r'^assays/assaystudy/(?P<study_id>[0-9]+)/assaymatrix/add/$', AssayMatrixAdd.as_view(), name='assays-assaymatrix-add'),
     url(r'^assays/assaymatrix/(?P<pk>[0-9]+)/$', AssayMatrixDetail.as_view(), name='assays-assaymatrix-detail'),
@@ -240,6 +287,7 @@ urlpatterns = [
     # Ajax
     url(r'^assays_ajax/$', assays.ajax.ajax),
 
+    # Maybe we ought to change the name for consistency?
     # Plate Map (add and update will go to the same page, content = True for one of them...)
     # Note pk vs. study_id
     url(r'^assays/assaystudy/(?P<pk>[0-9]+)/assayplatereadermap/$', AssayPlateReaderMapIndex.as_view(), name='assayplatereadermap-index'),

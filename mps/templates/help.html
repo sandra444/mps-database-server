@@ -3117,6 +3117,36 @@
         </div>
 
     </div>
+    {% endif %}
+
+    <div id="glossary" class="container padded-bottom">
+
+        <h1 class="sub1-bars"> Glossary </h1>
+        <table hidden id="glossary_table" class="display table table-striped" cellspacing="0" width="100%">
+
+        <thead>
+          <tr>
+            <th>Term</th>
+            <th>Definition</th>
+            <th>Ref</th>
+{#            <th>Help</th>#}
+          </tr>
+        </thead>
+
+        <tbody>
+          {% for term in glossary %}
+            <tr>
+              <td>{{ term.term }}</td>
+              <td>{{ term.definition }}</td>
+              <td>{{ term.show_url }}</td>
+{#              <td>{{ term.show_anchor }}</td>#}
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <div id="expand_all" class="special-button">Click Here to Expand All Sections of Help</div>
 
 </div>
 

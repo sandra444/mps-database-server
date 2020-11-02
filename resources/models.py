@@ -102,6 +102,19 @@ class Definition(LockableModel):
         default=True,
         help_text='Check to display in tables and other locations in the help page (does not apply to the glossary).',
     )
+    help_order = models.IntegerField(default=0, blank=True,
+        help_text=(
+            'Used in generating help tables. Order is way they will be listed in their respective tables. Make sure they are unique within a help_category.'
+        ),)
+    help_reference = models.URLField(default='', blank=True)
+    glossary_display = models.BooleanField(default=True,
+       help_text=(
+           'Check to display in the glossary.'
+       ), )
+    help_display = models.BooleanField(default=True,
+       help_text=(
+           'Check to display in tables and other locations in the help page (does not apply to the glossary).'
+       ), )
     data_sources = models.ManyToManyField(
         to='self',
         blank=True,
@@ -168,6 +181,20 @@ class Definition(LockableModel):
             return self.definition
         else:
             return self.definition[:250]+"   ...."
+
+    def count_data_sources(self):
+        # gets the queryset, good if want to make a list
+        # print("self.data_sources ", self.data_sources.all())
+        #     if self.data_sources.count() == 0:
+        #         return False
+        #     else:
+        #         return True
+        return self.data_sources.count()
+    # is_data_sources.boolean = True
+
+    def short_definition(self):
+        return self.definition[:350]+"...."
+
 
 class ComingSoonEntry(LockableModel):
     """An entry for the About Page's "Coming Soon" Section"""
