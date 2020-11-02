@@ -60,6 +60,7 @@ class AssayDataPointSerializer(serializers.ModelSerializer):
     item_id = serializers.StringRelatedField(source='matrix_item_id', read_only=True)
 
     time = serializers.StringRelatedField(source='get_time_string')
+    time_in_minutes = serializers.IntegerField(source='time')
 
     class Meta:
         model = AssayDataPoint
@@ -70,6 +71,7 @@ class AssayDataPointSerializer(serializers.ModelSerializer):
             'value',
             'cross_reference',
             'time',
+            'time_in_minutes',
             'notes',
             'assay_plate_id',
             'assay_well_id',
@@ -163,6 +165,7 @@ class AssayGroupSerializer(serializers.ModelSerializer):
             # Need the id for matching
             # It will be part of the representation
             'id',
+            'name',
             'mps_model',
             'mps_model_version',
             'compounds',
