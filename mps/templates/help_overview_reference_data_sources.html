@@ -29,10 +29,10 @@
             <tbody>
                 {% for term in source %}
                 <tr>
-                    <td class="gse1">{{ term.term }}</td>
-                    <td class="gse1">{{ term.definition|linebreaks }}</td>
-                    <td class="gse1">{{ term.help_order }}</td>
-                    <td class="gse1">{{ term.show_url }}</td>
+                    <td><span class="gse1"> {{ term.term }} </span></td>
+                    <td><span class="gse1"> {{ term.definition|linebreaks }} </span></td>
+                    <td><span class="gse1"> {{ term.help_order }} </span></td>
+                    <td><span class="gse1"> {{ term.show_url }} </span></td>
                 </tr>
                 {% endfor %}
             </tbody>

@@ -46,9 +46,9 @@
 
             <tbody>
                 {% for term in organization_study %}
-                <tr class="gse0">
-                    <td class="gse1">{{ term.term }}</td>
-                    <td class="gse1">{{ term.definition|linebreaks }}</td>
+                <tr>
+                    <td><span class="gse1"> {{ term.term }} </span></td>
+                    <td><span class="gse1"> {{ term.definition|linebreaks }} </span></td>
                 </tr>
                 {% endfor %}
             </tbody>

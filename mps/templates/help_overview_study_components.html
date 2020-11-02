@@ -9,13 +9,13 @@
     <li class="list-group-item">
         <h1 class="h1-level-1">Study Components</h1>
         {# HANDY accessing a dictionary in html dictionary python to java   #}
-        <span class="gse1">{{ all_glossary.studycomponent_def|linebreaks }}</span>
+        <span class="gse0">{{ all_glossary.studycomponent_def|linebreaks }}</span>
         They are the terms that are selected in dropdowns when setting up a study in the
         <span class="gse0">{{ all_glossary.mpsdb_term }}</span>.
         All registered users can review
         <span class="gse0">{{ all_glossary.studycomponent_term }}s</span>
         at this link
-        <span class="gse1">{{ all_glossary.studycomponent_ref }}</span>.
+        <span class="gse0">{{ all_glossary.studycomponent_ref }}</span>.
         <span class="gse0">{{ all_glossary.dataprovider_term }}s</span>
         (users who are assigned to, at least one,
         <span class="gse0">{{ all_glossary.datagroup_term }}</span>)
@@ -45,10 +45,10 @@
             <tbody>
                 {% for term in component_assay %}
                 <tr>
-                    <td class="gse1">{{ term.term }}</td>
-                    <td class="gse1">{{ term.definition|linebreaks }}</td>
-                    <th class="gse1">{{ term.show_url }}</th>
-                    <th class="gse1">{{ term.show_anchor }}</th>
+                    <td><span class="gse1"> {{ term.term }} </span></td>
+                    <td><span class="gse1"> {{ term.definition|linebreaks }} </span></td>
+                    <td><span class="gse1"> {{ term.show_url }} </span></td>
+                    <td><span class="gse1"> {{ term.show_anchor }} </span></td>
                 </tr>
                 {% endfor %}
             </tbody>
@@ -68,10 +68,10 @@
             <tbody>
                 {% for term in component_model %}
                 <tr>
-                    <td class="gse1">{{ term.term }}</td>
-                    <td class="gse1">{{ term.definition|linebreaks }}</td>
-                    <th class="gse1">{{ term.show_url }}</th>
-                    <th class="gse1">{{ term.show_anchor }}</th>
+                    <td><span class="gse1"> {{ term.term }} </span></td>
+                    <td><span class="gse1"> {{ term.definition|linebreaks }} </span></td>
+                    <td><span class="gse1"> {{ term.show_url }} </span></td>
+                    <td><span class="gse1"> {{ term.show_anchor }} </span></td>
                 </tr>
                 {% endfor %}
             </tbody>
@@ -91,10 +91,10 @@
             <tbody>
                 {% for term in component_compound %}
                 <tr>
-                    <td class="gse1">{{ term.term }}</td>
-                    <td class="gse1">{{ term.definition|linebreaks }}</td>
-                    <th class="gse1">{{ term.show_url }}</th>
-                    <th class="gse1">{{ term.show_anchor }}</th>
+                    <td><span class="gse1"> {{ term.term }} </span></td>
+                    <td><span class="gse1"> {{ term.definition|linebreaks }} </span></td>
+                    <td><span class="gse1"> {{ term.show_url }} </span></td>
+                    <td><span class="gse1"> {{ term.show_anchor }} </span></td>
                 </tr>
                 {% endfor %}
             </tbody>
@@ -114,10 +114,10 @@
             <tbody>
                 {% for term in component_cell %}
                 <tr>
-                    <td class="gse1">{{ term.term }}</td>
-                    <td class="gse1">{{ term.definition|linebreaks }}</td>
-                    <td class="gse1">{{ term.show_url }}</td>
-                    <td class="gse1">{{ term.show_anchor }}</td>
+                    <td><span class="gse1"> {{ term.term }} </span></td>
+                    <td><span class="gse1"> {{ term.definition|linebreaks }} </span></td>
+                    <td><span class="gse1"> {{ term.show_url }} </span></td>
+                    <td><span class="gse1"> {{ term.show_anchor }} </span></td>
                 </tr>
                 {% endfor %}
             </tbody>

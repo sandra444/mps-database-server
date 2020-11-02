@@ -138,12 +138,6 @@ def mps_help(request):
     # HANDY - super important - if use an order_by you make a new queryset!
     # https://stackoverflow.com/questions/51709984/sort-queryset-by-added-field
 
-    # HANDY get server path website address
-    # print("request.build_absolute_uri() ",request.build_absolute_uri())
-    # print("request.get_full_path() ", request.get_full_path())
-    # request.build_absolute_uri()  http://127.0.0.1:8000/help/
-    # request.get_full_path()  /help/
-
     # convert the list (that is in the models.py) of tuples to a dictionary for faster access
     help_category_choices_dict = {}
     for each in help_category_choices:
@@ -151,6 +145,28 @@ def mps_help(request):
 
     # get the whole glossary
     glossary_master = Definition.objects.all()
+
+    # This should be commented out when moving to production
+    # HANDY get server path website address
+    # print("request.build_absolute_uri() ",request.build_absolute_uri())
+    # print("request.get_full_path() ", request.get_full_path())
+    # request.build_absolute_uri()  http://127.0.0.1:8000/help/
+    # request.get_full_path()  /help/
+    for each in glossary_master:
+        if '127.0.0.1:8000' in request.build_absolute_uri():
+            print('each.reference ', each.reference)
+            print('each.help_reference ', each.help_reference)
+            each.reference.replace('127.0.0.1:8000', 'mps.csb.pitt.edu')
+            each.help_reference.replace('127.0.0.1:8000', 'mps.csb.pitt.edu')
+            # each.show_url.replace('127.0.0.1:8000', 'mps.csb.pitt.edu')
+            # each.show_anchor.replace('127.0.0.1:8000', 'mps.csb.pitt.edu')
+            print('show url ', each.show_url)
+            print('show anchor ', each.show_anchor)
+        elif 'bohr-prody-vm.upddi.pitt.edu' in request.build_absolute_uri():
+            each.reference.replace('bohr-prody-vm.upddi.pitt.edu', 'mps.csb.pitt.edu')
+            each.help_reference.replace('bohr-prody-vm.upddi.pitt.edu', 'mps.csb.pitt.edu')
+            # each.show_url.replace('bohr-prody-vm.upddi.pitt.edu', 'mps.csb.pitt.edu')
+            # each.show_anchor.replace('bohr-prody-vm.upddi.pitt.edu', 'mps.csb.pitt.edu')
 
     # take the glossary master and make a new glossary with terms that are needed for the html
     all_glossary = {}
@@ -161,7 +177,7 @@ def mps_help(request):
         # stripped term is used to access the terms etc in the template
         stripped_term = ''.join(e for e in term if e.isalnum())
         stripped_term = stripped_term.lower()
-        # print("stripped_term: ", stripped_term)
+        # print('stripped_term: ', stripped_term)
         all_glossary[stripped_term + '_term'] = each.term
         all_glossary[stripped_term+'_def'] = each.definition
         # the glif link
@@ -173,7 +189,7 @@ def mps_help(request):
     #     # HANDY - get each field name in a queryset
     #     # for field in each._meta.get_fields():
     #     #     print(field)
-    #     print("help_category_display ", each.help_category_display)
+    #     print('help_category_display ', each.help_category_display)
 
     # get a subset of the features for the feature table (in order as specified in the glossary)
     feature = glossary_master.filter(help_category='feature').filter(help_display=True).order_by('help_order')
@@ -194,7 +210,7 @@ def mps_help(request):
 
     glossary = glossary_master.filter(glossary_display=True).exclude(definition='')
     for each in glossary:
-        dict_value = help_category_choices_dict.get(each.help_category, "")
+        dict_value = help_category_choices_dict.get(each.help_category, '')
         each.help_category_display = dict_value
 
     # get other subsets for other tables on the help page

@@ -5,7 +5,7 @@ $(document).ready(function () {
     var anchor_xref = {
         // {# overview #}
         "": "#overview_section",
-        // "": "#help_overview_background",
+        // "": "#help_overview_background"  ---- at the bottom,
         "": "#help_overview_components",
         "": "#help_overview_organization",
         "": "#help_overview_sources",
@@ -223,6 +223,15 @@ $(document).ready(function () {
     });
 
     function gooo() {
+        //remove the class on the glossary extracts so the search will work better
+        $span = $('#realTimeContents .gse0');
+        $span.each(function() {
+            $(this).replaceWith($(this).html());
+        });
+        $span = $('#realTimeContents .gse1');
+        $span.each(function() {
+            $(this).replaceWith($(this).html());
+        });
         change_search_ables_to_search(false);
 
         var caseSensitive = false;

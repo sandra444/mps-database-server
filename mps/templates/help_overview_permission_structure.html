@@ -25,9 +25,9 @@
 
             <tbody>
                 {% for term in permission %}
-                <tr class="gse0">
-                    <td>{{ term.term }}</td>
-                    <td>{{ term.definition|linebreaks }}</td>
+                <tr>
+                    <td><span class="gse1"> {{ term.term }} </span></td>
+                    <td><span class="gse1"> {{ term.definition|linebreaks }} </span></td>
                 </tr>
                 {% endfor %}
             </tbody>
