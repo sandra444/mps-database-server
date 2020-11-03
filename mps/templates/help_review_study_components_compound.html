@@ -5,9 +5,7 @@
 </head>
 <body>
 
-
 {% for term in component_compound %}
-
     {% if term.term == "Compound" %}
         <button name="help_button" type="button" class="btn btn-success help-collapsible">{{ term.term }}</button>
         <div class="help-content-2">
@@ -16,6 +14,7 @@
                     <h1 class="h1-level-1">
                         <span class="gse1">{{ term.term }}</span>
                     </h1>
+                    <span class="gse0">{{ glossary_dict.compound_def|linebreaks }}</span>
                     <ul class="list-unstyled">
                         <li>To review the
                             <span class="gse1">{{ term.term }}</span>
@@ -55,7 +54,6 @@
                 </li>
             </ul>
         </div>
-
     {% endif %}
 {% endfor %}
 

@@ -6,15 +6,15 @@
 <body>
 
 {% for term in component_model %}
-
     {% if term.term == "MPS Model" %}
-        <button name="help_button" type="button" class="btn btn-success help-collapsible">{{ term.term }}</button>
+        <button id="mpsmodel" name="help_button" type="button" class="btn btn-success help-collapsible">{{ term.term }}</button>
         <div class="help-content-2">
             <ul class="list-group">
                 <li class="list-group-item">
                     <h1 class="h1-level-1">
                         <span class="gse1">{{ term.term }}</span>
                     </h1>
+                    <span class="gse0">{{ glossary_dict.mpsmodel_def|linebreaks }}</span>
                     <ul class="list-unstyled">
                         <li>To review the
                             <span class="gse1">{{ term.term }}</span>
@@ -43,9 +43,9 @@
                                     <ul class="help-open-circle">
                                         <li>Fill in all the required information </li>
                                         <li>Submit to save (an
-                                            <span class="gse0">{{ all_glossary.mpsmodel_term }}</span>
+                                            <span class="gse0">{{ glossary_dict.mpsmodel_term }}</span>
                                             must be saved before an
-                                            <span class="gse0">{{ all_glossary.mpsmodelversion_term }}</span>
+                                            <span class="gse0">{{ glossary_dict.mpsmodelversion_term }}</span>
                                             can be added)
                                         </li>
                                         <li>In the
@@ -56,10 +56,10 @@
                                             <b>MPS Model Versions</b>
                                             section of the page and click the
                                             <b>Edit</b> button to set up a
-                                            <span class="gse0">{{ all_glossary.mpsmodelversion_term }}</span>
+                                            <span class="gse0">{{ glossary_dict.mpsmodelversion_term }}</span>
                                         </li>
                                         <li>Add all the information for the
-                                            <span class="gse0">{{ all_glossary.mpsmodelversion_term }}</span>
+                                            <span class="gse0">{{ glossary_dict.mpsmodelversion_term }}</span>
                                         </li>
                                         <li>Click the <b>Submit</b> button to save </li>
                                     </ul>
@@ -70,28 +70,28 @@
                             <ul class="help-filled-circle">
                                 <li>Collect up all the metadata needed before adding or updating </li>
                                 <li>Add
-                                    <span class="gse0">{{ all_glossary.references_term }}</span>
+                                    <span class="gse0">{{ glossary_dict.references_term }}</span>
                                     to the database prior to trying to add them to a
                                     <span class="gse1">{{ term.term }}</span>
                                 </li>
                                 <li>Add
-                                    <span class="gse0">{{ all_glossary.mpsmodelversion_term }}s</span>
+                                    <span class="gse0">{{ glossary_dict.mpsmodelversion_term }}s</span>
                                     to expedite
-                                    <span class="gse0">{{ all_glossary.studysetup_term }}</span>
+                                    <span class="gse0">{{ glossary_dict.studysetup_term }}</span>
                                     <ul class="help-open-circle">
                                         <li>
-                                            <span class="gse0">{{ all_glossary.mpsmodelversion_term }}</span>
+                                            <span class="gse0">{{ glossary_dict.mpsmodelversion_term }}</span>
                                             include the information about cells and settings
                                         </li>
                                         <li>
-                                            <span class="gse0">{{ all_glossary.mpsmodelversion_term }}</span>
+                                            <span class="gse0">{{ glossary_dict.mpsmodelversion_term }}</span>
                                             are a starting point for setting up
-                                            <span class="gse0">{{ all_glossary.studytreatmentgroup_term }}s</span>
+                                            <span class="gse0">{{ glossary_dict.studytreatmentgroup_term }}s</span>
                                         </li>
                                         <li>
-                                            <span class="gse0">{{ all_glossary.mpsmodelversion_term }}</span>,
+                                            <span class="gse0">{{ glossary_dict.mpsmodelversion_term }}</span>,
                                             correctly completed, can significantly expedite the
-                                            <span class="gse0">{{ all_glossary.studysetup_term }}</span>
+                                            <span class="gse0">{{ glossary_dict.studysetup_term }}</span>
                                             process
                                         </li>
                                     </ul>
@@ -104,7 +104,10 @@
                     <div class="help-content-2">
                         <ul class="list-group">
                             <li class="list-group-item">
-                                <h1 class="h1-level-2">MPS Model Version Details</h1>
+                                <h1 class="h1-level-2">
+                                    MPS Model Version Details
+                                </h1>
+                                <span class="gse0">{{ glossary_dict.mpsmodelversion_def|linebreaks }}</span>
                                 <ul class="list-unstyled">
                                     <li>Follow these steps:
                                          <ul class="help-filled-circle">
@@ -119,7 +122,6 @@
                 </li>
             </ul>
         </div>
-
     {% endif %}
 {% endfor %}
 

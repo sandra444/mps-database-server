@@ -22,10 +22,8 @@ import os
 
 from mps.settings import MEDIA_ROOT
 
-from resources.models import Definition, ComingSoonEntry, WhatIsNewEntry, help_category_choices
 from django.views.generic.base import TemplateView
 from resources.models import Definition, ComingSoonEntry, WhatIsNewEntry
-# from django.views.generic.base import TemplateView
 
 from microdevices.models import MicrophysiologyCenter
 from mps.templatetags.custom_filters import ADMIN_SUFFIX, VIEWER_SUFFIX
@@ -155,61 +153,36 @@ def custom_search(request):
 
 def mps_help(request):
 
-    # HANDY - super important - if use an order_by you make a new queryset!
-    # https://stackoverflow.com/questions/51709984/sort-queryset-by-added-field
-
-    # convert the list (that is in the models.py) of tuples to a dictionary for faster access
-    help_category_choices_dict = {}
-    for each in help_category_choices:
-        help_category_choices_dict[each[0]] = each[1]
-
-    # get the whole glossary
-    glossary_master = Definition.objects.all()
-
-    # This should be commented out when moving to production
     # HANDY get server path website address
     # print("request.build_absolute_uri() ",request.build_absolute_uri())
     # print("request.get_full_path() ", request.get_full_path())
     # request.build_absolute_uri()  http://127.0.0.1:8000/help/
     # request.get_full_path()  /help/
-    for each in glossary_master:
-        if '127.0.0.1:8000' in request.build_absolute_uri():
-            print('each.reference ', each.reference)
-            print('each.help_reference ', each.help_reference)
-            each.reference.replace('127.0.0.1:8000', 'mps.csb.pitt.edu')
-            each.help_reference.replace('127.0.0.1:8000', 'mps.csb.pitt.edu')
-            # each.show_url.replace('127.0.0.1:8000', 'mps.csb.pitt.edu')
-            # each.show_anchor.replace('127.0.0.1:8000', 'mps.csb.pitt.edu')
-            print('show url ', each.show_url)
-            print('show anchor ', each.show_anchor)
-        elif 'bohr-prody-vm.upddi.pitt.edu' in request.build_absolute_uri():
-            each.reference.replace('bohr-prody-vm.upddi.pitt.edu', 'mps.csb.pitt.edu')
-            each.help_reference.replace('bohr-prody-vm.upddi.pitt.edu', 'mps.csb.pitt.edu')
-            # each.show_url.replace('bohr-prody-vm.upddi.pitt.edu', 'mps.csb.pitt.edu')
-            # each.show_anchor.replace('bohr-prody-vm.upddi.pitt.edu', 'mps.csb.pitt.edu')
+    help_url = request.build_absolute_uri()
+
+    # HANDY - super important - if use an order_by you make a new queryset!
+    # https://stackoverflow.com/questions/51709984/sort-queryset-by-added-field
+
+    # get the whole glossary
+    glossary_master = Definition.objects.all()
 
     # take the glossary master and make a new glossary with terms that are needed for the html
-    all_glossary = {}
+    glossary_dict = {}
     for each in glossary_master:
-        # here is the place to force something to a new line, if needed
-        #
-        term = each.term
-        # stripped term is used to access the terms etc in the template
-        stripped_term = ''.join(e for e in term if e.isalnum())
-        stripped_term = stripped_term.lower()
-        # print('stripped_term: ', stripped_term)
-        all_glossary[stripped_term + '_term'] = each.term
-        all_glossary[stripped_term+'_def'] = each.definition
-        # the glif link
-        all_glossary[stripped_term+'_ref'] = each.show_url
-        # the actual link to use in an href
-        all_glossary[stripped_term + '_naked_ref'] = each.reference
+        glossary_dict[each.stripped_term() + '_term'] = each.term
+        glossary_dict[each.stripped_term() + '_def'] = each.definition
 
-    # for each in glossary_master:
-    #     # HANDY - get each field name in a queryset
-    #     # for field in each._meta.get_fields():
-    #     #     print(field)
-    #     print('help_category_display ', each.help_category_display)
+        # START USE THIS SECTION IN DEVELOPMENT ONLY - comment out before going to production
+        if '127.0.0.1:8000' in help_url:
+            each.reference = each.reference.replace('mps.csb.pitt.edu', '127.0.0.1:8000')
+            each.help_reference = each.help_reference.replace('mps.csb.pitt.edu', '127.0.0.1:8000')
+        elif 'bohr-prody-vm.upddi.pitt.edu' in help_url:
+            each.reference = each.reference.replace('mps.csb.pitt.edu', 'bohr-prody-vm.upddi.pitt.edu')
+            each.help_reference = each.help_reference.replace('mps.csb.pitt.edu', 'bohr-prody-vm.upddi.pitt.edu')
+        # END USE THIS SECTION IN DEVELOPMENT ONLY
+
+        glossary_dict[each.stripped_term() + '_ref'] = each.reference
+        glossary_dict[each.stripped_term() + '_help_ref'] = each.help_reference
 
     # get a subset of the features for the feature table (in order as specified in the glossary)
     feature = glossary_master.filter(help_category='feature').filter(help_display=True).order_by('help_order')
@@ -225,14 +198,11 @@ def mps_help(request):
         this_list_string = ', '.join(map(str, this_list))
 
         # HANDY - add field to queryset add a field to a queryset
-        # Adding a field must be the last thing you do or the field will get removed
+        # Adding a field must be the LAST THING you do or the field will get removed
         each.source_list = this_list_string
 
-    glossary = glossary_master.filter(glossary_display=True).exclude(definition='')
-    for each in glossary:
-        dict_value = help_category_choices_dict.get(each.help_category, '')
-        each.help_category_display = dict_value
-
+    # limit the glossary to only those selected for display
+    glossary = glossary_master.filter(glossary_display=True)
     # get other subsets for other tables on the help page
     # note: these pull terms and associated metadata in loops in the html, so do not need the stripped reference term in these
     source = glossary_master.filter(help_category='source').filter(help_display=True).order_by('help_order')
@@ -243,30 +213,26 @@ def mps_help(request):
     permission = glossary_master.filter(help_category='permission').filter(help_display=True).order_by('help_order')
     organization_study = glossary_master.filter(help_category='organization-study').filter(help_display=True).order_by('help_order')
 
-    # get a subset of the features for the feature table
-    feature = glossary.filter(help_category='feature').order_by('help_order')
+    # HANDY get server path website address
+    # print("request.build_absolute_uri() ",request.build_absolute_uri())
+    # print("request.get_full_path() ", request.get_full_path())
+    # request.build_absolute_uri()  http://127.0.0.1:8000/help/
+    # request.get_full_path()  /help/
 
-    # get other subsets for other tables on the help page
-    source = glossary.filter(help_category='source').order_by('help_order')
-    component_assay = glossary.filter(help_category='component-assay').order_by('help_order')
-    component_model = glossary.filter(help_category='component-model').order_by('help_order')
-    component_compound = glossary.filter(help_category='component-compound').order_by('help_order')
-    component_cell = glossary.filter(help_category='component-cell').order_by('help_order')
-
-    all_glossary = {}
+    # START USE THIS SECTION IN DEVELOPMENT ONLY - comment out before going to production
+    # have to do this LAST or won't work
     for each in glossary:
-        term = each.term
-        stripped_term = ''.join(e for e in term if e.isalnum())
-        stripped_term = stripped_term.lower()
-        # print("stripped_term: ", stripped_term)
-        all_glossary[stripped_term+'_def'] = each.definition
-        all_glossary[stripped_term+'_ref'] = each.show_url
+        if '127.0.0.1:8000' in help_url:
+            each.reference = each.reference.replace('mps.csb.pitt.edu', '127.0.0.1:8000')
+            each.help_reference = each.help_reference.replace('mps.csb.pitt.edu', '127.0.0.1:8000')
+        elif 'bohr-prody-vm.upddi.pitt.edu' in help_url:
+            each.reference = each.reference.replace('mps.csb.pitt.edu', 'bohr-prody-vm.upddi.pitt.edu')
+            each.help_reference = each.help_reference.replace('mps.csb.pitt.edu', 'bohr-prody-vm.upddi.pitt.edu')
+    # END USE THIS SECTION IN DEVELOPMENT ONLY
 
-    # print("all_glossary ", all_glossary)
-
-    # limit the glossary to only those selected for display
-    glossary = glossary.filter(glossary_display=True)
-
+    # the main glossary
+    # specialty subsets
+    # dict for specific terms plus
     data = {
         # 'version': len(os.listdir(MEDIA_ROOT + '/excel_templates/')),
         'glossary': glossary,
@@ -278,12 +244,12 @@ def mps_help(request):
         'component_cell': component_cell,
         'permission': permission,
         'organization_study': organization_study,
-        'all_glossary': all_glossary,
-        # 'study_component_def': all_glossary.get('studycomponent_def', ''),
-        # 'study_component_ref': all_glossary.get('studycomponent_ref', ''),
+        'glossary_dict': glossary_dict,
+        # 'study_component_def': glossary_dict.get('studycomponent_def', ''),
+        # 'study_component_ref': glossary_dict.get('studycomponent_ref', ''),
     }
 
-    # for each in all_glossary:
+    # for each in glossary_dict:
     #     print(each)
 
     return render(request, 'help.html', data)
