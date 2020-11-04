@@ -3699,7 +3699,8 @@ def upload_plate_reader_file_location(instance, filename):
     return '/'.join(['plate_reader_file', str(instance.id), filename])
 
 
-class AssayPlateReaderMapDataFile(models.Model):
+# 20201104 needed to be a lockable model so permissions will allow for file deletion when not superuser
+class AssayPlateReaderMapDataFile(LockableModel):
     """Assay plate reader data file for plate reader integration."""
 
     class Meta(object):
@@ -3999,6 +4000,7 @@ class AssayPlateReaderMapItemValue(models.Model):
 
     def get_absolute_url(self):
         return '/assays/assayplatereadermapitem/{}/'.format(self.id)
+
 
     def get_post_submission_url(self):
         return '/assays/assayplatereadermapitem/'
