@@ -3472,8 +3472,11 @@ class AssayPlateReaderMapForm(BootstrapForm):
 
             # print("!!!!!!!!")
             # Write the lines here here uncomment this
+            i = 0
             for one_line_of_data in list_of_lists_mifc_headers_row_0:
+                print(i, "-", one_line_of_data)
                 csv_writer.writerow(one_line_of_data)
+                i = i + 1
 
             file_to_write.close()
             new_mifc_file = open(file_location, 'rb')
