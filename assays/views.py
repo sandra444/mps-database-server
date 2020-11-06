@@ -3858,7 +3858,8 @@ class AssayStudyComponents(TemplateView):
                     AssayMethod.objects.first(),
                     AssayMeasurementType.objects.first(),
                     PhysicalUnits.objects.first(),
-                    AssaySampleLocation.objects.first(),
+                    # Do not repeat for the moment
+                    # AssaySampleLocation.objects.first(),
                     AssaySetting.objects.first(),
                     AssaySupplier.objects.first(),
                     AssayReference.objects.first(),
@@ -3872,6 +3873,8 @@ class AssayStudyComponents(TemplateView):
                     # Note that sample location is more accurately placed here
                     AssaySampleLocation.objects.first(),
                     apps.get_model(app_label='microdevices', model_name='manufacturer').objects.first(),
+                    # SPECIAL EXCEPTION
+                    # apps.get_model(app_label='microdevices', model_name='manufacturer').objects.first(),
                 ]
             ],
             # NOTE WE COULD, IF WE WANTED, ADD COMPOUND SUPPLIER HERE
