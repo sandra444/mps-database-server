@@ -137,7 +137,7 @@ class DefinitionAdmin(LockableAdmin):
     form = DefinitionForm
     save_on_top = True
     ordering = [
-        '-help_category',
+        'help_category',
         'help_order',
         'term',
     ]
@@ -147,8 +147,8 @@ class DefinitionAdmin(LockableAdmin):
         'glossary_display',
         'help_display',
         'short_definition',
-        'is_url',
-        'is_anchor',
+        'reference',
+        'help_reference',
         'help_category',
         'count_data_sources',
         'help_order',
