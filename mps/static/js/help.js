@@ -396,6 +396,7 @@ $(document).ready(function () {
             }
         }
         animate_scroll_hash(initial_hash_help);
+        console.log("I am done moving. I should not move again")
     }
     // after the page is loaded, change location on page
     function animate_scroll_hash(anchor) {
@@ -403,6 +404,7 @@ $(document).ready(function () {
         // if the anchor is NOT on the page, do not cause and error in the console
         // this error causes the glossary NOT to display!!!
         console.log("animate anchor ",anchor)
+        console.log("offset_anchor ",offset_anchor)
         if ($(anchor).length)
         {
             $('html, body').animate({
