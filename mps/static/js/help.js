@@ -1,10 +1,11 @@
 $(document).ready(function () {
 
     var if_all_are_open_true = false;
-    expand_or_close_all('#close_all', 'c');
-    var blurred = false;
-    window.onblur = function() { blurred = true; };
-    window.onfocus = function() { blurred && (location.reload()); };
+
+    // expand_or_close_all('#close_all', 'c');
+    // var blurred = false;
+    // window.onblur = function() { blurred = true; };
+    // window.onfocus = function() { blurred && (location.reload()); };
 
     var initial_hash = window.location.hash;
     //navigate_to_anchor(initial_hash) is at the bottom so all loading happens first
@@ -413,6 +414,11 @@ $(document).ready(function () {
             $(anchor).find('button').next().first().css("display", "block");
         }
     }
+
+    $(window).on('hashchange', function(e) {
+        initial_hash = window.location.hash;
+        navigate_to_anchor(initial_hash);
+    })
 
     // END section to find anchor location
 
