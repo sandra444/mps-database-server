@@ -263,7 +263,7 @@
                                             <label for="caseSensitive" class="navi-special-1">Match Case</label>
                                         </td>
                                         <td>
-                                            <input id="search_term" type="search" name="keyword" class="form-control input-sm" placeholder="enter search term...">
+                                            <input id="search_term" type="search" name="keyword" class="form-control input-sm" placeholder="enter search term (e.g., study component)">
                                         </td>
                                         <td>
                                             <button id="search_gooo" type="button" class="btn btn-primary">Search</button>
@@ -321,86 +321,6 @@
             <div id="overview_section" class="stop-point">
 
                 <h1 class="h1-level-0">Overview of the MPS-Db</h1>
-
-                <div id="stilltodo">
-                    <button name="help_button" type="button" class="btn btn-danger help-collapsible">Still to Do</button>
-                    <div class="help-content-1">
-
-                        <ul class="list-group">
-                            <li class="list-group-item">
-                                <h1 class="h1-level-1"></h1>
-
-                                <table id="todotable" class="table table-bordered table-condensed small">
-                                    <thead>
-                                        <tr>
-                                            <th>Things Still Need To Do</th>
-                                        </tr>
-                                    </thead>
-
-                                    <tbody>
-                                        <tr>
-                                            <td>
-                                                1) add content for adding omic data
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>
-                                                2) add content for adding raw plate reader data and processing it
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>
-                                                3) add more information on adding a model version
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>
-                                                4) hard read through the whole main page
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>
-                                                5) hard read through admin content
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>
-                                                6) update collaborator and access groups in admin and main help depending on when that is to be released
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>
-                                                7) when ready, turn the red text back to regular styling (it is red to ID glossary extracts)
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>
-                                                8) fix any bugs that arise in testing
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>
-                                                9) check carefully how data are being pulled from the glossary into the help page
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>
-                                                10) clean up code
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>
-                                                Note: If you are testing links, test them in the glossary (these have been set to go to other locations on Stage). Links in other locations will try to send you to production, but should work fine in production if links work from the glossary.
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-
-                            </li>
-                        </ul>
-
-                    </div>
-                </div>
 
                 <div id="help_overview_background">
                     <button name="help_button" type="button" class="btn btn-primary help-collapsible">Database Background</button>
@@ -1040,28 +960,27 @@
                 <h1 class="h1-level-0">Database Features Based on Study Data</h1>
 
                 <div id="help_study_component">
-                    <button name="help_button" type="button" class="btn btn-primary help-collapsible">Study Components</button>
+                    <button id="help2_study_component_feature" name="help_button" type="button" class="btn btn-primary help-collapsible">Study Components</button>
                     <div class="help-content-1">
                         <ul class="list-group">
                             <li class="list-group-item">
                                 <h1 class="h1-level-1">Study Components</h1>
 
                                 <span class="gse0">{{ glossary_dict.studycomponent_def|linebreaks }}</span>
-
-                                    To review/add
-                                <span class="gse0">{{ glossary_dict.studycomponent_term }}s</span>,
-                                <span class="gse0"><a href={{ glossary_dict.studycomponent_ref }}>click here</a></span>.
-                                <br><br>
-                                Guidance on adding/updating more complicated components
-                                (<span class="gse0">{{ glossary_dict.assaytarget_term }}</span>,
-                                <span class="gse0">{{ glossary_dict.assaymethod_term }}</span>,
-                                <span class="gse0">{{ glossary_dict.mpsmodel_term }}</span>,
-                                <span class="gse0">{{ glossary_dict.mpsmodelversion_term }}</span>,
-                                <span class="gse0">{{ glossary_dict.cellsample_term }}</span>,
-                                and
-                                <span class="gse0">{{ glossary_dict.compound_term }}</span>)
-                                are provided below.
-
+                                <ul class="list-unstyled">
+                                    <li>To see a list and brief description of the
+                                        <span class="gse0">{{ glossary_dict.studycomponent_term }}s,</span>
+                                        <a href="#help_overview_components">click here</a>
+                                    </li>
+                                    <li>
+                                        To review/add
+                                        <span class="gse0">{{ glossary_dict.studycomponent_term }}s</span>
+                                        in the MPS-Db,
+                                        <span class="gse0"><a href={{ glossary_dict.studycomponent_ref }}>click here</a></span>
+                                    </li>
+                                </ul>
+                                <br>
+                                Guidance on adding/updating more complicated components is provided below:
                                 <div id="help_assay_components">
                                     {% include 'help_review_study_components_assay.html' %}
                                 </div>
@@ -2460,7 +2379,11 @@
                                 <h1 class="h1-level-1">Review Study Components</h1>
                                 <span class="gse0">{{ glossary_dict.studycomponents_def|linebreaks }}</span>
                                 <ul class="list-unstyled">
-                                    <li>To review
+                                    <li>To see a list and brief description of the
+                                        <span class="gse0">{{ glossary_dict.studycomponent_term }}s,</span>
+                                        <a href="#help_overview_components">click here</a>
+                                    </li>
+                                    <li>To learn more about adding some of the more complex
                                         <span class="gse0">{{ glossary_dict.studycomponent_term }}s,</span>
                                         <a href="#help_study_component">click here</a>
                                     </li>

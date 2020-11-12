@@ -7,6 +7,7 @@
 
 {% for term in component_assay %}
     {% if term.term == 'Assay Target' %}
+    <div id="help2_target">
         <button name='help_button' type='button' class='btn btn-success help-collapsible'>{{ term.term }}</button>
         <div class='help-content-2'>
             <ul class='list-group'>
@@ -72,8 +73,10 @@
                 </li>
             </ul>
         </div>
+    </div>
     {% else %}
         {% if term.term == 'Assay Method' %}
+        <div id="help2_method">
             <button name='help_button' type='button' class='btn btn-success help-collapsible'>{{ term.term }}</button>
             <div class='help-content-2'>
                 <ul class='list-group'>
@@ -133,6 +136,7 @@
                     </li>
                 </ul>
             </div>
+        </div>
         {% endif %}
     {% endif %}
 {% endfor %}

@@ -1,14 +1,14 @@
 $(document).ready(function () {
 
-    var if_all_are_open_true = false;
     var glossary_spans_on = true;
-
     //after done editing, do this
     //strip_the_glossary_spans()
 
     var initial_hash = window.location.hash;
     //navigate_to_anchor(initial_hash) is at the bottom so all loading happens first
 
+
+    var if_all_are_open_true = false;
     // need a listener click for after the search....
     //https://api.jquery.com/click/
     $(document).on('click', '#expand_all', function() {
@@ -48,8 +48,8 @@ $(document).ready(function () {
     });
 
     function change_display(content, what_doing) {
-        // console.log('content '+content)
-        // console.log('what_doing '+what_doing)
+        console.log('content '+content)
+        console.log('what_doing '+what_doing)
         if (what_doing === 't') {
             if ($(content).css('display') != 'none') {
                 $(content).css('display', 'none');
@@ -340,8 +340,7 @@ $(document).ready(function () {
             '#assays-assayreference-list': '#help_reference',
 
             '#compounds-compound-list': '#help_chemical_data',
-            // '': '#help_bioactivities',
-
+            'bioactivities/table/#filter': '#help_bioactivities',
             '#drugtrial_list': '#help_drug_trials',
             '#adverse_events_list': '#help_adverse_events',
             '#compare_adverse_events': '#help_compare_adverse_events',
@@ -349,6 +348,7 @@ $(document).ready(function () {
             // '': '#help_heatmap_bioactivities',
             // '': '#help_cluster_chemicals',
 
+            '#assays-assaystudy-add': '#help_study_detail',
             '#assays-assaystudy-update-details': '#help_study_detail',
             '#assays-assaystudy-update-groups': '#help_study_treatment_group',
             '#assays-assaystudy-update-chips': '#help_chip_and_plate',
@@ -360,36 +360,51 @@ $(document).ready(function () {
             '#assays-assaystudy-index': '#help_overview_organization',
         };
 
-        var initial_hash_help = '#help_overview_background';
+        var set_hash_default = '#search_term';
+        var initial_hash_help = set_hash_default;
         if (!initial_hash || initial_hash == '#None') {
-            initial_hash_help = '#help_overview_background';
+            initial_hash_help = set_hash_default;
         } else {
             initial_hash_help = anchor_xref[initial_hash];
-            console.log('after anchor ',initial_hash_help)
+            // console.log('after anchor ',initial_hash_help)
             if (!initial_hash_help) {
-                if (
-                    initial_hash.indexOf('microdevices-organmodel') >= 0
-                    || initial_hash.indexOf('microdevices-microdevice') >= 0
-                    || initial_hash.indexOf('microdevices-organmodelprotocol') >= 0
-                    || initial_hash.indexOf('microdevices-manufacturer') >= 0
-
-                    || initial_hash.indexOf('assays-assaytarget') >= 0
-                    || initial_hash.indexOf('assays-assaymethod') >= 0
-                    || initial_hash.indexOf('assays-assaymeasurementtype') >= 0
+                if (initial_hash.indexOf('assays-assaytarget') >= 0) {
+                    change_display($('#help2_study_component_feature')[0].nextElementSibling, 'e');
+                    initial_hash_help = '#help2_target'
+                } else if (initial_hash.indexOf('assays-assaymethod') >= 0) {
+                    change_display($('#help2_study_component_feature')[0].nextElementSibling, 'e');
+                    initial_hash_help = '#help2_method'
+                } else if (initial_hash.indexOf('microdevices-organmodelprotocol') >= 0) {
+                    change_display($('#help2_study_component_feature')[0].nextElementSibling, 'e');
+                    initial_hash_help = '#help2_modelversion'
+                } else if (initial_hash.indexOf('microdevices-organmodel') >= 0) {
+                    change_display($('#help2_study_component_feature')[0].nextElementSibling, 'e');
+                    initial_hash_help = '#help2_model'
+                } else if (initial_hash.indexOf('compounds-compound') >= 0) {
+                    change_display($('#help2_study_component_feature')[0].nextElementSibling, 'e');
+                    initial_hash_help = '#help2_compound'
+                } else if (initial_hash.indexOf('cellsamples-') >= 0) {
+                    change_display($('#help2_study_component_feature')[0].nextElementSibling, 'e');
+                    initial_hash_help = '#help2_cell'
+                } else if (
+                    initial_hash.indexOf('assays-assaymeasurementtype') >= 0
                     || initial_hash.indexOf('assays-physicalunits') >= 0
                     || initial_hash.indexOf('assays-assaysamplelocation') >= 0
                     || initial_hash.indexOf('assays-assaysetting') >= 0
-                    || initial_hash.indexOf('assays-assaysamplelocation') >= 0
-                    || initial_hash.indexOf('assays-assaysamplelocation') >= 0
-
-                    || initial_hash.indexOf('cellsamples-') >= 0
-                    || initial_hash.indexOf('compounds-compound') >= 0
+                    || initial_hash.indexOf('assays-assaysupplier') >= 0
+                    || initial_hash.indexOf('assays-assayreference') >= 0
+                    || initial_hash.indexOf('microdevices-microdevice') >= 0
+                    || initial_hash.indexOf('microdevices-manufacturer') >= 0
                 ) {
-                    initial_hash_help = '#help_overview_components'
+                    initial_hash_help = 'help_study_component';
+                } else {
+                    initial_hash_help = set_hash_default;
                 }
-                }
+            }
+
+            //if still null
             if (!initial_hash_help) {
-                initial_hash_help = '#help_overview_background';
+                initial_hash_help = set_hash_default;
             }
         }
         animate_scroll_hash(initial_hash_help);
@@ -400,7 +415,7 @@ $(document).ready(function () {
         var offset_anchor = 110;
         // if the anchor is NOT on the page, do not cause and error in the console
         // this error causes the glossary NOT to display!!!
-        console.log('animate anchor ',anchor)
+        // console.log('animate anchor ',anchor)
 
         if ($(anchor).length)
         {
