@@ -792,7 +792,9 @@
                                 <h1 class="h1-level-1">Plate Reader Data Integration Tool (20200521) </h1>
                                 UPDDI's Mark Schurdak introduces the
                                 <span class="gse0">{{ glossary_dict.platereaderdata_term }}</span>
-                                integration tool. This tool allows users to setup assay plate maps, upload assay data, calibrate and process data, and add data to the
+                                integration tool. This tool allows users to setup
+                                <span class="gse0">{{ glossary_dict.assayplatemap_term }}s</span>,
+                                upload assay data, calibrate and process data, and add data to the
                                 <span class="gse0">{{ glossary_dict.studysummary_term }}</span>.
                                 The demo begins at 4:30. Video was recorded on May 21, 2020 and is approximately 42 minutes long (demo is about 30 minutes). This demo was recorded using the stage/development server for the purpose of soliciting user feedback.
                                 <br><br>
@@ -1500,6 +1502,7 @@
                                             <li>Currently, the required parameters and rates have been added to the database for the liver</li>
                                             <li>Parameters and rates in yellow can be changed while performing an analysis</li>
                                             <li>Depending on the analysis being performed, some yellow boxes can remain empty</li>
+                                            <li>For a brief introduction to using this featuer, see <a href="#video_demo_w2">Study Design, Set-up and Test Compound Selection Using the MPS-Db</a> (time 45:03 minutes)</li>
                                         </ul>
                                     </li>
                                 </ul>
@@ -2751,116 +2754,195 @@
                                 file of processed assay data (non-omic),
                                 <br>2) uploading raw data exported from a plate reader, and
                                 <br>3) uploading omic formatted data in specific omic data format(s).
+
                                 <br><br>
-                                <h1 class="h1-level-2">Processed MIF-C-a Format</h1>
-                                    <span class="gse0">{{ glossary_dict.mpsdbimportfriendlycolumnar_def|linebreaks }}</span>
+                                <div>
+                                    <h1 class="h1-level-2">Processed MIF-C-a Format</h1>
+                                        <span class="gse0">{{ glossary_dict.mpsdbimportfriendlycolumnar_def|linebreaks }}</span>
 
-                                <ul class="list-unstyled">
-                                    <li>To add processed data in
-                                        <span class="gse0">{{ glossary_dict.mifc_term }}</span>-a
-                                        format:
-                                        <ul class="help-filled-circle">
-                                            <li>Prepare a data file
-                                                (<span class="gse0">{{ glossary_dict.mifc_term }}</span>-a)
-                                            </li>
-                                            <li>Make sure that the
-                                                <span class="gse0">{{ glossary_dict.assaymethod_term }}</span>,
-                                                <span class="gse0">{{ glossary_dict.assaytarget_term }}</span>,
-                                                <span class="gse0">{{ glossary_dict.assayunit_term }}</span>,
-                                                and Chip and Well Ids all match, exactly, what was entered as part of the
-                                                <span class="gse0">{{ glossary_dict.studyset_term }}up</span>
-                                            </li>
-                                            <li>In the Upload Data tab, click the button to add processed data files</li>
-                                            <li>To get an example template file,
-                                                <a href="{% url 'assays-currentuploadtemplate' %}">click here</a>
-                                            </li>
-                                        </ul>
-                                    </li>
-                                    <br>
-                                    <li>Processed Data Help Notes:
-                                        <ul class="help-filled-circle">
-                                            <li>The ONLY assay data that are editable in the
-                                                <span class="gse0">{{ glossary_dict.mpsgui_term }}</span>
-                                                is the <b>Exclude</b> field (editable on the Study item edit page)
-                                            </li>
-                                            <li>Changes made to the <b>Exclude</b> field using the
-                                                <span class="gse0">{{ glossary_dict.mpsgui_term }}</span>
-                                                will be lost when data are re-uploaded
-                                            </li>
-                                            <li>To replace assay data values with new values, remove the data file from the Current Data Files, then correct the values in the
-                                                <span class="gse0">{{ glossary_dict.mifc_term }}</span>-a
-                                                file and re-upload that file 
-                                            </li>
-                                            <li>Chip and well Ids must be unique within a Study</li>
-                                            <li>Each file (and each workbook if using Excel) should contain data for only one Study</li>
-                                            <li>Data for one Study may be submitted in multiple files (and/or multiple tabs of an Excel workbook) </li>
-                                            <li>If uploading an Excel workbook, a workbook can contain multiple tabs</li>
-                                            <li>All files (or tabs) with correct headers (i.e. column names) will be evaluated for upload, others will be ignored</li>
-                                            <li>Correct headers must be placed in the first three rows to be considered valid</li>
-                                        </ul>
-                                    </li>
+                                    <ul class="list-unstyled">
+                                        <li>To add processed data in
+                                            <span class="gse0">{{ glossary_dict.mifc_term }}</span>-a
+                                            format:
+                                            <ul class="help-filled-circle">
+                                                <li>Prepare a data file
+                                                    (<span class="gse0">{{ glossary_dict.mifc_term }}</span>-a)
+                                                    <ul class="help-open-circle">
+                                                        <li>To get an example template file,
+                                                        <a href="{% url 'assays-currentuploadtemplate' %}">click here</a>
+                                                        </li>
+                                                    </ul>
+                                                </li>
+                                                <li>Make sure that the
+                                                    <span class="gse0">{{ glossary_dict.assaymethod_term }}</span>,
+                                                    <span class="gse0">{{ glossary_dict.assaytarget_term }}</span>,
+                                                    <span class="gse0">{{ glossary_dict.assayunit_term }}</span>,
+                                                    and Chip and Well Ids all match, exactly, what was entered as part of the
+                                                    <span class="gse0">{{ glossary_dict.studyset_term }}up</span>
+                                                </li>
+                                                <li>In the Upload Data tab, click the button to add processed data files</li>
+                                                <li>Follow online instructions</li>
+                                            </ul>
+                                        </li>
+                                        <br>
+                                        <li>Processed Data Help Notes:
+                                            <ul class="help-filled-circle">
+                                                <li>The ONLY assay data that are editable in the
+                                                    <span class="gse0">{{ glossary_dict.mpsgui_term }}</span>
+                                                    is the <b>Exclude</b> field (editable on the Study item edit page)
+                                                </li>
+                                                <li>Changes made to the <b>Exclude</b> field using the
+                                                    <span class="gse0">{{ glossary_dict.mpsgui_term }}</span>
+                                                    will be lost when data are re-uploaded
+                                                </li>
+                                                <li>To replace assay data values with new values, remove the data file from the Current Data Files, then correct the values in the
+                                                    <span class="gse0">{{ glossary_dict.mifc_term }}</span>-a
+                                                    file and re-upload that file
+                                                </li>
+                                                <li>Chip and well Ids must be unique within a Study</li>
+                                                <li>Each file (and each workbook if using Excel) should contain data for only one Study</li>
+                                                <li>Data for one Study may be submitted in multiple files (and/or multiple tabs of an Excel workbook) </li>
+                                                <li>If uploading an Excel workbook, a workbook can contain multiple tabs</li>
+                                                <li>All files (or tabs) with correct headers (i.e. column names) will be evaluated for upload, others will be ignored</li>
+                                                <li>Correct headers must be placed in one of the first three rows to be considered valid</li>
+                                            </ul>
+                                        </li>
 
-                                    <button name="help_button" type="button" class="btn btn-success help-collapsible">More Details on the MIF-C File Format</button>
-                                    <div class="help-content-2">
-                                        {% include 'help_mifc_file_details_table.html' %}
-                                    </div>
+                                        <button name="help_button" type="button" class="btn btn-success help-collapsible">More Details on the MIF-C File Format</button>
+                                        <div class="help-content-2">
+                                            {% include 'help_mifc_file_details_table.html' %}
+                                        </div>
 
-                                </ul>
+                                    </ul>
+                                </div>
 
                                 <br>
-                                <h1 class="h1-level-2">Raw Plate Reader Data</h1>
+                                <div>
+                                    <h1 class="h1-level-2">Raw Plate Reader Data</h1>
                                     <span class="gse0">{{ glossary_dict.platereaderdata_def|linebreaks }}</span>
+                                    Raw data, exported from a plate reader, can be added to the MPS-Db, processed, an added to the main Study using the
+                                    <span class="gse0">{{ glossary_dict.platereaderdataprocessingtool_term }}</span>.
+                                    The tool is available on the <a href="#help_data_upload">Upload Assay Data</a> tab of the add/edit Study page.
+                                    <br><br>Using the
+                                    <span class="gse0">{{ glossary_dict.platereaderdataprocessingtool_term }}</span>
+                                    is a three-step process:
+                                    <br>1) Add an
+                                    <span class="gse0">{{ glossary_dict.assayplatemap_term }}</span>,
+                                    <br>2) Upload a file exported from a plate reader and associate an
+                                    <span class="gse0">{{ glossary_dict.assayplatemap_term }}</span>
+                                    to the file,
+                                    <br>3) Process/Calibrate the
+                                    <span class="gse0">{{ glossary_dict.platereaderdata_term }}</span>
+                                    and Send Averages to the Study Summary.
+                                    <br><br>
+                                    <ul class="list-unstyled">
+                                        <li>Step 1) To make a
+                                            <span class="gse0">{{ glossary_dict.assayplatemap_term }}</span>:
+                                            <ul class="help-filled-circle">
+                                                <li>In the Upload Data tab, click the button to add an
+                                                    <span class="gse0">{{ glossary_dict.assayplatemap_term }}</span>
+                                                </li>
+                                                <li>Click the <b>Add Plate Map</b> button</li>
+                                                <li>Follow online instructions</li>
+                                                <li>Click the <b>Submit</b> button to save</li>
+                                            </ul>
+                                        </li>
+                                        <br>
+                                        <li>Step 2) To add raw
+                                            <span class="gse0">{{ glossary_dict.platereaderdata_term }}</span>
+                                            exported from directly from a plate reader:
+                                            <ul class="help-filled-circle">
+                                                <li>In the Upload Data tab, click the button to add raw
+                                                    <span class="gse0">{{ glossary_dict.platereaderdata_term }}</span>
+                                                    file
+                                                    <br>
+                                                    - or -
+                                                    <br>
+                                                    From the Assay Plate Map List page, click the <b>Assay Plate Reader File List</b> button
+                                                </li>
+                                                <li>Click the <b>Add Assay Plate Reader File</b> button</li>
+                                                <li>Select a file</li>
+                                                <li>Click the <b>Submit</b> button to the file</li>
+                                                <li>Follow online instructions (do not forget to select an
+                                                    <span class="gse0">{{ glossary_dict.assayplatemap_term }}</span>)
+                                                </li>
+                                                <li>Click the <b>Submit</b> button to file selections</li>
+                                            </ul>
+                                        </li>
+                                        <br>
+                                        <li>Step 3) To process the raw data:
+                                            <ul class="help-filled-circle">
+                                                <li>In the Upload Data tab, click the button to process or calibrate
+                                                    <span class="gse0">{{ glossary_dict.platereaderdata_term }}</span>
+                                                    <br>
+                                                    - or -
+                                                    <br>
+                                                    From the Assay Plate Reader File List page, click the <b>Assay Plate Map List</b> button
+                                                </li>
+                                                <li>Next to the plate map of interest, click the <b>Calibrate</b> button</li>
+                                                <li>Follow online instructions</li>
+                                                <li>To send data to the Study Summary, check the <b>Send Averages to Study Summary</b> box</li>
+                                                <li>Click the <b>Submit</b> button to save changes, and, to send processed data to the Study Summary (occurs only if the box is checked)</li>
+                                            </ul>
+                                        </li>
+                                        <br>
+                                        <li>Raw Plate Reader Data Help Notes:
+                                            <ul class="help-filled-circle">
+                                                <li>To see this tool demonstrated, watch the video
+                                                    <a href="#video_demo_8">Plate Reader Data Integration Tool</a>
+                                                    (this was recorded while still in development and there some differences from the current version of the MPS-Db)
+                                                <li>The same
+                                                    <span class="gse0">{{ glossary_dict.assayplatemap_term }}</span>
+                                                    can be used for multiple files
+                                                </li>
+                                                <li>The
+                                                    <span class="gse0">{{ glossary_dict.assayplatemap_term }}'s</span>
+                                                    sample time can be overwritten when adding the
+                                                    <span class="gse0">{{ glossary_dict.assayplatemap_term }}</span>
+                                                    to a data file (in Step 2)</li>
+                                                <li><span class="gse0">{{ glossary_dict.assayplatemap_term }}'s</span>
+                                                    that have been assigned to a
+                                                    <span class="gse0">{{ glossary_dict.platereaderdata_term }}</span>
+                                                    file are not editable </li>
+                                                <li>To edit a
+                                                    <span class="gse0">{{ glossary_dict.assayplatemap_term }}</span>,
+                                                    make sure all
+                                                    <span class="gse0">{{ glossary_dict.platereaderdata_term }}</span>
+                                                    files have been detached from the
+                                                    <span class="gse0">{{ glossary_dict.assayplatemap_term }}</span>
+                                                </li>
+                                            </ul>
+                                        </li>
 
-                                <ul class="list-unstyled">
-                                    <li>To add raw
-                                        <span class="gse0">{{ glossary_dict.platereaderdata_term }}</span>
-                                        exported from directly from a plate reader:
-                                        <ul class="help-filled-circle">
-                                            <li>Help for raw plate reader data is coming soon</li>
-                                        </ul>
-                                    </li>
-                                    <br>
-                                    <li>Raw Plate Reader Data Help Notes:
-                                        <ul class="help-filled-circle">
-                                            <li>Help for raw plate reader data is coming soon</li>
-                                        </ul>
-                                    </li>
-
-                                    <button name="help_button" type="button" class="btn btn-success help-collapsible">More Details on Uploading Plate Reader Data</button>
-                                    <div class="help-content-2">
-                                        <li>Help for raw plate reader data is coming soon</li>
-{#                                        {% include 'xx.html' %}#}
-                                    </div>
-
-                                </ul>
+                                    </ul>
+                                </div>
 
                                 <br>
-                                <h1 class="h1-level-2">Omic Data</h1>
-                                    <span class="gse0">{{ glossary_dict.omicdata_def|linebreaks }}</span>
+                                <div>
+                                    <h1 class="h1-level-2">Omic Data</h1>
+                                        <span class="gse0">{{ glossary_dict.omicdata_def|linebreaks }}</span>
 
-                                <ul class="list-unstyled">
-                                    <li>To add
-                                        <span class="gse0">{{ glossary_dict.omicdata_term }}</span>
-                                        to the MPS-Db:
-                                        <ul class="help-filled-circle">
-                                            <li>Help for omic data is coming soon</li>
-                                        </ul>
-                                    </li>
-                                    <br>
-                                    <li>Omic Data Help Notes:
-                                        <ul class="help-filled-circle">
-                                            <li>Help for omic data is coming soon</li>
-                                        </ul>
-                                    </li>
+                                    <ul class="list-unstyled">
+                                        <li>To add
+                                            <span class="gse0">{{ glossary_dict.omicdata_term }}</span>
+                                            to the MPS-Db:
+                                            <ul class="help-filled-circle">
+                                                <li>In the Upload Data tab, click the button to add omic data files</li>
+                                                <li>Click the <b>Add Omic Data File</b> button</li>
+                                                <li>Follow online instructions</li>
+                                                <li>Click <b>Submit</b> to save</li>
+                                            </ul>
 
-                                    <button name="help_button" type="button" class="btn btn-success help-collapsible">More Details Uploading Omic Data</button>
-                                    <div class="help-content-2">
-                                        <li>Help for omic data is coming soon</li>
-{#                                        {% include 'help_mifc_file_details_table.html' %}#}
-                                    </div>
+                                        </li>
+                                        <br>
+                                        <li>Omic Data Help Notes:
+                                            <ul class="help-filled-circle">
+                                                <li>From the Omic Data File Upload List, click the <b>Visualization</b> button to see the uploaded data</li>
+                                            </ul>
+                                        </li>
 
-                                </ul>
-
+                                    </ul>
+                                </div>
                             </li>
                         </ul>
                     </div>
@@ -2881,10 +2963,11 @@
                                             <li>Prepare the image/video file</li>
                                             <li>Prepare an image/video metadata file
                                                 (<span class="gse0">{{ glossary_dict.mifc_term }}</span>-i)
-                                            </li>
-                                            <li>To get an example partial template file, 
-                                                <a href="{% url 'assays-currentuploadtemplate' %}">click here</a>
-                                            </li>
+                                                <ul class="help-open-circle">
+                                                    <li>To get an example partial template file,
+                                                    <a href="{% url 'assays-currentuploadtemplate' %}">click here</a>
+                                                    </li>
+                                                </ul>
                                             <li>Contact an
                                                 <span class="gse0">{{ glossary_dict.mpsdbadministrator_term }}</span>
                                                 to make arrangements for submitting the files
