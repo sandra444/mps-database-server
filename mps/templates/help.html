@@ -55,8 +55,8 @@
       <script>
       window.dataLayer = window.dataLayer || [];
           function gtag(){dataLayer.push(arguments);}
-          gtag('js', new Date());
-          gtag('config', '{{ GOOGLE_ANALYTICS }}');
+          gtag( "js ", new Date());
+          gtag( "config ", "{{ GOOGLE_ANALYTICS }} ");
       </script>
     {% endif %}
 </head>
@@ -698,7 +698,7 @@
                                 Webinar was recorded on October 6, 2020 and is approximately 60 minutes long.
                                 Questions asked during the webinar, along with answers, are available below.
 
-                                {% include 'help_webinar_20201006_qanda_table.html' %}
+                                {% include "help_webinar_20201006_qanda_table.html" %}
 
                                 <br><br>
                                 <button name="video_button" type="button" class="btn btn-default video-collapsible">Open Video Window</button>
@@ -984,19 +984,19 @@
                                 <br>
                                 Guidance on adding/updating more complicated components is provided below:
                                 <div id="help_assay_components">
-                                    {% include 'help_review_study_components_assay.html' %}
+                                    {% include "help_review_study_components_assay.html" %}
                                 </div>
 
                                 <div id="help_model_components">
-                                    {% include 'help_review_study_components_model.html' %}
+                                    {% include "help_review_study_components_model.html" %}
                                 </div>
 
                                 <div id="help_compound_components">
-                                    {% include 'help_review_study_components_compound.html' %}
+                                    {% include "help_review_study_components_compound.html" %}
                                 </div>
 
                                 <div id="help_cell_components">
-                                    {% include 'help_review_study_components_cell.html' %}
+                                    {% include "help_review_study_components_cell.html" %}
                                 </div>
 
                             </li>
@@ -2769,7 +2769,7 @@
                                                     (<span class="gse0">{{ glossary_dict.mifc_term }}</span>-a)
                                                     <ul class="help-open-circle">
                                                         <li>To get an example template file,
-                                                        <a href="{% url 'assays-currentuploadtemplate' %}">click here</a>
+                                                        <a href="{% url "assays-currentuploadtemplate" %}">click here</a>
                                                         </li>
                                                     </ul>
                                                 </li>
@@ -2810,7 +2810,7 @@
 
                                         <button name="help_button" type="button" class="btn btn-success help-collapsible">More Details on the MIF-C File Format</button>
                                         <div class="help-content-2">
-                                            {% include 'help_mifc_file_details_table.html' %}
+                                            {% include "help_mifc_file_details_table.html" %}
                                         </div>
 
                                     </ul>
@@ -2966,7 +2966,7 @@
                                                 (<span class="gse0">{{ glossary_dict.mifc_term }}</span>-i)
                                                 <ul class="help-open-circle">
                                                     <li>To get an example partial template file,
-                                                    <a href="{% url 'assays-currentuploadtemplate' %}">click here</a>
+                                                    <a href="{% url "assays-currentuploadtemplate" %}">click here</a>
                                                     </li>
                                                 </ul>
                                             <li>Contact an
@@ -2990,7 +2990,7 @@
 
                                     <button name="help_button" type="button" class="btn btn-success help-collapsible">More Details on the MIF-C File Format</button>
                                     <div class="help-content-2">
-                                        {% include 'help_mifc_file_details_table.html' %}
+                                        {% include "help_mifc_file_details_table.html" %}
                                     </div>
 
                                 </ul>
@@ -3238,7 +3238,7 @@
             {% if user.is_superuser %}
                 <div id="component_admin_section" class="stop-point">
                     <h1 class="h1-level-0">Information for MPS Database Administrators</h1>
-                    {% include 'help_superuser_content.html' %}
+                    {% include "help_superuser_content.html" %}
                 </div>
             {% endif %}
 
@@ -3268,7 +3268,7 @@
                         {# do this way for development** #}
                         {% if term.reference %}
                             <td><span class="gse1">
-                                <a target='_blank' href={{ term.reference }}>
+                                <a target="_blank" href={{ term.reference }}>
                                     <span class="glyphicon glyphicon-link"></span>
                                 </a>
                             </span></td>

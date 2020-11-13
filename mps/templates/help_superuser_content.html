@@ -1,20 +1,20 @@
 <!DOCTYPE html>
-<html lang='en'>
+<html lang="en">
 <head>
-    <meta charset='UTF-8'>
+    <meta charset="UTF-8">
 </head>
 <body>
 
-    <div id='access_overview_admin'>
-        <button name='help_button' type='button' class='btn btn-primary help-collapsible'>Sharing Study Data Overview</button>
-        <div class='help-content-1'>
+    <div id="access_overview_admin">
+        <button name="help_button" type="button" class="btn btn-primary help-collapsible">Sharing Study Data Overview</button>
+        <div class="help-content-1">
 
-            <ul class='list-group'>
-                <li class='list-group-item'>
-                    <h1 class='h1-level-1'> Sharing Study Data Overview for MPS Administrators </h1>
-                    <ul class='list-unstyled'>
+            <ul class="list-group">
+                <li class="list-group-item">
+                    <h1 class="h1-level-1"> Sharing Study Data Overview for MPS Administrators </h1>
+                    <ul class="list-unstyled">
                         <li> About sharing study data:
-                            <ul class='help-filled-circle'>
+                            <ul class="help-filled-circle">
                                 <li> Currently, all sharing options are setup by MPS administrators (there are discussions occurring to change this)</li>
                                 <li> Access is setup by assigning permissions to users and by assigning groups to studies in the admin interface (this may change - a prototype to allow changing group access on the front end is on stage)</li>
                                 <li> Access is granted to a study and everything contained within (no option for finer-grained sharing of parts of a study) </li>
@@ -23,18 +23,18 @@
                         </li>
                         <br>
                         <li> Examining sharing subsections:
-                            <ul class='help-filled-circle'>
+                            <ul class="help-filled-circle">
                                 <li> The <b>Change Tracking</b> section:
-                                    <ul class='help-open-circle'>
+                                    <ul class="help-open-circle">
                                         <li> Signed Off By - If this has a user name in it, it means that the study is following the sign-off, acknowledgement, embargo process</li>
                                         <li> A sign-off does not open the study to the public, even if there is no stakeholder</li>
                                         <li> If there is no stakeholder, the study is open to Access Groups </li>
                                     </ul>
                                 </li>
                             </ul>
-                            <ul class='help-filled-circle'>
+                            <ul class="help-filled-circle">
                                 <li> Study Data Group and Access Group Subsection
-                                    <ul class='help-open-circle'>
+                                    <ul class="help-open-circle">
                                         <li> Data Group - This is the team that can add/edit/remove a Study (until the Data Group Administrator signs off the Study) </li>
                                         <li> When adding/editing a Study in the front-end, a user who has been added to one or more Data Groups (by an MPS Admin) can select the Data Group for the Study (selection options will be limited to the Editing Groups to which the user is a member).</li>
                                         <li> Restricted - Until this is unchecked, a study is closed to the public (it can be unchecked by an admin at any time)</li>
@@ -46,9 +46,9 @@
                                     </ul>
                                 </li>
                             </ul>
-                            <ul class='help-filled-circle'>
+                            <ul class="help-filled-circle">
                                 <li> Assay Study Stakeholders Subsection
-                                    <ul class='help-open-circle'>
+                                    <ul class="help-open-circle">
                                         <li> Any number of Stakeholder Groups can be added</li>
                                         <li> When a Study is signed off, members of any present Stakeholder Groups will receive an email telling them to look at and approve the study </li>
                                     </ul>
@@ -57,7 +57,7 @@
                         </li>
                         <br>
                         <li>Help Notes:
-                            <ul class='help-filled-circle'>
+                            <ul class="help-filled-circle">
                                 <li> What happens if the 'Use in Calculations' box is check? The study becomes available in the Compound Report. </li>
                                 <li> Collaborator groups are completely controlled by the admins (no front-end GUI).</li>
                                 <li> To open a study to the public immediately (i.e. bypass sign-off, acknowledgment, embargo) must by done by the admin (uncheck the restricted box), but data providers can check the 'Use in Calculations' box.</li>
@@ -71,16 +71,16 @@
         </div>
     </div>
 
-    <div id='add_groups_admin'>
-        <button name='help_button' type='button' class='btn btn-primary help-collapsible'>Adding New Data Groups</button>
-        <div class='help-content-1'>
+    <div id="add_groups_admin">
+        <button name="help_button" type="button" class="btn btn-primary help-collapsible">Adding New Data Groups</button>
+        <div class="help-content-1">
 
-            <ul class='list-group'>
-                <li class='list-group-item'>
-                    <h1 class='h1-level-1'> Adding New Data Groups </h1>
-                    <ul class='list-unstyled'>
+            <ul class="list-group">
+                <li class="list-group-item">
+                    <h1 class="h1-level-1"> Adding New Data Groups </h1>
+                    <ul class="list-unstyled">
                         <li> A <b>Group</b> (Data, Stakeholder, Access) is actually a trio of groups. The following is an example for <b>Data Group Rusyn_TAMU</b>
-                            <ul class='help-filled-circle'>
+                            <ul class="help-filled-circle">
                                 <li> <b>Rusyn_TAMU</b> - this is the editor group, sometimes referred to as the group proper </li>
                                 <li> <b>Rusyn_TAMU Admin</b> - admins can edit and sign-off (or acknowledge for TCD groups) studies</li>
                                 <li> <b>Rusyn_TAMU Viewer</b> - can view studies prior to sign-off (or acknowledgement for TCD groups) </li>
@@ -88,14 +88,14 @@
                         </li>
                         <br>
                         <li> A <b>Collaborator Group</b> is two groups, one, the group proper, and one for viewers. The following is an example for the <b> SQL-SAL_1.5</b> group
-                            <ul class='help-filled-circle'>
+                            <ul class="help-filled-circle">
                                 <li> <b>SQL-SAL_1.5 </b> - add this <b>Collaborator Group</b> to studies to share </li>
                                 <li> <b>SQL-SAL_1.5 Viewer </b> - add the collaborators to this group </li>
                             </ul>
                         </li>
                         <br>
                         <li> A <b>Stakeholder Group</b> is three groups similar to Data Groups. Thus far, when naming these we have added 'TCD_' as a prefix and the name of the institution as a suffix. The following is an example for the <b>SQL-SAL_1.5</b> model
-                            <ul class='help-filled-circle'>
+                            <ul class="help-filled-circle">
                                 <li> <b>TCD_SQL-SAL_Pitt </b> - Add this group to studies for study review and sign-off</li>
                                 <li> <b>TCD_SQL-SAL_Pitt Admin </b> - add users to this group to allow those users to view any studies with this group as a Stakeholder once the study is signed off</li>
                                 <li> <b>TCD_SQL-SAL_Pitt Viewer </b> - add users to this group to approve signed off studies</li>
@@ -103,7 +103,7 @@
                         </li>
                         <br>
                         <li>To create and prepare a new <b>Group</b>
-                            <ul class='help-filled-circle'>
+                            <ul class="help-filled-circle">
                                 <li>Go to the MPS-Db admin (https://mps.csb.pitt.edu/admin/) </li>
                                 <li>Go to the MPS Authentication and Authorization Section</li>
                                 <li>Click on Groups and scroll down to review how groups are named</li>
@@ -124,7 +124,7 @@
                         </li>
                         <br>
                         <li>Help Notes:
-                            <ul class='help-filled-circle'>
+                            <ul class="help-filled-circle">
                                 <li> It is very easy to forget to attach the group proper to a center. If you forget, you will not be able to use the group. </li>
                                 <li> Although Groups are classified into three different types, each Group is fundamentally the same in the backend. The differences are purely functional based on where a Group is used. </li>
                             </ul>
@@ -136,16 +136,16 @@
         </div>
     </div>
 
-    <div id='study_groups_admin'>
-        <button name='help_button' type='button' class='btn btn-primary help-collapsible'>Assigning Groups to Studies</button>
-        <div class='help-content-1'>
+    <div id="study_groups_admin">
+        <button name="help_button" type="button" class="btn btn-primary help-collapsible">Assigning Groups to Studies</button>
+        <div class="help-content-1">
 
-            <ul class='list-group'>
-                <li class='list-group-item'>
-                    <h1 class='h1-level-1'> Assigning Groups to Studies </h1>
-                    <ul class='list-unstyled'>
+            <ul class="list-group">
+                <li class="list-group-item">
+                    <h1 class="h1-level-1"> Assigning Groups to Studies </h1>
+                    <ul class="list-unstyled">
                         <li>To assign groups to a <b>Study</b>
-                            <ul class='help-filled-circle'>
+                            <ul class="help-filled-circle">
                                 <li>Go to the MPS-Db admin</li>
                                 <li>Go to the MPS ASSAYS Section</li>
                                 <li>Click on Studies</li>
@@ -159,7 +159,7 @@
                         </li>
                         <br>
                         <li>Help Notes:
-                            <ul class='help-filled-circle'>
+                            <ul class="help-filled-circle">
                                 <li>Best practice would be to assign appropriate groups (Stakeholder and Access) at the time of study creation. </li>
                                 <li>Data Group Admins and Editors can create a study, but cannot add/edit special permission groups to a study</li>
                                 <li> Collaborator groups bypass the tri-level sign-off, review, and release protocol </li>
@@ -169,7 +169,7 @@
                             </ul>
                         </li>
                         <li><br>To quickly see what studies are in a <b>Collaborator Group</b>
-                            <ul class='help-filled-circle'>
+                            <ul class="help-filled-circle">
                                 <li> Go to the MPS-Db admin</li>
                                 <li> Go to the Authentication and Authorization Section</li>
                                 <li> Click on Groups</li>
@@ -185,17 +185,17 @@
         </div>
     </div>
 
-    <div id='user_groups_admin'>
+    <div id="user_groups_admin">
 
-        <button name='help_button' type='button' class='btn btn-primary help-collapsible'>Assigning Users To Groups</button>
-        <div class='help-content-1'>
+        <button name="help_button" type="button" class="btn btn-primary help-collapsible">Assigning Users To Groups</button>
+        <div class="help-content-1">
 
-            <ul class='list-group'>
-                <li class='list-group-item'>
-                    <h1 class='h1-level-1'> Assigning Users To Groups (Data, Stakeholder, Access, and Collaborator) </h1>
-                    <ul class='list-unstyled'>
+            <ul class="list-group">
+                <li class="list-group-item">
+                    <h1 class="h1-level-1"> Assigning Users To Groups (Data, Stakeholder, Access, and Collaborator) </h1>
+                    <ul class="list-unstyled">
                         <li>To assign users to a <b>Group</b>
-                            <ul class='help-filled-circle'>
+                            <ul class="help-filled-circle">
                                 <li> Go to the MPS-Db admin</li>
                                 <li> Go to the Authentication and Authorization Section</li>
                                 <li> Click on Users</li>
@@ -207,35 +207,35 @@
                         </li>
                         <br>
                         <li>Help Notes:
-                            <ul class='help-filled-circle'>
+                            <ul class="help-filled-circle">
                                 <li> Users should be assigned to appropriate groups when they register</li>
                                 <li> Users may have different roles in different groups</li>
                                 <li> <b>All users of collaborator groups should be Viewers</b></li>
                             </ul>
                         </li>
                         <li> <br> The term <b>Data Group</b> actually refers to three groups, one group for each role. The following is an example for <b>Data Group Rusyn_TAMU</b> group
-                            <ul class='help-filled-circle'>
+                            <ul class="help-filled-circle">
                                 <li> <b>Rusyn_TAMU</b> - this is the editor group, sometimes referred to as the group proper </li>
                                 <li> <b>Rusyn_TAMU Admin</b> - admins can edit and sign-off studies</li>
                                 <li> <b>Rusyn_TAMU Viewer</b> - can view studies prior to sign-off</li>
                             </ul>
                         </li>
                         <li> <br> The term <b>Stakeholder Group</b> also refers to three groups, one group for each role. The following is an example for <b>TCD_BBB_Vandy</b> group
-                            <ul class='help-filled-circle'>
+                            <ul class="help-filled-circle">
                                 <li> <b>TCD_BBB_Vandy </b> - this group must be present, but should not have members </li>
                                 <li> <b>TCD_BBB_Vandy Admin</b> – members are users who can acknowledge a study </li>
                                 <li> <b>TCD_BBB_Vandy Viewer</b> - members are users who can see a study but cannot acknowledge it </li>
                             </ul>
                         </li>
                         <li> <br> The term <b>Access Group</b> also refers to three groups, one group for each role. The following is an example for the <b> NCATS</b> group
-                            <ul class='help-filled-circle'>
+                            <ul class="help-filled-circle">
                                 <li> <b>NCATS </b> - group must be present, but should not have members </li>
                                 <li> <b>NCATS Admin</b> -  group should not have members </li>
                                 <li> <b>NCATS Viewer</b> - members are users with special access </li>
                             </ul>
                         </li>
                         <li> <br> The term <b>Collaborator Group</b> refers to two groups. The following is an example for the <b> SQL-SAL_1.5</b> group
-                            <ul class='help-filled-circle'>
+                            <ul class="help-filled-circle">
                                 <li> <b>SQL-SAL_1.5 </b> - add this <b>Collaborator Group</b> to studies to share </li>
                                 <li> <b>SQL-SAL_1.5 Viewer </b> - add the collaborators to this group </li>
                             </ul>
@@ -247,27 +247,27 @@
         </div>
     </div>
 
-    <div id='special_permission_admin'>
-        <button name='help_button' type='button' class='btn btn-primary help-collapsible'>Study Component Add/Edit </button>
-        <div class='help-content-1'>
+    <div id="special_permission_admin">
+        <button name="help_button" type="button" class="btn btn-primary help-collapsible">Study Component Add/Edit </button>
+        <div class="help-content-1">
 
-            <ul class='list-group'>
-                <li class='list-group-item'>
-                    <h1 class='h1-level-1'> Study Component Add </h1>
+            <ul class="list-group">
+                <li class="list-group-item">
+                    <h1 class="h1-level-1"> Study Component Add </h1>
                     <p> In the past, users had to be assigned the 'Add X Front' and/or 'Change X Front' (where X is Cells, Compounds, etc.) to add study components in the front-end. Now, any user who is a memeber of at least one Group (with the role of Editor or Administrator) can add study components in the front-end. </p>
                 </li>
 
-                <li class='list-group-item'>
-                    <h1 class='h1-level-1'> Study Component Edit </h1>
+                <li class="list-group-item">
+                    <h1 class="h1-level-1"> Study Component Edit </h1>
                     <p> Allowing study components to be edited is tricky and was the subject of much debate. </p>
-                    <ul class='list-unstyled'>
+                    <ul class="list-unstyled">
                         <li>Editing Study Components:</li>
                         <li></li>
-                            <ul class='help-filled-circle'>
+                            <ul class="help-filled-circle">
                                 <li> MPS Admins can edit study components via the admin interface</li>
                                 <li> Other Users - to edit an MPS Model, a user must be an editor or administrator of, at least one Group associated with the Model's Center. </li>
                                 <li> Other Users - to edit a specific Study Component, other than an MPS Model, the user must have either:
-                                    <ul class='help-open-circle'>
+                                    <ul class="help-open-circle">
                                         <li> created that specific study component, or </li>
                                         <li> the specific study component must not be in use (for example, if the specific study component is a Device, to be editable, the Device must not have been used in an MPS Model in the database) </li>
                                     </ul>
@@ -276,7 +276,7 @@
                         </li>
                         <br>
                         <li>Editing Help Notes:
-                            <ul class='help-filled-circle'>
+                            <ul class="help-filled-circle">
                                 <li> Some components, like Methods and Targets, have a 'limited' interface to allow for binding Target and Methods to each other, regardless of who created the specific study component or whether the specific study component is in use</li>
                             </ul>
                         </li>
@@ -289,17 +289,17 @@
     </div>
 
 
-    <div id='add_new_center'>
-        <button name='help_button' type='button' class='btn btn-primary help-collapsible'>Add New Center </button>
-        <div class='help-content-1'>
+    <div id="add_new_center">
+        <button name="help_button" type="button" class="btn btn-primary help-collapsible">Add New Center </button>
+        <div class="help-content-1">
 
-            <ul class='list-group'>
-                <li class='list-group-item'>
-                    <h1 class='h1-level-1'> Add New Center </h1>
-                    <ul class='list-unstyled'>
+            <ul class="list-group">
+                <li class="list-group-item">
+                    <h1 class="h1-level-1"> Add New Center </h1>
+                    <ul class="list-unstyled">
                         <li>Go to the admin and pick Microphysiology Centers - Add and add the following info</li>
                         <li></li>
-                            <ul class='help-filled-circle'>
+                            <ul class="help-filled-circle">
                                 <li>Center Name - University of Pittsburgh Drug Discovery Institute</li>
                                 <li>Center ID - UPDDI</li>
                                 <li>Institution - University of Pittsburgh</li>
@@ -315,7 +315,7 @@
                         </li>
                         <br>
                         <li>Help Notes:
-                            <ul class='help-filled-circle'>
+                            <ul class="help-filled-circle">
                                 <li> It is very easy to forget to attach the group proper to a center. If you forget, you will not be able to use the group. </li>
                                 <li> Although Groups are classified into three different types, each Group is fundamentally the same in the backend. The differences are purely functional based on where a Group is used. </li>
                             </ul>
