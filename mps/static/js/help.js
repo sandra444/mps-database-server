@@ -48,8 +48,8 @@ $(document).ready(function () {
     });
 
     function change_display(content, what_doing) {
-        console.log('content '+content)
-        console.log('what_doing '+what_doing)
+        // console.log('content '+content)
+        // console.log('what_doing '+what_doing)
         if (what_doing === 't') {
             if ($(content).css('display') != 'none') {
                 $(content).css('display', 'none');
