@@ -93,6 +93,9 @@ class AssayGroupCompoundSerializer(serializers.ModelSerializer):
     addition_time = serializers.StringRelatedField(source='get_addition_time_string')
     duration = serializers.StringRelatedField(source='get_duration_string')
 
+    addition_time_in_minutes = serializers.IntegerField(source='addition_time')
+    duration_in_minutes = serializers.IntegerField(source='duration')
+
     class Meta:
         model = AssayGroupCompound
         fields = [
@@ -100,7 +103,9 @@ class AssayGroupCompoundSerializer(serializers.ModelSerializer):
             'concentration',
             'concentration_unit',
             'addition_time',
+            'addition_time_in_minutes',
             'duration',
+            'duration_in_minutes',
             'addition_location',
         ]
 
@@ -115,6 +120,8 @@ class AssayGroupCellSerializer(serializers.ModelSerializer):
 
     addition_time = serializers.StringRelatedField(source='get_addition_time_string')
 
+    addition_time_in_minutes = serializers.IntegerField(source='addition_time')
+
     class Meta:
         model = AssayGroupCell
         fields = [
@@ -124,6 +131,7 @@ class AssayGroupCellSerializer(serializers.ModelSerializer):
             'density_unit',
             'passage',
             'addition_time',
+            'addition_time_in_minutes',
             'addition_location',
         ]
 
@@ -137,6 +145,9 @@ class AssayGroupSettingSerializer(serializers.ModelSerializer):
     addition_time = serializers.StringRelatedField(source='get_addition_time_string')
     duration = serializers.StringRelatedField(source='get_duration_string')
 
+    addition_time_in_minutes = serializers.IntegerField(source='addition_time')
+    duration_in_minutes = serializers.IntegerField(source='duration')
+
     class Meta:
         model = AssayGroupSetting
         fields = [
@@ -144,7 +155,9 @@ class AssayGroupSettingSerializer(serializers.ModelSerializer):
             'value',
             'unit',
             'addition_time',
+            'addition_time_in_minutes',
             'duration',
+            'duration_in_minutes',
             'addition_location',
         ]
 
