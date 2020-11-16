@@ -197,16 +197,23 @@ $(document).ready(function () {
                 }
             });
 
-            var glossary_search_box = null;
-            $('input:input').each(function() {
-                if ($(this)[0].getAttribute('type') === 'search' && $(this).attr("id") != 'search_term') {
-                    glossary_search_box = $(this);
-                    glossary_search_box.val(searchTerm);
-                    // WHAT DO I PUT HERE TO MAKE THE SEARCH HAPPEN
-                    // glossary_search_box.trigger('change');
-                    // glossary_search_box.dispatchEvent(new Event('change'));
-                }
-            });
+            // $('#glossary_table_filter')[0].childNodes[0].childNodes[1];
+            //same as $('#glossary_table_filter').children().children()[0];
+            //same as $('#glossary_table_filter :input');
+
+            $('#glossary_table_filter :input').val(searchTerm);
+            $('#glossary_table_filter :input').trigger('input');
+
+            // another option, but have to to through all the inputs and is much longer....
+            // var glossary_search_box = null;
+            // $('input:input').each(function() {
+            //     if ($(this)[0].getAttribute('type') === 'search' && $(this).attr("id") != 'search_term') {
+            //         glossary_search_box = $(this);
+            //         glossary_search_box.val(searchTerm);
+            //         glossary_search_box.trigger('input');
+            //     }
+            // });
+            
             if ($results.length == 0) {
                 // alert('Could not find a match in the main body of the help. Try searching the Glossary.');
                 animate_scroll_hash('#glossary');
