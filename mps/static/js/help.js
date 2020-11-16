@@ -199,11 +199,12 @@ $(document).ready(function () {
 
             var glossary_search_box = null;
             $('input:input').each(function() {
-                if ($(this)[0].getAttribute('type') === 'search') {
+                if ($(this)[0].getAttribute('type') === 'search' && $(this).attr("id") != 'search_term') {
                     glossary_search_box = $(this);
                     glossary_search_box.val(searchTerm);
                     // WHAT DO I PUT HERE TO MAKE THE SEARCH HAPPEN
-                    glossary_search_box.trigger('change');
+                    // glossary_search_box.trigger('change');
+                    // glossary_search_box.dispatchEvent(new Event('change'));
                 }
             });
             if ($results.length == 0) {
