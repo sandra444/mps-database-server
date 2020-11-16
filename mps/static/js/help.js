@@ -196,8 +196,19 @@ $(document).ready(function () {
                     });
                 }
             });
+
+            var glossary_search_box = null;
+            $('input:input').each(function() {
+                if ($(this)[0].getAttribute('type') === 'search') {
+                    glossary_search_box = $(this);
+                    glossary_search_box.val(searchTerm);
+                    // WHAT DO I PUT HERE TO MAKE THE SEARCH HAPPEN
+                    glossary_search_box.trigger('change');
+                }
+            });
             if ($results.length == 0) {
-                alert('Could not find a match');
+                // alert('Could not find a match in the main body of the help. Try searching the Glossary.');
+                animate_scroll_hash('#glossary');
                 change_search_ables_to_search(true);
             }
         }
