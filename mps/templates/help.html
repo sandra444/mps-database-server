@@ -238,6 +238,7 @@
                             <li><a href="#user_groups_admin">Assigning Users To Groups</a></li>
                             <li><a href="#special_permission_admin">Study Component Editing</a></li>
                             <li><a href="#add_new_center">Add New Center</a></li>
+                            <li><a href="#computational_targets">Preparing for New Omic Data Types</a></li>
 
                         </ul>
                     </li>
@@ -296,11 +297,11 @@
 
         <div id="realTimeContents" class="content">
 
-            <div id="search_help_page_section" class="hidden">
+            <div id="expand_help_page_section" class="hidden">
                 {# a search will expand them all and a reset will close them all - keep here for people who use the inspector and know the buttons are there#}
 
                 <h1 class="h1-level-0">Show and Hide Help</h1>
-                <div id="help_search_page">
+                <div id="help_expand_page">
 {#                    <button name="help_button" type="button" class="btn btn-primary help-collapsible">Show and Hide on the Help Page</button>#}
 {#                    <div class="help-content-1">#}
                         <ul class="list-group">
@@ -316,6 +317,14 @@
 {#                    </div>#}
                 </div>
                 <br><br>
+            </div>
+
+            <div id="search_help_page_section" class="hidden">
+                <h1 class="h1-level-1">Try using <b>Search</b> above
+{#                    <span class="glyphicon glyphicon-arrow-up"></span>#}
+                    to find the information here in the Help page.
+                </h1>
+                <br>
             </div>
 
             <div id="overview_section" class="stop-point">
@@ -3111,7 +3120,9 @@
                                 <span class="gse0">{{ glossary_dict.datagroupadministrator_term }}s</span>
                                 change data access by going to the <b>Study Overview</b> page,
                                 then clicking the <b>Sign Off/Permission</b> button, and selecting to:
-                                <br>1) Change Study Access (to add/change Collaborator Groups and Access Groups) or
+                                <br>1) Change Study Access (to add/change
+                                <span class="gse0">{{ glossary_dict.collaboratorgroup_term }}s</span> and
+                                <span class="gse0">{{ glossary_dict.assaygroup_term }}s)</span> or
                                 <br>2) View/Edit Sign Off Status of this Study (to add/change the Release Date and
                                 <span class="gse0">{{ glossary_dict.studysignoff_term }}</span> a Study).
 
@@ -3119,21 +3130,27 @@
 
                                 <div>
                                     <h1 class="h1-level-2">Change Study Access</h1>
-                                        <span class="gse0">{{ glossary_dict.studysignoff_def|linebreaks }}</span>
-
                                         <span class="gse0">{{ glossary_dict.datagroupadministrator_term }}s</span>
-                                        can sign-off a Study in their
-                                        <span class="gse0">{{ glossary_dict.datagroup_term }}</span>.
+                                        can assign
+                                        <span class="gse0">{{ glossary_dict.collaboratorgroup_term }}s</span> and/or
+                                        <span class="gse0">{{ glossary_dict.accessgroup_term }}s</span>
+                                        to a Study.
                                     <br><br>
 
                                     <ul class="list-unstyled">
-                                        <li>To sign-off a Study:
+                                        <li>To add
+                                            <span class="gse0">{{ glossary_dict.collaboratorgroup_term }}s</span> and/or
+                                            <span class="gse0">{{ glossary_dict.accessgroup_term }}s</span>
+                                            to a Study:
                                             <ul class="help-filled-circle">
                                                 <li>Go to the Study of interest</li>
                                                 <li>Click on the <b>Sign Off/Permission</b> button</li>
-                                                <li>Select the <b>View/Edit Sign Off Status of this Study</b> option</li>
-                                                <li>Add a note in the Notes box (optional)</li>
-                                                <li>Click the <b>Click Here to Sign Off on this Study</b> button</li>
+                                                <li>Select the <b>Change Study Access</b> option</li>
+                                                <li>Add/Remove
+                                                    <span class="gse0">{{ glossary_dict.collaboratorgroup_term }}s</span> and/or
+                                                    <span class="gse0">{{ glossary_dict.accessgroup_term }}s</span>
+                                                </li>
+                                                <li>Click the <b>Submit</b> button to save</li>
                                             </ul>
                                         </li>
                                     </ul>
@@ -3145,19 +3162,16 @@
                                     <h1 class="h1-level-2">View/Edit Sign Off Status of this Study</h1>
                                         <span class="gse0">{{ glossary_dict.studysignoff_def|linebreaks }}</span>
 
-                                        <span class="gse0">{{ glossary_dict.datagroupadministrator_term }}s</span>
-                                        can sign-off a Study in their
-                                        <span class="gse0">{{ glossary_dict.datagroup_term }}</span>.
-                                    <br><br>
-
                                     <ul class="list-unstyled">
                                         <li>To sign-off a Study:
                                             <ul class="help-filled-circle">
                                                 <li>Go to the Study of interest</li>
                                                 <li>Click on the <b>Sign Off/Permission</b> button</li>
                                                 <li>Select the <b>View/Edit Sign Off Status of this Study</b> option</li>
+                                                <li>Add a Release Date (if left null, Study will remain private unless part of the TCTC project)</li>
                                                 <li>Add a note in the Notes box (optional)</li>
                                                 <li>Click the <b>Click Here to Sign Off on this Study</b> button</li>
+                                                <li>Click the <b>Submit</b> button to save</li>
                                             </ul>
                                         </li>
                                         <br>
@@ -3184,10 +3198,29 @@
                                                 </li>
                                                 <li>After
                                                     <span class="gse0">{{ glossary_dict.studysignoff_term }}</span>
-                                                    there is basically no difference between a
-                                                    <span class="gse0">{{ glossary_dict.collaboratorgroup_term }}</span>
-                                                    and an
-                                                    <span class="gse0">{{ glossary_dict.accessgroup_term }}</span>
+                                                    <span class="gse0">{{ glossary_dict.collaboratorgroup_term }}s</span>
+                                                    will function like
+                                                    <span class="gse0">{{ glossary_dict.accessgroup_term }}s</span>
+                                                    (members o
+                                                    <span class="gse0">{{ glossary_dict.collaboratorgroup_term }}s</span>
+                                                    will still be able to see the Study data)
+                                                </li>
+                                                <li>
+                                                    <span class="gse0">{{ glossary_dict.datagroupadministrator_term }}s</span>
+                                                    can change the
+                                                    <span class="gse0">{{ glossary_dict.collaboratorgroup_term }}s</span> and/or
+                                                    <span class="gse0">{{ glossary_dict.accessgroup_term }}s</span> and/or
+                                                    the Release Date before AND after
+                                                    <span class="gse0">{{ glossary_dict.studysignoff_term }}</span>
+                                                </li>
+                                                <li>Change/Set the Release Date to the current date to open the Study on the following day</li>
+                                                <li>If a needed
+                                                    <span class="gse0">{{ glossary_dict.datagroup_term }}</span>
+                                                    if not available in the list of
+                                                    <span class="gse0">{{ glossary_dict.collaboratorgroup_term }}s</span> and/or
+                                                    <span class="gse0">{{ glossary_dict.accessgroup_term }}s</span>,
+                                                    contact an
+                                                    <span class="gse0">{{ glossary_dict.mpsdbadministrator_term }}</span>
                                                 </li>
                                             </ul>
                                         </li>
