@@ -201,8 +201,7 @@ $(document).ready(function () {
             //same as $('#glossary_table_filter').children().children()[0];
             //same as $('#glossary_table_filter :input');
 
-            $('#glossary_table_filter :input').val(searchTerm);
-            $('#glossary_table_filter :input').trigger('input');
+            $('#glossary_table_filter :input').val(searchTerm).trigger('input');
 
             // another option, but have to to through all the inputs and is much longer....
             // var glossary_search_box = null;
@@ -213,7 +212,7 @@ $(document).ready(function () {
             //         glossary_search_box.trigger('input');
             //     }
             // });
-            
+
             if ($results.length == 0) {
                 // alert('Could not find a match in the main body of the help. Try searching the Glossary.');
                 animate_scroll_hash('#glossary');
