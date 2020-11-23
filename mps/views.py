@@ -300,3 +300,7 @@ def mps_about(request):
 # TODO Consider defining this in URLS or either bringing the rest here
 class UnderConstruction(TemplateView):
     template_name = 'under_construction.html'
+
+
+class APIPrimer(TemplateView):
+    template_name = 'api_primer.html'
