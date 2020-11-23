@@ -2224,6 +2224,35 @@ class AssayStudyFormAdmin(BootstrapForm):
         if data.get('pbpk_bolus', '') and (not data.get('number_of_relevant_cells', '') or not data.get('total_device_volume', '')):
             raise forms.ValidationError('Bolus PBPK Requires Number of Cells Per MPS Model and Total Device Volume')
 
+        return data
+
+
+class AssayStudyAccessForm(forms.ModelForm):
+    """Form for changing access to studies"""
+    def __init__(self, *args, **kwargs):
+        super(AssayStudyAccessForm, self).__init__(*args, **kwargs)
+
+        # NEED A MORE ELEGANT WAY TO GET THIS
+        first_center = self.instance.group.center_groups.first()
+
+        groups_without_repeat = Group.objects.filter(
+            id__in=first_center.accessible_groups.all().values_list('id', flat=True),
+        ).order_by(
+            'name'
+        ).exclude(
+            id=self.instance.group.id
+        )
+
+        self.fields['access_groups'].queryset = groups_without_repeat
+        self.fields['collaborator_groups'].queryset = groups_without_repeat
+
+    class Meta(object):
+        model = AssayStudy
+        fields = (
+            'collaborator_groups',
+            'access_groups',
+        )
+
 
 class AssayStudySupportingDataForm(BootstrapForm):
     class Meta(object):
@@ -3293,7 +3322,11 @@ class AssayStudyDeleteForm(forms.ModelForm):
 class AssayStudySignOffForm(SignOffMixin, BootstrapForm):
     class Meta(object):
         model = AssayStudy
-        fields = ['signed_off', 'signed_off_notes']
+        fields = [
+            'signed_off',
+            'signed_off_notes',
+            'release_date',
+        ]
         widgets = {
             'signed_off_notes': forms.Textarea(attrs={'cols': 50, 'rows': 2}),
         }
@@ -3409,7 +3442,7 @@ class AssayStudySetForm(SignOffMixin, BootstrapForm):
         study_queryset = get_user_accessible_studies(
             self.user
         ).prefetch_related(
-            'group__microphysiologycenter_set',
+            'group__center_groups',
         )
         assay_queryset = AssayStudyAssay.objects.filter(
             study_id__in=study_queryset.values_list('id', flat=True)
