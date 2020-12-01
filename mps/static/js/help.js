@@ -374,6 +374,7 @@ $(document).ready(function () {
 
                 '#compounds-compound-list': '#help_chemical_data',
                 'bioactivities/table/#filter': '#help_bioactivities',
+                '#bioactivities-table': '#help_bioactivities',
                 '#drugtrial_list': '#help_drug_trials',
                 '#adverse_events_list': '#help_adverse_events',
                 '#compare_adverse_events': '#help_compare_adverse_events',
@@ -389,6 +390,7 @@ $(document).ready(function () {
                 '#assays-assaystudy-update-assays': '#help_target_and_method',
                 '#assays-assaystudy-data-index': '#help_data_upload',
                 '#assays-assaystudy-sign-off': '#help_study_signoff',
+                '#assays-editable-study-list': '#help_overview_organization',
                 '#assays-assaystudy-list': '#help_overview_organization',
                 '#assays-assaystudy-index': '#help_overview_organization',
             };
