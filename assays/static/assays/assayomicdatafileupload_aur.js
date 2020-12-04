@@ -230,8 +230,14 @@ $(document).ready(function () {
         }
     });
 
+    $(document).on('click', '#add_row_to_indy_table', function() {
+        // may want to keep track in the number of samples - thing about how to keep track and redraw the table or add a row to the table...
+    });
+
     $(document).on('click', '#clear_highlights_indy_table', function() {
         $('.special-selected1').removeClass('special-selected1')
+        page_drag_action = null;
+        sample_metadata_replace_show_hide();
     });
 
     // a default is not set, user has to pick one
@@ -241,7 +247,8 @@ $(document).ready(function () {
             page_drag_action = $(this).val();
             sample_metadata_replace_show_hide();
         } else {
-            this.checked = false;
+            page_drag_action = null;
+            sample_metadata_replace_show_hide();
             alert("No cells in the Sample Metadata Table have been highlighted. Drag over cells to select them.\n");
         }
     });
@@ -253,6 +260,12 @@ $(document).ready(function () {
         $('.copys-section').hide();
         $('.pastes-section').hide();
 
+        if (!page_drag_action) {
+            $('#radio_replace').prop('checked', false);
+            $('#radio_empty').prop('checked', false);
+            $('#radio_copys').prop('checked', false);
+            $('#radio_pastes').prop('checked', false);
+        } else
         if (page_drag_action === 'replace') {
             $('.replace-section').show();
         } else if (page_drag_action === 'empty') {
@@ -270,13 +283,13 @@ $(document).ready(function () {
     // make sure order is parallel to form field indy_list_of_keys
     var metadata_headers = [
         'Options',
-        'Sample Name/ID (Column Header)',
+        'Sample Name',
         'MPS Model Name',
-        'Sample Location Name',
+        'Sample Location',
+        'Assay Well Name',
         'Sample Time (Day)',
         'Sample Time (Hour)',
         'Sample Time (Minute)',
-        'Assay Plate Label',
         'sample_metadata_pk',
         'matrix_item_pk',
         'sample_location_pk',
@@ -457,6 +470,7 @@ $(document).ready(function () {
 
     function selectableDragOnSampleMetadataTable() {
         $('.ui-selected').addClass('special-selected1')
+        //todo may want to get a list of the fields and grey out and empty those that were not highlighted - for replace
         console.log("calling a drag on")
     //    todo here here if the sample name is changed, redo the data points.... get the flag
     }

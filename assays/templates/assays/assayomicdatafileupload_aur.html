@@ -341,14 +341,25 @@
                 {% if update or add %}
                     <div class="h1-level-2"><em>Instructions:</em></div>
                     <div class="number-samples">
-                        <ul style="list-style-type:circle">
+                        <ul class="help-filled-circle">
                             <li class="h1-level-2">Enter # samples in upload file (# rows for Sample Metadata Table)</li>
                         </ul>
+                        (Notes: 1) Highlighting is cumulative, 2) Only highlighted cells will be replaced, 3) Use Column visibility to simplify highlighting, 4) If table is paginated, only work with one page at a time, 5) Highlight the same rows in each of the selected columns for each replace)</li>
+
                         {% include "generic_field.html" with field=form.indy_number_of_samples %}
                     </div>
 
-                    <ul style="list-style-type:circle">
-                        <li class="h1-level-2">Select/Drag in Sample Metadata Table to select cells to copy, clear/remove, or replace content</li>
+                    <ul class="help-filled-circle">
+                        <li class="h1-level-2">Select/Drag in Sample Metadata Table to select cells
+                            <br><br>Tips:
+                            <ul class="help-open-circle">
+                                <li>The Sample Name MUST match, exactly, the header of the column of the upload file</li>
+                                <li>Highlighting is cumulative and only highlighted cells will be replaced</li>
+                                <li>Use Column visibility to simplify highlighting</li>
+                                <li>If table is paginated, only work with one page at a time</li>
+                                <li>Highlight the same rows in each of the selected columns for each replace</li>
+                            </ul>
+                        </li>
                     </ul>
 
                 {% endif %}
@@ -378,7 +389,7 @@
                 </div>
 
                 {% if update or add %}
-                    <ul style="list-style-type:circle">
+                    <ul class="help-filled-circle">
                         <li class="h1-level-2">Select action to apply to highlighted text</li>
                     </ul>
                     <div class="row">
@@ -406,10 +417,9 @@
                     </div>
 
                     <div class="replace-section">
-                        <ul style="list-style-type:circle">
-                            <li class="h1-level-2">Check the box(es) of the fields to change</li>
+                        <ul class="help-filled-circle">
                             <li class="h1-level-2">Select the content for the replace</li>
-                            <li class="h1-level-2">Select Copy or Increment</li>
+                            <li class="h1-level-2">Select Copy/Duplicate or Increment option</li>
                         </ul>
 
                         <br>
@@ -421,9 +431,9 @@
                                 <div class="row column-section-padding">
                                     <table>
                                         <tr>
-                                            <td class="left-pad">
-                                                <input class="big-checkbox" id="checkbox_sample_name" type="checkbox" name="change_sample_name" value="sample_name">
-                                            </td>
+{#                                            <td class="left-pad">#}
+{#                                                <input class="big-checkbox" id="checkbox_sample_name" type="checkbox" name="change_sample_name" value="sample_name">#}
+{#                                            </td>#}
                                             <td>
                                                 <div class="left-pad"><p id="sample_name_tooltip"></p>
                                                     <label for="sample_name_tooltip">Sample Name &nbsp;</label>
@@ -443,12 +453,12 @@
                                 <div class="row column-section-padding">
                                     <table>
                                         <tr>
-                                            <td class="left-pad">
-                                                <input class="big-checkbox" id="checkbox_matrix_item" type="checkbox" name="change_matrix_item" value="matrix_item" >
-                                            </td>
+{#                                            <td class="left-pad">#}
+{#                                                <input class="big-checkbox" id="checkbox_matrix_item" type="checkbox" name="change_matrix_item" value="matrix_item" >#}
+{#                                            </td>#}
                                             <td class="left-pad">
                                                 <div><p id="sample_matrix_item_tooltip"></p>
-                                                    <label for="sample_matrix_item_tooltip">Chip/Well Name &nbsp;</label>
+                                                    <label for="sample_matrix_item_tooltip">MPS Model Name &nbsp;</label>
                                                 </div>
                                             </td>
                                         </tr>
@@ -465,9 +475,9 @@
                                 <div class="row column-section-padding">
                                     <table>
                                         <tr>
-                                            <td class="left-pad">
-                                                <input class="big-checkbox" id="checkbox_location" type="checkbox" name="change_location" value="location" >
-                                            </td>
+{#                                            <td class="left-pad">#}
+{#                                                <input class="big-checkbox" id="checkbox_location" type="checkbox" name="change_location" value="location" >#}
+{#                                            </td>#}
                                             <td class="left-pad">
                                                 <div><p id="sample_location_tooltip"></p>
                                                     <label for="sample_location_tooltip">Sample Location &nbsp;</label>
@@ -487,9 +497,9 @@
                                 <div class="row column-section-padding">
                                     <table>
                                         <tr>
-                                            <td class="left-pad">
-                                                <input class="big-checkbox" id="checkbox_assay_well_name" type="checkbox" name="change_assay_well_name" value="assay_well_name" >
-                                            </td>
+{#                                            <td class="left-pad">#}
+{#                                                <input class="big-checkbox" id="checkbox_assay_well_name" type="checkbox" name="change_assay_well_name" value="assay_well_name" >#}
+{#                                            </td>#}
                                             <td class="left-pad">
                                                 <div><p id="assay_well_name_tooltip"></p>
                                                     <label for="assay_well_name_tooltip">Assay Well Name &nbsp;</label>
@@ -514,9 +524,9 @@
                                 <div class="row column-section-padding">
                                     <table>
                                         <tr>
-                                            <td class="left-pad">
-                                                <input class="big-checkbox" id="checkbox_sample_time_day" type="checkbox" name="change_sample_time_day" value="assay_sample_time_day" >
-                                            </td>
+{#                                            <td class="left-pad">#}
+{#                                                <input class="big-checkbox" id="checkbox_sample_time_day" type="checkbox" name="change_sample_time_day" value="assay_sample_time_day" >#}
+{#                                            </td>#}
                                             <td class="left-pad">
                                                 <div><p id="sample_time_day_tooltip"></p>
                                                     <label for="sample_time_day_tooltip">Sample Time (Day) &nbsp;</label>
@@ -536,9 +546,9 @@
                                 <div class="row column-section-padding">
                                     <table>
                                         <tr>
-                                            <td class="left-pad">
-                                                <input class="big-checkbox" id="checkbox_sample_time_hour" type="checkbox" name="change_sample_time_hour" value="assay_sample_time_hour" >
-                                            </td>
+{#                                            <td class="left-pad">#}
+{#                                                <input class="big-checkbox" id="checkbox_sample_time_hour" type="checkbox" name="change_sample_time_hour" value="assay_sample_time_hour" >#}
+{#                                            </td>#}
                                             <td class="left-pad">
                                                 <div><p id="sample_time_hour_tooltip"></p>
                                                     <label for="sample_time_hour_tooltip">Sample Time (Hour) &nbsp;</label>
@@ -558,9 +568,9 @@
                                 <div class="row column-section-padding">
                                     <table>
                                         <tr>
-                                            <td class="left-pad">
-                                                <input class="big-checkbox" id="checkbox_sample_time_minute" type="checkbox" name="change_sample_time_minute" value="assay_sample_time_minute" >
-                                            </td>
+{#                                            <td class="left-pad">#}
+{#                                                <input class="big-checkbox" id="checkbox_sample_time_minute" type="checkbox" name="change_sample_time_minute" value="assay_sample_time_minute" >#}
+{#                                            </td>#}
                                             <td class="left-pad">
                                                 <div><p id="sample_time_minute_tooltip"></p>
                                                     <label for="sample_time_minute_tooltip">Sample Time (Minute) &nbsp;</label>
@@ -604,7 +614,7 @@
                         <div class="increment-section">
                             <div class="row">
                                 <div class="col-md-5">
-                                    <ul style="list-style-type:circle">
+                                    <ul class="help-filled-circle">
                                         <li class="h1-level-2">Enter amount of increment</li>
                                     </ul>
                                 </div>
@@ -620,7 +630,7 @@
                         <br>
                         <div class="row">
                             <div class="col-md-6">
-                                <ul style="list-style-type:circle">
+                                <ul class="help-filled-circle">
                                     <li class="h1-level-2">Click the Replace Content button to update the table</li>
                                 </ul>
                             </div>
@@ -632,19 +642,19 @@
                     </div>
 
                     <div class="empty-section">
-                        <ul style="list-style-type:circle">
+                        <ul class="help-filled-circle">
                             <li class="h1-level-2">Confirm the content from the selected cells have been removed</li>
                         </ul>
                     </div>
 
                     <div class="copys-section">
-                        <ul style="list-style-type:circle">
+                        <ul class="help-filled-circle">
                             <li class="h1-level-2">FYI - The highlighted content has been copied and is ready for pasting</li>
                         </ul>
                     </div>
 
                     <div class="pastes-section">
-                        <ul style="list-style-type:circle">
+                        <ul class="help-filled-circle">
                             <li class="h1-level-2">Click in the row where copied content is to be pasted</li>
                         </ul>
                     </div>
