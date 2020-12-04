@@ -75,29 +75,6 @@
                 {% include "errors.html" %}
             </div>
 
-{#            {% if form.errors %}#}
-{#                {% for field in form %}#}
-{#                    {% if field.errors %}#}
-{#                        {% for error in field.errors %}#}
-{#                            <div id="form_errors" class="alert alert-danger" role="alert">#}
-{#                                <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>#}
-{#                                <span class="sr-only">Error:</span>#}
-{#                                {{field.label}}: {{error}}#}
-{#                            </div>#}
-{#                        {% endfor %}#}
-{#                    {% endif %}#}
-{#                {% endfor %}#}
-{#            {% endif %}#}
-{#            {% if form.non_field_errors %}#}
-{#                <div id="non_form_errors" class="alert alert-danger" role="alert">#}
-{#                    <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>#}
-{#                    <span class="sr-only">Error:</span>#}
-{#                    {{ form.non_field_errors }}#}
-{#                    form.errors<br>#}
-{#                    {{ form.errors }}<br>#}
-{#                </div>#}
-{#            {% endif %}#}
-
             {# main #}
 {#            <div class="container">   NO CONTAINERs   #}
             {# pass to js file need for use in js #}
@@ -113,6 +90,9 @@
                 </div>
                 <div class="hidden" id="show_hide_graph">
                     hide
+                </div>
+                <div class="hidden" id="check_load">
+                    {{ page_called }}
                 </div>
             </div>
 
@@ -137,7 +117,7 @@
 {#                                <br>#}
                             <b>Acceptable Formats: Excel and CSV. </b>
                         </div>
-                        <button type="button" class="btn" id="fileFormatDetailsButton">File Format Details</button>
+                        <button type="button" class="btn btn-info" id="fileFormatDetailsButton">File Format Details</button>
                         <br>
                         <div class="toggle-display-none" id="omic_file_format_details_section">
                             <div class="row">
@@ -151,59 +131,45 @@
                                 <div class="col-sm-8">
                                     <div class="plate-map-page-field-contents-medium">
 {#                                            Downloadable template in development.#}
-                                        <button type="button" class="btn" id="fileFileFormatTwoGroup">Download Two Group File Format (Headers Only)</button>
+                                        <button type="button" class="btn btn-info" id="fileFileFormatTwoGroup">Download Two Group File Format (Headers Only)</button>
                                     </div>
                                 </div>
                             </div>
 
-{#                            <div class="row">#}
-{#                                <div class="col-sm-4">#}
-{#                                    <div>#}
-{#                                        <div><p id="omic_file_format_normcounts_tooltip"></p>#}
-{#                                            <label for="omic_file_format_normcounts_tooltip">Normalized Count Files &nbsp;</label>#}
-{#                                        </div>#}
-{#                                    </div>#}
-{#                                </div>#}
-{#                                <div class="col-sm-8">#}
-{#                                    <div class="plate-map-page-field-contents-medium">#}
-{#                                            Downloadable template in development.#}
-{#                                        <button type="button" class="btn" id="fileFileFormatTwoGroup">Download Two Group File Format (Headers Only)</button>#}
-{#                                    </div>#}
-{#                                </div>#}
-{#                            </div>#}
-{#                            <div class="row">#}
-{#                                <div class="col-sm-4">#}
-{#                                    <div>#}
-{#                                        <div><p id="omic_file_format_rawcounts_tooltip"></p>#}
-{#                                            <label for="omic_file_format_rawcounts_tooltip">Raw Count Files &nbsp;</label>#}
-{#                                        </div>#}
-{#                                    </div>#}
-{#                                </div>#}
-{#                                <div class="col-sm-8">#}
-{#                                    <div class="plate-map-page-field-contents-medium">#}
-{#                                            Downloadable template in development.#}
-{#                                        <button type="button" class="btn" id="fileFileFormatTwoGroup">Download Two Group File Format (Headers Only)</button>#}
-{#                                    </div>#}
-{#                                </div>#}
-{#                            </div>#}
-
-{#                            <div><p id="omic_file_format_normcounts_tooltip"></p>#}
-{#                                <label for="omic_file_format_normcounts_tooltip">--  Normalized Count Files &nbsp;</label>#}
-{#                            </div>#}
-{##}
-{#                            <div><p id="omic_file_format_rawcounts_tooltip"></p>#}
-{#                                <label for="omic_file_format_rawcounts_tooltip">--  Raw Count Files &nbsp;</label>#}
-{#                            </div>#}
-
+                            <div class="row">
+                                <div class="col-sm-4">
+                                    <div>
+                                        <div><p id="omic_file_format_normcounts_tooltip"></p>
+                                            <label for="omic_file_format_normcounts_tooltip">Normalized Count Files &nbsp;</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-8">
+                                    <div class="plate-map-page-field-contents-medium">
+                                            Downloadable template in development.
+{#                                        <button type="button" class="btn btn-info" id="fileFileFormatTwoGroup">Download Two Group File Format (Headers Only)</button>#}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-4">
+                                    <div>
+                                        <div><p id="omic_file_format_rawcounts_tooltip"></p>
+                                            <label for="omic_file_format_rawcounts_tooltip">Raw Count Files &nbsp;</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-8">
+                                    <div class="plate-map-page-field-contents-medium">
+                                            Downloadable template in development.
+{#                                        <button type="button" class="btn btn-info" id="fileFileFormatTwoGroup">Download Two Group File Format (Headers Only)</button>#}
+                                    </div>
+                                </div>
+                            </div>
 
                         </div>
                     </div>
                 </div>
-                {% comment %}
-                {% if form.omic_data_file.errors %}
-                </div>
-                {% endif %}
-                {% endcomment %}
 
             {% else %}
                 <label class="col-sm-2 control-label" for="omic_data_file">Omic Data File*</label>
@@ -250,7 +216,7 @@
             {# groups #}
             <br>
 
-            <div class="two-groups">
+            <div class="two-group">
 
                 <div class="row">
                     <div class="col-md-2">
@@ -300,7 +266,7 @@
 
             </div>
 
-            <div class="two-groups">
+            <div class="two-group">
 
                 <div class="row">
                     <div class="col-md-2">
@@ -344,9 +310,8 @@
                     </div>
                 </div>
 
-
                 <div class="toggle-display-none" id="omic_preview_button_section">
-                    <button type="button" class="btn" id="omicPreviewTheGraphsButton">View Preview Graphs</button>
+                    <button type="button" class="btn btn-primary" id="omicPreviewTheGraphsButton">View Preview Graphs</button>
                 </div>
 
                 <div class="toggle-display-none" id="omic_preview_the_graphs_section">
@@ -359,6 +324,332 @@
                     </div>
 
                 </div>
+
+            </div>
+
+            <div class="indy-sample">
+
+                <div class="hidden">
+                    {# pass to js file need for use in js #}
+                    {{  form.indy_list_of_keys }}
+                    {# pass to js file need for use in js - this will be kept matcthing the table so can be passed back #}
+                    {{  form.indy_list_of_dicts }}
+                    {# pass to js file need for use in js - if the user adds or changes a sample id, this file should be true #}
+                    {% include "generic_field.html" with field=form.indy_flag_sample_name_change %}
+                </div>
+
+                {% if update or add %}
+                    <div class="h1-level-2"><em>Instructions:</em></div>
+                    <div class="number-samples">
+                        <ul style="list-style-type:circle">
+                            <li class="h1-level-2">Enter # samples in upload file (# rows for Sample Metadata Table)</li>
+                        </ul>
+                        {% include "generic_field.html" with field=form.indy_number_of_samples %}
+                    </div>
+
+                    <ul style="list-style-type:circle">
+                        <li class="h1-level-2">Select/Drag in Sample Metadata Table to select cells to copy, clear/remove, or replace content</li>
+                    </ul>
+
+                {% endif %}
+
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="for-sample-metadata-table">
+                            <h3>Sample Metadata Table</h3>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        {% if update or add %}
+                            <button type="button" class="btn btn-primary extra-top-margin" id="add_row_to_indy_table">Add Row to Table</button>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-2">
+                        {% if update or add %}
+                            <button type="button" class="btn btn-primary extra-top-margin" id="clear_highlights_indy_table">Clear Highlighting</button>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-4"></div>
+                </div>
+                <div id="div_for_sample_metadata_table" class="for-sample-metadata-table">
+                    {# <table id="sample_metadata_table" class="display table table-striped table-hover" cellspacing="0" width="100%">#}
+                    {#  note that the table (including the table tag) is made in javascript #}
+                    {# </table>#}
+                </div>
+
+                {% if update or add %}
+                    <ul style="list-style-type:circle">
+                        <li class="h1-level-2">Select action to apply to highlighted text</li>
+                    </ul>
+                    <div class="row">
+                        <div class="col-md-2">
+                            <div class="plate-map-page-field-labels-large">
+                                <div>
+                                    <div><p id="drag_use_tooltip"></p>
+                                        <label for="drag_use_tooltip">Action &nbsp;</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-10">
+                            <div class="plate-map-page-radio-contents">
+                                <label><input type="radio" class="plate-map-bigger-radio" name="radio_change_drag_action" value="replace" id="radio_replace">
+                                    <p class="plate-map-radio-spacing plate-map-no-wrap">Replace</p></label>
+                                <label><input type="radio" class="plate-map-bigger-radio" name="radio_change_drag_action" value="empty" id="radio_empty">
+                                    <p class="plate-map-radio-spacing plate-map-no-wrap">Remove/Empty</p></label>
+                                <label><input type="radio" class="plate-map-bigger-radio" name="radio_change_drag_action" value="copys" id="radio_copys">
+                                    <p class="plate-map-radio-spacing plate-map-no-wrap">Copy</p></label>
+                                <label><input type="radio" class="plate-map-bigger-radio" name="radio_change_drag_action" value="pastes" id="radio_pastes">
+                                    <p class="plate-map-radio-spacing plate-map-no-wrap">Paste</p></label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="replace-section">
+                        <ul style="list-style-type:circle">
+                            <li class="h1-level-2">Check the box(es) of the fields to change</li>
+                            <li class="h1-level-2">Select the content for the replace</li>
+                            <li class="h1-level-2">Select Copy or Increment</li>
+                        </ul>
+
+                        <br>
+
+                        {# pick sample metadata other than times #}
+                        <div class="row">
+
+                            <div class="col-md-3">
+                                <div class="row column-section-padding">
+                                    <table>
+                                        <tr>
+                                            <td class="left-pad">
+                                                <input class="big-checkbox" id="checkbox_sample_name" type="checkbox" name="change_sample_name" value="sample_name">
+                                            </td>
+                                            <td>
+                                                <div class="left-pad"><p id="sample_name_tooltip"></p>
+                                                    <label for="sample_name_tooltip">Sample Name &nbsp;</label>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </div>
+                                <div class="row column-section-padding">
+                                    <div class="extra-bottom-padding">
+                                        <input type="text" class="form-control" id="sample_name" name="sample_name" value="sample01">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-3">
+                                <div class="row column-section-padding">
+                                    <table>
+                                        <tr>
+                                            <td class="left-pad">
+                                                <input class="big-checkbox" id="checkbox_matrix_item" type="checkbox" name="change_matrix_item" value="matrix_item" >
+                                            </td>
+                                            <td class="left-pad">
+                                                <div><p id="sample_matrix_item_tooltip"></p>
+                                                    <label for="sample_matrix_item_tooltip">Chip/Well Name &nbsp;</label>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </div>
+                                <div class="row column-section-padding">
+                                     <div class="extra-bottom-padding">
+                                        {{ form.indy_matrix_item }}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-3">
+                                <div class="row column-section-padding">
+                                    <table>
+                                        <tr>
+                                            <td class="left-pad">
+                                                <input class="big-checkbox" id="checkbox_location" type="checkbox" name="change_location" value="location" >
+                                            </td>
+                                            <td class="left-pad">
+                                                <div><p id="sample_location_tooltip"></p>
+                                                    <label for="sample_location_tooltip">Sample Location &nbsp;</label>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </div>
+                                <div class="row column-section-padding">
+                                    <div class="extra-bottom-padding">
+                                        {{ form.indy_sample_location }}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-3">
+                                <div class="row column-section-padding">
+                                    <table>
+                                        <tr>
+                                            <td class="left-pad">
+                                                <input class="big-checkbox" id="checkbox_assay_well_name" type="checkbox" name="change_assay_well_name" value="assay_well_name" >
+                                            </td>
+                                            <td class="left-pad">
+                                                <div><p id="assay_well_name_tooltip"></p>
+                                                    <label for="assay_well_name_tooltip">Assay Well Name &nbsp;</label>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </div>
+                                <div class="row column-section-padding">
+                                    <div class="extra-bottom-padding">
+                                        <input type="text" class="form-control" id="assay_well_name" name="assay_well_name" value="A01">
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        {# pick sample times #}
+                        <div class="row">
+
+                            <div class="col-md-3">
+                                <div class="row column-section-padding">
+                                    <table>
+                                        <tr>
+                                            <td class="left-pad">
+                                                <input class="big-checkbox" id="checkbox_sample_time_day" type="checkbox" name="change_sample_time_day" value="assay_sample_time_day" >
+                                            </td>
+                                            <td class="left-pad">
+                                                <div><p id="sample_time_day_tooltip"></p>
+                                                    <label for="sample_time_day_tooltip">Sample Time (Day) &nbsp;</label>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </div>
+                                <div class="row column-section-padding">
+                                    <div class="extra-bottom-padding">
+                                        <input type="text" class="form-control" id="time_day" name="time_day" value="1">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-3">
+                                <div class="row column-section-padding">
+                                    <table>
+                                        <tr>
+                                            <td class="left-pad">
+                                                <input class="big-checkbox" id="checkbox_sample_time_hour" type="checkbox" name="change_sample_time_hour" value="assay_sample_time_hour" >
+                                            </td>
+                                            <td class="left-pad">
+                                                <div><p id="sample_time_hour_tooltip"></p>
+                                                    <label for="sample_time_hour_tooltip">Sample Time (Hour) &nbsp;</label>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </div>
+                                <div class="row column-section-padding">
+                                    <div class="extra-bottom-padding">
+                                        <input type="text" class="form-control" id="time_hour" name="time_hour" value="0">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-3">
+                                <div class="row column-section-padding">
+                                    <table>
+                                        <tr>
+                                            <td class="left-pad">
+                                                <input class="big-checkbox" id="checkbox_sample_time_minute" type="checkbox" name="change_sample_time_minute" value="assay_sample_time_minute" >
+                                            </td>
+                                            <td class="left-pad">
+                                                <div><p id="sample_time_minute_tooltip"></p>
+                                                    <label for="sample_time_minute_tooltip">Sample Time (Minute) &nbsp;</label>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </div>
+                                <div class="row column-section-padding">
+                                    <div class="extra-bottom-padding">
+                                        <input type="text" class="form-control" id="time_minute" name="time_minute" value="0">
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        {# copy or increment selection #}
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="plate-map-page-field-labels-small">
+                                    <div>
+                                        <div><p id="drag_action_tooltip"></p>
+                                            <label for="drag_action_tooltip">Copy or Increment &nbsp;</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-9">
+                                <div class="plate-map-page-radio-contents">
+                                    <label><input type="radio" class="plate-map-bigger-radio" name="radio_change_copy_increment" value="copy" checked>
+                                        <p class="plate-map-radio-spacing plate-map-no-wrap">Copy/Duplicate</p></label>
+                                    <label><input type="radio" class="plate-map-bigger-radio" name="radio_change_copy_increment" value="increment-ttb">
+                                        <p class="plate-map-radio-spacing plate-map-no-wrap">Increment Top to Bottom</p></label>
+                                    <label><input type="radio" class="plate-map-bigger-radio" name="radio_change_copy_increment" value="increment-btt">
+                                        <p class="plate-map-radio-spacing plate-map-no-wrap">Increment Bottom to Top</p></label>
+                                </div>
+                            </div>
+                        </div>
+                        {# increment value entry #}
+                        <div class="increment-section">
+                            <div class="row">
+                                <div class="col-md-5">
+                                    <ul style="list-style-type:circle">
+                                        <li class="h1-level-2">Enter amount of increment</li>
+                                    </ul>
+                                </div>
+                                <div class="col-md-7">
+                                    <div class="plate-map-no-wrap">
+                                        <label class="plate-map-no-wrap" for="increment_value">Increment:</label>
+                                        <input type="text" class="form-control plate-map-no-wrap" id="increment_value" name="increment_value" value="1">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <br>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <ul style="list-style-type:circle">
+                                    <li class="h1-level-2">Click the Replace Content button to update the table</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <button type="button" class="btn btn-primary" id="replace_in_indy_table">Replace Content</button>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="empty-section">
+                        <ul style="list-style-type:circle">
+                            <li class="h1-level-2">Confirm the content from the selected cells have been removed</li>
+                        </ul>
+                    </div>
+
+                    <div class="copys-section">
+                        <ul style="list-style-type:circle">
+                            <li class="h1-level-2">FYI - The highlighted content has been copied and is ready for pasting</li>
+                        </ul>
+                    </div>
+
+                    <div class="pastes-section">
+                        <ul style="list-style-type:circle">
+                            <li class="h1-level-2">Click in the row where copied content is to be pasted</li>
+                        </ul>
+                    </div>
+
+                {% endif %}
 
             </div>
 

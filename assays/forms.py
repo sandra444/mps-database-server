@@ -5195,6 +5195,88 @@ class AssayOmicDataFileUploadForm(BootstrapForm):
         # filename_only = os.path.basename(str(self.instance.omic_data_file))
         # self.fields['filename_only'].initial = filename_only
 
+        #indy-sample for the counts data
+        # if change these, check the order with the .js file column_table_headers
+        # make sure to leave _pk in the pk fields so they are excluded from the table in the .js file
+        # option also used to turn on an off including the duplicate button field
+        # (also uses day, hour, minute, sample, and well to set length of column in table, and item and location so no input field)
+        indy_list_of_keys = [
+            'options',
+            'sample_name',
+            'matrix_item_name',
+            'sample_location_name',
+            'day',
+            'hour',
+            'minute',
+            'assay_well_name',
+            'sample_metadata_pk',
+            'matrix_item_pk',
+            'sample_location_pk',
+            ]
+        self.fields['indy_list_of_keys'].initial = json.dumps(indy_list_of_keys)
+        self.fields['indy_flag_sample_name_change'].initial = False
+
+        list_of_defaults1 = [
+            '',
+            'sample20201105-01',
+            'chip1',
+            'efflux',
+            '1',
+            '0',
+            '0',
+            'A1',
+            '8',
+            '9',
+            '10'
+            ]
+        list_of_defaults2 = [
+            '',
+            'sample20201105-02',
+            'chip2',
+            'efflux',
+            '2',
+            '0',
+            '0',
+            'A1',
+            '8',
+            '9',
+            '10'
+            ]
+        list_of_defaults3 = [
+            '',
+            'sample20201105-03',
+            'chip3',
+            'efflux',
+            '1',
+            '0',
+            '0',
+            'A1',
+            '8',
+            '9',
+            '10'
+            ]
+        list_of_dicts = []
+
+        dict1 = {}
+        dict2 = {}
+        dict3 = {}
+        # make a default dict
+        # if this is an edit form, these lists will need initialized with what was previously saved
+        for index, each in enumerate(indy_list_of_keys):
+            dict1[each] = list_of_defaults1[index]
+            dict2[each] = list_of_defaults2[index]
+            dict3[each] = list_of_defaults3[index]
+        list_of_dicts.append(dict1)
+        list_of_dicts.append(dict2)
+        list_of_dicts.append(dict3)
+
+        # todo here here - need to get the real list of dicts
+        self.fields['indy_number_of_samples'].initial = len(list_of_dicts)
+
+        self.fields['indy_list_of_dicts'].initial = json.dumps(list_of_dicts)
+        self.fields['indy_matrix_item'].queryset = AssayMatrixItem.objects.filter(study_id=self.study).order_by('name', )
+        #indy-sample
+
     time_1_day = forms.DecimalField(
         required=False,
         label='Day'
@@ -5223,6 +5305,27 @@ class AssayOmicDataFileUploadForm(BootstrapForm):
     # filename_only = forms.CharField(
     #     required=False,
     # )
+
+    #indy-sample for the counts data
+    indy_list_of_dicts = forms.CharField(widget=forms.TextInput(), required=False,)
+    indy_list_of_keys = forms.CharField(widget=forms.TextInput(), required=False,)
+    indy_flag_sample_name_change = forms.BooleanField()
+
+    indy_number_of_samples = forms.DecimalField(
+        required=False,
+        label='Number of Samples'
+    )
+    indy_sample_location = forms.ModelChoiceField(
+        queryset=AssaySampleLocation.objects.all().order_by(
+            'name'
+        ),
+        required=False,
+    )
+    indy_matrix_item = forms.ModelChoiceField(
+        queryset=AssayMatrixItem.objects.none(),
+        required=False,
+    )
+    #indy-sample
 
     def clean(self):
         data = super(AssayOmicDataFileUploadForm, self).clean()

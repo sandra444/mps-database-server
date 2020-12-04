@@ -5104,6 +5104,7 @@ def omic_data_file_location(instance, filename):
 # this is for all omics files
 # we were going to separate into two group data and one group data
 # but the project PI strongly opposed this idea (he wanted all the files together)
+# if changes mind later, leave this for two group data and make a new one for count data without the group, time, and location metadata (since that will go in a separate table
 class AssayOmicDataFileUpload(LockableModel):
     """Assay omic data - usually export from a DEG tool."""
 
@@ -5186,7 +5187,7 @@ class AssayOmicDataFileUpload(LockableModel):
     #     verbose_name='Group 2*'
     # )
 
-    # data groups could be empty for the norm count and raw count data
+    # data groups WILL be empty for the norm count and raw count data
     # when they are visible on the form, they are required, so put the * here
     group_1 = models.ForeignKey(
         AssayGroup,
@@ -5206,7 +5207,7 @@ class AssayOmicDataFileUpload(LockableModel):
         help_text='Data Processing Reference Group',
         verbose_name='Reference Group*'
     )
-
+    # times WILL be empty for the norm count and raw count data
     time_1 = models.FloatField(
         default=0,
         null=True,
@@ -5221,7 +5222,7 @@ class AssayOmicDataFileUpload(LockableModel):
         help_text='Sample Time for the Reference Group',
         verbose_name='Reference Group Sample Time'
     )
-
+    # locations WILL be empty for the norm count and raw count data
     location_1 = models.ForeignKey(
         'AssaySampleLocation',
         null=True,
@@ -5231,6 +5232,16 @@ class AssayOmicDataFileUpload(LockableModel):
         help_text='Sample Location for the Test Group',
         verbose_name='Test Group Sample Location'
     )
+    location_2 = models.ForeignKey(
+        'AssaySampleLocation',
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+        related_name="location_2",
+        help_text='Sample Location for the Reference Group',
+        verbose_name='Reference Group Sample Location'
+    )
+    # for the counts data, store the number of samples in the table
     location_2 = models.ForeignKey(
         'AssaySampleLocation',
         null=True,
@@ -5253,7 +5264,7 @@ class AssayOmicDataFileUpload(LockableModel):
     def get_delete_url(self):
         return '{}delete/'.format(self.get_absolute_url())
 
-#
+# This is for the metadata when need to collect by individual sample
 # class AssayOmicSampleMetadata(models.Model):
 #     """Model for omic sample metadata associated to count data."""
 #
@@ -5265,14 +5276,24 @@ class AssayOmicDataFileUpload(LockableModel):
 #         on_delete=models.CASCADE,
 #         verbose_name='Study'
 #     )
+#     omic_data_file = models.ForeignKey(
+#         AssayOmicDataFileUpload,
+#         on_delete=models.CASCADE,
+#         verbose_name='Data File'
+#     )
+
 #     # sample id
 #     cross_reference = models.CharField(
 #         max_length=255,
 #         default='',
+#         help_text='The header for this sample used in the uploaded file - must match EXACTLY what is in the file',
 #         verbose_name='Cross Reference'
 #     )
 #
-#     # assay_well_id = models.CharField(max_length=255, default='N/A')
+#     # assay_well_id = models.CharField(
+#     max_length=255,
+#       help_text='If this is a well plate assay, and they assay well ID is known, put it here (could be the same as the sample id)',
+#     default='unspecified')
 #
 #     matrix_item = models.ForeignKey(
 #         'assays.AssayMatrixItem',
@@ -5295,16 +5316,14 @@ class AssayOmicDataFileUpload(LockableModel):
 #     def __str__(self):
 #         return '{0}'.format(self.id)
 
-
+# for the two group data points
 class AssayOmicDataPoint(models.Model):
-    """Individual points of omic data """
+    """Individual points of omic data for two group data with metadata by group"""
 
     class Meta(object):
-        verbose_name = 'Assay Omic Data Point'
-        verbose_name_plural = 'Assay Omic Data Points'
+        verbose_name = 'Assay Omic Data Point (two group)'
+        verbose_name_plural = 'Assay Omic Data Points (two group)'
 
-    # this will be the study in which the user was sitting when they uploaded the data file
-    # in theory, it could be study_1 or study_2
     study = models.ForeignKey(
         'assays.AssayStudy',
         on_delete=models.CASCADE,
@@ -5322,11 +5341,11 @@ class AssayOmicDataPoint(models.Model):
         help_text='Gene or Probe ID',
         verbose_name='Name'
     )
-    # to a table with the header and analysis target
+    # to a table with the header and analysis target that is controlled by the admins
     analysis_target = models.ForeignKey(
         AssayOmicAnalysisTarget,
         on_delete=models.CASCADE,
-        help_text='Analysis Target',
+        help_text='Analysis Target (e.g., p-value, log2FoldChange, baseMean)',
         verbose_name='Analysis Target'
     )
 
@@ -5336,16 +5355,58 @@ class AssayOmicDataPoint(models.Model):
         verbose_name='Computed Value'
     )
 
-    # when doing the count data, need to add a link to metadata table, else will be null
-    # sample_metadata = models.ForeignKey(
-    #     AssayOmicSampleMetadata,
-    #     blank=True,
-    #     null=True,
-    #     on_delete=models.CASCADE,
-    #     verbose_name='Metadata'
-    # )
-
     def __str__(self):
         return '{0}'.format(self.id)
+
+# for the counts data points
+# class AssayOmicDataPointCounts(models.Model):
+#     """Individual points of omic data with individual sample metadata"""
+#
+#     class Meta(object):
+#         verbose_name = 'Assay Omic Data Point (counts)'
+#         verbose_name_plural = 'Assay Omic Data Points (counts)'
+#
+#     study = models.ForeignKey(
+#         'assays.AssayStudy',
+#         on_delete=models.CASCADE,
+#         verbose_name='This Study'
+#     )
+# do not actually need this, since have a link to the AssayOmicSampleMetadata, but will be easier for visualization if have it
+#     omic_data_file = models.ForeignKey(
+#         AssayOmicDataFileUpload,
+#         on_delete=models.CASCADE,
+#         verbose_name='Data File'
+#     )
+#
+#     sample_metadata = models.ForeignKey(
+#         AssayOmicSampleMetadata,
+#         blank=True,
+#         null=True,
+#         on_delete=models.CASCADE,
+#         verbose_name='Metadata'
+#     )
+#
+#     # this might be replaced later with a pk to a master table
+#     name = models.CharField(
+#         max_length=100,
+#         help_text='Gene or Probe ID',
+#         verbose_name='Name'
+#     )
+#     # to a table with the header and analysis target that is controlled by the admins
+#     analysis_target = models.ForeignKey(
+#         AssayOmicAnalysisTarget,
+#         on_delete=models.CASCADE,
+#         help_text='Analysis Target (e.g., Normalized Counts, Raw Counts',
+#         verbose_name='Analysis Target'
+#     )
+#
+#     value = models.FloatField(
+#         blank=True,
+#         null=True,
+#         verbose_name='Computed Value'
+#     )
+#
+#     def __str__(self):
+#         return '{0}'.format(self.id)
 
 ##### End Assay Omic Section - Phase 1 and 2 design
