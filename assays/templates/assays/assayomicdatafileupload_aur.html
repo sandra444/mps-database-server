@@ -355,8 +355,7 @@
                             <ul class="help-open-circle">
                                 <li>The Sample Name MUST match, exactly, the header of the column of the upload file</li>
                                 <li>Highlighting is cumulative and only highlighted cells will be replaced</li>
-                                <li>Use Column visibility to simplify highlighting</li>
-                                <li>If table is paginated, only work with one page at a time</li>
+                                <li>Use Column visibility, Search, and/or column sorting to simplify highlighting</li>
                                 <li>Highlight the same rows in each of the selected columns for each replace</li>
                             </ul>
                         </li>
@@ -387,6 +386,7 @@
                     {#  note that the table (including the table tag) is made in javascript #}
                     {# </table>#}
                 </div>
+                <br>
 
                 {% if update or add %}
                     <ul class="help-filled-circle">
@@ -419,10 +419,7 @@
                     <div class="replace-section">
                         <ul class="help-filled-circle">
                             <li class="h1-level-2">Select the content for the replace</li>
-                            <li class="h1-level-2">Select Copy/Duplicate or Increment option</li>
                         </ul>
-
-                        <br>
 
                         {# pick sample metadata other than times #}
                         <div class="row">
@@ -589,6 +586,9 @@
                         </div>
 
                         {# copy or increment selection #}
+                        <ul class="help-filled-circle">
+                            <li class="h1-level-2">Select Copy/Duplicate or Increment option</li>
+                        </ul>
                         <div class="row">
                             <div class="col-md-3">
                                 <div class="plate-map-page-field-labels-small">

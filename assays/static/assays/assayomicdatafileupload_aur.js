@@ -297,23 +297,24 @@ $(document).ready(function () {
     var indy_keys = JSON.parse($('#id_indy_list_of_keys').val());
     let table_order = [[0, "asc"], [1, "asc"], [2, "asc"], [3, "asc"], [4, "asc"], [5, "asc"] ];
     let table_column_defs = [
-        {"targets": [0], "visible": true,},
-        {"targets": [1], "visible": true,},
-        {"targets": [2], "visible": true,},
-        {"targets": [3], "visible": true,},
-        {"targets": [4], "visible": true,},
-
-        {"targets": [5], "visible": true,},
-        {"targets": [6], "visible": true,},
-        // {"targets": [7], "visible": true,},
-        // {"targets": [8], "visible": true,},
-        // {"targets": [9], "visible": true,},
-        // {"targets": [10], "visible": true,},
-
-        {responsivePriority: 1, targets: 0},
-        {responsivePriority: 2, targets: 1},
-        {responsivePriority: 3, targets: 2},
-        {responsivePriority: 4, targets: 3},
+        { width: 200, targets: 0 }
+        // {"targets": [0], "visible": true,},
+        // {"targets": [1], "visible": true,},
+        // {"targets": [2], "visible": true,},
+        // {"targets": [3], "visible": true,},
+        // {"targets": [4], "visible": true,},
+        //
+        // {"targets": [5], "visible": true,},
+        // {"targets": [6], "visible": true,},
+        // // {"targets": [7], "visible": true,},
+        // // {"targets": [8], "visible": true,},
+        // // {"targets": [9], "visible": true,},
+        // // {"targets": [10], "visible": true,},
+        //
+        // {responsivePriority: 1, targets: 0},
+        // {responsivePriority: 2, targets: 1},
+        // {responsivePriority: 3, targets: 2},
+        // {responsivePriority: 4, targets: 3},
     ];
 
     function buildSampleMetadataTable(called_from) {
@@ -421,9 +422,9 @@ $(document).ready(function () {
         myTableDiv.appendChild(myTable);
 
         // When I did not have the var before the variable name, the table headers acted all kinds of crazy
-        // do not want the table to paginate, pick a big for display length
-        var sampleDataTable = $('#'+sample_metadata_table_id).DataTable({
-            "iDisplayLength": 100,
+        var sampleDataTable = $('#'+sample_metadata_table_id).removeAttr('width').DataTable({
+            // "iDisplayLength": 100,
+            paging:         false,
             "sDom": '<B<"row">lfrtip>',
             //do not do the fixed header here...only want for two of the tables
             //https://datatables.net/forums/discussion/30879/removing-fixedheader-from-a-table
@@ -431,7 +432,8 @@ $(document).ready(function () {
             fixedHeader: {headerOffset: 50},
             responsive: true,
             "order": table_order,
-            "columnDefs": table_column_defs
+            "columnDefs": table_column_defs,
+            fixedColumns: true
         });
 
         return myTable;
