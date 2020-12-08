@@ -78,7 +78,7 @@ $(document).ready(function () {
         ]
     var indy_keys = JSON.parse($('#id_indy_list_of_keys').val());
     // make a cross reference to the html dom name
-    // todo deal with the name/pk issue
+    // todo deal with the name/pk issue this affects many places
     var ikey_to_html_replace = {};
     $.each(indy_keys, function (index, ikey) {
         if (index === 1) {
@@ -844,7 +844,7 @@ $(document).ready(function () {
         buildSampleMetadataTable();
         afterBuildSampleMetadataTable();
         whatIsCurrentlyHighlightedInTheIndyTable();
-        //todo make the form field what is curently in the table!!!IMPORTANT!!!
+        $('#id_indy_list_of_dicts').val(JSON.stringify(metadata_lod));
     }
 
     // START - The functions that change the indy sample metadata table
@@ -966,8 +966,7 @@ $(document).ready(function () {
             // do not forget to subtract the header row
             // this is the copy
             metadata_lod[tirow-1][tikey] = $('#'+ikey_to_html_replace[tikey]).val();
-            // todo build the increment
-            // todo
+            // todo build the increment include dealing with pk and names
         }
         sameChangesToTableFromEmptyReplaceGoAndPaste();
     }
