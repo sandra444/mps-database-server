@@ -97,6 +97,9 @@
                 <div class="hidden">
                     {{ form.indy_sample_metadata_table_was_changed }}
                 </div>
+                <div class="hidden">
+                    {{  form.indy_sample_metadata_field_header_was_changed }}
+                </div>
             </div>
 
             {# The div will not match, so just make this comment for the error section  #}
@@ -369,15 +372,40 @@
 
                     <div class="indy-instructions">
                         <div class="h1-level-2"><em>Instructions:</em></div>
+                    </div>
+
+                    <div class="indy-instructions">
                         <div class="number-samples">
                             <ul class="help-filled-circle">
                                 <li class="h1-level-2">Enter # samples in upload file (# rows for Sample Metadata Table)</li>
                             </ul>
-                            (Notes: 1) Highlighting is cumulative, 2) Only highlighted cells will be replaced, 3) Use Column visibility to simplify highlighting, 4) If table is paginated, only work with one page at a time, 5) Highlight the same rows in each of the selected columns for each replace)</li>
-
-                            {% include "generic_field.html" with field=form.indy_number_of_samples %}
                         </div>
+                    </div>
+                    <div class="number-samples">
+                        <br>
+                        <div class="row">
+                            <div class="col-sm-2">
+                                <div class="plate-map-page-field-labels-small">
+                                    <div>
+                                        <div><p ></p>
+                                            <label >Number of Samples &nbsp;</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-2">
+                                <div class="plate-map-page-field-contents-small">
+                                    {{ form.indy_number_of_samples }}
+                                </div>
+                            </div>
+                            <div class="col-sm-2">
+                                <button type="button" class="btn btn-default">Go</button>
+                            </div>
+                            <div class="col-sm-6"></div>
+                        </div>
+                    </div>
 
+                    <div class="indy-instructions">
                         <ul class="help-filled-circle">
                             <li class="h1-level-2">Select/Drag in Sample Metadata Table to highlight cells
                                 <br><br>Tips:
@@ -385,7 +413,8 @@
                                     <li>Highlighting is cumulative</li>
                                     <li>When using Replace, only highlighted cells will be replaced</li>
                                     <li>When using Paste, if the paste cell is in the highlighted areas, the highlighted areas will be overwritten</li>
-                                    <li>Use Column visibility, Search, and/or column sorting to simplify highlighting</li>
+                                    <li>Use Column visibility, Search, and/or column sorting to simplify highlighting (e.g., if entering time in Days, hide Hour and Minute fields)</li>
+                                    <li>If times are missing, they will be set to 0 by default</li>
                                     <li>Empty rows will be removed on Submit</li>
                                     <li>Make sure rows are complete or there will be a Submit error (Assay Well Name is optional)</li>
                                 </ul>
@@ -409,7 +438,7 @@
                             <div class="plate-map-page-field-labels-large">
                                 <div>
                                     <div><p id="drag_use_tooltip"></p>
-                                        <label for="drag_use_tooltip">Action &nbsp;</label>
+                                        <label for="drag_use_tooltip">Table Action &nbsp;</label>
                                     </div>
                                 </div>
                             </div>
@@ -697,10 +726,17 @@
                             <h3>Sample Metadata Table</h3>
                         </div>
                     </div>
-                    <div id="undo_button_div" class="col-sm-1 toggle-display-none">
-                        <button type="button" class="btn btn-primary extra-top-margin" id="undoIndyUndoButton">Undo</button>
+                    <div class="col-sm-2">
+                        <div id="undo_button_div" class="col-sm-1 toggle-display-none">
+                            <button type="button" class="btn btn-primary extra-top-margin" id="undoIndyButton">Undo</button>
+                        </div>
                     </div>
-                    <div class="col-sm-7">
+                    <div class="col-sm-2">
+                        <div id="redo_button_div" class="col-sm-1 toggle-display-none">
+                            <button type="button" class="btn btn-primary extra-top-margin" id="redoIndyButton">Redo</button>
+                        </div>
+                    </div>
+                    <div class="col-sm-4">
 {#                        {% if update or add %}#}
 {#                            <button type="button" class="btn btn-primary extra-top-margin" id="add_row_to_indy_table">Add Row to Table</button>#}
 {#                        {% endif %}#}

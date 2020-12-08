@@ -5198,7 +5198,7 @@ class AssayOmicDataFileUploadForm(BootstrapForm):
         #indy-sample for the counts data
         # if change these, check the order with the .js file column_table_headers
         # make sure to leave _pk in the pk fields so they are excluded from the table in the .js file
-        # option also used to turn on an off including the duplicate button field
+        # option also used to turn on an off including the duplicate button field and sample_name
         # (also uses day, hour, minute, sample, and well to set length of column in table, and item and location so no input field)
         indy_list_of_keys = [
             'options',
@@ -5276,6 +5276,7 @@ class AssayOmicDataFileUploadForm(BootstrapForm):
         self.fields['indy_list_of_dicts'].initial = json.dumps(list_of_dicts)
         self.fields['indy_matrix_item'].queryset = AssayMatrixItem.objects.filter(study_id=self.study).order_by('name', )
         self.fields['indy_sample_metadata_table_was_changed'].initial = False
+        self.fields['indy_sample_metadata_field_header_was_changed'].initial = False
         #indy-sample
 
     time_1_day = forms.DecimalField(
@@ -5327,6 +5328,7 @@ class AssayOmicDataFileUploadForm(BootstrapForm):
         required=False,
     )
     indy_sample_metadata_table_was_changed = forms.BooleanField()
+    indy_sample_metadata_field_header_was_changed = forms.BooleanField()
     #indy-sample
 
     def clean(self):

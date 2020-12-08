@@ -32,9 +32,8 @@ $(document).ready(function () {
     let page_make_the_group_change = true;
 
     // indy sample stuff
-    var add_delete_and_duplicate_to_indy_table = true;
     var sample_metadata_table_id = 'sample_metadata_table';
-    //has the info for the indy metadata table been populated
+    //has the info for the indy metadata table been populated - use so only pull from initial form once
     var page_metadata_lod_done = false;
     var page_drag_action = null;
     var page_change_duplicate_increment = null;
@@ -43,18 +42,18 @@ $(document).ready(function () {
     //v number of the current one (should be 1, 2, 3, 4, or 5 after first population)
     var metadata_lod_current_index = 0;
     //for holding versions to allow for undo and redo
-    var metadata_lod_prev = [];
-    var metadata_lod_valid = [];
-    //the number of versions that were actually created by changing the TABLE (not the highlighting)
-    var metadata_lod_prev_index = 0;
+    var metadata_lod_cum = [];
     //the table that is highlighted
-    var metadata_highlighted_lod = [];
+    var metadata_highlighted_tirow = [];
+    var metadata_highlighted_ticol = [];
+    var metadata_highlighted_tikey = [];
+    var metadata_highlighted_content = [];
 
     // make sure order is parallel to form field indy_list_of_keys
     var metadata_headers = [
-        'Options',
+        'Row Options',
         'File Column Header',
-        'Chip/Well ID',
+        'Chip or Well ID',
         'Sample Location',
         'Assay Well Name (optional)',
         'Sample Time (Day)',
@@ -63,6 +62,19 @@ $(document).ready(function () {
         'sample_metadata_pk',
         'matrix_item_pk',
         'sample_location_pk',
+        ]
+    var include_header_in_indy_table = [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        0,
+        0,
         ]
     var indy_keys = JSON.parse($('#id_indy_list_of_keys').val());
     let table_order = [[0, "asc"], [1, "asc"], [2, "asc"], [3, "asc"], [4, "asc"], [5, "asc"] ];
@@ -299,7 +311,7 @@ $(document).ready(function () {
 
     $('#id_indy_number_of_samples').on('change', function (e) {
         number_samples_show_hide();
-        indyCalledToMakeTheEmptyTable();
+        indyCalledToMakeTheAnEmptyTableOfXrows();
     });
 
     $("input[type='radio'][name='radio_change_duplicate_increment']").click(function () {
@@ -311,10 +323,13 @@ $(document).ready(function () {
         }
     });
 
-    $(document).on('click', '#undoIndyUndoButton', function() {
-        indyClickedToUndoChangeToTable();
+    $(document).on('click', '#undoIndyButton', function() {
+        indyClickedToUndoRedoChangeToTable('undo');
     });
-
+    $(document).on('click', '#redoIndyButton', function() {
+        indyClickedToUndoRedoChangeToTable('redo');
+    });
+    
     $(document).on('click', '#add_row_to_indy_table', function() {
         // may want to keep track in the number of samples - thing about how to keep track and redraw the table or add a row to the table...
     });
@@ -322,6 +337,7 @@ $(document).ready(function () {
     $(document).on('click', '#clear_highlights_indy_table', function() {
         $('.special-selected1').removeClass('special-selected1')
         $('.special-selected2').removeClass('special-selected2')
+        whatIsCurrentlyHighlightedInTheIndyTable();
     });
 
     // a default is not set in the html file, so, user has to pick one
@@ -351,7 +367,7 @@ $(document).ready(function () {
         indyClickedToAddRow(add_button_clicked);
     });
     // clicked on an add row button in the indy table
-    $(document).on('delete', '.delete_indy_row', function () {
+    $(document).on('click', '.delete_indy_row', function () {
         let delete_button_clicked = $(this);
         indyClickedToDeleteRow(delete_button_clicked);
     });
@@ -530,10 +546,8 @@ $(document).ready(function () {
             if (!page_metadata_lod_done) {
                 // need to load metadata_lod the first time
                 metadata_lod = JSON.parse($('#id_indy_list_of_dicts').val());
-                metadata_lod_prev_index = 0;
                 metadata_lod_current_index = 0;
-                metadata_lod_valid = [];
-                metadata_lod_prev.push(metadata_lod);
+                metadata_lod_cum.push(JSON.parse(JSON.stringify(metadata_lod)));
                 page_metadata_lod_done = true;
             }
             indySampleMetadataCallBuildAndPost();
@@ -780,92 +794,199 @@ $(document).ready(function () {
         }
     }
 
-    function indySampleMetadataCallBuildAndPost() {
-        buildSampleMetadataTable();
-        afterBuildSampleMetadataTable();
-    }
- 
-    
-    // start the todo section
-    //    // use metadata_highlighted_lod
-    //             metadata_lod_prev_index = 0;
-    //             metadata_lod_current_index = 0;
-    //             metadata_lod_valid = [];
-    //             metadata_lod_prev.push(metadata_lod);
-    //             page_metadata_lod_done = true;
-
-    function indyClickedToUndoChangeToTable() {
-        if(metadata_lod_prev.length > 1) {
-            // there is another undo available
+    function indyUndoRedoButtonVisibilityCheck() {
+        var current_length_list = metadata_lod_cum.length;
+        // should a button show after whatever change brought you here
+        if (metadata_lod_current_index > 0) {
+            // yes, can undo another time
             $('#undo_button_div').show();
         } else {
             $('#undo_button_div').hide();
         }
-        metadata_lod_current_index = metadata_lod_current_index - 1;
 
-        
-//   const array = [2, 5, 9];
-//
-// console.log(array);
-//
-// const index = array.indexOf(5);
-// if (index > -1) {
-//   array.splice(index, 1);
-// }
-//
-// // array = [2, 9]
-// console.log(array);
-        
-        
+        if (metadata_lod_current_index < current_length_list-1) {
+            // yes, can undo another time
+            $('#redo_button_div').show();
+        } else {
+            $('#redo_button_div').hide();
+        }
+    }
 
-        if (metadata_lod_current_index < metadata_lod_prev_index) {
+    function indySampleMetadataCallBuildAndPost() {
+        indyUndoRedoButtonVisibilityCheck();
+        buildSampleMetadataTable();
+        afterBuildSampleMetadataTable();
+        whatIsCurrentlyHighlightedInTheIndyTable();
+        //todo make the form field what is curently in the table!!!IMPORTANT!!!
+    }
 
+    // START - The functions that change the indy sample metadata table
 
+    // ~~ The undo or redo button functions
+    //todo - maybe add some cleaning of the master list if it gets too big
+    function indyClickedToUndoRedoChangeToTable(which_do) {
+        var current_length_list = metadata_lod_cum.length;
+        // undo goes toward the 0 index, redo towards the length of the index
+        // the buttons should only be visible if the undo/redo is possible, but check before add/subtract
+        if (which_do === 'undo') {            
+            if (metadata_lod_current_index > 0) {
+                metadata_lod_current_index = metadata_lod_current_index - 1;
+            } else {
+                alert('No undo storage at the current time')
+            }
+        } else {
+            // which_do === 'redo'
+            if (metadata_lod_current_index < current_length_list-1) {
+                metadata_lod_current_index = metadata_lod_current_index + 1;
+            } else {
+                alert('No redo storage at the current time')
+            }
+        }
 
-        
+        metadata_lod = JSON.parse(JSON.stringify(metadata_lod_cum[metadata_lod_current_index]));
+        // assume that change flags happened when made the, ignore undo - no reversal of flags for undo for now
+        //     $('#id_indy_sample_metadata_table_was_changed').attr('checked',true);
+        //     $('#id_indy_sample_metadata_field_header_was_changed').attr('checked',true);
         indySampleMetadataCallBuildAndPost();
     }
 
-
-    // The functions that change the indy table
-    function indyCalledToMakeTheEmptyTable() {
-        $('#id_indy_sample_metadata_table_was_changed').attr('checked',true);
-        
-        indySampleMetadataCallBuildAndPost();
-    }    
-    
-    function indyCalledToPastes() {
-        $('#id_indy_sample_metadata_table_was_changed').attr('checked',true);
-        
-        indySampleMetadataCallBuildAndPost();
-    }
-    
-    function indyCalledToReplace() {
-        $('#id_indy_sample_metadata_table_was_changed').attr('checked',true);
-        
-        indySampleMetadataCallBuildAndPost();
-    }
-
-    function indyCalledToEmpty() {
-        $('#id_indy_sample_metadata_table_was_changed').attr('checked',true);
-
-        indySampleMetadataCallBuildAndPost();
-    }
-
+    // ~~ The row-wise buttons
     function indyClickedToAddRow(thisButton) {
-        $('#id_indy_sample_metadata_table_was_changed').attr('checked',true);
-        
-        indySampleMetadataCallBuildAndPost();
+        indyClickedAddOrDeleteRow(thisButton, 'add');
     }
 
     function indyClickedToDeleteRow(thisButton) {
-        $('#id_indy_sample_metadata_table_was_changed').attr('checked',true);
-    
-        indySampleMetadataCallBuildAndPost();
+        indyClickedAddOrDeleteRow(thisButton, 'delete');
     }
-    // end the to do section
+
+    function indyClickedAddOrDeleteRow(thisButton, add_or_delete) {
+        var thisRow = $(thisButton).attr("row-index");
+        var thisRowMinusHeader = thisRow-1;
+
+        //    todo - need to think about and plan for the pk in addition to the name of the chip and of the location!
+        var dictrow = metadata_lod[thisRowMinusHeader];
+        if (dictrow['sample_name'].length > 0) {
+            // check the row to see if it has a field header
+            $('#id_indy_sample_metadata_table_was_changed').attr('checked', true);
+            $('#id_indy_sample_metadata_field_header_was_changed').attr('checked', true);
+        } else {
+            // check the row to see if the whole row is empty
+            $.each(indy_keys, function (index, ikey) {
+                if (include_header_in_indy_table[index] === 1) {
+                    if (dictrow[ikey].length > 0) {
+                        $('#id_indy_sample_metadata_table_was_changed').attr('checked', true);
+                    }
+                }
+            });
+        }
+        if (add_or_delete === 'add') {
+            metadata_lod.push(dictrow);
+        } else {
+            metadata_lod.splice(thisRowMinusHeader, 1);
+        }
+
+        metadata_lod_cum.push(JSON.parse(JSON.stringify(metadata_lod)));
+        metadata_lod_current_index = metadata_lod_cum.length - 1;
+        indySampleMetadataCallBuildAndPost();
+        $('#id_indy_number_of_samples').val(metadata_lod.length);
+        number_samples_show_hide();
+    }
+
+    // ~~ Make a bunch of empty rows when sample row number is changed
+    function indyCalledToMakeTheAnEmptyTableOfXrows() {
+        // in the first make of the empty table, all rows will be empty, so, not data change occurred
+        // if rows were deleted until there were none, so that this option was available, the flags should have been flipped aready
+        //     $('#id_indy_sample_metadata_table_was_changed').attr('checked',true);
+        //     $('#id_indy_sample_metadata_field_header_was_changed').attr('checked',true);
+        if (metadata_lod.length === 0) {
+            var i;
+            for (i = 0; i < $('#id_indy_number_of_samples').val(); i++) {
+                var dict = {};
+                $.each(indy_keys, function (index, ikey) {
+                    if (include_header_in_indy_table[index] === 1) {
+                        dict[ikey] = null;
+                    }
+                });
+                metadata_lod.push(dict);
+            }
+            metadata_lod_cum.push(JSON.parse(JSON.stringify(metadata_lod)));
+            metadata_lod_current_index = metadata_lod_cum.length - 1;
+            indySampleMetadataCallBuildAndPost();
+            $('#id_indy_number_of_samples').val(metadata_lod.length);
+            number_samples_show_hide();
+        } else {
+            alert('Selecting the number of rows is only allowed when the table is empty.')
+        }
+        // nothing should be highlighted, but run it anyway
+    }
+
+    // ~~ The radio button change or change plus the go button/drag
+    function indyCalledToPastes() {
+        sameFrontMatterToTableFromEmptyReplaceGoAndPaste();
+        // todo get the correct metadata_lod
+        sameChangesToTableFromEmptyReplaceGoAndPaste();
+
+    }
     
-    
+    function indyCalledToReplace() {
+        sameFrontMatterToTableFromEmptyReplaceGoAndPaste();
+        // todo get the correct metadata_lod
+        sameChangesToTableFromEmptyReplaceGoAndPaste();
+    }
+
+    function indyCalledToEmpty() {
+        sameFrontMatterToTableFromEmptyReplaceGoAndPaste();
+        // todo get the correct metadata_lod
+        sameChangesToTableFromEmptyReplaceGoAndPaste();
+    }
+
+    function sameFrontMatterToTableFromEmptyReplaceGoAndPaste() {
+        whatIsCurrentlyHighlightedInTheIndyTable();
+        $('#id_indy_sample_metadata_table_was_changed').attr('checked',true);
+
+        if (metadata_highlighted_tikey.indexOf('sample_name') >= 0) {
+            $('#id_indy_sample_metadata_field_header_was_changed').attr('checked',true);
+        } else {
+            $('#id_indy_sample_metadata_field_header_was_changed').attr('checked',false);
+        }
+    }
+
+    function sameChangesToTableFromEmptyReplaceGoAndPaste() {
+        metadata_lod_cum.push(JSON.parse(JSON.stringify(metadata_lod)));
+        metadata_lod_current_index = metadata_lod_cum.length - 1;
+        indySampleMetadataCallBuildAndPost();
+        $('#id_indy_number_of_samples').val(metadata_lod.length);
+    }
+
+    function whatIsCurrentlyHighlightedInTheIndyTable() {
+        metadata_highlighted_tirow = [];
+        metadata_highlighted_ticol = [];
+        metadata_highlighted_tikey = [];
+        metadata_highlighted_content = [];
+        $('.special-selected1').each(function() {
+            metadata_highlighted_tirow.push($(this).attr("row-index"));
+            metadata_highlighted_ticol.push($(this).attr("col-index"));
+            metadata_highlighted_tikey.push($(this).attr("ikey"));
+            metadata_highlighted_content.push($(this).val());
+        });
+        // a special check to grey out replace content if field not in the ikey list
+        //     'sample_name',
+        //     'matrix_item_name',
+        //     'sample_location_name',
+        //     'assay_well_name',
+        //     'day',
+        //     'hour',
+        //     'minute',
+        //todo - add classing to other replace fields - watch the selectized and pk fields
+        if (metadata_highlighted_tikey.indexOf('sample_name') >= 0) {
+            $('#sample_name').addClass('special-selected1');
+        } else {
+            $('#sample_name').removeClass('special-selected1');
+        }
+
+    }
+
+    // END - The functions that change the indy table
     
     function selectableDragOnSampleMetadataTable() {
         if (page_drag_action === 'pastes') {
@@ -891,11 +1012,8 @@ $(document).ready(function () {
                 $(this).removeClass('ui-selected');
             });
         }
-
-        // $('.ui-selected').addClass('special-selected1')
-        //todo may want to get a list of the fields and grey out and empty those that were not highlighted - for replace
-        // console.log("calling a drag on")
-
+        // if keep this updated, can use to grey out replace fields that are not needed
+        whatIsCurrentlyHighlightedInTheIndyTable();
     }
 
     function buildSampleMetadataTable() {
@@ -919,29 +1037,33 @@ $(document).ready(function () {
         var hcolcounter = 0;
 
         $.each(metadata_headers, function (h_index, header) {
-            if (header.includes('_pk')) {
-                // do not put in the table
-            } else if (header.includes('ption')) {
-                if (add_delete_and_duplicate_to_indy_table && (page_omic_upload_check_load === 'add' || page_omic_upload_check_load === 'update')) {
+            ikey = indy_keys[h_index];
+            if (include_header_in_indy_table[h_index] === 1) {
+                if (header.includes('ption')) {
+                    if (page_omic_upload_check_load === 'add' || page_omic_upload_check_load === 'update') {
+                        var th = document.createElement('TH');
+                        $(th).attr('hcol-index', hcolcounter);
+                        $(th).attr('ikey', ikey);
+                        th.appendChild(document.createTextNode(header));
+                        tr.appendChild(th);
+                        hcolcounter = hcolcounter + 1;
+                    }
+                } else {
                     var th = document.createElement('TH');
                     $(th).attr('hcol-index', hcolcounter);
+                    $(th).attr('ikey', ikey);
+                    // this was how did with plate....$(th).html(colnumber + top_label_button);
                     th.appendChild(document.createTextNode(header));
                     tr.appendChild(th);
                     hcolcounter = hcolcounter + 1;
                 }
-            } else {
-                var th = document.createElement('TH');
-                $(th).attr('hcol-index', hcolcounter);
-                // this was how did with plate....$(th).html(colnumber + top_label_button);
-                th.appendChild(document.createTextNode(header));
-                tr.appendChild(th);
-                hcolcounter = hcolcounter + 1;
             }
         });
         myTable.appendChild(tableHead);
 
         var tableBody = document.createElement('TBODY');
-        var rowcounter = 0;
+        //the header row is 0, to keep consistent, start with 1, but watch when using the lod's
+        var rowcounter = 1;
 
         $.each(metadata_lod, function (r_index, row) {
 
@@ -953,16 +1075,15 @@ $(document).ready(function () {
             let myCellContent = '';
 
             $.each(indy_keys, function (c_index, ikey) {
-                if (ikey.includes('_pk')) {
-                    // do not add to the table
-                } else {
+                if (include_header_in_indy_table[c_index] === 1) {
                     var td = document.createElement('TD');
                     $(td).attr('col-index', colcounter);
                     $(td).attr('row-index', rowcounter);
                     $(td).attr('id-index', rowcounter * metadata_headers.length + colcounter);
+                    $(td).attr('ikey', ikey);
 
                     if (ikey.includes('ption') && colcounter === 0) {
-                        if (add_delete_and_duplicate_to_indy_table && (page_omic_upload_check_load === 'add' || page_omic_upload_check_load === 'update')) {
+                        if (page_omic_upload_check_load === 'add' || page_omic_upload_check_load === 'update') {
                             var side_label_button =
                                 ' <a class="add_indy_row" id="add_indy_row' + rowcounter
                                 + '" row-index="' + rowcounter
@@ -1023,7 +1144,7 @@ $(document).ready(function () {
             //https://datatables.net/forums/discussion/30879/removing-fixedheader-from-a-table
             //https://datatables.net/forums/discussion/33860/destroying-a-fixed-header
             fixedHeader: {headerOffset: 50},
-            responsive: true,
+            // responsive: true,
             "order": table_order,
             "columnDefs": table_column_defs,
             // fixedColumns: true
