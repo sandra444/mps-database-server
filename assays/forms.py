@@ -5275,6 +5275,7 @@ class AssayOmicDataFileUploadForm(BootstrapForm):
 
         self.fields['indy_list_of_dicts'].initial = json.dumps(list_of_dicts)
         self.fields['indy_matrix_item'].queryset = AssayMatrixItem.objects.filter(study_id=self.study).order_by('name', )
+        self.fields['indy_sample_metadata_table_was_changed'].initial = False
         #indy-sample
 
     time_1_day = forms.DecimalField(
@@ -5325,6 +5326,7 @@ class AssayOmicDataFileUploadForm(BootstrapForm):
         queryset=AssayMatrixItem.objects.none(),
         required=False,
     )
+    indy_sample_metadata_table_was_changed = forms.BooleanField()
     #indy-sample
 
     def clean(self):
