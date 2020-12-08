@@ -77,6 +77,33 @@ $(document).ready(function () {
         0,
         ]
     var indy_keys = JSON.parse($('#id_indy_list_of_keys').val());
+    // make a cross reference to the html dom name
+    // todo deal with the name/pk issue
+    var ikey_to_html_replace = {};
+    $.each(indy_keys, function (index, ikey) {
+        if (index === 1) {
+            ikey_to_html_replace[ikey] ='sample_name';
+        } else
+        if (index === 2) {
+            ikey_to_html_replace[ikey] ='id_indy_matrix_item';
+        }
+        if (index === 3) {
+            ikey_to_html_replace[ikey] ='id_indy_sample_location';
+        } else
+        if (index === 4) {
+            ikey_to_html_replace[ikey] ='assay_well_name';
+        }
+        if (index === 5) {
+            ikey_to_html_replace[ikey] ='time_day';
+        }
+        if (index === 6) {
+            ikey_to_html_replace[ikey] ='time_hour';
+        } else
+        if (index === 7) {
+            ikey_to_html_replace[ikey] ='time_minute';
+        }
+    });
+
     let table_order = [[0, "asc"], [1, "asc"], [2, "asc"], [3, "asc"], [4, "asc"], [5, "asc"] ];
     let table_column_defs = [
         // { "width": "20%" },
@@ -917,7 +944,6 @@ $(document).ready(function () {
         } else {
             alert('Selecting the number of rows is only allowed when the table is empty.')
         }
-        // nothing should be highlighted, but run it anyway
     }
 
     // ~~ The radio button change or change plus the go button/drag
@@ -930,13 +956,32 @@ $(document).ready(function () {
     
     function indyCalledToReplace() {
         sameFrontMatterToTableFromEmptyReplaceGoAndPaste();
-        // todo get the correct metadata_lod
+
+        // change the content of the cell with what is in the selections
+        // this is just a start, need to figure out how to get and add the names and pks!
+        var index = 0;
+        for (index = 0; index < metadata_highlighted_content.length; index++) {
+            var tirow = metadata_highlighted_tirow[index];
+            var tikey = metadata_highlighted_tikey[index];
+            // do not forget to subtract the header row
+            // this is the copy
+            metadata_lod[tirow-1][tikey] = $('#'+ikey_to_html_replace[tikey]).val();
+            // todo build the increment
+            // todo
+        }
         sameChangesToTableFromEmptyReplaceGoAndPaste();
     }
 
     function indyCalledToEmpty() {
         sameFrontMatterToTableFromEmptyReplaceGoAndPaste();
-        // todo get the correct metadata_lod
+        // just change the content of the cell
+        var index = 0;
+        for (index = 0; index < metadata_highlighted_content.length; index++) {
+            var tirow = metadata_highlighted_tirow[index];
+            var tikey = metadata_highlighted_tikey[index];
+            // do not forget to subtract the header row
+            metadata_lod[tirow-1][tikey] = '';
+        }
         sameChangesToTableFromEmptyReplaceGoAndPaste();
     }
 
@@ -969,21 +1014,14 @@ $(document).ready(function () {
             metadata_highlighted_tikey.push($(this).attr("ikey"));
             metadata_highlighted_content.push($(this).val());
         });
-        // a special check to grey out replace content if field not in the ikey list
-        //     'sample_name',
-        //     'matrix_item_name',
-        //     'sample_location_name',
-        //     'assay_well_name',
-        //     'day',
-        //     'hour',
-        //     'minute',
-        //todo - add classing to other replace fields - watch the selectized and pk fields
-        if (metadata_highlighted_tikey.indexOf('sample_name') >= 0) {
-            $('#sample_name').addClass('special-selected1');
-        } else {
-            $('#sample_name').removeClass('special-selected1');
+        // a special check to grey out replace content if field not in the ikey list that has a dom element
+        for (var ikey in ikey_to_html_replace) {
+            if (metadata_highlighted_tikey.indexOf(ikey) >= 0) {
+                $('#'+ikey_to_html_replace[ikey]).addClass('required');
+            } else {
+                $('#'+ikey_to_html_replace[ikey]).removeClass('required');
+            }
         }
-
     }
 
     // END - The functions that change the indy table
