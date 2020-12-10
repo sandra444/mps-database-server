@@ -416,6 +416,7 @@
                                     <li>Use Column visibility, Search, and/or column sorting to simplify highlighting (e.g., if entering time in Days, hide Hour and Minute fields)</li>
                                     <li>If times are missing, they will be set to 0 by default</li>
                                     <li>Empty rows will be removed on Submit</li>
+                                    <li>Sample Location cannot be incremented</li>
                                     <li>Make sure rows are complete or there will be a Submit error (Assay Well Name is optional)</li>
                                 </ul>
                             </li>
@@ -449,8 +450,8 @@
                                     <p class="plate-map-radio-spacing plate-map-no-wrap">Replace</p></label>
                                 <label><input type="radio" class="plate-map-bigger-radio" name="radio_change_drag_action" value="empty" id="radio_empty">
                                     <p class="plate-map-radio-spacing plate-map-no-wrap">Remove/Empty</p></label>
-                                <label><input type="radio" class="plate-map-bigger-radio" name="radio_change_drag_action" value="copys" id="radio_copys">
-                                    <p class="plate-map-radio-spacing plate-map-no-wrap">Edit Highlight</p></label>
+{#                                <label><input type="radio" class="plate-map-bigger-radio" name="radio_change_drag_action" value="copys" id="radio_copys">#}
+{#                                    <p class="plate-map-radio-spacing plate-map-no-wrap">Edit Highlight</p></label>#}
                                 <label><input type="radio" class="plate-map-bigger-radio" name="radio_change_drag_action" value="pastes" id="radio_pastes">
                                     <p class="plate-map-radio-spacing plate-map-no-wrap">Paste</p></label>
                             </div>
@@ -467,7 +468,7 @@
                         {# pick sample metadata other than times #}
                         <div class="row">
 
-                            <div class="col-sm-3">
+                            <div id="h_indy_sample_name" class="col-sm-3">
                                 <div class="row column-section-padding">
                                     <table>
                                         <tr>
@@ -489,7 +490,7 @@
                                 </div>
                             </div>
 
-                            <div class="col-sm-3">
+                            <div id="h_indy_matrix_item" class="col-sm-3">
                                 <div class="row column-section-padding">
                                     <table>
                                         <tr>
@@ -509,9 +510,14 @@
                                         {{ form.indy_matrix_item }}
                                     </div>
                                 </div>
+                                {# need for use in js #}
+                                <div class="row hidden">Will get hidden:
+                                    <div id="matrix_item_name"></div>
+                                    <div id="matrix_item_pk"></div>
+                                </div>
                             </div>
 
-                            <div class="col-sm-3">
+                            <div id="h_indy_sample_location" class="col-sm-3">
                                 <div class="row column-section-padding">
                                     <table>
                                         <tr>
@@ -531,9 +537,14 @@
                                         {{ form.indy_sample_location }}
                                     </div>
                                 </div>
+                                {# need for use in js #}
+                                <div class="row hidden">Will get hidden:
+                                    <div id="sample_location_name"></div>
+                                    <div id="sample_location_pk"></div>
+                                </div>
                             </div>
 
-                            <div class="col-sm-3">
+                            <div id="h_indy_assay_well_name" class="col-sm-3">
                                 <div class="row column-section-padding">
                                     <table>
                                         <tr>
@@ -560,7 +571,7 @@
                         {# pick sample times #}
                         <div class="row">
 
-                            <div class="col-sm-3">
+                            <div id="h_indy_time_day" class="col-sm-3">
                                 <div class="row column-section-padding">
                                     <table>
                                         <tr>
@@ -582,7 +593,7 @@
                                 </div>
                             </div>
 
-                            <div class="col-sm-3">
+                            <div id="h_indy_time_hour" class="col-sm-3">
                                 <div class="row column-section-padding">
                                     <table>
                                         <tr>
@@ -604,7 +615,7 @@
                                 </div>
                             </div>
 
-                            <div class="col-sm-3">
+                            <div id="h_indy_time_minute" class="col-sm-3">
                                 <div class="row column-section-padding">
                                     <table>
                                         <tr>
@@ -694,20 +705,20 @@
                         </div>
                     </div>
 
-                    <div class="copys-section">
-                        <div class="indy-instructions">
-                            <ul class="help-filled-circle">
-                                <li class="h1-level-2">Edit the highlighting as needed</li>
-                            </ul>
-                        </div>
-                        <div class="row">
-                            <div class="col-sm-2">
-                            </div>
-                            <div class="col-sm-9">
-                                <button type="button" class="btn btn-primary extra-top-margin" id="clear_highlights_indy_table">Clear All Table Highlighting</button>
-                            </div>
-                        </div>
-                    </div>
+{#                    <div class="copys-section">#}
+{#                        <div class="indy-instructions">#}
+{#                            <ul class="help-filled-circle">#}
+{#                                <li class="h1-level-2">Edit the highlighting as needed</li>#}
+{#                            </ul>#}
+{#                        </div>#}
+{#                        <div class="row">#}
+{#                            <div class="col-sm-2">#}
+{#                            </div>#}
+{#                            <div class="col-sm-9">#}
+{#                                <button type="button" class="btn btn-primary extra-top-margin" id="clear_highlights_indy_table">Clear All Table Highlighting</button>#}
+{#                            </div>#}
+{#                        </div>#}
+{#                    </div>#}
 
                     <div class="pastes-section">
 {#                        <div class="indy-instructions">#}
@@ -736,7 +747,10 @@
                             <button type="button" class="btn btn-primary extra-top-margin" id="redoIndyButton">Redo</button>
                         </div>
                     </div>
-                    <div class="col-sm-4">
+                    <div class="col-sm-2">
+                        <button type="button" class="btn btn-primary extra-top-margin" id="clear_highlights_indy_table">Clear Highlighting</button>
+                    </div>
+                    <div class="col-sm-2">
 {#                        {% if update or add %}#}
 {#                            <button type="button" class="btn btn-primary extra-top-margin" id="add_row_to_indy_table">Add Row to Table</button>#}
 {#                        {% endif %}#}

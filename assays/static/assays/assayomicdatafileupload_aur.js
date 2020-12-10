@@ -35,8 +35,10 @@ $(document).ready(function () {
     var sample_metadata_table_id = 'sample_metadata_table';
     //has the info for the indy metadata table been populated - use so only pull from initial form once
     var page_metadata_lod_done = false;
+    // had no default in html page
     var page_drag_action = null;
-    var page_change_duplicate_increment = null;
+    // has a default in html page
+    var page_change_duplicate_increment = 'duplicate';
     //the current one
     var metadata_lod = [];
     //v number of the current one (should be 1, 2, 3, 4, or 5 after first population)
@@ -44,10 +46,8 @@ $(document).ready(function () {
     //for holding versions to allow for undo and redo
     var metadata_lod_cum = [];
     //the table that is highlighted
-    var metadata_highlighted_tirow = [];
-    var metadata_highlighted_ticol = [];
-    var metadata_highlighted_tikey = [];
-    var metadata_highlighted_content = [];
+    var metadata_highlighted = [];
+    var list_of_ikeys_for_replace_highlighting = [];
 
     // make sure order is parallel to form field indy_list_of_keys
     var metadata_headers = [
@@ -59,10 +59,12 @@ $(document).ready(function () {
         'Sample Time (Day)',
         'Sample Time (Hour)',
         'Sample Time (Minute)',
-        'sample_metadata_pk',
+
         'matrix_item_pk',
         'sample_location_pk',
+        'sample_metadata_pk',
         ]
+    // this will control what gets put in the table, but metadata_lod will have all the indy_keys in it
     var include_header_in_indy_table = [
         1,
         1,
@@ -78,29 +80,46 @@ $(document).ready(function () {
         ]
     var indy_keys = JSON.parse($('#id_indy_list_of_keys').val());
     // make a cross reference to the html dom name
-    // todo deal with the name/pk issue this affects many places
-    var ikey_to_html_replace = {};
+    var ikey_to_html_outer = {};
+    var ikey_to_html_element = {};
     $.each(indy_keys, function (index, ikey) {
         if (index === 1) {
-            ikey_to_html_replace[ikey] ='sample_name';
+            ikey_to_html_outer[ikey] ='h_indy_sample_name';
+            ikey_to_html_element[ikey] ='sample_name';
         } else
         if (index === 2) {
-            ikey_to_html_replace[ikey] ='id_indy_matrix_item';
-        }
+            ikey_to_html_outer[ikey] ='h_indy_matrix_item';
+            ikey_to_html_element[ikey] ='matrix_item_name';
+        } else
         if (index === 3) {
-            ikey_to_html_replace[ikey] ='id_indy_sample_location';
+            ikey_to_html_outer[ikey] ='h_indy_sample_location';
+            ikey_to_html_element[ikey] ='sample_location_name';
         } else
         if (index === 4) {
-            ikey_to_html_replace[ikey] ='assay_well_name';
-        }
+            ikey_to_html_outer[ikey] ='h_indy_assay_well_name';
+            ikey_to_html_element[ikey] ='assay_well_name';
+        } else
         if (index === 5) {
-            ikey_to_html_replace[ikey] ='time_day';
-        }
+            ikey_to_html_outer[ikey] ='h_indy_time_day';
+            ikey_to_html_element[ikey] ='time_day';
+        } else
         if (index === 6) {
-            ikey_to_html_replace[ikey] ='time_hour';
+            ikey_to_html_outer[ikey] ='h_indy_time_hour';
+            ikey_to_html_element[ikey] ='time_hour';
         } else
         if (index === 7) {
-            ikey_to_html_replace[ikey] ='time_minute';
+            ikey_to_html_outer[ikey] = 'h_indy_time_minute';
+            ikey_to_html_element[ikey] = 'time_minute';
+        } else
+        if (index === 8) {
+            // ikey_to_html_outer[ikey] ='h_indy_matrix_item';
+            ikey_to_html_element[ikey] ='matrix_item_pk';
+        } else
+        if (index === 9) {
+            // ikey_to_html_outer[ikey] ='h_indy_sample_location';
+            ikey_to_html_element[ikey] ='sample_location_pk';
+        } else {
+
         }
     });
 
@@ -364,19 +383,41 @@ $(document).ready(function () {
     $(document).on('click', '#clear_highlights_indy_table', function() {
         $('.special-selected1').removeClass('special-selected1')
         $('.special-selected2').removeClass('special-selected2')
+        if (page_drag_action === 'pastes') {
+            page_drag_action = null;
+            sample_metadata_replace_show_hide();
+        }
         whatIsCurrentlyHighlightedInTheIndyTable();
     });
 
     // a default is not set in the html file, so, user has to pick one
     $("input[type='radio'][name='radio_change_drag_action']").click(function () {
-        // check to see if any cells in the table have been highlighted
-        if ($('.special-selected1').length > 0) {
+        // check to see if any cells in the table have been highlighted - such a pain....remove for now
+        // if ($('.special-selected1').length > 0) {
+        //     page_drag_action = $(this).val();
+        //     sample_metadata_replace_show_hide();
+        // } else {
+        //     if ($(this).val() === 'copys') {
+        //         page_drag_action = $(this).val();
+        //         sample_metadata_replace_show_hide();
+        //     } else {
+        //         page_drag_action = null;
+        //         sample_metadata_replace_show_hide();
+        //         alert("Drag over cells to highlight before selecting an Action.\n");
+        //     }
+        // }
+        if ($(this).val() === 'pastes' || $(this).val() === 'empty') {
+            if ($('.special-selected1').length > 0) {
+                page_drag_action = $(this).val();
+                sample_metadata_replace_show_hide();
+            } else {
+                page_drag_action = null;
+                sample_metadata_replace_show_hide();
+                alert("Drag over cells to highlight before selecting this Action.\n");
+            }
+        } else {
             page_drag_action = $(this).val();
             sample_metadata_replace_show_hide();
-        } else {
-            page_drag_action = null;
-            sample_metadata_replace_show_hide();
-            alert("Drag over cells to highlight before selecting an Action.\n");
         }
     });
 
@@ -398,6 +439,22 @@ $(document).ready(function () {
         let delete_button_clicked = $(this);
         indyClickedToDeleteRow(delete_button_clicked);
     });
+
+    // need on change events for chip id and for sample location so can populate the corresponding dom element
+    // could have just used a memory variable, but having the text and pk in a dom element made picking a general process for all!
+    $(document).on('change', '#id_indy_matrix_item', function() {
+        var thisText = $('#id_indy_matrix_item').children("option:selected").text();
+        var thisValue = $('#id_indy_matrix_item').children("option:selected").val();
+        document.getElementById('matrix_item_name').innerHTML = thisText;
+        document.getElementById('matrix_item_pk').innerHTML = thisValue;
+    });
+    $(document).on('change', '#id_indy_sample_location', function() {
+        var thisText = $('#id_indy_sample_location').children("option:selected").text();
+        var thisValue = $('#id_indy_sample_location').children("option:selected").val();
+        document.getElementById('sample_location_name').innerHTML = thisText;
+        document.getElementById('sample_location_pk').innerHTML = thisValue;
+    });
+
 
     // END added during indy-sample development click and change etc
 
@@ -811,9 +868,9 @@ $(document).ready(function () {
             $('.special-selected2').removeClass('special-selected2');
             $('.empty-section').show();
             indyCalledToEmpty();
-        } else if (page_drag_action === 'copys') {
-            $('.special-selected2').removeClass('special-selected2');
-            $('.copys-section').show();
+        // } else if (page_drag_action === 'copys') {
+        //     $('.special-selected2').removeClass('special-selected2');
+        //     $('.copys-section').show();
         } else if (page_drag_action === 'pastes') {
             $('.pastes-section').show();
         } else {
@@ -847,7 +904,7 @@ $(document).ready(function () {
         $('#id_indy_list_of_dicts').val(JSON.stringify(metadata_lod));
     }
 
-    // START - The functions that change the indy sample metadata table
+    // START - The functions that drive change to the indy sample metadata table
 
     // ~~ The undo or redo button functions
     //todo - maybe add some cleaning of the master list if it gets too big
@@ -890,7 +947,6 @@ $(document).ready(function () {
         var thisRow = $(thisButton).attr("row-index");
         var thisRowMinusHeader = thisRow-1;
 
-        //    todo - need to think about and plan for the pk in addition to the name of the chip and of the location!
         var dictrow = metadata_lod[thisRowMinusHeader];
         if (dictrow['sample_name'].length > 0) {
             // check the row to see if it has a field header
@@ -899,11 +955,12 @@ $(document).ready(function () {
         } else {
             // check the row to see if the whole row is empty
             $.each(indy_keys, function (index, ikey) {
-                if (include_header_in_indy_table[index] === 1) {
+                // do to all in the metadata_lod, not just the ones shown in the table, so, comment this out for now
+                // if (include_header_in_indy_table[index] === 1) {
                     if (dictrow[ikey].length > 0) {
                         $('#id_indy_sample_metadata_table_was_changed').attr('checked', true);
                     }
-                }
+                // }
             });
         }
         if (add_or_delete === 'add') {
@@ -930,9 +987,10 @@ $(document).ready(function () {
             for (i = 0; i < $('#id_indy_number_of_samples').val(); i++) {
                 var dict = {};
                 $.each(indy_keys, function (index, ikey) {
-                    if (include_header_in_indy_table[index] === 1) {
+                    // do to all in the metadata_lod, not just the ones shown in the table, so, comment this out for now
+                    // if (include_header_in_indy_table[index] === 1) {
                         dict[ikey] = null;
-                    }
+                    // }
                 });
                 metadata_lod.push(dict);
             }
@@ -950,23 +1008,113 @@ $(document).ready(function () {
     function indyCalledToPastes() {
         sameFrontMatterToTableFromEmptyReplaceGoAndPaste();
         // todo get the correct metadata_lod
+        alert("paste is still in development")
         sameChangesToTableFromEmptyReplaceGoAndPaste();
 
     }
     
     function indyCalledToReplace() {
         sameFrontMatterToTableFromEmptyReplaceGoAndPaste();
+        // because the pks are not in the table, they will not ever be highlighted
+        // BUT, we want to keep them matching the names selected in the metadata_lod
+        // so that, they are correct in the form field that is sent back
+        // plan to check in the back end to make sure they went together
+        // could remove the pks altogether, but, what if users decide want to see them.....
 
         // change the content of the cell with what is in the selections
-        // this is just a start, need to figure out how to get and add the names and pks!
-        var index = 0;
-        for (index = 0; index < metadata_highlighted_content.length; index++) {
-            var tirow = metadata_highlighted_tirow[index];
-            var tikey = metadata_highlighted_tikey[index];
-            // do not forget to subtract the header row
-            // this is the copy
-            metadata_lod[tirow-1][tikey] = $('#'+ikey_to_html_replace[tikey]).val();
-            // todo build the increment include dealing with pk and names
+        var ikey_last_highlighted = {};
+        $.each(indy_keys, function (index, ikey) {
+            ikey_last_highlighted[ikey] = '99';
+            ikey_last_highlighted[ikey+'_index'] = -99;
+        });
+
+        var metadata_highlighted_temp = JSON.parse(JSON.stringify(metadata_highlighted));
+
+        if (page_change_duplicate_increment === 'increment-ttb') {
+            // think should be in the order of the table, so, leave it as is
+        } else if (page_change_duplicate_increment === 'increment-btt') {
+            // index should be from top to bottom
+            metadata_highlighted = [];
+            for (var index = metadata_highlighted_temp.length-1; index >= 0; index--) {
+                metadata_highlighted.push(metadata_highlighted_temp[index]);
+            }
+        } else {
+            // duplicate - index should not matter
+        }
+
+        for (var index = 0; index < metadata_highlighted.length; index++) {
+            console.log("metadata_highlighted[index]['metadata_highlighted_tirow'] "+metadata_highlighted[index]['metadata_highlighted_tirow'])
+            console.log("metadata_highlighted[index]['metadata_highlighted_tikey'] "+metadata_highlighted[index]['metadata_highlighted_tikey'])
+            console.log("metadata_highlighted[index]['metadata_highlighted_content'] "+metadata_highlighted[index]['metadata_highlighted_content'])
+
+            var tirow = metadata_highlighted[index]['metadata_highlighted_tirow'];
+            var tikey = metadata_highlighted[index]['metadata_highlighted_tikey'];
+
+            // get using the .val for input fields
+            var current_val = $('#' + ikey_to_html_element[tikey]).val();
+
+            var current_pk = 0;
+            if (tikey === 'matrix_item_name') {
+                current_pk = $('#matrix_item_pk').text();
+                current_val = $('#' + ikey_to_html_element[tikey]).text();
+            } else if (tikey === 'sample_location_name') {
+                current_pk = $('#sample_location_pk').text();
+                current_val = $('#' + ikey_to_html_element[tikey]).text();
+            }
+
+            // do not forget to subtract the header row when getting metadata_lod index!
+            if (tikey === 'sample_location_name') {
+                // can only duplicate, not increment the sample location
+                metadata_lod[tirow - 1][tikey] = current_val;
+                metadata_lod[tirow - 1]['sample_location_pk'] = current_pk;
+            } else {
+                if (page_change_duplicate_increment === 'duplicate') {
+                    metadata_lod[tirow - 1][tikey] = current_val;
+                    if (tikey === 'matrix_item_name') {
+                        metadata_lod[tirow - 1]['matrix_item_pk'] = current_pk;
+                    }
+                } else {
+                    // an increment
+                    var current_index = ikey_last_highlighted[tikey+'_index'];
+
+                    if (current_index === -99) {
+                        // on the first one, it is a duplicate and change info for next
+                        metadata_lod[tirow - 1][tikey] = current_val;
+                        if (tikey === 'matrix_item_name') {
+                            metadata_lod[tirow - 1]['matrix_item_pk'] = current_pk;
+                        }
+                        // update the last found object for next go
+                        ikey_last_highlighted[tikey] = current_val;
+                        ikey_last_highlighted[tikey + '_index'] = 0;
+                    } else {
+                        // not the first occurrence of this tikey
+                        current_val = ikey_last_highlighted[tikey];
+                        console.log("current_val "+current_val)
+                        var i_current_val = 0;
+                        if (tikey === 'time_day' || tikey === 'time_hour' || tikey === 'time_minute') {
+                            if (page_change_duplicate_increment === 'increment-ttb'
+                                || page_change_duplicate_increment === 'increment-btt') {
+                                // it is + for both because the holding dict was sorting descending
+                                i_current_val = parseFloat(current_val) + parseFloat($('#increment_value').val());
+                            } else {
+                                alert("Make sure to select to duplicate or increment");
+                            }
+                        } else {
+                            // todo sample_name chip id and well name still need an increment
+
+                                alert("Increment for this field is in development: "+tikey);
+
+                        }
+                        var i_current_index = parseInt(ikey_last_highlighted[tikey + '_index']) + 1;
+                        // update the last found object for next go
+                        ikey_last_highlighted[tikey] = i_current_val;
+                        ikey_last_highlighted[tikey + '_index'] = i_current_index;
+                        // update the correct location in the table metadata
+                        metadata_lod[tirow - 1][tikey] = i_current_val;
+
+                    }
+                }
+            }
         }
         sameChangesToTableFromEmptyReplaceGoAndPaste();
     }
@@ -975,11 +1123,16 @@ $(document).ready(function () {
         sameFrontMatterToTableFromEmptyReplaceGoAndPaste();
         // just change the content of the cell
         var index = 0;
-        for (index = 0; index < metadata_highlighted_content.length; index++) {
-            var tirow = metadata_highlighted_tirow[index];
-            var tikey = metadata_highlighted_tikey[index];
+        for (index = 0; index < metadata_highlighted.length; index++) {
+            var tirow = metadata_highlighted[index]['metadata_highlighted_tirow'];
+            var tikey = metadata_highlighted[index]['metadata_highlighted_tikey'];
             // do not forget to subtract the header row
             metadata_lod[tirow-1][tikey] = '';
+            if (tikey === 'matrix_item_name') {
+                metadata_lod[tirow-1]['matrix_item_pk'] = '';
+            } else if (tikey === 'sample_location_name') {
+                metadata_lod[tirow-1]['sample_location_pk'] = '';
+            }
         }
         sameChangesToTableFromEmptyReplaceGoAndPaste();
     }
@@ -988,7 +1141,7 @@ $(document).ready(function () {
         whatIsCurrentlyHighlightedInTheIndyTable();
         $('#id_indy_sample_metadata_table_was_changed').attr('checked',true);
 
-        if (metadata_highlighted_tikey.indexOf('sample_name') >= 0) {
+        if (list_of_ikeys_for_replace_highlighting.indexOf('sample_name') >= 0) {
             $('#id_indy_sample_metadata_field_header_was_changed').attr('checked',true);
         } else {
             $('#id_indy_sample_metadata_field_header_was_changed').attr('checked',false);
@@ -1003,41 +1156,59 @@ $(document).ready(function () {
     }
 
     function whatIsCurrentlyHighlightedInTheIndyTable() {
-        metadata_highlighted_tirow = [];
-        metadata_highlighted_ticol = [];
-        metadata_highlighted_tikey = [];
-        metadata_highlighted_content = [];
+        metadata_highlighted = [];
+        list_of_ikeys_for_replace_highlighting = [];
         $('.special-selected1').each(function() {
-            metadata_highlighted_tirow.push($(this).attr("row-index"));
-            metadata_highlighted_ticol.push($(this).attr("col-index"));
-            metadata_highlighted_tikey.push($(this).attr("ikey"));
-            metadata_highlighted_content.push($(this).val());
+            var dict = {};
+            var imetadata_highlighted_tirow = $(this).attr("row-index");
+            var imetadata_highlighted_ticol = $(this).attr("col-index");
+            var imetadata_highlighted_tikey = $(this).attr("ikey");
+            var imetadata_highlighted_content = $(this).val();
+            if (imetadata_highlighted_content.length === 0) {
+                imetadata_highlighted_content = $(this).text();
+            }
+            if (imetadata_highlighted_content.length === 0) {
+                imetadata_highlighted_content = $(this).innerHTML.trim();
+            }
+            dict['metadata_highlighted_tirow'] = imetadata_highlighted_tirow;
+            dict['metadata_highlighted_ticol'] = imetadata_highlighted_ticol;
+            dict['metadata_highlighted_tikey'] = imetadata_highlighted_tikey;
+            dict['metadata_highlighted_content'] = imetadata_highlighted_content;
+            list_of_ikeys_for_replace_highlighting.push(imetadata_highlighted_tikey);
+            metadata_highlighted.push(dict);
         });
         // a special check to grey out replace content if field not in the ikey list that has a dom element
-        for (var ikey in ikey_to_html_replace) {
-            if (metadata_highlighted_tikey.indexOf(ikey) >= 0) {
-                $('#'+ikey_to_html_replace[ikey]).addClass('required');
+        for (var ikey in ikey_to_html_outer) {
+            if (list_of_ikeys_for_replace_highlighting.indexOf(ikey) >= 0) {
+                $('#'+ikey_to_html_outer[ikey]).addClass('required');
             } else {
-                $('#'+ikey_to_html_replace[ikey]).removeClass('required');
+                $('#'+ikey_to_html_outer[ikey]).removeClass('required');
             }
         }
+        // console.log("metadata_highlighted ",metadata_highlighted)
     }
 
     // END - The functions that change the indy table
     
     function selectableDragOnSampleMetadataTable() {
         if (page_drag_action === 'pastes') {
-            $('.special-selected2').removeClass('special-selected2');
-            // want to highlight from the first location, so, want only the first one
-            var icount = 0;
-            $('.ui-selected').each(function() {
-                if (icount === 0) {
-                    $(this).addClass('special-selected2');                    
-                }
-                $(this).removeClass('ui-selected');
-                icount = icount + 1;
-            }); 
-            indyCalledToPastes();
+            if (document.getElementsByClassName("special-selected1").length === 0) {
+                page_drag_action = null;
+                sample_metadata_replace_show_hide();
+                alert("Select some text to copy before drag to paste");
+            } else {
+                $('.special-selected2').removeClass('special-selected2');
+                // want to highlight from the first location, so, want only the first one
+                var icount = 0;
+                $('.ui-selected').each(function () {
+                    if (icount == 0) {
+                        $(this).addClass('special-selected2');
+                    }
+                    // $(this).removeClass('ui-selected');
+                    icount = icount + 1;
+                });
+                indyCalledToPastes();
+            }
         } else {
             $('.special-selected2').removeClass('special-selected2');
             $('.ui-selected').each(function() {
@@ -1089,6 +1260,9 @@ $(document).ready(function () {
                     var th = document.createElement('TH');
                     $(th).attr('hcol-index', hcolcounter);
                     $(th).attr('ikey', ikey);
+                    if (ikey != 'assay_well_name') {
+                        $(th).attr('class', 'required');
+                    }
                     // this was how did with plate....$(th).html(colnumber + top_label_button);
                     th.appendChild(document.createTextNode(header));
                     tr.appendChild(th);
@@ -1143,7 +1317,8 @@ $(document).ready(function () {
                             td.appendChild(document.createTextNode(row[ikey]));
                             $(td).attr('class', 'no-wrap');
                         // } else {
-                        //NOTE: the input fields were not sortable, so, skip this idea for now
+                        //NOTE: the input fields were not sortable, so, skip this idea for now - since did this changed
+                        // to time_day, time_hour, and time_minute
                         //     if (ikey.includes('item') || ikey.includes('location') || ikey.includes('day') || ikey.includes('hour') || ikey.includes('minute')) {
                         //         td.appendChild(document.createTextNode(row[ikey]));
                         //     } else {
