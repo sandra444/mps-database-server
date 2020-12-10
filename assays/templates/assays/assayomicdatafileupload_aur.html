@@ -363,6 +363,10 @@
                     {{  form.indy_list_of_dicts }}
                     {# pass to js file need for use in js - if the user adds or changes a sample id, this file should be true #}
                     {% include "generic_field.html" with field=form.indy_flag_sample_name_change %}
+                    {# pass to js file need for use in js #}
+                    {{  form.indy_matrix_item_list }}
+                    {# pass to js file need for use in js #}
+                    {{  form.indy_sample_name_list }}
                 </div>
 
                 {% if update or add %}
@@ -408,15 +412,17 @@
                     <div class="indy-instructions">
                         <ul class="help-filled-circle">
                             <li class="h1-level-2">Select/Drag in Sample Metadata Table to highlight cells
-                                <br><br>Tips:
+                                <br><br>Tips and Notes:
                                 <ul class="help-open-circle">
                                     <li>Highlighting is cumulative</li>
                                     <li>When using Replace, only highlighted cells will be replaced</li>
                                     <li>When using Paste, if the paste cell is in the highlighted areas, the highlighted areas will be overwritten</li>
+                                    <li>When updatings are made to the table, it will resort </li>
                                     <li>Use Column visibility, Search, and/or column sorting to simplify highlighting (e.g., if entering time in Days, hide Hour and Minute fields)</li>
-                                    <li>If times are missing, they will be set to 0 by default</li>
+                                    <li>If times are missing, they will be set to 0 on submit</li>
                                     <li>Empty rows will be removed on Submit</li>
                                     <li>Sample Location cannot be incremented</li>
+                                    <li>For chip/well names, increment will work down a sorted list of all the chips/wells in the study (sorted as text - chip11 will come before chip2, but after chip02)</li>
                                     <li>Make sure rows are complete or there will be a Submit error (Assay Well Name is optional)</li>
                                 </ul>
                             </li>
@@ -484,9 +490,14 @@
                                     </table>
                                 </div>
                                 <div class="row column-section-padding">
-                                    <div class="extra-bottom-padding">
-                                        <input type="text" class="form-control" id="sample_name" name="sample_name" value="sample01">
+                                     <div class="extra-bottom-padding">
+                                        {{ form.indy_sample_name }}
                                     </div>
+                                </div>
+                                {# need for use in js #}
+                                <div class="row hidden">Will get hidden:
+                                    <div id="sample_name"></div>
+                                    <div id="sample_pk"></div>
                                 </div>
                             </div>
 
@@ -673,7 +684,7 @@
                                 <div class="col-sm-3">
                                     <div class="indy-instructions">
                                         <ul class="help-filled-circle">
-                                            <li class="h1-level-2">Add Amount</li>
+                                            <li class="h1-level-2">Add Increment</li>
                                         </ul>
                                     </div>
                                 </div>
@@ -723,7 +734,7 @@
                     <div class="pastes-section">
 {#                        <div class="indy-instructions">#}
                             <ul class="help-filled-circle">
-                                <li class="h1-level-2">Drag in any cell of the paste location</li>
+                                <li class="h1-level-2">Drag in cell to start paste in row</li>
                             </ul>
 {#                        </div>#}
                     </div>

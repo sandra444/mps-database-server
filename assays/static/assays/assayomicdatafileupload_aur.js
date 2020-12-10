@@ -4,6 +4,8 @@ window.OMICS = {
     omics_data: null
 };
 
+//todo at some point, limit the sample locations to what is listed in model, if listed (location_1, 2 and sample location - three places currently)
+
 $(document).ready(function () {
     //show the validation stuff
     $('#form_errors').show()
@@ -78,6 +80,8 @@ $(document).ready(function () {
         0,
         0,
         ]
+    var chip_list = JSON.parse($('#id_indy_matrix_item_list').val());
+    var sample_list = JSON.parse($('#id_indy_sample_name_list').val());
     var indy_keys = JSON.parse($('#id_indy_list_of_keys').val());
     // make a cross reference to the html dom name
     var ikey_to_html_outer = {};
@@ -123,22 +127,22 @@ $(document).ready(function () {
         }
     });
 
-    let table_order = [[0, "asc"], [1, "asc"], [2, "asc"], [3, "asc"], [4, "asc"], [5, "asc"] ];
+    let table_order = [[0, 'asc'], [1, 'asc'], [2, 'asc'], [3, 'asc'], [4, 'asc'], [5, 'asc'] ];
     let table_column_defs = [
-        // { "width": "20%" },
+        // { 'width': '20%' },
         // { width: 200, targets: 0 }
-        // {"targets": [0], "visible": true,},
-        // {"targets": [1], "visible": true,},
-        // {"targets": [2], "visible": true,},
-        // {"targets": [3], "visible": true,},
-        // {"targets": [4], "visible": true,},
+        // {'targets': [0], 'visible': true,},
+        // {'targets': [1], 'visible': true,},
+        // {'targets': [2], 'visible': true,},
+        // {'targets': [3], 'visible': true,},
+        // {'targets': [4], 'visible': true,},
         //
-        // {"targets": [5], "visible": true,},
-        // {"targets": [6], "visible": true,},
-        // // {"targets": [7], "visible": true,},
-        // // {"targets": [8], "visible": true,},
-        // // {"targets": [9], "visible": true,},
-        // // {"targets": [10], "visible": true,},
+        // {'targets': [5], 'visible': true,},
+        // {'targets': [6], 'visible': true,},
+        // // {'targets': [7], 'visible': true,},
+        // // {'targets': [8], 'visible': true,},
+        // // {'targets': [9], 'visible': true,},
+        // // {'targets': [10], 'visible': true,},
         //
         // {responsivePriority: 1, targets: 0},
         // {responsivePriority: 2, targets: 1},
@@ -185,7 +189,7 @@ $(document).ready(function () {
     // END - Tool tips
 
     // Set the required-ness of the groups on load based on data type on load
-    changed_something_important("load");
+    changed_something_important('load');
     // some additional load functions that need to be run
     // indy sample functions
     number_samples_show_hide();
@@ -239,24 +243,39 @@ $(document).ready(function () {
     $('#id_omic_data_file').on('change', function (e) {
         clear_validation_errors();
         //when first change the file, make the preview button available
-        $('#omic_preview_button_section').show();
-        $('#omic_preview_the_graphs_section').show();
-        $('#omic_preview_the_graphs_section2').show();
-        changed_something_important("data_file");
+        if ($('#id_data_type')[0].selectize.items[0] == 'log2fc') {
+            $('#omic_preview_button_section').show();
+            $('#omic_preview_the_graphs_section').show();
+            $('#omic_preview_the_graphs_section2').show();
+        } else {
+            $('#omic_preview_button_section').hide();
+            $('#omic_preview_the_graphs_section').hide();
+            $('#omic_preview_the_graphs_section2').hide();
+        }
+        changed_something_important('data_file');
     });
     /**
      * On change data type, change what is required page logic
     */
     $('#id_data_type').change(function () {
         clear_validation_errors();
-        changed_something_important("data_type");
+        if ($('#id_data_type')[0].selectize.items[0] == 'log2fc') {
+            $('#omic_preview_button_section').show();
+            $('#omic_preview_the_graphs_section').show();
+            $('#omic_preview_the_graphs_section2').show();
+        } else {
+            $('#omic_preview_button_section').hide();
+            $('#omic_preview_the_graphs_section').hide();
+            $('#omic_preview_the_graphs_section2').hide();
+        }
+        changed_something_important('data_type');
     });
     /**
      * On changes that affect the graphs/plots on the preview page
     */
     $('#id_anaylsis_method').on('change', function (e) {
         clear_validation_errors();
-        changed_something_important("analysis_method");
+        changed_something_important('analysis_method');
     });
     /**
      * On change method
@@ -341,12 +360,12 @@ $(document).ready(function () {
      * On click to download_two_group_example
     */
     // Start file download_two_group_example.
-    document.getElementById("fileFileFormatTwoGroup").addEventListener("click", function(){
+    document.getElementById('fileFileFormatTwoGroup').addEventListener('click', function(){
     // Start the download_two_group_example of yournewfile.csv file with the content from the text area
         // could tie this to selections in the GUI later, if requested.
         // change with tool tip
         var text = page_omic_upload_omic_file_format_deseq2_log2fc_headers;
-        var filename = "TwoGroupDESeq2Omic.csv";
+        var filename = 'TwoGroupDESeq2Omic.csv';
 
         download_two_group_example(filename, text);
     }, false);
@@ -381,8 +400,10 @@ $(document).ready(function () {
     });
 
     $(document).on('click', '#clear_highlights_indy_table', function() {
-        $('.special-selected1').removeClass('special-selected1')
-        $('.special-selected2').removeClass('special-selected2')
+        $('.special-selected1').removeClass('special-selected1');
+        $('.special-selected2').removeClass('special-selected2');
+        page_paste_cell_ikey = null;
+        page_paste_cell_irow = null;
         if (page_drag_action === 'pastes') {
             page_drag_action = null;
             sample_metadata_replace_show_hide();
@@ -403,7 +424,7 @@ $(document).ready(function () {
         //     } else {
         //         page_drag_action = null;
         //         sample_metadata_replace_show_hide();
-        //         alert("Drag over cells to highlight before selecting an Action.\n");
+        //         alert('Drag over cells to highlight before selecting an Action.\n');
         //     }
         // }
         if ($(this).val() === 'pastes' || $(this).val() === 'empty') {
@@ -413,7 +434,7 @@ $(document).ready(function () {
             } else {
                 page_drag_action = null;
                 sample_metadata_replace_show_hide();
-                alert("Drag over cells to highlight before selecting this Action.\n");
+                alert('Drag over cells to highlight before selecting this Action.\n');
             }
         } else {
             page_drag_action = $(this).val();
@@ -443,18 +464,23 @@ $(document).ready(function () {
     // need on change events for chip id and for sample location so can populate the corresponding dom element
     // could have just used a memory variable, but having the text and pk in a dom element made picking a general process for all!
     $(document).on('change', '#id_indy_matrix_item', function() {
-        var thisText = $('#id_indy_matrix_item').children("option:selected").text();
-        var thisValue = $('#id_indy_matrix_item').children("option:selected").val();
+        var thisText = $('#id_indy_matrix_item').children('option:selected').text();
+        var thisValue = $('#id_indy_matrix_item').children('option:selected').val();
         document.getElementById('matrix_item_name').innerHTML = thisText;
         document.getElementById('matrix_item_pk').innerHTML = thisValue;
     });
     $(document).on('change', '#id_indy_sample_location', function() {
-        var thisText = $('#id_indy_sample_location').children("option:selected").text();
-        var thisValue = $('#id_indy_sample_location').children("option:selected").val();
+        var thisText = $('#id_indy_sample_location').children('option:selected').text();
+        var thisValue = $('#id_indy_sample_location').children('option:selected').val();
         document.getElementById('sample_location_name').innerHTML = thisText;
         document.getElementById('sample_location_pk').innerHTML = thisValue;
     });
-
+    $(document).on('change', '#id_indy_sample_name', function() {
+        var thisText = $('#id_indy_sample_name').children('option:selected').text();
+        var thisValue = $('#id_indy_sample_name').children('option:selected').val();
+        document.getElementById('sample_name').innerHTML = thisText;
+        document.getElementById('sample_pk').innerHTML = thisValue;
+    });
 
     // END added during indy-sample development click and change etc
 
@@ -465,14 +491,14 @@ $(document).ready(function () {
     // To make the preview in the upload page
     // NOTE: the upload page has the following elements
     // that are used in getting the data needed
-    // form name="omic_file"
-    // id="id_data_type"
-    // id="id_anaylsis_method"
-    // id="id_omic_data_file"
+    // form name='omic_file'
+    // id='id_data_type'
+    // id='id_anaylsis_method'
+    // id='id_omic_data_file'
     // And, these elements were added to the upload page
-    // id="plots"
-    // id="volcano-plots"
-    // id="ma-plots"
+    // id='plots'
+    // id='volcano-plots'
+    // id='ma-plots'
     function get_data_for_this_file_ready_for_preview(called_from) {
         let data = {
             call: 'fetch_omics_data_for_upload_preview_prep',
@@ -494,7 +520,7 @@ $(document).ready(function () {
         });
 
         let is_data = true;
-        if (document.getElementById("id_omic_data_file").files.length > 0) {
+        if (document.getElementById('id_omic_data_file').files.length > 0) {
             is_data = true;
         } else {
             is_data = false;
@@ -516,54 +542,86 @@ $(document).ready(function () {
                         alert(json.errors);
                     } else {
                         let exist = true;
-                        // console.log("a DATA", json)
-                        // omics_data = json['data'];
-                        // omics_target_name_to_id = json['target_name_to_id'];
-                        // omics_file_id_to_name = json['file_id_to_name'];
-                        // omics_table = json['table'];
-                        // console.log("b data ", omics_data)
-                        // console.log("c target_name_to_id ", omics_target_name_to_id)
-                        // console.log("d file_id_to_name ", omics_file_id_to_name)
-                        // console.log("e table ", omics_table)
+
                         window.OMICS.omics_data = JSON.parse(JSON.stringify(json));
                         omics_file_id_to_name_all = window.OMICS.omics_data['file_id_to_name'];
                         omics_file_id_to_name = omics_file_id_to_name_all[1];
-                        // maxL2FC_a = window.OMICS.omics_data['max_fold_change'];
-                        // maxPval_a = window.OMICS.omics_data['max_pvalue'];
-                        // minL2FC_a = window.OMICS.omics_data['min_fold_change'];
-                        // minPval_a = window.OMICS.omics_data['min_pvalue'];
-                        // console.log("a")
-                        // console.log(maxL2FC_a)
-                        // console.log(maxPval_a)
-                        // console.log(minL2FC_a)
-                        // console.log(minPval_a)
-                        // maxL2FC = -Math.log10(maxL2FC_a);
-                        // maxPval = -Math.log10(maxPval_a);
-                        // minL2FC = -Math.log10(minL2FC_a);
-                        // minPval = -Math.log10(minPval_a);
-                        // console.log("no a")
-                        // console.log(maxL2FC)
-                        // console.log(maxPval)
-                        // console.log(minL2FC)
-                        // console.log(minPval)
-                        // console.log("window.OMICS.omics_data ")
-                        // console.log(window.OMICS.omics_data)
-                        window.OMICS.draw_plots(window.OMICS.omics_data, true, 0, 0, 0, 0, 0, 0, 0, 'upload');
-                        // function(omics_data, firstTime, minPval, maxPval, minL2FC, maxL2FC, minPval_neg, maxPval_neg, L2FC_abs)
+
+                        if ($('#id_data_type')[0].selectize.items[0] == 'log2fc') {
+                            // console.log('a DATA', json)
+                            // omics_data = json['data'];
+                            // omics_target_name_to_id = json['target_name_to_id'];
+                            // omics_file_id_to_name = json['file_id_to_name'];
+                            // omics_table = json['table'];
+                            // console.log('b data ', omics_data)
+                            // console.log('c target_name_to_id ', omics_target_name_to_id)
+                            // console.log('d file_id_to_name ', omics_file_id_to_name)
+                            // console.log('e table ', omics_table)
+                            // maxL2FC_a = window.OMICS.omics_data['max_fold_change'];
+                            // maxPval_a = window.OMICS.omics_data['max_pvalue'];
+                            // minL2FC_a = window.OMICS.omics_data['min_fold_change'];
+                            // minPval_a = window.OMICS.omics_data['min_pvalue'];
+                            // console.log('a')
+                            // console.log(maxL2FC_a)
+                            // console.log(maxPval_a)
+                            // console.log(minL2FC_a)
+                            // console.log(minPval_a)
+                            // maxL2FC = -Math.log10(maxL2FC_a);
+                            // maxPval = -Math.log10(maxPval_a);
+                            // minL2FC = -Math.log10(minL2FC_a);
+                            // minPval = -Math.log10(minPval_a);
+                            // console.log('no a')
+                            // console.log(maxL2FC)
+                            // console.log(maxPval)
+                            // console.log(minL2FC)
+                            // console.log(minPval)
+                            // console.log('window.OMICS.omics_data ')
+                            // console.log(window.OMICS.omics_data)
+                            window.OMICS.draw_plots(window.OMICS.omics_data, true, 0, 0, 0, 0, 0, 0, 0, 'upload');
+                            // function(omics_data, firstTime, minPval, maxPval, minL2FC, maxL2FC, minPval_neg, maxPval_neg, L2FC_abs)
+                        }  else {
+                            // todo need to coordinate with Quinn for the counts data
+
+
+                        }
 
                         // put here to avoid race errors
-                        if (called_from == 'data_file') {
+                        if (called_from == 'data_file' || called_from == 'data_type') {
                             try {
                                 id_omic_data_file = $('#id_omic_data_file').val();
                                 check_file_add_update(id_omic_data_file);
                             } catch {
+                            }
+                            if ($('#id_data_type')[0].selectize.items[0] == 'log2fc') {
+                            } else {
+                                // to do need to fill the sample names list to use for replace in the list and in the pick box
+                                indy_file_headers = window.OMICS.omics_data['indy_column_header_list']
+                                sample_list = [];
+                                let $this_dropdown = $(document.getElementById('id_indy_sample_name'));
+
+                                //HANDY-selectize selection clear and refill all
+                                // clear the current selection or it can remain in the list :o
+                                $('#id_indy_sample_name').selectize()[0].selectize.clear()
+
+                                // clear all options and refill
+                                $this_dropdown.selectize()[0].selectize.clearOptions();
+                                let this_dict = $this_dropdown[0].selectize;
+                                // fill the dropdown with what brought back from ajax call
+                                $.each(indy_file_headers, function( pk, text ) {
+                                    // console.log('c '+pk+ '  '+text)
+                                    var in_me = text.indexOf('nnamed');
+                                    if (in_me < 0) {
+                                        this_dict.addOption({value: pk, text: text});
+                                        sample_list.push(text);
+                                    }
+                                });
                             }
                         }
                     }
                 },
                 error: function (xhr, errmsg, err) {
                     window.spinner.stop();
-                    alert('Encountered an error when trying to make a preview plot. Check to make sure the Data Type selected matches the file selected.');
+                    alert('Encountered an error when trying read the upload file. Check to make sure the Data Type selected matches the file selected.');
                     console.log(xhr.status + ': ' + xhr.responseText);
                 }
             });
@@ -587,11 +645,6 @@ $(document).ready(function () {
             // stuff for the two group fields
             $('#id_group_1').next().addClass('required');
             $('#id_group_2').next().addClass('required');
-
-            if (called_from != 'load') {
-                //this preview is specific for the log2 fold change data...will need something different for counts data
-                get_data_for_this_file_ready_for_preview(called_from)
-            }
 
         } else {
 
@@ -635,6 +688,11 @@ $(document).ready(function () {
                 page_metadata_lod_done = true;
             }
             indySampleMetadataCallBuildAndPost();
+        }
+
+        // if returning from existing, will be loaded in form, so, only need when CHANGE the data file
+        if (called_from != 'load') {
+            get_data_for_this_file_ready_for_preview(called_from)
         }
     }
 
@@ -748,7 +806,7 @@ $(document).ready(function () {
             let this_dict1 = $this_dropdown1[0].selectize;
             // fill the dropdown with what brought back from ajax call
             $.each(json.location_dict1[0], function( pk, text ) {
-                // console.log("1 "+pk+ "  "+text)
+                // console.log('1 '+pk+ '  '+text)
                 this_dict1.addOption({value: pk, text: text});
             });
 
@@ -757,7 +815,7 @@ $(document).ready(function () {
             let this_dict2 = $this_dropdown2[0].selectize;
             // fill the dropdown with what brought back from ajax call
             $.each(json.location_dict2[0], function( pk, text ) {
-                // console.log("2 "+pk+ "  "+text)
+                // console.log('2 '+pk+ '  '+text)
                 this_dict2.addOption({value: pk, text: text});
             });
 
@@ -777,7 +835,7 @@ $(document).ready(function () {
             // fill the dropdown with what brought back from ajax call
             //the changed one is always returned as the first
             $.each(json.location_dict1[0], function( pk, text ) {
-                // console.log("c "+pk+ "  "+text)
+                // console.log('c '+pk+ '  '+text)
                 this_dict.addOption({value: pk, text: text});
             });
             $('#id_location_'+page_omic_upload_group_id_change)[0].selectize.setValue(json.sample_location_pk1);
@@ -797,15 +855,15 @@ $(document).ready(function () {
       * is already in this study
     */
     function check_file_add_update(id_omic_data_file) {
-        if ($("#check_load").html().trim() === 'add') {
+        if ($('#check_load').html().trim() === 'add') {
             data_file_pk = 0;
         } else {
-            parseInt(document.getElementById("this_file_id").innerText.trim())
+            parseInt(document.getElementById('this_file_id').innerText.trim())
         }
         let data = {
             call: 'fetch_this_file_is_this_study',
             omic_data_file: id_omic_data_file,
-            study_id: parseInt(document.getElementById("this_study_id").innerText.trim()),
+            study_id: parseInt(document.getElementById('this_study_id').innerText.trim()),
             data_file_pk: data_file_pk,
             csrfmiddlewaretoken: window.COOKIES.csrfmiddlewaretoken
         };
@@ -837,7 +895,7 @@ $(document).ready(function () {
         });
     }
 
-     /**
+    /**
       * When the number of indy samples is > 0
     */
     function number_samples_show_hide() {
@@ -874,7 +932,7 @@ $(document).ready(function () {
         } else if (page_drag_action === 'pastes') {
             $('.pastes-section').show();
         } else {
-            // console.log("no selection");
+            // console.log('no selection');
         }
     }
 
@@ -900,7 +958,9 @@ $(document).ready(function () {
         indyUndoRedoButtonVisibilityCheck();
         buildSampleMetadataTable();
         afterBuildSampleMetadataTable();
-        whatIsCurrentlyHighlightedInTheIndyTable();
+        // do not want strip the highlighting after build table - instead, reapply the highlighting that was there
+        reapplyTheHighlightingToTheIndyTable();
+        // whatIsCurrentlyHighlightedInTheIndyTable();
         $('#id_indy_list_of_dicts').val(JSON.stringify(metadata_lod));
     }
 
@@ -944,7 +1004,7 @@ $(document).ready(function () {
     }
 
     function indyClickedAddOrDeleteRow(thisButton, add_or_delete) {
-        var thisRow = $(thisButton).attr("row-index");
+        var thisRow = $(thisButton).attr('row-index');
         var thisRowMinusHeader = thisRow-1;
 
         var dictrow = metadata_lod[thisRowMinusHeader];
@@ -1007,8 +1067,12 @@ $(document).ready(function () {
     // ~~ The radio button change or change plus the go button/drag
     function indyCalledToPastes() {
         sameFrontMatterToTableFromEmptyReplaceGoAndPaste();
+        // column will stay the same
+        // rows might not be in order
+        // if table is sorted, rows in the highlighted could be [3,2,4,1,5]
+
         // todo get the correct metadata_lod
-        alert("paste is still in development")
+        alert('paste is still in development')
         sameChangesToTableFromEmptyReplaceGoAndPaste();
 
     }
@@ -1043,9 +1107,9 @@ $(document).ready(function () {
         }
 
         for (var index = 0; index < metadata_highlighted.length; index++) {
-            console.log("metadata_highlighted[index]['metadata_highlighted_tirow'] "+metadata_highlighted[index]['metadata_highlighted_tirow'])
-            console.log("metadata_highlighted[index]['metadata_highlighted_tikey'] "+metadata_highlighted[index]['metadata_highlighted_tikey'])
-            console.log("metadata_highlighted[index]['metadata_highlighted_content'] "+metadata_highlighted[index]['metadata_highlighted_content'])
+            // console.log('metadata_highlighted[index]['metadata_highlighted_tirow'] '+metadata_highlighted[index]['metadata_highlighted_tirow'])
+            // console.log('metadata_highlighted[index]['metadata_highlighted_tikey'] '+metadata_highlighted[index]['metadata_highlighted_tikey'])
+            // console.log('metadata_highlighted[index]['metadata_highlighted_content'] '+metadata_highlighted[index]['metadata_highlighted_content'])
 
             var tirow = metadata_highlighted[index]['metadata_highlighted_tirow'];
             var tikey = metadata_highlighted[index]['metadata_highlighted_tikey'];
@@ -1059,6 +1123,9 @@ $(document).ready(function () {
                 current_val = $('#' + ikey_to_html_element[tikey]).text();
             } else if (tikey === 'sample_location_name') {
                 current_pk = $('#sample_location_pk').text();
+                current_val = $('#' + ikey_to_html_element[tikey]).text();
+            } else if (tikey === 'sample_name') {
+                current_pk = $('#sample_name_pk').text();
                 current_val = $('#' + ikey_to_html_element[tikey]).text();
             }
 
@@ -1089,7 +1156,7 @@ $(document).ready(function () {
                     } else {
                         // not the first occurrence of this tikey
                         current_val = ikey_last_highlighted[tikey];
-                        console.log("current_val "+current_val)
+
                         var i_current_val = 0;
                         if (tikey === 'time_day' || tikey === 'time_hour' || tikey === 'time_minute') {
                             if (page_change_duplicate_increment === 'increment-ttb'
@@ -1097,12 +1164,31 @@ $(document).ready(function () {
                                 // it is + for both because the holding dict was sorting descending
                                 i_current_val = parseFloat(current_val) + parseFloat($('#increment_value').val());
                             } else {
-                                alert("Make sure to select to duplicate or increment");
+                                alert('Make sure to select to duplicate or increment');
+                            }
+                        } else if (tikey === 'matrix_item_name') {
+                            // find the index of the last one, increase the index, if not out of range, replace
+                            var index_in_chip_list = chip_list.indexOf(current_val);
+                            var new_index = index_in_chip_list + parseInt($('#increment_value').val());
+                            if (index_in_chip_list >=0 && new_index < chip_list.length) {
+                                i_current_val = chip_list[new_index];
+                            } else {
+                                i_current_val = current_val;
+                            }
+                        } else if (tikey === 'sample_name') {
+                            // find the index of the last one, increase the index, if not out of range, replace
+                            var index_in_sample_list = sample_list.indexOf(current_val);
+                            var new_index = index_in_sample_list + parseInt($('#increment_value').val());
+                            if (index_in_sample_list >=0 && new_index < sample_list.length) {
+                                i_current_val = sample_list[new_index];
+                            } else {
+                                i_current_val = current_val;
                             }
                         } else {
-                            // todo sample_name chip id and well name still need an increment
+                            // todo well name still need an increment
+                            // could i look from the right until finds first non number and split? - maybe a list? not sure yet..
 
-                                alert("Increment for this field is in development: "+tikey);
+                                alert('Increment for this field is in development: '+tikey);
 
                         }
                         var i_current_index = parseInt(ikey_last_highlighted[tikey + '_index']) + 1;
@@ -1155,20 +1241,66 @@ $(document).ready(function () {
         $('#id_indy_number_of_samples').val(metadata_lod.length);
     }
 
+    function reapplyTheHighlightingToTheIndyTable() {
+        var tirow = null;
+        var tikey = null;
+        var thisElementList = null;
+        for (index = 0; index < metadata_highlighted.length; index++) {
+            tirow = metadata_highlighted[index]['metadata_highlighted_tirow'];
+            tikey = metadata_highlighted[index]['metadata_highlighted_tikey'];
+            thisElementList = $('td[ikey*="' + tikey + '"][row-index*="' + tirow + '"]');
+            // $("td[ikey*='sample_name'][row-index*='1']").addClass('special-selected1')
+            // console.log("thisElementList ",thisElementList)
+            thisElementList.addClass('special-selected1');
+        }
+        if (page_paste_cell_irow) {
+            tirow = page_paste_cell_irow;
+            tikey = page_paste_cell_ikey;
+            thisElementList = $('td[ikey*="' + tikey + '"][row-index*="' + tirow + '"]');
+            thisElementList.addClass('special-selected2');
+        }
+    }
+
     function whatIsCurrentlyHighlightedInTheIndyTable() {
         metadata_highlighted = [];
         list_of_ikeys_for_replace_highlighting = [];
         $('.special-selected1').each(function() {
             var dict = {};
-            var imetadata_highlighted_tirow = $(this).attr("row-index");
-            var imetadata_highlighted_ticol = $(this).attr("col-index");
-            var imetadata_highlighted_tikey = $(this).attr("ikey");
-            var imetadata_highlighted_content = $(this).val();
+            var imetadata_highlighted_tirow = $(this).attr('row-index');
+            var imetadata_highlighted_ticol = $(this).attr('col-index');
+            var imetadata_highlighted_tikey = $(this).attr('ikey');
+
+            // since this goes through all the keys, and they could be different types, try different ways of pulling
+            // keep in mind that the content could actually be null, if it is, make it a space
+            var imetadata_highlighted_content = null;
+            try {
+                imetadata_highlighted_content = $(this).val();
+            } catch {
+                 imetadata_highlighted_content = '';
+            }
+            if (!imetadata_highlighted_content) {
+                try {
+                    imetadata_highlighted_content = $(this).text();
+                } catch {
+                    imetadata_highlighted_content = '';
+                }
+            }
+            if (!imetadata_highlighted_content) {
+                try {
+                    imetadata_highlighted_content = $(this).innerHTML.trim();
+                } catch {
+                    imetadata_highlighted_content = '';
+                }
+            }
             if (imetadata_highlighted_content.length === 0) {
                 imetadata_highlighted_content = $(this).text();
             }
             if (imetadata_highlighted_content.length === 0) {
-                imetadata_highlighted_content = $(this).innerHTML.trim();
+                try {
+                    imetadata_highlighted_content = $(this).innerHTML.trim();
+                } catch {
+                    imetadata_highlighted_content = '';
+                }
             }
             dict['metadata_highlighted_tirow'] = imetadata_highlighted_tirow;
             dict['metadata_highlighted_ticol'] = imetadata_highlighted_ticol;
@@ -1185,17 +1317,19 @@ $(document).ready(function () {
                 $('#'+ikey_to_html_outer[ikey]).removeClass('required');
             }
         }
-        // console.log("metadata_highlighted ",metadata_highlighted)
+        // console.log('metadata_highlighted ',metadata_highlighted)
     }
 
     // END - The functions that change the indy table
     
+    var page_paste_cell_irow = null;
+    var page_paste_cell_ikey = null;
     function selectableDragOnSampleMetadataTable() {
         if (page_drag_action === 'pastes') {
-            if (document.getElementsByClassName("special-selected1").length === 0) {
+            if (document.getElementsByClassName('special-selected1').length === 0) {
                 page_drag_action = null;
                 sample_metadata_replace_show_hide();
-                alert("Select some text to copy before drag to paste");
+                alert('Select some text to copy before drag to paste');
             } else {
                 $('.special-selected2').removeClass('special-selected2');
                 // want to highlight from the first location, so, want only the first one
@@ -1203,6 +1337,8 @@ $(document).ready(function () {
                 $('.ui-selected').each(function () {
                     if (icount == 0) {
                         $(this).addClass('special-selected2');
+                        page_paste_cell_irow = $(this).attr('row-index');
+                        page_paste_cell_ikey = $(this).attr('ikey');
                     }
                     // $(this).removeClass('ui-selected');
                     icount = icount + 1;
@@ -1230,14 +1366,14 @@ $(document).ready(function () {
         //remove the table
         elem.removeChild(elem.childNodes[0]);
 
-        var myTableDiv = document.getElementById("div_for_"+sample_metadata_table_id);
+        var myTableDiv = document.getElementById('div_for_'+sample_metadata_table_id);
         var myTable = document.createElement('TABLE');
         $(myTable).attr('id', sample_metadata_table_id);
         $(myTable).attr('cellspacing', '0');
         $(myTable).attr('width', '100%');
         $(myTable).addClass('display table table-striped table-hover');
 
-        var tableHead = document.createElement("THEAD");
+        var tableHead = document.createElement('THEAD');
         var tr = document.createElement('TR');
         $(tr).attr('hrow-index', 0);
 
@@ -1313,7 +1449,7 @@ $(document).ready(function () {
                             tr.appendChild(td);
                         }
                     } else {
-                        // if ($("#check_load").html().trim() === 'review') {
+                        // if ($('#check_load").html().trim() === 'review') {
                             td.appendChild(document.createTextNode(row[ikey]));
                             $(td).attr('class', 'no-wrap');
                         // } else {
@@ -1330,7 +1466,7 @@ $(document).ready(function () {
                         //         // } else {
                         //         //     size = 10;
                         //         // }
-                        //         var input_button = ' <input type="text" size="' + size + '" name="r'
+                        //         var input_button = ' <input type="text" size='' + size + '" name="r'
                         //             + rowcounter + 'c' + colcounter + ' id="r'
                         //             + rowcounter + 'c' + colcounter + ' value=' + row[ikey] + '>';
                         //         $(td).html(input_button);
@@ -1349,18 +1485,18 @@ $(document).ready(function () {
 
         // When I did not have the var before the variable name, the table headers acted all kinds of crazy
         var sampleDataTable = $('#'+sample_metadata_table_id).removeAttr('width').DataTable({
-            // "iDisplayLength": 100,
+            // 'iDisplayLength': 100,
             paging:         false,
-            "sDom": '<B<"row">lfrtip>',
+            'sDom': '<B<"row">lfrtip>',
             //do not do the fixed header here...only want for two of the tables
             //https://datatables.net/forums/discussion/30879/removing-fixedheader-from-a-table
             //https://datatables.net/forums/discussion/33860/destroying-a-fixed-header
             fixedHeader: {headerOffset: 50},
             // responsive: true,
-            "order": table_order,
-            "columnDefs": table_column_defs,
+            'order': table_order,
+            'columnDefs': table_column_defs,
             // fixedColumns: true
-            "autoWidth": true
+            'autoWidth': true
         });
 
         return myTable;

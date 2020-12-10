@@ -5273,9 +5273,21 @@ class AssayOmicDataFileUploadForm(BootstrapForm):
 
         # todo here here - need to get the real list of dicts
         self.fields['indy_number_of_samples'].initial = len(list_of_dicts)
-
         self.fields['indy_list_of_dicts'].initial = json.dumps(list_of_dicts)
-        self.fields['indy_matrix_item'].queryset = AssayMatrixItem.objects.filter(study_id=self.study).order_by('name', )
+
+        matrix_item_queryset = AssayMatrixItem.objects.filter(study_id=self.study).order_by('name', )
+        self.fields['indy_matrix_item'].queryset = matrix_item_queryset
+        matrix_item_list = matrix_item_queryset.values_list('name', flat=True)
+        self.fields['indy_matrix_item_list'].initial = json.dumps(matrix_item_list)
+
+        # todo get the right list - decide on what is a list and what is a queryset - may need both like need for matrix item...
+        # sample_name_queryset = AssayOmicSampleMetadata.objects.filter(study_id=self.study).order_by('cross_reference', )
+        sample_name_queryset = AssayMatrixItem.objects.filter(study_id=self.study).order_by('name', )
+        self.fields['indy_sample_name'].queryset = sample_name_queryset
+        # sample_name_list = sample_name_queryset.values_list('cross_reference', flat=True)
+        sample_name_list = sample_name_queryset.values_list('name', flat=True)
+        self.fields['indy_sample_name_list'].initial = json.dumps(sample_name_list)
+
         self.fields['indy_sample_metadata_table_was_changed'].initial = False
         self.fields['indy_sample_metadata_field_header_was_changed'].initial = False
         #indy-sample
@@ -5328,8 +5340,14 @@ class AssayOmicDataFileUploadForm(BootstrapForm):
         queryset=AssayMatrixItem.objects.none(),
         required=False,
     )
+    indy_sample_name = forms.ModelChoiceField(
+        queryset=AssayMatrixItem.objects.none(),
+        required=False,
+    )
     indy_sample_metadata_table_was_changed = forms.BooleanField()
     indy_sample_metadata_field_header_was_changed = forms.BooleanField()
+    indy_matrix_item_list = forms.CharField(widget=forms.TextInput(), required=False,)
+    indy_sample_name_list = forms.CharField(widget=forms.TextInput(), required=False, )
     #indy-sample
 
     def clean(self):

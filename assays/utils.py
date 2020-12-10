@@ -59,6 +59,7 @@ import io
 import os
 from statistics import mean, mode
 import warnings
+import copy
 
 import pandas as pd
 import numpy as np
@@ -6523,16 +6524,19 @@ def omic_data_file_process_data(save, study_id, omic_data_file_id, data_file, fi
     data_dicts['file_id_to_name'][1] = joint_name
     data_dicts['table'][joint_name] = ['Preview Chosen File', omic_data_file_id]
     data_dicts['target_name_to_id'] = {}
+    data_dicts['indy_column_header_list'] = []
 
-    if data_type == 'log2fc':
-        pass
-        # print("~continue ", save)
-    else:
-        error_message = error_message + 'Currently only working for data type log2fc'
-        raise forms.ValidationError(error_message)
-        continue_outer_if_true = False
+    # if data_type == 'log2fc':
+    #     pass
+    #     # print("~continue ", save)
+    # else:
+    #     error_message = error_message + 'Currently only working for data type log2fc'
+    #     raise forms.ValidationError(error_message)
+    #     continue_outer_if_true = False
 
     if continue_outer_if_true:
+        # Think good for all log2fc and counts data
+
         # fill omic_target_text_header_list = [] and target_pk_list = []
         # pull from the AssayOmicAnalysisTarget
         # where file_header is true and data_type matches data_type and analysis_method matches analysis_method
@@ -6609,6 +6613,14 @@ def omic_data_file_process_data(save, study_id, omic_data_file_id, data_file, fi
                 data_dicts['target_name_to_id'] = {y: analysis_target_name_to_pk_dict[y] for y in list_of_relevant_headers_in_file}
 
             if continue_this_sheet_if_true:
+
+                uni_list = copy.deepcopy(data_dicts.get('indy_column_header_list'))
+                for item in df_column_headers_stripped:
+                    if item not in uni_list:
+                        uni_list.append(item)
+
+                data_dicts['indy_column_header_list'] = copy.deepcopy(uni_list)
+
                 # Guts of data loading for omic data file
                 # functions should return continue, error message, and a list of instances and an instance counter
                 if data_type == 'log2fc':
@@ -6638,6 +6650,7 @@ def omic_data_file_process_data(save, study_id, omic_data_file_id, data_file, fi
 
                 elif data_type == 'normcounts' or data_type == 'rawcounts':
                     pass
+                    # todo
                     # data_loaded_to_list_of_instances = omic_metadata_data_to_list_of_instances(
                     #     list_of_instances, instance_counter, df,
                     #     study_id, omic_data_file_id, analysis_target_name_to_pk_dict,
@@ -6648,7 +6661,8 @@ def omic_data_file_process_data(save, study_id, omic_data_file_id, data_file, fi
 
             sheet_index = sheet_index + 1
 
-    if instance_counter == 0:
+    # todo change this for all data types after get other data type data processing working
+    if instance_counter == 0 and data_type == 'log2fc':
         error_message = error_message + 'There were no records in the file to upload. '
         raise forms.ValidationError(error_message)
         continue_outer_if_true = False
@@ -6693,11 +6707,15 @@ def omic_qc_data_file(df, omic_target_text_header_list, data_type):
                     'FC') >= 0 or file_header.find('Fold') >= 0:
                 found_foldchange_true = True
 
-    if found_foldchange_true:
-        pass
+    if data_type == 'log2fc':
+        if found_foldchange_true:
+            pass
+        else:
+            continue_this_sheet_if_true = False
+            error_message = error_message + ' Required header containing "fc" or "fold" or "FC" or "Fold" is missing. '
     else:
-        continue_this_sheet_if_true = False
-        error_message = error_message + ' Required header containing "fc" or "fold" or "FC" or "Fold" is missing. '
+        pass
+        # just a reminder that need todo this - build qc
 
     # todo when ready to deal with count data or more qc for other data
     # if data_type != 'log2fc':
