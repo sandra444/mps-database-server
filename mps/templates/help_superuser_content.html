@@ -366,6 +366,23 @@
                                 </li>
                             </ul>
                         </li>
+                        <li>For Counts data:
+                            <ul class="help-filled-circle">
+                                <li> Make/confirm Assay Methods, such as TempO-Seq and DESeq2, are in the MPS-Db Study Components</li>
+                                <li> Make/confirm computational Assay Targets (see below) are in the Assay Targets list and assigned to Assay Method DESeq2 (with category: Computational)
+                                    <ul class="help-open-circle">
+                                        <li>Raw Counts and Normalized Counts - DESeq2 Ct (rawcounts and normcounts)</li>
+                                    </ul>
+                                </li>
+                                <li> Note: the visualizations depend on specific computational target naming, so, be careful with changing the names of computational targets and/or adding new computation targets or the GUI may not perform as expected</li>
+                                <li> Make/confirm categories Gene Expression and Computational are in the category list and assign the targets to them (as indicated above)</li>
+                                <li> When setting up a Study, add the Gene Expression Method, Target, and Unit (TempO-Seq, Human 1500+, Fold Change) in the Assay setup
+                                    <ul class="help-open-circle">
+                                        <li> When the user does the Assay Setup in the Study Setup - the only thing needed to work correctly is that the Assay Target selected is associated with category: Gene Expression</li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </li>
                         <br>
                         <li>Rules for Omic Data:
                             <ul class="help-filled-circle">
@@ -407,7 +424,7 @@
                                 <li>The purpose of the glossary categories are first and foremost to control the functioning of the help page, do not change them or tables on the help page that are subsets of the glossary (e.g., the Database Features table) may not work correctly</li>
                                 <li>Do not change the term metadata (e.g., other fields in the glossary table), other than the definition, without consulting the developers for the potential impact on the Help page</li>
                                 <li>Changing the definition will automatically change the places in the help page where the definition of a term is displayed</li>
-                                <li>There are some parts of the code that should be changed before moving to production, search for **change to find these</li>
+                                <li>There are some parts of the code that should be changed before moving to production, search for **change-star to find these</li>
                             </ul>
                         </li>
 

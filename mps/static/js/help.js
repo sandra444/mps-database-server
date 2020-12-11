@@ -1,8 +1,8 @@
 $(document).ready(function () {
 
     var glossary_spans_on = true;
-    //after done editing, do this **change
-    //strip_the_glossary_spans()
+    //after done editing, do this **change-star (uncomment the next line to make the text black instead of glossary red
+    strip_the_glossary_spans();
 
     var set_hash_default = '#search_help_page_section';
     var incoming_hash = window.location.hash;
@@ -235,6 +235,9 @@ $(document).ready(function () {
         change_search_ables_to_search(true);
         $content.unmark();
         $input.val('').focus();
+
+        $('#glossary_table_filter :input').val(null).trigger('input');
+
     });
 
     /**
@@ -486,11 +489,20 @@ $(document).ready(function () {
 
     function strip_the_glossary_spans() {
         //remove the class on the glossary extracts so the search will work better
+        // when use $('#realTimeContents .gse0') you do not get the glossary :o
         $span = $('#realTimeContents .gse0');
         $span.each(function() {
             $(this).replaceWith($(this).html());
         });
         $span = $('#realTimeContents .gse1');
+        $span.each(function() {
+            $(this).replaceWith($(this).html());
+        });
+        $span = $('#glossaryContents .gse0');
+        $span.each(function() {
+            $(this).replaceWith($(this).html());
+        });
+        $span = $('#glossaryContents .gse1');
         $span.each(function() {
             $(this).replaceWith($(this).html());
         });
