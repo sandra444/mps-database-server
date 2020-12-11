@@ -209,6 +209,9 @@
                 <br>
 
             <div>
+
+                {% include "generic_field.html" with field=form.data_type %}
+
                 {% include "generic_field.html" with field=form.description %}
 
                 {% include "generic_field.html" with field=form.study_assay %}
@@ -230,8 +233,6 @@
                         </div>
                     </div>
                 </div>
-
-                {% include "generic_field.html" with field=form.data_type %}
 
                 {% include "generic_field.html" with field=form.name_reference %}
 
@@ -406,6 +407,8 @@
                                 <button type="button" class="btn btn-default">Go</button>
                             </div>
                             <div class="col-sm-6"></div>
+                                <div id="number_headers_in_file">
+                                </div>
                         </div>
                     </div>
 
@@ -669,7 +672,7 @@
                             </div>
                             <div class="col-sm-9">
                                 <div class="plate-map-page-radio-contents">
-                                    <label><input type="radio" class="plate-map-bigger-radio" name="radio_change_duplicate_increment" value="duplicate" checked>
+                                    <label><input id="radio_duplicate" type="radio" class="plate-map-bigger-radio" name="radio_change_duplicate_increment" value="duplicate" checked>
                                         <p class="plate-map-radio-spacing plate-map-no-wrap">Duplicate</p></label>
                                     <label><input type="radio" class="plate-map-bigger-radio" name="radio_change_duplicate_increment" value="increment-ttb">
                                         <p class="plate-map-radio-spacing plate-map-no-wrap">Increment Top to Bottom</p></label>

@@ -6,6 +6,8 @@ window.OMICS = {
 
 //todo at some point, limit the sample locations to what is listed in model, if listed (location_1, 2 and sample location - three places currently)
 
+// todo add a highlight all to columns
+
 $(document).ready(function () {
     //show the validation stuff
     $('#form_errors').show()
@@ -50,6 +52,14 @@ $(document).ready(function () {
     //the table that is highlighted
     var metadata_highlighted = [];
     var list_of_ikeys_for_replace_highlighting = [];
+    var ikey_last_highlighted_seen = {};
+    var number_headers_in_file = 0;
+
+    // just working variables, but want in different subs, so just declare here
+    var current_pk = 0;
+    var current_val = '';
+    var indy_sample_metadata_table_current_row_order = [];
+
 
     // make sure order is parallel to form field indy_list_of_keys
     var metadata_headers = [
@@ -584,7 +594,7 @@ $(document).ready(function () {
 
 
                         }
-
+                        // console.log("called_from ",called_from)
                         // put here to avoid race errors
                         if (called_from == 'data_file' || called_from == 'data_type') {
                             try {
@@ -595,7 +605,13 @@ $(document).ready(function () {
                             if ($('#id_data_type')[0].selectize.items[0] == 'log2fc') {
                             } else {
                                 // to do need to fill the sample names list to use for replace in the list and in the pick box
-                                indy_file_headers = window.OMICS.omics_data['indy_column_header_list']
+                                indy_file_headers = window.OMICS.omics_data['indy_column_header_list'];
+                                number_headers_in_file = indy_file_headers.length;
+                                if (number_headers_in_file === 0) {
+                                    alert('There was no information pulled back from the file selected. This is commonly caused by a named header for the gene reference being missing. Use: gene, gene reference, or name as a column header for the gene field.')
+                                }
+                                // console.log('indy_file_headers ',indy_file_headers)
+
                                 sample_list = [];
                                 let $this_dropdown = $(document.getElementById('id_indy_sample_name'));
 
@@ -608,11 +624,16 @@ $(document).ready(function () {
                                 let this_dict = $this_dropdown[0].selectize;
                                 // fill the dropdown with what brought back from ajax call
                                 $.each(indy_file_headers, function( pk, text ) {
-                                    // console.log('c '+pk+ '  '+text)
+                                    console.log('c '+pk+ '  '+text)
                                     var in_me = text.indexOf('nnamed');
                                     if (in_me < 0) {
-                                        this_dict.addOption({value: pk, text: text});
-                                        sample_list.push(text);
+                                        lctext = text.toLowerCase();
+                                        if (lctext === 'gene reference' || lctext === 'name' || lctext === 'gene'  || lctext === 'gene id') {
+                                            //    skip it
+                                        } else {
+                                            this_dict.addOption({value: pk, text: text});
+                                            sample_list.push(text);
+                                        }
                                     }
                                 });
                             }
@@ -634,7 +655,7 @@ $(document).ready(function () {
     // Called from a variety of places, including load, to set the right visibilities based on the data type
     // and to call all the downstream functions needed depending on data type and how/when called
     function changed_something_important(called_from) {
-
+        // console.log("called_from ",called_from)
         if ($('#id_data_type')[0].selectize.items[0] == 'log2fc') {
 
             // $('.two-group').show();
@@ -903,6 +924,7 @@ $(document).ready(function () {
             $('.number-samples').hide();
         } else {
             $('.number-samples').show();
+            document.getElementById("number_headers_in_file").innerHTML = 'Extracted Headers: '+number_headers_in_file;
         }
     }
 
@@ -959,7 +981,8 @@ $(document).ready(function () {
         buildSampleMetadataTable();
         afterBuildSampleMetadataTable();
         // do not want strip the highlighting after build table - instead, reapply the highlighting that was there
-        reapplyTheHighlightingToTheIndyTable();
+        // todo fix the reapply highlighting
+        //reapplyTheHighlightingToTheIndyTable();
         // whatIsCurrentlyHighlightedInTheIndyTable();
         $('#id_indy_list_of_dicts').val(JSON.stringify(metadata_lod));
     }
@@ -1067,45 +1090,27 @@ $(document).ready(function () {
     // ~~ The radio button change or change plus the go button/drag
     function indyCalledToPastes() {
         sameFrontMatterToTableFromEmptyReplaceGoAndPaste();
-        // column will stay the same
-        // rows might not be in order
-        // if table is sorted, rows in the highlighted could be [3,2,4,1,5]
-
-        // todo get the correct metadata_lod
-        alert('paste is still in development')
+        indyCalledGutsPastesAndReplace('pastes');
         sameChangesToTableFromEmptyReplaceGoAndPaste();
-
     }
     
     function indyCalledToReplace() {
         sameFrontMatterToTableFromEmptyReplaceGoAndPaste();
-        // because the pks are not in the table, they will not ever be highlighted
-        // BUT, we want to keep them matching the names selected in the metadata_lod
-        // so that, they are correct in the form field that is sent back
-        // plan to check in the back end to make sure they went together
-        // could remove the pks altogether, but, what if users decide want to see them.....
+        // resort for increment is in the front matter (above)
+        indyCalledGutsPastesAndReplace('replace');
+        sameChangesToTableFromEmptyReplaceGoAndPaste();
+    }
 
-        // change the content of the cell with what is in the selections
-        var ikey_last_highlighted = {};
-        $.each(indy_keys, function (index, ikey) {
-            ikey_last_highlighted[ikey] = '99';
-            ikey_last_highlighted[ikey+'_index'] = -99;
-        });
+    function indyCalledGutsPastesAndReplace(called_from) {
+        // replace - has the increment option, but always replacing the same cell
+        // pastes - column will stay the same, rows will change, but, remember that, rows might not be in order
+        // so use the actual order of the table, which is stored in indy_sample_metadata_table_current_row_order
 
-        var metadata_highlighted_temp = JSON.parse(JSON.stringify(metadata_highlighted));
-
-        if (page_change_duplicate_increment === 'increment-ttb') {
-            // think should be in the order of the table, so, leave it as is
-        } else if (page_change_duplicate_increment === 'increment-btt') {
-            // index should be from top to bottom
-            metadata_highlighted = [];
-            for (var index = metadata_highlighted_temp.length-1; index >= 0; index--) {
-                metadata_highlighted.push(metadata_highlighted_temp[index]);
-            }
-        } else {
-            // duplicate - index should not matter
+        if (page_drag_action === 'pastes') {
+            alert("paste is still in development")
         }
 
+        var tirow_changing = null;
         for (var index = 0; index < metadata_highlighted.length; index++) {
             // console.log('metadata_highlighted[index]['metadata_highlighted_tirow'] '+metadata_highlighted[index]['metadata_highlighted_tirow'])
             // console.log('metadata_highlighted[index]['metadata_highlighted_tikey'] '+metadata_highlighted[index]['metadata_highlighted_tikey'])
@@ -1114,10 +1119,22 @@ $(document).ready(function () {
             var tirow = metadata_highlighted[index]['metadata_highlighted_tirow'];
             var tikey = metadata_highlighted[index]['metadata_highlighted_tikey'];
 
-            // get using the .val for input fields
-            var current_val = $('#' + ikey_to_html_element[tikey]).val();
+            if (page_drag_action === 'pastes') {
+                $("#radio_duplicate").prop("checked", true).trigger("click");
+                tirow_changing = tirow - 1;; //still working on this todo!!
+            } else {
+                tirow_changing = tirow - 1;
+            }
 
-            var current_pk = 0;
+            // get using the .val for input fields
+            current_val = $('#' + ikey_to_html_element[tikey]).val();
+
+            // because the pks are not in the table, they will not ever be highlighted
+            // BUT, we want to keep them matching the names selected in the metadata_lod
+            // so that, they are correct in the form field that is sent back
+            // plan to check in the back end to make sure they went together
+            // could remove the pks altogether, but, what if users decide want to see them.....
+            current_pk = 0;
             if (tikey === 'matrix_item_name') {
                 current_pk = $('#matrix_item_pk').text();
                 current_val = $('#' + ikey_to_html_element[tikey]).text();
@@ -1132,30 +1149,30 @@ $(document).ready(function () {
             // do not forget to subtract the header row when getting metadata_lod index!
             if (tikey === 'sample_location_name') {
                 // can only duplicate, not increment the sample location
-                metadata_lod[tirow - 1][tikey] = current_val;
-                metadata_lod[tirow - 1]['sample_location_pk'] = current_pk;
+                metadata_lod[tirow_changing][tikey] = current_val;
+                metadata_lod[tirow_changing]['sample_location_pk'] = current_pk;
             } else {
                 if (page_change_duplicate_increment === 'duplicate') {
-                    metadata_lod[tirow - 1][tikey] = current_val;
+                    metadata_lod[tirow_changing][tikey] = current_val;
                     if (tikey === 'matrix_item_name') {
-                        metadata_lod[tirow - 1]['matrix_item_pk'] = current_pk;
+                        metadata_lod[tirow_changing]['matrix_item_pk'] = current_pk;
                     }
                 } else {
                     // an increment
-                    var current_index = ikey_last_highlighted[tikey+'_index'];
+                    var current_index = ikey_last_highlighted_seen[tikey+'_index'];
 
                     if (current_index === -99) {
                         // on the first one, it is a duplicate and change info for next
-                        metadata_lod[tirow - 1][tikey] = current_val;
+                        metadata_lod[tirow_changing][tikey] = current_val;
                         if (tikey === 'matrix_item_name') {
-                            metadata_lod[tirow - 1]['matrix_item_pk'] = current_pk;
+                            metadata_lod[tirow_changing]['matrix_item_pk'] = current_pk;
                         }
                         // update the last found object for next go
-                        ikey_last_highlighted[tikey] = current_val;
-                        ikey_last_highlighted[tikey + '_index'] = 0;
+                        ikey_last_highlighted_seen[tikey] = current_val;
+                        ikey_last_highlighted_seen[tikey + '_index'] = 0;
                     } else {
                         // not the first occurrence of this tikey
-                        current_val = ikey_last_highlighted[tikey];
+                        current_val = ikey_last_highlighted_seen[tikey];
 
                         var i_current_val = 0;
                         if (tikey === 'time_day' || tikey === 'time_hour' || tikey === 'time_minute') {
@@ -1187,23 +1204,23 @@ $(document).ready(function () {
                         } else {
                             // todo well name still need an increment
                             // could i look from the right until finds first non number and split? - maybe a list? not sure yet..
-
+                            // maybe string split the whole thing and index backards to first non number, then icrement the number
+                            // could go back as string, but probably easier to work with list...think about
                                 alert('Increment for this field is in development: '+tikey);
 
                         }
-                        var i_current_index = parseInt(ikey_last_highlighted[tikey + '_index']) + 1;
+                        var i_current_index = parseInt(ikey_last_highlighted_seen[tikey + '_index']) + 1;
                         // update the last found object for next go
-                        ikey_last_highlighted[tikey] = i_current_val;
-                        ikey_last_highlighted[tikey + '_index'] = i_current_index;
+                        ikey_last_highlighted_seen[tikey] = i_current_val;
+                        ikey_last_highlighted_seen[tikey + '_index'] = i_current_index;
                         // update the correct location in the table metadata
-                        metadata_lod[tirow - 1][tikey] = i_current_val;
+                        metadata_lod[tirow_changing][tikey] = i_current_val;
 
                     }
                 }
             }
         }
-        sameChangesToTableFromEmptyReplaceGoAndPaste();
-    }
+    };
 
     function indyCalledToEmpty() {
         sameFrontMatterToTableFromEmptyReplaceGoAndPaste();
@@ -1232,6 +1249,24 @@ $(document).ready(function () {
         } else {
             $('#id_indy_sample_metadata_field_header_was_changed').attr('checked',false);
         }
+
+        // for replace, increment is only available in the replace, but allow the resorting here
+        var metadata_highlighted_temp = [];
+        metadata_highlighted_temp = JSON.parse(JSON.stringify(metadata_highlighted));
+        if (page_drag_action === 'replace') {
+            if (page_change_duplicate_increment === 'increment-ttb') {
+                // think should be in the order of the table, so, leave it as is
+            } else if (page_change_duplicate_increment === 'increment-btt') {
+                // index should be from top to bottom
+                metadata_highlighted = [];
+                for (var index = metadata_highlighted_temp.length - 1; index >= 0; index--) {
+                    metadata_highlighted.push(metadata_highlighted_temp[index]);
+                }
+            } else {
+                // duplicate - index should not matter
+            }
+        }
+
     }
 
     function sameChangesToTableFromEmptyReplaceGoAndPaste() {
@@ -1318,6 +1353,14 @@ $(document).ready(function () {
             }
         }
         // console.log('metadata_highlighted ',metadata_highlighted)
+        
+        // need for replace and pastes to keep track of last seen during the replace/pastes
+        // costs a little extra to put here, but will always be ready
+        ikey_last_highlighted_seen = {};
+        $.each(indy_keys, function (index, ikey) {
+            ikey_last_highlighted_seen[ikey] = '99';
+            ikey_last_highlighted_seen[ikey+'_index'] = -99;
+        });
     }
 
     // END - The functions that change the indy table
@@ -1325,6 +1368,7 @@ $(document).ready(function () {
     var page_paste_cell_irow = null;
     var page_paste_cell_ikey = null;
     function selectableDragOnSampleMetadataTable() {
+        // console.log("dragging")
         if (page_drag_action === 'pastes') {
             if (document.getElementsByClassName('special-selected1').length === 0) {
                 page_drag_action = null;
@@ -1499,8 +1543,39 @@ $(document).ready(function () {
             'autoWidth': true
         });
 
-        return myTable;
+        sampleDataTable.rows().every(function(){
+            // this.data() is a list, with the first one being the tags and such
+            // console.log("this row ",this.data());
+            // console.log("this row ",this.data()[0]);
+            // the tags and such look like a long string, so, to find an attribute, must be creative
+            // below is HANDY for looping through, and getting a value.by name, but we do not need that here
+            // var data = this.data();
+            // data.forEach(function (value, index) {
+            //     // if (value.isActive)
+            //     // {
+            //      console.log('value ',value);
+            //https://stackoverflow.com/questions/29077902/how-to-loop-through-all-rows-in-datatables-jquery
+            //      // console.log(value.UserName);
+            //     // }
+            // })
+            var tags_and_such = this.data()[0].replace('=','"').replace(' ','"');
+            var tags_and_such_list = tags_and_such.split('"');
+            var index_of_row_index_label = -1;
+            var row_index = -1;
+            tags_and_such_list.forEach(function (value, index) {
+                if (value.indexOf('row-index') >= 0) {
+                    index_of_row_index_label = index;
+                };
+            });
+            if (index_of_row_index_label >= 0) {
+                row_index = tags_and_such_list[index_of_row_index_label+1];
+                indy_sample_metadata_table_current_row_order.push(row_index);
+            } else {
+                console.log('The row index should always be found...');
+            }
+        });
 
+        return myTable;
     }
 
     function afterBuildSampleMetadataTable() {

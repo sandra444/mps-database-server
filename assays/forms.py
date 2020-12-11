@@ -5219,7 +5219,7 @@ class AssayOmicDataFileUploadForm(BootstrapForm):
 
         list_of_defaults1 = [
             '',
-            'sample20201105-01',
+            'sample20201105-05',
             'chip1',
             'efflux',
             'A1',
