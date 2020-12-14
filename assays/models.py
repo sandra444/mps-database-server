@@ -4619,7 +4619,9 @@ class AssayPlateReaderMap(FlaggableModel):
     """Assay Plate Reader Map for processing plate reader data."""
 
     class Meta(object):
-        verbose_name_plural = 'Assay Plate Reader Map'
+        verbose_name = 'Assay Plate Reader Map'
+        # Singular plural verbose name?
+        # verbose_name_plural = 'Assay Plate Reader Map'
         # unique_together = [
         #     ('study', 'name')
         # ]
