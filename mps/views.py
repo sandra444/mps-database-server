@@ -22,8 +22,8 @@ import os
 
 from mps.settings import MEDIA_ROOT
 
+from django.views.generic.base import TemplateView
 from resources.models import Definition, ComingSoonEntry, WhatIsNewEntry
-# from django.views.generic.base import TemplateView
 
 from microdevices.models import MicrophysiologyCenter
 from mps.templatetags.custom_filters import ADMIN_SUFFIX, VIEWER_SUFFIX
@@ -152,32 +152,79 @@ def custom_search(request):
 
 
 def mps_help(request):
-    glossary = Definition.objects.exclude(definition='')
 
-    # get a subset of the features for the feature table
-    feature = glossary.filter(help_category='feature').order_by('help_order')
+    # HANDY get server path website address
+    # print("request.build_absolute_uri() ",request.build_absolute_uri())
+    # print("request.get_full_path() ", request.get_full_path())
+    # request.build_absolute_uri()  http://127.0.0.1:8000/help/
+    # request.get_full_path()  /help/
+    help_url = request.build_absolute_uri()
 
-    # get other subsets for other tables on the help page
-    source = glossary.filter(help_category='source').order_by('help_order')
-    component_assay = glossary.filter(help_category='component-assay').order_by('help_order')
-    component_model = glossary.filter(help_category='component-model').order_by('help_order')
-    component_compound = glossary.filter(help_category='component-compound').order_by('help_order')
-    component_cell = glossary.filter(help_category='component-cell').order_by('help_order')
+    # HANDY - super important - if use an order_by you make a new queryset!
+    # https://stackoverflow.com/questions/51709984/sort-queryset-by-added-field
 
-    all_glossary = {}
-    for each in glossary:
-        term = each.term
-        stripped_term = ''.join(e for e in term if e.isalnum())
-        stripped_term = stripped_term.lower()
-        # print("stripped_term: ", stripped_term)
-        all_glossary[stripped_term+'_def'] = each.definition
-        all_glossary[stripped_term+'_ref'] = each.show_url
+    # get the whole glossary
+    glossary_master = Definition.objects.all()
 
-    # print("all_glossary ", all_glossary)
+    # take the glossary master and make a new glossary with terms that are needed for the html
+    glossary_dict = {}
+    for each in glossary_master:
+        glossary_dict[each.stripped_term() + '_term'] = each.term
+        glossary_dict[each.stripped_term() + '_def'] = each.definition
+        glossary_dict[each.stripped_term() + '_help_ref'] = each.help_reference
+        glossary_dict[each.stripped_term() + '_ref'] = each.reference
+
+    # get a subset of the features for the feature table (in order as specified in the glossary)
+    feature = glossary_master.filter(help_category='feature').filter(help_display=True).order_by('help_order')
+
+    # get the data sources for each feature and add them to the feature
+    for each in feature:
+        this_list = []
+        this_list_string = ''
+        for s in each.data_sources.all():
+            s_help_order = s.help_order
+            this_list.append(s_help_order)
+        this_list.sort()
+        this_list_string = ', '.join(map(str, this_list))
+
+        # HANDY - add field to queryset add a field to a queryset
+        # Adding a field must be the LAST THING you do or the field will get removed
+        each.source_list = this_list_string
 
     # limit the glossary to only those selected for display
-    glossary = glossary.filter(glossary_display=True)
+    glossary = glossary_master.filter(glossary_display=True)
+    # get other subsets for other tables on the help page
+    # note: these pull terms and associated metadata in loops in the html, so do not need the stripped reference term in these
+    source = glossary_master.filter(help_category='source').filter(help_display=True).order_by('help_order')
+    component_assay = glossary_master.filter(help_category='component-assay').filter(help_display=True).order_by('help_order')
+    component_model = glossary_master.filter(help_category='component-model').filter(help_display=True).order_by('help_order')
+    component_compound = glossary_master.filter(help_category='component-compound').filter(help_display=True).order_by('help_order')
+    component_cell = glossary_master.filter(help_category='component-cell').filter(help_display=True).order_by('help_order')
+    permission = glossary_master.filter(help_category='permission').filter(help_display=True).order_by('help_order')
+    organization_study = glossary_master.filter(help_category='organization-study').filter(help_display=True).order_by('help_order')
 
+    # HANDY get server path website address
+    # print("request.build_absolute_uri() ",request.build_absolute_uri())
+    # print("request.get_full_path() ", request.get_full_path())
+    # request.build_absolute_uri()  http://127.0.0.1:8000/help/
+    # request.get_full_path()  /help/
+
+    # START USE THIS SECTION IN DEVELOPMENT ONLY - comment out before going to production**change-star
+    # have to do this LAST for ALL of them, or won't work
+
+    # for each in glossary:
+    #     # print("~~each.reference pre ", each.reference)
+    #     if '127.0.0.1:8000' in help_url:
+    #         each.reference = each.reference.replace('mps.csb.pitt.edu', '127.0.0.1:8000')
+    #     elif 'bohr-prody-vm.upddi.pitt.edu' in help_url:
+    #         each.reference = each.reference.replace('mps.csb.pitt.edu', 'bohr-prody-vm.upddi.pitt.edu')
+    #     # print("  each.reference post ", each.reference)
+
+    # END USE THIS SECTION IN DEVELOPMENT ONLY
+
+    # the main glossary
+    # specialty subsets
+    # dict for specific terms plus
     data = {
         # 'version': len(os.listdir(MEDIA_ROOT + '/excel_templates/')),
         'glossary': glossary,
@@ -187,10 +234,15 @@ def mps_help(request):
         'component_model': component_model,
         'component_compound': component_compound,
         'component_cell': component_cell,
-        'all_glossary': all_glossary,
-        # 'study_component_def': all_glossary.get('studycomponent_def', ''),
-        # 'study_component_ref': all_glossary.get('studycomponent_ref', ''),
+        'permission': permission,
+        'organization_study': organization_study,
+        'glossary_dict': glossary_dict,
+        # 'study_component_def': glossary_dict.get('studycomponent_def', ''),
+        # 'study_component_ref': glossary_dict.get('studycomponent_ref', ''),
     }
+
+    # for each in glossary_dict:
+    #     print(each)
 
     return render(request, 'help.html', data)
 
