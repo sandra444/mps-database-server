@@ -4248,6 +4248,10 @@ class AssayImage(models.Model):
 
 
 class AssayStudySet(FlaggableModel):
+
+    class Meta(object):
+        verbose_name = 'Study Set'
+
     # Name for the set
     name = models.CharField(
         max_length=255,
