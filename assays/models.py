@@ -1441,6 +1441,9 @@ class AssayDataUpload(FlaggableRestrictedModel):
 class AssayDataFileUpload(FlaggableModel):
     """Shows the history of data uploads for a study; functions as inline"""
 
+    class Meta(object):
+        verbose_name = 'Processed Data File'
+
     # TO BE DEPRECATED
     # date_created, created_by, and other fields are used but come from FlaggableModel
     file_location = models.URLField(null=True, blank=True)
