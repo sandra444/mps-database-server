@@ -4,6 +4,9 @@ window.OMICS = {
     omics_data: null
 };
 
+// todo - maybe - make it so that the user can overwrite a previous rather than this (this will be complicated)
+// todo - remove an error for teh log2 fold change where group1 can not equal group 2 - this could happen if teh times are different - think about....
+
 //todo at some point, limit the sample locations to what is listed in model, if listed (location_1, 2 and sample location - three places currently)
 
 // todo add a highlight all to columns
@@ -202,6 +205,11 @@ $(document).ready(function () {
     changed_something_important('load');
     // some additional load functions that need to be run
     // indy sample functions
+
+
+    // todo - do not show this to the user, just, fill the table with the number of headers
+    // todo - do not forget to subtract one from the number of columns to remove the gene row..
+    // todo - this will require some thinking
     number_samples_show_hide();
 
     if (page_omic_upload_check_load === 'review') {
@@ -210,6 +218,9 @@ $(document).ready(function () {
         $('.selectized').each(function() { this.selectize.disable() });
         $(':input').attr('disabled', 'disabled');
     } else {
+        // todo add class to the sample time and sample location to make the box yellow
+        // todo whenever it shows, pi asked for it to be required
+        // todo build a required check into the form processess
         page_omic_upload_group_id_load_1 = 1;
         page_omic_upload_group_pk_load_1 = $('#id_group_1')[0].selectize.items[0];
         page_omic_upload_group_id_load_2 = 2;
@@ -374,6 +385,7 @@ $(document).ready(function () {
     // Start the download_two_group_example of yournewfile.csv file with the content from the text area
         // could tie this to selections in the GUI later, if requested.
         // change with tool tip
+        //todo - check the use of double quotes in some fields and not the first field....
         var text = page_omic_upload_omic_file_format_deseq2_log2fc_headers;
         var filename = 'TwoGroupDESeq2Omic.csv';
 
@@ -1099,6 +1111,9 @@ $(document).ready(function () {
         // resort for increment is in the front matter (above)
         indyCalledGutsPastesAndReplace('replace');
         sameChangesToTableFromEmptyReplaceGoAndPaste();
+
+        //todo need to reset the option boxes highlighting (what you are picking to use for the replace)
+        //it is not resetting correctly
     }
 
     function indyCalledGutsPastesAndReplace(called_from) {
@@ -1406,6 +1421,8 @@ $(document).ready(function () {
 
     function buildSampleMetadataTable() {
 
+        //todo - add highlight all the column for the table, not sure what to do for the plate....
+
         var elem = document.getElementById('div_for_'+sample_metadata_table_id);
         //remove the table
         elem.removeChild(elem.childNodes[0]);
@@ -1473,6 +1490,7 @@ $(document).ready(function () {
                     $(td).attr('id-index', rowcounter * metadata_headers.length + colcounter);
                     $(td).attr('ikey', ikey);
 
+                    //todo - want to remove the delete and add row option, but want to add a highlight all of the row or column buttons
                     if (ikey.includes('ption') && colcounter === 0) {
                         if (page_omic_upload_check_load === 'add' || page_omic_upload_check_load === 'update') {
                             var side_label_button =
