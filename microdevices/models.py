@@ -16,6 +16,7 @@ class MicrophysiologyCenter(LockableModel):
     Note that this is the model by which groups are affiliated with assays, cells, etc.
     """
     class Meta(object):
+        verbose_name = 'Microphysiology Center'
         ordering = ('name',)
 
     # TODO TODO THIS SHOULD BE JUST NAME
@@ -41,7 +42,16 @@ class MicrophysiologyCenter(LockableModel):
     groups = models.ManyToManyField(
         Group,
         blank=True,
-        help_text='***PLEASE DO NOT INCLUDE "Admin" OR "Viewer": ONLY SELECT THE BASE GROUP (ie "Taylor_MPS" NOT "Taylor_MPS Admin")***<br>'
+        help_text='***PLEASE DO NOT INCLUDE "Admin" OR "Viewer": ONLY SELECT THE BASE GROUP (ie "Taylor_MPS" NOT "Taylor_MPS Admin")***<br>',
+        related_name='center_groups'
+    )
+
+    # Groups which can be selected as collaborator or access groups on the front-end
+    accessible_groups = models.ManyToManyField(
+        Group,
+        blank=True,
+        help_text='***PLEASE DO NOT INCLUDE "Admin" OR "Viewer": ONLY SELECT THE BASE GROUP (ie "Taylor_MPS" NOT "Taylor_MPS Admin")***<br>',
+        related_name='center_accessible_groups'
     )
 
     def __str__(self):

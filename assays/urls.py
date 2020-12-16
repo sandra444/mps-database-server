@@ -19,6 +19,7 @@ from assays.views import (
     AssayStudyPlateDetail,
     AssayStudyAssays,
     AssayStudyDataIndex,
+    AssayStudyAccess,
     AssayGroupDetail,
     AssayDataFileUploadDetail,
     AssayDataFileUploadList,
@@ -149,6 +150,8 @@ urlpatterns = [
     # View the chips
     url(r'^assays/assaychips/(?P<pk>[0-9]+)/$', AssayStudyChipsDetail.as_view(), name='assays-assaymatrix-chips-detail'),
 
+    url(r'^assays/assaystudy/(?P<pk>[0-9]+)/access/$', AssayStudyAccess.as_view(), name='assays-assaystudy-update-access'),
+
     url(r'^assays/assaystudy/(?P<pk>[0-9]+)/data_index/$', AssayStudyDataIndex.as_view(), name='assays-assaystudy-data-index'),
 
     url(r'^assays/assaystudy/(?P<pk>[0-9]+)/data_files/$', AssayDataFileUploadList.as_view(), name='assays-assaydatafileupload-list'),
@@ -158,7 +161,7 @@ urlpatterns = [
     # Just redirect for now
     url(r'^assays/assaystudy/(?P<pk>[0-9]+)/update/$', RedirectView.as_view(pattern_name='assays-assaystudy-update-details', permanent=True), name='assays-assaystudy-update'),
 
-    url(r'^assays/assaystudy/(?P<study_id>[0-9]+)/assayplate/add/$', AssayStudyPlateAdd.as_view(), name='assays-assaymatrix-plate-add'),
+    url(r'^assays/assaystudy/(?P<study_id>[0-9]+)/plate/add/$', AssayStudyPlateAdd.as_view(), name='assays-assaymatrix-plate-add'),
     url(r'^assays/assayplate/(?P<pk>[0-9]+)/plate/$', AssayStudyPlateDetail.as_view(), name='assays-assaymatrix-plate-detail'),
     url(r'^assays/assayplate/(?P<pk>[0-9]+)/plate/update/$', AssayStudyPlateUpdate.as_view(), name='assays-assaymatrix-plate-update'),
     url(r'^assays/assayplate/(?P<pk>[0-9]+)/plate/delete/$', AssayMatrixDelete.as_view(), name='assays-assaymatrix-plate-delete'),

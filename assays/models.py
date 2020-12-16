@@ -1441,6 +1441,9 @@ class AssayDataUpload(FlaggableRestrictedModel):
 class AssayDataFileUpload(FlaggableModel):
     """Shows the history of data uploads for a study; functions as inline"""
 
+    class Meta(object):
+        verbose_name = 'Processed Data File'
+
     # TO BE DEPRECATED
     # date_created, created_by, and other fields are used but come from FlaggableModel
     file_location = models.URLField(null=True, blank=True)
@@ -1876,9 +1879,14 @@ class AssayStudy(FlaggableModel):
     #     )
     #     return study_types
 
-    # !!!!
-    # THIS IS ONLY FOR THE PROTOTYPE
-    # series_data = JSONField(default=dict, blank=True)
+    # Specify when to release the Study
+    release_date = models.DateField(
+        help_text='YYYY-MM-DD',
+        verbose_name='Release Date',
+        # NEEDS TO BE ABLE TO BE NULL AND BLANK
+        null=True,
+        blank=True,
+    )
 
     # TODO INEFFICIENT BUT SHOULD WORK
     def stakeholder_approval_needed(self):
@@ -2139,7 +2147,7 @@ class AssayStudy(FlaggableModel):
 
     # TODO REVISE REVISE
     def __str__(self):
-        first_center = self.group.microphysiologycenter_set.first()
+        first_center = self.group.center_groups.first()
         if first_center:
             center_id = first_center.center_id
         else:
@@ -2182,7 +2190,9 @@ class AssayStudy(FlaggableModel):
 class AssayMatrix(FlaggableModel):
     """Used to organize data in the interface. An Matrix is a set of setups"""
     class Meta(object):
-        verbose_name_plural = 'Assay Matrices'
+        verbose_name = 'Plate/Study Chips'
+        # verbose_name_plural = 'Assay Matrices'
+
         unique_together = [('study', 'name')]
 
     # TODO Name made unique within Study? What will the constraint be?
@@ -2713,6 +2723,8 @@ class AbstractSetupSetting(models.Model):
 # Previously considered the name "AssaySetupGroup"
 class AssayGroup(models.Model):
     class Meta(object):
+        verbose_name = 'Group'
+
         # Do not allow duplicates of name per study
         unique_together = [
             (
@@ -4243,6 +4255,10 @@ class AssayImage(models.Model):
 
 
 class AssayStudySet(FlaggableModel):
+
+    class Meta(object):
+        verbose_name = 'Study Set'
+
     # Name for the set
     name = models.CharField(
         max_length=255,
@@ -4610,7 +4626,9 @@ class AssayPlateReaderMap(FlaggableModel):
     """Assay Plate Reader Map for processing plate reader data."""
 
     class Meta(object):
-        verbose_name_plural = 'Assay Plate Reader Map'
+        verbose_name = 'Assay Plate Reader Map'
+        # Singular plural verbose name?
+        # verbose_name_plural = 'Assay Plate Reader Map'
         # unique_together = [
         #     ('study', 'name')
         # ]
@@ -4688,7 +4706,8 @@ def upload_plate_reader_file_location(instance, filename):
     return '/'.join(['plate_reader_file', str(instance.id), filename])
 
 
-class AssayPlateReaderMapDataFile(models.Model):
+# 20201104 needed to be a lockable model so permissions will allow for file deletion when not superuser
+class AssayPlateReaderMapDataFile(LockableModel):
     """Assay plate reader data file for plate reader integration."""
 
     class Meta(object):
@@ -4988,6 +5007,7 @@ class AssayPlateReaderMapItemValue(models.Model):
 
     def get_absolute_url(self):
         return '/assays/assayplatereadermapitem/{}/'.format(self.id)
+
 
     def get_post_submission_url(self):
         return '/assays/assayplatereadermapitem/'

@@ -1,13 +1,18 @@
 from .models import FindingResult,  DrugTrial, AdverseEvent, OpenFDACompound, CompoundAdverseEvent
 
-from django.views.generic import ListView, DetailView, TemplateView
+# from django.views.generic import TemplateView
 # from django.shortcuts import render_to_response
 # from django.template import RequestContext
+from mps.mixins import (
+    ListHandlerView,
+    DetailHandlerView,
+    TemplateHandlerView,
+)
 
 
-class DrugTrialList(ListView):
+class DrugTrialList(ListHandlerView):
     """Displays a list of Drug Trials"""
-    # model = FindingResult
+    model = FindingResult
     template_name = 'drugtrials/drugtrial_list.html'
 
     def get_queryset(self):
@@ -25,7 +30,7 @@ class DrugTrialList(ListView):
         return queryset
 
 
-class DrugTrialDetail(DetailView):
+class DrugTrialDetail(DetailHandlerView):
     """Details for a Drug Trial
 
     Contains next and previous buttons
@@ -90,12 +95,15 @@ class DrugTrialDetail(DetailView):
         return context
 
 
-class AdverseEventsList(TemplateView):
+# Interestingly, acquires the list from AJAX, so not a ListView
+class AdverseEventsList(TemplateHandlerView):
     """Displays a list of Compound Adverse Events"""
     template_name = 'drugtrials/adverse_events_list.html'
 
+    title = 'Adverse Events List'
 
-class AdverseEventDetail(DetailView):
+
+class AdverseEventDetail(DetailHandlerView):
     """Details for an Adverse Event (includes a time plot)
 
     Contains next and previous buttons
@@ -140,8 +148,10 @@ class AdverseEventDetail(DetailView):
         return context
 
 
-class CompareAdverseEvents(TemplateView):
+class CompareAdverseEvents(TemplateHandlerView):
     template_name = 'drugtrials/compare_adverse_events.html'
+
+    title = 'Compare Adverse Events'
 
 # PROBABLY SHOULD JUST BE A CBV TemplateView
 # def compare_adverse_events(request):
