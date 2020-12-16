@@ -6524,7 +6524,10 @@ def omic_data_file_process_data(save, study_id, omic_data_file_id, data_file, fi
     data_dicts['file_id_to_name'][1] = joint_name
     data_dicts['table'][joint_name] = ['Preview Chosen File', omic_data_file_id]
     data_dicts['target_name_to_id'] = {}
-    data_dicts['indy_column_header_list'] = []
+    data_dicts['indy_file_column_header_list'] = []
+    data_dicts['indy_file_column_header_prefix_set'] = []
+    data_dicts['indy_file_column_header_number_set'] = []
+    # todo fill the prefix and number set
 
     # if data_type == 'log2fc':
     #     pass
@@ -6614,12 +6617,12 @@ def omic_data_file_process_data(save, study_id, omic_data_file_id, data_file, fi
 
             if continue_this_sheet_if_true:
 
-                uni_list = copy.deepcopy(data_dicts.get('indy_column_header_list'))
+                uni_list = copy.deepcopy(data_dicts.get('indy_file_column_header_list'))
                 for item in df_column_headers_stripped:
                     if item not in uni_list:
                         uni_list.append(item)
 
-                data_dicts['indy_column_header_list'] = copy.deepcopy(uni_list)
+                data_dicts['indy_file_column_header_list'] = copy.deepcopy(uni_list)
 
                 # Guts of data loading for omic data file
                 # functions should return continue, error message, and a list of instances and an instance counter

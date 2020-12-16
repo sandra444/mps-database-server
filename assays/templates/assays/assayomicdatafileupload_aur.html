@@ -220,6 +220,7 @@
                         <label>Computer will guess based on file headers - update as needed</label>
                     </div>
                 </div>
+{#                todo when change file, program to guess which type#}
                 {% include "generic_field.html" with field=form.data_type %}
 
                 <div class="indy-sample">
@@ -395,17 +396,19 @@
 
             <div class="indy-sample">
 
-                <div class="hidden">
+                <div class="">
                     {# pass to js file need for use in js #}
                     {{  form.indy_list_of_keys }}
                     {# pass to js file need for use in js - this will be kept matcthing the table so can be passed back #}
                     {{  form.indy_list_of_dicts }}
                     {# pass to js file need for use in js - if the user adds or changes a sample id, this file should be true #}
-                    {% include "generic_field.html" with field=form.indy_flag_sample_name_change %}
+                    {% include "generic_field.html" with field=form.indy_flag_file_column_header_change %}
                     {# pass to js file need for use in js #}
                     {{  form.indy_matrix_item_list }}
                     {# pass to js file need for use in js #}
-                    {{  form.indy_sample_name_list }}
+                    {{  form.indy_file_column_header_list }}
+                    {{  form.indy_file_column_header_prefix_set }}
+                    {{  form.indy_file_column_header_number_set }}
                 </div>
 
                 {% if update or add %}
@@ -420,6 +423,10 @@
 
 {#                    todo - do not show this to the user, just, fill the table with the number of headers#}
 {#                    todo - do not forget to subtract one from the number of columns to remove the gene row...#}
+{#                    todo make this nice...program to guess#}
+                    {#                todo when change file, program to guess which type#}
+                    {{ form.header_type }}
+
                     <div class="indy-instructions">
                         <div class="number-samples">
                             <ul class="help-filled-circle">
@@ -518,16 +525,16 @@
                         {# pick sample metadata other than times #}
                         <div class="row">
 
-                            <div id="h_indy_sample_name" class="col-sm-3">
+                            <div id="h_indy_file_column_header" class="col-sm-3">
                                 <div class="row column-section-padding">
                                     <table>
                                         <tr>
 {#                                            <td class="left-pad">#}
-{#                                                <input class="big-checkbox" id="checkbox_sample_name" type="checkbox" name="change_sample_name" value="sample_name">#}
+{#                                                <input class="big-checkbox" id="checkbox_file_column_header" type="checkbox" name="change_file_column_header" value="file_column_header">#}
 {#                                            </td>#}
                                             <td>
-                                                <div class="left-pad"><p id="sample_name_tooltip"></p>
-                                                    <label for="sample_name_tooltip">File Column Header &nbsp;</label>
+                                                <div class="left-pad"><p id="file_column_header_tooltip"></p>
+                                                    <label for="file_column_header_tooltip">File Column Header &nbsp;</label>
                                                 </div>
                                             </td>
                                         </tr>
@@ -535,12 +542,12 @@
                                 </div>
                                 <div class="row column-section-padding">
                                      <div class="extra-bottom-padding">
-                                        {{ form.indy_sample_name }}
+                                        {{ form.indy_file_column_header }}
                                     </div>
                                 </div>
                                 {# need for use in js #}
                                 <div class="row hidden">Will get hidden:
-                                    <div id="sample_name"></div>
+                                    <div id="file_column_header"></div>
                                     <div id="sample_pk"></div>
                                 </div>
                             </div>

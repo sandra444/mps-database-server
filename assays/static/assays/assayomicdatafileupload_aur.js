@@ -94,15 +94,20 @@ $(document).ready(function () {
         0,
         ]
     var chip_list = JSON.parse($('#id_indy_matrix_item_list').val());
-    var sample_list = JSON.parse($('#id_indy_sample_name_list').val());
+    var sample_list = JSON.parse($('#id_indy_file_column_header_list').val());
+    // split into a letter part and a number part
+    // get the set of numbers, make those column headers
+    // get the set of letters, make those row headers
+    var sample_prefix_set = JSON.parse($('#id_indy_file_column_header_prefix_set').val());
+    var sample_number_set = JSON.parse($('#id_indy_file_column_header_number_set').val());
     var indy_keys = JSON.parse($('#id_indy_list_of_keys').val());
     // make a cross reference to the html dom name
     var ikey_to_html_outer = {};
     var ikey_to_html_element = {};
     $.each(indy_keys, function (index, ikey) {
         if (index === 1) {
-            ikey_to_html_outer[ikey] ='h_indy_sample_name';
-            ikey_to_html_element[ikey] ='sample_name';
+            ikey_to_html_outer[ikey] ='h_indy_file_column_header';
+            ikey_to_html_element[ikey] ='file_column_header';
         } else
         if (index === 2) {
             ikey_to_html_outer[ikey] ='h_indy_matrix_item';
@@ -182,8 +187,8 @@ $(document).ready(function () {
     $('#drag_action_tooltip').next().html($('#drag_action_tooltip').next().html() + make_escaped_tooltip(page_drag_action_tooltip));
     let page_drag_use_tooltip = 'Select what to do to the highlighted cells.';
     $('#drag_use_tooltip').next().html($('#drag_use_tooltip').next().html() + make_escaped_tooltip(page_drag_use_tooltip));
-    let page_sample_name_tooltip = 'The header of this sample data in the upload file.';
-    $('#sample_name_tooltip').next().html($('#sample_name_tooltip').next().html() + make_escaped_tooltip(page_sample_name_tooltip));
+    let page_file_column_header_tooltip = 'The header of this sample data in the upload file.';
+    $('#file_column_header_tooltip').next().html($('#file_column_header_tooltip').next().html() + make_escaped_tooltip(page_file_column_header_tooltip));
     let page_sample_matrix_item_tooltip = 'The MPS Model name (chip/well ID).';
     $('#sample_matrix_item_tooltip').next().html($('#sample_matrix_item_tooltip').next().html() + make_escaped_tooltip(page_sample_matrix_item_tooltip));
     let page_sample_location_tooltip = 'The location in the MPS Model where the sample was collected.';
@@ -497,10 +502,10 @@ $(document).ready(function () {
         document.getElementById('sample_location_name').innerHTML = thisText;
         document.getElementById('sample_location_pk').innerHTML = thisValue;
     });
-    $(document).on('change', '#id_indy_sample_name', function() {
-        var thisText = $('#id_indy_sample_name').children('option:selected').text();
-        var thisValue = $('#id_indy_sample_name').children('option:selected').val();
-        document.getElementById('sample_name').innerHTML = thisText;
+    $(document).on('change', '#id_indy_file_column_header', function() {
+        var thisText = $('#id_indy_file_column_header').children('option:selected').text();
+        var thisValue = $('#id_indy_file_column_header').children('option:selected').val();
+        document.getElementById('file_column_header').innerHTML = thisText;
         document.getElementById('sample_pk').innerHTML = thisValue;
     });
 
@@ -608,6 +613,7 @@ $(document).ready(function () {
                         }
                         // console.log("called_from ",called_from)
                         // put here to avoid race errors
+                        
                         if (called_from == 'data_file' || called_from == 'data_type') {
                             try {
                                 id_omic_data_file = $('#id_omic_data_file').val();
@@ -625,11 +631,14 @@ $(document).ready(function () {
                                 // console.log('indy_file_headers ',indy_file_headers)
 
                                 sample_list = [];
-                                let $this_dropdown = $(document.getElementById('id_indy_sample_name'));
+                                sample_prefix_set = [];
+                                sample_number_set = [];
+                                // to do , load the previx set and the number set!!!
+                                let $this_dropdown = $(document.getElementById('id_indy_file_column_header'));
 
                                 //HANDY-selectize selection clear and refill all
                                 // clear the current selection or it can remain in the list :o
-                                $('#id_indy_sample_name').selectize()[0].selectize.clear()
+                                $('#id_indy_file_column_header').selectize()[0].selectize.clear()
 
                                 // clear all options and refill
                                 $this_dropdown.selectize()[0].selectize.clearOptions();
@@ -1043,7 +1052,7 @@ $(document).ready(function () {
         var thisRowMinusHeader = thisRow-1;
 
         var dictrow = metadata_lod[thisRowMinusHeader];
-        if (dictrow['sample_name'].length > 0) {
+        if (dictrow['file_column_header'].length > 0) {
             // check the row to see if it has a field header
             $('#id_indy_sample_metadata_table_was_changed').attr('checked', true);
             $('#id_indy_sample_metadata_field_header_was_changed').attr('checked', true);
@@ -1156,8 +1165,8 @@ $(document).ready(function () {
             } else if (tikey === 'sample_location_name') {
                 current_pk = $('#sample_location_pk').text();
                 current_val = $('#' + ikey_to_html_element[tikey]).text();
-            } else if (tikey === 'sample_name') {
-                current_pk = $('#sample_name_pk').text();
+            } else if (tikey === 'file_column_header') {
+                current_pk = $('#file_column_header_pk').text();
                 current_val = $('#' + ikey_to_html_element[tikey]).text();
             }
 
@@ -1207,7 +1216,7 @@ $(document).ready(function () {
                             } else {
                                 i_current_val = current_val;
                             }
-                        } else if (tikey === 'sample_name') {
+                        } else if (tikey === 'file_column_header') {
                             // find the index of the last one, increase the index, if not out of range, replace
                             var index_in_sample_list = sample_list.indexOf(current_val);
                             var new_index = index_in_sample_list + parseInt($('#increment_value').val());
@@ -1259,7 +1268,7 @@ $(document).ready(function () {
         whatIsCurrentlyHighlightedInTheIndyTable();
         $('#id_indy_sample_metadata_table_was_changed').attr('checked',true);
 
-        if (list_of_ikeys_for_replace_highlighting.indexOf('sample_name') >= 0) {
+        if (list_of_ikeys_for_replace_highlighting.indexOf('file_column_header') >= 0) {
             $('#id_indy_sample_metadata_field_header_was_changed').attr('checked',true);
         } else {
             $('#id_indy_sample_metadata_field_header_was_changed').attr('checked',false);
@@ -1299,7 +1308,7 @@ $(document).ready(function () {
             tirow = metadata_highlighted[index]['metadata_highlighted_tirow'];
             tikey = metadata_highlighted[index]['metadata_highlighted_tikey'];
             thisElementList = $('td[ikey*="' + tikey + '"][row-index*="' + tirow + '"]');
-            // $("td[ikey*='sample_name'][row-index*='1']").addClass('special-selected1')
+            // $("td[ikey*='file_column_header'][row-index*='1']").addClass('special-selected1')
             // console.log("thisElementList ",thisElementList)
             thisElementList.addClass('special-selected1');
         }
@@ -1423,11 +1432,12 @@ $(document).ready(function () {
 
         //todo - add highlight all the column for the table, not sure what to do for the plate....
 
-        var elem = document.getElementById('div_for_'+sample_metadata_table_id);
+        //same for both plate and list
+        var elem = document.getElementById('div_for_' + sample_metadata_table_id);
         //remove the table
         elem.removeChild(elem.childNodes[0]);
 
-        var myTableDiv = document.getElementById('div_for_'+sample_metadata_table_id);
+        var myTableDiv = document.getElementById('div_for_' + sample_metadata_table_id);
         var myTable = document.createElement('TABLE');
         $(myTable).attr('id', sample_metadata_table_id);
         $(myTable).attr('cellspacing', '0');
@@ -1441,157 +1451,172 @@ $(document).ready(function () {
         tableHead.appendChild(tr);
         var hcolcounter = 0;
 
-        $.each(metadata_headers, function (h_index, header) {
-            ikey = indy_keys[h_index];
-            if (include_header_in_indy_table[h_index] === 1) {
-                if (header.includes('ption')) {
-                    if (page_omic_upload_check_load === 'add' || page_omic_upload_check_load === 'update') {
+
+        //use the header type to determine if plate or list
+        if ($('#id_header_type')[0].selectize.items[0] == 'well') {
+            // build a well plate - of sorts
+            // the sample_list variable should have all the headers
+            // split into a letter part and a number part
+            // get the set of numbers, make those column headers
+            // get the set of letters, make those row headers
+
+        } else {
+            // build a table
+
+
+            $.each(metadata_headers, function (h_index, header) {
+                ikey = indy_keys[h_index];
+                if (include_header_in_indy_table[h_index] === 1) {
+                    if (header.includes('ption')) {
+                        if (page_omic_upload_check_load === 'add' || page_omic_upload_check_load === 'update') {
+                            var th = document.createElement('TH');
+                            $(th).attr('hcol-index', hcolcounter);
+                            $(th).attr('ikey', ikey);
+                            th.appendChild(document.createTextNode(header));
+                            tr.appendChild(th);
+                            hcolcounter = hcolcounter + 1;
+                        }
+                    } else {
                         var th = document.createElement('TH');
                         $(th).attr('hcol-index', hcolcounter);
                         $(th).attr('ikey', ikey);
+                        if (ikey != 'assay_well_name') {
+                            $(th).attr('class', 'required');
+                        }
+                        // this was how did with plate....$(th).html(colnumber + top_label_button);
                         th.appendChild(document.createTextNode(header));
                         tr.appendChild(th);
                         hcolcounter = hcolcounter + 1;
                     }
-                } else {
-                    var th = document.createElement('TH');
-                    $(th).attr('hcol-index', hcolcounter);
-                    $(th).attr('ikey', ikey);
-                    if (ikey != 'assay_well_name') {
-                        $(th).attr('class', 'required');
-                    }
-                    // this was how did with plate....$(th).html(colnumber + top_label_button);
-                    th.appendChild(document.createTextNode(header));
-                    tr.appendChild(th);
-                    hcolcounter = hcolcounter + 1;
                 }
-            }
-        });
-        myTable.appendChild(tableHead);
+            });
+            myTable.appendChild(tableHead);
 
-        var tableBody = document.createElement('TBODY');
-        //the header row is 0, to keep consistent, start with 1, but watch when using the lod's
-        var rowcounter = 1;
+            var tableBody = document.createElement('TBODY');
+            //the header row is 0, to keep consistent, start with 1, but watch when using the lod's
+            var rowcounter = 1;
 
-        $.each(metadata_lod, function (r_index, row) {
+            $.each(metadata_lod, function (r_index, row) {
 
-            var tr = document.createElement('TR');
-            $(tr).attr('row-index', rowcounter);
-            tableBody.appendChild(tr);
+                var tr = document.createElement('TR');
+                $(tr).attr('row-index', rowcounter);
+                tableBody.appendChild(tr);
 
-            let colcounter = 0;
-            let myCellContent = '';
+                let colcounter = 0;
+                let myCellContent = '';
 
-            $.each(indy_keys, function (c_index, ikey) {
-                if (include_header_in_indy_table[c_index] === 1) {
-                    var td = document.createElement('TD');
-                    $(td).attr('col-index', colcounter);
-                    $(td).attr('row-index', rowcounter);
-                    $(td).attr('id-index', rowcounter * metadata_headers.length + colcounter);
-                    $(td).attr('ikey', ikey);
+                $.each(indy_keys, function (c_index, ikey) {
+                    if (include_header_in_indy_table[c_index] === 1) {
+                        var td = document.createElement('TD');
+                        $(td).attr('col-index', colcounter);
+                        $(td).attr('row-index', rowcounter);
+                        $(td).attr('id-index', rowcounter * metadata_headers.length + colcounter);
+                        $(td).attr('ikey', ikey);
 
-                    //todo - want to remove the delete and add row option, but want to add a highlight all of the row or column buttons
-                    if (ikey.includes('ption') && colcounter === 0) {
-                        if (page_omic_upload_check_load === 'add' || page_omic_upload_check_load === 'update') {
-                            var side_label_button =
-                                ' <a class="add_indy_row" id="add_indy_row' + rowcounter
-                                + '" row-index="' + rowcounter
-                                + '" class="btn btn-sm btn-primary">'
-                                // + 'duplicate'
-                                + '<span class="glyphicon glyphicon-duplicate" aria-hidden="true"></span>'
-                                + ' </a>'
-                            +
-                                ' <a class="delete_indy_row" id="delete_indy_row' + rowcounter
-                                + '" row-index="' + rowcounter
-                                + '" class="btn btn-sm btn-primary">'
-                                // + 'duplicate'
-                                + '<span class="glyphicon glyphicon-remove" aria-hidden="true"></span>'
-                                + ' </a>'
-                            $(td).html(side_label_button);
-                            tr.appendChild(td);
-                        }
-                    } else {
-                        // if ($('#check_load").html().trim() === 'review') {
+                        //todo - want to remove the delete and add row option, but want to add a highlight all of the row or column buttons
+                        if (ikey.includes('ption') && colcounter === 0) {
+                            if (page_omic_upload_check_load === 'add' || page_omic_upload_check_load === 'update') {
+                                var side_label_button =
+                                    ' <a class="add_indy_row" id="add_indy_row' + rowcounter
+                                    + '" row-index="' + rowcounter
+                                    + '" class="btn btn-sm btn-primary">'
+                                    // + 'duplicate'
+                                    + '<span class="glyphicon glyphicon-duplicate" aria-hidden="true"></span>'
+                                    + ' </a>'
+                                    +
+                                    ' <a class="delete_indy_row" id="delete_indy_row' + rowcounter
+                                    + '" row-index="' + rowcounter
+                                    + '" class="btn btn-sm btn-primary">'
+                                    // + 'duplicate'
+                                    + '<span class="glyphicon glyphicon-remove" aria-hidden="true"></span>'
+                                    + ' </a>'
+                                $(td).html(side_label_button);
+                                tr.appendChild(td);
+                            }
+                        } else {
+                            // if ($('#check_load").html().trim() === 'review') {
                             td.appendChild(document.createTextNode(row[ikey]));
                             $(td).attr('class', 'no-wrap');
-                        // } else {
-                        //NOTE: the input fields were not sortable, so, skip this idea for now - since did this changed
-                        // to time_day, time_hour, and time_minute
-                        //     if (ikey.includes('item') || ikey.includes('location') || ikey.includes('day') || ikey.includes('hour') || ikey.includes('minute')) {
-                        //         td.appendChild(document.createTextNode(row[ikey]));
-                        //     } else {
-                        //         var size = 15;
-                        //         // if (ikey.includes('day') || ikey.includes('hour') || ikey.includes('minute') || ikey.includes('well')) {
-                        //         //     size = 5;
-                        //         // } else if (ikey.includes('sample')) {
-                        //         //     size = 15;
-                        //         // } else {
-                        //         //     size = 10;
-                        //         // }
-                        //         var input_button = ' <input type="text" size='' + size + '" name="r'
-                        //             + rowcounter + 'c' + colcounter + ' id="r'
-                        //             + rowcounter + 'c' + colcounter + ' value=' + row[ikey] + '>';
-                        //         $(td).html(input_button);
-                        //     }
-                        // }
-                        tr.appendChild(td);
+                            // } else {
+                            //NOTE: the input fields were not sortable, so, skip this idea for now - since did this changed
+                            // to time_day, time_hour, and time_minute
+                            //     if (ikey.includes('item') || ikey.includes('location') || ikey.includes('day') || ikey.includes('hour') || ikey.includes('minute')) {
+                            //         td.appendChild(document.createTextNode(row[ikey]));
+                            //     } else {
+                            //         var size = 15;
+                            //         // if (ikey.includes('day') || ikey.includes('hour') || ikey.includes('minute') || ikey.includes('well')) {
+                            //         //     size = 5;
+                            //         // } else if (ikey.includes('sample')) {
+                            //         //     size = 15;
+                            //         // } else {
+                            //         //     size = 10;
+                            //         // }
+                            //         var input_button = ' <input type="text" size='' + size + '" name="r'
+                            //             + rowcounter + 'c' + colcounter + ' id="r'
+                            //             + rowcounter + 'c' + colcounter + ' value=' + row[ikey] + '>';
+                            //         $(td).html(input_button);
+                            //     }
+                            // }
+                            tr.appendChild(td);
+                        }
+                        colcounter = colcounter + 1;
                     }
-                    colcounter = colcounter + 1;
+                });
+                rowcounter = rowcounter + 1
+            });
+
+            myTable.appendChild(tableBody);
+            myTableDiv.appendChild(myTable);
+
+            // When I did not have the var before the variable name, the table headers acted all kinds of crazy
+            var sampleDataTable = $('#' + sample_metadata_table_id).removeAttr('width').DataTable({
+                // 'iDisplayLength': 100,
+                paging: false,
+                'sDom': '<B<"row">lfrtip>',
+                //do not do the fixed header here...only want for two of the tables
+                //https://datatables.net/forums/discussion/30879/removing-fixedheader-from-a-table
+                //https://datatables.net/forums/discussion/33860/destroying-a-fixed-header
+                fixedHeader: {headerOffset: 50},
+                // responsive: true,
+                'order': table_order,
+                'columnDefs': table_column_defs,
+                // fixedColumns: true
+                'autoWidth': true
+            });
+
+            sampleDataTable.rows().every(function () {
+                // this.data() is a list, with the first one being the tags and such
+                // console.log("this row ",this.data());
+                // console.log("this row ",this.data()[0]);
+                // the tags and such look like a long string, so, to find an attribute, must be creative
+                // below is HANDY for looping through, and getting a value.by name, but we do not need that here
+                // var data = this.data();
+                // data.forEach(function (value, index) {
+                //     // if (value.isActive)
+                //     // {
+                //      console.log('value ',value);
+                //https://stackoverflow.com/questions/29077902/how-to-loop-through-all-rows-in-datatables-jquery
+                //      // console.log(value.UserName);
+                //     // }
+                // })
+                var tags_and_such = this.data()[0].replace('=', '"').replace(' ', '"');
+                var tags_and_such_list = tags_and_such.split('"');
+                var index_of_row_index_label = -1;
+                var row_index = -1;
+                tags_and_such_list.forEach(function (value, index) {
+                    if (value.indexOf('row-index') >= 0) {
+                        index_of_row_index_label = index;
+                    }
+                    ;
+                });
+                if (index_of_row_index_label >= 0) {
+                    row_index = tags_and_such_list[index_of_row_index_label + 1];
+                    indy_sample_metadata_table_current_row_order.push(row_index);
+                } else {
+                    console.log('The row index should always be found...');
                 }
             });
-            rowcounter = rowcounter+1
-        });
-
-        myTable.appendChild(tableBody);
-        myTableDiv.appendChild(myTable);
-
-        // When I did not have the var before the variable name, the table headers acted all kinds of crazy
-        var sampleDataTable = $('#'+sample_metadata_table_id).removeAttr('width').DataTable({
-            // 'iDisplayLength': 100,
-            paging:         false,
-            'sDom': '<B<"row">lfrtip>',
-            //do not do the fixed header here...only want for two of the tables
-            //https://datatables.net/forums/discussion/30879/removing-fixedheader-from-a-table
-            //https://datatables.net/forums/discussion/33860/destroying-a-fixed-header
-            fixedHeader: {headerOffset: 50},
-            // responsive: true,
-            'order': table_order,
-            'columnDefs': table_column_defs,
-            // fixedColumns: true
-            'autoWidth': true
-        });
-
-        sampleDataTable.rows().every(function(){
-            // this.data() is a list, with the first one being the tags and such
-            // console.log("this row ",this.data());
-            // console.log("this row ",this.data()[0]);
-            // the tags and such look like a long string, so, to find an attribute, must be creative
-            // below is HANDY for looping through, and getting a value.by name, but we do not need that here
-            // var data = this.data();
-            // data.forEach(function (value, index) {
-            //     // if (value.isActive)
-            //     // {
-            //      console.log('value ',value);
-            //https://stackoverflow.com/questions/29077902/how-to-loop-through-all-rows-in-datatables-jquery
-            //      // console.log(value.UserName);
-            //     // }
-            // })
-            var tags_and_such = this.data()[0].replace('=','"').replace(' ','"');
-            var tags_and_such_list = tags_and_such.split('"');
-            var index_of_row_index_label = -1;
-            var row_index = -1;
-            tags_and_such_list.forEach(function (value, index) {
-                if (value.indexOf('row-index') >= 0) {
-                    index_of_row_index_label = index;
-                };
-            });
-            if (index_of_row_index_label >= 0) {
-                row_index = tags_and_such_list[index_of_row_index_label+1];
-                indy_sample_metadata_table_current_row_order.push(row_index);
-            } else {
-                console.log('The row index should always be found...');
-            }
-        });
+        }
 
         return myTable;
     }

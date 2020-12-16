@@ -5056,6 +5056,12 @@ assay_omic_data_type_choices = [
     ('rawcounts', 'Raw Counts')
 ]
 
+assay_omic_file_header_type_choices = [
+    ('well', 'Well Names (e.g., A01, A02'),
+    ('sample', 'Sample Names'),
+    ('other', 'Something Else')
+]
+
 # This is the why we allowed grouping while Luke was finishing the treatment group naming
 # probably will not need this, but keep unitl we are sure we do not want a separate group
 # class AssayOmicDataGroup(LockableModel):
@@ -5241,15 +5247,20 @@ class AssayOmicDataFileUpload(LockableModel):
         help_text='Sample Location for the Reference Group',
         verbose_name='Reference Group Sample Location'
     )
+    # # for the counts data, store the number of samples in the table
+    # number_saved_samples = models.IntegerField(
+    #     null=True,
+    #     blank=True,
+    #     help_text='Number of Samples from the Uploaded File to be Stored',
+    #     verbose_name='Number of Samples'
+    # )
     # for the counts data, store the number of samples in the table
-    location_2 = models.ForeignKey(
-        'AssaySampleLocation',
-        null=True,
-        blank=True,
-        on_delete=models.CASCADE,
-        related_name="location_2",
-        help_text='Sample Location for the Reference Group',
-        verbose_name='Reference Group Sample Location'
+    header_type = models.CharField(
+        max_length=20,
+        default='well',
+        choices=assay_omic_file_header_type_choices,
+        help_text='What are the headers of the upload file?',
+        verbose_name='Upload File Header Type'
     )
 
     def __str__(self):
@@ -5282,7 +5293,7 @@ class AssayOmicDataFileUpload(LockableModel):
 #         verbose_name='Data File'
 #     )
 
-#     # sample id
+#     # column header from the upload file
 #     cross_reference = models.CharField(
 #         max_length=255,
 #         default='',
@@ -5290,6 +5301,7 @@ class AssayOmicDataFileUpload(LockableModel):
 #         verbose_name='Cross Reference'
 #     )
 #
+# TODO decide if will put a well id - maybe only a heder field and that will be a cross-reference - for now - do not offer this
 #     # assay_well_id = models.CharField(
 #     max_length=255,
 #       help_text='If this is a well plate assay, and they assay well ID is known, put it here (could be the same as the sample id)',

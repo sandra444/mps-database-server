@@ -5198,11 +5198,11 @@ class AssayOmicDataFileUploadForm(BootstrapForm):
         #indy-sample for the counts data
         # if change these, check the order with the .js file column_table_headers
         # make sure to leave _pk in the pk fields so they are excluded from the table in the .js file
-        # option also used to turn on an off including the duplicate button field and sample_name
+        # option also used to turn on an off including the duplicate button field and file_column_header
         # (also uses day, hour, minute, sample, and well to set length of column in table, and item and location so no input field)
         indy_list_of_keys = [
             'options',
-            'sample_name',
+            'file_column_header',
             'matrix_item_name',
             'sample_location_name',
             'assay_well_name',
@@ -5215,7 +5215,7 @@ class AssayOmicDataFileUploadForm(BootstrapForm):
             'sample_metadata_pk',
             ]
         self.fields['indy_list_of_keys'].initial = json.dumps(indy_list_of_keys)
-        self.fields['indy_flag_sample_name_change'].initial = False
+        self.fields['indy_flag_file_column_header_change'].initial = False
 
         list_of_defaults1 = [
             '',
@@ -5281,15 +5281,18 @@ class AssayOmicDataFileUploadForm(BootstrapForm):
         self.fields['indy_matrix_item_list'].initial = json.dumps(matrix_item_list)
 
         # todo get the right list - decide on what is a list and what is a queryset - may need both like need for matrix item...
-        # sample_name_queryset = AssayOmicSampleMetadata.objects.filter(study_id=self.study).order_by('cross_reference', )
-        sample_name_queryset = AssayMatrixItem.objects.filter(study_id=self.study).order_by('name', )
-        self.fields['indy_sample_name'].queryset = sample_name_queryset
-        # sample_name_list = sample_name_queryset.values_list('cross_reference', flat=True)
-        sample_name_list = sample_name_queryset.values_list('name', flat=True)
-        self.fields['indy_sample_name_list'].initial = json.dumps(sample_name_list)
+        # file_column_header_queryset = AssayOmicSampleMetadata.objects.filter(study_id=self.study).order_by('cross_reference', )
+        file_column_header_queryset = AssayMatrixItem.objects.filter(study_id=self.study).order_by('name', )
+        self.fields['indy_file_column_header'].queryset = file_column_header_queryset
+        # file_column_header_list = file_column_header_queryset.values_list('cross_reference', flat=True)
+        file_column_header_list = file_column_header_queryset.values_list('name', flat=True)
+        self.fields['indy_file_column_header_list'].initial = json.dumps(file_column_header_list)
 
         self.fields['indy_sample_metadata_table_was_changed'].initial = False
         self.fields['indy_sample_metadata_field_header_was_changed'].initial = False
+
+        self.fields['group_2'].widget.attrs['class'] += 'required'
+
         #indy-sample
 
     time_1_day = forms.DecimalField(
@@ -5324,7 +5327,7 @@ class AssayOmicDataFileUploadForm(BootstrapForm):
     #indy-sample for the counts data
     indy_list_of_dicts = forms.CharField(widget=forms.TextInput(), required=False,)
     indy_list_of_keys = forms.CharField(widget=forms.TextInput(), required=False,)
-    indy_flag_sample_name_change = forms.BooleanField()
+    indy_flag_file_column_header_change = forms.BooleanField()
 
     indy_number_of_samples = forms.DecimalField(
         required=False,
@@ -5340,14 +5343,14 @@ class AssayOmicDataFileUploadForm(BootstrapForm):
         queryset=AssayMatrixItem.objects.none(),
         required=False,
     )
-    indy_sample_name = forms.ModelChoiceField(
+    indy_file_column_header = forms.ModelChoiceField(
         queryset=AssayMatrixItem.objects.none(),
         required=False,
     )
     indy_sample_metadata_table_was_changed = forms.BooleanField()
     indy_sample_metadata_field_header_was_changed = forms.BooleanField()
     indy_matrix_item_list = forms.CharField(widget=forms.TextInput(), required=False,)
-    indy_sample_name_list = forms.CharField(widget=forms.TextInput(), required=False, )
+    indy_file_column_header_list = forms.CharField(widget=forms.TextInput(), required=False, )
     #indy-sample
 
     def clean(self):
