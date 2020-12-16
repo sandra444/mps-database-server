@@ -136,6 +136,11 @@ class DefinitionAdmin(LockableAdmin):
     """Admin for Definitions"""
     form = DefinitionForm
     save_on_top = True
+    ordering = [
+        'help_category',
+        'help_order',
+        'term',
+    ]
     list_per_page = 300
     list_display = (
         'term',
@@ -145,7 +150,7 @@ class DefinitionAdmin(LockableAdmin):
         'is_url',
         'is_anchor',
         'help_category',
-        'count_data_sources',
+        # 'count_data_sources',
         'help_order',
         'modified_on',
         'created_on',
