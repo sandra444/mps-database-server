@@ -6526,8 +6526,8 @@ def omic_data_file_process_data(save, study_id, omic_data_file_id, data_file, fi
     data_dicts['table'][joint_name] = ['Preview Chosen File', omic_data_file_id]
     data_dicts['target_name_to_id'] = {}
     data_dicts['indy_file_column_header_list'] = []
-    data_dicts['indy_file_column_header_prefix_set'] = []
-    data_dicts['indy_file_column_header_number_set'] = []
+    data_dicts['indy_file_column_header_prefix_uni_list'] = []
+    data_dicts['indy_file_column_header_number_uni_dict'] = {}
     # todo fill the prefix and number set
 
     # if data_type == 'log2fc':
@@ -6624,6 +6624,14 @@ def omic_data_file_process_data(save, study_id, omic_data_file_id, data_file, fi
                         uni_list.append(item)
 
                 data_dicts['indy_file_column_header_list'] = copy.deepcopy(uni_list)
+                prefix_set, number_set = omic_find_sets_of_prefixes_and_numbers_for_well_names(uni_list)
+                data_dicts['indy_file_column_header_prefix_uni_list'] = prefix_set
+                data_dicts['indy_file_column_header_number_uni_dict'] = number_set
+
+
+                print('header_list ', uni_list)
+                print('prefix_set ', prefix_set)
+                print('number_set ', number_set)
 
                 # Guts of data loading for omic data file
                 # functions should return continue, error message, and a list of instances and an instance counter
@@ -6679,6 +6687,44 @@ def omic_data_file_process_data(save, study_id, omic_data_file_id, data_file, fi
     # print(data_dicts)
     return data_dicts
 
+
+def omic_find_sets_of_prefixes_and_numbers_for_well_names(header_list):
+    prefix_long = []
+    number_long = {}
+
+    for str in header_list:
+        if not (str == 'gene' or str == 'gene reference' or str == 'name'):
+            # loop to iterating characters
+            index = len(str)-1
+            while index >= 0:
+
+                # checking if character is numeric,
+                # saving index
+                if str[index].isdigit():
+                    index = index - 1
+                else:
+                    break
+
+            prefix_long.append(str[:index+1])
+            # todo - do want to make it a number or leave as a string?
+            # if number it, it will not match a recombination of the two, which could be a problem
+            # number_long.append(int(str[index+1:]))
+            thisStr = str[index+1:]
+            thisKey = int(thisStr)
+            number_long[thisStr] = thisKey
+
+    return [long_list_to_unique_list(prefix_long), number_long]
+
+
+# function to get unique values
+def long_list_to_unique_list(long_list):
+    unique_list = []
+
+    for each in long_list:
+        if each not in unique_list:
+            unique_list.append(each)
+
+    return unique_list
 
 def omic_determine_if_field_with_header_for_gene(df_column_headers_stripped):
     continue_this_sheet_if_true = True
@@ -6991,6 +7037,9 @@ def data_quality_clean_check_for_omic_file_upload(self, data, data_file_pk):
 
 
 def qc_for_log2fc_omic_upload(self, data, data_file_pk):
+    # todo - error check - sample time - is it required or not and should it be for the log2 fold change
+
+
     true_to_continue = True
     file_name = data.get('omic_data_file').name
 

@@ -5077,7 +5077,7 @@ assay_omic_data_type_choices = [
 ]
 
 assay_omic_file_header_type_choices = [
-    ('well', 'Well Names (e.g., A01, A02'),
+    ('well', 'Well Names (e.g., A01, A02, DA01, etc)'),
     ('sample', 'Sample Names'),
     ('other', 'Something Else')
 ]
@@ -5280,7 +5280,15 @@ class AssayOmicDataFileUpload(LockableModel):
         default='well',
         choices=assay_omic_file_header_type_choices,
         help_text='What are the headers of the upload file?',
-        verbose_name='Upload File Header Type'
+        verbose_name='File Header Type'
+    )
+    # sample time unit for the count data, not currently using for the two group data
+    time_unit = models.CharField(
+        max_length=8,
+        default='day',
+        null=True,
+        blank=True,
+        choices=assay_plate_reader_time_unit_choices
     )
 
     def __str__(self):
@@ -5313,20 +5321,15 @@ class AssayOmicDataFileUpload(LockableModel):
 #         verbose_name='Data File'
 #     )
 
-#     # column header from the upload file
-#     cross_reference = models.CharField(
+#     # might be a sample name or a well name or something else
+#     column_header = models.CharField(
 #         max_length=255,
 #         default='',
 #         help_text='The header for this sample used in the uploaded file - must match EXACTLY what is in the file',
 #         verbose_name='Cross Reference'
 #     )
 #
-# TODO decide if will put a well id - maybe only a heder field and that will be a cross-reference - for now - do not offer this
-#     # assay_well_id = models.CharField(
-#     max_length=255,
-#       help_text='If this is a well plate assay, and they assay well ID is known, put it here (could be the same as the sample id)',
-#     default='unspecified')
-#
+# todo - think about if want to allow these to be null - if do, will only need to delete if file is changed, otherwise, just update..might want to do it that way
 #     matrix_item = models.ForeignKey(
 #         'assays.AssayMatrixItem',
 #         on_delete=models.CASCADE,

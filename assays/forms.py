@@ -5194,9 +5194,7 @@ class AssayOmicDataFileUploadForm(BootstrapForm):
         # the following could remove other classes, so stick with the below
         # NO self.fields['group_1'].widget.attrs.update({'class': ' required'})
         # YES self.fields['group_1'].widget.attrs['class'] += 'required'
-
-        self.fields['group_1'].widget.attrs['class'] += 'required'
-        self.fields['group_2'].widget.attrs['class'] += 'required'
+        # BUT, the above does not work on selectized, just do addClass in javascript: $('#id_time_unit').next().addClass('required');
 
         if self.instance.time_1:
             time_1_instance = self.instance.time_1
@@ -5211,6 +5209,8 @@ class AssayOmicDataFileUploadForm(BootstrapForm):
             self.fields['time_2_day'].initial = times_2.get('day')
             self.fields['time_2_hour'].initial = times_2.get('hour')
             self.fields['time_2_minute'].initial = times_2.get('minute')
+
+        #  todo will need to deal with the time unit.... for the counts data for now....
 
         # filename_only = os.path.basename(str(self.instance.omic_data_file))
         # self.fields['filename_only'].initial = filename_only
@@ -5303,15 +5303,18 @@ class AssayOmicDataFileUploadForm(BootstrapForm):
         # todo get the right list - decide on what is a list and what is a queryset - may need both like need for matrix item...
         # file_column_header_queryset = AssayOmicSampleMetadata.objects.filter(study_id=self.study).order_by('cross_reference', )
         file_column_header_queryset = AssayMatrixItem.objects.filter(study_id=self.study).order_by('name', )
-        self.fields['indy_file_column_header'].queryset = file_column_header_queryset
+        # self.fields['indy_file_column_header'].queryset = file_column_header_queryset
         # file_column_header_list = file_column_header_queryset.values_list('cross_reference', flat=True)
         file_column_header_list = file_column_header_queryset.values_list('name', flat=True)
         self.fields['indy_file_column_header_list'].initial = json.dumps(file_column_header_list)
 
+        # todo, get these right too
+        self.fields['indy_file_column_header_prefix_uni_list'].initial = json.dumps(file_column_header_list)
+        # todo will this be a dict or a list, thing about if one is A1 and another is A02 and another is B01, how sort and put back together (look in utils too)
+        self.fields['indy_file_column_header_number_uni_dict'].initial = json.dumps(file_column_header_list)
+
         self.fields['indy_sample_metadata_table_was_changed'].initial = False
         self.fields['indy_sample_metadata_field_header_was_changed'].initial = False
-
-        self.fields['group_2'].widget.attrs['class'] += 'required'
 
         #indy-sample
 
@@ -5345,6 +5348,9 @@ class AssayOmicDataFileUploadForm(BootstrapForm):
     # )
 
     #indy-sample for the counts data
+
+    # todo - sample time unit for the count data - get the right value back from the minutes ...or store in unit???
+    # todo - think about, if not letting the user change a header, maybe only update after first add? Unless change file? Think about...
     indy_list_of_dicts = forms.CharField(widget=forms.TextInput(), required=False,)
     indy_list_of_keys = forms.CharField(widget=forms.TextInput(), required=False,)
     indy_flag_file_column_header_change = forms.BooleanField()
@@ -5371,6 +5377,8 @@ class AssayOmicDataFileUploadForm(BootstrapForm):
     indy_sample_metadata_field_header_was_changed = forms.BooleanField()
     indy_matrix_item_list = forms.CharField(widget=forms.TextInput(), required=False,)
     indy_file_column_header_list = forms.CharField(widget=forms.TextInput(), required=False, )
+    indy_file_column_header_prefix_uni_list = forms.CharField(widget=forms.TextInput(), required=False, )
+    indy_file_column_header_number_uni_dict = forms.CharField(widget=forms.TextInput(), required=False, )
     #indy-sample
 
     def clean(self):
@@ -5410,6 +5418,8 @@ class AssayOmicDataFileUploadForm(BootstrapForm):
         if self.instance.id:
             data_file_pk = self.instance.id
 
+        # todo - get the new fields, time unit and header type and not sure what else and add them to the call
+
         true_to_continue = data_quality_clean_check_for_omic_file_upload(self, data, data_file_pk)
         return true_to_continue
 
@@ -5421,6 +5431,8 @@ class AssayOmicDataFileUploadForm(BootstrapForm):
         file_extension = os.path.splitext(data.get('omic_data_file').name)[1]
         data_type = data['data_type']
         analysis_method = data['analysis_method']
+
+        # todo - get the new fields, time unit and header type and not sure what else and add them to the call to process
 
         # HANDY for getting a file object and a file queryset when doing clean vrs save
         if calledme == 'clean':

@@ -4,10 +4,12 @@ window.OMICS = {
     omics_data: null
 };
 
+// todo - put target stuff back in for counts data (got database again, need to readd it)
 // todo - maybe - make it so that the user can overwrite a previous rather than this (this will be complicated)
 // todo - remove an error for teh log2 fold change where group1 can not equal group 2 - this could happen if teh times are different - think about....
 
 //todo at some point, limit the sample locations to what is listed in model, if listed (location_1, 2 and sample location - three places currently)
+
 
 // todo add a highlight all to columns
 
@@ -58,6 +60,8 @@ $(document).ready(function () {
     var ikey_last_highlighted_seen = {};
     var number_headers_in_file = 0;
 
+    $('#id_time_unit').next().addClass('required');
+
     // just working variables, but want in different subs, so just declare here
     var current_pk = 0;
     var current_val = '';
@@ -71,24 +75,26 @@ $(document).ready(function () {
         'Chip or Well ID',
         'Sample Location',
         'Assay Well Name (optional)',
-        'Sample Time (Day)',
-        'Sample Time (Hour)',
-        'Sample Time (Minute)',
+        'Sample Time',
+        // 'Sample Time (Day)',
+        // 'Sample Time (Hour)',
+        // 'Sample Time (Minute)',
 
         'matrix_item_pk',
         'sample_location_pk',
         'sample_metadata_pk',
         ]
     // this will control what gets put in the table, but metadata_lod will have all the indy_keys in it
+    // todo need to get the two extra sample times out and assay well name, but for now, turned them off
     var include_header_in_indy_table = [
+        0,
         1,
         1,
         1,
+        0,
         1,
-        1,
-        1,
-        1,
-        1,
+        0,
+        0,
         0,
         0,
         0,
@@ -98,15 +104,15 @@ $(document).ready(function () {
     // split into a letter part and a number part
     // get the set of numbers, make those column headers
     // get the set of letters, make those row headers
-    var sample_prefix_set = JSON.parse($('#id_indy_file_column_header_prefix_set').val());
-    var sample_number_set = JSON.parse($('#id_indy_file_column_header_number_set').val());
+    var sample_prefix_set = JSON.parse($('#id_indy_file_column_header_prefix_uni_list').val());
+    var sample_number_set = JSON.parse($('#id_indy_file_column_header_number_uni_dict').val());
     var indy_keys = JSON.parse($('#id_indy_list_of_keys').val());
     // make a cross reference to the html dom name
     var ikey_to_html_outer = {};
     var ikey_to_html_element = {};
     $.each(indy_keys, function (index, ikey) {
         if (index === 1) {
-            ikey_to_html_outer[ikey] ='h_indy_file_column_header';
+            ikey_to_html_outer[ikey] ='h_indy_file_column_header_list';
             ikey_to_html_element[ikey] ='file_column_header';
         } else
         if (index === 2) {
@@ -117,22 +123,22 @@ $(document).ready(function () {
             ikey_to_html_outer[ikey] ='h_indy_sample_location';
             ikey_to_html_element[ikey] ='sample_location_name';
         } else
-        if (index === 4) {
-            ikey_to_html_outer[ikey] ='h_indy_assay_well_name';
-            ikey_to_html_element[ikey] ='assay_well_name';
-        } else
+        // if (index === 4) {
+        //     ikey_to_html_outer[ikey] ='h_indy_assay_well_name';
+        //     ikey_to_html_element[ikey] ='assay_well_name';
+        // } else
         if (index === 5) {
             ikey_to_html_outer[ikey] ='h_indy_time_day';
             ikey_to_html_element[ikey] ='time_day';
         } else
-        if (index === 6) {
-            ikey_to_html_outer[ikey] ='h_indy_time_hour';
-            ikey_to_html_element[ikey] ='time_hour';
-        } else
-        if (index === 7) {
-            ikey_to_html_outer[ikey] = 'h_indy_time_minute';
-            ikey_to_html_element[ikey] = 'time_minute';
-        } else
+        // if (index === 6) {
+        //     ikey_to_html_outer[ikey] ='h_indy_time_hour';
+        //     ikey_to_html_element[ikey] ='time_hour';
+        // } else
+        // if (index === 7) {
+        //     ikey_to_html_outer[ikey] = 'h_indy_time_minute';
+        //     ikey_to_html_element[ikey] = 'time_minute';
+        // } else
         if (index === 8) {
             // ikey_to_html_outer[ikey] ='h_indy_matrix_item';
             ikey_to_html_element[ikey] ='matrix_item_pk';
@@ -145,7 +151,9 @@ $(document).ready(function () {
         }
     });
 
-    let table_order = [[0, 'asc'], [1, 'asc'], [2, 'asc'], [3, 'asc'], [4, 'asc'], [5, 'asc'] ];
+    // let table_order = [[0, 'asc'], [1, 'asc'], [2, 'asc'], [3, 'asc'], [4, 'asc'], [5, 'asc'] ];
+    // todo - get the order column fixed
+    let table_order = [ ];
     let table_column_defs = [
         // { 'width': '20%' },
         // { width: 200, targets: 0 }
@@ -295,6 +303,10 @@ $(document).ready(function () {
             $('#omic_preview_the_graphs_section2').hide();
         }
         changed_something_important('data_type');
+    });
+    $('#id_header_type').change(function () {
+        clear_validation_errors();
+        changed_something_important('header_type');
     });
     /**
      * On changes that affect the graphs/plots on the preview page
@@ -502,12 +514,12 @@ $(document).ready(function () {
         document.getElementById('sample_location_name').innerHTML = thisText;
         document.getElementById('sample_location_pk').innerHTML = thisValue;
     });
-    $(document).on('change', '#id_indy_file_column_header', function() {
-        var thisText = $('#id_indy_file_column_header').children('option:selected').text();
-        var thisValue = $('#id_indy_file_column_header').children('option:selected').val();
-        document.getElementById('file_column_header').innerHTML = thisText;
-        document.getElementById('sample_pk').innerHTML = thisValue;
-    });
+    // $(document).on('change', '#id_indy_file_column_header_list', function() {
+    //     var thisText = $('#id_indy_file_column_header_list').children('option:selected').text();
+    //     var thisValue = $('#id_indy_file_column_header_list').children('option:selected').val();
+    //     document.getElementById('file_column_header').innerHTML = thisText;
+    //     document.getElementById('sample_pk').innerHTML = thisValue;
+    // });
 
     // END added during indy-sample development click and change etc
 
@@ -623,7 +635,7 @@ $(document).ready(function () {
                             if ($('#id_data_type')[0].selectize.items[0] == 'log2fc') {
                             } else {
                                 // to do need to fill the sample names list to use for replace in the list and in the pick box
-                                indy_file_headers = window.OMICS.omics_data['indy_column_header_list'];
+                                indy_file_headers = window.OMICS.omics_data['indy_file_column_header_list'];
                                 number_headers_in_file = indy_file_headers.length;
                                 if (number_headers_in_file === 0) {
                                     alert('There was no information pulled back from the file selected. This is commonly caused by a named header for the gene reference being missing. Use: gene, gene reference, or name as a column header for the gene field.')
@@ -634,11 +646,11 @@ $(document).ready(function () {
                                 sample_prefix_set = [];
                                 sample_number_set = [];
                                 // to do , load the previx set and the number set!!!
-                                let $this_dropdown = $(document.getElementById('id_indy_file_column_header'));
+                                let $this_dropdown = $(document.getElementById('id_indy_file_column_header_list'));
 
                                 //HANDY-selectize selection clear and refill all
                                 // clear the current selection or it can remain in the list :o
-                                $('#id_indy_file_column_header').selectize()[0].selectize.clear()
+                                $('#id_indy_file_column_header_list').selectize()[0].selectize.clear()
 
                                 // clear all options and refill
                                 $this_dropdown.selectize()[0].selectize.clearOptions();
@@ -1431,25 +1443,10 @@ $(document).ready(function () {
     function buildSampleMetadataTable() {
 
         //todo - add highlight all the column for the table, not sure what to do for the plate....
+        //{#                    todo - make the unit form selection and only have one sample time D H or M#}
 
         //same for both plate and list
-        var elem = document.getElementById('div_for_' + sample_metadata_table_id);
-        //remove the table
-        elem.removeChild(elem.childNodes[0]);
 
-        var myTableDiv = document.getElementById('div_for_' + sample_metadata_table_id);
-        var myTable = document.createElement('TABLE');
-        $(myTable).attr('id', sample_metadata_table_id);
-        $(myTable).attr('cellspacing', '0');
-        $(myTable).attr('width', '100%');
-        $(myTable).addClass('display table table-striped table-hover');
-
-        var tableHead = document.createElement('THEAD');
-        var tr = document.createElement('TR');
-        $(tr).attr('hrow-index', 0);
-
-        tableHead.appendChild(tr);
-        var hcolcounter = 0;
 
 
         //use the header type to determine if plate or list
@@ -1462,7 +1459,23 @@ $(document).ready(function () {
 
         } else {
             // build a table
+            var elem = document.getElementById('div_for_' + sample_metadata_table_id);
+            //remove the table
+            elem.removeChild(elem.childNodes[0]);
 
+            var myTableDiv = document.getElementById('div_for_' + sample_metadata_table_id);
+            var myTable = document.createElement('TABLE');
+            $(myTable).attr('id', sample_metadata_table_id);
+            $(myTable).attr('cellspacing', '0');
+            $(myTable).attr('width', '100%');
+            $(myTable).addClass('display table table-striped table-hover');
+
+            var tableHead = document.createElement('THEAD');
+            var tr = document.createElement('TR');
+            $(tr).attr('hrow-index', 0);
+
+            tableHead.appendChild(tr);
+            var hcolcounter = 0;
 
             $.each(metadata_headers, function (h_index, header) {
                 ikey = indy_keys[h_index];

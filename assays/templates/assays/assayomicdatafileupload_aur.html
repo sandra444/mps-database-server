@@ -103,6 +103,21 @@
                 <div class="hidden">
                     {{  form.indy_sample_metadata_field_header_was_changed }}
                 </div>
+                <div class="hidden">
+                    {# pass to js file need for use in js #}
+                    {{  form.indy_list_of_keys }}
+                    {# pass to js file need for use in js - this will be kept matcthing the table so can be passed back #}
+                    {{  form.indy_list_of_dicts }}
+                    {# pass to js file need for use in js - if the user adds or changes a sample id, this file should be true #}
+                    {% include "generic_field.html" with field=form.indy_flag_file_column_header_change %}
+                    {# pass to js file need for use in js #}
+                    {{  form.indy_matrix_item_list }}
+                    {# pass to js file need for use in js #}
+                    {{  form.indy_file_column_header_list }}
+                    {{  form.indy_file_column_header_prefix_uni_list }}
+                    {{  form.indy_file_column_header_number_uni_dict }}
+                </div>
+
             </div>
 
             {# The div will not match, so just make this comment for the error section  #}
@@ -138,12 +153,20 @@
                     </div>
                 </div>
 
-{#                todo change the page logic so that it only shows the data type that is selected....here#}
                 <div class="row">
                     <div class="col-sm-2"></div>
                     <div class="col-sm-10">
                         <br>
                         <div class="toggle-display-none" id="omic_file_format_details_section">
+
+                            <div class="row">
+                                <div class="col-sm-2">
+                                </div>
+                                <div class="col-sm-10">
+                                    <label>TODO - code for: only show the option for the data type that is selected</label>
+                                </div>
+                            </div>
+
                             <div class="row">
                                 <div class="col-sm-4">
                                     <div>
@@ -213,52 +236,20 @@
                 <br>
 
             <div>
-
-{#                todo - move to first? maybe not, maybe have computer guess based on file, but, let user override#}
-{#                todo - build the gussing for this and the next one#}
                 <div class="row">
                     <div class="col-sm-2">
                     </div>
                     <div class="col-sm-10">
-                        <label>Computer will guess based on file headers - update as needed</label>
+                        <label>TODO - code for: Assigned based on file headers - update as needed</label>
                     </div>
                 </div>
-{#                todo when change file, program to guess which type#}
                 {% include "generic_field.html" with field=form.data_type %}
-
-                <div class="indy-sample">
-{#                    todo give class and make work.....#}
-                    <div class="todo-givename">
-                        <div class="row">
-                            <div class="col-sm-2">
-                                <div class="plate-map-page-field-labels-large">
-                                    <div>
-                                        <div><p id="_tooltip"></p>
-                                            <label for="_tooltip">File Headers &nbsp;</label>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-sm-10">
-                                <div class="plate-map-page-radio-contents">
-                                    <label><input type="radio" class="plate-map-bigger-radio" name="radio_file_headers" value="wells" id="radio_wells">
-                                        <p class="plate-map-radio-spacing plate-map-no-wrap">Assay Well Names</p></label>
-                                    <label><input type="radio" class="plate-map-bigger-radio" name="radio_file_headers" value="samples" id="radio_samples">
-                                        <p class="plate-map-radio-spacing plate-map-no-wrap">Sample Names</p></label>
-                                    <label><input type="radio" class="plate-map-bigger-radio" name="radio_file_headers" value="others" id="radio_others">
-                                        <p class="plate-map-radio-spacing plate-map-no-wrap">Other</p></label>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <br>
-                </div>
 
                 {% include "generic_field.html" with field=form.description %}
 
                 {% include "generic_field.html" with field=form.study_assay %}
 
-    {#                {% include "generic_field.html" with field=form.analysis_method %}#}
+                {# No used cause need a hover tip {% include "generic_field.html" with field=form.analysis_method %}#}
                 <div class="form-group">
                     <div class="col-sm-2">
                         <div class="plate-map-page-field-labels-small">
@@ -345,7 +336,7 @@
                     </div>
 
                     {% include "generic_field.html" with field=form.group_2 %}
-{#todo - error check - sample time - is it required or not and should it be for the log2 fold change#}
+
                     <div class="row">
                         <div class="col-sm-2">
                         </div>
@@ -399,36 +390,29 @@
 
             <div class="indy-sample">
 
-                <div class="">
-                    {# pass to js file need for use in js #}
-                    {{  form.indy_list_of_keys }}
-                    {# pass to js file need for use in js - this will be kept matcthing the table so can be passed back #}
-                    {{  form.indy_list_of_dicts }}
-                    {# pass to js file need for use in js - if the user adds or changes a sample id, this file should be true #}
-                    {% include "generic_field.html" with field=form.indy_flag_file_column_header_change %}
-                    {# pass to js file need for use in js #}
-                    {{  form.indy_matrix_item_list }}
-                    {# pass to js file need for use in js #}
-                    {{  form.indy_file_column_header_list }}
-                    {{  form.indy_file_column_header_prefix_set }}
-                    {{  form.indy_file_column_header_number_set }}
-                </div>
-
                 {% if update or add %}
-
-                    <button type="button" class="btn btn-info" id="indy_instructions">Toggle Step-by-Step Instructions</button>
+{# todo - update all instructions and hover tips#}
+{#                    <button type="button" class="btn btn-info" id="indy_instructions">Toggle Step-by-Step Instructions</button>#}
                     <br>
 
                     <div class="indy-instructions">
                         <div class="h1-level-2"><em>Instructions:</em></div>
                     </div>
 
+                    <div class="indy-sample">
+
+                        <div class="row">
+                            <div class="col-sm-2">
+                            </div>
+                            <div class="col-sm-10">
+                                <label>TODO - code for: Assigned based on file headers - update as needed</label>
+                            </div>
+                        </div>
+                        {% include "generic_field.html" with field=form.header_type %}
+                    </div>
 
 {#                    todo - do not show this to the user, just, fill the table with the number of headers#}
 {#                    todo - do not forget to subtract one from the number of columns to remove the gene row...#}
-{#                    todo make this nice...program to guess#}
-                    {#                todo when change file, program to guess which type#}
-                    {{ form.header_type }}
 
                     <div class="indy-instructions">
                         <div class="number-samples">
@@ -499,7 +483,7 @@
                             <div class="plate-map-page-field-labels-large">
                                 <div>
                                     <div><p id="drag_use_tooltip"></p>
-                                        <label for="drag_use_tooltip">Table Action &nbsp;</label>
+                                        <label for="drag_use_tooltip">Action &nbsp;</label>
                                     </div>
                                 </div>
                             </div>
@@ -528,32 +512,32 @@
                         {# pick sample metadata other than times #}
                         <div class="row">
 
-                            <div id="h_indy_file_column_header" class="col-sm-3">
-                                <div class="row column-section-padding">
-                                    <table>
-                                        <tr>
+{#                            <div id="h_indy_file_column_header" class="col-sm-3">#}
+{#                                <div class="row column-section-padding">#}
+{#                                    <table>#}
+{#                                        <tr>#}
 {#                                            <td class="left-pad">#}
 {#                                                <input class="big-checkbox" id="checkbox_file_column_header" type="checkbox" name="change_file_column_header" value="file_column_header">#}
 {#                                            </td>#}
-                                            <td>
-                                                <div class="left-pad"><p id="file_column_header_tooltip"></p>
-                                                    <label for="file_column_header_tooltip">File Column Header &nbsp;</label>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    </table>
-                                </div>
-                                <div class="row column-section-padding">
-                                     <div class="extra-bottom-padding">
-                                        {{ form.indy_file_column_header }}
-                                    </div>
-                                </div>
+{#                                            <td>#}
+{#                                                <div class="left-pad"><p id="file_column_header_tooltip"></p>#}
+{#                                                    <label for="file_column_header_tooltip">File Column Header &nbsp;</label>#}
+{#                                                </div>#}
+{#                                            </td>#}
+{#                                        </tr>#}
+{#                                    </table>#}
+{#                                </div>#}
+{#                                <div class="row column-section-padding">#}
+{#                                     <div class="extra-bottom-padding">#}
+{#                                        {{ form.indy_file_column_header }}#}
+{#                                    </div>#}
+{#                                </div>#}
                                 {# need for use in js #}
-                                <div class="row hidden">Will get hidden:
-                                    <div id="file_column_header"></div>
-                                    <div id="sample_pk"></div>
-                                </div>
-                            </div>
+{#                                <div class="row hidden">Will get hidden:#}
+{#                                    <div id="file_column_header"></div>#}
+{#                                    <div id="sample_pk"></div>#}
+{#                                </div>#}
+{#                            </div>#}
 
                             <div id="h_indy_matrix_item" class="col-sm-3">
                                 <div class="row column-section-padding">
@@ -609,33 +593,7 @@
                                 </div>
                             </div>
 
-                            <div id="h_indy_assay_well_name" class="col-sm-3">
-                                <div class="row column-section-padding">
-                                    <table>
-                                        <tr>
-{#                                            <td class="left-pad">#}
-{#                                                <input class="big-checkbox" id="checkbox_assay_well_name" type="checkbox" name="change_assay_well_name" value="assay_well_name" >#}
-{#                                            </td>#}
-                                            <td class="left-pad">
-                                                <div><p id="assay_well_name_tooltip"></p>
-                                                    <label for="assay_well_name_tooltip">Assay Well Name &nbsp;</label>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    </table>
-                                </div>
-                                <div class="row column-section-padding">
-                                    <div class="extra-bottom-padding">
-                                        <input type="text" class="form-control" id="assay_well_name" name="assay_well_name" value="A01">
-                                    </div>
-                                </div>
-                            </div>
-
-                        </div>
-
-                        {# pick sample times #}
-                        <div class="row">
-
+                            {# pick sample times #}
                             <div id="h_indy_time_day" class="col-sm-3">
                                 <div class="row column-section-padding">
                                     <table>
@@ -645,7 +603,7 @@
 {#                                            </td>#}
                                             <td class="left-pad">
                                                 <div><p id="sample_time_day_tooltip"></p>
-                                                    <label for="sample_time_day_tooltip">Sample Time (Day) &nbsp;</label>
+                                                    <label for="sample_time_day_tooltip">Sample Time &nbsp;</label>
                                                 </div>
                                             </td>
                                         </tr>
@@ -658,62 +616,7 @@
                                 </div>
                             </div>
 
-{#                    todo - make the unit form selection and only have one sample time D H or M#}
-                            <div class="col-md-3">
-                                <div class="plate-map-page-field-labels-small">
-                                    <div><p id="sample_time_unit_tooltip"></p>
-                                        <label for="sample_time_unit_tooltip">Sample Time Unit - todo, get working* &nbsp;</label>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-2">
-                                <div class="plate-map-page-field-contents-medium required">
-                                    {{ form.time_unit }}make DAY the default unit
-                                </div>
-                            </div>
-
-                            <div id="h_indy_time_hour" class="col-sm-3">
-                                <div class="row column-section-padding">
-                                    <table>
-                                        <tr>
-{#                                            <td class="left-pad">#}
-{#                                                <input class="big-checkbox" id="checkbox_sample_time_hour" type="checkbox" name="change_sample_time_hour" value="assay_sample_time_hour" >#}
-{#                                            </td>#}
-                                            <td class="left-pad">
-                                                <div><p id="sample_time_hour_tooltip"></p>
-                                                    <label for="sample_time_hour_tooltip">Sample Time (Hour) &nbsp;</label>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    </table>
-                                </div>
-                                <div class="row column-section-padding">
-                                    <div class="extra-bottom-padding">
-                                        <input type="text" class="form-control" id="time_hour" name="time_hour" value="0">
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div id="h_indy_time_minute" class="col-sm-3">
-                                <div class="row column-section-padding">
-                                    <table>
-                                        <tr>
-{#                                            <td class="left-pad">#}
-{#                                                <input class="big-checkbox" id="checkbox_sample_time_minute" type="checkbox" name="change_sample_time_minute" value="assay_sample_time_minute" >#}
-{#                                            </td>#}
-                                            <td class="left-pad">
-                                                <div><p id="sample_time_minute_tooltip"></p>
-                                                    <label for="sample_time_minute_tooltip">Sample Time (Minute) &nbsp;</label>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    </table>
-                                </div>
-                                <div class="row column-section-padding">
-                                    <div class="extra-bottom-padding">
-                                        <input type="text" class="form-control" id="time_minute" name="time_minute" value="0">
-                                    </div>
-                                </div>
+                            <div class="col-sm-3">
                             </div>
 
                         </div>
@@ -810,32 +713,45 @@
                 {% endif %}
 
                 <br><br>
+                <h3>Sample Metadata Table</h3>
+
+                <hr>
                 <div class="row">
-                    <div class="col-sm-4">
-                        <div class="for-sample-metadata-table">
-                            <h3>Sample Metadata Table</h3>
+                    <div class="col-sm-2">
+                        <div class="plate-map-page-field-labels-small">
+                            <div><p id="sample_time_unit_tooltip"></p>
+                                <label for="sample_time_unit_tooltip">Sample Time Unit &nbsp;</label>
+                            </div>
                         </div>
                     </div>
-                    <div class="col-sm-2">
+                    <div class="col-sm-1">
+                        <div class="plate-map-page-field-contents-medium required">
+                            {{ form.time_unit }}
+                        </div>
+                    </div>
+                    <div class="col-sm-1">
+                    </div>
+                    <div class="col-sm-1">
                         <div id="undo_button_div" class="col-sm-1 toggle-display-none">
                             <button type="button" class="btn btn-primary extra-top-margin" id="undoIndyButton">Undo</button>
                         </div>
                     </div>
-                    <div class="col-sm-2">
+                    <div class="col-sm-1">
                         <div id="redo_button_div" class="col-sm-1 toggle-display-none">
                             <button type="button" class="btn btn-primary extra-top-margin" id="redoIndyButton">Redo</button>
                         </div>
                     </div>
-                    <div class="col-sm-2">
+                    <div class="col-sm-1">
+                    </div>
+                    <div class="col-sm-3">
                         <button type="button" class="btn btn-primary extra-top-margin" id="clear_highlights_indy_table">Clear Highlighting</button>
                     </div>
                     <div class="col-sm-2">
-{#                        {% if update or add %}#}
-{#                            <button type="button" class="btn btn-primary extra-top-margin" id="add_row_to_indy_table">Add Row to Table</button>#}
-{#                        {% endif %}#}
                     </div>
                 </div>
-                <div id="div_for_sample_metadata_table" class="for-sample-metadata-table">
+                <hr>
+
+                <div id="div_for_sample_metadata_table">
                     {# <table id="sample_metadata_table" class="display table table-striped table-hover" cellspacing="0" width="100%">#}
                     {#  note that the table (including the table tag) is made in javascript #}
                     {# </table>#}
