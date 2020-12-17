@@ -5239,14 +5239,14 @@ class AssayOmicDataFileUpload(LockableModel):
         null=True,
         blank=True,
         help_text='Sample Time for the Test Group',
-        verbose_name='Test Group Sample Time'
+        verbose_name='Sample Time 1*'
     )
     time_2 = models.FloatField(
         default=0,
         null=True,
         blank=True,
         help_text='Sample Time for the Reference Group',
-        verbose_name='Reference Group Sample Time'
+        verbose_name='Sample Time 2*'
     )
     # locations WILL be empty for the norm count and raw count data
     location_1 = models.ForeignKey(
@@ -5256,7 +5256,7 @@ class AssayOmicDataFileUpload(LockableModel):
         on_delete=models.CASCADE,
         related_name="location_1",
         help_text='Sample Location for the Test Group',
-        verbose_name='Test Group Sample Location'
+        verbose_name='Sample Location 1*'
     )
     location_2 = models.ForeignKey(
         'AssaySampleLocation',
@@ -5265,7 +5265,7 @@ class AssayOmicDataFileUpload(LockableModel):
         on_delete=models.CASCADE,
         related_name="location_2",
         help_text='Sample Location for the Reference Group',
-        verbose_name='Reference Group Sample Location'
+        verbose_name='Sample Location 2'
     )
     # # for the counts data, store the number of samples in the table
     # number_saved_samples = models.IntegerField(
@@ -5282,13 +5282,14 @@ class AssayOmicDataFileUpload(LockableModel):
         help_text='What are the headers of the upload file?',
         verbose_name='File Header Type'
     )
-    # sample time unit for the count data, not currently using for the two group data
+    # sample time DISPLAY unit - indicates how the user wants to see the time displayed and interact with the time
+    # IMPORTANT - the sample time is saved in minutes, as per the database standard
     time_unit = models.CharField(
         max_length=8,
         default='day',
-        null=True,
-        blank=True,
-        choices=assay_plate_reader_time_unit_choices
+        choices=assay_plate_reader_time_unit_choices,
+        help_text='Unit for the Sample Collection Time',
+        verbose_name='Sample Time Unit'
     )
 
     def __str__(self):

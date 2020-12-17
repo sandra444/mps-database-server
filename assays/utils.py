@@ -6629,9 +6629,9 @@ def omic_data_file_process_data(save, study_id, omic_data_file_id, data_file, fi
                 data_dicts['indy_file_column_header_number_uni_dict'] = number_set
 
 
-                print('header_list ', uni_list)
-                print('prefix_set ', prefix_set)
-                print('number_set ', number_set)
+                # print('header_list ', uni_list)
+                # print('prefix_set ', prefix_set)
+                # print('number_set ', number_set)
 
                 # Guts of data loading for omic data file
                 # functions should return continue, error message, and a list of instances and an instance counter
@@ -6710,8 +6710,11 @@ def omic_find_sets_of_prefixes_and_numbers_for_well_names(header_list):
             # if number it, it will not match a recombination of the two, which could be a problem
             # number_long.append(int(str[index+1:]))
             thisStr = str[index+1:]
-            thisKey = int(thisStr)
-            number_long[thisStr] = thisKey
+            if thisStr is None or len(thisStr) == 0:
+                number_long[987654321] = None
+            else:
+                thisKey = int(thisStr)
+                number_long[thisStr] = thisKey
 
     return [long_list_to_unique_list(prefix_long), number_long]
 

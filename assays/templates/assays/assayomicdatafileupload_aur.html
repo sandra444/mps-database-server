@@ -20,12 +20,7 @@
     <li><a href="/assays/assaystudy/">Studies</a>
     <li><a href="{{ form.instance.study.get_absolute_url }}">{{ form.instance.study }}</a></li>
     <li><a href="{% url 'assays-assaystudy-data-index' form.instance.study.id %}">Data</a></li>
-    {# form.instance should work either way? #}
-    {% if object %}
-        <li><a href="{% url "assayomicdatafileupload-index" object.study.id %}">Assay Omic Data Files</a>
-    {% else %}
-        <li><a href="{% url "assayomicdatafileupload-index" form.instance.study_id %}">Assay Omic Data Files</a>
-    {% endif %}
+    <li><a href="{% url "assayomicdatafileupload-index" form.instance.study_id %}">Assay Omic Data Files</a>
     <li class="active">
         {% if object %}
             <em>{{ object }}</em>
@@ -78,8 +73,8 @@
                 {% include "errors.html" %}
             </div>
 
-            {# main #}
 {#            <div class="container">   NO CONTAINERs   #}
+
             {# pass to js file need for use in js #}
             <div class="for-javascript">
                 <div class="hidden" id="check_load">
@@ -117,7 +112,6 @@
                     {{  form.indy_file_column_header_prefix_uni_list }}
                     {{  form.indy_file_column_header_number_uni_dict }}
                 </div>
-
             </div>
 
             {# The div will not match, so just make this comment for the error section  #}
@@ -164,6 +158,7 @@
                                 </div>
                                 <div class="col-sm-10">
                                     <label>TODO - code for: only show the option for the data type that is selected</label>
+                                    <label>TODO - check on format use of quotes vrs no quotes</label>
                                 </div>
                             </div>
 
@@ -233,7 +228,7 @@
                 <br>
             {% endif %}
 
-                <br>
+            <br>
 
             <div>
                 <div class="row">
@@ -249,7 +244,7 @@
 
                 {% include "generic_field.html" with field=form.study_assay %}
 
-                {# No used cause need a hover tip {% include "generic_field.html" with field=form.analysis_method %}#}
+                {# Not used cause do not want the + for adding? {% include "generic_field.html" with field=form.analysis_method %}#}
                 <div class="form-group">
                     <div class="col-sm-2">
                         <div class="plate-map-page-field-labels-small">
@@ -269,199 +264,109 @@
 
                 {% include "generic_field.html" with field=form.name_reference %}
 
+{#                <div class="indy-sample">#}
+
+                    <div class="row">
+                        <div class="col-sm-2">
+                        </div>
+                        <div class="col-sm-10">
+                            <label>TODO - code for: Assigned based on file headers - update as needed</label>
+                        </div>
+                    </div>
+                    {% include "generic_field.html" with field=form.header_type %}
+{#                </div>#}
+
+                {% include "generic_field.html" with field=form.time_unit %}
+
             </div>
 
             <br>
 
             <div class="compare-group">
+                <h3>Metadata for Comparing Two Treatment Groups</h3>
 
-                <div class="two-group">
+                <div class="h1-level-1"><i>Group 1:</i></div><br>
+                {% include "generic_field.html" with field=form.group_1 %}
+                {% include "generic_field.html" with field=form.time_1_display %}
 
-                    <div class="row">
-                        <div class="col-sm-2">
-                        </div>
-                        <div class="col-sm-10">
-                            <label>Group 1 - Test Group*</label>
-                        </div>
-                    </div>
-
-                </div>
-
-                <div class="one-group">
-
-                    {% include "generic_field.html" with field=form.group_1 %}
-
-                    <div class="row">
-                        <div class="col-sm-2">
-                        </div>
-                        <div class="col-sm-10">
-                            <table class="table table-condensed table-bordered table-nonfluid no-margin-bottom">
-                                <tr>
-                                    <th class="bg-success" colspan="3">Sample Time 1*</th>
-                                    <th class="bg-warning">Sample Location 1*</th>
-                                </tr>
-                                <tr>
-                                    <th class="bg-success">Day</th>
-                                    <th class="bg-success">Hour</th>
-                                    <th class="bg-success">Minute</th>
-                                    <td class="bg-warning">
-    {#                                    {% if update or add %}#}
-    {#                                            {% include "generic_popup_link.html" with field=form.location_1 %}#}
-    {#                                    {% endif %}#}
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td hidden>
-                                        {{ form.time_1 }}
-                                    </td>
-                                    <td class="bg-success">{{ form.time_1_day }}</td>
-                                    <td class="bg-success">{{ form.time_1_hour }}</td>
-                                    <td class="bg-success">{{ form.time_1_minute }}</td>
-                                    <td class="bg-warning">{{ form.location_1 }}</td>
-                                </tr>
-                            </table>
-                        </div>
-                    </div>
-
-                </div>
-
-                <div class="two-group">
-
-                    <div class="row">
-                        <div class="col-sm-2">
-                        </div>
-                        <div class="col-sm-10">
-                            <label>Group 2 - Reference Group*</label>
-                        </div>
-                    </div>
-
-                    {% include "generic_field.html" with field=form.group_2 %}
-
-                    <div class="row">
-                        <div class="col-sm-2">
-                        </div>
-                        <div class="col-sm-10">
-                            <table class="table table-condensed table-bordered table-nonfluid no-margin-bottom">
-                                <tr>
-                                    <th class="bg-success" colspan="3">Sample Time 2*</th>
-                                    <th class="bg-warning">Sample Location 2*</th>
-                                </tr>
-                                <tr>
-                                    <th class="bg-success">Day</th>
-                                    <th class="bg-success">Hour</th>
-                                    <th class="bg-success">Minute</th>
-                                    <td class="bg-warning">
-    {#                                        {% if update or add %}#}
-    {#                                            {% include "generic_popup_link.html" with field=form.location_2 %}#}
-    {#                                        {% endif %}#}
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td hidden>
-                                        {{ form.time_2 }}
-                                    </td>
-                                    <td class="bg-success">{{ form.time_2_day }}</td>
-                                    <td class="bg-success">{{ form.time_2_hour }}</td>
-                                    <td class="bg-success">{{ form.time_2_minute }}</td>
-                                    <td class="bg-warning">{{ form.location_2 }}</td>
-                                </tr>
-                            </table>
-                        </div>
-                    </div>
-
-                    <div class="toggle-display-none" id="omic_preview_button_section">
-                        <button type="button" class="btn btn-info" id="omicPreviewTheGraphsButton">View Preview Graphs</button>
-                    </div>
-
-                    <div class="toggle-display-none" id="omic_preview_the_graphs_section">
-
-                        <div id="plots">
-                            <div id="volcano-plots">
-                            </div>
-                            <div id="ma-plots" style="display: none">
+                {# Not used cause do not want the + for adding? {% include "generic_field.html" with field=form.location_1 %} #}
+                <div class="form-group">
+                    <div class="col-sm-2">
+                        <div class="plate-map-page-field-labels-small">
+                            <div>
+                                <label>Sample Location 1</label>
                             </div>
                         </div>
+                    </div>
+                    <div class="col-sm-10">
+                        <div class="plate-map-page-field-contents-small">
+                            {{ form.location_1 }}
+                        </div>
+                    </div>
+                </div>
 
+                <div class="h1-level-1"><i>Group 2:</i></div><br>
+                {% include "generic_field.html" with field=form.group_2 %}
+                {% include "generic_field.html" with field=form.time_2_display %}
+
+                {# Not used cause do not want the + for adding? {% include "generic_field.html" with field=form.location_2 %} #}
+                <div class="form-group">
+                    <div class="col-sm-2">
+                        <div class="plate-map-page-field-labels-small">
+                            <div>
+                                <label>Sample Location 2</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-10">
+                        <div class="plate-map-page-field-contents-small">
+                            {{ form.location_2 }}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="toggle-display-none" id="omic_preview_button_section">
+                    <button type="button" class="btn btn-info" id="omicPreviewTheGraphsButton">View Preview Graphs</button>
+                </div>
+
+                <div class="toggle-display-none" id="omic_preview_the_graphs_section">
+
+                    <div id="plots">
+                        <div id="volcano-plots">
+                        </div>
+                        <div id="ma-plots" style="display: none">
+                        </div>
                     </div>
 
                 </div>
 
             </div>
 
+            </div>
+
             <div class="indy-sample">
+                <h3>Metadata for Normalized Count and Raw Count Data</h3>
 
                 {% if update or add %}
 {# todo - update all instructions and hover tips#}
-{#                    <button type="button" class="btn btn-info" id="indy_instructions">Toggle Step-by-Step Instructions</button>#}
+                    <button type="button" class="btn btn-info" id="indy_instructions">Toggle Instructions</button>
                     <br>
 
                     <div class="indy-instructions">
-                        <div class="h1-level-2"><em>Instructions:</em></div>
-                    </div>
-
-                    <div class="indy-sample">
-
-                        <div class="row">
-                            <div class="col-sm-2">
-                            </div>
-                            <div class="col-sm-10">
-                                <label>TODO - code for: Assigned based on file headers - update as needed</label>
-                            </div>
-                        </div>
-                        {% include "generic_field.html" with field=form.header_type %}
-                    </div>
-
-{#                    todo - do not show this to the user, just, fill the table with the number of headers#}
-{#                    todo - do not forget to subtract one from the number of columns to remove the gene row...#}
-
-                    <div class="indy-instructions">
-                        <div class="number-samples">
-                            <ul class="help-filled-circle">
-                                <li class="h1-level-2">Enter # samples in upload file (# rows for Sample Metadata Table)</li>
+                        <div style="margin-top: 25px;" class="alert alert-info" role="alert">
+                            <ul>
+                                <li>Highlight, using dragging or a click button, the cells/wells in the plate/table with content to be replaced, removed, or copied</li>
                             </ul>
-                        </div>
-                    </div>
-                    <div class="number-samples">
-                        <br>
-                        <div class="row">
-                            <div class="col-sm-2">
-                                <div class="plate-map-page-field-labels-small">
-                                    <div>
-                                        <div><p ></p>
-                                            <label >Number of Samples &nbsp;</label>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-sm-2">
-                                <div class="plate-map-page-field-contents-small">
-                                    {{ form.indy_number_of_samples }}
-                                </div>
-                            </div>
-                            <div class="col-sm-2">
-                                <button type="button" class="btn btn-default">Go</button>
-                            </div>
-                            <div class="col-sm-6"></div>
-                                <div id="number_headers_in_file">
-                                </div>
                         </div>
                     </div>
 
                     <div class="indy-instructions">
                         <ul class="help-filled-circle">
-                            <li class="h1-level-2">Select/Drag in Sample Metadata Table to highlight cells
-                                <br><br>Tips and Notes:
+                                Tips and Notes:
                                 <ul class="help-open-circle">
                                     <li>Highlighting is cumulative</li>
-                                    <li>When using Replace, only highlighted cells will be replaced</li>
-                                    <li>When using Paste, if the paste cell is in the highlighted areas, the highlighted areas will be overwritten</li>
                                     <li>When updates are made to the table, it will resort </li>
-                                    <li>Use Column visibility, Search, and/or column sorting to simplify highlighting (e.g., if entering time in Days, hide Hour and Minute fields)</li>
-                                    <li>If times are missing, they will be set to 0 on submit</li>
-                                    <li>Empty rows will be removed on Submit</li>
-                                    <li>Sample Location cannot be incremented</li>
-                                    <li>For chip/well names, increment will work down a sorted list of all the chips/wells in the study (sorted as text - chip11 will come before chip2, but after chip02)</li>
-                                    <li>Make sure rows are complete or there will be a Submit error (Assay Well Name is optional)</li>
+                                    <li>Use Column visibility, Search, and/or column sorting to simplify highlighting</li>
                                 </ul>
                             </li>
                         </ul>
@@ -469,15 +374,9 @@
 
                 {% endif %}
 
-{#            may want the table here instead...see what team response is#}
                 <br>
 
                 {% if update or add %}
-                    <div class="indy-instructions">
-                        <ul class="help-filled-circle">
-                            <li class="h1-level-2">Select action for highlighted text</li>
-                        </ul>
-                    </div>
                     <div class="row">
                         <div class="col-sm-2">
                             <div class="plate-map-page-field-labels-large">
@@ -504,40 +403,17 @@
 
                     <div class="replace-section">
                         <div class="indy-instructions">
-                            <ul class="help-filled-circle">
-                                <li class="h1-level-2">Select the content for the replace</li>
-                            </ul>
+                            <div style="margin-top: 25px;" class="alert alert-info" role="alert">
+                                <ul>
+                                    <li>Select the content to use for replacement</li>
+                                    <li>Select to duplicate or increment</li>
+                                    <li>Click the Replace Content button</li>
+                                </ul>
+                            </div>
                         </div>
 
                         {# pick sample metadata other than times #}
                         <div class="row">
-
-{#                            <div id="h_indy_file_column_header" class="col-sm-3">#}
-{#                                <div class="row column-section-padding">#}
-{#                                    <table>#}
-{#                                        <tr>#}
-{#                                            <td class="left-pad">#}
-{#                                                <input class="big-checkbox" id="checkbox_file_column_header" type="checkbox" name="change_file_column_header" value="file_column_header">#}
-{#                                            </td>#}
-{#                                            <td>#}
-{#                                                <div class="left-pad"><p id="file_column_header_tooltip"></p>#}
-{#                                                    <label for="file_column_header_tooltip">File Column Header &nbsp;</label>#}
-{#                                                </div>#}
-{#                                            </td>#}
-{#                                        </tr>#}
-{#                                    </table>#}
-{#                                </div>#}
-{#                                <div class="row column-section-padding">#}
-{#                                     <div class="extra-bottom-padding">#}
-{#                                        {{ form.indy_file_column_header }}#}
-{#                                    </div>#}
-{#                                </div>#}
-                                {# need for use in js #}
-{#                                <div class="row hidden">Will get hidden:#}
-{#                                    <div id="file_column_header"></div>#}
-{#                                    <div id="sample_pk"></div>#}
-{#                                </div>#}
-{#                            </div>#}
 
                             <div id="h_indy_matrix_item" class="col-sm-3">
                                 <div class="row column-section-padding">
@@ -559,7 +435,7 @@
                                         {{ form.indy_matrix_item }}
                                     </div>
                                 </div>
-                                {# need for use in js #}
+                                {# need for use in js ~pk_tracking_note~ #}
                                 <div class="row hidden">Will get hidden:
                                     <div id="matrix_item_name"></div>
                                     <div id="matrix_item_pk"></div>
@@ -586,7 +462,7 @@
                                         {{ form.indy_sample_location }}
                                     </div>
                                 </div>
-                                {# need for use in js #}
+                                {# need for use in js ~pk_tracking_note~ #}
                                 <div class="row hidden">Will get hidden:
                                     <div id="sample_location_name"></div>
                                     <div id="sample_location_pk"></div>
@@ -594,7 +470,7 @@
                             </div>
 
                             {# pick sample times #}
-                            <div id="h_indy_time_day" class="col-sm-3">
+                            <div id="h_indy_time_in_unit" class="col-sm-3">
                                 <div class="row column-section-padding">
                                     <table>
                                         <tr>
@@ -602,6 +478,7 @@
 {#                                                <input class="big-checkbox" id="checkbox_sample_time_day" type="checkbox" name="change_sample_time_day" value="assay_sample_time_day" >#}
 {#                                            </td>#}
                                             <td class="left-pad">
+{#                                                todo fix this tool tip and label for the tool tip#}
                                                 <div><p id="sample_time_day_tooltip"></p>
                                                     <label for="sample_time_day_tooltip">Sample Time &nbsp;</label>
                                                 </div>
@@ -611,6 +488,7 @@
                                 </div>
                                 <div class="row column-section-padding">
                                     <div class="extra-bottom-padding">
+{#                                        todo fix this to transition from 3 time units#}
                                         <input type="text" class="form-control" id="time_day" name="time_day" value="1">
                                     </div>
                                 </div>
@@ -619,13 +497,6 @@
                             <div class="col-sm-3">
                             </div>
 
-                        </div>
-
-                        {# duplicate or increment selection #}
-                        <div class="indy-instructions">
-                            <ul class="help-filled-circle">
-                                <li class="h1-level-2">Select Duplicate or Increment option</li>
-                            </ul>
                         </div>
 
                         <div class="row">
@@ -653,11 +524,6 @@
                         <div class="increment-section">
                             <div class="row">
                                 <div class="col-sm-3">
-                                    <div class="indy-instructions">
-                                        <ul class="help-filled-circle">
-                                            <li class="h1-level-2">Add Increment</li>
-                                        </ul>
-                                    </div>
                                 </div>
                                 <div class="col-sm-9">
                                     <div class="plate-map-no-wrap">
@@ -669,22 +535,8 @@
                         </div>
 
                         <br>
-
-                        <div class="indy-instructions">
-                            <ul class="help-filled-circle">
-                                <li class="h1-level-2">Click the Replace Content button to update the table</li>
-                            </ul>
-                        </div>
                         <button type="button" class="btn btn-primary" id="replace_in_indy_table">Replace Content</button>
 
-                    </div>
-
-                    <div class="empty-section">
-                        <div class="indy-instructions">
-                            <ul class="help-filled-circle">
-                                <li class="h1-level-2">Confirm the content from the selected cells have been removed</li>
-                            </ul>
-                        </div>
                     </div>
 
 {#                    <div class="copys-section">#}
@@ -704,32 +556,25 @@
 
                     <div class="pastes-section">
 {#                        <div class="indy-instructions">#}
-                            <ul class="help-filled-circle">
-                                <li class="h1-level-2">Drag in cell to start paste in row</li>
-                            </ul>
+                            <div style="margin-top: 25px;" class="alert alert-info" role="alert">
+                                <ul>
+                                    <li>Drag in the location where the paste should start</li>
+                                </ul>
+                            </div>
 {#                        </div>#}
                     </div>
 
                 {% endif %}
 
-                <br><br>
-                <h3>Sample Metadata Table</h3>
-
                 <hr>
+
+
                 <div class="row">
-                    <div class="col-sm-2">
-                        <div class="plate-map-page-field-labels-small">
-                            <div><p id="sample_time_unit_tooltip"></p>
-                                <label for="sample_time_unit_tooltip">Sample Time Unit &nbsp;</label>
-                            </div>
-                        </div>
+                    <div class="col-sm-5">
+                        <div class="h1-level-1"><i>Metadata Plate/Table</i></div>
                     </div>
-                    <div class="col-sm-1">
-                        <div class="plate-map-page-field-contents-medium required">
-                            {{ form.time_unit }}
-                        </div>
-                    </div>
-                    <div class="col-sm-1">
+                    <div class="col-sm-4">
+                        <button type="button" class="btn btn-primary extra-top-margin" id="clear_highlights_indy_table">Clear Highlighting</button>
                     </div>
                     <div class="col-sm-1">
                         <div id="undo_button_div" class="col-sm-1 toggle-display-none">
@@ -743,13 +588,7 @@
                     </div>
                     <div class="col-sm-1">
                     </div>
-                    <div class="col-sm-3">
-                        <button type="button" class="btn btn-primary extra-top-margin" id="clear_highlights_indy_table">Clear Highlighting</button>
-                    </div>
-                    <div class="col-sm-2">
-                    </div>
                 </div>
-                <hr>
 
                 <div id="div_for_sample_metadata_table">
                     {# <table id="sample_metadata_table" class="display table table-striped table-hover" cellspacing="0" width="100%">#}

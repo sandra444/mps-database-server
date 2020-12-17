@@ -4,14 +4,10 @@ window.OMICS = {
     omics_data: null
 };
 
-// todo - put target stuff back in for counts data (got database again, need to readd it)
 // todo - maybe - make it so that the user can overwrite a previous rather than this (this will be complicated)
-// todo - remove an error for teh log2 fold change where group1 can not equal group 2 - this could happen if teh times are different - think about....
-
-//todo at some point, limit the sample locations to what is listed in model, if listed (location_1, 2 and sample location - three places currently)
-
-
-// todo add a highlight all to columns
+// todo - remove an error for the log2 fold change where group1 can not equal group 2 - this could happen if the times are different - think about....
+// todo at some point, check to make sure to limit the sample locations to what is listed in models in the study, if listed (location_1, 2 and sample location - three places currently)
+// todo add a highlight all to columns required
 
 $(document).ready(function () {
     //show the validation stuff
@@ -23,8 +19,6 @@ $(document).ready(function () {
     
     let page_omic_upload_called_from_in_js_file = 'add';
     let page_omic_upload_check_load = $('#check_load').html().trim();
-
-    // $('.has-popover').popover({'trigger':'hover'});
 
     // two group stuff
     let page_omic_upload_group_id_change = 0;
@@ -39,6 +33,12 @@ $(document).ready(function () {
     let page_omic_current_group2 = $('#id_group_2')[0].selectize.items[0];
 
     let page_make_the_group_change = true;
+
+    // when visible, they are required
+    $('#id_group_1').next().addClass('required');
+    $('#id_group_2').next().addClass('required');
+    $('#id_location_1').next().addClass('required');
+    $('#id_location_2').next().addClass('required');
 
     // indy sample stuff
     var sample_metadata_table_id = 'sample_metadata_table';
@@ -58,16 +58,14 @@ $(document).ready(function () {
     var metadata_highlighted = [];
     var list_of_ikeys_for_replace_highlighting = [];
     var ikey_last_highlighted_seen = {};
-    var number_headers_in_file = 0;
-
-    $('#id_time_unit').next().addClass('required');
+    var indy_sample_metadata_table_current_row_order = [];
 
     // just working variables, but want in different subs, so just declare here
     var current_pk = 0;
     var current_val = '';
-    var indy_sample_metadata_table_current_row_order = [];
 
 
+    // todo redo these here and in the parallel in the forms.py
     // make sure order is parallel to form field indy_list_of_keys
     var metadata_headers = [
         'Row Options',
@@ -84,6 +82,8 @@ $(document).ready(function () {
         'sample_location_pk',
         'sample_metadata_pk',
         ]
+    // todo need to update for the table as a plate
+    // still need to decide how will nest the table (if well nest the table)
     // this will control what gets put in the table, but metadata_lod will have all the indy_keys in it
     // todo need to get the two extra sample times out and assay well name, but for now, turned them off
     var include_header_in_indy_table = [
@@ -101,13 +101,12 @@ $(document).ready(function () {
         ]
     var chip_list = JSON.parse($('#id_indy_matrix_item_list').val());
     var sample_list = JSON.parse($('#id_indy_file_column_header_list').val());
-    // split into a letter part and a number part
-    // get the set of numbers, make those column headers
-    // get the set of letters, make those row headers
-    var sample_prefix_set = JSON.parse($('#id_indy_file_column_header_prefix_uni_list').val());
-    var sample_number_set = JSON.parse($('#id_indy_file_column_header_number_uni_dict').val());
+    var sample_prefix_list = JSON.parse($('#id_indy_file_column_header_prefix_uni_list').val());
+    var sample_number_dict = JSON.parse($('#id_indy_file_column_header_number_uni_dict').val());
     var indy_keys = JSON.parse($('#id_indy_list_of_keys').val());
     // make a cross reference to the html dom name
+    // todo - fix for new assumption that all headers are going in and are not editable
+    // also - todo fix to add buttons for highlight change whole column and whole row
     var ikey_to_html_outer = {};
     var ikey_to_html_element = {};
     $.each(indy_keys, function (index, ikey) {
@@ -128,7 +127,7 @@ $(document).ready(function () {
         //     ikey_to_html_element[ikey] ='assay_well_name';
         // } else
         if (index === 5) {
-            ikey_to_html_outer[ikey] ='h_indy_time_day';
+            ikey_to_html_outer[ikey] ='h_indy_time_in_unit';
             ikey_to_html_element[ikey] ='time_day';
         } else
         // if (index === 6) {
@@ -178,6 +177,7 @@ $(document).ready(function () {
 
     // START - Tool tips
 
+    //todo update all the tool tips (add/remove as needed)
     // tool tips - two group stuff
     let page_omic_upload_omic_file_format_deseq2_log2fc_headers = '"name", "baseMean", "log2FoldChange", "lfcSE", "stat", "pvalue", "padj"';
     let page_omic_upload_omic_file_format_deseq2_log2fc_tooltip = 'For DESeq2 Log2Fold change data, the header "log2FoldChange" must be in the first row. Other optional columns headers are: "baseMean", "lfcSE", "stat", "pvalue", "padj", and "gene reference" (or "name" or "gene").';
@@ -214,16 +214,8 @@ $(document).ready(function () {
 
     // END - Tool tips
 
-    // Set the required-ness of the groups on load based on data type on load
+    // Some more load things Section
     changed_something_important('load');
-    // some additional load functions that need to be run
-    // indy sample functions
-
-
-    // todo - do not show this to the user, just, fill the table with the number of headers
-    // todo - do not forget to subtract one from the number of columns to remove the gene row..
-    // todo - this will require some thinking
-    number_samples_show_hide();
 
     if (page_omic_upload_check_load === 'review') {
         page_omic_upload_called_from_in_js_file = 'load-review';
@@ -231,8 +223,8 @@ $(document).ready(function () {
         $('.selectized').each(function() { this.selectize.disable() });
         $(':input').attr('disabled', 'disabled');
     } else {
-        // todo add class to the sample time and sample location to make the box yellow
-        // todo whenever it shows, pi asked for it to be required
+        // todo add class to the sample time and sample location to make the box yellow - check to make sure we are not going to time unit and one time before mess with this
+        // todo whenever it shows, PI asked for it to be required
         // todo build a required check into the form processess
         page_omic_upload_group_id_load_1 = 1;
         page_omic_upload_group_pk_load_1 = $('#id_group_1')[0].selectize.items[0];
@@ -248,14 +240,13 @@ $(document).ready(function () {
         }
     }
 
-    // START pre indy-sample general and two group stuff
+    // START - General and two group stuff (written during log2fold change - that is pre indy
     /**
      * A function to clear the validation errors on change of any field
     */
     function clear_validation_errors() {
         $('#form_errors').hide();
     }
-
     /**
      * On click to toggle
     */
@@ -333,9 +324,8 @@ $(document).ready(function () {
             $('#id_name_reference')[0].selectize.setValue('entrez_gene');
         }
     });
-
     /**
-     * On change a group, call a function that gets sample info
+     * On change a group 1, call a function that gets sample info
     */
     $('#id_group_1').change(function () {
         clear_validation_errors();
@@ -365,6 +355,9 @@ $(document).ready(function () {
             page_omic_current_group1 = $('#id_group_1')[0].selectize.items[0];
         }
     });
+    /**
+     * On change a group 2, call a function that gets sample info
+    */
     $('#id_group_2').change(function () {
         clear_validation_errors();
         if (page_make_the_group_change) {
@@ -393,7 +386,6 @@ $(document).ready(function () {
             page_omic_current_group2 = $('#id_group_2')[0].selectize.items[0];
         }
     });
-
     /**
      * On click to download_two_group_example
     */
@@ -409,14 +401,9 @@ $(document).ready(function () {
         download_two_group_example(filename, text);
     }, false);
 
-    // END pre indy-sample general and two group stuff
+    // END - General and two group stuff (written during log2fold change - that is pre indy
 
     // START added during indy-sample development click and change etc
-
-    $('#id_indy_number_of_samples').on('change', function (e) {
-        number_samples_show_hide();
-        indyCalledToMakeTheAnEmptyTableOfXrows();
-    });
 
     $("input[type='radio'][name='radio_change_duplicate_increment']").click(function () {
         page_change_duplicate_increment = $(this).val();
@@ -450,9 +437,9 @@ $(document).ready(function () {
         whatIsCurrentlyHighlightedInTheIndyTable();
     });
 
-    // a default is not set in the html file, so, user has to pick one
+    // a default is NOT set in the html file, so, user has to pick one
     $("input[type='radio'][name='radio_change_drag_action']").click(function () {
-        // check to see if any cells in the table have been highlighted - such a pain....remove for now
+        // check to see if any cells in the table have been highlighted - such a pain....remove for now, but may need to had back a copys radio button
         // if ($('.special-selected1').length > 0) {
         //     page_drag_action = $(this).val();
         //     sample_metadata_replace_show_hide();
@@ -489,6 +476,7 @@ $(document).ready(function () {
         indyCalledToReplace();
     });
 
+    //todo - going to get rid of these, but need to add others (highlight row/column)
     // clicked on an add row button in the indy table
     $(document).on('click', '.add_indy_row', function () {
         let add_button_clicked = $(this);
@@ -502,6 +490,7 @@ $(document).ready(function () {
 
     // need on change events for chip id and for sample location so can populate the corresponding dom element
     // could have just used a memory variable, but having the text and pk in a dom element made picking a general process for all!
+    // note in html file, search ~pk_tracking_note~
     $(document).on('change', '#id_indy_matrix_item', function() {
         var thisText = $('#id_indy_matrix_item').children('option:selected').text();
         var thisValue = $('#id_indy_matrix_item').children('option:selected').val();
@@ -514,6 +503,7 @@ $(document).ready(function () {
         document.getElementById('sample_location_name').innerHTML = thisText;
         document.getElementById('sample_location_pk').innerHTML = thisValue;
     });
+    // not going to offer this to users - when sure about this, todo, delete this commented out stuff
     // $(document).on('change', '#id_indy_file_column_header_list', function() {
     //     var thisText = $('#id_indy_file_column_header_list').children('option:selected').text();
     //     var thisValue = $('#id_indy_file_column_header_list').children('option:selected').val();
@@ -526,10 +516,10 @@ $(document).ready(function () {
 
     // START - All Functions section
 
-    // START section for preview page of the log2 fold change visualizations
-    // To make the preview in the upload page
-    // NOTE: the upload page has the following elements
-    // that are used in getting the data needed
+    // ##START section for preview page(s)
+    // FIRST, designed for log2 fold change by DESeq2 - phase I omic development fall 2020
+    // To make the preview on this upload page:
+    // NOTE: the upload page has the following elements that are used in getting the data needed
     // form name='omic_file'
     // id='id_data_type'
     // id='id_anaylsis_method'
@@ -537,7 +527,8 @@ $(document).ready(function () {
     // And, these elements were added to the upload page
     // id='plots'
     // id='volcano-plots'
-    // id='ma-plots'
+    // id='ma-plots''
+    // THEN, in early 2021, extended for phase II omic development
     function get_data_for_this_file_ready_for_preview(called_from) {
         let data = {
             call: 'fetch_omics_data_for_upload_preview_prep',
@@ -623,9 +614,7 @@ $(document).ready(function () {
 
 
                         }
-                        // console.log("called_from ",called_from)
                         // put here to avoid race errors
-                        
                         if (called_from == 'data_file' || called_from == 'data_type') {
                             try {
                                 id_omic_data_file = $('#id_omic_data_file').val();
@@ -635,17 +624,22 @@ $(document).ready(function () {
                             if ($('#id_data_type')[0].selectize.items[0] == 'log2fc') {
                             } else {
                                 // to do need to fill the sample names list to use for replace in the list and in the pick box
+                                // todo - changing this so that it won't put in a replace option list, but will
+                                // either write them to a table or a plate - lots of work todo here
                                 indy_file_headers = window.OMICS.omics_data['indy_file_column_header_list'];
-                                number_headers_in_file = indy_file_headers.length;
-                                if (number_headers_in_file === 0) {
+                                if (indy_file_headers.length === 0) {
                                     alert('There was no information pulled back from the file selected. This is commonly caused by a named header for the gene reference being missing. Use: gene, gene reference, or name as a column header for the gene field.')
                                 }
                                 // console.log('indy_file_headers ',indy_file_headers)
 
+                                // todo these could be samples or well names...still working on this
                                 sample_list = [];
-                                sample_prefix_set = [];
-                                sample_number_set = [];
-                                // to do , load the previx set and the number set!!!
+                                sample_prefix_list = [];
+                                sample_number_dict = [];
+
+                                // todo, load the prefix and number, think about how will use to make a plate looking table
+
+                                // todo - do not think we will be using this drop down anymore, but keep since might need some of this code for getting what need for plate list(s)
                                 let $this_dropdown = $(document.getElementById('id_indy_file_column_header_list'));
 
                                 //HANDY-selectize selection clear and refill all
@@ -681,7 +675,7 @@ $(document).ready(function () {
             });
         }
     };
-    // END section for preview page of the log2 fold change visualizations
+    // ##END section for preview page(s)
 
     // Other Functions
 
@@ -691,28 +685,28 @@ $(document).ready(function () {
         // console.log("called_from ",called_from)
         if ($('#id_data_type')[0].selectize.items[0] == 'log2fc') {
 
-            // $('.two-group').show();
-            // $('.one-group').show();
             $('.compare-group').show();
             $('.indy-sample').hide();
 
-            // stuff for the two group fields
-            $('#id_group_1').next().addClass('required');
-            $('#id_group_2').next().addClass('required');
+            //stuff for the indy fields - make sure some fields are empty
+            //this is so that stuff that is not related to the file is not saved in the upload file table
+            // todo - do this for the indy form fields that are saved to the upload file table and check
+            $('#id_header_type')[0].selectize.setValue('not-full');
+            $('#id_time_unit')[0].selectize.setValue('not-full');
+            // todo - save to a variable and put back if change back?? think about
+
 
         } else {
 
-            // $('.one-group').hide();
-            // $('.two-group').hide();
             $('.compare-group').hide();
             $('.indy-sample').show();
 
             // setting some of the inside classes to hidden
-            $('.number-samples').hide();
             $('.increment-section').hide();
             $('.indy-instructions').hide();
 
             //stuff for the two group fields - make sure some fields are empty
+            //this is so that stuff that is not related to the file is not saved in the upload file table
             page_make_the_group_change = false;
             $('#id_group_1')[0].selectize.setValue('not-full');
             $('#id_group_2')[0].selectize.setValue('not-full');
@@ -751,6 +745,7 @@ $(document).ready(function () {
     }
 
     // https://www.bitdegree.org/learn/best-code-editor/javascript-download-example-1
+    //todo-change on double quote issue - want or not - all or none??
     function download_two_group_example(filename, text) {
       var element = document.createElement('a');
       element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
@@ -765,6 +760,8 @@ $(document).ready(function () {
         if (typeof $('#id_group_1')[0].selectize.items[0] !== 'undefined') {
             alert('Group 1 and Group 2 must be different or both must be empty.');
         }
+        //todo, want to change sample time, this may need to be turned off, could have same groups with different sample time or location
+        //todo, need to check in the form qc too
     }
 
      /**
@@ -949,32 +946,20 @@ $(document).ready(function () {
         });
     }
 
-    /**
-      * When the number of indy samples is > 0
-    */
-    function number_samples_show_hide() {
-        if ($('#id_indy_number_of_samples').val() > 0) {
-            $('.number-samples').hide();
-        } else {
-            $('.number-samples').show();
-            document.getElementById("number_headers_in_file").innerHTML = 'Extracted Headers: '+number_headers_in_file;
-        }
-    }
-
     function sample_metadata_replace_show_hide() {
         //options are replace, empty, copys, pastes
+        // for now, not using copys, but, keep in case PI wants to go back to something more like plate map app
         $('.replace-section').hide();
         $('.empty-section').hide();
-        $('.copys-section').hide();
+        // $('.copys-section').hide();
         $('.pastes-section').hide();
 
         if (!page_drag_action) {
             $('#radio_replace').prop('checked', false);
             $('#radio_empty').prop('checked', false);
-            $('#radio_copys').prop('checked', false);
+            // $('#radio_copys').prop('checked', false);
             $('#radio_pastes').prop('checked', false);
-        } else
-        if (page_drag_action === 'replace') {
+        } else if (page_drag_action === 'replace') {
             $('.special-selected2').removeClass('special-selected2');
             $('.replace-section').show();
         } else if (page_drag_action === 'empty') {
@@ -993,7 +978,7 @@ $(document).ready(function () {
 
     function indyUndoRedoButtonVisibilityCheck() {
         var current_length_list = metadata_lod_cum.length;
-        // should a button show after whatever change brought you here
+        // should a button (undo or redo) show after whatever change brought you here
         if (metadata_lod_current_index > 0) {
             // yes, can undo another time
             $('#undo_button_div').show();
@@ -1088,36 +1073,6 @@ $(document).ready(function () {
         metadata_lod_cum.push(JSON.parse(JSON.stringify(metadata_lod)));
         metadata_lod_current_index = metadata_lod_cum.length - 1;
         indySampleMetadataCallBuildAndPost();
-        $('#id_indy_number_of_samples').val(metadata_lod.length);
-        number_samples_show_hide();
-    }
-
-    // ~~ Make a bunch of empty rows when sample row number is changed
-    function indyCalledToMakeTheAnEmptyTableOfXrows() {
-        // in the first make of the empty table, all rows will be empty, so, not data change occurred
-        // if rows were deleted until there were none, so that this option was available, the flags should have been flipped aready
-        //     $('#id_indy_sample_metadata_table_was_changed').attr('checked',true);
-        //     $('#id_indy_sample_metadata_field_header_was_changed').attr('checked',true);
-        if (metadata_lod.length === 0) {
-            var i;
-            for (i = 0; i < $('#id_indy_number_of_samples').val(); i++) {
-                var dict = {};
-                $.each(indy_keys, function (index, ikey) {
-                    // do to all in the metadata_lod, not just the ones shown in the table, so, comment this out for now
-                    // if (include_header_in_indy_table[index] === 1) {
-                        dict[ikey] = null;
-                    // }
-                });
-                metadata_lod.push(dict);
-            }
-            metadata_lod_cum.push(JSON.parse(JSON.stringify(metadata_lod)));
-            metadata_lod_current_index = metadata_lod_cum.length - 1;
-            indySampleMetadataCallBuildAndPost();
-            $('#id_indy_number_of_samples').val(metadata_lod.length);
-            number_samples_show_hide();
-        } else {
-            alert('Selecting the number of rows is only allowed when the table is empty.')
-        }
     }
 
     // ~~ The radio button change or change plus the go button/drag
@@ -1309,7 +1264,6 @@ $(document).ready(function () {
         metadata_lod_cum.push(JSON.parse(JSON.stringify(metadata_lod)));
         metadata_lod_current_index = metadata_lod_cum.length - 1;
         indySampleMetadataCallBuildAndPost();
-        $('#id_indy_number_of_samples').val(metadata_lod.length);
     }
 
     function reapplyTheHighlightingToTheIndyTable() {

@@ -5038,6 +5038,7 @@ AssayPlateReaderMapDataFileBlockFormSetFactory = inlineformset_factory(
 # OMIC RULES - The table AssayOmicAnalysisTarget field method content must match exactly method selected in the GUI as the Data Analysis Method
 
 # monkey patch to display method target and unit combo as needed in the assay omic page
+# originally was going to display this, but not sure if will need to display anywhere, but, since already used for querying, just keep it
 class AbstractClassAssayStudyAssayOmic(AssayStudyAssay):
     class Meta:
         proxy = True
@@ -5057,49 +5058,27 @@ class AssayOmicDataFileUploadForm(BootstrapForm):
         self.study = kwargs.pop('study', None)
         super(AssayOmicDataFileUploadForm, self).__init__(*args, **kwargs)
 
-        # # http://www.chidgilovitz.com/displaying-django-form-field-help-text-in-a-bootstrap-3-popover/
-        # for field in self.fields:
-        #     help_text = self.fields[field].help_text
-        #     self.fields[field].help_text = None
-        #     if help_text != '':
-        #         self.fields[field].widget.attrs.update(
-        #             {'class': 'has-popover',
-        #              'data-content': help_text,
-        #              'data-placement': 'right',
-        #              # 'data-container': 'body'
-        #              }
-        #         )
-
         if not self.study and self.instance.study:
             self.study = self.instance.study
         if self.study:
             self.instance.study = self.study
 
-        # for now, limit to the same study - we will need to revisit this when we think about
-        # inter study and transitioning to treatment groups
-        # data_groups_filtered = AssayOmicDataGroup.objects.filter(
-        #     study_id=self.instance.study.id
-        # )
+        # for now, limit to the same study - we may need to revisit this when we think about inter-study
         data_groups_filtered = AssayGroup.objects.filter(
             study_id=self.instance.study.id
         )
 
         # The rules for getting the list of study assays in the upload GUI
-        # 1 category = gene expression
-        # 2 the target must be associated to that category
+        # Rule 1: category = gene expression; Rule 2 the target must be associated to that category
         gene_targets = AssayTarget.objects.filter(assaycategory__name="Gene Expression")
 
-        # HANDY, to get pks from a queryset, gene_targets_pks=gene_targets.values_list('pk',flat=True)
-        # gene_target_pks = []
-        # for each in gene_targets:
-        #     gene_target_pks.append(each.id)
+        # HANDY, to get a list of pks from a queryset, gene_targets_pks=gene_targets.values_list('pk',flat=True)
 
-        # this would be what the user set up in the assay setup tab (e.g. Human 1500+, TempO-Seq, Fold Change)
+        # this is a queryset of what the user set up in the assay setup tab (e.g. Human 1500+, TempO-Seq, Fold Change)
         study_assay_queryset = AbstractClassAssayStudyAssayOmic.objects.filter(
             study_id=self.study
         ).filter(
-            # HANDY to use a queryset as a filter instead of pks
-            # instead of getting a list of pks and using them here      target_id__in=gene_targets_pks
+            # HANDY to use a queryset as a filter instead using a list of pks
             target__in=gene_targets
         ).prefetch_related(
             'target',
@@ -5121,59 +5100,24 @@ class AssayOmicDataFileUploadForm(BootstrapForm):
         initial_study_assay = None
         for each in study_assay_queryset:
             this_unit = each.unit.unit.lower()
-            # may need to change this to give something else a priority
-            # just to get an initial one
-            # Mark had units of 'Fold Change' and 'Count', Tongying has 'Unitless' for all omic data...see how plays out
+            # may need to change this to give something else a priority (this is just to get an initial one)
+            # Mark had units of 'Fold Change' and 'Count', then switched to not specified
+            # Tongying used 'Unitless' for all omic data.
             if this_unit.find("fold") >= 0:
                 # so a unit with a fold in it will get priority
                 initial_study_assay = each.id
                 break
             else:
+                # result will be it just gets the last one
                 initial_study_assay = each.id
 
         self.fields['study_assay'].initial = initial_study_assay
-
-        # study_method_target_unit = AssayStudyAssay.objects.filter(
-        #     study_id=self.instance.study.id
-        # ).prefetch_related(
-        #     'target',
-        #     'method',
-        #     'unit',
-        # )
-
-        # first_gene_method = None
-        # first_gene_target = None
-        # first_gene_unit = None
-
-        # study_gene_target_method_dict = {}
-        # for each in study_method_target_unit:
-        #     # print("-----\neach: ", each)
-        #     # print("each: ", each.id)
-        #     # print("each: ", each.method_id)
-        #     # print("each: ", each.target_id)
-        #     # print("each: ", each.unit_id)
-        #     # print("each: ", each.method)
-        #     # print("each: ", each.target)
-        #     # print("each: ", each.unit)
-        #     if each.target_id in gene_target_dict:
-        #         study_gene_target_method_dict[each.id] = [
-        #             each.method_id,
-        #             each.target_id,
-        #             each.unit_id,
-        #             each.method,
-        #             each.target,
-        #             each.unit
-        #         ]
-        #         first_gene_method = each.method_id
-        #         first_gene_target = each.target_id
-        #         first_gene_unit = each.unit_id
 
         omic_computational_methods_distinct = AssayOmicAnalysisTarget.objects.values('method').distinct()
         omic_computational_methods = AssayMethod.objects.filter(
             id__in=omic_computational_methods_distinct
         )
 
-        initial_omic_computational_method = None
         initial_computational_method = None
         # just get the first one for the default, if there is one
         if len(omic_computational_methods) > 0:
@@ -5189,37 +5133,37 @@ class AssayOmicDataFileUploadForm(BootstrapForm):
         self.fields['group_1'].queryset = data_groups_filtered
         self.fields['group_2'].queryset = data_groups_filtered
 
-        # when these are visible, they should be class required
         # HANDY for adding classes in forms
-        # the following could remove other classes, so stick with the below
         # NO self.fields['group_1'].widget.attrs.update({'class': ' required'})
         # YES self.fields['group_1'].widget.attrs['class'] += 'required'
-        # BUT, the above does not work on selectized, just do addClass in javascript: $('#id_time_unit').next().addClass('required');
+        # BUT, the above does not work on selectized, just do addClass in javascript, i.e.: $('#id_time_unit').next().addClass('required');
+        self.fields['time_1_display'].widget.attrs.update({'class': ' form-control required'})
+        self.fields['time_2_display'].widget.attrs.update({'class': ' form-control required'})
 
+        # todo done right before break - may need to check
         if self.instance.time_1:
             time_1_instance = self.instance.time_1
-            times_1 = get_split_times(time_1_instance)
-            self.fields['time_1_day'].initial = times_1.get('day')
-            self.fields['time_1_hour'].initial = times_1.get('hour')
-            self.fields['time_1_minute'].initial = times_1.get('minute')
+            time_unit_instance = self.instance.time_unit
+            ctime = convert_time_from_mintues_to_unit_given(time_1_instance, time_unit_instance)
+            self.fields['time_1_display'].initial = ctime
 
         if self.instance.time_2:
             time_2_instance = self.instance.time_2
-            times_2 = get_split_times(time_2_instance)
-            self.fields['time_2_day'].initial = times_2.get('day')
-            self.fields['time_2_hour'].initial = times_2.get('hour')
-            self.fields['time_2_minute'].initial = times_2.get('minute')
-
-        #  todo will need to deal with the time unit.... for the counts data for now....
-
-        # filename_only = os.path.basename(str(self.instance.omic_data_file))
-        # self.fields['filename_only'].initial = filename_only
+            time_unit_instance = self.instance.time_unit
+            ctime = convert_time_from_mintues_to_unit_given(time_2_instance, time_unit_instance)
+            self.fields['time_2_display'].initial = ctime
 
         #indy-sample for the counts data
+        #  todo will need to deal with the time unit.... for the counts data for now... in qc and form load and save.
+        # todo get an initial header type that matches the data type for add page
+
         # if change these, check the order with the .js file column_table_headers
         # make sure to leave _pk in the pk fields so they are excluded from the table in the .js file
         # option also used to turn on an off including the duplicate button field and file_column_header
         # (also uses day, hour, minute, sample, and well to set length of column in table, and item and location so no input field)
+
+        # todo - this all needs updated to include only the fields that will be in the table
+        # and also, we are going to just have a column header, not a sample id and a well name
         indy_list_of_keys = [
             'options',
             'file_column_header',
@@ -5292,7 +5236,6 @@ class AssayOmicDataFileUploadForm(BootstrapForm):
         list_of_dicts.append(dict3)
 
         # todo here here - need to get the real list of dicts
-        self.fields['indy_number_of_samples'].initial = len(list_of_dicts)
         self.fields['indy_list_of_dicts'].initial = json.dumps(list_of_dicts)
 
         matrix_item_queryset = AssayMatrixItem.objects.filter(study_id=self.study).order_by('name', )
@@ -5318,34 +5261,14 @@ class AssayOmicDataFileUploadForm(BootstrapForm):
 
         #indy-sample
 
-    time_1_day = forms.DecimalField(
+    time_1_display = forms.DecimalField(
         required=False,
-        label='Day'
+        label='Sample Time 1*'
     )
-    time_1_hour = forms.DecimalField(
+    time_2_display = forms.DecimalField(
         required=False,
-        label='Hour'
+        label='Sample Time 2*'
     )
-    time_1_minute = forms.DecimalField(
-        required=False,
-        label='Minute'
-    )
-
-    time_2_day = forms.DecimalField(
-        required=False,
-        label='Day'
-    )
-    time_2_hour = forms.DecimalField(
-        required=False,
-        label='Hour'
-    )
-    time_2_minute = forms.DecimalField(
-        required=False,
-        label='Minute'
-    )
-    # filename_only = forms.CharField(
-    #     required=False,
-    # )
 
     #indy-sample for the counts data
 
@@ -5355,10 +5278,6 @@ class AssayOmicDataFileUploadForm(BootstrapForm):
     indy_list_of_keys = forms.CharField(widget=forms.TextInput(), required=False,)
     indy_flag_file_column_header_change = forms.BooleanField()
 
-    indy_number_of_samples = forms.DecimalField(
-        required=False,
-        label='Number of Samples'
-    )
     indy_sample_location = forms.ModelChoiceField(
         queryset=AssaySampleLocation.objects.all().order_by(
             'name'
@@ -5385,17 +5304,9 @@ class AssayOmicDataFileUploadForm(BootstrapForm):
         data = super(AssayOmicDataFileUploadForm, self).clean()
 
         # data are changed here, so NEED to return the data
-        data['time_1'] = 0
-        for time_unit, conversion in list(TIME_CONVERSIONS.items()):
-            if data.get('time_1_' + time_unit) is not None:
-                inttime = (data.get('time_1_' + time_unit))
-                data.update({'time_1': data.get('time_1') + inttime * conversion,})
 
-        data['time_2'] = 0
-        for time_unit, conversion in list(TIME_CONVERSIONS.items()):
-            if data.get('time_2_' + time_unit) is not None:
-                inttime = data.get('time_2_' + time_unit)
-                data.update({'time_2': data.get('time_2') + inttime * conversion,})
+        data['time_1'] = convert_time_unit_given_to_minutes(data.get('time_1_display'), data.get('time_unit'))
+        data['time_2'] = convert_time_unit_given_to_minutes(data.get('time_2_display'), data.get('time_unit'))
 
         true_to_continue = self.qc_file(save=False, calledme='clean')
         if not true_to_continue:
@@ -5418,7 +5329,7 @@ class AssayOmicDataFileUploadForm(BootstrapForm):
         if self.instance.id:
             data_file_pk = self.instance.id
 
-        # todo - get the new fields, time unit and header type and not sure what else and add them to the call
+        # todo - get the new fields, time unit and header type and, not sure what else, and add them to the call
 
         true_to_continue = data_quality_clean_check_for_omic_file_upload(self, data, data_file_pk)
         return true_to_continue
@@ -5447,5 +5358,26 @@ class AssayOmicDataFileUploadForm(BootstrapForm):
             a_returned = omic_data_file_process_data(save, self.study.id, data_file_pk, data_file, file_extension, calledme, data_type, analysis_method)
 
         return data
+
+
+# time unit display and store
+# store in minutes, display in unit given
+def convert_time_from_mintues_to_unit_given(tvalue, unit_given):
+    if unit_given == 'day':
+        ctime = (tvalue/24.0)/60.0
+    elif unit_given == 'hour':
+        ctime = tvalue / 60.0
+    else:
+        ctime = tvalue
+    return ctime
+
+def convert_time_unit_given_to_minutes(tvalue, unit_given):
+    if unit_given == 'day':
+        ctime = tvalue*24.0*60.0
+    elif unit_given == 'hour':
+        ctime = tvalue*60.0
+    else:
+        ctime = tvalue
+    return ctime
 
 #     End Omic Data File Upload Section
