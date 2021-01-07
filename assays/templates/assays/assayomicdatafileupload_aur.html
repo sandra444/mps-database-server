@@ -304,7 +304,7 @@
                                 <li>Highlighting is cumulative and toggles</li>
                                 <li>When updates are made to the table, it will resort depending on the new content </li>
                                 <li>Use Column visibility, Search, and/or column sorting to expedite highlighting</li>
-                                <li>When highlighting is complete, select an Action</li>
+                                <li>Select the content to use for replacement</li>
                             </ul>
 
                         </div>
@@ -312,43 +312,47 @@
 
                 {% endif %}
 
-                <br>
-
                 {% if update or add %}
-                    <div class="row">
-                        <div class="col-sm-2">
-                            <div class="plate-map-page-field-labels-large">
-                                <div>
-                                    <div><p id="drag_use_tooltip"></p>
-                                        <label for="drag_use_tooltip">Action &nbsp;</label>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-sm-10">
-                            <div class="plate-map-page-radio-contents">
-                                <label><input type="radio" class="plate-map-bigger-radio" name="radio_change_drag_action" value="replace" id="radio_replace">
-                                    <p class="plate-map-radio-spacing plate-map-no-wrap">Replace</p></label>
-                                <label><input type="radio" class="plate-map-bigger-radio" name="radio_change_drag_action" value="empty" id="radio_empty">
-                                    <p class="plate-map-radio-spacing plate-map-no-wrap">Remove/Empty</p></label>
+{#                    <div class="collapse large-padding-top inline-help">#}
+{#                        <div class="alert alert-info" role="alert">#}
+{#                            <ul>#}
+{#                                <li>When highlighting is complete, select an Action</li>#}
+{#                            </ul>#}
+{#                        </div>#}
+{#                    </div>                    #}
+
+{#                    <div class="row">#}
+{#                        <div class="col-sm-2">#}
+{#                            <div class="plate-map-page-field-labels-large">#}
+{#                                <div>#}
+{#                                    <div><p id="drag_use_tooltip"></p>#}
+{#                                        <label for="drag_use_tooltip">Action &nbsp;</label>#}
+{#                                    </div>#}
+{#                                </div>#}
+{#                            </div>#}
+{#                        </div>#}
+{#                        <div class="col-sm-10">#}
+{#                            <div class="plate-map-page-radio-contents">#}
+{#                                <label><input type="radio" class="plate-map-bigger-radio" name="radio_change_drag_action" value="replace" id="radio_replace">#}
+{#                                    <p class="plate-map-radio-spacing plate-map-no-wrap">Replace</p></label>#}
+{#                                <label><input type="radio" class="plate-map-bigger-radio" name="radio_change_drag_action" value="empty" id="radio_empty">#}
+{#                                    <p class="plate-map-radio-spacing plate-map-no-wrap">Remove/Empty</p></label>#}
 {#                                <label><input type="radio" class="plate-map-bigger-radio" name="radio_change_drag_action" value="copys" id="radio_copys">#}
 {#                                    <p class="plate-map-radio-spacing plate-map-no-wrap">Edit Highlight</p></label>#}
-                                <label><input type="radio" class="plate-map-bigger-radio" name="radio_change_drag_action" value="pastes" id="radio_pastes">
-                                    <p class="plate-map-radio-spacing plate-map-no-wrap">Paste</p></label>
-                            </div>
-                        </div>
-                    </div>
+{#                                <label><input type="radio" class="plate-map-bigger-radio" name="radio_change_drag_action" value="pastes" id="radio_pastes">#}
+{#                                    <p class="plate-map-radio-spacing plate-map-no-wrap">Paste</p></label>#}
+{#                            </div>#}
+{#                        </div>#}
+{#                    </div>#}
 
                     <div class="replace-section">
-                        <div class="collapse large-padding-top inline-help">
-                            <div class="alert alert-info" role="alert">
-                                <ul>
-                                    <li>Select the content to use for replacement</li>
-                                    <li>Select to Duplicate or Increment (Sample Location will duplicate regardless of selection)</li>
-                                    <li>After selections are made, click the Replace Content button</li>
-                                </ul>
-                            </div>
-                        </div>
+{#                        <div class="collapse large-padding-top inline-help">#}
+{#                            <div class="alert alert-info" role="alert">#}
+{#                                <ul>#}
+{#                                    <li>Select the content to use for replacement</li>#}
+{#                                </ul>#}
+{#                            </div>#}
+{#                        </div>#}
 
                         {# pick sample metadata other than times #}
                         <div class="row">
@@ -437,24 +441,37 @@
 
                         </div>
 
-                        <div class="row">
-                            <div class="col-sm-3">
-                                <div class="plate-map-page-field-labels-small">
-                                    <div>
-                                        <div><p id="drag_action_tooltip"></p>
-                                            <label for="drag_action_tooltip">Duplicate or Increment &nbsp;</label>
-                                        </div>
-                                    </div>
-                                </div>
+                        <div class="collapse large-padding-top inline-help">
+                            <div class="alert alert-info" role="alert">
+                                <ul>
+                                    <li>Select to Duplicate or Increment (Sample Location will duplicate regardless of selection)</li>
+                                    <li>Duplicate will put the selected content in the highlighted cells</li>
+                                    <li>Increment will put the selected content in the first of the highlighted cells, then iterate over the rest of the highlighted cells, adding the increment as requested to the next highlighted cell</li>
+                                    <li>Sample Location will Duplicate regardless of selection</li>
+                                    <li>Incrementing a Chip/Well Name works down an alphabetized list of all the Chips/Wells in the Study</li>
+                                    <li>Incrementing will always be applied top to bottom - use column sorting switch top and bottom</li>
+                                </ul>
                             </div>
-                            <div class="col-sm-9">
+                        </div>
+
+                        <div class="row">
+{#                            <div class="col-sm-3">#}
+{#                                <div class="plate-map-page-field-labels-small">#}
+{#                                    <div>#}
+{#                                        <div><p id="drag_action_tooltip"></p>#}
+{#                                            <label for="drag_action_tooltip">Duplicate or Increment &nbsp;</label>#}
+{#                                        </div>#}
+{#                                    </div>#}
+{#                                </div>#}
+{#                            </div>#}
+                            <div class="col-sm-12">
                                 <div class="plate-map-page-radio-contents">
                                     <label><input id="radio_duplicate" type="radio" class="plate-map-bigger-radio" name="radio_change_duplicate_increment" value="duplicate" checked>
                                         <p class="plate-map-radio-spacing plate-map-no-wrap">Duplicate</p></label>
-                                    <label><input type="radio" class="plate-map-bigger-radio" name="radio_change_duplicate_increment" value="increment-ttb">
-                                        <p class="plate-map-radio-spacing plate-map-no-wrap">Increment Top to Bottom</p></label>
-                                    <label><input type="radio" class="plate-map-bigger-radio" name="radio_change_duplicate_increment" value="increment-btt">
-                                        <p class="plate-map-radio-spacing plate-map-no-wrap">Increment Bottom to Top</p></label>
+                                    <label><input type="radio" class="plate-map-bigger-radio" name="radio_change_duplicate_increment" value="increment-ttbltr">
+                                        <p class="plate-map-radio-spacing plate-map-no-wrap">Increment - Left to Right</p></label>
+                                    <label><input type="radio" class="plate-map-bigger-radio" name="radio_change_duplicate_increment" value="increment-ttbrtl">
+                                        <p class="plate-map-radio-spacing plate-map-no-wrap">Increment - Right to Left</p></label>
                                 </div>
                             </div>
                         </div>
@@ -472,7 +489,15 @@
                             </div>
                         </div>
 
-                        <br>
+                        <div class="collapse large-padding-top inline-help">
+                            <div class="alert alert-info" role="alert">
+                                <ul>
+                                    <li>After selections are made, click the Replace Content button</li>
+                                    <li>The content will be replaced in visible, highlighted cells only</li>
+                                </ul>
+                            </div>
+                        </div>
+
                         <button type="button" class="btn btn-primary" id="replace_in_indy_table">Replace Content</button>
 
                     </div>
@@ -482,7 +507,8 @@
 {#                    </div>#}
 
                     <div class="pastes-section">
-                        <div class="collapse large-padding-top inline-help">
+{#                      want to show this all the time, not just when help is on  <div class="collapse large-padding-top inline-help">#}
+                        <div class="large-padding-top">
                             <div class="alert alert-info" role="alert">
                                 <ul>
                                     <li>Drag in the cell where the paste should start</li>

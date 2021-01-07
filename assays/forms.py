@@ -5165,14 +5165,14 @@ class AssayOmicDataFileUploadForm(BootstrapForm):
 
         header_type_instance = 'other'
         # todo-sck remove this later...just for testing
-        self.fields['header_type'].initial = 'well'
-        # self.fields['header_type'].initial = 'sample'
+        # self.fields['header_type'].initial = 'well'
+        self.fields['header_type'].initial = 'sample'
 
         if self.instance.header_type:
             header_type_instance = self.instance.header_type
             # todo-sck remove this later...just for testing
-            header_type_instance = 'well'
-            # header_type_instance = 'sample'
+            # header_type_instance = 'well'
+            header_type_instance = 'sample'
 
 
         # this is really only for development to pull in some example data, change to false later

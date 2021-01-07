@@ -73,8 +73,6 @@ $(document).ready(function () {
     var indy_button_label = 'Button'
     
     var indy_list_of_dicts_of_table_rows = JSON.parse($('#id_indy_list_of_dicts_of_table_rows').val());
-    console.log('indy_list_of_dicts_of_table_rows')
-    console.log(indy_list_of_dicts_of_table_rows)
     var indy_list_of_column_labels = JSON.parse($('#id_indy_list_of_column_labels').val());
     var indy_list_of_column_labels_show_hide = JSON.parse($('#id_indy_list_of_column_labels_show_hide').val());
 
@@ -88,12 +86,6 @@ $(document).ready(function () {
     //var indy_row_labels = indy_list_of_row_labels;
 
     // boolean, using the form field - var indy_sample_metadata_table_was_changed = JSON.parse($('#id_indy_sample_metadata_table_was_changed').val());
-        
-    // todo need to update for the table as a plate
-    // still need to decide how will nest the table (if well nest the table)
-    // this will control what gets put in the table, but metadata_lod will have all the indy_column_labels in it
-    // todo need to get the two extra sample times out and assay well name, but for now, turned them off
-    
 
     // make a cross reference to the html dom name
     // todo - fix for new assumption that all headers are going in and are not editable
@@ -141,9 +133,7 @@ $(document).ready(function () {
         }
     });
 
-    // let table_order = [[0, 'asc'], [1, 'asc'], [2, 'asc'], [3, 'asc'], [4, 'asc'], [5, 'asc'] ];
-    // todo - get the order column fixed
-    let table_order = [ ];
+    let table_order = [[0, 'asc'], [1, 'asc'] ];
     let table_column_defs = [
         // { 'width': '20%' },
         // { width: 200, targets: 0 }
@@ -155,32 +145,23 @@ $(document).ready(function () {
 
     // START - Tool tips
 
-    //todo update all the tool tips (add/remove as needed)
-
     // tool tips - two group stuff - all moved to help_text (at least, for now)
 
     // tool tips - indy-sample stuff
-    //todo see if still need these....
-    let page_drag_action_tooltip = 'Copy will copy and paste that selected value. Increment will add the indicated amount to the cells (note: for text field, will attempt to find a string+value, if found, will increment the value only, if not found, will treat all entered as a string and will add a value starting from 1).  ';
-    $('#drag_action_tooltip').next().html($('#drag_action_tooltip').next().html() + make_escaped_tooltip(page_drag_action_tooltip));
-    let page_drag_use_tooltip = 'Select what to do to the highlighted cells.';
-    $('#drag_use_tooltip').next().html($('#drag_use_tooltip').next().html() + make_escaped_tooltip(page_drag_use_tooltip));
-    let page_file_column_header_tooltip = 'The header of this sample data in the upload file.';
-    $('#file_column_header_tooltip').next().html($('#file_column_header_tooltip').next().html() + make_escaped_tooltip(page_file_column_header_tooltip));
+    // might not want to show these options.... todo decide
+    // let page_drag_action_tooltip = 'Duplicate will put the selected content in the highlighted cells. Increment will put the selected content in the first of the highlighted cells, then add the increment to the next highlighted cell (Sample Location is Duplicate only). ';
+    // $('#drag_action_tooltip').next().html($('#drag_action_tooltip').next().html() + make_escaped_tooltip(page_drag_action_tooltip));
+    // let page_drag_use_tooltip = 'Select what to do to with the highlighted cells.';
+    // $('#drag_use_tooltip').next().html($('#drag_use_tooltip').next().html() + make_escaped_tooltip(page_drag_use_tooltip));
+    //
+
+    //in the replace section - hovertips for the three fields using to replace/update/overwrite
     let page_sample_matrix_item_tooltip = 'The MPS Model name (chip/well ID).';
     $('#sample_matrix_item_tooltip').next().html($('#sample_matrix_item_tooltip').next().html() + make_escaped_tooltip(page_sample_matrix_item_tooltip));
     let page_sample_location_tooltip = 'The location in the MPS Model where the sample was collected.';
     $('#sample_location_tooltip').next().html($('#sample_location_tooltip').next().html() + make_escaped_tooltip(page_sample_location_tooltip));
-    let page_assay_well_name_tooltip = 'If the omic assay is plate based, the well id (e.g., A1, A2, A3 etc.) - optional.';
-    $('#assay_well_name_tooltip').next().html($('#assay_well_name_tooltip').next().html() + make_escaped_tooltip(page_assay_well_name_tooltip));
-    let page_sample_time_day_tooltip = 'The time, from the start of the experiment, when the sample was collected. Can enter as Day and/or Hour and/or Minute.';
+    let page_sample_time_day_tooltip = 'The time, from the start of the experiment, when the sample was collected.';
     $('#sample_time_day_tooltip').next().html($('#sample_time_day_tooltip').next().html() + make_escaped_tooltip(page_sample_time_day_tooltip));
-    let page_sample_time_hour_tooltip = 'The time, from the start of the experiment, when the sample was collected. Can enter as Day and/or Hour and/or Minute.';
-    $('#sample_time_hour_tooltip').next().html($('#sample_time_hour_tooltip').next().html() + make_escaped_tooltip(page_sample_time_hour_tooltip));
-    let page_sample_time_minute_tooltip = 'The time, from the start of the experiment, when the sample was collected. Can enter as Day and/or Hour and/or Minute.';
-    $('#sample_time_minute_tooltip').next().html($('#sample_time_minute_tooltip').next().html() + make_escaped_tooltip(page_sample_time_minute_tooltip));
-    let page_empty_tooltip = 'Use this to empty cells in the table.';
-    $('#empty_tooltip').next().html($('#empty_tooltip').next().html() + make_escaped_tooltip(page_empty_tooltip));
 
     // END - Tool tips
 
@@ -412,7 +393,7 @@ $(document).ready(function () {
 
     $("input[type='radio'][name='radio_change_duplicate_increment']").click(function () {
         page_change_duplicate_increment = $(this).val();
-        if (page_change_duplicate_increment === 'increment-ttb' || page_change_duplicate_increment === 'increment-btt') {
+        if (page_change_duplicate_increment === 'increment-ttbltr' || page_change_duplicate_increment === 'increment-ttbrtl') {
             $('.increment-section').show();
         } else {
             $('.increment-section').hide();
@@ -971,6 +952,11 @@ $(document).ready(function () {
         } else {
             // console.log('no selection');
         }
+        //todo - figure out if even need the radio button...not sure cut and paste has much value here
+        //for now, treat as only a replace option and hide the radio button in the html
+
+
+        $('.replace-section').show();
     }
 
     function indyUndoRedoButtonVisibilityCheck() {
@@ -1100,6 +1086,7 @@ $(document).ready(function () {
 
         var tirow_changing = null;
         for (var index = 0; index < metadata_highlighted.length; index++) {
+            // console.log("index ",index)
             // console.log('metadata_highlighted[index]['metadata_highlighted_tirow'] '+metadata_highlighted[index]['metadata_highlighted_tirow'])
             // console.log('metadata_highlighted[index]['metadata_highlighted_ticol'] '+metadata_highlighted[index]['metadata_highlighted_ticol'])
             // console.log('metadata_highlighted[index]['metadata_highlighted_content'] '+metadata_highlighted[index]['metadata_highlighted_content'])
@@ -1164,8 +1151,8 @@ $(document).ready(function () {
 
                         var i_current_val = 0;
                         if (ticol === 'time_day' || ticol === 'time_hour' || ticol === 'time_minute') {
-                            if (page_change_duplicate_increment === 'increment-ttb'
-                                || page_change_duplicate_increment === 'increment-btt') {
+                            if (page_change_duplicate_increment === 'increment-ttbltr'
+                                || page_change_duplicate_increment === 'increment-ttbrtl') {
                                 // it is + for both because the holding dict was sorting descending
                                 i_current_val = parseFloat(current_val) + parseFloat($('#increment_value').val());
                             } else {
@@ -1242,9 +1229,9 @@ $(document).ready(function () {
         var metadata_highlighted_temp = [];
         metadata_highlighted_temp = JSON.parse(JSON.stringify(metadata_highlighted));
         if (page_drag_action === 'replace') {
-            if (page_change_duplicate_increment === 'increment-ttb') {
+            if (page_change_duplicate_increment === 'increment-ttbltr') {
                 // think should be in the order of the table, so, leave it as is
-            } else if (page_change_duplicate_increment === 'increment-btt') {
+            } else if (page_change_duplicate_increment === 'increment-ttbrtl') {
                 // index should be from top to bottom
                 metadata_highlighted = [];
                 for (var index = metadata_highlighted_temp.length - 1; index >= 0; index--) {
@@ -1291,8 +1278,17 @@ $(document).ready(function () {
 
     //todo check all the attibute labels - adding new ones
     function whatIsCurrentlyHighlightedInTheIndyTable() {
+        // first, get what is currently visible in the data table
+        $(sample_metadata_table_id).DataTable().rows( { filter: 'applied' } ).every( function () {
+            var row = this.data();
+            console.log("###row ", row)
+        });
+
+
+
         metadata_highlighted = [];
         list_of_icols_for_replace_highlighting = [];
+        let index = 0;
         $('.special-selected1').each(function() {
             var dict = {};
             var imetadata_highlighted_tirow = $(this).attr('row-index');
@@ -1300,6 +1296,14 @@ $(document).ready(function () {
             var imetadata_highlighted_tlrow = $(this).attr('row-label');
             var imetadata_highlighted_tlcol = $(this).attr('col-label');
             var imetadata_highlighted_label = $(this).attr('meta-label');
+
+            console.log("###index ",index)
+            // console.log(imetadata_highlighted_tirow)
+            // console.log(imetadata_highlighted_ticol)
+            // console.log(imetadata_highlighted_tlrow)
+            // console.log(imetadata_highlighted_tlcol)
+            // console.log(imetadata_highlighted_label)
+
 
             // since this goes through all the keys, and they could be different types, try different ways of pulling
             // keep in mind that the content could actually be null, if it is, make it a space
@@ -1339,6 +1343,7 @@ $(document).ready(function () {
             dict['metadata_highlighted_content'] = imetadata_highlighted_content;
             list_of_icols_for_replace_highlighting.push(imetadata_highlighted_ticol);
             metadata_highlighted.push(dict);
+            index = index + 1;
         });
         // a special check to grey out replace content if field not in the icol list that has a dom element
         for (var icol in icol_to_html_outer) {
