@@ -12,6 +12,10 @@ window.OMICS = {
 
 //todo what if change the tie unit???? time_unit_instance
 
+//todo put the search term back in the search bar
+//$('#glossary_table_filter :input').val(searchTerm).trigger('input');
+//$('#glossary_table_filter :input').val(null).trigger('input');
+
 $(document).ready(function () {
     //show the validation stuff
     $('#form_errors').show()
@@ -75,6 +79,8 @@ $(document).ready(function () {
     var indy_list_of_dicts_of_table_rows = JSON.parse($('#id_indy_list_of_dicts_of_table_rows').val());
     var indy_list_of_column_labels = JSON.parse($('#id_indy_list_of_column_labels').val());
     var indy_list_of_column_labels_show_hide = JSON.parse($('#id_indy_list_of_column_labels_show_hide').val());
+    var indy_table_order = [];
+    var indy_table_column_defs = [];
 
     // a queryset, using the form field - var indy_sample_location = JSON.parse($('#id_indy_sample_location').val());
     // a queryset, using the form field - var indy_matrix_item = JSON.parse($('#id_indy_matrix_item').val());
@@ -132,16 +138,6 @@ $(document).ready(function () {
 
         }
     });
-
-    let table_order = [[0, 'asc'], [1, 'asc'] ];
-    let table_column_defs = [
-        // { 'width': '20%' },
-        // { width: 200, targets: 0 }
-        // {'targets': [0], 'visible': true,},
-        // {'targets': [1], 'visible': true,},
-        // {responsivePriority: 1, targets: 0},
-        // {responsivePriority: 2, targets: 1},
-    ];
 
     // START - Tool tips
 
@@ -260,6 +256,8 @@ $(document).ready(function () {
         $('#log2fc_template_section').hide();
         $('#normcounts_template_section').hide();
         $('#rawcounts_template_section').hide();
+        $('#count_extra').hide();
+
 
         if ($('#id_data_type')[0].selectize.items[0] == 'log2fc') {
             $('#omic_preview_button_section').show();
@@ -276,6 +274,7 @@ $(document).ready(function () {
                $('#normcounts_template_section').show();
 
             }
+            $('#count_extra').show();
         }
     }
     /**
@@ -978,6 +977,20 @@ $(document).ready(function () {
     }
 
     function indySampleMetadataCallBuildAndPost() {
+        //do not show sort icon for the highlight row buttons
+        if ($('#id_header_type')[0].selectize.items[0] === 'well') {
+            indy_table_order = [[0, 'asc'],[1, 'asc']];
+            indy_table_column_defs = [{bSortable: false, targets: [2,]}];
+        } else {
+            indy_table_order = [[0, 'asc'],];
+            indy_table_column_defs = [{bSortable: false, targets: [1,]}];
+        }
+            // { 'width': '20%' },
+            // { width: 200, targets: 0 }
+            // {'targets': [0], 'visible': true,},
+            // {'targets': [1], 'visible': true,},
+            // {responsivePriority: 1, targets: 0},
+            // {responsivePriority: 2, targets: 1},
         indyUndoRedoButtonVisibilityCheck();
         buildSampleMetadataTable();
         afterBuildSampleMetadataTable();
@@ -1397,7 +1410,11 @@ $(document).ready(function () {
                 if ($(this).hasClass('special-selected1')) {
                     $(this).removeClass('special-selected1');
                 } else {
-                    $(this).addClass('special-selected1');
+                    if ($(this).hasClass('no-edit') || $(this).hasClass('no-edit-data')) {
+                        //skip
+                    } else {
+                        $(this).addClass('special-selected1');
+                    }
                 }
                 $(this).removeClass('ui-selected');
             });
@@ -1478,7 +1495,11 @@ $(document).ready(function () {
                 $(th).attr('meta-label', indy_column_labels);
 
                 if (colLabel.includes(indy_button_label)) {
-                    th.appendChild(document.createTextNode(''));
+                    let top_button_column = ''
+                        + '<span class="glyphicon glyphicon-option-horizontal" aria-hidden="true"></span>'
+                        + '<span class="glyphicon glyphicon-option-vertical" aria-hidden="true"></span>'
+                    $(th).html(top_button_column);
+                    // th.appendChild(document.createTextNode(''));
                 } else {
                     th.appendChild(document.createTextNode(colLabel));
                 }
@@ -1523,7 +1544,7 @@ $(document).ready(function () {
                         $(td).attr('class', 'apply-column-button');
                         let top_label_button = ' <a col-index="' + colcounter
                             + '" class="btn btn-sm btn-primary apply-column-button">'
-                            + '<span class="glyphicon glyphicon-resize-vertical" aria-hidden="true"></span></a>'
+                            + '<span class="glyphicon glyphicon-option-vertical" aria-hidden="true"></span></a>'
                         $(td).html(top_label_button);
                     }
                     $(td).attr('class', 'no-edit');
@@ -1582,7 +1603,7 @@ $(document).ready(function () {
                                 $(th).attr('class', 'apply-row-button');
                                 let row_label_button = ' <a row-index="' + rowcounter
                                 + '" class="btn btn-sm btn-primary apply-row-button">'
-                                + '<span class="glyphicon glyphicon-resize-horizontal" aria-hidden="true"></span></a>'
+                                + '<span class="glyphicon glyphicon-option-horizontal" aria-hidden="true"></span></a>'
                                 //$(th).html(myCellContent + row_label_button);
                                 $(th).html(row_label_button);
                                 $(th).attr('class', 'no-edit');
@@ -1618,6 +1639,9 @@ $(document).ready(function () {
         myTable.appendChild(tableBody);
         myTableDiv.appendChild(myTable);
 
+        console.log("indy_table_order ",indy_table_order)
+        console.log("indy_table_column_defs ",indy_table_column_defs)
+
         // When I did not have the var before the variable name, the table headers acted all kinds of crazy
         var sampleDataTable = $('#' + sample_metadata_table_id).removeAttr('width').DataTable({
             // 'iDisplayLength': 100,
@@ -1628,8 +1652,8 @@ $(document).ready(function () {
             //https://datatables.net/forums/discussion/33860/destroying-a-fixed-header
             fixedHeader: {headerOffset: 50},
             // responsive: true,
-            'order': table_order,
-            'columnDefs': table_column_defs,
+            'order': indy_table_order,
+            'columnDefs': indy_table_column_defs,
             // fixedColumns: true
             'autoWidth': true
         });

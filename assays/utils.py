@@ -7363,11 +7363,12 @@ def find_the_labels_needed_for_the_indy_omic_table(header_type, omic_file_pk, ti
     indy_list_of_column_labels = []
     indy_list_of_column_labels_show_hide = []
     indy_list_of_dicts_of_table_rows = []
+    indy_table_order = [[0, 'asc'], [1, 'asc']]
 
     # if omic_file_pk is none, use find_defaults to see if want to get example data (this is for development)
     # else, should send back everything as blank (it is an add page - thus, no file has been added yet)
 
-    # for the plate, make upper case row lables please...
+    # for the plate, make upper case row labels please...
     if omic_file_pk is None:
         if find_defaults:
             #  get the defaults for testing
@@ -7731,6 +7732,7 @@ def find_the_labels_needed_for_the_indy_omic_table(header_type, omic_file_pk, ti
     indy_omic_table['indy_list_of_column_labels'] = indy_list_of_column_labels
     indy_omic_table['indy_list_of_column_labels_show_hide'] = indy_list_of_column_labels_show_hide
     indy_omic_table['indy_list_of_dicts_of_table_rows'] = indy_list_of_dicts_of_table_rows
+    indy_omic_table['indy_table_order'] = indy_table_order
     return indy_omic_table
 
 
