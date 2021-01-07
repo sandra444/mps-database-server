@@ -84,6 +84,9 @@ from .utils import (
     omic_data_file_process_data,
     COLUMN_HEADERS,
     data_quality_clean_check_for_omic_file_upload,
+    find_the_labels_needed_for_the_indy_omic_table,
+    convert_time_from_mintues_to_unit_given,
+    convert_time_unit_given_to_minutes
 )
 
 from mps.utils import (
@@ -5140,124 +5143,58 @@ class AssayOmicDataFileUploadForm(BootstrapForm):
         self.fields['time_1_display'].widget.attrs.update({'class': ' form-control required'})
         self.fields['time_2_display'].widget.attrs.update({'class': ' form-control required'})
 
-        # todo done right before break - may need to check
+        time_unit_instance = self.instance.time_unit
+
         if self.instance.time_1:
             time_1_instance = self.instance.time_1
-            time_unit_instance = self.instance.time_unit
             ctime = convert_time_from_mintues_to_unit_given(time_1_instance, time_unit_instance)
             self.fields['time_1_display'].initial = ctime
 
         if self.instance.time_2:
             time_2_instance = self.instance.time_2
-            time_unit_instance = self.instance.time_unit
             ctime = convert_time_from_mintues_to_unit_given(time_2_instance, time_unit_instance)
             self.fields['time_2_display'].initial = ctime
 
-        #indy-sample for the counts data
-        #  todo will need to deal with the time unit.... for the counts data for now... in qc and form load and save.
-        # todo get an initial header type that matches the data type for add page
+        #indy-sample for the counts data, we need the sample metadata table
 
-        # if change these, check the order with the .js file column_table_headers
-        # make sure to leave _pk in the pk fields so they are excluded from the table in the .js file
-        # option also used to turn on an off including the duplicate button field and file_column_header
-        # (also uses day, hour, minute, sample, and well to set length of column in table, and item and location so no input field)
+        # if an add file, will get from an ajax call when add a file, else, query them up (option for defaults for testing is included)
+        if self.instance.id:
+            omic_file_pk = self.instance.id
+        else:
+            omic_file_pk = None
 
-        # todo - this all needs updated to include only the fields that will be in the table
-        # and also, we are going to just have a column header, not a sample id and a well name
-        indy_list_of_keys = [
-            'options',
-            'file_column_header',
-            'matrix_item_name',
-            'sample_location_name',
-            'assay_well_name',
-            'time_day',
-            'time_hour',
-            'time_minute',
+        header_type_instance = 'other'
+        # todo-sck remove this later...just for testing
+        self.fields['header_type'].initial = 'well'
+        # self.fields['header_type'].initial = 'sample'
 
-            'matrix_item_pk',
-            'sample_location_pk',
-            'sample_metadata_pk',
-            ]
-        self.fields['indy_list_of_keys'].initial = json.dumps(indy_list_of_keys)
-        self.fields['indy_flag_file_column_header_change'].initial = False
+        if self.instance.header_type:
+            header_type_instance = self.instance.header_type
+            # todo-sck remove this later...just for testing
+            header_type_instance = 'well'
+            # header_type_instance = 'sample'
 
-        list_of_defaults1 = [
-            '',
-            'sample20201105-05',
-            'chip1',
-            'efflux',
-            'A1',
-            '1',
-            '40',
-            '0',
-            '8',
-            '9',
-            '10'
-            ]
-        list_of_defaults2 = [
-            '',
-            'sample20201105-02',
-            'chip2',
-            'efflux',
-            'A2',
-            '2',
-            '60',
-            '0',
-            '8',
-            '9',
-            '10'
-            ]
-        list_of_defaults3 = [
-            '',
-            'sample20201105-03',
-            'chip3',
-            'efflux',
-            'A3',
-            '3',
-            '50',
-            '0',
-            '8',
-            '9',
-            '10'
-            ]
-        list_of_dicts = []
 
-        dict1 = {}
-        dict2 = {}
-        dict3 = {}
-        # make a default dict
-        # if this is an edit form, these lists will need initialized with what was previously saved
-        for index, each in enumerate(indy_list_of_keys):
-            dict1[each] = list_of_defaults1[index]
-            dict2[each] = list_of_defaults2[index]
-            dict3[each] = list_of_defaults3[index]
-        list_of_dicts.append(dict1)
-        list_of_dicts.append(dict2)
-        list_of_dicts.append(dict3)
+        # this is really only for development to pull in some example data, change to false later
+        # **change-star
+        find_defaults = True
 
-        # todo here here - need to get the real list of dicts
-        self.fields['indy_list_of_dicts'].initial = json.dumps(list_of_dicts)
+        indy_table_labels = find_the_labels_needed_for_the_indy_omic_table(header_type_instance, omic_file_pk, time_unit_instance, find_defaults)
+        indy_list_of_column_labels = indy_table_labels.get('indy_list_of_column_labels')
+        indy_list_of_column_labels_show_hide = indy_table_labels.get('indy_list_of_column_labels_show_hide')
+        indy_list_of_dicts_of_table_rows = indy_table_labels.get('indy_list_of_dicts_of_table_rows')
 
+        self.fields['indy_list_of_column_labels'].initial = json.dumps(indy_list_of_column_labels)
+        self.fields['indy_list_of_column_labels_show_hide'].initial = json.dumps(indy_list_of_column_labels_show_hide)
+        self.fields['indy_list_of_dicts_of_table_rows'].initial = json.dumps(indy_list_of_dicts_of_table_rows)
+
+        # get the list of matrix items in this study
         matrix_item_queryset = AssayMatrixItem.objects.filter(study_id=self.study).order_by('name', )
         self.fields['indy_matrix_item'].queryset = matrix_item_queryset
         matrix_item_list = matrix_item_queryset.values_list('name', flat=True)
         self.fields['indy_matrix_item_list'].initial = json.dumps(matrix_item_list)
 
-        # todo get the right list - decide on what is a list and what is a queryset - may need both like need for matrix item...
-        # file_column_header_queryset = AssayOmicSampleMetadata.objects.filter(study_id=self.study).order_by('cross_reference', )
-        file_column_header_queryset = AssayMatrixItem.objects.filter(study_id=self.study).order_by('name', )
-        # self.fields['indy_file_column_header'].queryset = file_column_header_queryset
-        # file_column_header_list = file_column_header_queryset.values_list('cross_reference', flat=True)
-        file_column_header_list = file_column_header_queryset.values_list('name', flat=True)
-        self.fields['indy_file_column_header_list'].initial = json.dumps(file_column_header_list)
-
-        # todo, get these right too
-        self.fields['indy_file_column_header_prefix_uni_list'].initial = json.dumps(file_column_header_list)
-        # todo will this be a dict or a list, thing about if one is A1 and another is A02 and another is B01, how sort and put back together (look in utils too)
-        self.fields['indy_file_column_header_number_uni_dict'].initial = json.dumps(file_column_header_list)
-
         self.fields['indy_sample_metadata_table_was_changed'].initial = False
-        self.fields['indy_sample_metadata_field_header_was_changed'].initial = False
 
         #indy-sample
 
@@ -5271,12 +5208,9 @@ class AssayOmicDataFileUploadForm(BootstrapForm):
     )
 
     #indy-sample for the counts data
-
-    # todo - sample time unit for the count data - get the right value back from the minutes ...or store in unit???
-    # todo - think about, if not letting the user change a header, maybe only update after first add? Unless change file? Think about...
-    indy_list_of_dicts = forms.CharField(widget=forms.TextInput(), required=False,)
-    indy_list_of_keys = forms.CharField(widget=forms.TextInput(), required=False,)
-    indy_flag_file_column_header_change = forms.BooleanField()
+    indy_list_of_dicts_of_table_rows = forms.CharField(widget=forms.TextInput(), required=False,)
+    indy_list_of_column_labels = forms.CharField(widget=forms.TextInput(), required=False,)
+    indy_list_of_column_labels_show_hide = forms.CharField(widget=forms.TextInput(), required=False, )
 
     indy_sample_location = forms.ModelChoiceField(
         queryset=AssaySampleLocation.objects.all().order_by(
@@ -5288,16 +5222,9 @@ class AssayOmicDataFileUploadForm(BootstrapForm):
         queryset=AssayMatrixItem.objects.none(),
         required=False,
     )
-    indy_file_column_header = forms.ModelChoiceField(
-        queryset=AssayMatrixItem.objects.none(),
-        required=False,
-    )
-    indy_sample_metadata_table_was_changed = forms.BooleanField()
-    indy_sample_metadata_field_header_was_changed = forms.BooleanField()
     indy_matrix_item_list = forms.CharField(widget=forms.TextInput(), required=False,)
-    indy_file_column_header_list = forms.CharField(widget=forms.TextInput(), required=False, )
-    indy_file_column_header_prefix_uni_list = forms.CharField(widget=forms.TextInput(), required=False, )
-    indy_file_column_header_number_uni_dict = forms.CharField(widget=forms.TextInput(), required=False, )
+
+    indy_sample_metadata_table_was_changed = forms.BooleanField()
     #indy-sample
 
     def clean(self):
@@ -5329,8 +5256,6 @@ class AssayOmicDataFileUploadForm(BootstrapForm):
         if self.instance.id:
             data_file_pk = self.instance.id
 
-        # todo - get the new fields, time unit and header type and, not sure what else, and add them to the call
-
         true_to_continue = data_quality_clean_check_for_omic_file_upload(self, data, data_file_pk)
         return true_to_continue
 
@@ -5341,43 +5266,22 @@ class AssayOmicDataFileUploadForm(BootstrapForm):
             data_file_pk = self.instance.id
         file_extension = os.path.splitext(data.get('omic_data_file').name)[1]
         data_type = data['data_type']
+        header_type = data['header_type']
+        time_unit = data['time_unit']
         analysis_method = data['analysis_method']
-
-        # todo - get the new fields, time unit and header type and not sure what else and add them to the call to process
 
         # HANDY for getting a file object and a file queryset when doing clean vrs save
         if calledme == 'clean':
             # this function is in utils.py
             # print('form clean')
             data_file = data.get('omic_data_file')
-            a_returned = omic_data_file_process_data(save, self.study.id, data_file_pk, data_file, file_extension, calledme, data_type, analysis_method)
+            a_returned = omic_data_file_process_data(save, self.study.id, data_file_pk, data_file, file_extension, calledme, data_type, header_type, time_unit, analysis_method)
         else:
             # print('form save')
             queryset = AssayOmicDataFileUpload.objects.get(id=data_file_pk)
             data_file = queryset.omic_data_file.open()
-            a_returned = omic_data_file_process_data(save, self.study.id, data_file_pk, data_file, file_extension, calledme, data_type, analysis_method)
+            a_returned = omic_data_file_process_data(save, self.study.id, data_file_pk, data_file, file_extension, calledme, data_type, header_type, time_unit, analysis_method)
 
         return data
-
-
-# time unit display and store
-# store in minutes, display in unit given
-def convert_time_from_mintues_to_unit_given(tvalue, unit_given):
-    if unit_given == 'day':
-        ctime = (tvalue/24.0)/60.0
-    elif unit_given == 'hour':
-        ctime = tvalue / 60.0
-    else:
-        ctime = tvalue
-    return ctime
-
-def convert_time_unit_given_to_minutes(tvalue, unit_given):
-    if unit_given == 'day':
-        ctime = tvalue*24.0*60.0
-    elif unit_given == 'hour':
-        ctime = tvalue*60.0
-    else:
-        ctime = tvalue
-    return ctime
 
 #     End Omic Data File Upload Section

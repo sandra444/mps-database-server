@@ -97,6 +97,7 @@ from .utils import (
     omic_data_file_process_data,
     this_file_same_as_another_in_this_study,
     get_model_location_dictionary,
+    find_the_labels_needed_for_the_indy_omic_table,
     sandrasGeneralFormatNumberFunction
 )
 
@@ -6837,6 +6838,7 @@ def fetch_multiplier_for_data_processing_plate_map_integration(request):
                         content_type="application/json")
 
 
+# sck
 def sub_to_fetch_multiplier_for_data_processing_plate_map_integration(more_conversions_needed, standard_unit, reportin_unit):
     multiplier = 1
     multiplier_string = ""
@@ -7099,6 +7101,7 @@ def fetch_omic_sample_info_from_upload_data_table(request):
     return HttpResponse(json.dumps(data), content_type="application/json")
 
 
+# sck assayomicdatafileupload_aur.js
 def fetch_this_file_is_this_study(request):
     omic_data_file = request.POST.get('omic_data_file', '0')
     study_id = int(request.POST.get('study_id', '0'))
@@ -7116,7 +7119,9 @@ def fetch_this_file_is_this_study(request):
     return HttpResponse(json.dumps(data), content_type="application/json")
 
 
+# sck ajax.py
 def sub_fetch_omic_sample_info_from_upload_data_table(this_pk):
+    # todo-sck change the format for time - not doing d h m anymore
     locmess = "no"
     loc_pk = None
     timemess = "no"
@@ -7170,11 +7175,12 @@ def sub_fetch_omic_sample_info_from_upload_data_table(this_pk):
     return [timemess, locmess, day, hour, minute, loc_pk]
 
 
+# sck ajax.py
 def sub_fetch_model_location_dictionary(this_model_pk):
     location_dict = get_model_location_dictionary(this_model_pk)
     return [location_dict]
 
-
+# qkw assaystudy_omics.js
 def fetch_omics_data_for_visualization(request):
     data = {'data': {}}
 
@@ -7286,6 +7292,7 @@ def fetch_omics_data_for_visualization(request):
     )
 
 
+# sck assayomicdatafileupload_aur.js
 def fetch_omics_data_for_upload_preview_prep(request):
 
     save = False
@@ -7296,12 +7303,14 @@ def fetch_omics_data_for_upload_preview_prep(request):
     file_extension = os.path.splitext(data_file.name)[1]
     calledme = 'clean'
     data_type = request.POST.get('data_type', '{}')
+    time_unit = request.POST.get('time_unit', '{}')
+    header_type = request.POST.get('header_type', '{}')
     analysis_method = request.POST.get('analysis_method', '{}')
     group_1 = request.POST.get('group_1', '{}')
     group_2 = request.POST.get('group_2', '{}')
     description = request.POST.get('description', '{}')
 
-    data_dicts = omic_data_file_process_data(save, study_id, data_file_pk, data_file, file_extension, calledme, data_type, analysis_method)
+    data_dicts = omic_data_file_process_data(save, study_id, data_file_pk, data_file, file_extension, calledme, data_type, header_type, time_unit, analysis_method)
 
     data = data_dicts
 
@@ -7311,6 +7320,7 @@ def fetch_omics_data_for_upload_preview_prep(request):
     )
 
 
+# qkw views.py
 def get_filtered_omics_data_as_csv(get_params):
     """Returns data points as a csv in the form of a string"""
     ids = AssayOmicDataFileUpload.objects.filter(

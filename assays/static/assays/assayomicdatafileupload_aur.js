@@ -8,6 +8,9 @@ window.OMICS = {
 // todo - remove an error for the log2 fold change where group1 can not equal group 2 - this could happen if the times are different - think about....
 // todo at some point, check to make sure to limit the sample locations to what is listed in models in the study, if listed (location_1, 2 and sample location - three places currently)
 // todo add a highlight all to columns required
+// todo make sure form saved are not getting overwritten when come into update or review form
+
+//todo what if change the tie unit???? time_unit_instance
 
 $(document).ready(function () {
     //show the validation stuff
@@ -34,7 +37,7 @@ $(document).ready(function () {
 
     let page_make_the_group_change = true;
 
-    // when visible, they are required
+    // when visible, they are required, make them yellow
     $('#id_group_1').next().addClass('required');
     $('#id_group_2').next().addClass('required');
     $('#id_location_1').next().addClass('required');
@@ -56,95 +59,83 @@ $(document).ready(function () {
     var metadata_lod_cum = [];
     //the table that is highlighted
     var metadata_highlighted = [];
-    var list_of_ikeys_for_replace_highlighting = [];
-    var ikey_last_highlighted_seen = {};
+    var list_of_icols_for_replace_highlighting = [];
+    var icol_last_highlighted_seen = {};
     var indy_sample_metadata_table_current_row_order = [];
 
     // just working variables, but want in different subs, so just declare here
     var current_pk = 0;
     var current_val = '';
 
+    // make sure to update this as needed (to match what comes from utils.py)
+    var indy_well_meta_label = 'Metadata'
+    var indy_row_label = 'Label'
+    var indy_button_label = 'Button'
+    
+    var indy_list_of_dicts_of_table_rows = JSON.parse($('#id_indy_list_of_dicts_of_table_rows').val());
+    console.log('indy_list_of_dicts_of_table_rows')
+    console.log(indy_list_of_dicts_of_table_rows)
+    var indy_list_of_column_labels = JSON.parse($('#id_indy_list_of_column_labels').val());
+    var indy_list_of_column_labels_show_hide = JSON.parse($('#id_indy_list_of_column_labels_show_hide').val());
 
-    // todo redo these here and in the parallel in the forms.py
-    // make sure order is parallel to form field indy_list_of_keys
-    var metadata_headers = [
-        'Row Options',
-        'File Column Header',
-        'Chip or Well ID',
-        'Sample Location',
-        'Assay Well Name (optional)',
-        'Sample Time',
-        // 'Sample Time (Day)',
-        // 'Sample Time (Hour)',
-        // 'Sample Time (Minute)',
+    // a queryset, using the form field - var indy_sample_location = JSON.parse($('#id_indy_sample_location').val());
+    // a queryset, using the form field - var indy_matrix_item = JSON.parse($('#id_indy_matrix_item').val());
 
-        'matrix_item_pk',
-        'sample_location_pk',
-        'sample_metadata_pk',
-        ]
+    var indy_matrix_item_list = JSON.parse($('#id_indy_matrix_item_list').val());
+    var include_column_in_indy_table = indy_list_of_column_labels_show_hide;
+    var chip_list = indy_matrix_item_list;
+    var indy_column_labels = indy_list_of_column_labels;
+    //var indy_row_labels = indy_list_of_row_labels;
+
+    // boolean, using the form field - var indy_sample_metadata_table_was_changed = JSON.parse($('#id_indy_sample_metadata_table_was_changed').val());
+        
     // todo need to update for the table as a plate
     // still need to decide how will nest the table (if well nest the table)
-    // this will control what gets put in the table, but metadata_lod will have all the indy_keys in it
+    // this will control what gets put in the table, but metadata_lod will have all the indy_column_labels in it
     // todo need to get the two extra sample times out and assay well name, but for now, turned them off
-    var include_header_in_indy_table = [
-        0,
-        1,
-        1,
-        1,
-        0,
-        1,
-        0,
-        0,
-        0,
-        0,
-        0,
-        ]
-    var chip_list = JSON.parse($('#id_indy_matrix_item_list').val());
-    var sample_list = JSON.parse($('#id_indy_file_column_header_list').val());
-    var sample_prefix_list = JSON.parse($('#id_indy_file_column_header_prefix_uni_list').val());
-    var sample_number_dict = JSON.parse($('#id_indy_file_column_header_number_uni_dict').val());
-    var indy_keys = JSON.parse($('#id_indy_list_of_keys').val());
+    
+
     // make a cross reference to the html dom name
     // todo - fix for new assumption that all headers are going in and are not editable
     // also - todo fix to add buttons for highlight change whole column and whole row
-    var ikey_to_html_outer = {};
-    var ikey_to_html_element = {};
-    $.each(indy_keys, function (index, ikey) {
+    var icol_to_html_outer = {};
+    var icol_to_html_element = {};
+    $.each(indy_column_labels, function (index, ikey) {
         if (index === 1) {
-            ikey_to_html_outer[ikey] ='h_indy_file_column_header_list';
-            ikey_to_html_element[ikey] ='file_column_header';
+            icol_to_html_outer[ikey] ='h_indy_file_column_header_list';
+            icol_to_html_element[ikey] ='file_column_header';
         } else
         if (index === 2) {
-            ikey_to_html_outer[ikey] ='h_indy_matrix_item';
-            ikey_to_html_element[ikey] ='matrix_item_name';
+            icol_to_html_outer[ikey] ='h_indy_matrix_item';
+            icol_to_html_element[ikey] ='matrix_item_name';
         } else
         if (index === 3) {
-            ikey_to_html_outer[ikey] ='h_indy_sample_location';
-            ikey_to_html_element[ikey] ='sample_location_name';
+            icol_to_html_outer[ikey] ='h_indy_sample_location';
+            icol_to_html_element[ikey] ='sample_location_name';
         } else
         // if (index === 4) {
-        //     ikey_to_html_outer[ikey] ='h_indy_assay_well_name';
-        //     ikey_to_html_element[ikey] ='assay_well_name';
+        //     icol_to_html_outer[ikey] ='h_indy_assay_well_name';
+        //     icol_to_html_element[ikey] ='assay_well_name';
         // } else
         if (index === 5) {
-            ikey_to_html_outer[ikey] ='h_indy_time_in_unit';
-            ikey_to_html_element[ikey] ='time_day';
+            icol_to_html_outer[ikey] ='h_indy_time_in_unit';
+            icol_to_html_element[ikey] ='time_day';
         } else
         // if (index === 6) {
-        //     ikey_to_html_outer[ikey] ='h_indy_time_hour';
-        //     ikey_to_html_element[ikey] ='time_hour';
+        //     icol_to_html_outer[ikey] ='h_indy_time_hour';
+        //     icol_to_html_element[ikey] ='time_hour';
         // } else
         // if (index === 7) {
-        //     ikey_to_html_outer[ikey] = 'h_indy_time_minute';
-        //     ikey_to_html_element[ikey] = 'time_minute';
+        //     icol_to_html_outer[ikey] = 'h_indy_time_minute';
+        //     icol_to_html_element[ikey] = 'time_minute';
         // } else
         if (index === 8) {
-            // ikey_to_html_outer[ikey] ='h_indy_matrix_item';
-            ikey_to_html_element[ikey] ='matrix_item_pk';
+            // icol_to_html_outer[ikey] ='h_indy_matrix_item';
+            icol_to_html_element[ikey] ='matrix_item_pk';
         } else
         if (index === 9) {
-            // ikey_to_html_outer[ikey] ='h_indy_sample_location';
-            ikey_to_html_element[ikey] ='sample_location_pk';
+            // icol_to_html_outer[ikey] ='h_indy_sample_location';
+            icol_to_html_element[ikey] ='sample_location_pk';
         } else {
 
         }
@@ -158,39 +149,18 @@ $(document).ready(function () {
         // { width: 200, targets: 0 }
         // {'targets': [0], 'visible': true,},
         // {'targets': [1], 'visible': true,},
-        // {'targets': [2], 'visible': true,},
-        // {'targets': [3], 'visible': true,},
-        // {'targets': [4], 'visible': true,},
-        //
-        // {'targets': [5], 'visible': true,},
-        // {'targets': [6], 'visible': true,},
-        // // {'targets': [7], 'visible': true,},
-        // // {'targets': [8], 'visible': true,},
-        // // {'targets': [9], 'visible': true,},
-        // // {'targets': [10], 'visible': true,},
-        //
         // {responsivePriority: 1, targets: 0},
         // {responsivePriority: 2, targets: 1},
-        // {responsivePriority: 3, targets: 2},
-        // {responsivePriority: 4, targets: 3},
     ];
 
     // START - Tool tips
 
     //todo update all the tool tips (add/remove as needed)
-    // tool tips - two group stuff
-    let page_omic_upload_omic_file_format_deseq2_log2fc_headers = '"name", "baseMean", "log2FoldChange", "lfcSE", "stat", "pvalue", "padj"';
-    let page_omic_upload_omic_file_format_deseq2_log2fc_tooltip = 'For DESeq2 Log2Fold change data, the header "log2FoldChange" must be in the first row. Other optional columns headers are: "baseMean", "lfcSE", "stat", "pvalue", "padj", and "gene reference" (or "name" or "gene").';
-    $('#omic_file_format_deseq2_log2fc_tooltip').next().html($('#omic_file_format_deseq2_log2fc_tooltip').next().html() + make_escaped_tooltip(page_omic_upload_omic_file_format_deseq2_log2fc_tooltip));
-    let page_omic_anaylsis_method_tooltip = 'The method (i.e. data processing tool, pipeline, etc.) used to process data.';
-    $('#omic_anaylsis_method_tooltip').next().html($('#omic_anaylsis_method_tooltip').next().html() + make_escaped_tooltip(page_omic_anaylsis_method_tooltip));
+
+    // tool tips - two group stuff - all moved to help_text (at least, for now)
 
     // tool tips - indy-sample stuff
-    let page_count_files = 'Counts data files must have one header row labeled "Sample ID" with each column labeled with a sample ID and the sample ID must match, EXACTLY, what is provided in the metadata table.  ';
-    let page_omic_upload_omic_file_format_normcounts_tooltip = 'Under Development - ' + page_count_files;
-    $('#omic_file_format_normcounts_tooltip').next().html($('#omic_file_format_normcounts_tooltip').next().html() + make_escaped_tooltip(page_omic_upload_omic_file_format_normcounts_tooltip));
-    let page_omic_upload_omic_file_format_rawcounts_tooltip = 'Under Development - ' + page_count_files;
-    $('#omic_file_format_rawcounts_tooltip').next().html($('#omic_file_format_rawcounts_tooltip').next().html() + make_escaped_tooltip(page_omic_upload_omic_file_format_rawcounts_tooltip));
+    //todo see if still need these....
     let page_drag_action_tooltip = 'Copy will copy and paste that selected value. Increment will add the indicated amount to the cells (note: for text field, will attempt to find a string+value, if found, will increment the value only, if not found, will treat all entered as a string and will add a value starting from 1).  ';
     $('#drag_action_tooltip').next().html($('#drag_action_tooltip').next().html() + make_escaped_tooltip(page_drag_action_tooltip));
     let page_drag_use_tooltip = 'Select what to do to the highlighted cells.';
@@ -216,6 +186,7 @@ $(document).ready(function () {
 
     // Some more load things Section
     changed_something_important('load');
+    change_visibility_of_some_doms();
 
     if (page_omic_upload_check_load === 'review') {
         page_omic_upload_called_from_in_js_file = 'load-review';
@@ -237,6 +208,8 @@ $(document).ready(function () {
         } else {
             page_omic_upload_called_from_in_js_file = 'load-update';
             get_group_sample_info('load-update');
+            //do not allow changing of data type after a valid submit and save - user has to delete and then add back
+            $('#id_data_type').selectize.disable();
         }
     }
 
@@ -284,17 +257,49 @@ $(document).ready(function () {
     */
     $('#id_data_type').change(function () {
         clear_validation_errors();
+
+        if ($('#id_data_type')[0].selectize.items[0] == 'log2fc') {
+            $('#id_header_type')[0].selectize.setValue('target');
+        } else {
+            if ($('#id_header_type')[0].selectize.items[0] == 'target') {
+                $('#id_header_type')[0].selectize.setValue('well');
+            }
+        }
+
+        change_visibility_of_some_doms();
+
+        changed_something_important('data_type');
+    });
+    function change_visibility_of_some_doms() {
+        console.log("$('#id_data_type')[0].selectize.items[0] ",$('#id_data_type')[0].selectize.items[0])
+        $('#omic_preview_button_section').hide();
+        $('#omic_preview_the_graphs_section').hide();
+        $('#omic_preview_the_graphs_section2').hide();
+
+        $('#log2fc_template_section').hide();
+        $('#normcounts_template_section').hide();
+        $('#rawcounts_template_section').hide();
+
         if ($('#id_data_type')[0].selectize.items[0] == 'log2fc') {
             $('#omic_preview_button_section').show();
             $('#omic_preview_the_graphs_section').show();
             $('#omic_preview_the_graphs_section2').show();
+            console.log("should show the log2fc")
+            $('#log2fc_template_section').show();
+
         } else {
-            $('#omic_preview_button_section').hide();
-            $('#omic_preview_the_graphs_section').hide();
-            $('#omic_preview_the_graphs_section2').hide();
+
+            if ($('#id_data_type')[0].selectize.items[0] == 'rawcounts') {
+               $('#rawcounts_template_section').show();
+            } else {
+               $('#normcounts_template_section').show();
+
+            }
         }
-        changed_something_important('data_type');
-    });
+    }
+    /**
+     * On change header type, change what is required page logic
+    */
     $('#id_header_type').change(function () {
         clear_validation_errors();
         changed_something_important('header_type');
@@ -428,7 +433,7 @@ $(document).ready(function () {
     $(document).on('click', '#clear_highlights_indy_table', function() {
         $('.special-selected1').removeClass('special-selected1');
         $('.special-selected2').removeClass('special-selected2');
-        page_paste_cell_ikey = null;
+        page_paste_cell_icol = null;
         page_paste_cell_irow = null;
         if (page_drag_action === 'pastes') {
             page_drag_action = null;
@@ -467,10 +472,10 @@ $(document).ready(function () {
             sample_metadata_replace_show_hide();
         }
     });
-
-    $(document).on('click', '#indy_instructions', function() {
-        $('.indy-instructions').toggle();
-    });
+    //
+    // $(document).on('click', '#indy_instructions', function() {
+    //     $('.indy-instructions').toggle();
+    // });
 
     $(document).on('click', '#replace_in_indy_table', function() {
         indyCalledToReplace();
@@ -633,9 +638,8 @@ $(document).ready(function () {
                                 // console.log('indy_file_headers ',indy_file_headers)
 
                                 // todo these could be samples or well names...still working on this
-                                sample_list = [];
-                                sample_prefix_list = [];
-                                sample_number_dict = [];
+                                // indy_row_labels = [];
+
 
                                 // todo, load the prefix and number, think about how will use to make a plate looking table
 
@@ -659,7 +663,7 @@ $(document).ready(function () {
                                             //    skip it
                                         } else {
                                             this_dict.addOption({value: pk, text: text});
-                                            sample_list.push(text);
+                                            // indy_row_labels.push(text);
                                         }
                                     }
                                 });
@@ -680,21 +684,18 @@ $(document).ready(function () {
     // Other Functions
 
     // Called from a variety of places, including load, to set the right visibilities based on the data type
+    // and also based on header_type....
     // and to call all the downstream functions needed depending on data type and how/when called
     function changed_something_important(called_from) {
         // console.log("called_from ",called_from)
+
+        // could make this so it only checks if the data_type was changed, but it is okay this way, so leave it
         if ($('#id_data_type')[0].selectize.items[0] == 'log2fc') {
 
             $('.compare-group').show();
             $('.indy-sample').hide();
 
-            //stuff for the indy fields - make sure some fields are empty
-            //this is so that stuff that is not related to the file is not saved in the upload file table
-            // todo - do this for the indy form fields that are saved to the upload file table and check
-            $('#id_header_type')[0].selectize.setValue('not-full');
-            $('#id_time_unit')[0].selectize.setValue('not-full');
-            // todo - save to a variable and put back if change back?? think about
-
+            //stuff for the indy fields - all model form fields are used for log2fc
 
         } else {
 
@@ -703,9 +704,8 @@ $(document).ready(function () {
 
             // setting some of the inside classes to hidden
             $('.increment-section').hide();
-            $('.indy-instructions').hide();
 
-            //stuff for the two group fields - make sure some fields are empty
+            //stuff for the two group fields - make sure some fields are empty for the indy upload files
             //this is so that stuff that is not related to the file is not saved in the upload file table
             page_make_the_group_change = false;
             $('#id_group_1')[0].selectize.setValue('not-full');
@@ -713,24 +713,21 @@ $(document).ready(function () {
             page_make_the_group_change = true;
 
             $('#id_location_1')[0].selectize.setValue('not-full');
-            $('#id_time_1_day').val(0);
-            $('#id_time_1_hour').val(0);
-            $('#id_time_1_minute').val(0);
+            $('#id_time_1_display').val(0);
             page_omic_current_group1 = $('#id_group_1')[0].selectize.items[0];
 
-
             $('#id_location_2')[0].selectize.setValue('not-full');
-            $('#id_time_2_day').val(0);
-            $('#id_time_2_hour').val(0);
-            $('#id_time_2_minute').val(0);
+            $('#id_time_2_display').val(0);
             page_omic_current_group2 = $('#id_group_2')[0].selectize.items[0];
 
             sample_metadata_replace_show_hide();
-            // do this the first time called 
-            // this should be the first time it is called, either by load or change data type
+
+            // do this ONLY for the first time need the metadata_lod, it may be on load, but may not
             if (!page_metadata_lod_done) {
                 // need to load metadata_lod the first time
-                metadata_lod = JSON.parse($('#id_indy_list_of_dicts').val());
+                metadata_lod = indy_list_of_dicts_of_table_rows;
+                console.log('metadata_lod')
+                console.log(metadata_lod)
                 metadata_lod_current_index = 0;
                 metadata_lod_cum.push(JSON.parse(JSON.stringify(metadata_lod)));
                 page_metadata_lod_done = true;
@@ -1002,7 +999,7 @@ $(document).ready(function () {
         // todo fix the reapply highlighting
         //reapplyTheHighlightingToTheIndyTable();
         // whatIsCurrentlyHighlightedInTheIndyTable();
-        $('#id_indy_list_of_dicts').val(JSON.stringify(metadata_lod));
+        $('#id_indy_list_of_dicts_of_table_rows').val(JSON.stringify(metadata_lod));
     }
 
     // START - The functions that drive change to the indy sample metadata table
@@ -1055,10 +1052,10 @@ $(document).ready(function () {
             $('#id_indy_sample_metadata_field_header_was_changed').attr('checked', true);
         } else {
             // check the row to see if the whole row is empty
-            $.each(indy_keys, function (index, ikey) {
+            $.each(indy_column_labels, function (index, icol) {
                 // do to all in the metadata_lod, not just the ones shown in the table, so, comment this out for now
                 // if (include_header_in_indy_table[index] === 1) {
-                    if (dictrow[ikey].length > 0) {
+                    if (dictrow[icol].length > 0) {
                         $('#id_indy_sample_metadata_table_was_changed').attr('checked', true);
                     }
                 // }
@@ -1104,21 +1101,21 @@ $(document).ready(function () {
         var tirow_changing = null;
         for (var index = 0; index < metadata_highlighted.length; index++) {
             // console.log('metadata_highlighted[index]['metadata_highlighted_tirow'] '+metadata_highlighted[index]['metadata_highlighted_tirow'])
-            // console.log('metadata_highlighted[index]['metadata_highlighted_tikey'] '+metadata_highlighted[index]['metadata_highlighted_tikey'])
+            // console.log('metadata_highlighted[index]['metadata_highlighted_ticol'] '+metadata_highlighted[index]['metadata_highlighted_ticol'])
             // console.log('metadata_highlighted[index]['metadata_highlighted_content'] '+metadata_highlighted[index]['metadata_highlighted_content'])
 
             var tirow = metadata_highlighted[index]['metadata_highlighted_tirow'];
-            var tikey = metadata_highlighted[index]['metadata_highlighted_tikey'];
+            var ticol = metadata_highlighted[index]['metadata_highlighted_ticol'];
 
             if (page_drag_action === 'pastes') {
                 $("#radio_duplicate").prop("checked", true).trigger("click");
-                tirow_changing = tirow - 1;; //still working on this todo!!
+                tirow_changing = tirow - 1; //still working on this todo!!
             } else {
                 tirow_changing = tirow - 1;
             }
 
             // get using the .val for input fields
-            current_val = $('#' + ikey_to_html_element[tikey]).val();
+            current_val = $('#' + icol_to_html_element[ticol]).val();
 
             // because the pks are not in the table, they will not ever be highlighted
             // BUT, we want to keep them matching the names selected in the metadata_lod
@@ -1126,47 +1123,47 @@ $(document).ready(function () {
             // plan to check in the back end to make sure they went together
             // could remove the pks altogether, but, what if users decide want to see them.....
             current_pk = 0;
-            if (tikey === 'matrix_item_name') {
+            if (ticol === 'matrix_item_name') {
                 current_pk = $('#matrix_item_pk').text();
-                current_val = $('#' + ikey_to_html_element[tikey]).text();
-            } else if (tikey === 'sample_location_name') {
+                current_val = $('#' + icol_to_html_element[ticol]).text();
+            } else if (ticol === 'sample_location_name') {
                 current_pk = $('#sample_location_pk').text();
-                current_val = $('#' + ikey_to_html_element[tikey]).text();
-            } else if (tikey === 'file_column_header') {
+                current_val = $('#' + icol_to_html_element[ticol]).text();
+            } else if (ticol === 'file_column_header') {
                 current_pk = $('#file_column_header_pk').text();
-                current_val = $('#' + ikey_to_html_element[tikey]).text();
+                current_val = $('#' + icol_to_html_element[ticol]).text();
             }
 
             // do not forget to subtract the header row when getting metadata_lod index!
-            if (tikey === 'sample_location_name') {
+            if (ticol === 'sample_location_name') {
                 // can only duplicate, not increment the sample location
-                metadata_lod[tirow_changing][tikey] = current_val;
+                metadata_lod[tirow_changing][ticol] = current_val;
                 metadata_lod[tirow_changing]['sample_location_pk'] = current_pk;
             } else {
                 if (page_change_duplicate_increment === 'duplicate') {
-                    metadata_lod[tirow_changing][tikey] = current_val;
-                    if (tikey === 'matrix_item_name') {
+                    metadata_lod[tirow_changing][ticol] = current_val;
+                    if (ticol === 'matrix_item_name') {
                         metadata_lod[tirow_changing]['matrix_item_pk'] = current_pk;
                     }
                 } else {
                     // an increment
-                    var current_index = ikey_last_highlighted_seen[tikey+'_index'];
+                    var current_index = icol_last_highlighted_seen[ticol+'_index'];
 
                     if (current_index === -99) {
                         // on the first one, it is a duplicate and change info for next
-                        metadata_lod[tirow_changing][tikey] = current_val;
-                        if (tikey === 'matrix_item_name') {
+                        metadata_lod[tirow_changing][ticol] = current_val;
+                        if (ticol === 'matrix_item_name') {
                             metadata_lod[tirow_changing]['matrix_item_pk'] = current_pk;
                         }
                         // update the last found object for next go
-                        ikey_last_highlighted_seen[tikey] = current_val;
-                        ikey_last_highlighted_seen[tikey + '_index'] = 0;
+                        icol_last_highlighted_seen[ticol] = current_val;
+                        icol_last_highlighted_seen[ticol + '_index'] = 0;
                     } else {
-                        // not the first occurrence of this tikey
-                        current_val = ikey_last_highlighted_seen[tikey];
+                        // not the first occurrence of this ticol
+                        current_val = icol_last_highlighted_seen[ticol];
 
                         var i_current_val = 0;
-                        if (tikey === 'time_day' || tikey === 'time_hour' || tikey === 'time_minute') {
+                        if (ticol === 'time_day' || ticol === 'time_hour' || ticol === 'time_minute') {
                             if (page_change_duplicate_increment === 'increment-ttb'
                                 || page_change_duplicate_increment === 'increment-btt') {
                                 // it is + for both because the holding dict was sorting descending
@@ -1174,7 +1171,7 @@ $(document).ready(function () {
                             } else {
                                 alert('Make sure to select to duplicate or increment');
                             }
-                        } else if (tikey === 'matrix_item_name') {
+                        } else if (ticol === 'matrix_item_name') {
                             // find the index of the last one, increase the index, if not out of range, replace
                             var index_in_chip_list = chip_list.indexOf(current_val);
                             var new_index = index_in_chip_list + parseInt($('#increment_value').val());
@@ -1183,29 +1180,29 @@ $(document).ready(function () {
                             } else {
                                 i_current_val = current_val;
                             }
-                        } else if (tikey === 'file_column_header') {
+                        } else if (ticol === 'file_column_header') {
                             // find the index of the last one, increase the index, if not out of range, replace
-                            var index_in_sample_list = sample_list.indexOf(current_val);
-                            var new_index = index_in_sample_list + parseInt($('#increment_value').val());
-                            if (index_in_sample_list >=0 && new_index < sample_list.length) {
-                                i_current_val = sample_list[new_index];
-                            } else {
-                                i_current_val = current_val;
-                            }
+                            // var index_in_indy_row_labels = indy_row_labels.indexOf(current_val);
+                            // var new_index = index_in_indy_row_labels + parseInt($('#increment_value').val());
+                            // if (index_in_indy_row_labels >=0 && new_index < indy_row_labels.length) {
+                            //     i_current_val = indy_row_labels[new_index];
+                            // } else {
+                            //     i_current_val = current_val;
+                            // }
                         } else {
                             // todo well name still need an increment
                             // could i look from the right until finds first non number and split? - maybe a list? not sure yet..
                             // maybe string split the whole thing and index backards to first non number, then icrement the number
                             // could go back as string, but probably easier to work with list...think about
-                                alert('Increment for this field is in development: '+tikey);
+                                alert('Increment for this field is in development: '+ticol);
 
                         }
-                        var i_current_index = parseInt(ikey_last_highlighted_seen[tikey + '_index']) + 1;
+                        var i_current_index = parseInt(icol_last_highlighted_seen[ticol + '_index']) + 1;
                         // update the last found object for next go
-                        ikey_last_highlighted_seen[tikey] = i_current_val;
-                        ikey_last_highlighted_seen[tikey + '_index'] = i_current_index;
+                        icol_last_highlighted_seen[ticol] = i_current_val;
+                        icol_last_highlighted_seen[ticol + '_index'] = i_current_index;
                         // update the correct location in the table metadata
-                        metadata_lod[tirow_changing][tikey] = i_current_val;
+                        metadata_lod[tirow_changing][ticol] = i_current_val;
 
                     }
                 }
@@ -1219,12 +1216,12 @@ $(document).ready(function () {
         var index = 0;
         for (index = 0; index < metadata_highlighted.length; index++) {
             var tirow = metadata_highlighted[index]['metadata_highlighted_tirow'];
-            var tikey = metadata_highlighted[index]['metadata_highlighted_tikey'];
+            var ticol = metadata_highlighted[index]['metadata_highlighted_ticol'];
             // do not forget to subtract the header row
-            metadata_lod[tirow-1][tikey] = '';
-            if (tikey === 'matrix_item_name') {
+            metadata_lod[tirow-1][ticol] = '';
+            if (ticol === 'matrix_item_name') {
                 metadata_lod[tirow-1]['matrix_item_pk'] = '';
-            } else if (tikey === 'sample_location_name') {
+            } else if (ticol === 'sample_location_name') {
                 metadata_lod[tirow-1]['sample_location_pk'] = '';
             }
         }
@@ -1235,7 +1232,7 @@ $(document).ready(function () {
         whatIsCurrentlyHighlightedInTheIndyTable();
         $('#id_indy_sample_metadata_table_was_changed').attr('checked',true);
 
-        if (list_of_ikeys_for_replace_highlighting.indexOf('file_column_header') >= 0) {
+        if (list_of_icols_for_replace_highlighting.indexOf('file_column_header') >= 0) {
             $('#id_indy_sample_metadata_field_header_was_changed').attr('checked',true);
         } else {
             $('#id_indy_sample_metadata_field_header_was_changed').attr('checked',false);
@@ -1266,34 +1263,43 @@ $(document).ready(function () {
         indySampleMetadataCallBuildAndPost();
     }
 
+    //todo, changed the ikey to col-index - will need to check this later
     function reapplyTheHighlightingToTheIndyTable() {
         var tirow = null;
-        var tikey = null;
+        var ticol = null;
         var thisElementList = null;
         for (index = 0; index < metadata_highlighted.length; index++) {
             tirow = metadata_highlighted[index]['metadata_highlighted_tirow'];
-            tikey = metadata_highlighted[index]['metadata_highlighted_tikey'];
-            thisElementList = $('td[ikey*="' + tikey + '"][row-index*="' + tirow + '"]');
-            // $("td[ikey*='file_column_header'][row-index*='1']").addClass('special-selected1')
+            ticol = metadata_highlighted[index]['metadata_highlighted_ticol'];
+            thisElementList = $('td[col-index*="' + ticol + '"][row-index*="' + tirow + '"]');
+            // $("td[col-index*='file_column_header'][row-index*='1']").addClass('special-selected1')
             // console.log("thisElementList ",thisElementList)
-            thisElementList.addClass('special-selected1');
+            if ( (thisElementList.hasClass('no-edit') || thisElementList.hasClass('no-edit-data'))
+                && $('#id_header_type')[0].selectize.items[0] === 'well') {
+            //    skip todo fix this so can not hightling the empty wells!
+            } else {
+                thisElementList.addClass('special-selected1');
+            }
         }
         if (page_paste_cell_irow) {
             tirow = page_paste_cell_irow;
-            tikey = page_paste_cell_ikey;
-            thisElementList = $('td[ikey*="' + tikey + '"][row-index*="' + tirow + '"]');
+            ticol = page_paste_cell_icol;
+            thisElementList = $('td[col-index*="' + ticol + '"][row-index*="' + tirow + '"]');
             thisElementList.addClass('special-selected2');
         }
     }
 
+    //todo check all the attibute labels - adding new ones
     function whatIsCurrentlyHighlightedInTheIndyTable() {
         metadata_highlighted = [];
-        list_of_ikeys_for_replace_highlighting = [];
+        list_of_icols_for_replace_highlighting = [];
         $('.special-selected1').each(function() {
             var dict = {};
             var imetadata_highlighted_tirow = $(this).attr('row-index');
             var imetadata_highlighted_ticol = $(this).attr('col-index');
-            var imetadata_highlighted_tikey = $(this).attr('ikey');
+            var imetadata_highlighted_tlrow = $(this).attr('row-label');
+            var imetadata_highlighted_tlcol = $(this).attr('col-label');
+            var imetadata_highlighted_label = $(this).attr('meta-label');
 
             // since this goes through all the keys, and they could be different types, try different ways of pulling
             // keep in mind that the content could actually be null, if it is, make it a space
@@ -1329,34 +1335,34 @@ $(document).ready(function () {
             }
             dict['metadata_highlighted_tirow'] = imetadata_highlighted_tirow;
             dict['metadata_highlighted_ticol'] = imetadata_highlighted_ticol;
-            dict['metadata_highlighted_tikey'] = imetadata_highlighted_tikey;
+            dict['metadata_highlighted_ticol'] = imetadata_highlighted_ticol;
             dict['metadata_highlighted_content'] = imetadata_highlighted_content;
-            list_of_ikeys_for_replace_highlighting.push(imetadata_highlighted_tikey);
+            list_of_icols_for_replace_highlighting.push(imetadata_highlighted_ticol);
             metadata_highlighted.push(dict);
         });
-        // a special check to grey out replace content if field not in the ikey list that has a dom element
-        for (var ikey in ikey_to_html_outer) {
-            if (list_of_ikeys_for_replace_highlighting.indexOf(ikey) >= 0) {
-                $('#'+ikey_to_html_outer[ikey]).addClass('required');
+        // a special check to grey out replace content if field not in the icol list that has a dom element
+        for (var icol in icol_to_html_outer) {
+            if (list_of_icols_for_replace_highlighting.indexOf(icol) >= 0) {
+                $('#'+icol_to_html_outer[icol]).addClass('required');
             } else {
-                $('#'+ikey_to_html_outer[ikey]).removeClass('required');
+                $('#'+icol_to_html_outer[icol]).removeClass('required');
             }
         }
         // console.log('metadata_highlighted ',metadata_highlighted)
         
         // need for replace and pastes to keep track of last seen during the replace/pastes
         // costs a little extra to put here, but will always be ready
-        ikey_last_highlighted_seen = {};
-        $.each(indy_keys, function (index, ikey) {
-            ikey_last_highlighted_seen[ikey] = '99';
-            ikey_last_highlighted_seen[ikey+'_index'] = -99;
+        icol_last_highlighted_seen = {};
+        $.each(indy_column_labels, function (index, icol) {
+            icol_last_highlighted_seen[icol] = '99';
+            icol_last_highlighted_seen[icol+'_index'] = -99;
         });
     }
 
     // END - The functions that change the indy table
     
     var page_paste_cell_irow = null;
-    var page_paste_cell_ikey = null;
+    var page_paste_cell_icol = null;
     function selectableDragOnSampleMetadataTable() {
         // console.log("dragging")
         if (page_drag_action === 'pastes') {
@@ -1372,7 +1378,8 @@ $(document).ready(function () {
                     if (icount == 0) {
                         $(this).addClass('special-selected2');
                         page_paste_cell_irow = $(this).attr('row-index');
-                        page_paste_cell_ikey = $(this).attr('ikey');
+                        page_paste_cell_icol = $(this).attr('col-index');
+                        //todo add others????
                     }
                     // $(this).removeClass('ui-selected');
                     icount = icount + 1;
@@ -1394,197 +1401,266 @@ $(document).ready(function () {
         whatIsCurrentlyHighlightedInTheIndyTable();
     }
 
+
+
+    //may want to move these later todo make these work without the sort...
+    $(document).on('click', '.apply-column-button', function (e) {
+        e.stopPropagation();
+        let apply_button_that_was_clicked = $(this);
+        console.log(apply_button_that_was_clicked);
+
+        let this_col_index = this.getAttribute("col-index");
+        //what is the column-index, for each with this column-index
+        $('.indy-data').each(function() {
+            if ($(this).attr('col-index') === this_col_index) {
+                if ($(this).hasClass('special-selected1')) {
+                    $(this).removeClass('special-selected1');
+                } else {
+                    $(this).addClass('special-selected1');
+                }
+            }
+        });
+    });
+    $(document).on('click', '.apply-row-button', function (e) {
+        e.stopPropagation();
+        let apply_button_that_was_clicked = $(this);
+        console.log(apply_button_that_was_clicked);
+
+        let this_row_index = this.getAttribute("row-index");
+        //what is the column-index, for each with this column-index
+        $('.indy-data').each(function() {
+            if ($(this).attr('row-index') === this_row_index) {
+                if ($(this).hasClass('special-selected1')) {
+                    $(this).removeClass('special-selected1');
+                } else {
+                    $(this).addClass('special-selected1');
+                }
+            }
+        });
+    });
+
     function buildSampleMetadataTable() {
 
-        //todo - add highlight all the column for the table, not sure what to do for the plate....
-        //{#                    todo - make the unit form selection and only have one sample time D H or M#}
-
-        //same for both plate and list
-
-
-
-        //use the header type to determine if plate or list
-        if ($('#id_header_type')[0].selectize.items[0] == 'well') {
-            // build a well plate - of sorts
-            // the sample_list variable should have all the headers
-            // split into a letter part and a number part
-            // get the set of numbers, make those column headers
-            // get the set of letters, make those row headers
-
-        } else {
-            // build a table
-            var elem = document.getElementById('div_for_' + sample_metadata_table_id);
-            //remove the table
+        // build a table
+        var elem = document.getElementById('div_for_' + sample_metadata_table_id);
+        //remove the table
+        if (elem.childNodes[0]) {
             elem.removeChild(elem.childNodes[0]);
+        }
 
-            var myTableDiv = document.getElementById('div_for_' + sample_metadata_table_id);
-            var myTable = document.createElement('TABLE');
-            $(myTable).attr('id', sample_metadata_table_id);
-            $(myTable).attr('cellspacing', '0');
-            $(myTable).attr('width', '100%');
-            $(myTable).addClass('display table table-striped table-hover');
+        var myTableDiv = document.getElementById('div_for_' + sample_metadata_table_id);
+        var myTable = document.createElement('TABLE');
+        $(myTable).attr('id', sample_metadata_table_id);
+        $(myTable).attr('cellspacing', '0');
+        $(myTable).attr('width', '100%');
+        $(myTable).addClass('display table table-striped table-hover');
 
-            var tableHead = document.createElement('THEAD');
+        var tableHead = document.createElement('THEAD');
+
+        var tr = document.createElement('TR');
+        var rowcounter = 0;
+        $(tr).attr('row-index', rowcounter);
+        var colcounter = 0;
+
+        $.each(indy_column_labels, function (i_index, colLabel) {
+            // include in table or not - 1 is for include
+            if (include_column_in_indy_table[i_index] === 1) {
+                var th = document.createElement('TH');
+                $(th).attr('col-index', colcounter);
+                $(th).attr('row-index', rowcounter);
+                $(th).attr('col-label', colLabel);
+                $(th).attr('row-label', indy_column_labels);
+                $(th).attr('meta-label', indy_column_labels);
+
+                if (colLabel.includes(indy_button_label)) {
+                    th.appendChild(document.createTextNode(''));
+                } else {
+                    th.appendChild(document.createTextNode(colLabel));
+                }
+
+
+                // when put in the header like this, the column sorted
+                // if (colLabel.includes(indy_row_label) || colLabel.includes(indy_well_meta_label) || page_omic_upload_check_load === 'review') {
+                //    th.appendChild(document.createTextNode(colLabel));
+                // } else {
+                //     let top_label_button = ' <a col-index="' + colcounter
+                //     + '" class="btn btn-sm btn-primary apply-column-button">'
+                //     + '<span class="glyphicon glyphicon-option-vertical" aria-hidden="true"></span></a>'
+                //     $(th).html(colLabel + top_label_button);
+                // }
+
+                tr.appendChild(th);
+                colcounter = colcounter + 1;
+            }
+            // else, do not put in the table and do not increment the header counter
+        });
+
+        tableHead.appendChild(tr);
+
+        myTable.appendChild(tableHead);
+        var tableBody = document.createElement('TBODY');
+
+        // start add arrow down row in body
+        if (5==5 && page_omic_upload_check_load != 'review') {
             var tr = document.createElement('TR');
-            $(tr).attr('hrow-index', 0);
+            rowcounter = rowcounter + 1;
+            $(tr).attr('row-index', rowcounter);
 
-            tableHead.appendChild(tr);
-            var hcolcounter = 0;
-
-            $.each(metadata_headers, function (h_index, header) {
-                ikey = indy_keys[h_index];
-                if (include_header_in_indy_table[h_index] === 1) {
-                    if (header.includes('ption')) {
-                        if (page_omic_upload_check_load === 'add' || page_omic_upload_check_load === 'update') {
-                            var th = document.createElement('TH');
-                            $(th).attr('hcol-index', hcolcounter);
-                            $(th).attr('ikey', ikey);
-                            th.appendChild(document.createTextNode(header));
-                            tr.appendChild(th);
-                            hcolcounter = hcolcounter + 1;
-                        }
+            colcounter = 0;
+            $.each(indy_column_labels, function (i_index, colLabel) {
+                if (include_column_in_indy_table[i_index] === 1) {
+                    var td = document.createElement('TD');
+                    if (colLabel.includes(indy_row_label) ||
+                        colLabel.includes(indy_well_meta_label) ||
+                        colLabel.includes(indy_button_label)) {
+                        td.appendChild(document.createTextNode(''));
                     } else {
-                        var th = document.createElement('TH');
-                        $(th).attr('hcol-index', hcolcounter);
-                        $(th).attr('ikey', ikey);
-                        if (ikey != 'assay_well_name') {
-                            $(th).attr('class', 'required');
-                        }
-                        // this was how did with plate....$(th).html(colnumber + top_label_button);
-                        th.appendChild(document.createTextNode(header));
-                        tr.appendChild(th);
-                        hcolcounter = hcolcounter + 1;
+                        $(td).attr('class', 'apply-column-button');
+                        let top_label_button = ' <a col-index="' + colcounter
+                            + '" class="btn btn-sm btn-primary apply-column-button">'
+                            + '<span class="glyphicon glyphicon-resize-vertical" aria-hidden="true"></span></a>'
+                        $(td).html(top_label_button);
                     }
+                    $(td).attr('class', 'no-edit');
+                    tr.appendChild(td);
+                    colcounter = colcounter + 1;
                 }
             });
-            myTable.appendChild(tableHead);
+            rowcounter = rowcounter + 1;
+        }
+        tableBody.appendChild(tr);
+        // end add arrow down row in body
 
-            var tableBody = document.createElement('TBODY');
-            //the header row is 0, to keep consistent, start with 1, but watch when using the lod's
-            var rowcounter = 1;
-
-            $.each(metadata_lod, function (r_index, row) {
-
+        colcounter = 0;
+        let myCellContent = '';
+        $.each(metadata_lod, function (i_index, row) {
+            let rowLabel = row[indy_row_label];
+            let metaLabel = row[indy_row_label];
+            if ($('#id_header_type')[0].selectize.items[0] === 'well') {
+                metaLabel = row[indy_well_meta_label];
+            }
+            // if doing as a well, there are some rows we do not want in the table, but want in our metadata_lod
+            if (
+                $('#id_header_type')[0].selectize.items[0] === 'well'
+                &&
+                (metaLabel === 'matrix_item_pk' ||
+                    metaLabel === 'sample_location_pk' ||
+                    metaLabel === 'sample_metadata_pk')
+                ) {
+                // skip over the rows of metadata_lod that we just do not want (pk rows)
+            } else {
                 var tr = document.createElement('TR');
                 $(tr).attr('row-index', rowcounter);
                 tableBody.appendChild(tr);
 
-                let colcounter = 0;
+                colcounter = 0;
                 let myCellContent = '';
 
-                $.each(indy_keys, function (c_index, ikey) {
-                    if (include_header_in_indy_table[c_index] === 1) {
-                        var td = document.createElement('TD');
-                        $(td).attr('col-index', colcounter);
-                        $(td).attr('row-index', rowcounter);
-                        $(td).attr('id-index', rowcounter * metadata_headers.length + colcounter);
-                        $(td).attr('ikey', ikey);
+                $.each(indy_column_labels, function (i_index, colLabel) {
+                    myCellContent = row[colLabel];
 
-                        //todo - want to remove the delete and add row option, but want to add a highlight all of the row or column buttons
-                        if (ikey.includes('ption') && colcounter === 0) {
-                            if (page_omic_upload_check_load === 'add' || page_omic_upload_check_load === 'update') {
-                                var side_label_button =
-                                    ' <a class="add_indy_row" id="add_indy_row' + rowcounter
-                                    + '" row-index="' + rowcounter
-                                    + '" class="btn btn-sm btn-primary">'
-                                    // + 'duplicate'
-                                    + '<span class="glyphicon glyphicon-duplicate" aria-hidden="true"></span>'
-                                    + ' </a>'
-                                    +
-                                    ' <a class="delete_indy_row" id="delete_indy_row' + rowcounter
-                                    + '" row-index="' + rowcounter
-                                    + '" class="btn btn-sm btn-primary">'
-                                    // + 'duplicate'
-                                    + '<span class="glyphicon glyphicon-remove" aria-hidden="true"></span>'
-                                    + ' </a>'
-                                $(td).html(side_label_button);
-                                tr.appendChild(td);
+                    // include in table or not - 1 is for include
+                    if (include_column_in_indy_table[i_index] === 1) {
+
+                        if (colLabel.includes(indy_row_label) ||
+                            colLabel.includes(indy_well_meta_label) ||
+                            colLabel.includes(indy_button_label)) {
+
+                            var th = document.createElement('TH');
+                            $(th).attr('col-index', colcounter);
+                            $(th).attr('row-index', rowcounter);
+                            $(th).attr('col-label', colLabel);
+                            $(th).attr('row-label', 'header');
+                            $(th).attr('meta-label', 'header');
+
+                            if (page_omic_upload_check_load != 'review' && colLabel.includes(indy_button_label)) {
+                                $(th).attr('class', 'apply-row-button');
+                                let row_label_button = ' <a row-index="' + rowcounter
+                                + '" class="btn btn-sm btn-primary apply-row-button">'
+                                + '<span class="glyphicon glyphicon-resize-horizontal" aria-hidden="true"></span></a>'
+                                //$(th).html(myCellContent + row_label_button);
+                                $(th).html(row_label_button);
+                                $(th).attr('class', 'no-edit');
+                            } else {
+                                th.appendChild(document.createTextNode(myCellContent));
                             }
+                            tr.appendChild(th);
                         } else {
-                            // if ($('#check_load").html().trim() === 'review') {
-                            td.appendChild(document.createTextNode(row[ikey]));
-                            $(td).attr('class', 'no-wrap');
-                            // } else {
-                            //NOTE: the input fields were not sortable, so, skip this idea for now - since did this changed
-                            // to time_day, time_hour, and time_minute
-                            //     if (ikey.includes('item') || ikey.includes('location') || ikey.includes('day') || ikey.includes('hour') || ikey.includes('minute')) {
-                            //         td.appendChild(document.createTextNode(row[ikey]));
-                            //     } else {
-                            //         var size = 15;
-                            //         // if (ikey.includes('day') || ikey.includes('hour') || ikey.includes('minute') || ikey.includes('well')) {
-                            //         //     size = 5;
-                            //         // } else if (ikey.includes('sample')) {
-                            //         //     size = 15;
-                            //         // } else {
-                            //         //     size = 10;
-                            //         // }
-                            //         var input_button = ' <input type="text" size='' + size + '" name="r'
-                            //             + rowcounter + 'c' + colcounter + ' id="r'
-                            //             + rowcounter + 'c' + colcounter + ' value=' + row[ikey] + '>';
-                            //         $(td).html(input_button);
-                            //     }
-                            // }
+                            var td = document.createElement('TD');
+                            $(td).attr('col-index', colcounter);
+                            $(td).attr('row-index', rowcounter);
+                            $(td).attr('col-label', colLabel);
+                            $(td).attr('row-label', rowLabel);
+                            $(td).attr('meta-label', metaLabel);
+                            td.appendChild(document.createTextNode(myCellContent));
+                            let contentLength = myCellContent.trim().length;
+                            //todo think about how to do this - do want empty or some place holder?
+                            console.log("myCellContent ",myCellContent, " ", contentLength)
+                            if (contentLength == 0 && $('#id_header_type')[0].selectize.items[0] === 'well') {
+                                $(td).attr('class', 'no-edit-data');
+                            } else {
+                                $(td).attr('class', 'indy-data');
+                            }
                             tr.appendChild(td);
                         }
                         colcounter = colcounter + 1;
                     }
                 });
-                rowcounter = rowcounter + 1
-            });
+                rowcounter = rowcounter + 1;
+            }
+        });
 
-            myTable.appendChild(tableBody);
-            myTableDiv.appendChild(myTable);
+        myTable.appendChild(tableBody);
+        myTableDiv.appendChild(myTable);
 
-            // When I did not have the var before the variable name, the table headers acted all kinds of crazy
-            var sampleDataTable = $('#' + sample_metadata_table_id).removeAttr('width').DataTable({
-                // 'iDisplayLength': 100,
-                paging: false,
-                'sDom': '<B<"row">lfrtip>',
-                //do not do the fixed header here...only want for two of the tables
-                //https://datatables.net/forums/discussion/30879/removing-fixedheader-from-a-table
-                //https://datatables.net/forums/discussion/33860/destroying-a-fixed-header
-                fixedHeader: {headerOffset: 50},
-                // responsive: true,
-                'order': table_order,
-                'columnDefs': table_column_defs,
-                // fixedColumns: true
-                'autoWidth': true
-            });
+        // When I did not have the var before the variable name, the table headers acted all kinds of crazy
+        var sampleDataTable = $('#' + sample_metadata_table_id).removeAttr('width').DataTable({
+            // 'iDisplayLength': 100,
+            paging: false,
+            'sDom': '<B<"row">lfrtip>',
+            //do not do the fixed header here...only want for two of the tables
+            //https://datatables.net/forums/discussion/30879/removing-fixedheader-from-a-table
+            //https://datatables.net/forums/discussion/33860/destroying-a-fixed-header
+            fixedHeader: {headerOffset: 50},
+            // responsive: true,
+            'order': table_order,
+            'columnDefs': table_column_defs,
+            // fixedColumns: true
+            'autoWidth': true
+        });
 
-            sampleDataTable.rows().every(function () {
-                // this.data() is a list, with the first one being the tags and such
-                // console.log("this row ",this.data());
-                // console.log("this row ",this.data()[0]);
-                // the tags and such look like a long string, so, to find an attribute, must be creative
-                // below is HANDY for looping through, and getting a value.by name, but we do not need that here
-                // var data = this.data();
-                // data.forEach(function (value, index) {
-                //     // if (value.isActive)
-                //     // {
-                //      console.log('value ',value);
-                //https://stackoverflow.com/questions/29077902/how-to-loop-through-all-rows-in-datatables-jquery
-                //      // console.log(value.UserName);
-                //     // }
-                // })
-                var tags_and_such = this.data()[0].replace('=', '"').replace(' ', '"');
-                var tags_and_such_list = tags_and_such.split('"');
-                var index_of_row_index_label = -1;
-                var row_index = -1;
-                tags_and_such_list.forEach(function (value, index) {
-                    if (value.indexOf('row-index') >= 0) {
-                        index_of_row_index_label = index;
-                    }
-                    ;
-                });
-                if (index_of_row_index_label >= 0) {
-                    row_index = tags_and_such_list[index_of_row_index_label + 1];
-                    indy_sample_metadata_table_current_row_order.push(row_index);
-                } else {
-                    console.log('The row index should always be found...');
+        sampleDataTable.rows().every(function () {
+            // this.data() is a list, with the first one being the tags and such
+            // console.log("this row ",this.data());
+            // console.log("this row ",this.data()[0]);
+            // the tags and such look like a long string, so, to find an attribute, must be creative
+            // below is HANDY for looping through, and getting a value.by name, but we do not need that here
+            // var data = this.data();
+            // data.forEach(function (value, index) {
+            //     // if (value.isActive)
+            //     // {
+            //      console.log('value ',value);
+            //https://stackoverflow.com/questions/29077902/how-to-loop-through-all-rows-in-datatables-jquery
+            //      // console.log(value.UserName);
+            //     // }
+            // })
+            var tags_and_such = this.data()[0].replace('=', '"').replace(' ', '"');
+            var tags_and_such_list = tags_and_such.split('"');
+            var index_of_row_index_label = -1;
+            var row_index = -1;
+            tags_and_such_list.forEach(function (value, index) {
+                if (value.indexOf('row-index') >= 0) {
+                    index_of_row_index_label = index;
                 }
+                ;
             });
-        }
-
+            if (index_of_row_index_label >= 0) {
+                row_index = tags_and_such_list[index_of_row_index_label + 1];
+                indy_sample_metadata_table_current_row_order.push(row_index);
+            } else {
+                console.log('The row index should always be found...');
+            }
+        });
         return myTable;
     }
 

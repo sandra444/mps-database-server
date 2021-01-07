@@ -20,7 +20,12 @@
     <li><a href="/assays/assaystudy/">Studies</a>
     <li><a href="{{ form.instance.study.get_absolute_url }}">{{ form.instance.study }}</a></li>
     <li><a href="{% url 'assays-assaystudy-data-index' form.instance.study.id %}">Data</a></li>
-    <li><a href="{% url "assayomicdatafileupload-index" form.instance.study_id %}">Assay Omic Data Files</a>
+    {# form.instance should work either way? #}
+    {% if object %}
+        <li><a href="{% url "assayomicdatafileupload-index" object.study.id %}">Assay Omic Data Files</a>
+    {% else %}
+        <li><a href="{% url "assayomicdatafileupload-index" form.instance.study_id %}">Assay Omic Data Files</a>
+    {% endif %}
     <li class="active">
         {% if object %}
             <em>{{ object }}</em>
@@ -73,6 +78,7 @@
                 {% include "errors.html" %}
             </div>
 
+            {# main #}
 {#            <div class="container">   NO CONTAINERs   #}
 
             {# pass to js file need for use in js #}
@@ -93,28 +99,18 @@
                     {{ page_called }}
                 </div>
                 <div class="hidden">
-                    {{ form.indy_sample_metadata_table_was_changed }}
-                </div>
-                <div class="hidden">
-                    {{  form.indy_sample_metadata_field_header_was_changed }}
-                </div>
-                <div class="hidden">
-                    {# pass to js file need for use in js #}
-                    {{  form.indy_list_of_keys }}
                     {# pass to js file need for use in js - this will be kept matcthing the table so can be passed back #}
-                    {{  form.indy_list_of_dicts }}
-                    {# pass to js file need for use in js - if the user adds or changes a sample id, this file should be true #}
-                    {% include "generic_field.html" with field=form.indy_flag_file_column_header_change %}
-                    {# pass to js file need for use in js #}
-                    {{  form.indy_matrix_item_list }}
-                    {# pass to js file need for use in js #}
-                    {{  form.indy_file_column_header_list }}
-                    {{  form.indy_file_column_header_prefix_uni_list }}
-                    {{  form.indy_file_column_header_number_uni_dict }}
+                    {{ form.indy_list_of_dicts_of_table_rows }}
+                    {{ form.indy_list_of_column_labels }}
+                    {{ form.indy_list_of_column_labels_show_hide }}
+                    {{ form.indy_list_of_row_labels }}
+                    {# used below  {{ form.indy_sample_location }}#}
+                    {# used below  {{ form.indy_matrix_item }}#}
+                    {{ form.indy_matrix_item_list }}
+                    {{ form.indy_sample_metadata_table_was_changed }}
                 </div>
             </div>
 
-            {# The div will not match, so just make this comment for the error section  #}
             {% if update or add %}
                 <div class="hidden" id="upload_file"></div>
                 {% if form.omic_data_file.errors %}
@@ -133,83 +129,49 @@
                     <div class="col-sm-10">
                         {{ form.omic_data_file }}
                     </div>
-                </div>
 
-                <div class="row">
-                    <div class="col-sm-2"></div>
-                    <div class="col-sm-3">
-                        <div>
-                            <b>Acceptable Formats: Excel and CSV. </b>
+                    <div class="row">
+                        <div class="col-sm-2"></div>
+                        <div class="col-sm-5">
+                            <div>
+                                <b>Acceptable Formats: Excel and CSV. </b>
+                                <p style="color:red">TODO - check on format of quotes vrs no quotes</p>
+                            </div>
                         </div>
-                    </div>
-                    <div class="col-sm-7">
-                        <button type="button" class="btn btn-info" id="fileFormatDetailsButton">Toggle File Format Details</button>
-                    </div>
-                </div>
-
-                <div class="row">
-                    <div class="col-sm-2"></div>
-                    <div class="col-sm-10">
-                        <br>
-                        <div class="toggle-display-none" id="omic_file_format_details_section">
-
-                            <div class="row">
-                                <div class="col-sm-2">
-                                </div>
-                                <div class="col-sm-10">
-                                    <label>TODO - code for: only show the option for the data type that is selected</label>
-                                    <label>TODO - check on format use of quotes vrs no quotes</label>
-                                </div>
+                        <div class="col-sm-5">
+                            <div class="toggle-display-none" id="log2fc_template_section">
+                                <button type="button" class="btn btn-primary" id="fileFileFormatTwoGroup">Download Template (Downloads the Headers Only)</button>
                             </div>
+                            <div class="toggle-display-none" id="normcounts_template_section">
+                                                Downloadable template in development.
+                                <div class="alert alert-info" role="alert">
+                                    <button class="btn btn-info" type="button" data-toggle="collapse" data-target=".inline-help" aria-expanded="false" aria-controls="inline-help">
+                                        Show/Hide Inline Help
+                                    </button>
+                                    <div class="collapse large-padding-top inline-help">
+                                        <ul>
+                                            <li>Counts data files must have one header row labeled "Sample ID", with each column subsequent column labeled with either a sample ID or a well name (i.e. A1, BA05).</li>
+                                        </ul>
+                                    </div>
+                                </div>
 
-                            <div class="row">
-                                <div class="col-sm-4">
-                                    <div>
-                                        <div><p id="omic_file_format_deseq2_log2fc_tooltip"></p>
-                                            <label for="omic_file_format_deseq2_log2fc_tooltip">Log 2 Fold Change Files &nbsp;</label>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-sm-6">
-                                    <div class="plate-map-page-field-contents-medium">
-{#                                            Downloadable template in development.#}
-                                        <button type="button" class="btn btn-primary" id="fileFileFormatTwoGroup">Download Two Group File Format (Downloads the Headers Only)</button>
-                                    </div>
-                                </div>
+    {#                                        <button type="button" class="btn btn-primary" id="fileFileFormatTwoGroup">Download Two Group File Format (Headers Only)</button>#}
                             </div>
+                            <div class="toggle-display-none" id="rawcounts_template_section">
+                                                Downloadable template in development.
+                                <div class="alert alert-info" role="alert">
+                                    <button class="btn btn-info" type="button" data-toggle="collapse" data-target=".inline-help" aria-expanded="false" aria-controls="inline-help">
+                                        Show/Hide Inline Help
+                                    </button>
+                                    <div class="collapse large-padding-top inline-help">
+                                        <ul>
+                                            <li>Counts data files must have one header row labeled "Sample ID", with each column subsequent column labeled with either a sample ID or a well name (i.e. A1, BA05).</li>
+                                        </ul>
+                                    </div>
+                                </div>
 
-                            <div class="row">
-                                <div class="col-sm-4">
-                                    <div>
-                                        <div><p id="omic_file_format_normcounts_tooltip"></p>
-                                            <label for="omic_file_format_normcounts_tooltip">Normalized Count Files &nbsp;</label>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-sm-6">
-                                    <div class="plate-map-page-field-contents-medium">
-                                            Downloadable template in development.
-{#                                        <button type="button" class="btn btn-primary" id="fileFileFormatTwoGroup">Download Two Group File Format (Headers Only)</button>#}
-                                    </div>
-                                </div>
+    {#                                        <button type="button" class="btn btn-primary" id="fileFileFormatTwoGroup">Download Two Group File Format (Headers Only)</button>#}
                             </div>
-
-                            <div class="row">
-                                <div class="col-sm-4">
-                                    <div>
-                                        <div><p id="omic_file_format_rawcounts_tooltip"></p>
-                                            <label for="omic_file_format_rawcounts_tooltip">Raw Count Files &nbsp;</label>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-sm-6">
-                                    <div class="plate-map-page-field-contents-medium">
-                                            Downloadable template in development.
-{#                                        <button type="button" class="btn btn-primary" id="fileFileFormatTwoGroup">Download Two Group File Format (Headers Only)</button>#}
-                                    </div>
-                                </div>
-                            </div>
-
                         </div>
                     </div>
                 </div>
@@ -235,46 +197,27 @@
                     <div class="col-sm-2">
                     </div>
                     <div class="col-sm-10">
-                        <label>TODO - code for: Assigned based on file headers - update as needed</label>
+                        <p style="color:red">TODO - code for: Assigned based on file headers (only allow on add page)</p>
                     </div>
                 </div>
                 {% include "generic_field.html" with field=form.data_type %}
+
+                <div class="row">
+                    <div class="col-sm-2">
+                    </div>
+                    <div class="col-sm-10">
+                        <p style="color:red">TODO - code for: Assigned based on file headers - update as needed (only allow on add page) (make sure default changes with data_type for add page)</p>
+                    </div>
+                </div>
+                {% include "generic_field.html" with field=form.header_type %}
 
                 {% include "generic_field.html" with field=form.description %}
 
                 {% include "generic_field.html" with field=form.study_assay %}
 
-                {# Not used cause do not want the + for adding? {% include "generic_field.html" with field=form.analysis_method %}#}
-                <div class="form-group">
-                    <div class="col-sm-2">
-                        <div class="plate-map-page-field-labels-small">
-                            <div>
-                                <div><p id="omic_anaylsis_method_tooltip"></p>
-                                    <label for="omic_anaylsis_method_tooltip">Analysis Method* &nbsp;</label>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-sm-10">
-                        <div class="plate-map-page-field-contents-small">
-                            {{ form.analysis_method }}
-                        </div>
-                    </div>
-                </div>
+                {% include "generic_field_no_add_option.html" with field=form.analysis_method %}
 
                 {% include "generic_field.html" with field=form.name_reference %}
-
-{#                <div class="indy-sample">#}
-
-                    <div class="row">
-                        <div class="col-sm-2">
-                        </div>
-                        <div class="col-sm-10">
-                            <label>TODO - code for: Assigned based on file headers - update as needed</label>
-                        </div>
-                    </div>
-                    {% include "generic_field.html" with field=form.header_type %}
-{#                </div>#}
 
                 {% include "generic_field.html" with field=form.time_unit %}
 
@@ -326,7 +269,7 @@
                 </div>
 
                 <div class="toggle-display-none" id="omic_preview_button_section">
-                    <button type="button" class="btn btn-info" id="omicPreviewTheGraphsButton">View Preview Graphs</button>
+                    <button type="button" class="btn btn-primary" id="omicPreviewTheGraphsButton">View Preview Graphs</button>
                 </div>
 
                 <div class="toggle-display-none" id="omic_preview_the_graphs_section">
@@ -343,33 +286,28 @@
             </div>
 
             </div>
-
+{# todo - update all instructions and hover tips#}
             <div class="indy-sample">
                 <h3>Metadata for Normalized Count and Raw Count Data</h3>
 
                 {% if update or add %}
-{# todo - update all instructions and hover tips#}
-                    <button type="button" class="btn btn-info" id="indy_instructions">Toggle Instructions</button>
-                    <br>
 
-                    <div class="indy-instructions">
-                        <div style="margin-top: 25px;" class="alert alert-info" role="alert">
+                    <div class="alert alert-info" role="alert">
+                        <button class="btn btn-info" type="button" data-toggle="collapse" data-target=".inline-help" aria-expanded="false" aria-controls="inline-help">
+                            Show/Hide Inline Help
+                        </button>
+                        <div class="collapse large-padding-top inline-help">
+                            <p>Tips and Notes:</p>
                             <ul>
-                                <li>Highlight, using dragging or a click button, the cells/wells in the plate/table with content to be replaced, removed, or copied</li>
+                                <li>Highlight the cells in the table to which an Action will be applied</li>
+                                <li>Highlight by dragging over the cells to highlight and/or by using the click buttons to highlight a whole column or whole row</li>
+                                <li>Highlighting is cumulative and toggles</li>
+                                <li>When updates are made to the table, it will resort depending on the new content </li>
+                                <li>Use Column visibility, Search, and/or column sorting to expedite highlighting</li>
+                                <li>When highlighting is complete, select an Action</li>
                             </ul>
-                        </div>
-                    </div>
 
-                    <div class="indy-instructions">
-                        <ul class="help-filled-circle">
-                                Tips and Notes:
-                                <ul class="help-open-circle">
-                                    <li>Highlighting is cumulative</li>
-                                    <li>When updates are made to the table, it will resort </li>
-                                    <li>Use Column visibility, Search, and/or column sorting to simplify highlighting</li>
-                                </ul>
-                            </li>
-                        </ul>
+                        </div>
                     </div>
 
                 {% endif %}
@@ -402,12 +340,12 @@
                     </div>
 
                     <div class="replace-section">
-                        <div class="indy-instructions">
-                            <div style="margin-top: 25px;" class="alert alert-info" role="alert">
+                        <div class="collapse large-padding-top inline-help">
+                            <div class="alert alert-info" role="alert">
                                 <ul>
                                     <li>Select the content to use for replacement</li>
-                                    <li>Select to duplicate or increment</li>
-                                    <li>Click the Replace Content button</li>
+                                    <li>Select to Duplicate or Increment (Sample Location will duplicate regardless of selection)</li>
+                                    <li>After selections are made, click the Replace Content button</li>
                                 </ul>
                             </div>
                         </div>
@@ -424,7 +362,7 @@
 {#                                            </td>#}
                                             <td class="left-pad">
                                                 <div><p id="sample_matrix_item_tooltip"></p>
-                                                    <label for="sample_matrix_item_tooltip">Chip/Well ID &nbsp;</label>
+                                                    <label for="sample_matrix_item_tooltip">Chip/Well Name &nbsp;</label>
                                                 </div>
                                             </td>
                                         </tr>
@@ -540,28 +478,17 @@
                     </div>
 
 {#                    <div class="copys-section">#}
-{#                        <div class="indy-instructions">#}
-{#                            <ul class="help-filled-circle">#}
-{#                                <li class="h1-level-2">Edit the highlighting as needed</li>#}
-{#                            </ul>#}
-{#                        </div>#}
-{#                        <div class="row">#}
-{#                            <div class="col-sm-2">#}
-{#                            </div>#}
-{#                            <div class="col-sm-9">#}
-{#                                <button type="button" class="btn btn-primary extra-top-margin" id="clear_highlights_indy_table">Clear All Table Highlighting</button>#}
-{#                            </div>#}
-{#                        </div>#}
+
 {#                    </div>#}
 
                     <div class="pastes-section">
-{#                        <div class="indy-instructions">#}
-                            <div style="margin-top: 25px;" class="alert alert-info" role="alert">
+                        <div class="collapse large-padding-top inline-help">
+                            <div class="alert alert-info" role="alert">
                                 <ul>
-                                    <li>Drag in the location where the paste should start</li>
+                                    <li>Drag in the cell where the paste should start</li>
                                 </ul>
                             </div>
-{#                        </div>#}
+                        </div>
                     </div>
 
                 {% endif %}
@@ -600,4 +527,5 @@
 
         </div>
     </form>
+
 {% endblock %}

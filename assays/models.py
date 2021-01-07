@@ -5045,7 +5045,7 @@ class AssayOmicAnalysisTarget(models.Model):
     method = models.ForeignKey(
         AssayMethod,
         on_delete=models.CASCADE,
-        help_text='Data Analysis Method (Computational Method). Do not change without checking with omic upload developer.',
+        help_text='Data Analysis Method - The method (i.e. data processing tool, pipeline, etc.) used to process data. Do not change without checking with omic upload developer.',
         verbose_name='Data Analysis Method'
     )
     target = models.ForeignKey(
@@ -5079,6 +5079,7 @@ assay_omic_data_type_choices = [
 assay_omic_file_header_type_choices = [
     ('well', 'Well Names (e.g., A01, A02, DA01, etc)'),
     ('sample', 'Sample Names'),
+    ('target', 'Computational Targets'),
     ('other', 'Something Else')
 ]
 
@@ -5148,13 +5149,13 @@ class AssayOmicDataFileUpload(LockableModel):
     description = models.CharField(
         max_length=2000,
         default=set_default_description(),
-        help_text='Description of the data being uploaded in this file (e.g., "Treated vrs Control" or "Treated with 1uM Calcifidiol".',
+        help_text='A description of the data being uploaded in this file (e.g., "Treated vrs Control" or "Treated with 1uM Calcifidiol".',
         verbose_name='Data Description'
     )
     # if not required, and user tries to have two empty, will get error
     omic_data_file = models.FileField(
         upload_to=omic_data_file_location,
-        help_text='Omic data file to be uploaded to the database.',
+        help_text='The omic data file to be uploaded to the database.',
         verbose_name='Omic Data File*'
     )
 
@@ -5162,14 +5163,14 @@ class AssayOmicDataFileUpload(LockableModel):
         max_length=25,
         default='temposeq_probe',
         choices=assay_omic_gene_name_choices,
-        help_text='Gene or probe ID (nomenclature used in import file)',
+        help_text='The gene or probe ID (nomenclature used in omic file).',
         verbose_name='Gene or Probe ID'
     )
 
     study_assay = models.ForeignKey(
         'assays.AssayStudyAssay',
-        help_text='Category, Target, Method, Unit as entered in the Study Assay Setup.',
         on_delete=models.CASCADE,
+        help_text='The category, Target, Method, Unit as entered in the Study Assay Setup.',
         verbose_name='Upload File Assay'
     )
     # this is also stored, as part of the link to AssayOmicAnalysisTarget, in the data point file
@@ -5179,7 +5180,7 @@ class AssayOmicDataFileUpload(LockableModel):
     analysis_method = models.ForeignKey(
         AssayMethod,
         on_delete=models.CASCADE,
-        help_text='Data analysis method or computational tool (e.g. DESeq2).',
+        help_text='The data analysis method or computational tool (e.g. DESeq2).',
         verbose_name='Data Analysis Method'
     )
 
@@ -5187,8 +5188,27 @@ class AssayOmicDataFileUpload(LockableModel):
         max_length=25,
         default='log2fc',
         choices=assay_omic_data_type_choices,
-        help_text='Type of computational results.',
+        help_text='The type of the computational results.',
         verbose_name='Data Type'
+    )
+
+    # keep this aligned with the data_type defaults
+    header_type = models.CharField(
+        max_length=20,
+        default='target',
+        choices=assay_omic_file_header_type_choices,
+        help_text='The type of the headers in the omic file.',
+        verbose_name='File Header Type'
+    )
+
+    # sample time DISPLAY unit - indicates how the user wants to see the time displayed and interact with the time
+    # IMPORTANT - the sample time is saved in minutes, as per the database standard
+    time_unit = models.CharField(
+        max_length=8,
+        default='day',
+        choices=assay_plate_reader_time_unit_choices,
+        help_text='The display unit for the sample collection time.',
+        verbose_name='Sample Time Unit'
     )
 
     # these were during development when we were using separate groups
@@ -5221,7 +5241,7 @@ class AssayOmicDataFileUpload(LockableModel):
         related_name='group_1',
         null=True,
         blank=True,
-        help_text='Data Processing Test Group',
+        help_text='The data analysis test group.',
         verbose_name='Test Group*'
     )
     group_2 = models.ForeignKey(
@@ -5230,7 +5250,7 @@ class AssayOmicDataFileUpload(LockableModel):
         related_name='group_2',
         null=True,
         blank=True,
-        help_text='Data Processing Reference Group',
+        help_text='The data analysis reference group.',
         verbose_name='Reference Group*'
     )
     # times WILL be empty for the norm count and raw count data
@@ -5238,14 +5258,14 @@ class AssayOmicDataFileUpload(LockableModel):
         default=0,
         null=True,
         blank=True,
-        help_text='Sample Time for the Test Group',
+        help_text='The sample collection time for the data test group.',
         verbose_name='Sample Time 1*'
     )
     time_2 = models.FloatField(
         default=0,
         null=True,
         blank=True,
-        help_text='Sample Time for the Reference Group',
+        help_text='The sample collection time for the data reference group.',
         verbose_name='Sample Time 2*'
     )
     # locations WILL be empty for the norm count and raw count data
@@ -5255,7 +5275,7 @@ class AssayOmicDataFileUpload(LockableModel):
         blank=True,
         on_delete=models.CASCADE,
         related_name="location_1",
-        help_text='Sample Location for the Test Group',
+        help_text='The sample collection location for the data test group.',
         verbose_name='Sample Location 1*'
     )
     location_2 = models.ForeignKey(
@@ -5264,32 +5284,8 @@ class AssayOmicDataFileUpload(LockableModel):
         blank=True,
         on_delete=models.CASCADE,
         related_name="location_2",
-        help_text='Sample Location for the Reference Group',
+        help_text='The sample collection location for the data reference group.',
         verbose_name='Sample Location 2'
-    )
-    # # for the counts data, store the number of samples in the table
-    # number_saved_samples = models.IntegerField(
-    #     null=True,
-    #     blank=True,
-    #     help_text='Number of Samples from the Uploaded File to be Stored',
-    #     verbose_name='Number of Samples'
-    # )
-    # for the counts data, store the number of samples in the table
-    header_type = models.CharField(
-        max_length=20,
-        default='well',
-        choices=assay_omic_file_header_type_choices,
-        help_text='What are the headers of the upload file?',
-        verbose_name='File Header Type'
-    )
-    # sample time DISPLAY unit - indicates how the user wants to see the time displayed and interact with the time
-    # IMPORTANT - the sample time is saved in minutes, as per the database standard
-    time_unit = models.CharField(
-        max_length=8,
-        default='day',
-        choices=assay_plate_reader_time_unit_choices,
-        help_text='Unit for the Sample Collection Time',
-        verbose_name='Sample Time Unit'
     )
 
     def __str__(self):
@@ -5328,6 +5324,21 @@ class AssayOmicDataFileUpload(LockableModel):
 #         default='',
 #         help_text='The header for this sample used in the uploaded file - must match EXACTLY what is in the file',
 #         verbose_name='Cross Reference'
+#     )
+# For the table format, if the file column header is, for example: samp1, samp2, samp3
+# -row labels would be samp1, samp2, samp3
+# -column labels would be code for File Column Header, Chip or Well ID, Sample Location, Sample Time, PKS???
+# For the plate format, if file column header is, for example: Dmso1,DMso2,DMSO4,DMSO5,DMSO6,DA08,DA09
+# -row labels would be DMSO and DA (use upper case)
+# -column labels would be 1, 2, 4, 5, 6, 8, and 9
+
+#     row_label = models.CharField(
+#         max_length=255,
+#         default='',
+#     )
+#     column_label = models.CharField(
+#         max_length=255,
+#         default='',
 #     )
 #
 # todo - think about if want to allow these to be null - if do, will only need to delete if file is changed, otherwise, just update..might want to do it that way
@@ -5413,11 +5424,9 @@ class AssayOmicDataPoint(models.Model):
 #         on_delete=models.CASCADE,
 #         verbose_name='Data File'
 #     )
-#
+# this is what is different from the other omic data point table
 #     sample_metadata = models.ForeignKey(
 #         AssayOmicSampleMetadata,
-#         blank=True,
-#         null=True,
 #         on_delete=models.CASCADE,
 #         verbose_name='Metadata'
 #     )

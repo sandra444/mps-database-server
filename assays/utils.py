@@ -3452,6 +3452,7 @@ def get_the_plate_layout_info_for_assay_plate_map(plate_size):
     return [col_labels, row_labels, row_contents]
 
 
+# sck
 # function to make a list of file line, file line length (need in more than one place, so put in function)
 def sub_function_inside_utils_plate_reader_map_file_by_line_del(my_file_object, file_delimiter):
     # print("into this with delimiter ", file_delimiter)
@@ -3780,6 +3781,8 @@ def review_plate_reader_data_file_format(my_file_object, set_dict):
     # print(file_list_of_dicts)
     return [file_list_of_dicts, file_list]
 
+
+# sck
 def sub_function_inside_utils_plate_reader_map_file_find_potential_indexes(file_list, file_length_list, mean_len):
     rows_with_1_2_3 = []
     cols_with_1_of_1_2_3 = []
@@ -3832,6 +3835,7 @@ def sub_function_inside_utils_plate_reader_map_file_find_potential_indexes(file_
             rows_that_are_empty_first_if_series]
 
 
+# sck
 def sub_function_inside_utils_plate_reader_map_file_find_blocks_format_is_1(
     file_list, file_length_list, form_number_blank_columns, set_number_blank_columns,
     rows_idx_with_1_2_3, cols_idx_with_1_of_1_2_3, rows_idx_with_blank_or_end, rows_that_are_empty_first_if_series
@@ -3911,6 +3915,7 @@ def sub_function_inside_utils_plate_reader_map_file_find_blocks_format_is_1(
     return start_block_line_indexes, start_block_delimiter_indexes, data_block_metadata
 
 
+# sck
 def sub_function_inside_utils_plate_reader_map_file_best_guess_block_detect(
         file_list,
         plate_rows, plate_columns,
@@ -3997,6 +4002,7 @@ def sub_function_inside_utils_plate_reader_map_file_best_guess_block_detect(
     return start_block_line_indexes, start_block_delimiter_indexes, data_block_metadata
 
 
+# sck
 def sub_function_inside_utils_plate_reader_map_file_guess_plate_size(
         file_list, file_length_list, form_number_blank_columns, set_number_blank_columns,
         rows_idx_with_1_2_3, cols_idx_with_1_of_1_2_3, rows_idx_with_blank_or_end, rows_that_are_empty_first_if_series):
@@ -5786,6 +5792,7 @@ def plate_reader_data_file_process_data(set_dict):
             list_of_dicts_of_each_sample_row_average]
 
 
+# sck
 def sub_to_load_processed_data_to_dict(
         replicate,
         mxii, mxin, loci, locn, st,
@@ -5897,6 +5904,7 @@ def sub_to_load_processed_data_to_dict(
     return this_row
 
 
+# sck
 # 1,
 # mxin, locn, st,
 # cumWelln, cumNotes, valueSum / valueCount,
@@ -5997,6 +6005,7 @@ def sub_to_load_processed_data_to_dict_limited(
     return this_row
 
 
+# sck
 def plate_map_sub_return_the_fitted_and_other_info(
     araw, df, cv, ct, caution_flag, notes, omits, sendmessage, standardunitCellsStart, unitCellsStart,
     yes_to_calibrate, use_calibration_curve, multiplier, use_form_max, use_form_min,
@@ -6208,6 +6217,7 @@ def plate_map_sub_return_the_fitted_and_other_info(
     return [ftv, pdv, caution_flag, sendmessage, notes, omits]
 
 
+# sck
 # Find the R Squared
 def plateMapRsquared(N, S, y_predStandards):
 
@@ -6247,6 +6257,7 @@ def plateMapRsquared(N, S, y_predStandards):
     return rsquared
 
 
+# sck
 # Logistic 4 Parameter Set of Functions
 # https://people.duke.edu/~ccc14/pcfb/analysis.html
 # equations sck using for fitting in plate reader calibration
@@ -6270,12 +6281,15 @@ def plateMapLogistic4(n, A, B, C, D):
     # print(signal)
     return signal
 
+
+# sck
 def plateMapResidualsLogistic4(p, r, n):
     """Deviations of data from fitted 4PL curve"""
     A, B, C, D = p
     err = r - plateMapLogistic4(n, A, B, C, D)
     return err
 
+# sck
 # # takes concentration and returns signal
 # def plateMap_pevalLogistic4(n, p):
 #     """Evaluated value (signal) at concentration n with current parameters."""
@@ -6288,12 +6302,15 @@ def plateMapLogistic4a0(n, A, B, C, D):
     signal = ((0-D)/(1.0+((n/C)**B))) + D
     return signal
 
+
+# sck
 def plateMapResidualsLogistic4a0(p, r, n):
     """Deviations of data from fitted 4PL curve"""
     A, B, C, D = p
     err = r - plateMapLogistic4a0(n, 0, B, C, D)
     return err
 
+# sck
 # def plateMap_pevalLogistic4a0(n, p):
 #     """Evaluated value (signal) at concentration n with current parameters."""
 #     A, B, C, D = p
@@ -6301,27 +6318,37 @@ def plateMapResidualsLogistic4a0(p, r, n):
 
 # NOTE: def plateMapLogistic4f(n, A, B, C, D): was moved to an inner function so could pass different variables inside
 
+
+# sck
 # Power Set of Functions
 # https://stackoverflow.com/questions/3433486/how-to-do-exponential-and-logarithmic-curve-fitting-in-python-i-found-only-poly
 def plateMapPoly2(n, A, B, C, D):
     signal = C*n**2 + B*n + A
     return signal
 
+
+# sck
 def plateMapResidualsPoly2(p, r, n):
     A, B, C, D = p
     err = r-plateMapPoly2(n, A, B, C, D)
     return err
 
+
+# sck
 # def plateMap_pevalPoly2(n, p):
 #     A, B, C, D = p
 #     return plateMapPoly2(n, A, B, C, D)
 
+
+# sck
 # Linear0 Set of Functions
 # B is SLOPE!!!
 def plateMapLinear0(n, A, B):
     signal = B * n
     return signal
 
+
+# sck
 def plateMapResidualsLinear0(p, r, n):
     A, B = p
     err = r - plateMapLinear0(n, A, B)
@@ -6331,6 +6358,8 @@ def plateMapResidualsLinear0(p, r, n):
 #     A, B = p
 #     return plateMapLinear0(n, A, B)
 
+
+# sck
 # Linear Set of Functions
 # and Log Set of Functions when talk log before sending (base determined outside of the fitting
 # https://stackoverflow.com/questions/3433486/how-to-do-exponential-and-logarithmic-curve-fitting-in-python-i-found-only-poly
@@ -6340,6 +6369,8 @@ def plateMapLinear(n, A, B):
     signal = (B*n) + A
     return signal
 
+
+# sck
 def plateMapResidualsLinear(p, r, n):
     A, B = p
     err = r-plateMapLinear(n, A, B)
@@ -6495,11 +6526,12 @@ def sandrasGeneralFormatNumberFunction(this_number_in):
 
 # sck called from forms.py when save or change omic data file
 def omic_data_file_process_data(save, study_id, omic_data_file_id, data_file, file_extension,
-                                          called_from, data_type, analysis_method):
+                                          called_from, data_type, header_type, time_unit, analysis_method):
     """
     Assay Omics Data File Add or Change the file (utility).
     """
 
+    # todo do need to do anything with the header_type and time unit (need to save in minutes)
     error_message = ''
     continue_outer_if_true = True
     # if there is more than one Excel sheet, will need a loop, check for number of sheets.
@@ -6629,9 +6661,9 @@ def omic_data_file_process_data(save, study_id, omic_data_file_id, data_file, fi
                 data_dicts['indy_file_column_header_number_uni_dict'] = number_set
 
 
-                # print('header_list ', uni_list)
-                # print('prefix_set ', prefix_set)
-                # print('number_set ', number_set)
+                print('line 6632ish of utils.py - header_list ', uni_list)
+                print('prefix_set ', prefix_set)
+                print('number_set ', number_set)
 
                 # Guts of data loading for omic data file
                 # functions should return continue, error message, and a list of instances and an instance counter
@@ -6688,10 +6720,11 @@ def omic_data_file_process_data(save, study_id, omic_data_file_id, data_file, fi
     return data_dicts
 
 
+# sck
 def omic_find_sets_of_prefixes_and_numbers_for_well_names(header_list):
     prefix_long = []
     number_long = {}
-
+    # todo-sck make these all UPPER case!!
     for str in header_list:
         if not (str == 'gene' or str == 'gene reference' or str == 'name'):
             # loop to iterating characters
@@ -6719,6 +6752,7 @@ def omic_find_sets_of_prefixes_and_numbers_for_well_names(header_list):
     return [long_list_to_unique_list(prefix_long), number_long]
 
 
+# sck
 # function to get unique values
 def long_list_to_unique_list(long_list):
     unique_list = []
@@ -6729,6 +6763,8 @@ def long_list_to_unique_list(long_list):
 
     return unique_list
 
+
+# sck
 def omic_determine_if_field_with_header_for_gene(df_column_headers_stripped):
     continue_this_sheet_if_true = True
     # may need other options here (eg probe_id, refseq name, etc), but these will do for now
@@ -6745,6 +6781,7 @@ def omic_determine_if_field_with_header_for_gene(df_column_headers_stripped):
     return [continue_this_sheet_if_true, gene_id_field_name]
 
 
+# sck
 def omic_qc_data_file(df, omic_target_text_header_list, data_type):
     error_message = ''
     continue_this_sheet_if_true = True
@@ -6788,6 +6825,7 @@ def omic_qc_data_file(df, omic_target_text_header_list, data_type):
     return [continue_this_sheet_if_true, error_message, list_of_relevant_headers_in_file]
 
 
+# sck
 # two group data only
 def omic_two_group_data_to_list_of_instances(
     list_of_instances, instance_counter, df,
@@ -6878,6 +6916,7 @@ def omic_two_group_data_to_list_of_instances(
     return [continue_this_sheet_if_true, error_message, list_of_instances, instance_counter, data_dict]
 
 
+# sck
 # one group data only
 def omic_metadata_data_to_list_of_instances(
     list_of_instances, instance_counter, df,
@@ -6944,6 +6983,7 @@ def omic_metadata_data_to_list_of_instances(
     return [continue_this_sheet_if_true, error_message, list_of_instances, instance_counter]
 
 
+# sck
 def omic_data_upload_remove_and_add(data_file_pk, list_of_instances, error_message):
     # Guts of removing old and saving the data to the DataPoint Table.
     # double check that there are data ready to add to the DataPoint table before continuing
@@ -6963,6 +7003,7 @@ def omic_data_upload_remove_and_add(data_file_pk, list_of_instances, error_messa
         raise forms.ValidationError(error_message)
 
 
+# sck
 def data_file_to_data_frame(data_file, file_extension, workbook=None, sheet_index=None):
     # should be able to use this for all data to data frame
 
@@ -7039,9 +7080,10 @@ def data_quality_clean_check_for_omic_file_upload(self, data, data_file_pk):
     return true_to_continue
 
 
+# sck
 def qc_for_log2fc_omic_upload(self, data, data_file_pk):
     # todo - error check - sample time - is it required or not and should it be for the log2 fold change
-
+    # todo - any checks needed for header type and switch over to time unit
 
     true_to_continue = True
     file_name = data.get('omic_data_file').name
@@ -7169,6 +7211,7 @@ def qc_for_log2fc_omic_upload(self, data, data_file_pk):
     return true_to_continue
 
 
+# sck
 def this_file_is_the_same_hash_as_another_in_this_study(self, data, data_file_pk):
     true_to_continue = True
     message = ''
@@ -7222,6 +7265,7 @@ def this_file_is_the_same_hash_as_another_in_this_study(self, data, data_file_pk
     return true_to_continue
 
 
+# sck
 # this is called from the ajax.py to pick up the subs as needed
 def this_file_same_as_another_in_this_study(omic_data_file, study_id, data_file_pk):
     # 'same' is determined here by what subs are called
@@ -7236,6 +7280,7 @@ def this_file_same_as_another_in_this_study(omic_data_file, study_id, data_file_
     return [true_to_continue, message]
 
 
+# sck
 def this_file_name_is_similar_to_another_in_this_study(omic_data_file, study_id, data_file_pk):
     true_to_continue = True
     message = ''
@@ -7281,6 +7326,7 @@ def this_file_name_is_similar_to_another_in_this_study(omic_data_file, study_id,
     return [true_to_continue, message]
 
 
+# sck
 def get_model_location_dictionary(this_model_pk):
     location_dict = {}
 
@@ -7302,3 +7348,411 @@ def get_model_location_dictionary(this_model_pk):
 
     # print('location_dict ', location_dict)
     return location_dict
+
+
+# sck forms.py - will load for previous submits based on saved header_type
+def find_the_labels_needed_for_the_indy_omic_table(header_type, omic_file_pk, time_unit, find_defaults):
+    # For the table format, if the file column header is, for example: samp1, samp2, samp3
+    # -row labels would be samp1, samp2, samp3
+    # -column labels would be code for File Column Header, Chip or Well ID, Sample Location, Sample Time, PKS???
+    # For the plate format, if file column header is, for example: DC1,DC2,DC4,DC5,DC6,DA08,DA09
+    # -row labels would be DC and DA (use upper case)
+    # -column labels would be 1, 2, 4, 5, 6, 8, and 9
+
+    indy_omic_table = {}
+    indy_list_of_column_labels = []
+    indy_list_of_column_labels_show_hide = []
+    indy_list_of_dicts_of_table_rows = []
+
+    # if omic_file_pk is none, use find_defaults to see if want to get example data (this is for development)
+    # else, should send back everything as blank (it is an add page - thus, no file has been added yet)
+
+    # for the plate, make upper case row lables please...
+    if omic_file_pk is None:
+        if find_defaults:
+            #  get the defaults for testing
+            if header_type == 'well':
+                indy_list_of_column_labels = [
+                    'Label',
+                    'Metadata',
+                    'Button',
+                    '1',
+                    '2',
+                    '4',
+                    '5',
+                    '6',
+                    '8',
+                    '9'
+                ]
+                indy_list_of_column_labels_show_hide = [
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1
+                ]
+                indy_list_of_dicts_of_table_rows = []
+
+                list_of_defaults1 = []
+                list_of_defaults2 = []
+                list_of_defaults3 = []
+                list_of_defaults4 = []
+                list_of_defaults5 = []
+                list_of_defaults6 = []
+                list_of_defaults7 = []
+                list_of_defaults8 = []
+                list_of_defaults9 = []
+                list_of_defaults10 = []
+                list_of_defaults11 = []
+                list_of_defaults12 = []
+                dict1 = {}
+                dict2 = {}
+                dict3 = {}
+                dict4 = {}
+                dict5 = {}
+                dict6 = {}
+                dict7 = {}
+                dict8 = {}
+                dict9 = {}
+                dict10 = {}
+                dict11 = {}
+                dict12 = {}
+
+                # DA and DC
+                list_of_defaults1 = [
+                    'DA',
+                    'Name',
+                    '',
+                    'chip1',
+                    'chip2',
+                    'chip3',
+                    'chip4',
+                    'chip5',
+                    '',
+                    'chip6'
+                ]
+                list_of_defaults2 = [
+                    'DA',
+                    'Location',
+                    '',
+                    'efflux',
+                    'efflux',
+                    'efflux',
+                    'efflux',
+                    'efflux',
+                    '',
+                    'efflux'
+                ]
+                list_of_defaults3 = [
+                    'DA',
+                    'Time',
+                    '',
+                    '1',
+                    '1',
+                    '1',
+                    '2',
+                    '3',
+                    '',
+                    '9'
+                ]
+                list_of_defaults4 = [
+                    'DA',
+                    'matrix_item_pk',
+                    '',
+                    '1',
+                    '1',
+                    '1',
+                    '2',
+                    '3',
+                    '',
+                    '9'
+                ]
+                list_of_defaults5 = [
+                    'DA',
+                    'sample_location_pk',
+                    '',
+                    '1',
+                    '1',
+                    '1',
+                    '2',
+                    '3',
+                    '',
+                    '9'
+                ]
+                list_of_defaults6 = [
+                    'DA',
+                    'sample_metadata_pk',
+                    '',
+                    '1',
+                    '1',
+                    '1',
+                    '2',
+                    '3',
+                    '',
+                    '9'
+                ]
+                list_of_defaults7 = [
+                    'DC',
+                    'Name',
+                    '',
+                    'chip1',
+                    'chip2',
+                    'chip3',
+                    'chip4',
+                    'chip5',
+                    'chip9',
+                    'chip6'
+                ]
+                list_of_defaults8 = [
+                    'DC',
+                    'Location',
+                    '',
+                    'efflux',
+                    'efflux',
+                    'efflux',
+                    'efflux',
+                    'efflux',
+                    'efflux',
+                    'efflux'
+                ]
+                list_of_defaults9 = [
+                    'DC',
+                    'Time',
+                    '',
+                    '1',
+                    '1',
+                    '1',
+                    '2',
+                    '3',
+                    '4',
+                    '9'
+                ]
+                list_of_defaults10 = [
+                    'DC',
+                    'matrix_item_pk',
+                    '',
+                    '1',
+                    '1',
+                    '1',
+                    '2',
+                    '3',
+                    '4',
+                    '9'
+                ]
+                list_of_defaults11 = [
+                    'DC',
+                    'sample_location_pk',
+                    '',
+                    '1',
+                    '1',
+                    '1',
+                    '2',
+                    '3',
+                    '4',
+                    '9'
+                ]
+                list_of_defaults12 = [
+                    'DC',
+                    'sample_metadata_pk',
+                    '',
+                    '1',
+                    '1',
+                    '1',
+                    '2',
+                    '3',
+                    '4',
+                    '9'
+                ]
+                # make a default dict
+                # if this is an edit form, these lists will need initialized with what was previously saved
+                for index, each in enumerate(indy_list_of_column_labels):
+                    dict1[each] = list_of_defaults1[index]
+                    dict2[each] = list_of_defaults2[index]
+                    dict3[each] = list_of_defaults3[index]
+                    dict4[each] = list_of_defaults4[index]
+                    dict5[each] = list_of_defaults5[index]
+                    dict6[each] = list_of_defaults6[index]
+                    dict7[each] = list_of_defaults7[index]
+                    dict8[each] = list_of_defaults8[index]
+                    dict9[each] = list_of_defaults9[index]
+                    dict10[each] = list_of_defaults10[index]
+                    dict11[each] = list_of_defaults11[index]
+                    dict12[each] = list_of_defaults12[index]
+                indy_list_of_dicts_of_table_rows.append(dict1)
+                indy_list_of_dicts_of_table_rows.append(dict2)
+                indy_list_of_dicts_of_table_rows.append(dict3)
+                indy_list_of_dicts_of_table_rows.append(dict4)
+                indy_list_of_dicts_of_table_rows.append(dict5)
+                indy_list_of_dicts_of_table_rows.append(dict6)
+                indy_list_of_dicts_of_table_rows.append(dict7)
+                indy_list_of_dicts_of_table_rows.append(dict8)
+                indy_list_of_dicts_of_table_rows.append(dict9)
+                indy_list_of_dicts_of_table_rows.append(dict10)
+                indy_list_of_dicts_of_table_rows.append(dict11)
+                indy_list_of_dicts_of_table_rows.append(dict12)
+            else:
+                indy_list_of_column_labels = [
+                    'Label',
+                    'Button',
+                    'Chip or Well Name',
+                    'Sample Location',
+                    'Sample Time',
+
+                    'matrix_item_pk',
+                    'sample_location_pk',
+                    'sample_metadata_pk'
+                ]
+                indy_list_of_column_labels_show_hide = [
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    0,
+                    0,
+                    0
+                ]
+                indy_list_of_dicts_of_table_rows = []
+
+                list_of_defaults1 = []
+                list_of_defaults2 = []
+                list_of_defaults3 = []
+
+                dict1 = {}
+                dict2 = {}
+                dict3 = {}
+
+                list_of_defaults1 = [
+                    'sample20201105-05',
+                    '',
+                    'chip1',
+                    'efflux',
+                    '2',
+                    '1',
+                    '9',
+                    '10'
+                ]
+                list_of_defaults2 = [
+                    'sample20201105-02',
+                    '',
+                    'chip2',
+                    'efflux',
+                    '1',
+                    '0',
+                    '9',
+                    '10'
+                ]
+                list_of_defaults3 = [
+                    'sample20201105-03',
+                    '',
+                    'chip3',
+                    'efflux',
+                    '5',
+                    '8',
+                    '9',
+                    '10'
+                ]
+
+                # make a default dict
+                # if this is an edit form, these lists will need initialized with what was previously saved
+                for index, each in enumerate(indy_list_of_column_labels):
+                    dict1[each] = list_of_defaults1[index]
+                    dict2[each] = list_of_defaults2[index]
+                    dict3[each] = list_of_defaults3[index]
+                indy_list_of_dicts_of_table_rows.append(dict1)
+                indy_list_of_dicts_of_table_rows.append(dict2)
+                indy_list_of_dicts_of_table_rows.append(dict3)
+
+
+        else:
+            # return empties (already set)
+            pass
+
+    else:
+        # todo-sck need to get the data when update or review
+        pass
+
+    # print("header_type")
+    # print(header_type)
+    # print("find_defaults")
+    # print(find_defaults)
+    # print("indy_list_of_dicts_of_table_rows")
+    # print(indy_list_of_dicts_of_table_rows)
+
+    # use funciton -> omic_find_sets_of_prefixes_and_numbers_for_well_names
+
+
+
+
+
+    # uni_list = copy.deepcopy(data_dicts.get('indy_file_column_header_list'))
+    # for item in df_column_headers_stripped:
+    #     if item not in uni_list:
+    #         uni_list.append(item)
+    #
+    # data_dicts['indy_file_column_header_list'] = copy.deepcopy(uni_list)
+    # prefix_set, number_set = omic_find_sets_of_prefixes_and_numbers_for_well_names(uni_list)
+    # data_dicts['indy_file_column_header_prefix_uni_list'] = prefix_set
+    # data_dicts['indy_file_column_header_number_uni_dict'] = number_set
+    #
+    # print('line 6632ish of utils.py - header_list ', uni_list)
+    # print('prefix_set ', prefix_set)
+    # print('number_set ', number_set)
+
+
+
+        # make sure to leave _pk in the pk fields so they are excluded from the table in the .js file
+        # // todo need to update for the table as a plate
+        # // still need to decide how will nest the table (if well nest the table)
+        # // this will control what gets put in the table, but metadata_lod will have all the indy_column_labels in it
+        # // todo need to get the two extra sample times out and assay well name, but for now, turned them off
+
+
+        # # todo here here - need to get the real list of dicts
+        # # todo get the right list - decide on what is a list and what is a queryset - may need both like need for matrix item...
+        # # file_column_header_queryset = AssayOmicSampleMetadata.objects.filter(study_id=self.study).order_by('cross_reference', )
+        # file_column_header_queryset = AssayMatrixItem.objects.filter(study_id=self.study).order_by('name', )
+        # # self.fields['indy_file_column_header'].queryset = file_column_header_queryset
+        # # file_column_header_list = file_column_header_queryset.values_list('cross_reference', flat=True)
+        # file_column_header_list = file_column_header_queryset.values_list('name', flat=True)
+        # self.fields['indy_file_column_header_list'].initial = json.dumps(file_column_header_list)
+        #
+        # # todo, get these right too
+        # self.fields['indy_file_column_header_prefix_uni_list'].initial = json.dumps(file_column_header_list)
+        # # todo will this be a dict or a list, thing about if one is A1 and another is A02 and another is B01, how sort and put back together (look in utils too)
+        # self.fields['indy_file_column_header_number_uni_dict'].initial = json.dumps(file_column_header_list)
+
+
+    indy_omic_table['indy_list_of_column_labels'] = indy_list_of_column_labels
+    indy_omic_table['indy_list_of_column_labels_show_hide'] = indy_list_of_column_labels_show_hide
+    indy_omic_table['indy_list_of_dicts_of_table_rows'] = indy_list_of_dicts_of_table_rows
+    return indy_omic_table
+
+
+# sck
+# time unit for display and store (when giving as a unit and a time, not in DD HH MM (then use the other function)
+def convert_time_from_mintues_to_unit_given(tvalue, unit_given):
+    if unit_given == 'day':
+        ctime = (tvalue/24.0)/60.0
+    elif unit_given == 'hour':
+        ctime = tvalue / 60.0
+    else:
+        ctime = tvalue
+    return ctime
+
+
+# sck
+# time unit for display and store (when giving as a unit and a time, not in DD HH MM (then use the other function)
+def convert_time_unit_given_to_minutes(tvalue, unit_given):
+    if unit_given == 'day':
+        ctime = tvalue*24.0*60.0
+    elif unit_given == 'hour':
+        ctime = tvalue*60.0
+    else:
+        ctime = tvalue
+    return ctime
