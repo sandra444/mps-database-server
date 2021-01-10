@@ -6524,7 +6524,7 @@ def sandrasGeneralFormatNumberFunction(this_number_in):
         return formatted_number
 
 
-# sck called from forms.py when save or change omic data file
+# sck called from forms.py when save or change omic data file via ajax function fetch_omics_data_for_upload_preview_prep; js function get_data_for_this_file_ready_for_preview
 def omic_data_file_process_data(save, study_id, omic_data_file_id, data_file, file_extension,
                                           called_from, data_type, header_type, time_unit, analysis_method):
     """
@@ -7351,7 +7351,7 @@ def get_model_location_dictionary(this_model_pk):
 
 
 # sck forms.py - will load for previous submits based on saved header_type
-def find_the_labels_needed_for_the_indy_omic_table(header_type, omic_file_pk, time_unit, find_defaults):
+def find_the_labels_needed_for_the_indy_omic_table(called_from, header_type, omic_file_pk, time_unit, find_defaults):
     # For the table format, if the file column header is, for example: samp1, samp2, samp3
     # -row labels would be samp1, samp2, samp3
     # -column labels would be code for File Column Header, Chip or Well ID, Sample Location, Sample Time, PKS???

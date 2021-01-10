@@ -135,7 +135,7 @@
                         <div class="col-sm-5">
                             <div>
                                 <b>Acceptable Formats: Excel and CSV. </b>
-                                <p style="color:red">TODO - check on format of quotes vrs no quotes</p>
+{#                                <p style="color:red">TODO - check on format of quotes vrs no quotes</p>#}
                             </div>
                         </div>
                         <div class="col-sm-5">
@@ -190,7 +190,7 @@
                     <div class="col-sm-2">
                     </div>
                     <div class="col-sm-10">
-                        <p style="color:red">TODO - code for: Assigned based on file headers (only allow on add page)</p>
+{#                        <p style="color:red">TODO - code for: Assigned based on file headers (only allow on add page)</p>#}
                     </div>
                 </div>
                 {% include "generic_field.html" with field=form.data_type %}
@@ -199,7 +199,7 @@
                     <div class="col-sm-2">
                     </div>
                     <div class="col-sm-10">
-                        <p style="color:red">TODO - code for: Assigned based on file headers - update as needed (only allow on add page) (make sure default changes with data_type for add page)</p>
+{#                        <p style="color:red">TODO - code for: Assigned based on file headers - update as needed (only allow on add page) (make sure default changes with data_type for add page)</p>#}
                     </div>
                 </div>
                 {% include "generic_field.html" with field=form.header_type %}
@@ -306,6 +306,7 @@
                 {% endif %}
 
                 {% if update or add %}
+{#                    Keep for now in case need to add back the option to paste#}
 {#                    <div class="collapse large-padding-top inline-help">#}
 {#                        <div class="alert alert-info" role="alert">#}
 {#                            <ul>#}
@@ -339,13 +340,6 @@
 {#                    </div>#}
 
                     <div class="replace-section">
-{#                        <div class="collapse large-padding-top inline-help">#}
-{#                            <div class="alert alert-info" role="alert">#}
-{#                                <ul>#}
-{#                                    <li>Select the content to use for replacement</li>#}
-{#                                </ul>#}
-{#                            </div>#}
-{#                        </div>#}
 
                         {# pick sample metadata other than times #}
                         <div class="row">
@@ -414,8 +408,8 @@
 {#                                            </td>#}
                                             <td class="left-pad">
 {#                                                todo fix this tool tip and label for the tool tip#}
-                                                <div><p id="sample_time_day_tooltip"></p>
-                                                    <label for="sample_time_day_tooltip">Sample Time &nbsp;</label>
+                                                <div><p id="sample_time_display_tooltip"></p>
+                                                    <label for="sample_time_display_tooltip">Sample Time &nbsp;</label>
                                                 </div>
                                             </td>
                                         </tr>
@@ -424,7 +418,7 @@
                                 <div class="row column-section-padding">
                                     <div class="extra-bottom-padding">
 {#                                        todo fix this to transition from 3 time units#}
-                                        <input type="text" class="form-control" id="time_day" name="time_day" value="1">
+                                        <input type="text" class="form-control" id="time_display" name="time_display" value="1">
                                     </div>
                                 </div>
                             </div>
@@ -448,6 +442,7 @@
                         </div>
 
                         <div class="row">
+
 {#                            <div class="col-sm-3">#}
 {#                                <div class="plate-map-page-field-labels-small">#}
 {#                                    <div>#}
@@ -457,23 +452,71 @@
 {#                                    </div>#}
 {#                                </div>#}
 {#                            </div>#}
+{#                            <div class="col-sm-12">#}
+{#                                <div class="plate-map-page-radio-contents no-wrap">#}
+{#                                    <div class="col-sm-3">#}
+{#                                        <label><input id="radio_duplicate" type="radio" class="plate-map-bigger-radio" name="radio_change_duplicate_increment" value="duplicate" checked>#}
+{#                                        <p class="plate-map-radio-spacing plate-map-no-wrap">Duplicate</p></label>#}
+{#                                    </div>#}
+{##}
+{#                                    <div class="col-sm-3">#}
+{#                                        <div class="header-type-not-well">#}
+{#                                            <label><input type="radio" class="plate-map-bigger-radio" name="radio_change_duplicate_increment" value="increment-ttbo">#}
+{#                                            <p class="plate-map-radio-spacing plate-map-no-wrap">Increment</p></label>#}
+{#                                        </div>#}
+{#                                    </div>#}
+{##}
+{#                                    <div class="col-sm-3">#}
+{#                                        <div class="header-type-well">#}
+{#                                            <label><input type="radio" class="plate-map-bigger-radio" name="radio_change_duplicate_increment" value="increment-ttbltr">#}
+{#                                            <p class="plate-map-radio-spacing plate-map-no-wrap">Increment - Left to Right</p></label>#}
+{#                                        </div>#}
+{#                                    </div>#}
+{##}
+{#                                    <div class="col-sm-3">#}
+{#                                        <div class="header-type-well">#}
+{#                                            <label><input type="radio" class="plate-map-bigger-radio" name="radio_change_duplicate_increment" value="increment-ttbrtl">#}
+{#                                                <p class="plate-map-radio-spacing plate-map-no-wrap">Increment - Right to Left</p></label>#}
+{#                                        </div>#}
+{#                                    </div>#}
+
+{#                                </div>#}
+{#                            </div>#}
+
+
                             <div class="col-sm-12">
-                                <div class="plate-map-page-radio-contents">
-                                    <label><input id="radio_duplicate" type="radio" class="plate-map-bigger-radio" name="radio_change_duplicate_increment" value="duplicate" checked>
+                                <div class="plate-map-no-wrap">
+
+                                        <label><input id="radio_duplicate" type="radio" class="plate-map-bigger-radio" name="radio_change_duplicate_increment" value="duplicate" checked>
                                         <p class="plate-map-radio-spacing plate-map-no-wrap">Duplicate</p></label>
-                                    <label><input type="radio" class="plate-map-bigger-radio" name="radio_change_duplicate_increment" value="increment-ttbltr">
-                                        <p class="plate-map-radio-spacing plate-map-no-wrap">Increment - Left to Right</p></label>
-                                    <label><input type="radio" class="plate-map-bigger-radio" name="radio_change_duplicate_increment" value="increment-ttbrtl">
-                                        <p class="plate-map-radio-spacing plate-map-no-wrap">Increment - Right to Left</p></label>
+
+
+
+                                        <div class="header-type-not-well">
+                                            <label><input type="radio" class="plate-map-bigger-radio" name="radio_change_duplicate_increment" value="increment-ttbo">
+                                            <p class="plate-map-radio-spacing plate-map-no-wrap">Increment</p></label>
+                                        </div>
+
+
+
+                                        <div class="header-type-well">
+                                            <label><input type="radio" class="plate-map-bigger-radio" name="radio_change_duplicate_increment" value="increment-ttbltr">
+                                            <p class="plate-map-radio-spacing plate-map-no-wrap">Increment - Left to Right</p></label>
+
+                                            <label><input type="radio" class="plate-map-bigger-radio" name="radio_change_duplicate_increment" value="increment-ttbrtl">
+                                            <p class="plate-map-radio-spacing plate-map-no-wrap">Increment - Right to Left</p></label>
+                                        </div>
                                 </div>
                             </div>
+
+
                         </div>
                         {# increment value entry #}
                         <div class="increment-section">
                             <div class="row">
-                                <div class="col-sm-3">
-                                </div>
-                                <div class="col-sm-9">
+{#                                <div class="col-sm-3">#}
+{#                                </div>#}
+                                <div class="col-sm-12">
                                     <div class="plate-map-no-wrap">
                                         <label class="plate-map-no-wrap" for="increment_value">Increment Amount:</label>
                                         <input type="text" class="form-control plate-map-no-wrap" id="increment_value" name="increment_value" value="1">
@@ -491,6 +534,7 @@
                             </div>
                         </div>
 
+                        <br>
                         <button type="button" class="btn btn-primary" id="replace_in_indy_table">Replace Content</button>
 
                     </div>

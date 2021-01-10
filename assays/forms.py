@@ -5179,7 +5179,7 @@ class AssayOmicDataFileUploadForm(BootstrapForm):
         # **change-star
         find_defaults = True
 
-        indy_table_labels = find_the_labels_needed_for_the_indy_omic_table(header_type_instance, omic_file_pk, time_unit_instance, find_defaults)
+        indy_table_labels = find_the_labels_needed_for_the_indy_omic_table('form', header_type_instance, omic_file_pk, time_unit_instance, find_defaults)
         indy_list_of_column_labels = indy_table_labels.get('indy_list_of_column_labels')
         indy_list_of_column_labels_show_hide = indy_table_labels.get('indy_list_of_column_labels_show_hide')
         indy_list_of_dicts_of_table_rows = indy_table_labels.get('indy_list_of_dicts_of_table_rows')
