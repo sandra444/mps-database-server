@@ -104,6 +104,7 @@ import ujson as json
 import os
 import csv
 import re
+import operator
 
 # TODO REFACTOR WHITTLING TO BE HERE IN LIEU OF VIEW
 # TODO REFACTOR FK QUERYSETS TO AVOID N+1
@@ -5183,10 +5184,16 @@ class AssayOmicDataFileUploadForm(BootstrapForm):
         indy_list_of_column_labels = indy_table_labels.get('indy_list_of_column_labels')
         indy_list_of_column_labels_show_hide = indy_table_labels.get('indy_list_of_column_labels_show_hide')
         indy_list_of_dicts_of_table_rows = indy_table_labels.get('indy_list_of_dicts_of_table_rows')
+        indy_list_of_row_labels = indy_table_labels.get('indy_list_of_row_labels')
+        indy_list_of_unique_row_labels = indy_table_labels.get('indy_list_of_unique_row_labels')
+        indy_count_of_unique_row_labels = indy_table_labels.get('indy_count_of_unique_row_labels')
 
         self.fields['indy_list_of_column_labels'].initial = json.dumps(indy_list_of_column_labels)
         self.fields['indy_list_of_column_labels_show_hide'].initial = json.dumps(indy_list_of_column_labels_show_hide)
         self.fields['indy_list_of_dicts_of_table_rows'].initial = json.dumps(indy_list_of_dicts_of_table_rows)
+        self.fields['indy_list_of_row_labels'].initial = json.dumps(indy_list_of_row_labels)
+        self.fields['indy_list_of_unique_row_labels'].initial = json.dumps(indy_list_of_unique_row_labels)
+        self.fields['indy_count_of_unique_row_labels'].initial = json.dumps(indy_count_of_unique_row_labels)
 
         # get the list of matrix items in this study
         matrix_item_queryset = AssayMatrixItem.objects.filter(study_id=self.study).order_by('name', )
@@ -5211,6 +5218,11 @@ class AssayOmicDataFileUploadForm(BootstrapForm):
     indy_list_of_dicts_of_table_rows = forms.CharField(widget=forms.TextInput(), required=False,)
     indy_list_of_column_labels = forms.CharField(widget=forms.TextInput(), required=False,)
     indy_list_of_column_labels_show_hide = forms.CharField(widget=forms.TextInput(), required=False, )
+    indy_list_of_row_labels= forms.CharField(widget=forms.TextInput(), required=False, )
+    indy_list_of_unique_row_labels= forms.CharField(widget=forms.TextInput(), required=False, )
+    indy_count_of_unique_row_labels = forms.IntegerField(
+        required=False,
+    )
 
     indy_sample_location = forms.ModelChoiceField(
         queryset=AssaySampleLocation.objects.all().order_by(

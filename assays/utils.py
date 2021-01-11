@@ -7363,39 +7363,48 @@ def find_the_labels_needed_for_the_indy_omic_table(called_from, header_type, omi
     indy_list_of_column_labels = []
     indy_list_of_column_labels_show_hide = []
     indy_list_of_dicts_of_table_rows = []
-    indy_table_order = [[0, 'asc'], [1, 'asc']]
+    indy_list_of_row_labels = []
+    indy_list_of_unique_row_labels = []
+    indy_count_of_unique_row_labels = []
 
     # if omic_file_pk is none, use find_defaults to see if want to get example data (this is for development)
     # else, should send back everything as blank (it is an add page - thus, no file has been added yet)
+
+    # note: the ROW for the apply button is completely handled in the js file
+    # see the js file for changing the option to add the row of apply to column buttons
+    # note: the COLUMN for the apply to row buttons is added here in the column headers
+    # this is for both the well and other!
+    # keep it, or remove it here -
+    # no change in the js file should be needed when change here
 
     # for the plate, make upper case row labels please...
     if omic_file_pk is None:
         if find_defaults:
             #  get the defaults for testing
             if header_type == 'well':
+                # when it is in well plate format
+                # this is more challenging.....
+                # currently, the column for the apply to all rows button is included as a column header
+                # if do not want it, just turn its show/hide to 0 instead of 1
                 indy_list_of_column_labels = [
-                    'Label',
-                    'Metadata',
-                    'Button',
-                    '1',
-                    '2',
-                    '4',
-                    '5',
-                    '6',
-                    '8',
-                    '9'
+                    'Label', 'Metadata', 'Button',
+                    '1', '1-pk',
+                    '2', '2-pk',
+                    '4', '4-pk',
+                    '5', '5-pk',
+                    '6', '6-pk',
+                    '8', '8-pk',
+                    '9', '9-pk'
                 ]
                 indy_list_of_column_labels_show_hide = [
-                    1,
-                    1,
-                    1,
-                    1,
-                    1,
-                    1,
-                    1,
-                    1,
-                    1,
-                    1
+                    1, 1, 1,
+                    1, 0,
+                    1, 0,
+                    1, 0,
+                    1, 0,
+                    1, 0,
+                    1, 0,
+                    1, 0
                 ]
                 indy_list_of_dicts_of_table_rows = []
 
@@ -7405,208 +7414,102 @@ def find_the_labels_needed_for_the_indy_omic_table(called_from, header_type, omi
                 list_of_defaults4 = []
                 list_of_defaults5 = []
                 list_of_defaults6 = []
-                list_of_defaults7 = []
-                list_of_defaults8 = []
-                list_of_defaults9 = []
-                list_of_defaults10 = []
-                list_of_defaults11 = []
-                list_of_defaults12 = []
+
                 dict1 = {}
                 dict2 = {}
                 dict3 = {}
                 dict4 = {}
                 dict5 = {}
                 dict6 = {}
-                dict7 = {}
-                dict8 = {}
-                dict9 = {}
-                dict10 = {}
-                dict11 = {}
-                dict12 = {}
 
+
+                # life will be easier if the metadata is the same as the column headers
+                # which are the same as the meta-label attribute in the table cells
                 # DA and DC
                 list_of_defaults1 = [
-                    'DA',
-                    'Name',
-                    '',
-                    'chip1',
-                    'chip2',
-                    'chip3',
-                    'chip4',
-                    'chip5',
-                    '',
-                    'chip6'
+                    'DA', 'Chip/Well Name', '',
+                    'chip1', '0',
+                    'chip2', '0',
+                    'chip3', '0',
+                    'chip4', '0',
+                    'chip5', '0',
+                    ''     , '0',
+                    'chip6', '0'
                 ]
                 list_of_defaults2 = [
-                    'DA',
-                    'Location',
-                    '',
-                    'efflux',
-                    'efflux',
-                    'efflux',
-                    'efflux',
-                    'efflux',
-                    '',
-                    'efflux'
+                    'DA', 'Sample Location', '',
+                    'efflux', '0',
+                    'efflux', '0',
+                    'efflux', '0',
+                    'efflux', '0',
+                    'efflux', '0',
+                    ''      , '0',
+                    'efflux', '0'
                 ]
                 list_of_defaults3 = [
-                    'DA',
-                    'Time',
-                    '',
-                    '1',
-                    '1',
-                    '1',
-                    '2',
-                    '3',
-                    '',
-                    '9'
+                    'DA', 'Sample Time', '',
+                    '1', '0',
+                    '1', '0',
+                    '1', '0',
+                    '2', '0',
+                    '3', '0',
+                    '' , '0',
+                    '9', '0'
                 ]
                 list_of_defaults4 = [
                     'DA',
                     'matrix_item_pk',
                     '',
-                    '1',
-                    '1',
-                    '1',
-                    '2',
-                    '3',
-                    '',
-                    '9'
+                    '4', '0',
+                    '4', '0',
+                    '4', '0',
+                    '4', '0',
+                    '4', '0',
+                    '' , '0',
+                    '4', '0'
                 ]
                 list_of_defaults5 = [
                     'DA',
                     'sample_location_pk',
                     '',
-                    '1',
-                    '1',
-                    '1',
-                    '2',
-                    '3',
-                    '',
-                    '9'
+                    '6', '0',
+                    '6', '0',
+                    '6', '0',
+                    '6', '0',
+                    '6', '0',
+                    '' , '0',
+                    '6', '0'
                 ]
-                list_of_defaults6 = [
-                    'DA',
-                    'sample_metadata_pk',
-                    '',
-                    '1',
-                    '1',
-                    '1',
-                    '2',
-                    '3',
-                    '',
-                    '9'
-                ]
-                list_of_defaults7 = [
-                    'DC',
-                    'Name',
-                    '',
-                    'chip1',
-                    'chip2',
-                    'chip3',
-                    'chip4',
-                    'chip5',
-                    'chip9',
-                    'chip6'
-                ]
-                list_of_defaults8 = [
-                    'DC',
-                    'Location',
-                    '',
-                    'efflux',
-                    'efflux',
-                    'efflux',
-                    'efflux',
-                    'efflux',
-                    'efflux',
-                    'efflux'
-                ]
-                list_of_defaults9 = [
-                    'DC',
-                    'Time',
-                    '',
-                    '1',
-                    '1',
-                    '1',
-                    '2',
-                    '3',
-                    '4',
-                    '9'
-                ]
-                list_of_defaults10 = [
-                    'DC',
-                    'matrix_item_pk',
-                    '',
-                    '1',
-                    '1',
-                    '1',
-                    '2',
-                    '3',
-                    '4',
-                    '9'
-                ]
-                list_of_defaults11 = [
-                    'DC',
-                    'sample_location_pk',
-                    '',
-                    '1',
-                    '1',
-                    '1',
-                    '2',
-                    '3',
-                    '4',
-                    '9'
-                ]
-                list_of_defaults12 = [
-                    'DC',
-                    'sample_metadata_pk',
-                    '',
-                    '1',
-                    '1',
-                    '1',
-                    '2',
-                    '3',
-                    '4',
-                    '9'
-                ]
+
                 # make a default dict
                 # if this is an edit form, these lists will need initialized with what was previously saved
                 for index, each in enumerate(indy_list_of_column_labels):
+                    print(index," ",each)
                     dict1[each] = list_of_defaults1[index]
                     dict2[each] = list_of_defaults2[index]
                     dict3[each] = list_of_defaults3[index]
                     dict4[each] = list_of_defaults4[index]
                     dict5[each] = list_of_defaults5[index]
-                    dict6[each] = list_of_defaults6[index]
-                    dict7[each] = list_of_defaults7[index]
-                    dict8[each] = list_of_defaults8[index]
-                    dict9[each] = list_of_defaults9[index]
-                    dict10[each] = list_of_defaults10[index]
-                    dict11[each] = list_of_defaults11[index]
-                    dict12[each] = list_of_defaults12[index]
+                    # dict6[each] = list_of_defaults6[index]
                 indy_list_of_dicts_of_table_rows.append(dict1)
                 indy_list_of_dicts_of_table_rows.append(dict2)
                 indy_list_of_dicts_of_table_rows.append(dict3)
                 indy_list_of_dicts_of_table_rows.append(dict4)
                 indy_list_of_dicts_of_table_rows.append(dict5)
-                indy_list_of_dicts_of_table_rows.append(dict6)
-                indy_list_of_dicts_of_table_rows.append(dict7)
-                indy_list_of_dicts_of_table_rows.append(dict8)
-                indy_list_of_dicts_of_table_rows.append(dict9)
-                indy_list_of_dicts_of_table_rows.append(dict10)
-                indy_list_of_dicts_of_table_rows.append(dict11)
-                indy_list_of_dicts_of_table_rows.append(dict12)
+                # indy_list_of_dicts_of_table_rows.append(dict6)
             else:
+                # when it is not a well plate format (table/list format)
+                # this is the much easier way...
+                # currently, the column for the apply to all rows button is included as a column header
+                # if do not want it, just turn its show/hide to 0 instead of 1
                 indy_list_of_column_labels = [
                     'Label',
                     'Button',
-                    'Chip or Well Name',
+                    'Chip/Well Name',
                     'Sample Location',
                     'Sample Time',
-
                     'matrix_item_pk',
                     'sample_location_pk',
-                    'sample_metadata_pk'
                 ]
                 indy_list_of_column_labels_show_hide = [
                     1,
@@ -7614,7 +7517,6 @@ def find_the_labels_needed_for_the_indy_omic_table(called_from, header_type, omi
                     1,
                     1,
                     1,
-                    0,
                     0,
                     0
                 ]
@@ -7634,9 +7536,8 @@ def find_the_labels_needed_for_the_indy_omic_table(called_from, header_type, omi
                     'chip1',
                     'efflux',
                     '2',
-                    '1',
-                    '9',
-                    '10'
+                    '5',
+                    '6'
                 ]
                 list_of_defaults2 = [
                     'sample20201105-02',
@@ -7644,9 +7545,8 @@ def find_the_labels_needed_for_the_indy_omic_table(called_from, header_type, omi
                     'chip2',
                     'efflux',
                     '1',
-                    '0',
-                    '9',
-                    '10'
+                    '7',
+                    '9'
                 ]
                 list_of_defaults3 = [
                     'sample20201105-03',
@@ -7654,9 +7554,8 @@ def find_the_labels_needed_for_the_indy_omic_table(called_from, header_type, omi
                     'chip3',
                     'efflux',
                     '5',
-                    '8',
                     '9',
-                    '10'
+                    '9'
                 ]
 
                 # make a default dict
@@ -7668,7 +7567,6 @@ def find_the_labels_needed_for_the_indy_omic_table(called_from, header_type, omi
                 indy_list_of_dicts_of_table_rows.append(dict1)
                 indy_list_of_dicts_of_table_rows.append(dict2)
                 indy_list_of_dicts_of_table_rows.append(dict3)
-
 
         else:
             # return empties (already set)
@@ -7731,8 +7629,25 @@ def find_the_labels_needed_for_the_indy_omic_table(called_from, header_type, omi
 
     indy_omic_table['indy_list_of_column_labels'] = indy_list_of_column_labels
     indy_omic_table['indy_list_of_column_labels_show_hide'] = indy_list_of_column_labels_show_hide
-    indy_omic_table['indy_list_of_dicts_of_table_rows'] = indy_list_of_dicts_of_table_rows
-    indy_omic_table['indy_table_order'] = indy_table_order
+
+    # sort here so that the table does not need to be sorted by default - which makes it rearrange when stuff is replaced
+    r_counter = 0
+    new_indy_list_of_dicts_of_table_rows = sorted(indy_list_of_dicts_of_table_rows, key=sortkeypicker([indy_list_of_column_labels[0], indy_list_of_column_labels[1]]))
+    indy_omic_table['indy_list_of_dicts_of_table_rows'] = new_indy_list_of_dicts_of_table_rows
+    for each_dict in new_indy_list_of_dicts_of_table_rows:
+        thisLabel = each_dict.get('Label')
+        indy_list_of_row_labels.append(thisLabel)
+        if (thisLabel in indy_list_of_unique_row_labels):
+            pass
+        else :
+            indy_list_of_unique_row_labels.append(thisLabel)
+            r_counter = r_counter + 1
+    indy_count_of_unique_row_labels = r_counter
+
+    indy_omic_table['indy_list_of_row_labels'] = indy_list_of_row_labels
+    indy_omic_table['indy_list_of_unique_row_labels'] = indy_list_of_unique_row_labels
+    indy_omic_table['indy_count_of_unique_row_labels'] = indy_count_of_unique_row_labels
+
     return indy_omic_table
 
 
@@ -7758,3 +7673,21 @@ def convert_time_unit_given_to_minutes(tvalue, unit_given):
     else:
         ctime = tvalue
     return ctime
+
+# sck sub in utils.py
+# from https://stackoverflow.com/questions/1143671/how-to-sort-objects-by-multiple-keys-in-python
+# call like this a = sorted(b, key=sortkeypicker(['-Total_Points', 'TOT_PTS_Misc']))
+# where b is the list of dictionaries
+def sortkeypicker(keynames):
+    negate = set()
+    for i, k in enumerate(keynames):
+        if k[:1] == '-':
+            keynames[i] = k[1:]
+            negate.add(k[1:])
+    def getit(adict):
+       composite = [adict[k] for k in keynames]
+       for i, (k, v) in enumerate(zip(keynames, composite)):
+           if k in negate:
+               composite[i] = -v
+       return composite
+    return getit

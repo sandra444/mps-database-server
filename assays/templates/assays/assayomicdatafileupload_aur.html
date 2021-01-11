@@ -104,6 +104,8 @@
                     {{ form.indy_list_of_column_labels }}
                     {{ form.indy_list_of_column_labels_show_hide }}
                     {{ form.indy_list_of_row_labels }}
+                    {{ form.indy_list_of_unique_row_labels }}
+                    {{ form.indy_count_of_unique_row_labels }}
                     {# used below  {{ form.indy_sample_location }}#}
                     {# used below  {{ form.indy_matrix_item }}#}
                     {{ form.indy_matrix_item_list }}
@@ -223,43 +225,52 @@
 
                 <div class="h1-level-1"><i>Group 1:</i></div><br>
                 {% include "generic_field.html" with field=form.group_1 %}
-                {% include "generic_field.html" with field=form.time_1_display %}
 
                 {# Not used cause do not want the + for adding? {% include "generic_field.html" with field=form.location_1 %} #}
-                <div class="form-group">
-                    <div class="col-sm-2">
-                        <div class="plate-map-page-field-labels-small">
-                            <div>
-                                <label>Sample Location 1</label>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-sm-10">
-                        <div class="plate-map-page-field-contents-small">
-                            {{ form.location_1 }}
-                        </div>
-                    </div>
-                </div>
+                {% include "generic_field_no_add_option.html" with field=form.location_1 %}
+
+                {% include "generic_field.html" with field=form.time_1_display %}
+
+
+{#                <div class="form-group">#}
+{#                    <div class="col-sm-2">#}
+{#                        <div class="plate-map-page-field-labels-small">#}
+{#                            <div>#}
+{#                                <label>Sample Location 1</label>#}
+{#                            </div>#}
+{#                        </div>#}
+{#                    </div>#}
+{#                    <div class="col-sm-10">#}
+{#                        <div class="plate-map-page-field-contents-small">#}
+{#                            {{ form.location_1 }}#}
+{#                        </div>#}
+{#                    </div>#}
+{#                </div>#}
+
+
 
                 <div class="h1-level-1"><i>Group 2:</i></div><br>
                 {% include "generic_field.html" with field=form.group_2 %}
-                {% include "generic_field.html" with field=form.time_2_display %}
 
                 {# Not used cause do not want the + for adding? {% include "generic_field.html" with field=form.location_2 %} #}
-                <div class="form-group">
-                    <div class="col-sm-2">
-                        <div class="plate-map-page-field-labels-small">
-                            <div>
-                                <label>Sample Location 2</label>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-sm-10">
-                        <div class="plate-map-page-field-contents-small">
-                            {{ form.location_2 }}
-                        </div>
-                    </div>
-                </div>
+                {% include "generic_field_no_add_option.html" with field=form.location_2 %}
+
+                {% include "generic_field.html" with field=form.time_2_display %}
+
+{#                <div class="form-group">#}
+{#                    <div class="col-sm-2">#}
+{#                        <div class="plate-map-page-field-labels-small">#}
+{#                            <div>#}
+{#                                <label>Sample Location 2</label>#}
+{#                            </div>#}
+{#                        </div>#}
+{#                    </div>#}
+{#                    <div class="col-sm-10">#}
+{#                        <div class="plate-map-page-field-contents-small">#}
+{#                            {{ form.location_2 }}#}
+{#                        </div>#}
+{#                    </div>#}
+{#                </div>#}
 
                 <div class="toggle-display-none" id="omic_preview_button_section">
                     <button type="button" class="btn btn-primary" id="omicPreviewTheGraphsButton">View Preview Graphs</button>
@@ -344,6 +355,7 @@
                         {# pick sample metadata other than times #}
                         <div class="row">
 
+                            {# STARME need for use in js #}
                             <div id="h_indy_matrix_item" class="col-sm-3">
                                 <div class="row column-section-padding">
                                     <table>
@@ -364,13 +376,13 @@
                                         {{ form.indy_matrix_item }}
                                     </div>
                                 </div>
-                                {# need for use in js ~pk_tracking_note~ #}
+                                {# STARME need for use in js ~pk_tracking_note~ #}
                                 <div class="row hidden">Will get hidden:
                                     <div id="matrix_item_name"></div>
                                     <div id="matrix_item_pk"></div>
                                 </div>
                             </div>
-
+                            {# STARME need for use in js #}
                             <div id="h_indy_sample_location" class="col-sm-3">
                                 <div class="row column-section-padding">
                                     <table>
@@ -391,7 +403,7 @@
                                         {{ form.indy_sample_location }}
                                     </div>
                                 </div>
-                                {# need for use in js ~pk_tracking_note~ #}
+                                {# STARME need for use in js ~pk_tracking_note~ #}
                                 <div class="row hidden">Will get hidden:
                                     <div id="sample_location_name"></div>
                                     <div id="sample_location_pk"></div>
@@ -399,6 +411,7 @@
                             </div>
 
                             {# pick sample times #}
+                            {# STARME need for use in js #}
                             <div id="h_indy_time_in_unit" class="col-sm-3">
                                 <div class="row column-section-padding">
                                     <table>
@@ -418,6 +431,7 @@
                                 <div class="row column-section-padding">
                                     <div class="extra-bottom-padding">
 {#                                        todo fix this to transition from 3 time units#}
+                                        {# STARME need for use in js #}
                                         <input type="text" class="form-control" id="time_display" name="time_display" value="1">
                                     </div>
                                 </div>
@@ -497,8 +511,6 @@
                                             <p class="plate-map-radio-spacing plate-map-no-wrap">Increment</p></label>
                                         </div>
 
-
-
                                         <div class="header-type-well">
                                             <label><input type="radio" class="plate-map-bigger-radio" name="radio_change_duplicate_increment" value="increment-ttbltr">
                                             <p class="plate-map-radio-spacing plate-map-no-wrap">Increment - Left to Right</p></label>
@@ -506,6 +518,8 @@
                                             <label><input type="radio" class="plate-map-bigger-radio" name="radio_change_duplicate_increment" value="increment-ttbrtl">
                                             <p class="plate-map-radio-spacing plate-map-no-wrap">Increment - Right to Left</p></label>
                                         </div>
+
+
                                 </div>
                             </div>
 
