@@ -7025,14 +7025,11 @@ def fetch_omic_sample_info_first_found_in_upload_file_table(request):
     # if called_from a load, have to do both (did them here to avoid race errors)
     called_from = request.POST.get('called_from', '0')
     # could be called from change, load-add, load-update
-    groupIDc = int(request.POST.get('groupIDc', '0'))
-    groupPkc = int(request.POST.get('groupPkc', '0'))
-    groupID1 = int(request.POST.get('groupID1', '0'))
-    groupPk1 = int(request.POST.get('groupPk1', '0'))
-    groupId2 = int(request.POST.get('groupId2', '0'))
-    groupPk2 = int(request.POST.get('groupPk2', '0'))
+    group_pkc = int(request.POST.get('group_pkc', '0'))
+    group_pk1 = int(request.POST.get('group_pk1', '0'))
+    group_pk2 = int(request.POST.get('group_pk2', '0'))
 
-    # when called from is a change, we are only working with ONE, the groupIDc and groupPkc
+    # when called from is a change, we are only working with ONE, the group_idc and group_pkc
     # note that the ID is the id of the changed group (could be first or second on the form)
     # or the IDs on the form (1 and 2 - for the load-add and load-update)
 
@@ -7053,8 +7050,8 @@ def fetch_omic_sample_info_first_found_in_upload_file_table(request):
     loc_pk2 = None
     location_dict2 = {}
 
-    if called_from == 'change' and groupPkc > 0:
-        sample_info = sub_fetch_omic_sample_info_first_found_in_upload_file_table(groupPkc)
+    if called_from == 'change' and group_pkc > 0:
+        sample_info = sub_fetch_omic_sample_info_first_found_in_upload_file_table(group_pkc)
         timemess1 = sample_info[0]
         locmess1 = sample_info[1]
         day1 = sample_info[2]
@@ -7062,19 +7059,19 @@ def fetch_omic_sample_info_first_found_in_upload_file_table(request):
         minute1 = sample_info[4]
         loc_pk1 = sample_info[5]
 
-        model_row = AssayGroup.objects.only('organ_model').get(pk=groupPkc).organ_model
+        model_row = AssayGroup.objects.only('organ_model').get(pk=group_pkc).organ_model
         this_model_pk = model_row.id
         location_dict1 = sub_fetch_model_location_dictionary(this_model_pk)
 
-    if called_from == 'load-update' and groupPk1 > 0:
+    if called_from == 'load-update' and group_pk1 > 0:
         # loading an update page, get the correct list for group1
-        model_row = AssayGroup.objects.only('organ_model').get(pk=groupPk1).organ_model
+        model_row = AssayGroup.objects.only('organ_model').get(pk=group_pk1).organ_model
         this_model_pk = model_row.id
         location_dict1 = sub_fetch_model_location_dictionary(this_model_pk)
 
-    if called_from == 'load-update' and groupPk2 > 0:
+    if called_from == 'load-update' and group_pk2 > 0:
         # loading an update page, get the correct list for group2
-        model_row = AssayGroup.objects.only('organ_model').get(pk=groupPk2).organ_model
+        model_row = AssayGroup.objects.only('organ_model').get(pk=group_pk2).organ_model
         this_model_pk = model_row.id
         location_dict2 = sub_fetch_model_location_dictionary(this_model_pk)
 

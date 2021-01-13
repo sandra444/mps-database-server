@@ -19,12 +19,14 @@ $(document).ready(function () {
     let page_omic_upload_check_load = $('#check_load').html().trim();
 
     // two group stuff
+    // when called from a group change, need to know if 1 or 2 was changed
     let page_omic_upload_group_id_change = 0;
+    // what is the pk, of the treatment group in the database of the changed group
     let page_omic_upload_group_pk_change = 0;
 
-    let page_omic_upload_group_id_load_1 = 0;
+    // let page_omic_upload_group_id_load_1 = 0;
     let page_omic_upload_group_pk_load_1 = 0;
-    let page_omic_upload_group_id_load_2 = 0;
+    // let page_omic_upload_group_id_load_2 = 0;
     let page_omic_upload_group_pk_load_2 = 0;   
     
     let page_omic_current_group1 = $('#id_group_1')[0].selectize.items[0];
@@ -49,6 +51,9 @@ $(document).ready(function () {
     // tool tips - two group stuff - all moved to help_text (at least, for now)
     // END - Tool tips
 
+    // todo - check about double or single quotes
+    let page_omic_upload_omic_file_format_deseq2_log2fc_headers = '"name", "baseMean", "log2FoldChange", "lfcSE", "stat", "pvalue", "padj"';
+
     // Some more load things Section
     changed_something_important('load');
     change_visibility_of_some_doms();
@@ -59,9 +64,9 @@ $(document).ready(function () {
         $('.selectized').each(function() { this.selectize.disable() });
         $(':input').attr('disabled', 'disabled');
     } else {
-        page_omic_upload_group_id_load_1 = 1;
+        // page_omic_upload_group_id_load_1 = 1;
         page_omic_upload_group_pk_load_1 = $('#id_group_1')[0].selectize.items[0];
-        page_omic_upload_group_id_load_2 = 2;
+        // page_omic_upload_group_id_load_2 = 2;
         page_omic_upload_group_pk_load_2 = $('#id_group_2')[0].selectize.items[0];
 
         if (page_omic_upload_check_load === 'add') {
@@ -449,12 +454,9 @@ $(document).ready(function () {
         let data = {
             call: 'fetch_omic_sample_info_first_found_in_upload_file_table',
             called_from: page_omic_upload_called_from_in_js_file,
-            groupIdc: page_omic_upload_group_id_change,
-            groupPkc: page_omic_upload_group_pk_change,
-            groupId1: page_omic_upload_group_id_load_1,
-            groupPk1: page_omic_upload_group_pk_load_1,
-            groupId2: page_omic_upload_group_id_load_2,
-            groupPk2: page_omic_upload_group_pk_load_2,
+            group_pkc: page_omic_upload_group_pk_change,
+            group_pk1: page_omic_upload_group_pk_load_1,
+            group_pk2: page_omic_upload_group_pk_load_2,
             csrfmiddlewaretoken: window.COOKIES.csrfmiddlewaretoken
         };
         window.spinner.spin(document.getElementById('spinner'));
@@ -489,7 +491,6 @@ $(document).ready(function () {
     let get_group_sample_info_ajax = function (json, exist) {
         // bringing back the D, H, M, and sample location (if found)
 
-        // console.log('--- '+page_omic_upload_group_id_load_1)
         // console.log(json.timemess1)
         // console.log(json.day1)
         // console.log(json.hour1)

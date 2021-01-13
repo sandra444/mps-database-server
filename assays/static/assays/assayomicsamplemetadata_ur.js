@@ -765,12 +765,12 @@ $(document).ready(function () {
         let data = {
             call: 'fetch_omic_sample_info_first_found_in_upload_file_table',
             called_from: page_omic_upload_called_from_in_js_file,
-            groupIdc: page_omic_upload_group_id_change,
-            groupPkc: page_omic_upload_group_pk_change,
-            groupId1: page_omic_upload_group_id_load_1,
-            groupPk1: page_omic_upload_group_pk_load_1,
-            groupId2: page_omic_upload_group_id_load_2,
-            groupPk2: page_omic_upload_group_pk_load_2,
+            group_idc: page_omic_upload_group_id_change,
+            group_pkc: page_omic_upload_group_pk_change,
+            group_id1: page_omic_upload_group_id_load_1,
+            group_pk1: page_omic_upload_group_pk_load_1,
+            group_id2: page_omic_upload_group_id_load_2,
+            group_pk2: page_omic_upload_group_pk_load_2,
             csrfmiddlewaretoken: window.COOKIES.csrfmiddlewaretoken
         };
         window.spinner.spin(document.getElementById('spinner'));
