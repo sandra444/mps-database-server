@@ -5297,3 +5297,39 @@ class AssayOmicDataFileUploadForm(BootstrapForm):
         return data
 
 #     End Omic Data File Upload Section
+
+
+# Start Omic Metadata Collection Section
+# Form to use to collect the omic sample metadata
+# The actual metadata will be stuffed into a field for performance
+class AssayPlateReadMapAdditionalInfoForm(forms.Form):
+    """Form for Assay Plate Reader Map add/update/view extra info for dropdowns that are just used in GUI (not saved)."""
+
+    def __init__(self, *args, **kwargs):
+        study_id = kwargs.pop('study_id', None)
+        self.user = kwargs.pop('user', None)
+        super(AssayPlateReadMapAdditionalInfoForm, self).__init__(*args, **kwargs)
+        # note that the non-selectized versions are manipulated in javascript to facilitate the plate map
+        # they are not displayed to the user (they are hidden)
+        # something did very early in development...probably would do differently now
+        self.fields['se_matrix_item'].queryset = AssayMatrixItem.objects.filter(study_id=study_id).order_by('name',)
+        self.fields['ns_matrix_item'].queryset = AssayMatrixItem.objects.filter(study_id=study_id).order_by('name',)
+        self.fields['ns_matrix_item'].widget.attrs.update({'class': 'no-selectize'})
+        self.fields['ns_location'].widget.attrs.update({'class': 'no-selectize'})
+        self.fields['se_matrix'].queryset = AssayMatrix.objects.filter(
+            study_id=study_id
+        ).order_by('name',)
+        self.fields['se_matrix'].widget.attrs.update({'class': ' required'})
+        self.fields['se_platemap'].queryset = AssayPlateReaderMap.objects.filter(
+            study_id=study_id
+        ).order_by('name',)
+        self.fields['se_platemap'].widget.attrs.update({'class': ' required'})
+
+    # before got to development of calibration/processing the data
+    ns_matrix_item = forms.ModelChoiceField(
+        queryset=AssayMatrixItem.objects.none(),
+        required=False,
+    )
+
+# End omic sample metadata collection section
+

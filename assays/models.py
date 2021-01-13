@@ -5193,13 +5193,13 @@ class AssayOmicDataFileUpload(LockableModel):
     )
 
     # keep this aligned with the data_type defaults
-    header_type = models.CharField(
-        max_length=20,
-        default='target',
-        choices=assay_omic_file_header_type_choices,
-        help_text='The type of the headers in the omic file.',
-        verbose_name='File Header Type'
-    )
+    # header_type = models.CharField(
+    #     max_length=20,
+    #     default='target',
+    #     choices=assay_omic_file_header_type_choices,
+    #     help_text='The type of the headers in the omic file.',
+    #     verbose_name='File Header Type'
+    # )
 
     # sample time DISPLAY unit - indicates how the user wants to see the time displayed and interact with the time
     # IMPORTANT - the sample time is saved in minutes, as per the database standard
@@ -5300,68 +5300,46 @@ class AssayOmicDataFileUpload(LockableModel):
     def get_delete_url(self):
         return '{}delete/'.format(self.get_absolute_url())
 
-# This is for the metadata when need to collect by individual sample
-# class AssayOmicSampleMetadata(models.Model):
-#     """Model for omic sample metadata associated to count data."""
-#
-#     class Meta(object):
-#         verbose_name = 'Omic Sample Metadata'
-#
-#     study = models.ForeignKey(
-#         'assays.AssayStudy',
-#         on_delete=models.CASCADE,
-#         verbose_name='Study'
-#     )
-#     omic_data_file = models.ForeignKey(
-#         AssayOmicDataFileUpload,
-#         on_delete=models.CASCADE,
-#         verbose_name='Data File'
-#     )
+#This is for the metadata when need to collect by individual sample
+class AssayOmicSampleMetadata(models.Model):
+    """Model for omic sample metadata associated to count data."""
 
-#     # might be a sample name or a well name or something else
-#     column_header = models.CharField(
-#         max_length=255,
-#         default='',
-#         help_text='The header for this sample used in the uploaded file - must match EXACTLY what is in the file',
-#         verbose_name='Cross Reference'
-#     )
-# For the table format, if the file column header is, for example: samp1, samp2, samp3
-# -row labels would be samp1, samp2, samp3
-# -column labels would be code for File Column Header, Chip or Well ID, Sample Location, Sample Time, PKS???
-# For the plate format, if file column header is, for example: Dmso1,DMso2,DMSO4,DMSO5,DMSO6,DA08,DA09
-# -row labels would be DMSO and DA (use upper case)
-# -column labels would be 1, 2, 4, 5, 6, 8, and 9
+    class Meta(object):
+        verbose_name = 'Omic Sample Name and Metadata'
 
-#     row_label = models.CharField(
-#         max_length=255,
-#         default='',
-#     )
-#     column_label = models.CharField(
-#         max_length=255,
-#         default='',
-#     )
-#
-# todo - think about if want to allow these to be null - if do, will only need to delete if file is changed, otherwise, just update..might want to do it that way
-#     matrix_item = models.ForeignKey(
-#         'assays.AssayMatrixItem',
-#         on_delete=models.CASCADE,
-#         verbose_name='Matrix Item'
-#     )
-#
-#     sample_location = models.ForeignKey(
-#         'assays.AssaySampleLocation',
-#         on_delete=models.CASCADE,
-#         verbose_name='Sample Location'
-#     )
-#
-#     # PLEASE NOTE THAT THIS IS IN MINUTES
-#     time = models.FloatField(
-#         default=0,
-#         verbose_name='Time'
-#     )
-#
-#     def __str__(self):
-#         return '{0}'.format(self.id)
+    study = models.ForeignKey(
+        'assays.AssayStudy',
+        on_delete=models.CASCADE,
+        verbose_name='Study'
+    )
+
+    sample_name = models.CharField(
+        max_length=255,
+        default='',
+        help_text='The header for this sample used in the uploaded file - must match EXACTLY what is in the omic file',
+        verbose_name='Cross Reference'
+    )
+
+    matrix_item = models.ForeignKey(
+        'assays.AssayMatrixItem',
+        on_delete=models.CASCADE,
+        verbose_name='Matrix Item'
+    )
+
+    sample_location = models.ForeignKey(
+        'assays.AssaySampleLocation',
+        on_delete=models.CASCADE,
+        verbose_name='Sample Location'
+    )
+
+    # PLEASE NOTE THAT THIS IS IN MINUTES
+    time = models.FloatField(
+        default=0,
+        verbose_name='Time'
+    )
+
+    def __str__(self):
+        return '{0}'.format(self.id)
 
 # for the two group data points
 class AssayOmicDataPoint(models.Model):
