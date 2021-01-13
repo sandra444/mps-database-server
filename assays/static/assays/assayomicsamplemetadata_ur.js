@@ -763,7 +763,7 @@ $(document).ready(function () {
         // if update page, need to get the model location list
 
         let data = {
-            call: 'fetch_omic_sample_info_from_upload_data_table',
+            call: 'fetch_omic_sample_info_first_found_in_upload_file_table',
             called_from: page_omic_upload_called_from_in_js_file,
             groupIdc: page_omic_upload_group_id_change,
             groupPkc: page_omic_upload_group_pk_change,
@@ -888,7 +888,7 @@ $(document).ready(function () {
             parseInt(document.getElementById('this_file_id').innerText.trim())
         }
         let data = {
-            call: 'fetch_this_file_is_this_study',
+            call: 'fetch_this_file_is_this_study_omic_upload_file',
             omic_data_file: id_omic_data_file,
             study_id: parseInt(document.getElementById('this_study_id').innerText.trim()),
             data_file_pk: data_file_pk,

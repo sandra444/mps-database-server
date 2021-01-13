@@ -80,22 +80,20 @@
 
             {# main #}
 {#            <div class="container">   NO CONTAINERs   #}
+
             {# pass to js file need for use in js #}
-            <div class="for-javascript">
-                <div class="hidden" id="check_load">
+            <div class="hidden">
+                <div id="check_load">
                     {{ page_called }}
                 </div>
-                <div class="hidden" id="this_file_id">
+                <div id="this_file_id">
                     {{ object.id }}
                 </div>
-                <div class="hidden" id="this_study_id">
+                <div id="this_study_id">
                     {{ form.instance.study_id }}
                 </div>
-                <div class="hidden" id="show_hide_graph">
+                <div id="show_hide_graph">
                     hide
-                </div>
-                <div class="hidden" id="check_load">
-                    {{ page_called }}
                 </div>
             </div>
 
@@ -117,6 +115,37 @@
                     <label class="col-sm-2 control-label" for="protocol">Omic Data File*</label>
                     <div class="col-sm-10">
                         {{ form.omic_data_file }}
+                    </div>
+
+                     <div id="group_extra" class="toggle-display-none row">
+                        <div class="col-sm-2"></div>
+                        <div class="col-sm-10">
+                            <div class="alert alert-info" role="alert">
+                                <button class="btn btn-info" type="button" data-toggle="collapse" data-target=".inline-help" aria-expanded="false" aria-controls="inline-help">
+                                    Show/Hide Inline Help
+                                </button>
+                                <div class="collapse large-padding-top inline-help">
+                                    <ul>
+                                        <li>something about file format.</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="count_extra" class="toggle-display-none row">
+                        <div class="col-sm-2"></div>
+                        <div class="col-sm-10">
+                            <div class="alert alert-info" role="alert">
+                                <button class="btn btn-info" type="button" data-toggle="collapse" data-target=".inline-help" aria-expanded="false" aria-controls="inline-help">
+                                    Show/Hide Inline Help
+                                </button>
+                                <div class="collapse large-padding-top inline-help">
+                                    <ul>
+                                        <li>Counts data files must have one header row labeled "Sample ID", with each column subsequent column labeled with either a sample ID or a well name (i.e. A1, BA05).</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="row">
@@ -141,21 +170,7 @@
                             </div>
                         </div>
                     </div>
-                    <div id="count_extra" class="toggle-display-none row">
-                        <div class="col-sm-2"></div>
-                        <div class="col-sm-10">
-                            <div class="alert alert-info" role="alert">
-                                <button class="btn btn-info" type="button" data-toggle="collapse" data-target=".inline-help" aria-expanded="false" aria-controls="inline-help">
-                                    Show/Hide Inline Help
-                                </button>
-                                <div class="collapse large-padding-top inline-help">
-                                    <ul>
-                                        <li>Counts data files must have one header row labeled "Sample ID", with each column subsequent column labeled with either a sample ID or a well name (i.e. A1, BA05).</li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+
                 </div>
 
             {% else %}
@@ -174,42 +189,37 @@
 
             <br>
 
-            <div>
+            {% include "generic_field.html" with field=form.data_type %}
 
-                <div class="row">
-                    <div class="col-sm-2">
-                    </div>
-                    <div class="col-sm-10">
-{#                        <p style="color:red">TODO - code for: Assigned based on file headers (only allow on add page)</p>#}
-                    </div>
-                </div>
-                {% include "generic_field.html" with field=form.data_type %}
+            {% include "generic_field.html" with field=form.description %}
 
-                <div class="row">
-                    <div class="col-sm-2">
-                    </div>
-                    <div class="col-sm-10">
-{#                        <p style="color:red">TODO - code for: Assigned based on file headers - update as needed (only allow on add page) (make sure default changes with data_type for add page)</p>#}
-                    </div>
-                </div>
-                {% include "generic_field.html" with field=form.header_type %}
+            {% include "generic_field.html" with field=form.study_assay %}
 
-                {% include "generic_field.html" with field=form.description %}
+            {% include "generic_field_no_add_option.html" with field=form.analysis_method %}
 
-                {% include "generic_field.html" with field=form.study_assay %}
-
-                {% include "generic_field_no_add_option.html" with field=form.analysis_method %}
-
-                {% include "generic_field.html" with field=form.name_reference %}
-
-            </div>
+            {% include "generic_field.html" with field=form.name_reference %}
 
             <br>
 
             <div class="compare-group">
                 <h3>Metadata for Comparing Two Treatment Groups</h3>
 
-                <div class="h1-level-1"><i>Group 1:</i></div><br>
+                <div class="alert alert-info" role="alert">
+                    <button class="btn btn-info" type="button" data-toggle="collapse" data-target=".inline-help" aria-expanded="false" aria-controls="inline-help">
+                        Show/Hide Inline Help
+                    </button>
+                    <div class="collapse large-padding-top inline-help">
+                        <ul>
+                            <li>When adding Sample Time, only one unit is required, either Day, Hour, or Minute.</li>
+                            <li>Select the group before selecting the Sample Location</li>
+                            <li>Selecting (and updating) a group will update the Sample Location options</li>
+                            <li>What else should we add?</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <br>
+
                 {% include "generic_field.html" with field=form.group_1 %}
 
                 <div class="row">
@@ -244,7 +254,6 @@
                     </div>
                 </div>
 
-                <div class="h1-level-1"><i>Group 2:</i></div><br>
                 {% include "generic_field.html" with field=form.group_2 %}
 
                 <div class="row">
@@ -296,327 +305,38 @@
 
             </div>
 
+            <div class="counts-data">
+                <h3>Metadata for Counts Data</h3>
+
+                <div class="alert alert-info" role="alert">
+                    <button class="btn btn-info" type="button" data-toggle="collapse" data-target=".inline-help" aria-expanded="false" aria-controls="inline-help">
+                        Show/Hide Inline Help
+                    </button>
+                    <div class="collapse large-padding-top inline-help">
+                        <ul>
+                            <li>Counts data files must have one header row labeled "Sample ID", with each column subsequent column labeled with either a sample ID or a well name (i.e. A1, BA05).</li>
+                        </ul>
+                    </div>
+                </div>
 
 
-{# todo - update all instructions and hover tips#}
+{#                when file is changed, do some qc of the file and add messages here - can not do it on submit ONLY due to why doing form sends data#}
+{#                some will pop on submit that are in the processing util#}
+                <br>
 
+                <div id="message_about_sample_names">
+                    this is a generic message
+                </div>
 
+                <div class="collapse large-padding-top inline-help">
+                    <div class="alert alert-info" role="alert">
+                        <ul>
+                            <li>The sample names (which much match, exactly, the column headers in the upload file) must be added prior to uploading the file.</li>
+                        </ul>
+                    </div>
+                </div>
 
-
-{#            <div class="indy-sample">#}
-{#                <h3>Missing Sample Names for Normalized Count and Raw Count Data</h3>#}
-{##}
-{#                {% if update or add %}#}
-{##}
-{#                    <div class="alert alert-info" role="alert">#}
-{#                        <button class="btn btn-info" type="button" data-toggle="collapse" data-target=".inline-help" aria-expanded="false" aria-controls="inline-help">#}
-{#                            Show/Hide Inline Help#}
-{#                        </button>#}
-{#                        <div class="collapse large-padding-top inline-help">#}
-{#                            <p>Tips and Notes:</p>#}
-{#                            <ul>#}
-{#                                <li>Highlight the cells in the table to which an Action will be applied</li>#}
-{#                                <li>Highlight by dragging over the cells to highlight and/or by using the click buttons to highlight a whole column (<span class="glyphicon glyphicon-option-vertical" aria-hidden="true"></span>) or whole row (<span class="glyphicon glyphicon-option-horizontal" aria-hidden="true"></span>)</li>#}
-{#                                <li>Highlighting is cumulative and toggles</li>#}
-{#                                <li>When updates are made to the table, it will resort depending on the new content </li>#}
-{#                                <li>Use Column visibility, Search, and/or column sorting to expedite highlighting</li>#}
-{#                                <li>Select the content to use for replacement</li>#}
-{#                            </ul>#}
-{##}
-{#                        </div>#}
-{#                    </div>#}
-{##}
-{#                {% endif %}#}
-{##}
-{#                {% if update or add %}#}
-{#                    Keep for now in case need to add back the option to paste#}
-{#                    <div class="collapse large-padding-top inline-help">#}
-{#                        <div class="alert alert-info" role="alert">#}
-{#                            <ul>#}
-{#                                <li>When highlighting is complete, select an Action</li>#}
-{#                            </ul>#}
-{#                        </div>#}
-{#                    </div>                    #}
-{##}
-{#                    <div class="row">#}
-{#                        <div class="col-sm-2">#}
-{#                            <div class="plate-map-page-field-labels-large">#}
-{#                                <div>#}
-{#                                    <div><p id="drag_use_tooltip"></p>#}
-{#                                        <label for="drag_use_tooltip">Action &nbsp;</label>#}
-{#                                    </div>#}
-{#                                </div>#}
-{#                            </div>#}
-{#                        </div>#}
-{#                        <div class="col-sm-10">#}
-{#                            <div class="plate-map-page-radio-contents">#}
-{#                                <label><input type="radio" class="plate-map-bigger-radio" name="radio_change_drag_action" value="replace" id="radio_replace">#}
-{#                                    <p class="plate-map-radio-spacing plate-map-no-wrap">Replace</p></label>#}
-{#                                <label><input type="radio" class="plate-map-bigger-radio" name="radio_change_drag_action" value="empty" id="radio_empty">#}
-{#                                    <p class="plate-map-radio-spacing plate-map-no-wrap">Remove/Empty</p></label>#}
-{#                                <label><input type="radio" class="plate-map-bigger-radio" name="radio_change_drag_action" value="copys" id="radio_copys">#}
-{#                                    <p class="plate-map-radio-spacing plate-map-no-wrap">Edit Highlight</p></label>#}
-{#                                <label><input type="radio" class="plate-map-bigger-radio" name="radio_change_drag_action" value="pastes" id="radio_pastes">#}
-{#                                    <p class="plate-map-radio-spacing plate-map-no-wrap">Paste</p></label>#}
-{#                            </div>#}
-{#                        </div>#}
-{#                    </div>#}
-{##}
-{#                    <div class="replace-section">#}
-{##}
-                        {# pick sample metadata other than times #}
-{#                        <div class="row">#}
-{##}
-                            {# STARME need for use in js #}
-{#                            <div id="h_indy_matrix_item" class="col-sm-3">#}
-{#                                <div class="row column-section-padding">#}
-{#                                    <table>#}
-{#                                        <tr>#}
-{#                                            <td class="left-pad">#}
-{#                                                <input class="big-checkbox" id="checkbox_matrix_item" type="checkbox" name="change_matrix_item" value="matrix_item" >#}
-{#                                            </td>#}
-{#                                            <td class="left-pad">#}
-{#                                                <div><p id="sample_matrix_item_tooltip"></p>#}
-{#                                                    <label for="sample_matrix_item_tooltip">Chip/Well Name &nbsp;</label>#}
-{#                                                </div>#}
-{#                                            </td>#}
-{#                                        </tr>#}
-{#                                    </table>#}
-{#                                </div>#}
-{#                                <div class="row column-section-padding">#}
-{#                                     <div class="extra-bottom-padding">#}
-{#                                        {{ form.indy_matrix_item }}#}
-{#                                    </div>#}
-{#                                </div>#}
-                                {# STARME need for use in js ~pk_tracking_note~ #}
-{#                                <div class="row hidden">Will get hidden:#}
-{#                                    <div id="matrix_item_name"></div>#}
-{#                                    <div id="matrix_item_pk"></div>#}
-{#                                </div>#}
-{#                            </div>#}
-                            {# STARME need for use in js #}
-{#                            <div id="h_indy_sample_location" class="col-sm-3">#}
-{#                                <div class="row column-section-padding">#}
-{#                                    <table>#}
-{#                                        <tr>#}
-{#                                            <td class="left-pad">#}
-{#                                                <input class="big-checkbox" id="checkbox_location" type="checkbox" name="change_location" value="location" >#}
-{#                                            </td>#}
-{#                                            <td class="left-pad">#}
-{#                                                <div><p id="sample_location_tooltip"></p>#}
-{#                                                    <label for="sample_location_tooltip">Sample Location &nbsp;</label>#}
-{#                                                </div>#}
-{#                                            </td>#}
-{#                                        </tr>#}
-{#                                    </table>#}
-{#                                </div>#}
-{#                                <div class="row column-section-padding">#}
-{#                                    <div class="extra-bottom-padding">#}
-{#                                        {{ form.indy_sample_location }}#}
-{#                                    </div>#}
-{#                                </div>#}
-                                {# STARME need for use in js ~pk_tracking_note~ #}
-{#                                <div class="row hidden">Will get hidden:#}
-{#                                    <div id="sample_location_name"></div>#}
-{#                                    <div id="sample_location_pk"></div>#}
-{#                                </div>#}
-{#                            </div>#}
-{##}
-                            {# pick sample times #}
-                            {# STARME need for use in js #}
-{#                            <div id="h_indy_time_in_unit" class="col-sm-3">#}
-{#                                <div class="row column-section-padding">#}
-{#                                    <table>#}
-{#                                        <tr>#}
-{#                                            <td class="left-pad">#}
-{#                                                <input class="big-checkbox" id="checkbox_sample_time_day" type="checkbox" name="change_sample_time_day" value="assay_sample_time_day" >#}
-{#                                            </td>#}
-{#                                            <td class="left-pad">#}
-{#                                                todo fix this tool tip and label for the tool tip#}
-{#                                                <div><p id="sample_time_display_tooltip"></p>#}
-{#                                                    <label for="sample_time_display_tooltip">Sample Time &nbsp;</label>#}
-{#                                                </div>#}
-{#                                            </td>#}
-{#                                        </tr>#}
-{#                                    </table>#}
-{#                                </div>#}
-{#                                <div class="row column-section-padding">#}
-{#                                    <div class="extra-bottom-padding">#}
-{#                                        todo fix this to transition from 3 time units#}
-                                        {# STARME need for use in js #}
-{#                                        <input type="text" class="form-control" id="time_display" name="time_display" value="1">#}
-{#                                    </div>#}
-{#                                </div>#}
-{#                            </div>#}
-{##}
-{#                            <div class="col-sm-3">#}
-{#                            </div>#}
-{##}
-{#                        </div>#}
-{##}
-{#                        <div class="collapse large-padding-top inline-help">#}
-{#                            <div class="alert alert-info" role="alert">#}
-{#                                <ul>#}
-{#                                    <li>Select to Duplicate or Increment (Sample Location will duplicate regardless of selection)</li>#}
-{#                                    <li>Duplicate will put the selected content in the highlighted cells</li>#}
-{#                                    <li>Increment will put the selected content in the first of the highlighted cells, then iterate over the rest of the highlighted cells, adding the increment as requested to the next highlighted cell</li>#}
-{#                                    <li>Sample Location will Duplicate regardless of selection</li>#}
-{#                                    <li>Incrementing a Chip/Well Name works down an alphabetized list of all the Chips/Wells in the Study</li>#}
-{#                                    <li>Incrementing will always be applied top to bottom - use column sorting switch top and bottom</li>#}
-{#                                </ul>#}
-{#                            </div>#}
-{#                        </div>#}
-{##}
-{#                        <div class="row">#}
-{##}
-{#                            <div class="col-sm-3">#}
-{#                                <div class="plate-map-page-field-labels-small">#}
-{#                                    <div>#}
-{#                                        <div><p id="drag_action_tooltip"></p>#}
-{#                                            <label for="drag_action_tooltip">Duplicate or Increment &nbsp;</label>#}
-{#                                        </div>#}
-{#                                    </div>#}
-{#                                </div>#}
-{#                            </div>#}
-{#                            <div class="col-sm-12">#}
-{#                                <div class="plate-map-page-radio-contents no-wrap">#}
-{#                                    <div class="col-sm-3">#}
-{#                                        <label><input id="radio_duplicate" type="radio" class="plate-map-bigger-radio" name="radio_change_duplicate_increment" value="duplicate" checked>#}
-{#                                        <p class="plate-map-radio-spacing plate-map-no-wrap">Duplicate</p></label>#}
-{#                                    </div>#}
-{##}
-{#                                    <div class="col-sm-3">#}
-{#                                        <div class="header-type-not-well">#}
-{#                                            <label><input type="radio" class="plate-map-bigger-radio" name="radio_change_duplicate_increment" value="increment-ttbo">#}
-{#                                            <p class="plate-map-radio-spacing plate-map-no-wrap">Increment</p></label>#}
-{#                                        </div>#}
-{#                                    </div>#}
-{##}
-{#                                    <div class="col-sm-3">#}
-{#                                        <div class="header-type-well">#}
-{#                                            <label><input type="radio" class="plate-map-bigger-radio" name="radio_change_duplicate_increment" value="increment-ttbltr">#}
-{#                                            <p class="plate-map-radio-spacing plate-map-no-wrap">Increment - Left to Right</p></label>#}
-{#                                        </div>#}
-{#                                    </div>#}
-{##}
-{#                                    <div class="col-sm-3">#}
-{#                                        <div class="header-type-well">#}
-{#                                            <label><input type="radio" class="plate-map-bigger-radio" name="radio_change_duplicate_increment" value="increment-ttbrtl">#}
-{#                                                <p class="plate-map-radio-spacing plate-map-no-wrap">Increment - Right to Left</p></label>#}
-{#                                        </div>#}
-{#                                    </div>#}
-{##}
-{#                                </div>#}
-{#                            </div>#}
-{##}
-{##}
-{#                            <div class="col-sm-12">#}
-{#                                <div class="plate-map-no-wrap">#}
-{##}
-{#                                        <label><input id="radio_duplicate" type="radio" class="plate-map-bigger-radio" name="radio_change_duplicate_increment" value="duplicate" checked>#}
-{#                                        <p class="plate-map-radio-spacing plate-map-no-wrap">Duplicate</p></label>#}
-{##}
-{##}
-{##}
-{#                                        <div class="header-type-not-well">#}
-{#                                            <label><input type="radio" class="plate-map-bigger-radio" name="radio_change_duplicate_increment" value="increment-ttbo">#}
-{#                                            <p class="plate-map-radio-spacing plate-map-no-wrap">Increment</p></label>#}
-{#                                        </div>#}
-{##}
-{#                                        <div class="header-type-well">#}
-{#                                            <label><input type="radio" class="plate-map-bigger-radio" name="radio_change_duplicate_increment" value="increment-ttbltr">#}
-{#                                            <p class="plate-map-radio-spacing plate-map-no-wrap">Increment - Left to Right</p></label>#}
-{##}
-{#                                            <label><input type="radio" class="plate-map-bigger-radio" name="radio_change_duplicate_increment" value="increment-ttbrtl">#}
-{#                                            <p class="plate-map-radio-spacing plate-map-no-wrap">Increment - Right to Left</p></label>#}
-{#                                        </div>#}
-{##}
-{##}
-{#                                </div>#}
-{#                            </div>#}
-{##}
-{##}
-{#                        </div>#}
-                        {# increment value entry #}
-{#                        <div class="increment-section">#}
-{#                            <div class="row">#}
-{#                                <div class="col-sm-3">#}
-{#                                </div>#}
-{#                                <div class="col-sm-12">#}
-{#                                    <div class="plate-map-no-wrap">#}
-{#                                        <label class="plate-map-no-wrap" for="increment_value">Increment Amount:</label>#}
-{#                                        <input type="text" class="form-control plate-map-no-wrap" id="increment_value" name="increment_value" value="1">#}
-{#                                    </div>#}
-{#                                </div>#}
-{#                            </div>#}
-{#                        </div>#}
-{##}
-{#                        <div class="collapse large-padding-top inline-help">#}
-{#                            <div class="alert alert-info" role="alert">#}
-{#                                <ul>#}
-{#                                    <li>After selections are made, click the Replace Content button</li>#}
-{#                                    <li>The content will be replaced in visible, highlighted cells only</li>#}
-{#                                </ul>#}
-{#                            </div>#}
-{#                        </div>#}
-{##}
-{#                        <br>#}
-{#                        <button type="button" class="btn btn-primary" id="replace_in_indy_table">Replace Content</button>#}
-{##}
-{#                    </div>#}
-{##}
-{#                    <div class="copys-section">#}
-{##}
-{#                    </div>#}
-{##}
-{#                    <div class="pastes-section">#}
-{#                      want to show this all the time, not just when help is on  <div class="collapse large-padding-top inline-help">#}
-{#                        <div class="large-padding-top">#}
-{#                            <div class="alert alert-info" role="alert">#}
-{#                                <ul>#}
-{#                                    <li>Drag in the cell where the paste should start</li>#}
-{#                                </ul>#}
-{#                            </div>#}
-{#                        </div>#}
-{#                    </div>#}
-{##}
-{#                {% endif %}#}
-{##}
-{#                <hr>#}
-{##}
-{##}
-{#                <div class="row">#}
-{#                    <div class="col-sm-5">#}
-{#                        <div class="h1-level-1"><i>Metadata Plate/Table</i></div>#}
-{#                    </div>#}
-{#                    <div class="col-sm-4">#}
-{#                        <button type="button" class="btn btn-primary extra-top-margin" id="clear_highlights_indy_table">Clear Highlighting</button>#}
-{#                    </div>#}
-{#                    <div class="col-sm-1">#}
-{#                        <div id="undo_button_div" class="col-sm-1 toggle-display-none">#}
-{#                            <button type="button" class="btn btn-primary extra-top-margin" id="undoIndyButton">Undo</button>#}
-{#                        </div>#}
-{#                    </div>#}
-{#                    <div class="col-sm-1">#}
-{#                        <div id="redo_button_div" class="col-sm-1 toggle-display-none">#}
-{#                            <button type="button" class="btn btn-primary extra-top-margin" id="redoIndyButton">Redo</button>#}
-{#                        </div>#}
-{#                    </div>#}
-{#                    <div class="col-sm-1">#}
-{#                    </div>#}
-{#                </div>#}
-{##}
-{#                <div id="div_for_sample_metadata_table">#}
-                    {# <table id="sample_metadata_table" class="display table table-striped table-hover" cellspacing="0" width="100%">#}
-                    {#  note that the table (including the table tag) is made in javascript #}
-                    {# </table>#}
-{#                </div>#}
-{##}
-{#            </div>#}
-
-
-
-
+            </div>
 
         </div>
     </form>

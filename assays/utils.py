@@ -6526,7 +6526,7 @@ def sandrasGeneralFormatNumberFunction(this_number_in):
 
 # sck called from forms.py when save or change omic data file via ajax function fetch_omics_data_for_upload_preview_prep; js function get_data_for_this_file_ready_for_preview
 def omic_data_file_process_data(save, study_id, omic_data_file_id, data_file, file_extension,
-                                          called_from, data_type, header_type, time_unit, analysis_method):
+                                          called_from, data_type, analysis_method):
     """
     Assay Omics Data File Add or Change the file (utility).
     """
@@ -6557,10 +6557,6 @@ def omic_data_file_process_data(save, study_id, omic_data_file_id, data_file, fi
     data_dicts['file_id_to_name'][1] = joint_name
     data_dicts['table'][joint_name] = ['Preview Chosen File', omic_data_file_id]
     data_dicts['target_name_to_id'] = {}
-    data_dicts['indy_file_column_header_list'] = []
-    data_dicts['indy_file_column_header_prefix_uni_list'] = []
-    data_dicts['indy_file_column_header_number_uni_dict'] = {}
-    # todo fill the prefix and number set
 
     # if data_type == 'log2fc':
     #     pass
@@ -6649,21 +6645,6 @@ def omic_data_file_process_data(save, study_id, omic_data_file_id, data_file, fi
                 data_dicts['target_name_to_id'] = {y: analysis_target_name_to_pk_dict[y] for y in list_of_relevant_headers_in_file}
 
             if continue_this_sheet_if_true:
-
-                uni_list = copy.deepcopy(data_dicts.get('indy_file_column_header_list'))
-                for item in df_column_headers_stripped:
-                    if item not in uni_list:
-                        uni_list.append(item)
-
-                data_dicts['indy_file_column_header_list'] = copy.deepcopy(uni_list)
-                prefix_set, number_set = omic_find_sets_of_prefixes_and_numbers_for_well_names(uni_list)
-                data_dicts['indy_file_column_header_prefix_uni_list'] = prefix_set
-                data_dicts['indy_file_column_header_number_uni_dict'] = number_set
-
-
-                print('line 6632ish of utils.py - header_list ', uni_list)
-                print('prefix_set ', prefix_set)
-                print('number_set ', number_set)
 
                 # Guts of data loading for omic data file
                 # functions should return continue, error message, and a list of instances and an instance counter
@@ -6785,6 +6766,9 @@ def omic_determine_if_field_with_header_for_gene(df_column_headers_stripped):
 def omic_qc_data_file(df, omic_target_text_header_list, data_type):
     error_message = ''
     continue_this_sheet_if_true = True
+
+    # // todo - remove an error for the log2 fold change where group1 can not equal group 2, if there is one
+    # make it group and all metadata....instead
 
     list_of_relevant_headers_in_file = []
     found_foldchange_true = False

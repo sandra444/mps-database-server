@@ -7009,11 +7009,14 @@ def fetch_data_processing_for_plate_map_integration(request):
     return HttpResponse(json.dumps(data), content_type="application/json")
 
 
-# sck omic data find sample information if group already in the upload file
-def fetch_omic_sample_info_from_upload_data_table(request):
+# sck assayomicdatafileupload_aur.js
+# omic data find sample information if group already in the upload file
+def fetch_omic_sample_info_first_found_in_upload_file_table(request):
     """
         Assay Omic Data File get the sample info if the group previously added to upload table
     """
+
+    # also gets the lost of sample locations for the models in the selected group
 
     # if changing a group, need to get all the updated info
     # if an add page, need to call to clear out the location list
@@ -7051,7 +7054,7 @@ def fetch_omic_sample_info_from_upload_data_table(request):
     location_dict2 = {}
 
     if called_from == 'change' and groupPkc > 0:
-        sample_info = sub_fetch_omic_sample_info_from_upload_data_table(groupPkc)
+        sample_info = sub_fetch_omic_sample_info_first_found_in_upload_file_table(groupPkc)
         timemess1 = sample_info[0]
         locmess1 = sample_info[1]
         day1 = sample_info[2]
@@ -7102,7 +7105,7 @@ def fetch_omic_sample_info_from_upload_data_table(request):
 
 
 # sck assayomicdatafileupload_aur.js
-def fetch_this_file_is_this_study(request):
+def fetch_this_file_is_this_study_omic_upload_file(request):
     omic_data_file = request.POST.get('omic_data_file', '0')
     study_id = int(request.POST.get('study_id', '0'))
     data_file_pk = int(request.POST.get('data_file_pk', '0'))
@@ -7120,7 +7123,7 @@ def fetch_this_file_is_this_study(request):
 
 
 # sck ajax.py
-def sub_fetch_omic_sample_info_from_upload_data_table(this_pk):
+def sub_fetch_omic_sample_info_first_found_in_upload_file_table(this_pk):
     # todo-sck change the format for time - not doing d h m anymore
     locmess = "no"
     loc_pk = None
@@ -7304,13 +7307,12 @@ def fetch_omics_data_for_upload_preview_prep(request):
     calledme = 'clean'
     data_type = request.POST.get('data_type', '{}')
     time_unit = request.POST.get('time_unit', '{}')
-    header_type = request.POST.get('header_type', '{}')
     analysis_method = request.POST.get('analysis_method', '{}')
     group_1 = request.POST.get('group_1', '{}')
     group_2 = request.POST.get('group_2', '{}')
     description = request.POST.get('description', '{}')
 
-    data_dicts = omic_data_file_process_data(save, study_id, data_file_pk, data_file, file_extension, calledme, data_type, header_type, time_unit, analysis_method)
+    data_dicts = omic_data_file_process_data(save, study_id, data_file_pk, data_file, file_extension, calledme, data_type, analysis_method)
 
     data = data_dicts
 
@@ -7609,8 +7611,8 @@ switch = {
     'fetch_data_processing_for_plate_map_integration': {
         'call': fetch_data_processing_for_plate_map_integration
     },
-    'fetch_omic_sample_info_from_upload_data_table': {
-        'call': fetch_omic_sample_info_from_upload_data_table
+    'fetch_omic_sample_info_first_found_in_upload_file_table': {
+        'call': fetch_omic_sample_info_first_found_in_upload_file_table
     },
     'fetch_omics_data_for_visualization': {
         'call': fetch_omics_data_for_visualization
@@ -7618,8 +7620,8 @@ switch = {
     'fetch_omics_data_for_upload_preview_prep': {
         'call': fetch_omics_data_for_upload_preview_prep
     },
-    'fetch_this_file_is_this_study': {
-        'call': fetch_this_file_is_this_study
+    'fetch_this_file_is_this_study_omic_upload_file': {
+        'call': fetch_this_file_is_this_study_omic_upload_file
     },
 
 }

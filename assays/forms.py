@@ -5054,6 +5054,9 @@ class AbstractClassAssayStudyAssayOmic(AssayStudyAssay):
 class AssayOmicDataFileUploadForm(BootstrapForm):
     """Form Upload an AssayOmicDataFileUpload file and associated metadata """
 
+    # since the metadata for the log2fc is by group, and is collected once for each file, it is stored with the upload file
+    # the metadata for the count data is stored separately (and linked by sample name/file column header)
+
     class Meta(object):
         model = AssayOmicDataFileUpload
         exclude = tracking + ('study',)
@@ -5154,11 +5157,12 @@ class AssayOmicDataFileUploadForm(BootstrapForm):
         # HANDY for adding classes in forms
         # NO self.fields['group_1'].widget.attrs.update({'class': ' required'})
         # YES self.fields['group_1'].widget.attrs['class'] += 'required'
-        # BUT, the above does not work on selectized, just do addClass in javascript, i.e.: $('#id_time_unit').next().addClass('required');
+        # BUT, the above does not work on selectized, just do addClass in javascript
+        # i.e.: $('#id_time_unit').next().addClass('required');
 
+        # Luke wanted to use DHM, so, went back to that. Hold in case gets outvoted
         # self.fields['time_1_display'].widget.attrs.update({'class': ' form-control required'})
         # self.fields['time_2_display'].widget.attrs.update({'class': ' form-control required'})
-
         # time_unit_instance = self.instance.time_unit
 
         # if self.instance.time_1:
@@ -5170,55 +5174,6 @@ class AssayOmicDataFileUploadForm(BootstrapForm):
         #     time_2_instance = self.instance.time_2
         #     ctime = convert_time_from_mintues_to_unit_given(time_2_instance, time_unit_instance)
         #     self.fields['time_2_display'].initial = ctime
-
-        #indy-sample for the counts data, we need the sample metadata table
-
-        # if an add file, will get from an ajax call when add a file, else, query them up (option for defaults for testing is included)
-        if self.instance.id:
-            omic_file_pk = self.instance.id
-        else:
-            omic_file_pk = None
-
-        # header_type_instance = 'other'
-        # todo-sck remove this later...just for testing
-        # self.fields['header_type'].initial = 'well'
-        # self.fields['header_type'].initial = 'sample'
-
-        # if self.instance.header_type:
-        #     header_type_instance = self.instance.header_type
-        #     # todo-sck remove this later...just for testing
-        #     # header_type_instance = 'well'
-        #     header_type_instance = 'sample'
-
-
-        # this is really only for development to pull in some example data, change to false later
-        # **change-star
-        # find_defaults = True
-        #
-        # indy_table_labels = find_the_labels_needed_for_the_indy_omic_table('form', header_type_instance, omic_file_pk, time_unit_instance, find_defaults)
-        # indy_list_of_column_labels = indy_table_labels.get('indy_list_of_column_labels')
-        # indy_list_of_column_labels_show_hide = indy_table_labels.get('indy_list_of_column_labels_show_hide')
-        # indy_list_of_dicts_of_table_rows = indy_table_labels.get('indy_list_of_dicts_of_table_rows')
-        # indy_list_of_row_labels = indy_table_labels.get('indy_list_of_row_labels')
-        # indy_list_of_unique_row_labels = indy_table_labels.get('indy_list_of_unique_row_labels')
-        # indy_count_of_unique_row_labels = indy_table_labels.get('indy_count_of_unique_row_labels')
-        #
-        # self.fields['indy_list_of_column_labels'].initial = json.dumps(indy_list_of_column_labels)
-        # self.fields['indy_list_of_column_labels_show_hide'].initial = json.dumps(indy_list_of_column_labels_show_hide)
-        # self.fields['indy_list_of_dicts_of_table_rows'].initial = json.dumps(indy_list_of_dicts_of_table_rows)
-        # self.fields['indy_list_of_row_labels'].initial = json.dumps(indy_list_of_row_labels)
-        # self.fields['indy_list_of_unique_row_labels'].initial = json.dumps(indy_list_of_unique_row_labels)
-        # self.fields['indy_count_of_unique_row_labels'].initial = json.dumps(indy_count_of_unique_row_labels)
-        #
-        # # get the list of matrix items in this study
-        # matrix_item_queryset = AssayMatrixItem.objects.filter(study_id=self.study).order_by('name', )
-        # self.fields['indy_matrix_item'].queryset = matrix_item_queryset
-        # matrix_item_list = matrix_item_queryset.values_list('name', flat=True)
-        # self.fields['indy_matrix_item_list'].initial = json.dumps(matrix_item_list)
-        #
-        # self.fields['indy_sample_metadata_table_was_changed'].initial = False
-
-        #indy-sample
 
     time_1_day = forms.DecimalField(
         required=False,
@@ -5255,37 +5210,10 @@ class AssayOmicDataFileUploadForm(BootstrapForm):
     #     label='Sample Time 2*'
     # )
 
-    #indy-sample for the counts data
-    # indy_list_of_dicts_of_table_rows = forms.CharField(widget=forms.TextInput(), required=False,)
-    # indy_list_of_column_labels = forms.CharField(widget=forms.TextInput(), required=False,)
-    # indy_list_of_column_labels_show_hide = forms.CharField(widget=forms.TextInput(), required=False, )
-    # indy_list_of_row_labels= forms.CharField(widget=forms.TextInput(), required=False, )
-    # indy_list_of_unique_row_labels= forms.CharField(widget=forms.TextInput(), required=False, )
-    # indy_count_of_unique_row_labels = forms.IntegerField(
-    #     required=False,
-    # )
-    #
-    # indy_sample_location = forms.ModelChoiceField(
-    #     queryset=AssaySampleLocation.objects.all().order_by(
-    #         'name'
-    #     ),
-    #     required=False,
-    # )
-    # indy_matrix_item = forms.ModelChoiceField(
-    #     queryset=AssayMatrixItem.objects.none(),
-    #     required=False,
-    # )
-    # indy_matrix_item_list = forms.CharField(widget=forms.TextInput(), required=False,)
-    #
-    # indy_sample_metadata_table_was_changed = forms.BooleanField()
-    #indy-sample
-
     def clean(self):
         data = super(AssayOmicDataFileUploadForm, self).clean()
 
         # data are changed here, so NEED to return the data
-
-
         data['time_1'] = 0
         for time_unit, conversion in list(TIME_CONVERSIONS.items()):
             if data.get('time_1_' + time_unit) is not None:
@@ -5297,7 +5225,6 @@ class AssayOmicDataFileUploadForm(BootstrapForm):
             if data.get('time_2_' + time_unit) is not None:
                 inttime = data.get('time_2_' + time_unit)
                 data.update({'time_2': data.get('time_2') + inttime * conversion,})
-
 
         true_to_continue = self.qc_file(save=False, calledme='clean')
         if not true_to_continue:
@@ -5330,8 +5257,7 @@ class AssayOmicDataFileUploadForm(BootstrapForm):
             data_file_pk = self.instance.id
         file_extension = os.path.splitext(data.get('omic_data_file').name)[1]
         data_type = data['data_type']
-        # header_type = data['header_type']
-        time_unit = data['time_unit']
+        # time_unit = data['time_unit']
         analysis_method = data['analysis_method']
 
         # HANDY for getting a file object and a file queryset when doing clean vrs save
@@ -5339,12 +5265,12 @@ class AssayOmicDataFileUploadForm(BootstrapForm):
             # this function is in utils.py
             # print('form clean')
             data_file = data.get('omic_data_file')
-            # a_returned = omic_data_file_process_data(save, self.study.id, data_file_pk, data_file, file_extension, calledme, data_type, header_type, time_unit, analysis_method)
+            a_returned = omic_data_file_process_data(save, self.study.id, data_file_pk, data_file, file_extension, calledme, data_type, analysis_method)
         else:
             # print('form save')
             queryset = AssayOmicDataFileUpload.objects.get(id=data_file_pk)
             data_file = queryset.omic_data_file.open()
-            # a_returned = omic_data_file_process_data(save, self.study.id, data_file_pk, data_file, file_extension, calledme, data_type, header_type, time_unit, analysis_method)
+            a_returned = omic_data_file_process_data(save, self.study.id, data_file_pk, data_file, file_extension, calledme, data_type, analysis_method)
 
         return data
 
