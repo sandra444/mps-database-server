@@ -47,59 +47,59 @@ $(document).ready(function () {
     $('#id_location_1').next().addClass('required');
     $('#id_location_2').next().addClass('required');
 
-    // // indy sample stuff
-    // var sample_metadata_table_id = 'sample_metadata_table';
-    // //has the info for the indy metadata table been populated - use so only pull from initial form once
-    // var page_metadata_lod_done = false;
-    // // had no default in html page
-    // var page_drag_action = null;
-    // // has a default in html page
-    // var page_change_duplicate_increment = 'duplicate';
-    // //the current one
-    // var metadata_lod = [];
-    // //v number of the current one (should be 1, 2, 3, 4, or 5 after first population)
-    // var metadata_lod_current_index = 0;
-    // //for holding versions to allow for undo and redo
-    // var metadata_lod_cum = [];
-    // //the table that is highlighted
-    // var metadata_highlighted = [];
-    // var list_of_fields_for_replacing_that_are_highlighted = [];
-    // var icol_last_highlighted_seen = {};
-    // var indy_sample_metadata_table_current_row_order = [];
+    // indy sample stuff
+    var sample_metadata_table_id = 'sample_metadata_table';
+    //has the info for the indy metadata table been populated - use so only pull from initial form once
+    var page_metadata_lod_done = false;
+    // had no default in html page
+    var page_drag_action = null;
+    // has a default in html page
+    var page_change_duplicate_increment = 'duplicate';
+    //the current one
+    var metadata_lod = [];
+    //v number of the current one (should be 1, 2, 3, 4, or 5 after first population)
+    var metadata_lod_current_index = 0;
+    //for holding versions to allow for undo and redo
+    var metadata_lod_cum = [];
+    //the table that is highlighted
+    var metadata_highlighted = [];
+    var list_of_fields_for_replacing_that_are_highlighted = [];
+    var icol_last_highlighted_seen = {};
+    var indy_sample_metadata_table_current_row_order = [];
 
     // just working variables, but want in different subs, so just declare here
     var current_pk = 0;
     var current_val = '';
 
-    // // make sure to update this as needed (to match what comes from utils.py)
-    // var indy_well_meta_label = 'Metadata'
-    // var indy_row_label = 'Label'
-    // var indy_button_label = 'Button'
-    //
-    // var indy_list_of_dicts_of_table_rows = JSON.parse($('#id_indy_list_of_dicts_of_table_rows').val());
-    // var indy_list_of_column_labels = JSON.parse($('#id_indy_list_of_column_labels').val());
-    // var indy_list_of_column_labels_show_hide = JSON.parse($('#id_indy_list_of_column_labels_show_hide').val());
-    // var indy_list_of_row_labels = JSON.parse($('#id_indy_list_of_row_labels').val());
-    // var indy_list_of_unique_row_labels = JSON.parse($('#id_indy_list_of_unique_row_labels').val());
-    // var indy_count_of_unique_row_labels = JSON.parse($('#id_indy_count_of_unique_row_labels').val());
-    //
-    //
-    // var indy_table_order = [];
-    // var indy_table_column_defs = [];
+    // make sure to update this as needed (to match what comes from utils.py)
+    var indy_well_meta_label = 'Metadata'
+    var indy_row_label = 'Label'
+    var indy_button_label = 'Button'
+    
+    var indy_list_of_dicts_of_table_rows = JSON.parse($('#id_indy_list_of_dicts_of_table_rows').val());
+    var indy_list_of_column_labels = JSON.parse($('#id_indy_list_of_column_labels').val());
+    var indy_list_of_column_labels_show_hide = JSON.parse($('#id_indy_list_of_column_labels_show_hide').val());
+    var indy_list_of_row_labels = JSON.parse($('#id_indy_list_of_row_labels').val());
+    var indy_list_of_unique_row_labels = JSON.parse($('#id_indy_list_of_unique_row_labels').val());
+    var indy_count_of_unique_row_labels = JSON.parse($('#id_indy_count_of_unique_row_labels').val());
+
+
+    var indy_table_order = [];
+    var indy_table_column_defs = [];
 
     // a queryset, using the form field - var indy_sample_location = JSON.parse($('#id_indy_sample_location').val());
     // a queryset, using the form field - var indy_matrix_item = JSON.parse($('#id_indy_matrix_item').val());
 
-    // var indy_matrix_item_list = JSON.parse($('#id_indy_matrix_item_list').val());
-    // var include_column_in_indy_table = indy_list_of_column_labels_show_hide;
-    // var chip_list = indy_matrix_item_list;
-    // var indy_column_labels = indy_list_of_column_labels;
+    var indy_matrix_item_list = JSON.parse($('#id_indy_matrix_item_list').val());
+    var include_column_in_indy_table = indy_list_of_column_labels_show_hide;
+    var chip_list = indy_matrix_item_list;
+    var indy_column_labels = indy_list_of_column_labels;
 
     // boolean, using the form field - var indy_sample_metadata_table_was_changed = JSON.parse($('#id_indy_sample_metadata_table_was_changed').val());
 
     //this is the variable to control if the row of apply to column headers will be added to the indy metadata table
-    // var add_apply_row_col_to_indy_table = true;
-    // change_indy_increment_visibility();
+    var add_apply_row_col_to_indy_table = true;
+    change_indy_increment_visibility();
 
     // make a cross reference to the html dom name of the content box
     // make a cross reference to the html of the content box
@@ -107,15 +107,15 @@ $(document).ready(function () {
     // and the key of these to dicts is the column header
     // e.g. col-label='Chip or Well Name'
 
-    // var icol_to_html_outer = {};
-    // var icol_to_html_element = {};
-    // // Note that these keys are hardcoded to columns headers or metadata labels
-    // icol_to_html_outer['Chip/Well Name'] = 'h_indy_matrix_item';
-    // icol_to_html_element['Chip/Well Name'] = 'matrix_item_name';
-    // icol_to_html_outer['Sample Location'] = 'h_indy_sample_location';
-    // icol_to_html_element['Sample Location'] = 'sample_location_name';
-    // icol_to_html_outer['Sample Time'] = 'h_indy_time_in_unit';
-    // icol_to_html_element['Sample Time'] = 'time_display';
+    var icol_to_html_outer = {};
+    var icol_to_html_element = {};
+    // Note that these keys are hardcoded to columns headers or metadata labels
+    icol_to_html_outer['Chip/Well Name'] = 'h_indy_matrix_item';
+    icol_to_html_element['Chip/Well Name'] = 'matrix_item_name';
+    icol_to_html_outer['Sample Location'] = 'h_indy_sample_location';
+    icol_to_html_element['Sample Location'] = 'sample_location_name';
+    icol_to_html_outer['Sample Time'] = 'h_indy_time_in_unit';
+    icol_to_html_element['Sample Time'] = 'time_display';
 
     // START - Tool tips
 
@@ -130,12 +130,12 @@ $(document).ready(function () {
     //
 
     //in the replace section - hovertips for the three fields using to replace/update/overwrite
-    // let page_sample_matrix_item_tooltip = 'The MPS Model name (chip/well ID).';
-    // $('#sample_matrix_item_tooltip').next().html($('#sample_matrix_item_tooltip').next().html() + make_escaped_tooltip(page_sample_matrix_item_tooltip));
-    // let page_sample_location_tooltip = 'The location in the MPS Model where the sample was collected.';
-    // $('#sample_location_tooltip').next().html($('#sample_location_tooltip').next().html() + make_escaped_tooltip(page_sample_location_tooltip));
-    // let page_sample_time_display_tooltip = 'The time, from the start of the experiment, when the sample was collected.';
-    // $('#sample_time_display_tooltip').next().html($('#sample_time_display_tooltip').next().html() + make_escaped_tooltip(page_sample_time_display_tooltip));
+    let page_sample_matrix_item_tooltip = 'The MPS Model name (chip/well ID).';
+    $('#sample_matrix_item_tooltip').next().html($('#sample_matrix_item_tooltip').next().html() + make_escaped_tooltip(page_sample_matrix_item_tooltip));
+    let page_sample_location_tooltip = 'The location in the MPS Model where the sample was collected.';
+    $('#sample_location_tooltip').next().html($('#sample_location_tooltip').next().html() + make_escaped_tooltip(page_sample_location_tooltip));
+    let page_sample_time_display_tooltip = 'The time, from the start of the experiment, when the sample was collected.';
+    $('#sample_time_display_tooltip').next().html($('#sample_time_display_tooltip').next().html() + make_escaped_tooltip(page_sample_time_display_tooltip));
 
     // END - Tool tips
 
@@ -250,10 +250,10 @@ $(document).ready(function () {
     /**
      * On change header type, change what is required page logic
     */
-    // $('#id_header_type').change(function () {
-    //     clear_validation_errors();
-    //     changed_something_important('header_type');
-    // });
+    $('#id_header_type').change(function () {
+        clear_validation_errors();
+        changed_something_important('header_type');
+    });
     /**
      * On changes that affect the graphs/plots on the preview page
     */
@@ -359,115 +359,115 @@ $(document).ready(function () {
     // END - General and two group stuff (written during log2fold change - that is pre indy
 
     // START added during indy-sample development click and change etc
+
+    $("input[type='radio'][name='radio_change_duplicate_increment']").click(function () {
+        page_change_duplicate_increment = $(this).val();
+
+        if (page_change_duplicate_increment === 'increment-ttbltr' ||
+            page_change_duplicate_increment === 'increment-ttbrtl' ||
+            page_change_duplicate_increment === 'increment-ttbo') {
+            $('.increment-section').show();
+        } else {
+            $('.increment-section').hide();
+        }
+    });
+
+    $(document).on('click', '#undoIndyButton', function() {
+        indyClickedToUndoRedoChangeToTable('undo');
+    });
+    $(document).on('click', '#redoIndyButton', function() {
+        indyClickedToUndoRedoChangeToTable('redo');
+    });
+    
+    $(document).on('click', '#add_row_to_indy_table', function() {
+        // may want to keep track in the number of samples - thing about how to keep track and redraw the table or add a row to the table...
+    });
+
+    $(document).on('click', '#clear_highlights_indy_table', function() {
+        $('.special-selected1').removeClass('special-selected1');
+        $('.special-selected2').removeClass('special-selected2');
+        page_paste_cell_icol = null;
+        page_paste_cell_irow = null;
+        if (page_drag_action === 'pastes') {
+            page_drag_action = null;
+            sample_metadata_replace_show_hide();
+        }
+        whatIsCurrentlyHighlightedInTheIndyTable();
+    });
+
+    // a default is NOT set in the html file, so, user has to pick one
+    $("input[type='radio'][name='radio_change_drag_action']").click(function () {
+        // check to see if any cells in the table have been highlighted - such a pain....remove for now, but may need to had back a copys radio button
+        // if ($('.special-selected1').length > 0) {
+        //     page_drag_action = $(this).val();
+        //     sample_metadata_replace_show_hide();
+        // } else {
+        //     if ($(this).val() === 'copys') {
+        //         page_drag_action = $(this).val();
+        //         sample_metadata_replace_show_hide();
+        //     } else {
+        //         page_drag_action = null;
+        //         sample_metadata_replace_show_hide();
+        //         alert('Drag over cells to highlight before selecting an Action.\n');
+        //     }
+        // }
+        if ($(this).val() === 'pastes' || $(this).val() === 'empty') {
+            if ($('.special-selected1').length > 0) {
+                page_drag_action = $(this).val();
+                sample_metadata_replace_show_hide();
+            } else {
+                page_drag_action = null;
+                sample_metadata_replace_show_hide();
+                alert('Drag over cells to highlight before selecting this Action.\n');
+            }
+        } else {
+            page_drag_action = $(this).val();
+            sample_metadata_replace_show_hide();
+        }
+    });
     //
-    // $("input[type='radio'][name='radio_change_duplicate_increment']").click(function () {
-    //     page_change_duplicate_increment = $(this).val();
-    //
-    //     if (page_change_duplicate_increment === 'increment-ttbltr' ||
-    //         page_change_duplicate_increment === 'increment-ttbrtl' ||
-    //         page_change_duplicate_increment === 'increment-ttbo') {
-    //         $('.increment-section').show();
-    //     } else {
-    //         $('.increment-section').hide();
-    //     }
+    // $(document).on('click', '#indy_instructions', function() {
+    //     $('.indy-instructions').toggle();
     // });
-    //
-    // $(document).on('click', '#undoIndyButton', function() {
-    //     indyClickedToUndoRedoChangeToTable('undo');
+
+    $(document).on('click', '#replace_in_indy_table', function() {
+        indyCalledToReplace();
+    });
+
+    //todo - going to get rid of these, but need to add others (highlight row/column)
+    // clicked on an add row button in the indy table
+    $(document).on('click', '.add_indy_row', function () {
+        let add_button_clicked = $(this);
+        indyClickedToAddRow(add_button_clicked);
+    });
+    // clicked on an add row button in the indy table
+    $(document).on('click', '.delete_indy_row', function () {
+        let delete_button_clicked = $(this);
+        indyClickedToDeleteRow(delete_button_clicked);
+    });
+
+    // need on change events for chip id and for sample location so can populate the corresponding dom element
+    // could have just used a memory variable, but having the text and pk in a dom element made picking a general process for all!
+    // note in html file, search ~pk_tracking_note~
+    $(document).on('change', '#id_indy_matrix_item', function() {
+        var thisText = $('#id_indy_matrix_item').children('option:selected').text();
+        var thisValue = $('#id_indy_matrix_item').children('option:selected').val();
+        document.getElementById('matrix_item_name').innerHTML = thisText;
+        document.getElementById('matrix_item_pk').innerHTML = thisValue;
+    });
+    $(document).on('change', '#id_indy_sample_location', function() {
+        var thisText = $('#id_indy_sample_location').children('option:selected').text();
+        var thisValue = $('#id_indy_sample_location').children('option:selected').val();
+        document.getElementById('sample_location_name').innerHTML = thisText;
+        document.getElementById('sample_location_pk').innerHTML = thisValue;
+    });
+    // not going to offer this to users - when sure about this, todo, delete this commented out stuff
+    // $(document).on('change', '#id_indy_file_column_header_list', function() {
+    //     var thisText = $('#id_indy_file_column_header_list').children('option:selected').text();
+    //     var thisValue = $('#id_indy_file_column_header_list').children('option:selected').val();
+    //     document.getElementById('file_column_header').innerHTML = thisText;
+    //     document.getElementById('sample_pk').innerHTML = thisValue;
     // });
-    // $(document).on('click', '#redoIndyButton', function() {
-    //     indyClickedToUndoRedoChangeToTable('redo');
-    // });
-    //
-    // $(document).on('click', '#add_row_to_indy_table', function() {
-    //     // may want to keep track in the number of samples - thing about how to keep track and redraw the table or add a row to the table...
-    // });
-    //
-    // $(document).on('click', '#clear_highlights_indy_table', function() {
-    //     $('.special-selected1').removeClass('special-selected1');
-    //     $('.special-selected2').removeClass('special-selected2');
-    //     page_paste_cell_icol = null;
-    //     page_paste_cell_irow = null;
-    //     if (page_drag_action === 'pastes') {
-    //         page_drag_action = null;
-    //         sample_metadata_replace_show_hide();
-    //     }
-    //     whatIsCurrentlyHighlightedInTheIndyTable();
-    // });
-    //
-    // // a default is NOT set in the html file, so, user has to pick one
-    // $("input[type='radio'][name='radio_change_drag_action']").click(function () {
-    //     // check to see if any cells in the table have been highlighted - such a pain....remove for now, but may need to had back a copys radio button
-    //     // if ($('.special-selected1').length > 0) {
-    //     //     page_drag_action = $(this).val();
-    //     //     sample_metadata_replace_show_hide();
-    //     // } else {
-    //     //     if ($(this).val() === 'copys') {
-    //     //         page_drag_action = $(this).val();
-    //     //         sample_metadata_replace_show_hide();
-    //     //     } else {
-    //     //         page_drag_action = null;
-    //     //         sample_metadata_replace_show_hide();
-    //     //         alert('Drag over cells to highlight before selecting an Action.\n');
-    //     //     }
-    //     // }
-    //     if ($(this).val() === 'pastes' || $(this).val() === 'empty') {
-    //         if ($('.special-selected1').length > 0) {
-    //             page_drag_action = $(this).val();
-    //             sample_metadata_replace_show_hide();
-    //         } else {
-    //             page_drag_action = null;
-    //             sample_metadata_replace_show_hide();
-    //             alert('Drag over cells to highlight before selecting this Action.\n');
-    //         }
-    //     } else {
-    //         page_drag_action = $(this).val();
-    //         sample_metadata_replace_show_hide();
-    //     }
-    // });
-    // //
-    // // $(document).on('click', '#indy_instructions', function() {
-    // //     $('.indy-instructions').toggle();
-    // // });
-    //
-    // $(document).on('click', '#replace_in_indy_table', function() {
-    //     indyCalledToReplace();
-    // });
-    //
-    // //todo - going to get rid of these, but need to add others (highlight row/column)
-    // // clicked on an add row button in the indy table
-    // $(document).on('click', '.add_indy_row', function () {
-    //     let add_button_clicked = $(this);
-    //     indyClickedToAddRow(add_button_clicked);
-    // });
-    // // clicked on an add row button in the indy table
-    // $(document).on('click', '.delete_indy_row', function () {
-    //     let delete_button_clicked = $(this);
-    //     indyClickedToDeleteRow(delete_button_clicked);
-    // });
-    //
-    // // need on change events for chip id and for sample location so can populate the corresponding dom element
-    // // could have just used a memory variable, but having the text and pk in a dom element made picking a general process for all!
-    // // note in html file, search ~pk_tracking_note~
-    // $(document).on('change', '#id_indy_matrix_item', function() {
-    //     var thisText = $('#id_indy_matrix_item').children('option:selected').text();
-    //     var thisValue = $('#id_indy_matrix_item').children('option:selected').val();
-    //     document.getElementById('matrix_item_name').innerHTML = thisText;
-    //     document.getElementById('matrix_item_pk').innerHTML = thisValue;
-    // });
-    // $(document).on('change', '#id_indy_sample_location', function() {
-    //     var thisText = $('#id_indy_sample_location').children('option:selected').text();
-    //     var thisValue = $('#id_indy_sample_location').children('option:selected').val();
-    //     document.getElementById('sample_location_name').innerHTML = thisText;
-    //     document.getElementById('sample_location_pk').innerHTML = thisValue;
-    // });
-    // // not going to offer this to users - when sure about this, todo, delete this commented out stuff
-    // // $(document).on('change', '#id_indy_file_column_header_list', function() {
-    // //     var thisText = $('#id_indy_file_column_header_list').children('option:selected').text();
-    // //     var thisValue = $('#id_indy_file_column_header_list').children('option:selected').val();
-    // //     document.getElementById('file_column_header').innerHTML = thisText;
-    // //     document.getElementById('sample_pk').innerHTML = thisValue;
-    // // });
 
     // END added during indy-sample development click and change etc
 
@@ -581,47 +581,47 @@ $(document).ready(function () {
                             }
                             if ($('#id_data_type')[0].selectize.items[0] == 'log2fc') {
                             } else {
-                                // // to do need to fill the sample names list to use for replace in the list and in the pick box
-                                // // todo - changing this so that it won't put in a replace option list, but will
-                                // // either write them to a table or a plate - lots of work todo here
-                                // var indy_file_headers = window.OMICS.omics_data['indy_file_column_header_list'];
-                                // if (indy_file_headers.length === 0) {
-                                //     alert('There was no information pulled back from the file selected. This is commonly caused by a named header for the gene reference being missing. Use: gene, gene reference, or name as a column header for the gene field.')
-                                // }
-                                // //todo modify the utils.py omic_data_file_process_data to pull back what need
-                                // //based on plate or sample - pull both so can just switch...
-                                // // console.log('indy_file_headers ',indy_file_headers)
-                                //
-                                // // todo these could be samples or well names...still working on this
-                                // // indy_row_labels = [];
-                                //
-                                //
-                                // // todo, load the prefix and number, think about how will use to make a plate looking table
-                                //
-                                // // // todo - do not think we will be using this drop down anymore, but keep since might need some of this code for getting what need for plate list(s)
-                                // // let $this_dropdown = $(document.getElementById('id_indy_file_column_header_list'));
-                                //
-                                // //HANDY-selectize selection clear and refill all
-                                // // clear the current selection or it can remain in the list :o
-                                // $('#id_indy_file_column_header_list').selectize()[0].selectize.clear()
-                                //
-                                // // clear all options and refill
-                                // $this_dropdown.selectize()[0].selectize.clearOptions();
-                                // let this_dict = $this_dropdown[0].selectize;
-                                // // fill the dropdown with what brought back from ajax call
-                                // $.each(indy_file_headers, function( pk, text ) {
-                                //     // console.log('c '+pk+ '  '+text)
-                                //     var in_me = text.indexOf('nnamed');
-                                //     if (in_me < 0) {
-                                //         lctext = text.toLowerCase();
-                                //         if (lctext === 'gene reference' || lctext === 'name' || lctext === 'gene'  || lctext === 'gene id') {
-                                //             //    skip it
-                                //         } else {
-                                //             this_dict.addOption({value: pk, text: text});
-                                //             // indy_row_labels.push(text);
-                                //         }
-                                //     }
-                                // });
+                                // to do need to fill the sample names list to use for replace in the list and in the pick box
+                                // todo - changing this so that it won't put in a replace option list, but will
+                                // either write them to a table or a plate - lots of work todo here
+                                var indy_file_headers = window.OMICS.omics_data['indy_file_column_header_list'];
+                                if (indy_file_headers.length === 0) {
+                                    alert('There was no information pulled back from the file selected. This is commonly caused by a named header for the gene reference being missing. Use: gene, gene reference, or name as a column header for the gene field.')
+                                }
+                                //todo modify the utils.py omic_data_file_process_data to pull back what need
+                                //based on plate or sample - pull both so can just switch...
+                                // console.log('indy_file_headers ',indy_file_headers)
+
+                                // todo these could be samples or well names...still working on this
+                                // indy_row_labels = [];
+
+
+                                // todo, load the prefix and number, think about how will use to make a plate looking table
+
+                                // // todo - do not think we will be using this drop down anymore, but keep since might need some of this code for getting what need for plate list(s)
+                                // let $this_dropdown = $(document.getElementById('id_indy_file_column_header_list'));
+
+                                //HANDY-selectize selection clear and refill all
+                                // clear the current selection or it can remain in the list :o
+                                $('#id_indy_file_column_header_list').selectize()[0].selectize.clear()
+
+                                // clear all options and refill
+                                $this_dropdown.selectize()[0].selectize.clearOptions();
+                                let this_dict = $this_dropdown[0].selectize;
+                                // fill the dropdown with what brought back from ajax call
+                                $.each(indy_file_headers, function( pk, text ) {
+                                    // console.log('c '+pk+ '  '+text)
+                                    var in_me = text.indexOf('nnamed');
+                                    if (in_me < 0) {
+                                        lctext = text.toLowerCase();
+                                        if (lctext === 'gene reference' || lctext === 'name' || lctext === 'gene'  || lctext === 'gene id') {
+                                            //    skip it
+                                        } else {
+                                            this_dict.addOption({value: pk, text: text});
+                                            // indy_row_labels.push(text);
+                                        }
+                                    }
+                                });
                             }
                         }
                     }
@@ -638,15 +638,15 @@ $(document).ready(function () {
 
     // Other Functions
 
-    // function change_indy_increment_visibility() {
-    //     $('.header-type-well').addClass('hidden');
-    //     $('.header-type-not-well').addClass('hidden');
-    //     if ($('#id_header_type')[0].selectize.items[0] === 'well') {
-    //         $('.header-type-well').removeClass('hidden');
-    //     } else {
-    //         $('.header-type-not-well').removeClass('hidden');
-    //     }
-    // }
+    function change_indy_increment_visibility() {
+        $('.header-type-well').addClass('hidden');
+        $('.header-type-not-well').addClass('hidden');
+        if ($('#id_header_type')[0].selectize.items[0] === 'well') {
+            $('.header-type-well').removeClass('hidden');
+        } else {
+            $('.header-type-not-well').removeClass('hidden');
+        }
+    }
 
     // Called from a variety of places, including load, to set the right visibilities based on the data type
     // and also based on header_type....
@@ -654,18 +654,18 @@ $(document).ready(function () {
     function changed_something_important(called_from) {
         // console.log("called_from ",called_from)
 
-        // change_indy_increment_visibility();
-        //
-        // // todo streamline this
-        //
-        // if ($('#id_data_type')[0].selectize.items[0] == 'log2fc') {
-        //     $('#id_header_type')[0].selectize.setValue('target');
-        // } else {
-        //     //todo, may need to fix depending on other selections
-        //     if ($('#id_header_type')[0].selectize.items[0] == 'target') {
-        //         $('#id_header_type')[0].selectize.setValue('well');
-        //     }
-        // }
+        change_indy_increment_visibility();
+
+        // todo streamline this
+
+        if ($('#id_data_type')[0].selectize.items[0] == 'log2fc') {
+            $('#id_header_type')[0].selectize.setValue('target');
+        } else {
+            //todo, may need to fix depending on other selections
+            if ($('#id_header_type')[0].selectize.items[0] == 'target') {
+                $('#id_header_type')[0].selectize.setValue('well');
+            }
+        }
 
 
         // could make this so it only checks if the data_type was changed, but it is okay this way, so leave it
@@ -978,15 +978,15 @@ $(document).ready(function () {
     function indySampleMetadataCallBuildAndPost() {
         //do the sort in the utils.py and NOT in the table
         //do not show sort icon for the highlight row buttons
-        // if ($('#id_header_type')[0].selectize.items[0] === 'well') {
-        //     // indy_table_order = [[0, 'asc'],[1, 'asc']];
-        //     indy_table_order = [];
-        //     indy_table_column_defs = [{bSortable: false, targets: [2,]}];
-        // } else {
-        //     // indy_table_order = [[0, 'asc'],];
-        //     indy_table_order = [];
-        //     indy_table_column_defs = [{bSortable: false, targets: [1,]}];
-        // }
+        if ($('#id_header_type')[0].selectize.items[0] === 'well') {
+            // indy_table_order = [[0, 'asc'],[1, 'asc']];
+            indy_table_order = [];
+            indy_table_column_defs = [{bSortable: false, targets: [2,]}];
+        } else {
+            // indy_table_order = [[0, 'asc'],];
+            indy_table_order = [];
+            indy_table_column_defs = [{bSortable: false, targets: [1,]}];
+        }
             // { 'width': '20%' },
             // { width: 200, targets: 0 }
             // {'targets': [0], 'visible': true,},
@@ -1151,13 +1151,13 @@ $(document).ready(function () {
             // sample location can ONLY be duplicate!
             if (tmeta === 'Sample Location' || tlcol === 'Sample Location') {
                 if (current_sample_location_name.length > 0) {
-                    // if ($('#id_header_type')[0].selectize.items[0] === 'well') {
-                    //     metadata_lod[tirow_in_metadata_lod][tlcol] = current_sample_location_name;
-                    //     metadata_lod[tirow_in_metadata_lod+3][tlcol] = current_sample_location_pk;
-                    // } else {
+                    if ($('#id_header_type')[0].selectize.items[0] === 'well') {
+                        metadata_lod[tirow_in_metadata_lod][tlcol] = current_sample_location_name;
+                        metadata_lod[tirow_in_metadata_lod+3][tlcol] = current_sample_location_pk;
+                    } else {
                         metadata_lod[tirow_in_metadata_lod]['Sample Location'] = current_sample_location_name;
                         metadata_lod[tirow_in_metadata_lod]['sample_location_pk'] = current_sample_location_pk;
-                    // }
+                    }
                 }
             } else {
                 if (page_change_duplicate_increment === 'duplicate') {
@@ -1172,13 +1172,13 @@ $(document).ready(function () {
                         }
                     } else if (tmeta === 'Chip/Well Name'  || tlcol === 'Chip/Well Name') {
                         if (current_matrix_item_name.length > 0) {
-                            // if ($('#id_header_type')[0].selectize.items[0] === 'well') {
-                            //     metadata_lod[tirow_in_metadata_lod][tlcol] = current_matrix_item_name;
-                            //     metadata_lod[tirow_in_metadata_lod+3][tlcol] = current_matrix_item_pk;
-                            // } else {
+                            if ($('#id_header_type')[0].selectize.items[0] === 'well') {
+                                metadata_lod[tirow_in_metadata_lod][tlcol] = current_matrix_item_name;
+                                metadata_lod[tirow_in_metadata_lod+3][tlcol] = current_matrix_item_pk;
+                            } else {
                                 metadata_lod[tirow_in_metadata_lod]['Chip/Well Name'] = current_matrix_item_name;
                                 metadata_lod[tirow_in_metadata_lod]['matrix_item_pk'] = current_matrix_item_pk;
-                            // }
+                            }
                         }
                     }
 
@@ -1319,8 +1319,8 @@ $(document).ready(function () {
             thisElementList = $('td[col-index*="' + ticol + '"][row-index*="' + tirow + '"]');
             // $("td[col-index*='file_column_header'][row-index*='1']").addClass('special-selected1')
             // console.log("thisElementList ",thisElementList)
-            if ( (thisElementList.hasClass('no-edit') || thisElementList.hasClass('no-edit-data')) ) {
-                // && $('#id_header_type')[0].selectize.items[0] === 'well') {
+            if ( (thisElementList.hasClass('no-edit') || thisElementList.hasClass('no-edit-data'))
+                && $('#id_header_type')[0].selectize.items[0] === 'well') {
             //    skip todo fix this so can not hightling the empty wells!
             } else {
                 thisElementList.addClass('special-selected1');
@@ -1406,11 +1406,11 @@ $(document).ready(function () {
             dict_highlighted_indy_metadata['metadata_highlighted_content'] = imetadata_highlighted_content;
             metadata_highlighted.push(dict_highlighted_indy_metadata);
 
-            // if ($('#id_header_type')[0].selectize.items[0] === 'well') {
-            //     list_of_fields_for_replacing_that_are_highlighted.push(imetadata_highlighted_meta_label);
-            // } else {
+            if ($('#id_header_type')[0].selectize.items[0] === 'well') {
+                list_of_fields_for_replacing_that_are_highlighted.push(imetadata_highlighted_meta_label);
+            } else {
                 list_of_fields_for_replacing_that_are_highlighted.push(imetadata_highlighted_tlcol);
-            // }
+            }
             // console.log("list_of_fields_for_replacing_that_are_highlighted ",list_of_fields_for_replacing_that_are_highlighted)
 
             index = index + 1;
@@ -1628,13 +1628,13 @@ $(document).ready(function () {
         $.each(metadata_lod, function (i_index, row) {
             let rowLabel = row[indy_row_label];
             let metaLabel = row[indy_row_label];
-            // if ($('#id_header_type')[0].selectize.items[0] === 'well') {
-            //     metaLabel = row[indy_well_meta_label];
-            // }
+            if ($('#id_header_type')[0].selectize.items[0] === 'well') {
+                metaLabel = row[indy_well_meta_label];
+            }
             // if doing as a well, there are some rows we do not want in the table, but want in our metadata_lod
             if (
-                // $('#id_header_type')[0].selectize.items[0] === 'well'
-                // &&
+                $('#id_header_type')[0].selectize.items[0] === 'well'
+                &&
                 (metaLabel === 'matrix_item_pk' ||
                     metaLabel === 'sample_location_pk' ||
                     metaLabel === 'sample_metadata_pk')
@@ -1688,8 +1688,7 @@ $(document).ready(function () {
                             let contentLength = myCellContent.trim().length;
                             //todo think about how to do this - do want empty or some place holder?
                             // console.log("myCellContent ",myCellContent, " ", contentLength)
-                            // if (contentLength == 0 && $('#id_header_type')[0].selectize.items[0] === 'well') {
-                            if (contentLength == 0) {
+                            if (contentLength == 0 && $('#id_header_type')[0].selectize.items[0] === 'well') {
                                 $(td).attr('class', 'no-edit-data');
                             } else {
                                 $(td).attr('class', 'indy-data');

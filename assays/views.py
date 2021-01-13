@@ -100,6 +100,7 @@ from assays.forms import (
     AbstractClassAssayStudyAssay,
     AssayOmicDataFileUploadForm,
     AssayMatrixItemForm,
+    AssayOmicSampleMetadataAdditionalInfoForm,
 )
 
 from microdevices.models import MicrophysiologyCenter
@@ -4955,6 +4956,49 @@ class AssayOmicDataFileUploadView(StudyGroupMixin, DetailHandlerView):
         return context
 
 # END omic data file list, add, update, view and delete section
+
+
+##### Start omic METADATA (for counts), add, update, view and delete section
+# LUKE EYES
+class AssayOmicSampleMetadataAdditionalInfoFormUpdate(StudyGroupMixin, HistoryMixin, UpdateView):
+    """Views Upload of omic sample metadata """
+
+    template_name = 'assays/assayomicsamplemetadata_ur.html'
+    form_class = AssayOmicSampleMetadataAdditionalInfoForm
+
+    def get_context_data(self, **kwargs):
+        context = super(AssayOmicSampleMetadataAdditionalInfoForm, self).get_context_data(**kwargs)
+        context['update'] = True
+        context['page_called'] = 'update'
+        return context
+
+    def form_valid(self, form):
+        if form.is_valid():
+            save_forms_with_tracking(self, form, update=True)
+            return redirect(self.object.get_post_submission_url())
+        else:
+            return self.render_to_response(self.get_context_data(form=form, ))
+
+# LUKE EYES
+class AssayOmicSampleMetadataAdditionalInfoFormView(StudyGroupMixin, DetailHandlerView):
+    """Views View Upload an AssayOmicDataFileUpload file """
+
+    template_name = 'assays/assayomicsamplemetadata_ur.html'
+    form_class = AssayOmicSampleMetadataAdditionalInfoForm
+
+    def get_context_data(self, **kwargs):
+        context = super(AssayOmicSampleMetadataAdditionalInfoForm, self).get_context_data(**kwargs)
+        context['review'] = True
+        context['page_called'] = 'review'
+
+        # HANDY to use DetailView in a View view and trick Django into getting the form
+        context.update({
+            'form': AssayOmicSampleMetadataAdditionalInfoForm(instance=self.object),
+        })
+
+        return context
+
+# END omic METADATA (for counts), add, update, view and delete section
 
 
 class AssayStudyOmics(StudyViewerMixin, DetailHandlerView):

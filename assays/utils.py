@@ -7351,21 +7351,11 @@ def get_model_location_dictionary(this_model_pk):
 
 
 # sck forms.py - will load for previous submits based on saved header_type
-def find_the_labels_needed_for_the_indy_omic_table(called_from, header_type, omic_file_pk, time_unit, find_defaults):
-    # For the table format, if the file column header is, for example: samp1, samp2, samp3
-    # -row labels would be samp1, samp2, samp3
-    # -column labels would be code for File Column Header, Chip or Well ID, Sample Location, Sample Time, PKS???
-    # For the plate format, if file column header is, for example: DC1,DC2,DC4,DC5,DC6,DA08,DA09
-    # -row labels would be DC and DA (use upper case)
-    # -column labels would be 1, 2, 4, 5, 6, 8, and 9
-
+def find_the_labels_needed_for_the_indy_omic_table(called_from, find_defaults):
     indy_omic_table = {}
     indy_list_of_column_labels = []
     indy_list_of_column_labels_show_hide = []
     indy_list_of_dicts_of_table_rows = []
-    indy_list_of_row_labels = []
-    indy_list_of_unique_row_labels = []
-    indy_count_of_unique_row_labels = []
 
     # if omic_file_pk is none, use find_defaults to see if want to get example data (this is for development)
     # else, should send back everything as blank (it is an add page - thus, no file has been added yet)
@@ -7378,199 +7368,77 @@ def find_the_labels_needed_for_the_indy_omic_table(called_from, header_type, omi
     # no change in the js file should be needed when change here
 
     # for the plate, make upper case row labels please...
-    if omic_file_pk is None:
-        if find_defaults:
-            #  get the defaults for testing
-            if header_type == 'well':
-                # when it is in well plate format
-                # this is more challenging.....
-                # currently, the column for the apply to all rows button is included as a column header
-                # if do not want it, just turn its show/hide to 0 instead of 1
-                indy_list_of_column_labels = [
-                    'Label', 'Metadata', 'Button',
-                    '1', '1-pk',
-                    '2', '2-pk',
-                    '4', '4-pk',
-                    '5', '5-pk',
-                    '6', '6-pk',
-                    '8', '8-pk',
-                    '9', '9-pk'
-                ]
-                indy_list_of_column_labels_show_hide = [
-                    1, 1, 1,
-                    1, 0,
-                    1, 0,
-                    1, 0,
-                    1, 0,
-                    1, 0,
-                    1, 0,
-                    1, 0
-                ]
-                indy_list_of_dicts_of_table_rows = []
+    if find_defaults:
+        #  get the defaults for testing
+        # when it is not a well plate format (table/list format)
+        # this is the much easier way...
+        # currently, the column for the apply to all rows button is included as a column header
+        # if do not want it, just turn its show/hide to 0 instead of 1
+        indy_list_of_column_labels = [
+            'Label',
+            'Button',
+            'Chip/Well Name',
+            'Sample Location',
+            'Sample Time',
+            'matrix_item_pk',
+            'sample_location_pk',
+        ]
+        indy_list_of_column_labels_show_hide = [
+            1,
+            1,
+            1,
+            1,
+            1,
+            0,
+            0
+        ]
+        indy_list_of_dicts_of_table_rows = []
 
-                list_of_defaults1 = []
-                list_of_defaults2 = []
-                list_of_defaults3 = []
-                list_of_defaults4 = []
-                list_of_defaults5 = []
-                list_of_defaults6 = []
+        list_of_defaults1 = []
+        list_of_defaults2 = []
+        list_of_defaults3 = []
 
-                dict1 = {}
-                dict2 = {}
-                dict3 = {}
-                dict4 = {}
-                dict5 = {}
-                dict6 = {}
+        dict1 = {}
+        dict2 = {}
+        dict3 = {}
 
+        list_of_defaults1 = [
+            'sample20201105-05',
+            '',
+            'chip1',
+            'efflux',
+            '2',
+            '5',
+            '6'
+        ]
+        list_of_defaults2 = [
+            'sample20201105-02',
+            '',
+            'chip2',
+            'efflux',
+            '1',
+            '7',
+            '9'
+        ]
+        list_of_defaults3 = [
+            'sample20201105-03',
+            '',
+            'chip3',
+            'efflux',
+            '5',
+            '9',
+            '9'
+        ]
 
-                # life will be easier if the metadata is the same as the column headers
-                # which are the same as the meta-label attribute in the table cells
-                # DA and DC
-                list_of_defaults1 = [
-                    'DA', 'Chip/Well Name', '',
-                    'chip1', '0',
-                    'chip2', '0',
-                    'chip3', '0',
-                    'chip4', '0',
-                    'chip5', '0',
-                    ''     , '0',
-                    'chip6', '0'
-                ]
-                list_of_defaults2 = [
-                    'DA', 'Sample Location', '',
-                    'efflux', '0',
-                    'efflux', '0',
-                    'efflux', '0',
-                    'efflux', '0',
-                    'efflux', '0',
-                    ''      , '0',
-                    'efflux', '0'
-                ]
-                list_of_defaults3 = [
-                    'DA', 'Sample Time', '',
-                    '1', '0',
-                    '1', '0',
-                    '1', '0',
-                    '2', '0',
-                    '3', '0',
-                    '' , '0',
-                    '9', '0'
-                ]
-                list_of_defaults4 = [
-                    'DA',
-                    'matrix_item_pk',
-                    '',
-                    '4', '0',
-                    '4', '0',
-                    '4', '0',
-                    '4', '0',
-                    '4', '0',
-                    '' , '0',
-                    '4', '0'
-                ]
-                list_of_defaults5 = [
-                    'DA',
-                    'sample_location_pk',
-                    '',
-                    '6', '0',
-                    '6', '0',
-                    '6', '0',
-                    '6', '0',
-                    '6', '0',
-                    '' , '0',
-                    '6', '0'
-                ]
-
-                # make a default dict
-                # if this is an edit form, these lists will need initialized with what was previously saved
-                for index, each in enumerate(indy_list_of_column_labels):
-                    print(index," ",each)
-                    dict1[each] = list_of_defaults1[index]
-                    dict2[each] = list_of_defaults2[index]
-                    dict3[each] = list_of_defaults3[index]
-                    dict4[each] = list_of_defaults4[index]
-                    dict5[each] = list_of_defaults5[index]
-                    # dict6[each] = list_of_defaults6[index]
-                indy_list_of_dicts_of_table_rows.append(dict1)
-                indy_list_of_dicts_of_table_rows.append(dict2)
-                indy_list_of_dicts_of_table_rows.append(dict3)
-                indy_list_of_dicts_of_table_rows.append(dict4)
-                indy_list_of_dicts_of_table_rows.append(dict5)
-                # indy_list_of_dicts_of_table_rows.append(dict6)
-            else:
-                # when it is not a well plate format (table/list format)
-                # this is the much easier way...
-                # currently, the column for the apply to all rows button is included as a column header
-                # if do not want it, just turn its show/hide to 0 instead of 1
-                indy_list_of_column_labels = [
-                    'Label',
-                    'Button',
-                    'Chip/Well Name',
-                    'Sample Location',
-                    'Sample Time',
-                    'matrix_item_pk',
-                    'sample_location_pk',
-                ]
-                indy_list_of_column_labels_show_hide = [
-                    1,
-                    1,
-                    1,
-                    1,
-                    1,
-                    0,
-                    0
-                ]
-                indy_list_of_dicts_of_table_rows = []
-
-                list_of_defaults1 = []
-                list_of_defaults2 = []
-                list_of_defaults3 = []
-
-                dict1 = {}
-                dict2 = {}
-                dict3 = {}
-
-                list_of_defaults1 = [
-                    'sample20201105-05',
-                    '',
-                    'chip1',
-                    'efflux',
-                    '2',
-                    '5',
-                    '6'
-                ]
-                list_of_defaults2 = [
-                    'sample20201105-02',
-                    '',
-                    'chip2',
-                    'efflux',
-                    '1',
-                    '7',
-                    '9'
-                ]
-                list_of_defaults3 = [
-                    'sample20201105-03',
-                    '',
-                    'chip3',
-                    'efflux',
-                    '5',
-                    '9',
-                    '9'
-                ]
-
-                # make a default dict
-                # if this is an edit form, these lists will need initialized with what was previously saved
-                for index, each in enumerate(indy_list_of_column_labels):
-                    dict1[each] = list_of_defaults1[index]
-                    dict2[each] = list_of_defaults2[index]
-                    dict3[each] = list_of_defaults3[index]
-                indy_list_of_dicts_of_table_rows.append(dict1)
-                indy_list_of_dicts_of_table_rows.append(dict2)
-                indy_list_of_dicts_of_table_rows.append(dict3)
-
-        else:
-            # return empties (already set)
-            pass
+        # make a default dict
+        # if this is an edit form, these lists will need initialized with what was previously saved
+        for index, each in enumerate(indy_list_of_column_labels):
+            dict1[each] = list_of_defaults1[index]
+            dict2[each] = list_of_defaults2[index]
+            dict3[each] = list_of_defaults3[index]
+        indy_list_of_dicts_of_table_rows.append(dict1)
+        indy_list_of_dicts_of_table_rows.append(dict2)
+        indy_list_of_dicts_of_table_rows.append(dict3)
 
     else:
         # todo-sck need to get the data when update or review
@@ -7634,19 +7502,8 @@ def find_the_labels_needed_for_the_indy_omic_table(called_from, header_type, omi
     r_counter = 0
     new_indy_list_of_dicts_of_table_rows = sorted(indy_list_of_dicts_of_table_rows, key=sortkeypicker([indy_list_of_column_labels[0], indy_list_of_column_labels[1]]))
     indy_omic_table['indy_list_of_dicts_of_table_rows'] = new_indy_list_of_dicts_of_table_rows
-    for each_dict in new_indy_list_of_dicts_of_table_rows:
-        thisLabel = each_dict.get('Label')
-        indy_list_of_row_labels.append(thisLabel)
-        if (thisLabel in indy_list_of_unique_row_labels):
-            pass
-        else :
-            indy_list_of_unique_row_labels.append(thisLabel)
-            r_counter = r_counter + 1
-    indy_count_of_unique_row_labels = r_counter
-
-    indy_omic_table['indy_list_of_row_labels'] = indy_list_of_row_labels
-    indy_omic_table['indy_list_of_unique_row_labels'] = indy_list_of_unique_row_labels
-    indy_omic_table['indy_count_of_unique_row_labels'] = indy_count_of_unique_row_labels
+    print("indy_omic_table")
+    print(indy_omic_table)
 
     return indy_omic_table
 

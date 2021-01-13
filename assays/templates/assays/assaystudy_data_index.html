@@ -59,7 +59,9 @@
             <br>
             <small>Omic data that will use the MPS-Db Omic visualization and analysis tools (i.e. fold change, normalized counts, raw counts). Data to be uploaded must be formatted specifically as omic data in the file format corresponding to the type of omic data being uploaded.</small>
         </h3>
-    <a href="{% url 'assayomicdatafileupload-index' object.id %}" class="btn btn-lg btn-primary" role="button">View, Add, Remove or Edit Omic Data Sample Names and Associated Chips/Wells, Sample Locations, and Sample Time</a>
-        <a href="{% url 'assayomicdatafileupload-index' object.id %}" class="btn btn-lg btn-primary" role="button">View, Add or Remove Omic Data File or Update File Metadata</a>
+{#    todo - how go between view and update ?? mixin??#}
+    {# LUKE EYES#}
+    <a href="{% url 'assayomicsamplemetadata-update' object.id %}" class="btn btn-lg btn-primary" role="button">View, Add, Remove or Edit Omic Data Sample Names and Associated Chips/Wells, Sample Locations, and Sample Time</a>
+        <a href="{% url 'assayomicsamplemetadata-update' object.id %}" class="btn btn-lg btn-primary" role="button">View, Add or Remove Omic Data File or Update File Metadata</a>
     </div>
 {% endblock %}

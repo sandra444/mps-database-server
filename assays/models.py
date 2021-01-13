@@ -5192,25 +5192,6 @@ class AssayOmicDataFileUpload(LockableModel):
         verbose_name='Data Type'
     )
 
-    # keep this aligned with the data_type defaults
-    # header_type = models.CharField(
-    #     max_length=20,
-    #     default='target',
-    #     choices=assay_omic_file_header_type_choices,
-    #     help_text='The type of the headers in the omic file.',
-    #     verbose_name='File Header Type'
-    # )
-
-    # sample time DISPLAY unit - indicates how the user wants to see the time displayed and interact with the time
-    # IMPORTANT - the sample time is saved in minutes, as per the database standard
-    time_unit = models.CharField(
-        max_length=8,
-        default='day',
-        choices=assay_plate_reader_time_unit_choices,
-        help_text='The display unit for the sample collection time.',
-        verbose_name='Sample Time Unit'
-    )
-
     # these were during development when we were using separate groups
     # probably will not need again, but keep just in case
     # # data groups could be empty for the norm count and raw count data
@@ -5300,46 +5281,57 @@ class AssayOmicDataFileUpload(LockableModel):
     def get_delete_url(self):
         return '{}delete/'.format(self.get_absolute_url())
 
-#This is for the metadata when need to collect by individual sample
-class AssayOmicSampleMetadata(models.Model):
-    """Model for omic sample metadata associated to count data."""
 
-    class Meta(object):
-        verbose_name = 'Omic Sample Name and Metadata'
+#This is for the metadata when need to collect by individual omicsample
+# class AssayOmicSampleMetadata(models.Model):
+#     """Model for omic sample metadata associated to count data."""
+#
+#     class Meta(object):
+#         verbose_name = 'Omic Sample Name and Metadata'
+#
+#     study = models.ForeignKey(
+#         'assays.AssayStudy',
+#         on_delete=models.CASCADE,
+#         verbose_name='Study'
+#     )
+#
+#     sample_name = models.CharField(
+#         max_length=255,
+#         default='',
+#         help_text='The header for this sample used in the uploaded file - must match EXACTLY what is in the omic file',
+#         verbose_name='Cross Reference'
+#     )
+#
+#     matrix_item = models.ForeignKey(
+#         'assays.AssayMatrixItem',
+#         on_delete=models.CASCADE,
+#         verbose_name='Matrix Item'
+#     )
+#
+#     sample_location = models.ForeignKey(
+#         'assays.AssaySampleLocation',
+#         on_delete=models.CASCADE,
+#         verbose_name='Sample Location'
+#     )
+#
+#     # PLEASE NOTE THAT THIS IS IN MINUTES
+#     sample_time = models.FloatField(
+#         default=0,
+#         verbose_name='Time'
+#     )
+    # sample time DISPLAY unit - indicates how the user wants to see the time displayed and interact with the time
+    # IMPORTANT - the sample time is saved in minutes, as per the database standard
+    # time_unit = models.CharField(
+    #     max_length=8,
+    #     default='day',
+    #     choices=assay_plate_reader_time_unit_choices,
+    #     help_text='The display unit for the sample collection time.',
+    #     verbose_name='Sample Time Unit'
+    # )
 
-    study = models.ForeignKey(
-        'assays.AssayStudy',
-        on_delete=models.CASCADE,
-        verbose_name='Study'
-    )
-
-    sample_name = models.CharField(
-        max_length=255,
-        default='',
-        help_text='The header for this sample used in the uploaded file - must match EXACTLY what is in the omic file',
-        verbose_name='Cross Reference'
-    )
-
-    matrix_item = models.ForeignKey(
-        'assays.AssayMatrixItem',
-        on_delete=models.CASCADE,
-        verbose_name='Matrix Item'
-    )
-
-    sample_location = models.ForeignKey(
-        'assays.AssaySampleLocation',
-        on_delete=models.CASCADE,
-        verbose_name='Sample Location'
-    )
-
-    # PLEASE NOTE THAT THIS IS IN MINUTES
-    time = models.FloatField(
-        default=0,
-        verbose_name='Time'
-    )
-
-    def __str__(self):
-        return '{0}'.format(self.id)
+#
+#     def __str__(self):
+#         return '{0}'.format(self.id)
 
 # for the two group data points
 class AssayOmicDataPoint(models.Model):

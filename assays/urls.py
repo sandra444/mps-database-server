@@ -103,7 +103,9 @@ from assays.views import (
     AssayOmicDataFileUploadDelete,
     AssayStudyOmics,
     AssayStudyTemplate,
-    AssayStudyOmicsDownload
+    AssayStudyOmicsDownload,
+    AssayOmicSampleMetadataAdditionalInfoFormUpdate,
+    AssayOmicSampleMetadataAdditionalInfoFormView
 )
 import assays.ajax
 
@@ -321,10 +323,29 @@ urlpatterns = [
     url(r'^assays/assayplatereaderfile/(?P<pk>[0-9]+)/delete/$', AssayPlateReaderMapDataFileDelete.as_view(), name='assayplatereaderfile-delete'),
 
     # Omic Data
-    url(r'^assays/assaystudy/(?P<pk>[0-9]+)/assayomicdatafileupload/$', AssayOmicDataFileUploadIndex.as_view(), name='assayomicdatafileupload-index'),
-    url(r'^assays/assaystudy/(?P<study_id>[0-9]+)/assayomicdatafileupload/add/$', AssayOmicDataFileUploadAdd.as_view(), name='assayomicdatafileupload-add'),
-    url(r'^assays/assayomicdatafileupload/(?P<pk>[0-9]+)/view/$', AssayOmicDataFileUploadView.as_view(), name='assayomicdatafileupload-view'),
-    url(r'^assays/assayomicdatafileupload/(?P<pk>[0-9]+)/update/$', AssayOmicDataFileUploadUpdate.as_view(), name='assayomicdatafileupload-update'),
-    url(r'^assays/assayomicdatafileupload/(?P<pk>[0-9]+)/delete/$', AssayOmicDataFileUploadDelete.as_view(), name='assayomicdatafileupload-delete'),
+    url(r'^assays/assaystudy/(?P<pk>[0-9]+)/assayomicdatafileupload/$',
+        AssayOmicDataFileUploadIndex.as_view(),
+        name='assayomicdatafileupload-index'),
+    url(r'^assays/assaystudy/(?P<study_id>[0-9]+)/assayomicdatafileupload/add/$',
+        AssayOmicDataFileUploadAdd.as_view(),
+        name='assayomicdatafileupload-add'),
+    url(r'^assays/assayomicdatafileupload/(?P<pk>[0-9]+)/view/$',
+        AssayOmicDataFileUploadView.as_view(),
+        name='assayomicdatafileupload-view'),
+    url(r'^assays/assayomicdatafileupload/(?P<pk>[0-9]+)/update/$',
+        AssayOmicDataFileUploadUpdate.as_view(),
+        name='assayomicdatafileupload-update'),
+    url(r'^assays/assayomicdatafileupload/(?P<pk>[0-9]+)/delete/$',
+        AssayOmicDataFileUploadDelete.as_view(),
+        name='assayomicdatafileupload-delete'),
+
+    # Omic Metadata
+    # LUKE EYES
+    url(r'^assays/assaystudy/(?P<study_id>[0-9]+)/assayomicsamplemetadata/update/$',
+        AssayOmicSampleMetadataAdditionalInfoFormUpdate.as_view(),
+        name='assayomicsamplemetadata-update'),
+    url(r'^assays/assaystudy/(?P<study_id>[0-9]+)/assayomicsamplemetadata/view/$',
+        AssayOmicSampleMetadataAdditionalInfoFormView.as_view(),
+        name='assayomicsamplemetadata-view'),
 
 ]

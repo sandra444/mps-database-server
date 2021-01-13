@@ -3,13 +3,10 @@
 
 {% block extra_head %}
     <script src="//www.google.com/jsapi"></script>
-    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 {% endblock %}
 
 {% block load_js %}
-    <script src="{% static "assays/grouping_filtering.js" %}"></script>
-    <script src="{% static "assays/assay_shared_omics.js" %}"></script>
-    <script src="{% static "assays/assayomicdatafileupload_aur.js" %}"></script>
+{#    <script src="{% static "assays/assayomicsamplemetadata_ur.js" %}"></script>#}
     <script src="{% static "js/enter_override.js" %}"></script>
 {% endblock %}
 
@@ -21,31 +18,23 @@
     <li><a href="{{ form.instance.study.get_absolute_url }}">{{ form.instance.study }}</a></li>
     <li><a href="{% url 'assays-assaystudy-data-index' form.instance.study.id %}">Data</a></li>
     {# form.instance should work either way? #}
-    {% if object %}
-        <li><a href="{% url "assayomicdatafileupload-index" object.study.id %}">Assay Omic Data Files</a>
-    {% else %}
-        <li><a href="{% url "assayomicdatafileupload-index" form.instance.study_id %}">Assay Omic Data Files</a>
-    {% endif %}
-    <li class="active">
-        {% if object %}
-            <em>{{ object }}</em>
-        {% else %}
-            Add
-        {% endif %}
-    </li>
-{% endblock %}
-
-{% block sidebar %}
-    {% if update or add %}
-    <div class="toggle-display-none" id="omic_preview_the_graphs_section2">
-        {% include 'assays/grouping_filtering.html' with omics="true"%}
-    </div>
-    {% endif %}
+{#    {% if object %}#}
+{#        <li><a href="{% url "assayomicdatafileupload-index" object.study.id %}">Assay Omic Data Files</a>#}
+{#    {% else %}#}
+{#        <li><a href="{% url "assayomicdatafileupload-index" form.instance.study_id %}">Assay Omic Data Files</a>#}
+{#    {% endif %}#}
+{#    <li class="active">#}
+{#        {% if object %}#}
+{#            <em>{{ object }}</em>#}
+{#        {% else %}#}
+{#            Add#}
+{#        {% endif %}#}
+{#    </li>#}
 {% endblock %}
 
 {% block fluid-content %}
-
-    <form name="omic_file" class="form-horizontal" method="post" enctype="multipart/form-data">
+{# LUKE EYES#}
+    <form class="form-horizontal" method="post" enctype="multipart/form-data">
         <div class="padded-bottom">
 
             <div class="well">
@@ -54,13 +43,9 @@
                     {% if update %}
                         Update
                     {% else %}
-                        {% if review %}
-                            Review
-                        {% else %}
-                            Add
-                        {% endif %}
+                        Review
                     {% endif %}
-                    Omic File
+                    Omic Sample Metadata
                     </b></em>
                     <br>
                     <br>
@@ -77,234 +62,223 @@
             <div id="form_errors" class="toggle-display-none">
                 {% include "errors.html" %}
             </div>
+        </div>
 
             {# main #}
 {#            <div class="container">   NO CONTAINERs   #}
+{##}
             {# pass to js file need for use in js #}
             <div class="for-javascript">
-                <div class="hidden" id="check_load">
-                    {{ page_called }}
-                </div>
-                <div class="hidden" id="this_file_id">
-                    {{ object.id }}
-                </div>
-                <div class="hidden" id="this_study_id">
-                    {{ form.instance.study_id }}
-                </div>
-                <div class="hidden" id="show_hide_graph">
-                    hide
-                </div>
-                <div class="hidden" id="check_load">
-                    {{ page_called }}
+{#                <div class="hidden" id="check_load">#}
+{#                    {{ page_called }}#}
+{#                </div>#}
+{#                <div class="hidden" id="this_file_id">#}
+{#                    {{ object.id }}#}
+{#                </div>#}
+{#                <div class="hidden" id="this_study_id">#}
+{#                    {{ form.instance.study_id }}#}
+{#                </div>#}
+{#                <div class="hidden" id="show_hide_graph">#}
+{#                    hide#}
+{#                </div>#}
+{#                <div class="hidden" id="check_load">#}
+{#                    {{ page_called }}#}
+{#                </div>#}
+                <div class="">
+                    {# pass to js file need for use in js - this will be kept matcthing the table so can be passed back #}
+                    {{ form.indy_list_of_dicts_of_table_rows }}
+                    {{ form.indy_list_of_column_labels }}
+                    {{ form.indy_list_of_column_labels_show_hide }}
+{#                    {{ form.indy_list_of_row_labels }}#}
+{#                    {{ form.indy_list_of_unique_row_labels }}#}
+{#                    {{ form.indy_count_of_unique_row_labels }}#}
+                    {# used below  {{ form.indy_sample_location }}#}
+                    {# used below  {{ form.indy_matrix_item }}#}
+{#                    {{ form.indy_matrix_item_list }}#}
+{#                    {{ form.indy_sample_metadata_table_was_changed }}#}
                 </div>
             </div>
-
-            {# The div will not match, so just make this comment for the error section  #}
-            {% if update or add %}
-                <div class="hidden" id="upload_file"></div>
-                {% if form.omic_data_file.errors %}
-                    {% for error in form.omic_data_file.errors %}
-                        <div class="alert alert-danger" role="alert">
-                            <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
-                            <span class="sr-only">Error:</span>
-                            {{ error }}
-                        </div>
-                    {% endfor %}
-                <div class="form-group has-error">
-                {% else %}
-                <div class="form-group">
-                {% endif %}
-                    <label class="col-sm-2 control-label" for="protocol">Omic Data File*</label>
-                    <div class="col-sm-10">
-                        {{ form.omic_data_file }}
-                    </div>
-
-                    <div class="row">
-                        <div class="col-sm-2"></div>
-                        <div class="col-sm-5">
-                            <div>
-                                <b>Acceptable Formats: Excel and CSV. </b>
+{##}
+{#            {% if update or add %}#}
+{#                <div class="hidden" id="upload_file"></div>#}
+{#                {% if form.omic_data_file.errors %}#}
+{#                    {% for error in form.omic_data_file.errors %}#}
+{#                        <div class="alert alert-danger" role="alert">#}
+{#                            <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>#}
+{#                            <span class="sr-only">Error:</span>#}
+{#                            {{ error }}#}
+{#                        </div>#}
+{#                    {% endfor %}#}
+{#                <div class="form-group has-error">#}
+{#                {% else %}#}
+{#                <div class="form-group">#}
+{#                {% endif %}#}
+{#                    <label class="col-sm-2 control-label" for="protocol">Omic Data File*</label>#}
+{#                    <div class="col-sm-10">#}
+{#                        {{ form.omic_data_file }}#}
+{#                    </div>#}
+{##}
+{#                    <div class="row">#}
+{#                        <div class="col-sm-2"></div>#}
+{#                        <div class="col-sm-5">#}
+{#                            <div>#}
+{#                                <b>Acceptable Formats: Excel and CSV. </b>#}
 {#                                <p style="color:red">TODO - check on format of quotes vrs no quotes</p>#}
-                            </div>
-                        </div>
-                        <div class="col-sm-5">
-                            <div class="toggle-display-none" id="log2fc_template_section">
-                                <button type="button" class="btn btn-primary" id="fileFileFormatTwoGroup">Download Template (Downloads the Headers Only)</button>
-                            </div>
-                            <div class="toggle-display-none" id="normcounts_template_section">
-                                                Downloadable template in development.
+{#                            </div>#}
+{#                        </div>#}
+{#                        <div class="col-sm-5">#}
+{#                            <div class="toggle-display-none" id="log2fc_template_section">#}
+{#                                <button type="button" class="btn btn-primary" id="fileFileFormatTwoGroup">Download Template (Downloads the Headers Only)</button>#}
+{#                            </div>#}
+{#                            <div class="toggle-display-none" id="normcounts_template_section">#}
+{#                                                Downloadable template in development.#}
     {#                                        <button type="button" class="btn btn-primary" id="fileFileFormatTwoGroup">Download Two Group File Format (Headers Only)</button>#}
-                            </div>
-                            <div class="toggle-display-none" id="rawcounts_template_section">
-                                                Downloadable template in development.
+{#                            </div>#}
+{#                            <div class="toggle-display-none" id="rawcounts_template_section">#}
+{#                                                Downloadable template in development.#}
     {#                                        <button type="button" class="btn btn-primary" id="fileFileFormatTwoGroup">Download Two Group File Format (Headers Only)</button>#}
-                            </div>
-                        </div>
-                    </div>
-                    <div id="count_extra" class="toggle-display-none row">
-                        <div class="col-sm-2"></div>
-                        <div class="col-sm-10">
-                            <div class="alert alert-info" role="alert">
-                                <button class="btn btn-info" type="button" data-toggle="collapse" data-target=".inline-help" aria-expanded="false" aria-controls="inline-help">
-                                    Show/Hide Inline Help
-                                </button>
-                                <div class="collapse large-padding-top inline-help">
-                                    <ul>
-                                        <li>Counts data files must have one header row labeled "Sample ID", with each column subsequent column labeled with either a sample ID or a well name (i.e. A1, BA05).</li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-            {% else %}
-                <label class="col-sm-2 control-label" for="omic_data_file">Omic Data File*</label>
-                <div class="col-sm-10">
-                    <a target="_blank" href="/media/{{ form.instance.omic_data_file }}">
-                        {{ form.instance.omic_data_file }}
-                    </a>
+{#                            </div>#}
+{#                        </div>#}
+{#                    </div>#}
+{#                    <div id="count_extra" class="toggle-display-none row">#}
+{#                        <div class="col-sm-2"></div>#}
+{#                        <div class="col-sm-10">#}
+{#                            <div class="alert alert-info" role="alert">#}
+{#                                <button class="btn btn-info" type="button" data-toggle="collapse" data-target=".inline-help" aria-expanded="false" aria-controls="inline-help">#}
+{#                                    Show/Hide Inline Help#}
+{#                                </button>#}
+{#                                <div class="collapse large-padding-top inline-help">#}
+{#                                    <ul>#}
+{#                                        <li>Counts data files must have one header row labeled "Sample ID", with each column subsequent column labeled with either a sample ID or a well name (i.e. A1, BA05).</li>#}
+{#                                    </ul>#}
+{#                                </div>#}
+{#                            </div>#}
+{#                        </div>#}
+{#                    </div>#}
+{#                </div>#}
+{##}
+{#            {% else %}#}
+{#                <label class="col-sm-2 control-label" for="omic_data_file">Omic Data File*</label>#}
+{#                <div class="col-sm-10">#}
+{#                    <a target="_blank" href="/media/{{ form.instance.omic_data_file }}">#}
+{#                        {{ form.instance.omic_data_file }}#}
+{#                    </a>#}
                     {# <em><b> {{ form.filename_only.value }} </b></em> #}
                     {# Show form field as text .name vrs .value HANDY  #}
                     {# name {{ form.form_filename_only.name }} #}
                     {# value {{ form.form_filename_only.value }} #}
-                </div>
-                <br>
-            {% endif %}
+{#                </div>#}
+{#                <br>#}
+{#            {% endif %}#}
+{##}
+{#            <br>#}
 
-            <br>
-
-            <div>
-
-                <div class="row">
-                    <div class="col-sm-2">
-                    </div>
-                    <div class="col-sm-10">
+{#            <div>#}
+{#                <div class="row">#}
+{#                    <div class="col-sm-2">#}
+{#                    </div>#}
+{#                    <div class="col-sm-10">#}
 {#                        <p style="color:red">TODO - code for: Assigned based on file headers (only allow on add page)</p>#}
-                    </div>
-                </div>
-                {% include "generic_field.html" with field=form.data_type %}
-
-                <div class="row">
-                    <div class="col-sm-2">
-                    </div>
-                    <div class="col-sm-10">
+{#                    </div>#}
+{#                </div>#}
+{#                {% include "generic_field.html" with field=form.data_type %}#}
+{##}
+{#                <div class="row">#}
+{#                    <div class="col-sm-2">#}
+{#                    </div>#}
+{#                    <div class="col-sm-10">#}
 {#                        <p style="color:red">TODO - code for: Assigned based on file headers - update as needed (only allow on add page) (make sure default changes with data_type for add page)</p>#}
-                    </div>
-                </div>
-                {% include "generic_field.html" with field=form.header_type %}
+{#                    </div>#}
+{#                </div>#}
+{#                {% include "generic_field.html" with field=form.header_type %}#}
+{##}
+{#                {% include "generic_field.html" with field=form.description %}#}
+{##}
+{#                {% include "generic_field.html" with field=form.study_assay %}#}
+{##}
+{#                {% include "generic_field_no_add_option.html" with field=form.analysis_method %}#}
+{##}
+{#                {% include "generic_field.html" with field=form.name_reference %}#}
+{##}
+{#                {% include "generic_field.html" with field=form.time_unit %}#}
+{##}
+{#            </div>#}
 
-                {% include "generic_field.html" with field=form.description %}
+{#            <br>#}
+{##}
+{#            <div class="compare-group">#}
+{#                <h3>Metadata for Comparing Two Treatment Groups</h3>#}
+{##}
+{#                <div class="h1-level-1"><i>Group 1:</i></div><br>#}
+{#                {% include "generic_field.html" with field=form.group_1 %}#}
+{##}
+                {# Not used cause do not want the + for adding? {% include "generic_field.html" with field=form.location_1 %} #}
+{#                {% include "generic_field_no_add_option.html" with field=form.location_1 %}#}
+{##}
+{#                {% include "generic_field.html" with field=form.time_1_display %}#}
+{##}
+{##}
+{#                <div class="form-group">#}
+{#                    <div class="col-sm-2">#}
+{#                        <div class="plate-map-page-field-labels-small">#}
+{#                            <div>#}
+{#                                <label>Sample Location 1</label>#}
+{#                            </div>#}
+{#                        </div>#}
+{#                    </div>#}
+{#                    <div class="col-sm-10">#}
+{#                        <div class="plate-map-page-field-contents-small">#}
+{#                            {{ form.location_1 }}#}
+{#                        </div>#}
+{#                    </div>#}
+{#                </div>#}
+{##}
+{##}
+{##}
+{#                <div class="h1-level-1"><i>Group 2:</i></div><br>#}
+{#                {% include "generic_field.html" with field=form.group_2 %}#}
+{##}
+                {# Not used cause do not want the + for adding? {% include "generic_field.html" with field=form.location_2 %} #}
+{#                {% include "generic_field_no_add_option.html" with field=form.location_2 %}#}
+{##}
+{#                {% include "generic_field.html" with field=form.time_2_display %}#}
+{##}
+{#                <div class="form-group">#}
+{#                    <div class="col-sm-2">#}
+{#                        <div class="plate-map-page-field-labels-small">#}
+{#                            <div>#}
+{#                                <label>Sample Location 2</label>#}
+{#                            </div>#}
+{#                        </div>#}
+{#                    </div>#}
+{#                    <div class="col-sm-10">#}
+{#                        <div class="plate-map-page-field-contents-small">#}
+{#                            {{ form.location_2 }}#}
+{#                        </div>#}
+{#                    </div>#}
+{#                </div>#}
+{##}
+{#                <div class="toggle-display-none" id="omic_preview_button_section">#}
+{#                    <button type="button" class="btn btn-primary" id="omicPreviewTheGraphsButton">View Preview Graphs</button>#}
+{#                </div>#}
+{##}
+{#                <div class="toggle-display-none" id="omic_preview_the_graphs_section">#}
+{##}
+{#                    <div id="plots">#}
+{#                        <div id="volcano-plots">#}
+{#                        </div>#}
+{#                        <div id="ma-plots" style="display: none">#}
+{#                        </div>#}
+{#                    </div>#}
+{##}
+{#                </div>#}
+{##}
+{#            </div>#}
 
-                {% include "generic_field.html" with field=form.study_assay %}
-
-                {% include "generic_field_no_add_option.html" with field=form.analysis_method %}
-
-                {% include "generic_field.html" with field=form.name_reference %}
-
-            </div>
-
-            <br>
-
-            <div class="compare-group">
-                <h3>Metadata for Comparing Two Treatment Groups</h3>
-
-                <div class="h1-level-1"><i>Group 1:</i></div><br>
-                {% include "generic_field.html" with field=form.group_1 %}
-
-                <div class="row">
-                    <div class="col-sm-2">
-                    </div>
-                    <div class="col-sm-10">
-                        <table class="table table-condensed table-bordered table-nonfluid no-margin-bottom">
-                            <tr>
-                                <th class="bg-success" colspan="3">Sample Time 1*</th>
-                                <th class="bg-warning">Sample Location 1*</th>
-                            </tr>
-                            <tr>
-                                <th class="bg-success">Day</th>
-                                <th class="bg-success">Hour</th>
-                                <th class="bg-success">Minute</th>
-                                <td class="bg-warning">
-{#                                    {% if update or add %}#}
-{#                                            {% include "generic_popup_link.html" with field=form.location_1 %}#}
-{#                                    {% endif %}#}
-                                </td>
-                            </tr>
-                            <tr>
-                                <td hidden>
-                                    {{ form.time_1 }}
-                                </td>
-                                <td class="bg-success">{{ form.time_1_day }}</td>
-                                <td class="bg-success">{{ form.time_1_hour }}</td>
-                                <td class="bg-success">{{ form.time_1_minute }}</td>
-                                <td class="bg-warning">{{ form.location_1 }}</td>
-                            </tr>
-                        </table>
-                    </div>
-                </div>
-
-                <div class="h1-level-1"><i>Group 2:</i></div><br>
-                {% include "generic_field.html" with field=form.group_2 %}
-
-                <div class="row">
-                    <div class="col-sm-2">
-                    </div>
-                    <div class="col-sm-10">
-                        <table class="table table-condensed table-bordered table-nonfluid no-margin-bottom">
-                            <tr>
-                                <th class="bg-success" colspan="3">Sample Time 2*</th>
-                                <th class="bg-warning">Sample Location 2*</th>
-                            </tr>
-                            <tr>
-                                <th class="bg-success">Day</th>
-                                <th class="bg-success">Hour</th>
-                                <th class="bg-success">Minute</th>
-                                <td class="bg-warning">
-{#                                        {% if update or add %}#}
-{#                                            {% include "generic_popup_link.html" with field=form.location_2 %}#}
-{#                                        {% endif %}#}
-                                </td>
-                            </tr>
-                            <tr>
-                                <td hidden>
-                                    {{ form.time_2 }}
-                                </td>
-                                <td class="bg-success">{{ form.time_2_day }}</td>
-                                <td class="bg-success">{{ form.time_2_hour }}</td>
-                                <td class="bg-success">{{ form.time_2_minute }}</td>
-                                <td class="bg-warning">{{ form.location_2 }}</td>
-                            </tr>
-                        </table>
-                    </div>
-                </div>
-
-                <div class="toggle-display-none" id="omic_preview_button_section">
-                    <button type="button" class="btn btn-info" id="omicPreviewTheGraphsButton">View Preview Graphs</button>
-                </div>
-
-                <div class="toggle-display-none" id="omic_preview_the_graphs_section">
-
-                    <div id="plots">
-                        <div id="volcano-plots">
-                        </div>
-                        <div id="ma-plots" style="display: none">
-                        </div>
-                    </div>
-
-                </div>
-
-            </div>
-
-
-
+{#            </div>#}
 {# todo - update all instructions and hover tips#}
-
-
-
-
 {#            <div class="indy-sample">#}
-{#                <h3>Missing Sample Names for Normalized Count and Raw Count Data</h3>#}
+{#                <h3>Metadata for Normalized Count and Raw Count Data</h3>#}
 {##}
 {#                {% if update or add %}#}
 {##}
@@ -614,11 +588,7 @@
 {##}
 {#            </div>#}
 
-
-
-
-
-        </div>
+{#        </div>#}
     </form>
 
 {% endblock %}
