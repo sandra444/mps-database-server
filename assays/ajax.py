@@ -7121,7 +7121,6 @@ def fetch_this_file_is_this_study_omic_upload_file(request):
 
 # sck ajax.py
 def sub_fetch_omic_sample_info_first_found_in_upload_file_table(this_pk):
-    # todo-sck change the format for time - not doing d h m anymore
     locmess = "no"
     loc_pk = None
     timemess = "no"
@@ -7301,7 +7300,7 @@ def fetch_omics_data_for_upload_preview_prep(request):
     data_file_pk = request.POST.get('file_id', '{}')
     data_file = request.FILES.get('omic_data_file', '{}')
     file_extension = os.path.splitext(data_file.name)[1]
-    calledme = 'clean'
+    calledme = 'ajax'
     data_type = request.POST.get('data_type', '{}')
     time_unit = request.POST.get('time_unit', '{}')
     analysis_method = request.POST.get('analysis_method', '{}')

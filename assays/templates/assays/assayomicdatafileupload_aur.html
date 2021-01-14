@@ -37,7 +37,10 @@
 
 {% block sidebar %}
     {% if update or add %}
-    <div class="toggle-display-none" id="omic_preview_the_graphs_section2">
+    <div class="toggle-display-none" id="omic_preview_compare_graphs_section2">
+        {% include 'assays/grouping_filtering.html' with omics="true"%}
+    </div>
+    <div class="toggle-display-none" id="omic_preview_count_graphs_section2">
         {% include 'assays/grouping_filtering.html' with omics="true"%}
     </div>
     {% endif %}
@@ -96,6 +99,8 @@
                     hide
                 </div>
             </div>
+
+            {% include "generic_field.html" with field=form.data_type %}
 
             {# The div will not match, so just make this comment for the error section  #}
             {% if update or add %}
@@ -188,8 +193,6 @@
             {% endif %}
 
             <br>
-
-            {% include "generic_field.html" with field=form.data_type %}
 
             {% include "generic_field.html" with field=form.description %}
 
@@ -288,11 +291,15 @@
                     </div>
                 </div>
 
-                <div class="toggle-display-none" id="omic_preview_button_section">
-                    <button type="button" class="btn btn-info" id="omicPreviewTheGraphsButton">View Preview Graphs</button>
+                <div id="error_message_compare"></div>
+
+                <br>
+
+                <div class="toggle-display-none" id="omic_preview_compare_button_section">
+                    <button type="button" class="btn btn-info" id="omicPreviewTheCompareGraphsButton">View Preview Graphs</button>
                 </div>
 
-                <div class="toggle-display-none" id="omic_preview_the_graphs_section">
+                <div class="toggle-display-none" id="omic_preview_compare_graphs_section">
 
                     <div id="plots">
                         <div id="volcano-plots">
@@ -315,26 +322,29 @@
                     <div class="collapse large-padding-top inline-help">
                         <ul>
                             <li>Counts data files must have one header row labeled "Sample ID", with each column subsequent column labeled with either a sample ID or a well name (i.e. A1, BA05).</li>
-                        </ul>
-                    </div>
-                </div>
-
-
-{#                when file is changed, do some qc of the file and add messages here - can not do it on submit ONLY due to why doing form sends data#}
-{#                some will pop on submit that are in the processing util#}
-                <br>
-
-                <div id="message_about_sample_names">
-                    this is a generic message
-                </div>
-
-                <div class="collapse large-padding-top inline-help">
-                    <div class="alert alert-info" role="alert">
-                        <ul>
                             <li>The sample names (which much match, exactly, the column headers in the upload file) must be added prior to uploading the file.</li>
                         </ul>
                     </div>
                 </div>
+
+                <div id="error_message_counts"></div>
+
+                <br>
+
+                <div class="toggle-display-none" id="omic_preview_count_button_section">
+                    <button type="button" class="btn btn-info" id="omicPreviewTheCountGraphsButton">View Preview Graphs</button>
+                </div>
+
+                <div class="toggle-display-none" id="omic_preview_count_graphs_section">
+
+                    <div id="a">
+                        <div id="b">
+                            in development for clustering and revised sidebar
+                        </div>
+                    </div>
+
+                </div>
+
 
             </div>
 

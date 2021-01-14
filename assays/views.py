@@ -4959,15 +4959,15 @@ class AssayOmicDataFileUploadView(StudyGroupMixin, DetailHandlerView):
 
 
 ##### Start omic METADATA (for counts), add, update, view and delete section
-# LUKE EYES
-class AssayOmicSampleMetadataAdditionalInfoFormUpdate(StudyGroupMixin, HistoryMixin, UpdateView):
+class AssayOmicSampleMetadataAdditionalInfoFormUpdate(ObjectGroupRequiredMixin, HistoryMixin, UpdateView):
     """Views Upload of omic sample metadata """
 
     template_name = 'assays/assayomicsamplemetadata_ur.html'
     form_class = AssayOmicSampleMetadataAdditionalInfoForm
+    model = AssayStudy
 
     def get_context_data(self, **kwargs):
-        context = super(AssayOmicSampleMetadataAdditionalInfoForm, self).get_context_data(**kwargs)
+        context = super(AssayOmicSampleMetadataAdditionalInfoFormUpdate, self).get_context_data(**kwargs)
         context['update'] = True
         context['page_called'] = 'update'
         return context
@@ -4979,19 +4979,21 @@ class AssayOmicSampleMetadataAdditionalInfoFormUpdate(StudyGroupMixin, HistoryMi
         else:
             return self.render_to_response(self.get_context_data(form=form, ))
 
-# LUKE EYES
-class AssayOmicSampleMetadataAdditionalInfoFormView(StudyGroupMixin, DetailHandlerView):
+
+class AssayOmicSampleMetadataAdditionalInfoFormDetail(StudyViewerMixin, DetailHandlerView):
     """Views View Upload an AssayOmicDataFileUpload file """
+    # Luke prefers using Detail over View
 
     template_name = 'assays/assayomicsamplemetadata_ur.html'
-    form_class = AssayOmicSampleMetadataAdditionalInfoForm
+    model = AssayStudy
 
     def get_context_data(self, **kwargs):
-        context = super(AssayOmicSampleMetadataAdditionalInfoForm, self).get_context_data(**kwargs)
+        context = super(AssayOmicSampleMetadataAdditionalInfoFormDetail, self).get_context_data(**kwargs)
         context['review'] = True
         context['page_called'] = 'review'
 
         # HANDY to use DetailView in a View view and trick Django into getting the form
+        # remember, do not need the form class in the main code because doing it here
         context.update({
             'form': AssayOmicSampleMetadataAdditionalInfoForm(instance=self.object),
         })

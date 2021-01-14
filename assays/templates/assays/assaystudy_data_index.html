@@ -61,7 +61,12 @@
         </h3>
 {#    todo - how go between view and update ?? mixin??#}
     {# LUKE EYES#}
-        <a href="{% url 'assayomicsamplemetadata-update' object.id %}" class="btn btn-lg btn-primary" role="button">View, Add, Remove or Edit Omic Data Sample Names and Associated Chips/Wells, Sample Locations, and Sample Time</a>
+
+    {% if user|is_group_editor:object.group.name and not object.signed_off_by %}
+        <a href="{% url 'assays-assayomicsamplemetadata-update' object.id %}" class="btn btn-lg btn-primary" role="button">View, Add, Remove or Edit Omic Data Sample Names and Associated Chips/Wells, Sample Locations, and Sample Time</a>
+    {% else %}
+        <a href="{% url 'assays-assayomicsamplemetadata-detail' object.id %}" class="btn btn-lg btn-primary" role="button">View Omic Data Sample Names and Associated Chips/Wells, Sample Locations, and Sample Time</a>
+    {% endif %}
         <a href="{% url 'assayomicdatafileupload-index' object.id %}" class="btn btn-lg btn-primary" role="button">View, Add or Remove Omic Data File or Update File Metadata</a>
     </div>
 {% endblock %}

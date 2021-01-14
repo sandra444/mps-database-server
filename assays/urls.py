@@ -105,7 +105,7 @@ from assays.views import (
     AssayStudyTemplate,
     AssayStudyOmicsDownload,
     AssayOmicSampleMetadataAdditionalInfoFormUpdate,
-    AssayOmicSampleMetadataAdditionalInfoFormView
+    AssayOmicSampleMetadataAdditionalInfoFormDetail,
 )
 import assays.ajax
 
@@ -322,7 +322,7 @@ urlpatterns = [
     url(r'^assays/assayplatereaderfile/(?P<pk>[0-9]+)/update/$', AssayPlateReaderMapDataFileUpdate.as_view(), name='assayplatereaderfile-update'),
     url(r'^assays/assayplatereaderfile/(?P<pk>[0-9]+)/delete/$', AssayPlateReaderMapDataFileDelete.as_view(), name='assayplatereaderfile-delete'),
 
-    # Omic Data
+    # Omic Data  todo-sck change these to match lukes
     url(r'^assays/assaystudy/(?P<pk>[0-9]+)/assayomicdatafileupload/$',
         AssayOmicDataFileUploadIndex.as_view(),
         name='assayomicdatafileupload-index'),
@@ -341,11 +341,11 @@ urlpatterns = [
 
     # Omic Metadata
     # LUKE EYES
-    url(r'^assays/assaystudy/(?P<study_id>[0-9]+)/assayomicsamplemetadata/update/$',
+    url(r'^assays/assaystudy/(?P<pk>[0-9]+)/assayomicsamplemetadata/update/$',
         AssayOmicSampleMetadataAdditionalInfoFormUpdate.as_view(),
-        name='assayomicsamplemetadata-update'),
-    url(r'^assays/assaystudy/(?P<study_id>[0-9]+)/assayomicsamplemetadata/view/$',
-        AssayOmicSampleMetadataAdditionalInfoFormView.as_view(),
-        name='assayomicsamplemetadata-view'),
+        name='assays-assayomicsamplemetadata-update'),
+    url(r'^assays/assaystudy/(?P<pk>[0-9]+)/assayomicsamplemetadata/$',
+        AssayOmicSampleMetadataAdditionalInfoFormDetail.as_view(),
+        name='assays-assayomicsamplemetadata-detail'),
 
 ]

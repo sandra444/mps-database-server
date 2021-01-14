@@ -15,8 +15,8 @@
 {# breadcrumbs should be generated automatically for obvious reasons #}
 {% block breadcrumbs %}
     <li><a href="/assays/assaystudy/">Studies</a>
-    <li><a href="{{ form.instance.study.get_absolute_url }}">{{ form.instance.study }}</a></li>
-    <li><a href="{% url 'assays-assaystudy-data-index' form.instance.study.id %}">Data</a></li>
+    <li><a href="{{ form.instance.get_absolute_url }}">{{ form.instance }}</a></li>
+    <li><a href="{% url 'assays-assaystudy-data-index' form.instance.id %}">Data</a></li>
     {# form.instance should work either way? #}
 {#    {% if object %}#}
 {#        <li><a href="{% url "assayomicdatafileupload-index" object.study.id %}">Assay Omic Data Files</a>#}
@@ -49,7 +49,7 @@
                     </b></em>
                     <br>
                     <br>
-                    for Study {{ form.instance.study }}
+                    for Study {{ form.instance }}
                     <br>
                 {% csrf_token %}
                 </h1>
@@ -258,11 +258,11 @@
 {#                    </div>#}
 {#                </div>#}
 {##}
-{#                <div class="toggle-display-none" id="omic_preview_button_section">#}
-{#                    <button type="button" class="btn btn-primary" id="omicPreviewTheGraphsButton">View Preview Graphs</button>#}
+{#                <div class="toggle-display-none" id="omic_preview_compare_button_section">#}
+{#                    <button type="button" class="btn btn-primary" id="omicPreviewTheCompareGraphsButton">View Preview Graphs</button>#}
 {#                </div>#}
 {##}
-{#                <div class="toggle-display-none" id="omic_preview_the_graphs_section">#}
+{#                <div class="toggle-display-none" id="omic_preview_compare_graphs_section">#}
 {##}
 {#                    <div id="plots">#}
 {#                        <div id="volcano-plots">#}

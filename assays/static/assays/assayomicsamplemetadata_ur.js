@@ -186,9 +186,9 @@ $(document).ready(function () {
      * On click to toggle
     */
     // the graph sections
-    $('#omicPreviewTheGraphsButton').click(function () {
-        $('#omic_preview_the_graphs_section').toggle();
-        $('#omic_preview_the_graphs_section2').toggle();
+    $('#omicPreviewTheCompareGraphsButton').click(function () {
+        $('#omic_preview_compare_graphs_section').toggle();
+        $('#omic_preview_compare_graphs_section2').toggle();
     });
     /**
      * On change data file
@@ -197,13 +197,13 @@ $(document).ready(function () {
         clear_validation_errors();
         //when first change the file, make the preview button available
         if ($('#id_data_type')[0].selectize.items[0] == 'log2fc') {
-            $('#omic_preview_button_section').show();
-            $('#omic_preview_the_graphs_section').show();
-            $('#omic_preview_the_graphs_section2').show();
+            $('#omic_preview_compare_button_section').show();
+            $('#omic_preview_compare_graphs_section').show();
+            $('#omic_preview_compare_graphs_section2').show();
         } else {
-            $('#omic_preview_button_section').hide();
-            $('#omic_preview_the_graphs_section').hide();
-            $('#omic_preview_the_graphs_section2').hide();
+            $('#omic_preview_compare_button_section').hide();
+            $('#omic_preview_compare_graphs_section').hide();
+            $('#omic_preview_compare_graphs_section2').hide();
         }
         changed_something_important('data_file');
     });
@@ -219,9 +219,9 @@ $(document).ready(function () {
     });
     function change_visibility_of_some_doms() {
         // console.log("$('#id_data_type')[0].selectize.items[0] ",$('#id_data_type')[0].selectize.items[0])
-        $('#omic_preview_button_section').hide();
-        $('#omic_preview_the_graphs_section').hide();
-        $('#omic_preview_the_graphs_section2').hide();
+        $('#omic_preview_compare_button_section').hide();
+        $('#omic_preview_compare_graphs_section').hide();
+        $('#omic_preview_compare_graphs_section2').hide();
 
         $('#log2fc_template_section').hide();
         $('#normcounts_template_section').hide();
@@ -230,9 +230,9 @@ $(document).ready(function () {
 
 
         if ($('#id_data_type')[0].selectize.items[0] == 'log2fc') {
-            $('#omic_preview_button_section').show();
-            $('#omic_preview_the_graphs_section').show();
-            $('#omic_preview_the_graphs_section2').show();
+            $('#omic_preview_compare_button_section').show();
+            $('#omic_preview_compare_graphs_section').show();
+            $('#omic_preview_compare_graphs_section2').show();
             // console.log("should show the log2fc")
             $('#log2fc_template_section').show();
 

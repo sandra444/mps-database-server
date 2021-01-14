@@ -5214,7 +5214,7 @@ class AssayOmicDataFileUpload(LockableModel):
     #     verbose_name='Group 2*'
     # )
 
-    # data groups WILL be empty for the norm count and raw count data
+    # data groups WILL be empty for the norm count and raw count data (not stored for counts data, can pull from study setup)
     # when they are visible on the form, they are required, so put the * here
     group_1 = models.ForeignKey(
         AssayGroup,
@@ -5234,7 +5234,7 @@ class AssayOmicDataFileUpload(LockableModel):
         help_text='The data analysis reference group.',
         verbose_name='Reference Group*'
     )
-    # times WILL be empty for the norm count and raw count data
+    # times WILL be empty for the norm count and raw count data (in AssayOmicSampleMetadata instead)
     time_1 = models.FloatField(
         default=0,
         null=True,
@@ -5249,7 +5249,7 @@ class AssayOmicDataFileUpload(LockableModel):
         help_text='The sample collection time for the data reference group.',
         verbose_name='Sample Time 2*'
     )
-    # locations WILL be empty for the norm count and raw count data
+    # locations WILL be empty for the norm count and raw count data (in AssayOmicSampleMetadata instead)
     location_1 = models.ForeignKey(
         'AssaySampleLocation',
         null=True,
@@ -5294,11 +5294,11 @@ class AssayOmicDataFileUpload(LockableModel):
 #         on_delete=models.CASCADE,
 #         verbose_name='Study'
 #     )
-#
+#add unique study and sample name constraint
 #     sample_name = models.CharField(
 #         max_length=255,
 #         default='',
-#         help_text='The header for this sample used in the uploaded file - must match EXACTLY what is in the omic file',
+#         help_text='The sample name - must match EXACTLY the headers found in the omic counts data files',
 #         verbose_name='Cross Reference'
 #     )
 #
@@ -5319,16 +5319,6 @@ class AssayOmicDataFileUpload(LockableModel):
 #         default=0,
 #         verbose_name='Time'
 #     )
-    # sample time DISPLAY unit - indicates how the user wants to see the time displayed and interact with the time
-    # IMPORTANT - the sample time is saved in minutes, as per the database standard
-    # time_unit = models.CharField(
-    #     max_length=8,
-    #     default='day',
-    #     choices=assay_plate_reader_time_unit_choices,
-    #     help_text='The display unit for the sample collection time.',
-    #     verbose_name='Sample Time Unit'
-    # )
-
 #
 #     def __str__(self):
 #         return '{0}'.format(self.id)
@@ -5388,7 +5378,7 @@ class AssayOmicDataPoint(models.Model):
 #         on_delete=models.CASCADE,
 #         verbose_name='This Study'
 #     )
-# do not actually need this, since have a link to the AssayOmicSampleMetadata, but will be easier for visualization if have it
+# need this here
 #     omic_data_file = models.ForeignKey(
 #         AssayOmicDataFileUpload,
 #         on_delete=models.CASCADE,

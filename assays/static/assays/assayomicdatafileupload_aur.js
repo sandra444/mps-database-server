@@ -99,9 +99,17 @@ $(document).ready(function () {
      * On click to toggle
     */
     // the graph sections
-    $('#omicPreviewTheGraphsButton').click(function () {
-        $('#omic_preview_the_graphs_section').toggle();
-        $('#omic_preview_the_graphs_section2').toggle();
+    $('#omicPreviewTheCompareGraphsButton').click(function () {
+        $('#omic_preview_compare_graphs_section').toggle();
+        $('#omic_preview_compare_graphs_section2').toggle();
+    });
+    /**
+     * On click to toggle
+    */
+    // the graph sections
+    $('#omicPreviewTheCountGraphsButton').click(function () {
+        $('#omic_preview_count_graphs_section').toggle();
+        $('#omic_preview_count_graphs_section2').toggle();
     });
     /**
      * On change data file
@@ -110,13 +118,13 @@ $(document).ready(function () {
         clear_validation_errors();
         //when first change the file, make the preview button available
         if ($('#id_data_type')[0].selectize.items[0] == 'log2fc') {
-            $('#omic_preview_button_section').show();
-            $('#omic_preview_the_graphs_section').show();
-            $('#omic_preview_the_graphs_section2').show();
+            $('#omic_preview_compare_button_section').show();
+            $('#omic_preview_compare_graphs_section').show();
+            $('#omic_preview_compare_graphs_section2').show();
         } else {
-            $('#omic_preview_button_section').hide();
-            $('#omic_preview_the_graphs_section').hide();
-            $('#omic_preview_the_graphs_section2').hide();
+            $('#omic_preview_compare_button_section').hide();
+            $('#omic_preview_compare_graphs_section').hide();
+            $('#omic_preview_compare_graphs_section2').hide();
         }
         changed_something_important('data_file');
     });
@@ -181,7 +189,7 @@ $(document).ready(function () {
         //console.log('change 1')
         if (page_make_the_group_change) {
             if ($('#id_group_1')[0].selectize.items[0] == $('#id_group_2')[0].selectize.items[0]) {
-                $('#id_group_1')[0].selectize.setValue(page_omic_current_group1);
+                // $('#id_group_1')[0].selectize.setValue(page_omic_current_group1);
             } else {
                 page_omic_upload_called_from_in_js_file = 'change';
                 page_omic_upload_group_id_change = 1;
@@ -210,7 +218,7 @@ $(document).ready(function () {
         clear_validation_errors();
         if (page_make_the_group_change) {
             if ($('#id_group_1')[0].selectize.items[0] == $('#id_group_2')[0].selectize.items[0]) {
-                $('#id_group_2')[0].selectize.setValue(page_omic_current_group2);
+                // $('#id_group_2')[0].selectize.setValue(page_omic_current_group2);
             } else {
                 page_omic_upload_called_from_in_js_file = 'change';
                 //console.log('change 2')
@@ -310,8 +318,9 @@ $(document).ready(function () {
                         let exist = true;
 
                         window.OMICS.omics_data = JSON.parse(JSON.stringify(json));
-                        omics_file_id_to_name_all = window.OMICS.omics_data['file_id_to_name'];
-                        omics_file_id_to_name = omics_file_id_to_name_all[1];
+                        let omics_file_id_to_name_all = window.OMICS.omics_data['file_id_to_name'];
+                        let omics_file_id_to_name = omics_file_id_to_name_all[1];
+                        let error_message =  window.OMICS.omics_data['error_message'];
 
                         if ($('#id_data_type')[0].selectize.items[0] == 'log2fc') {
                             // console.log('a DATA', json)
@@ -346,8 +355,7 @@ $(document).ready(function () {
                             window.OMICS.draw_plots(window.OMICS.omics_data, true, 0, 0, 0, 0, 0, 0, 0, 'upload');
                             // function(omics_data, firstTime, minPval, maxPval, minL2FC, maxL2FC, minPval_neg, maxPval_neg, L2FC_abs)
                         }  else {
-                            // todo need to coordinate with Quinn for the counts data
-
+                            // todo need to coordinate with Quinn for the counts data preview
 
                         }
                         // put here to avoid race errors
@@ -357,14 +365,13 @@ $(document).ready(function () {
                                 check_file_add_update_ajax_sub(id_omic_data_file);
                             } catch {
                             }
-                            if ($('#id_data_type')[0].selectize.items[0] == 'log2fc') {
-                            } else {
-                                //will want some preliminary qc - check for column headers in metadata table
-                                //put the message here
-                                //
-                                let a_new_message = "a new message"
-                                $('#message_about_sample_names').val(a_new_message);
+                            let a_new_message = error_message
+                            if (error_message.trim().length > 0) {
+                                a_new_message = 'Error Message: ' + error_message.trim().length
                             }
+                            $('#error_message_compare').text(a_new_message);
+                            $('#error_message_counts').text(a_new_message);
+
                         }
                     }
                 },
@@ -596,7 +603,9 @@ $(document).ready(function () {
                 else {
                     let exist = true;
                     if (json.true_to_continue.toString().toLowerCase() === 'false') {
-                       alert(json.message);
+                        alert(json.message);
+                        $('#error_message_compare').text('Warning: '+ json.message);
+                        $('#error_message_counts').text('Warning: '+ json.message);
                     }
                 }
             },

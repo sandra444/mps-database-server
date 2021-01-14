@@ -5217,14 +5217,14 @@ class AssayOmicDataFileUploadForm(BootstrapForm):
         data['time_1'] = 0
         for time_unit, conversion in list(TIME_CONVERSIONS.items()):
             if data.get('time_1_' + time_unit) is not None:
-                inttime = (data.get('time_1_' + time_unit))
-                data.update({'time_1': data.get('time_1') + inttime * conversion,})
+                int_time = (data.get('time_1_' + time_unit))
+                data.update({'time_1': data.get('time_1') + int_time * conversion,})
 
         data['time_2'] = 0
         for time_unit, conversion in list(TIME_CONVERSIONS.items()):
             if data.get('time_2_' + time_unit) is not None:
-                inttime = data.get('time_2_' + time_unit)
-                data.update({'time_2': data.get('time_2') + inttime * conversion,})
+                int_time = data.get('time_2_' + time_unit)
+                data.update({'time_2': data.get('time_2') + int_time * conversion,})
 
         true_to_continue = self.qc_file(save=False, calledme='clean')
         if not true_to_continue:
@@ -5247,6 +5247,7 @@ class AssayOmicDataFileUploadForm(BootstrapForm):
         if self.instance.id:
             data_file_pk = self.instance.id
 
+        # the data_type specific QC is in the utils.py
         true_to_continue = data_quality_clean_check_for_omic_file_upload(self, data, data_file_pk)
         return true_to_continue
 
@@ -5280,31 +5281,24 @@ class AssayOmicDataFileUploadForm(BootstrapForm):
 # Start Omic Metadata Collection Section
 # Form to use to collect the omic sample metadata
 # The actual metadata will be stuffed into a field for performance
-# LUKE EYES
-class AssayOmicSampleMetadataAdditionalInfoForm(forms.Form):
+class AssayOmicSampleMetadataAdditionalInfoForm(BootstrapForm):
     """Form for collecting omic sample metadata."""
 
     # nts - this will be one record per form (the rest will be crammed in a field...)
-    # THIS IS THE ERROR I GET: AssayOmicSampleMetadataAdditionalInfoFormUpdate is missing a QuerySet. Define AssayOmicSampleMetadataAdditionalInfoFormUpdate.model, AssayOmicSampleMetadataAdditionalInfoFormUpdate.queryset, or override AssayOmicSampleMetadataAdditionalInfoFormUpdate.get_queryset().
-    def get_queryset(self):
-        self.study = self.request.study
-        self.user = self.request.user
-    #     # todo-sck fix this
-    #     # https://teamtreehouse.com/community/code-challenge-overriding-getqueryset-method-in-generic-listview-for-article
-    #     # just_a_queryset = AssayMatrixItem.objects.filter(study_id=self.study).order_by('name', )
-    #
-        queryset = super().get_queryset()
-        return queryset.none()
+    class Meta(object):
+        model = AssayStudy
+        fields = (
+            'indy_list_of_dicts_of_table_rows',
+            'indy_list_of_column_labels',
+            'indy_list_of_column_labels_show_hide',
+            'indy_sample_location',
+            'indy_matrix_item',
+            'indy_matrix_item_list',
+            'indy_sample_metadata_table_was_changed')
 
     def __init__(self, *args, **kwargs):
-        self.study = kwargs.pop('study', None)
-        self.user = kwargs.pop('user', None)
         super(AssayOmicSampleMetadataAdditionalInfoForm, self).__init__(*args, **kwargs)
-
-        if not self.study and self.instance.study:
-            self.study = self.instance.study
-        if self.study:
-            self.instance.study = self.study
+        # self.instance will be the study self.instance.id is the study id
 
         # this is really only for development to pull in some example data, change to false later
         # **change-star
@@ -5320,7 +5314,7 @@ class AssayOmicSampleMetadataAdditionalInfoForm(forms.Form):
         self.fields['indy_list_of_dicts_of_table_rows'].initial = json.dumps(indy_list_of_dicts_of_table_rows)
 
         # get the queryset of matrix items in this study
-        matrix_item_queryset = AssayMatrixItem.objects.filter(study_id=self.study).order_by('name', )
+        matrix_item_queryset = AssayMatrixItem.objects.filter(study_id=self.instance.id).order_by('name', )
         self.fields['indy_matrix_item'].queryset = matrix_item_queryset
         # get the matrix items names in this study
         matrix_item_list = matrix_item_queryset.values_list('name', flat=True)
@@ -5346,7 +5340,7 @@ class AssayOmicSampleMetadataAdditionalInfoForm(forms.Form):
     indy_matrix_item_list = forms.CharField(widget=forms.TextInput(), required=False,)
     indy_sample_metadata_table_was_changed = forms.BooleanField()
 
-    # todo need to fix all this
+    # todo-sck need to fix all this
     # def clean(self):
     #     data = super(AssayOmicSampleMetadataAdditionalInfoForm, self).clean()
     #
@@ -5356,8 +5350,8 @@ class AssayOmicSampleMetadataAdditionalInfoForm(forms.Form):
     #     data['sample_time'] = 0
     #     for time_unit, conversion in list(TIME_CONVERSIONS.items()):
     #         if data.get('time_1_' + time_unit) is not None:
-    #             inttime = (data.get('time_1_' + time_unit))
-    #             data.update({'time_1': data.get('time_1') + inttime * conversion,})
+    #             int_time = (data.get('time_1_' + time_unit))
+    #             data.update({'time_1': data.get('time_1') + int_time * conversion,})
     #
     #     true_to_continue = self.qc_file(save=False, calledme='clean')
     #     if not true_to_continue:
