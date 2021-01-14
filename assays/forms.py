@@ -5284,6 +5284,8 @@ class AssayOmicDataFileUploadForm(BootstrapForm):
 class AssayOmicSampleMetadataAdditionalInfoForm(BootstrapForm):
     """Form for collecting omic sample metadata."""
 
+    # todo-sck may need to add more form fields...need to work on this
+
     # nts - this will be one record per form (the rest will be crammed in a field...)
     class Meta(object):
         model = AssayStudy
@@ -5304,6 +5306,7 @@ class AssayOmicSampleMetadataAdditionalInfoForm(BootstrapForm):
         # **change-star
         find_defaults = True
 
+        # todo-sck update the call to include the study id so can pull the correct metadata
         indy_table_labels = find_the_labels_needed_for_the_indy_omic_table('form', find_defaults)
         indy_list_of_column_labels = indy_table_labels.get('indy_list_of_column_labels')
         indy_list_of_column_labels_show_hide = indy_table_labels.get('indy_list_of_column_labels_show_hide')

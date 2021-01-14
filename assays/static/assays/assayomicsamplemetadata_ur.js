@@ -3,7 +3,7 @@ window.OMICS = {
     draw_plots: null,
     omics_data: null
 };
-
+// todo this whole thing
 // todo - maybe - make it so that the user can overwrite a previous rather than this (this will be complicated)
 // todo - remove an error for the log2 fold change where group1 can not equal group 2 - this could happen if the times are different - think about....
 // todo at some point, check to make sure to limit the sample locations to what is listed in models in the study, if listed (location_1, 2 and sample location - three places currently)

@@ -4916,7 +4916,7 @@ class AssayOmicDataFileUploadAdd(StudyGroupMixin, HistoryMixin, CreateView):
             return self.render_to_response(self.get_context_data(form=form, ))
 
 class AssayOmicDataFileUploadUpdate(StudyGroupMixin, HistoryMixin, UpdateView):
-    """Views View Upload an AssayOmicDataFileUpload file """
+    """Views Update Upload an AssayOmicDataFileUpload file """
 
     model = AssayOmicDataFileUpload
     template_name = 'assays/assayomicdatafileupload_aur.html'
@@ -4936,15 +4936,15 @@ class AssayOmicDataFileUploadUpdate(StudyGroupMixin, HistoryMixin, UpdateView):
             return self.render_to_response(self.get_context_data(form=form, ))
 
 
-class AssayOmicDataFileUploadView(StudyGroupMixin, DetailHandlerView):
-    """Views View Upload an AssayOmicDataFileUpload file """
+class AssayOmicDataFileUploadDetail(StudyGroupMixin, DetailHandlerView):
+    """Views Detail Upload an AssayOmicDataFileUpload file """
 
     model = AssayOmicDataFileUpload
     template_name = 'assays/assayomicdatafileupload_aur.html'
-    form_class = AssayOmicDataFileUploadForm
+    # do not need this since using the hacky way below -- form_class = AssayOmicDataFileUploadForm
 
     def get_context_data(self, **kwargs):
-        context = super(AssayOmicDataFileUploadView, self).get_context_data(**kwargs)
+        context = super(AssayOmicDataFileUploadDetail, self).get_context_data(**kwargs)
         context['review'] = True
         context['page_called'] = 'review'
 
@@ -4955,7 +4955,7 @@ class AssayOmicDataFileUploadView(StudyGroupMixin, DetailHandlerView):
 
         return context
 
-# END omic data file list, add, update, view and delete section
+# END omic data file list, add, update, detail and delete section
 
 
 ##### Start omic METADATA (for counts), add, update, view and delete section

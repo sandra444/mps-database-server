@@ -6526,7 +6526,7 @@ def sandrasGeneralFormatNumberFunction(this_number_in):
 
 
 # sck called from forms.py when save and
-# change omic data file via ajax function
+# change omic data file in GUI via an ajax function
 # fetch_omics_data_for_upload_preview_prep;
 # js function get_data_for_this_file_ready_for_preview
 def omic_data_file_process_data(save, study_id, omic_data_file_id, data_file, file_extension,
@@ -6535,14 +6535,15 @@ def omic_data_file_process_data(save, study_id, omic_data_file_id, data_file, fi
     Assay Omics Data File Add or Change the file (utility).
     """
 
-    # todo-sck add processing of counts data
-
     # when called from ajax, this is what is used for the preview (Quinn's)
-    # the dictionary that is returned can have extra stuff, but must match with what Quinn's preview is expecting
-    # when called from the form clean and save, this makes the list of rows that will go into the data points table
+    # the preview is ONLY called/available when the file is changed (not on load for the saved file)
+    # the dictionary that is returned can have extra stuff
+    # but must the stuff that matches with what Quinn's preview is expecting
+    # when called from the form clean and save, this makes the list of rows that will go into the data points table(s)
     # note: there is a table for compare (two group) data and a table for counts data
     # this is because the metadata for the compare data is stored in the table with the upload file
-    # but the metadata for the counts data is stored in a separate table and a required pk foreign key is needed
+    # but the metadata for the counts data is stored in a separate table and a requires pk foreign key to the sample metadata
+    # to be stored with the count value
 
     # set the defaults
     continue_outer_if_true = True
@@ -6569,7 +6570,7 @@ def omic_data_file_process_data(save, study_id, omic_data_file_id, data_file, fi
     data_dicts['target_name_to_id'] = {}
     error_message = ''
     data_dicts['error_message'] = ''
-    # todo-sck need to coordinate with Quinn for the counts data preview - what need and in what format
+    # todo-sck need to coordinate with Quinn for the counts data preview - what need and in what format?
 
 
     # Was asked to build a check to autofind the file type
@@ -6634,7 +6635,6 @@ def omic_data_file_process_data(save, study_id, omic_data_file_id, data_file, fi
         # each sheet will be checked for data
         # not all sheets need to be valid, a sheet can be skipped and others imported
         while sheet_index < looper:
-            # when working with count data, will need metadata, not sure what yet????
             matrix_item_pk_list = []
 
             # Guts of opening the file or sheet and find and return the dataframe
@@ -6656,9 +6656,9 @@ def omic_data_file_process_data(save, study_id, omic_data_file_id, data_file, fi
             # print("~gene ",gene_id_field_header)
 
             if continue_this_sheet_if_true:
-                qc_each_file_or_worksheet_level = []
                 # Guts of the QC for the omics data point file
                 # functions should return continue and error message (and other stuff if needed for data type)
+                #  todo-sck need to see what file headers are being pulled - did have a function to pull them but not sure if current...check it
                 qc_each_file_or_worksheet_level = omic_qc_data_file(df, omic_target_text_header_list, data_type)
                 continue_this_sheet_if_true = qc_each_file_or_worksheet_level[0]
                 error_message = error_message + qc_each_file_or_worksheet_level[1]
@@ -6670,47 +6670,32 @@ def omic_data_file_process_data(save, study_id, omic_data_file_id, data_file, fi
                 data_dicts['target_name_to_id'] = {y: analysis_target_name_to_pk_dict[y] for y in list_of_relevant_headers_in_file}
 
             if continue_this_sheet_if_true:
-
+                parameter_list = [
+                    list_of_instances, instance_counter, df,
+                    study_id, omic_data_file_id, analysis_target_name_to_pk_dict,
+                    sc_target_pk_to_name_dict, analysis_target_pk_to_sc_target_pk_dict,
+                    list_of_relevant_headers_in_file, called_from, gene_id_field_header,
+                    data_dicts['data'][joint_name]
+                ]
                 # Guts of data loading for omic data file
                 # functions should return continue, error message, and a list of instances and an instance counter
                 if data_type == 'log2fc':
-                    data_loaded_to_list_of_instances = omic_two_group_data_to_list_of_instances(
-                        list_of_instances, instance_counter, df,
-                        study_id, omic_data_file_id, analysis_target_name_to_pk_dict,
-                        sc_target_pk_to_name_dict, analysis_target_pk_to_sc_target_pk_dict,
-                        list_of_relevant_headers_in_file, called_from, gene_id_field_header,
-                        data_dicts['data'][joint_name])
+                    data_loaded_to_list_of_instances = omic_two_group_data_to_list_of_instances(parameter_list)
                     continue_this_sheet_if_true = data_loaded_to_list_of_instances[0]
-                    error_message = error_message + data_loaded_to_list_of_instances[1]
-                    data_dicts['error_message'] = error_message
-                    list_of_instances = data_loaded_to_list_of_instances[2]
-                    instance_counter = data_loaded_to_list_of_instances[3]
-                    data_dicts['data'][joint_name] = data_loaded_to_list_of_instances[4]
-
                 elif data_type == 'normcounts' or data_type == 'rawcounts':
-                    # todo-sck write/fix this
-                    # data_loaded_to_list_of_instances = omic_metadata_data_to_list_of_instances(
-                    #     list_of_instances, instance_counter, df,
-                    #     study_id, omic_data_file_id, analysis_target_name_to_pk_dict,
-                    #                         sc_target_pk_to_name_dict, analysis_target_pk_to_sc_target_pk_dict,
-                    #     matrix_item_pk_list, called_from, gene_id_field_name_if_app)
-                    # todo-sck, going to need to pass through the pk for the meta data file!
-                    data_loaded_to_list_of_instances = omic_count_data_to_list_of_instances(
-                        list_of_instances, instance_counter, df,
-                        study_id, omic_data_file_id, analysis_target_name_to_pk_dict,
-                        sc_target_pk_to_name_dict, analysis_target_pk_to_sc_target_pk_dict,
-                        list_of_relevant_headers_in_file, called_from, gene_id_field_header,
-                        data_dicts['data'][joint_name])
+                    data_loaded_to_list_of_instances = omic_count_data_to_list_of_instances(parameter_list)
                     continue_this_sheet_if_true = data_loaded_to_list_of_instances[0]
-                    error_message = error_message + data_loaded_to_list_of_instances[1]
-                    data_dicts['error_message'] = error_message
-                    list_of_instances = data_loaded_to_list_of_instances[2]
-                    instance_counter = data_loaded_to_list_of_instances[3]
-                    data_dicts['data'][joint_name] = data_loaded_to_list_of_instances[4]
-
-                    data_dicts['error_message'] = error_message
                 else:
                     continue_this_sheet_if_true = False
+
+                if continue_this_sheet_if_true:
+                    error_message = error_message + data_loaded_to_list_of_instances[1]
+                    data_dicts['error_message'] = error_message
+                    list_of_instances = data_loaded_to_list_of_instances[2]
+                    instance_counter = data_loaded_to_list_of_instances[3]
+                    data_dicts['data'][joint_name] = data_loaded_to_list_of_instances[4]
+                    data_dicts['error_message'] = error_message
+                    # todo-sck need to coordinate with Quinn for the counts data preview - what need and in what format?
 
             sheet_index = sheet_index + 1
 
@@ -6732,51 +6717,7 @@ def omic_data_file_process_data(save, study_id, omic_data_file_id, data_file, fi
     return data_dicts
 
 
-# sck sub here in utils.py
-def omic_find_sets_of_prefixes_and_numbers_for_well_names(header_list):
-    prefix_long = []
-    number_long = {}
-    # todo-sck make these all UPPER case!!
-    for str in header_list:
-        if not (str == 'gene' or str == 'gene reference' or str == 'name'):
-            # loop to iterating characters
-            index = len(str)-1
-            while index >= 0:
-
-                # checking if character is numeric,
-                # saving index
-                if str[index].isdigit():
-                    index = index - 1
-                else:
-                    break
-
-            prefix_long.append(str[:index+1])
-            # todo-sck - do want to make it a number or leave as a string?
-            # if number it, it will not match a recombination of the two, which could be a problem
-            # number_long.append(int(str[index+1:]))
-            thisStr = str[index+1:]
-            if thisStr is None or len(thisStr) == 0:
-                number_long[987654321] = None
-            else:
-                thisKey = int(thisStr)
-                number_long[thisStr] = thisKey
-
-    return [long_list_to_unique_list(prefix_long), number_long]
-
-
-# sck
-# function to get unique values
-def long_list_to_unique_list(long_list):
-    unique_list = []
-
-    for each in long_list:
-        if each not in unique_list:
-            unique_list.append(each)
-
-    return unique_list
-
-
-# sck
+# sck sub here
 def omic_determine_if_field_with_header_for_gene(df_column_headers_stripped):
     continue_this_sheet_if_true = True
     # may need other options here (eg probe_id, refseq name, etc), but these will do for now
@@ -6793,13 +6734,10 @@ def omic_determine_if_field_with_header_for_gene(df_column_headers_stripped):
     return [continue_this_sheet_if_true, gene_id_field_name]
 
 
-# sck form save
+# sck form save qc of omics upload file
 def omic_qc_data_file(df, omic_target_text_header_list, data_type):
     error_message = ''
     continue_this_sheet_if_true = True
-
-    # // todo-sck - remove an error for the log2 fold change where group1 can not equal group 2, if there is one
-    # make it group and all metadata....instead
 
     list_of_relevant_headers_in_file = []
     found_foldchange_true = False
@@ -6820,22 +6758,7 @@ def omic_qc_data_file(df, omic_target_text_header_list, data_type):
             error_message = error_message + ' Required header containing "fc" or "fold" or "FC" or "Fold" is missing. '
     else:
         pass
-        # just a reminder that need todo-sck this - build qc
-
-    # todo-sck when ready to deal with count data or more qc for other data
-    # if data_type != 'log2fc':
-    #     matrix_item_name_to_pk = {matrix_item.name: matrix_item.id for matrix_item in AssayMatrixItem.objects.filter(study_id=study_id)}
-    #
-    #     matrix_item_pk_list = []
-    #     i = 0
-    #     for each in df.columns:
-    #         pk = matrix_item_name_to_pk.get(each, 0)
-    #         matrix_item_pk_list.append(pk)
-    #         if pk == 0 and i > 0:
-    #             # build the error string just in case NONE of the fields are valid, but otherwise, just ignore them
-    #             # continue_this_sheet_if_true = False
-    #             error_message = error_message + ' Chip/Well Name ' + each + ' not found in this study. '
-    #         i = i + 1
+        # todo-sck need build for counts data - not that the head list would be normcounts or rawcounts, not the sample headers
 
     return [continue_this_sheet_if_true, error_message, list_of_relevant_headers_in_file]
 
@@ -7008,6 +6931,7 @@ def omic_count_data_upload_remove_and_add(data_file_pk, list_of_instances, error
         error_message = error_message + ' During the save, found no records in the file to upload. Should have received and error message during data cleaning. '
         raise forms.ValidationError(error_message)
 
+
 # sck
 def data_file_to_data_frame(data_file, file_extension, workbook=None, sheet_index=None):
     # should be able to use this for all data to data frame
@@ -7062,8 +6986,6 @@ def data_quality_clean_check_for_omic_file_upload(self, data, data_file_pk):
     # 'analysis_method' in self.changed_data or
     # 'data_type' in self.changed_data or
 
-    # todo-sck add qc for counts data - this is a form save qc
-
     true_to_continue = True
     file_name = data.get('omic_data_file').name
 
@@ -7081,17 +7003,19 @@ def data_quality_clean_check_for_omic_file_upload(self, data, data_file_pk):
         true_to_continue = this_file_is_the_same_hash_as_another_in_this_study(self, data, data_file_pk)
 
     if true_to_continue:
-        # ONGOING - add to the list with all data types that are two groups required
+        # todo-sck ONGOING - add to the list with all data types that are two groups required
         if data['data_type'] in ['log2fc']:
-            true_to_continue = qc_for_log2fc_omic_upload(self, data, data_file_pk)
+            true_to_continue = qc_for_compare_omic_upload(self, data, data_file_pk)
+        elif data['data_type'] in ['normcounts', 'rawcounts']:
+            true_to_continue = qc_for_count_omic_upload(self, data, data_file_pk)
+        else:
+            pass
+
     return true_to_continue
 
 
 # sck sub here in utils.py
-def qc_for_log2fc_omic_upload(self, data, data_file_pk):
-    # todo-sck - error check - sample time - is it required or not and should it be for the log2 fold change
-    # todo-sck - any checks needed for header type and switch over to time unit
-
+def qc_for_compare_omic_upload(self, data, data_file_pk):
     true_to_continue = True
     file_name = data.get('omic_data_file').name
 
@@ -7100,9 +7024,9 @@ def qc_for_log2fc_omic_upload(self, data, data_file_pk):
         validation_message = 'For data type that compares two groups, both groups must be selected.'
         validation_message = validation_message + "  " + file_name
         raise ValidationError(validation_message, code='invalid')
-    if data['group_1'] == data['group_2']:
+    if data['group_1'] == data['group_2'] and data['time_1'] == data['time_2'] and data['location_1'] == data['location_2']:
         true_to_continue = False
-        validation_message = 'For data type that compares two groups, the two selected groups must be different.'
+        validation_message = 'For data type that compares two groups, the combination of the group, sample location, and sample time must be different.'
         validation_message = validation_message + "  " + file_name
         raise ValidationError(validation_message, code='invalid')
     if data['location_1'] is None or data['location_2'] is None:
@@ -7219,6 +7143,22 @@ def qc_for_log2fc_omic_upload(self, data, data_file_pk):
 
 
 # sck sub here in utils.py
+def qc_for_count_omic_upload(self, data, data_file_pk):
+    # todo-sck update this all for counts data
+    true_to_continue = True
+    file_name = data.get('omic_data_file').name
+
+    # change for missing headers in the sample metadata
+    # example of how to send error messages
+    # if data['group_1'] is None or data['group_2'] is None:
+    #     true_to_continue = False
+    #     validation_message = 'For data type that compares two groups, both groups must be selected.'
+    #     validation_message = validation_message + "  " + file_name
+    #     raise ValidationError(validation_message, code='invalid')
+    return true_to_continue
+
+
+# sck sub here in utils.py
 def this_file_is_the_same_hash_as_another_in_this_study(self, data, data_file_pk):
     true_to_continue = True
     message = ''
@@ -7287,7 +7227,7 @@ def this_file_same_as_another_in_this_study(omic_data_file, study_id, data_file_
     return [true_to_continue, message]
 
 
-# sck
+# sck - sub here in utils.py
 def this_file_name_is_similar_to_another_in_this_study(omic_data_file, study_id, data_file_pk):
     true_to_continue = True
     message = ''
@@ -7331,30 +7271,6 @@ def this_file_name_is_similar_to_another_in_this_study(omic_data_file, study_id,
         message = 'Similar file names already in this study [' + potential_dup_string + ']. Make sure you are uploading the correct file.'
 
     return [true_to_continue, message]
-
-
-# sck
-def get_model_location_dictionary(this_model_pk):
-    location_dict = {}
-
-    qs_locations = OrganModelLocation.objects.filter(
-        organ_model_id=this_model_pk
-    ).prefetch_related(
-        'sample_location'
-    )
-    if len(qs_locations) > 0:
-        for each in qs_locations:
-            location_dict[each.sample_location.id] = each.sample_location.name
-    else:
-        qs_locations = AssaySampleLocation.objects.all()
-        for each in qs_locations:
-            if each.name.lower() == 'na' or each.name.lower() == 'unspecified':
-                pass
-            else:
-                location_dict[each.id] = each.name
-
-    # print('location_dict ', location_dict)
-    return location_dict
 
 
 # sck forms.py - will load for previous submits based on saved header_type
@@ -7513,6 +7429,73 @@ def find_the_labels_needed_for_the_indy_omic_table(called_from, find_defaults):
     print(indy_omic_table)
 
     return indy_omic_table
+
+# sck sub here in utils.py
+def omic_find_sets_of_prefixes_and_numbers_for_well_names(header_list):
+    prefix_long = []
+    number_long = {}
+    # todo-sck make these all UPPER case!!
+    for str in header_list:
+        if not (str == 'gene' or str == 'gene reference' or str == 'name'):
+            # loop to iterating characters
+            index = len(str)-1
+            while index >= 0:
+
+                # checking if character is numeric,
+                # saving index
+                if str[index].isdigit():
+                    index = index - 1
+                else:
+                    break
+
+            prefix_long.append(str[:index+1])
+            # todo-sck - do want to make it a number or leave as a string?
+            # if number it, it will not match a recombination of the two, which could be a problem
+            # number_long.append(int(str[index+1:]))
+            thisStr = str[index+1:]
+            if thisStr is None or len(thisStr) == 0:
+                number_long[987654321] = None
+            else:
+                thisKey = int(thisStr)
+                number_long[thisStr] = thisKey
+
+    return [long_list_to_unique_list(prefix_long), number_long]
+
+
+# sck
+# function to get unique values
+def long_list_to_unique_list(long_list):
+    unique_list = []
+
+    for each in long_list:
+        if each not in unique_list:
+            unique_list.append(each)
+
+    return unique_list
+
+
+# sck called for ajax.py
+def get_model_location_dictionary(this_model_pk):
+    location_dict = {}
+
+    qs_locations = OrganModelLocation.objects.filter(
+        organ_model_id=this_model_pk
+    ).prefetch_related(
+        'sample_location'
+    )
+    if len(qs_locations) > 0:
+        for each in qs_locations:
+            location_dict[each.sample_location.id] = each.sample_location.name
+    else:
+        qs_locations = AssaySampleLocation.objects.all()
+        for each in qs_locations:
+            if each.name.lower() == 'na' or each.name.lower() == 'unspecified':
+                pass
+            else:
+                location_dict[each.id] = each.name
+
+    # print('location_dict ', location_dict)
+    return location_dict
 
 
 # sck

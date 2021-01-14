@@ -19,9 +19,9 @@
     <li><a href="{% url 'assays-assaystudy-data-index' form.instance.id %}">Data</a></li>
     {# form.instance should work either way? #}
 {#    {% if object %}#}
-{#        <li><a href="{% url "assayomicdatafileupload-index" object.study.id %}">Assay Omic Data Files</a>#}
+{#        <li><a href="{% url "assays-assayomicdatafileupload-index" object.study.id %}">Assay Omic Data Files</a>#}
 {#    {% else %}#}
-{#        <li><a href="{% url "assayomicdatafileupload-index" form.instance.study_id %}">Assay Omic Data Files</a>#}
+{#        <li><a href="{% url "assays-assayomicdatafileupload-index" form.instance.study_id %}">Assay Omic Data Files</a>#}
 {#    {% endif %}#}
 {#    <li class="active">#}
 {#        {% if object %}#}
