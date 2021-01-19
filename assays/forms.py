@@ -5286,7 +5286,10 @@ class AssayOmicSampleMetadataAdditionalInfoForm(BootstrapForm):
 
     # todo-sck may need to add more form fields...need to work on this
 
-    # nts - this will be one record per form (the rest will be crammed in a field...)
+    # NOTE TO SCK - this will be one record per form (the rest will be crammed in a field...)
+    # the form will not have an index page, so, there is a conditional in the call (click to go there) and
+    # this uses the AssayStudy model so that the study id is easily passed in and out
+
     class Meta(object):
         model = AssayStudy
         fields = (
@@ -5306,8 +5309,7 @@ class AssayOmicSampleMetadataAdditionalInfoForm(BootstrapForm):
         # **change-star
         find_defaults = True
 
-        # todo-sck update the call to include the study id so can pull the correct metadata
-        indy_table_labels = find_the_labels_needed_for_the_indy_omic_table('form', find_defaults)
+        indy_table_labels = find_the_labels_needed_for_the_indy_omic_table('form', self.instance.id, find_defaults)
         indy_list_of_column_labels = indy_table_labels.get('indy_list_of_column_labels')
         indy_list_of_column_labels_show_hide = indy_table_labels.get('indy_list_of_column_labels_show_hide')
         indy_list_of_dicts_of_table_rows = indy_table_labels.get('indy_list_of_dicts_of_table_rows')
@@ -5343,7 +5345,7 @@ class AssayOmicSampleMetadataAdditionalInfoForm(BootstrapForm):
     indy_matrix_item_list = forms.CharField(widget=forms.TextInput(), required=False,)
     indy_sample_metadata_table_was_changed = forms.BooleanField()
 
-    # todo-sck need to fix all this
+    # todo-sck need to fix all this after get buying for design
     # def clean(self):
     #     data = super(AssayOmicSampleMetadataAdditionalInfoForm, self).clean()
     #

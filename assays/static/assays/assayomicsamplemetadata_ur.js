@@ -1,67 +1,39 @@
-//GLOBAL-SCOPE
-window.OMICS = {
-    draw_plots: null,
-    omics_data: null
-};
-// todo this whole thing
-// todo - maybe - make it so that the user can overwrite a previous rather than this (this will be complicated)
-// todo - remove an error for the log2 fold change where group1 can not equal group 2 - this could happen if the times are different - think about....
-// todo at some point, check to make sure to limit the sample locations to what is listed in models in the study, if listed (location_1, 2 and sample location - three places currently)
-// todo add a highlight all to columns required
-// todo make sure form saved are not getting overwritten when come into update or review form
-
-//todo what if change the tie unit???? time_unit_instance
-
-//todo put the search term back in the search bar
-//$('#glossary_table_filter :input').val(searchTerm).trigger('input');
-//$('#glossary_table_filter :input').val(null).trigger('input');
-
 $(document).ready(function () {
+
+    // todo this whole thing
+    // todo - maybe - make it so that the user can overwrite a previous rather than this (this will be complicated)
+    // todo - remove an error for the log2 fold change where group1 can not equal group 2 - this could happen if the times are different - think about....
+    // todo at some point, check to make sure to limit the sample locations to what is listed in models in the study, if listed (location_1, 2 and sample location - three places currently)
+    // todo add a highlight all to columns required
+    // todo make sure form saved are not getting overwritten when come into update or review form
+    
+    //todo what if change the tie unit???? time_unit_instance
+    
+    //todo put the search term back in the search bar
+    //$('#glossary_table_filter :input').val(searchTerm).trigger('input');
+    //$('#glossary_table_filter :input').val(null).trigger('input');    
+
     //show the validation stuff
     $('#form_errors').show()
 
-    // Load core chart package
-    google.charts.load('current', {'packages': ['corechart']});
-    google.charts.load('visualization', '1', {'packages': ['imagechart']});
-    
-    let page_omic_upload_called_from_in_js_file = 'add';
-    let page_omic_upload_check_load = $('#check_load').html().trim();
+    // there will only be upload and review, not add (add is a special case of update handled by the forms.py!)
+    let page_omic_metadata_called_from_in_js_file = 'update';
+    let page_omic_metadata_check_load = $('#check_load').html().trim();
 
-    // two group stuff
-    let page_omic_upload_group_id_change = 0;
-    let page_omic_upload_group_pk_change = 0;
-
-    let page_omic_upload_group_id_load_1 = 0;
-    let page_omic_upload_group_pk_load_1 = 0;
-    let page_omic_upload_group_id_load_2 = 0;
-    let page_omic_upload_group_pk_load_2 = 0;   
-    
-    let page_omic_current_group1 = $('#id_group_1')[0].selectize.items[0];
-    let page_omic_current_group2 = $('#id_group_2')[0].selectize.items[0];
-
-    let page_make_the_group_change = true;
-
-    // when visible, they are required, make them yellow
-    $('#id_group_1').next().addClass('required');
-    $('#id_group_2').next().addClass('required');
-    $('#id_location_1').next().addClass('required');
-    $('#id_location_2').next().addClass('required');
 
     // indy sample stuff
     var sample_metadata_table_id = 'sample_metadata_table';
-    //has the info for the indy metadata table been populated - use so only pull from initial form once
-    var page_metadata_lod_done = false;
     // had no default in html page
     var page_drag_action = null;
     // has a default in html page
     var page_change_duplicate_increment = 'duplicate';
     //the current one
     var metadata_lod = [];
-    //v number of the current one (should be 1, 2, 3, 4, or 5 after first population)
+    // version number of the current one (should be 1, 2, 3, 4, or 5 after first population)
     var metadata_lod_current_index = 0;
     //for holding versions to allow for undo and redo
     var metadata_lod_cum = [];
-    //the table that is highlighted
+    //the table info that is highlighted
     var metadata_highlighted = [];
     var list_of_fields_for_replacing_that_are_highlighted = [];
     var icol_last_highlighted_seen = {};
@@ -79,10 +51,6 @@ $(document).ready(function () {
     var indy_list_of_dicts_of_table_rows = JSON.parse($('#id_indy_list_of_dicts_of_table_rows').val());
     var indy_list_of_column_labels = JSON.parse($('#id_indy_list_of_column_labels').val());
     var indy_list_of_column_labels_show_hide = JSON.parse($('#id_indy_list_of_column_labels_show_hide').val());
-    var indy_list_of_row_labels = JSON.parse($('#id_indy_list_of_row_labels').val());
-    var indy_list_of_unique_row_labels = JSON.parse($('#id_indy_list_of_unique_row_labels').val());
-    var indy_count_of_unique_row_labels = JSON.parse($('#id_indy_count_of_unique_row_labels').val());
-
 
     var indy_table_order = [];
     var indy_table_column_defs = [];
@@ -143,8 +111,8 @@ $(document).ready(function () {
     changed_something_important('load');
     change_visibility_of_some_doms();
 
-    if (page_omic_upload_check_load === 'review') {
-        page_omic_upload_called_from_in_js_file = 'load-review';
+    if (page_omic_metadata_check_load === 'review') {
+        page_omic_metadata_called_from_in_js_file = 'load-review';
         // HANDY - to make everything on a page read only (for review page)
         $('.selectized').each(function() { this.selectize.disable() });
         $(':input').attr('disabled', 'disabled');
@@ -152,16 +120,12 @@ $(document).ready(function () {
         // todo add class to the sample time and sample location to make the box yellow - check to make sure we are not going to time unit and one time before mess with this
         // todo whenever it shows, PI asked for it to be required
         // todo build a required check into the form processess
-        page_omic_upload_group_id_load_1 = 1;
-        page_omic_upload_group_pk_load_1 = $('#id_group_1')[0].selectize.items[0];
-        page_omic_upload_group_id_load_2 = 2;
-        page_omic_upload_group_pk_load_2 = $('#id_group_2')[0].selectize.items[0];
 
-        if (page_omic_upload_check_load === 'add') {
-            page_omic_upload_called_from_in_js_file = 'load-add';
+        if (page_omic_metadata_check_load === 'add') {
+            page_omic_metadata_called_from_in_js_file = 'load-add';
             get_group_sample_info('load-add');
         } else {
-            page_omic_upload_called_from_in_js_file = 'load-update';
+            page_omic_metadata_called_from_in_js_file = 'load-update';
             get_group_sample_info('load-update');
             //do not allow changing of data type after a valid submit and save - user has to delete and then add back
             $('#id_data_type').selectize.disable();
@@ -175,48 +139,7 @@ $(document).ready(function () {
     function clear_validation_errors() {
         $('#form_errors').hide();
     }
-    /**
-     * On click to toggle
-    */
-    // the file format details
-    $('#fileFormatDetailsButton').click(function () {
-        $('#omic_file_format_details_section').toggle();
-    });
-    /**
-     * On click to toggle
-    */
-    // the graph sections
-    $('#omicPreviewTheCompareGraphsButton').click(function () {
-        $('#omic_preview_compare_graphs_section').toggle();
-        $('#omic_preview_compare_graphs_section2').toggle();
-    });
-    /**
-     * On change data file
-    */
-    $('#id_omic_data_file').on('change', function (e) {
-        clear_validation_errors();
-        //when first change the file, make the preview button available
-        if ($('#id_data_type')[0].selectize.items[0] == 'log2fc') {
-            $('#omic_preview_compare_button_section').show();
-            $('#omic_preview_compare_graphs_section').show();
-            $('#omic_preview_compare_graphs_section2').show();
-        } else {
-            $('#omic_preview_compare_button_section').hide();
-            $('#omic_preview_compare_graphs_section').hide();
-            $('#omic_preview_compare_graphs_section2').hide();
-        }
-        changed_something_important('data_file');
-    });
-    /**
-     * On change data type, change what is required page logic
-    */
-    $('#id_data_type').change(function () {
-        clear_validation_errors();
 
-        change_visibility_of_some_doms();
-
-        changed_something_important('data_type');
-    });
     function change_visibility_of_some_doms() {
         // console.log("$('#id_data_type')[0].selectize.items[0] ",$('#id_data_type')[0].selectize.items[0])
         $('#omic_preview_compare_button_section').hide();
@@ -247,116 +170,6 @@ $(document).ready(function () {
             $('#count_extra').show();
         }
     }
-    /**
-     * On change header type, change what is required page logic
-    */
-    $('#id_header_type').change(function () {
-        clear_validation_errors();
-        changed_something_important('header_type');
-    });
-    /**
-     * On changes that affect the graphs/plots on the preview page
-    */
-    $('#id_anaylsis_method').on('change', function (e) {
-        clear_validation_errors();
-        changed_something_important('analysis_method');
-    });
-    /**
-     * On change method
-    */
-    $('#id_study_assay').change(function () {
-        clear_validation_errors();
-        study_assay_value = $('#id_study_assay')[0].selectize.items[0];
-        try {
-            study_assay_text = $('#id_study_assay')[0].selectize.options[study_assay_value]['text'];
-            if (study_assay_text.toLowerCase().includes('tempo-seq')) {
-                new_value = 'temposeq_probe';
-            } else {
-                new_value = 'entrez_gene';
-            }
-            $('#id_name_reference')[0].selectize.setValue(new_value);
-        } catch {
-            $('#id_name_reference')[0].selectize.setValue('entrez_gene');
-        }
-    });
-    /**
-     * On change a group 1, call a function that gets sample info
-    */
-    $('#id_group_1').change(function () {
-        clear_validation_errors();
-        //console.log('change 1')
-        if (page_make_the_group_change) {
-            if ($('#id_group_1')[0].selectize.items[0] == $('#id_group_2')[0].selectize.items[0]) {
-                $('#id_group_1')[0].selectize.setValue(page_omic_current_group1);
-                send_user_groups_are_different_message();
-            } else {
-                page_omic_upload_called_from_in_js_file = 'change';
-                page_omic_upload_group_id_change = 1;
-                page_omic_upload_group_pk_change = $('#id_group_1')[0].selectize.items[0];
-
-                if ($('#id_group_'+page_omic_upload_group_id_change)[0].selectize.items[0] != null) {
-                    get_group_sample_info('change');
-                } else {
-                    $('#id_group_'+page_omic_upload_group_id_change)[0].selectize.items[0];
-                    $('#id_time_'+page_omic_upload_group_id_change+'_day').val(null);
-                    $('#id_time_'+page_omic_upload_group_id_change+'_hour').val(null);
-                    $('#id_time_'+page_omic_upload_group_id_change+'_minute').val(null);
-
-                    let $this_dropdown = $(document.getElementById('id_location_'+page_omic_upload_group_id_change));
-                    $this_dropdown.selectize()[0].selectize.clearOptions();
-                    $('#id_location_'+page_omic_upload_group_id_change)[0].selectize.setValue();
-                }
-            }
-            page_omic_current_group1 = $('#id_group_1')[0].selectize.items[0];
-        }
-    });
-    /**
-     * On change a group 2, call a function that gets sample info
-    */
-    $('#id_group_2').change(function () {
-        clear_validation_errors();
-        if (page_make_the_group_change) {
-            if ($('#id_group_1')[0].selectize.items[0] == $('#id_group_2')[0].selectize.items[0]) {
-                $('#id_group_2')[0].selectize.setValue(page_omic_current_group2);
-                send_user_groups_are_different_message();
-            } else {
-                page_omic_upload_called_from_in_js_file = 'change';
-                //console.log('change 2')
-                page_omic_upload_group_id_change = 2;
-                page_omic_upload_group_pk_change = $('#id_group_2')[0].selectize.items[0];
-
-                if ($('#id_group_'+page_omic_upload_group_id_change)[0].selectize.items[0] != null) {
-                    get_group_sample_info('change');
-                } else {
-                    $('#id_group_'+page_omic_upload_group_id_change)[0].selectize.items[0];
-                    $('#id_time_'+page_omic_upload_group_id_change+'_day').val(null);
-                    $('#id_time_'+page_omic_upload_group_id_change+'_hour').val(null);
-                    $('#id_time_'+page_omic_upload_group_id_change+'_minute').val(null);
-
-                    let $this_dropdown = $(document.getElementById('id_location_'+page_omic_upload_group_id_change));
-                    $this_dropdown.selectize()[0].selectize.clearOptions();
-                    $('#id_location_'+page_omic_upload_group_id_change)[0].selectize.setValue();
-                }
-            }
-            page_omic_current_group2 = $('#id_group_2')[0].selectize.items[0];
-        }
-    });
-    /**
-     * On click to download_two_group_example
-    */
-    // Start file download_two_group_example.
-    document.getElementById('fileFileFormatTwoGroup').addEventListener('click', function(){
-    // Start the download_two_group_example of yournewfile.csv file with the content from the text area
-        // could tie this to selections in the GUI later, if requested.
-        // change with tool tip
-        //todo - check the use of double quotes in some fields and not the first field....
-        var text = page_omic_upload_omic_file_format_deseq2_log2fc_headers;
-        var filename = 'TwoGroupDESeq2Omic.csv';
-
-        download_two_group_example(filename, text);
-    }, false);
-
-    // END - General and two group stuff (written during log2fold change - that is pre indy
 
     // START added during indy-sample development click and change etc
 
@@ -745,10 +558,10 @@ $(document).ready(function () {
       * get the first occurrence that has sample information.
     */
     function get_group_sample_info(called_from) {
-        // console.log('1: '+page_omic_upload_group_pk_change)
-        // console.log('2: '+page_omic_upload_group_pk_load_1)
-        // console.log('3: '+page_omic_upload_group_pk_load_2)
-        // console.log('4: '+page_omic_upload_called_from_in_js_file)
+        // console.log('1: '+page_omic_metadata_group_pk_change)
+        // console.log('2: '+page_omic_metadata_group_pk_load_1)
+        // console.log('3: '+page_omic_metadata_group_pk_load_2)
+        // console.log('4: '+page_omic_metadata_called_from_in_js_file)
 
         // HANDY if using js split time
         // time_in_minutes = 121
@@ -764,13 +577,13 @@ $(document).ready(function () {
 
         let data = {
             call: 'fetch_omic_sample_info_first_found_in_upload_file_table',
-            called_from: page_omic_upload_called_from_in_js_file,
-            group_idc: page_omic_upload_group_id_change,
-            group_pkc: page_omic_upload_group_pk_change,
-            group_id1: page_omic_upload_group_id_load_1,
-            group_pk1: page_omic_upload_group_pk_load_1,
-            group_id2: page_omic_upload_group_id_load_2,
-            group_pk2: page_omic_upload_group_pk_load_2,
+            called_from: page_omic_metadata_called_from_in_js_file,
+            group_idc: page_omic_metadata_group_id_change,
+            group_pkc: page_omic_metadata_group_pk_change,
+            group_id1: page_omic_metadata_group_id_load_1,
+            group_pk1: page_omic_metadata_group_pk_load_1,
+            group_id2: page_omic_metadata_group_id_load_2,
+            group_pk2: page_omic_metadata_group_pk_load_2,
             csrfmiddlewaretoken: window.COOKIES.csrfmiddlewaretoken
         };
         window.spinner.spin(document.getElementById('spinner'));
@@ -805,7 +618,7 @@ $(document).ready(function () {
     let get_group_sample_info_ajax = function (json, exist) {
         // bringing back the D, H, M, and sample location (if found)
 
-        // console.log('--- '+page_omic_upload_group_id_load_1)
+        // console.log('--- '+page_omic_metadata_group_id_load_1)
         // console.log(json.timemess1)
         // console.log(json.day1)
         // console.log(json.hour1)
@@ -821,9 +634,9 @@ $(document).ready(function () {
         // console.log(json.sample_location_pk2)
         // console.log(json.location_dict2)
 
-        if (page_omic_upload_called_from_in_js_file == 'load-add') {
+        if (page_omic_metadata_called_from_in_js_file == 'load-add') {
             // just do the location lists
-        } else if (page_omic_upload_called_from_in_js_file == 'load-update') {
+        } else if (page_omic_metadata_called_from_in_js_file == 'load-update') {
             // just do the location lists to restrict to the model
             let pk_loc_1 = $('#id_location_1')[0].selectize.items[0];
             let pk_loc_2 = $('#id_location_2')[0].selectize.items[0];
@@ -850,13 +663,13 @@ $(document).ready(function () {
             $('#id_location_2')[0].selectize.setValue(pk_loc_2);
         } else {
             // called from a change of one of the groups
-            $('#id_time_'+page_omic_upload_group_id_change+'_day').val(json.day1);
-            $('#id_time_'+page_omic_upload_group_id_change+'_hour').val(json.hour1);
-            $('#id_time_'+page_omic_upload_group_id_change+'_minute').val(json.minute1);
+            $('#id_time_'+page_omic_metadata_group_id_change+'_day').val(json.day1);
+            $('#id_time_'+page_omic_metadata_group_id_change+'_hour').val(json.hour1);
+            $('#id_time_'+page_omic_metadata_group_id_change+'_minute').val(json.minute1);
 
             // https://github.com/selectize/selectize.js/blob/master/docs/api.md
             // HANDY to set the options of selectized dropdown
-            let $this_dropdown = $(document.getElementById('id_location_'+page_omic_upload_group_id_change));
+            let $this_dropdown = $(document.getElementById('id_location_'+page_omic_metadata_group_id_change));
             $this_dropdown.selectize()[0].selectize.clearOptions();
             let this_dict = $this_dropdown[0].selectize;
             // fill the dropdown with what brought back from ajax call
@@ -865,62 +678,18 @@ $(document).ready(function () {
                 // console.log('c '+pk+ '  '+text)
                 this_dict.addOption({value: pk, text: text});
             });
-            $('#id_location_'+page_omic_upload_group_id_change)[0].selectize.setValue(json.sample_location_pk1);
+            $('#id_location_'+page_omic_metadata_group_id_change)[0].selectize.setValue(json.sample_location_pk1);
         }
 
         //HANDY get the value from selectized
         // $('#id_se_block_standard_borrow_string')[0].selectize.items[0];
         //HANDY set value of selectized
-        //$('#id_ns_blah')[0].selectize.setValue(page_omic_upload_blah);
+        //$('#id_ns_blah')[0].selectize.setValue(page_omic_metadata_blah);
         //HANDY get the text from selectized
-        //page_omic_upload_aa = $('#id_aa')[0].selectize.options[page_omic_upload_aa]['text'];
+        //page_omic_metadata_aa = $('#id_aa')[0].selectize.options[page_omic_metadata_aa]['text'];
 
     };
 
-     /**
-      * When the file is changed and is not null, check to see if the file
-      * is already in this study
-    */
-    function check_file_add_update(id_omic_data_file) {
-        if ($('#check_load').html().trim() === 'add') {
-            data_file_pk = 0;
-        } else {
-            parseInt(document.getElementById('this_file_id').innerText.trim())
-        }
-        let data = {
-            call: 'fetch_this_file_is_this_study_omic_upload_file',
-            omic_data_file: id_omic_data_file,
-            study_id: parseInt(document.getElementById('this_study_id').innerText.trim()),
-            data_file_pk: data_file_pk,
-            csrfmiddlewaretoken: window.COOKIES.csrfmiddlewaretoken
-        };
-        window.spinner.spin(document.getElementById('spinner'));
-        $.ajax({
-            url: '/assays_ajax/',
-            type: 'POST',
-            dataType: 'json',
-            data: data,
-            success: function (json) {
-                window.spinner.stop();
-                if (json.errors) {
-                    // Display errors
-                    alert(json.errors);
-                }
-                else {
-                    let exist = true;
-                    if (json.true_to_continue.toString().toLowerCase() === 'false') {
-                       alert(json.message);
-                    }
-                }
-            },
-            // error callback
-            error: function (xhr, errmsg, err) {
-                window.spinner.stop();
-                alert('An error has occurred checking the file name. ');
-                console.log(xhr.status + ': ' + xhr.responseText);
-            }
-        });
-    }
 
     function sample_metadata_replace_show_hide() {
         //options are replace, empty, copys, pastes
@@ -1572,7 +1341,7 @@ $(document).ready(function () {
 
 
                 // when put in the header like this, the column sorted
-                // if (colLabel.includes(indy_row_label) || colLabel.includes(indy_well_meta_label) || page_omic_upload_check_load === 'review') {
+                // if (colLabel.includes(indy_row_label) || colLabel.includes(indy_well_meta_label) || page_omic_metadata_check_load === 'review') {
                 //    th.appendChild(document.createTextNode(colLabel));
                 // } else {
                 //     let top_label_button = ' <a col-index="' + colcounter
@@ -1593,7 +1362,7 @@ $(document).ready(function () {
         var tableBody = document.createElement('TBODY');
 
         // start add arrow down row in body
-        if (add_apply_row_col_to_indy_table && page_omic_upload_check_load != 'review') {
+        if (add_apply_row_col_to_indy_table && page_omic_metadata_check_load != 'review') {
             var tr = document.createElement('TR');
             rowcounter = rowcounter + 1;
             $(tr).attr('row-index', rowcounter);
@@ -1665,7 +1434,7 @@ $(document).ready(function () {
                             $(th).attr('row-label', 'header');
                             $(th).attr('meta-label', 'header');
 
-                            if (page_omic_upload_check_load != 'review' && colLabel.includes(indy_button_label)) {
+                            if (page_omic_metadata_check_load != 'review' && colLabel.includes(indy_button_label)) {
                                 $(th).attr('class', 'apply-row-button');
                                 let row_label_button = ' <a row-index="' + rowcounter
                                 + '" class="btn btn-sm btn-primary apply-row-button">'
@@ -1771,25 +1540,5 @@ $(document).ready(function () {
     }    
 
     // END - All Functions section
-
-    // START - general tool tip functions
-    function escapeHtml(html) {
-        return $('<div>').text(html).html();
-    }
-
-    function make_escaped_tooltip(title_text) {
-        let new_span = $('<div>').append($('<span>')
-            .attr('data-toggle', 'tooltip')
-            .attr('data-title', escapeHtml(title_text))
-            .addClass('glyphicon glyphicon-question-sign')
-            .attr('aria-hidden', 'true')
-            .attr('data-placement', 'bottom'));
-        return new_span.html();
-    }
-
-    // activates Bootstrap tooltips, must be AFTER tooltips are created - keep
-    $('[data-toggle="tooltip"]').tooltip({container:'body', html: true});
-
-    // END - general tool tip functions
 
 });

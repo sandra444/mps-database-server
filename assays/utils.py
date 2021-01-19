@@ -7273,40 +7273,38 @@ def this_file_name_is_similar_to_another_in_this_study(omic_data_file, study_id,
     return [true_to_continue, message]
 
 
-# sck forms.py - will load for previous submits based on saved header_type
-def find_the_labels_needed_for_the_indy_omic_table(called_from, find_defaults):
+# sck forms.py - will load for previous submit
+def find_the_labels_needed_for_the_indy_omic_table(called_from, study_id, find_defaults):
     indy_omic_table = {}
     indy_list_of_column_labels = []
     indy_list_of_column_labels_show_hide = []
     indy_list_of_dicts_of_table_rows = []
 
-    # if omic_file_pk is none, use find_defaults to see if want to get example data (this is for development)
-    # else, should send back everything as blank (it is an add page - thus, no file has been added yet)
+    # for development, use find_defaults to get a table to work with
+    # else, if there is metadata for this study, pull it in the correct format
+    # else, if there is none, pull one for each chip in the study
 
     # note: the ROW for the apply button is completely handled in the js file
     # see the js file for changing the option to add the row of apply to column buttons
-    # note: the COLUMN for the apply to row buttons is added here in the column headers
-    # this is for both the well and other!
-    # keep it, or remove it here -
+    # note: the COLUMN for the apply to row buttons COULD be added here in the column headers
+    # keep it, or remove it here (it was removed....)
     # no change in the js file should be needed when change here
 
-    # for the plate, make upper case row labels please...
     if find_defaults:
-        #  get the defaults for testing
-        # when it is not a well plate format (table/list format)
-        # this is the much easier way...
-        # currently, the column for the apply to all rows button is included as a column header
-        # if do not want it, just turn its show/hide to 0 instead of 1
+        # get the defaults for testing
         indy_list_of_column_labels = [
-            'Label',
-            'Button',
+
             'Chip/Well Name',
             'Sample Location',
-            'Sample Time',
+            'Sample Time (Day)',
+            'Sample Time (Hour)',
+            'Sample Time (Minute)',
+            'Label',
             'matrix_item_pk',
             'sample_location_pk',
         ]
         indy_list_of_column_labels_show_hide = [
+            1,
             1,
             1,
             1,
@@ -7320,35 +7318,67 @@ def find_the_labels_needed_for_the_indy_omic_table(called_from, find_defaults):
         list_of_defaults1 = []
         list_of_defaults2 = []
         list_of_defaults3 = []
+        list_of_defaults4 = []
+        list_of_defaults5 = []
 
         dict1 = {}
         dict2 = {}
         dict3 = {}
+        dict4 = {}
+        dict5 = {}
 
         list_of_defaults1 = [
-            'sample20201105-05',
-            '',
+
             'chip1',
             'efflux',
             '2',
+            '0',
+            '1',
+            'sample20201105-05',
             '5',
             '6'
         ]
         list_of_defaults2 = [
-            'sample20201105-02',
-            '',
+
             'chip2',
             'efflux',
             '1',
+            '0',
+            '1',
+            'sample20201105-02',
             '7',
             '9'
         ]
         list_of_defaults3 = [
-            'sample20201105-03',
-            '',
+
             'chip3',
             'efflux',
             '5',
+            '0',
+            '1',
+            'sample20201105-03',
+            '9',
+            '9'
+        ]
+        list_of_defaults4 = [
+
+            'chip5',
+            'efflux',
+            '5',
+            '0',
+            '1',
+            'Chip5-10mL-a',
+            '9',
+            '9'
+        ]
+        list_of_defaults5 = [
+
+            'chip5',
+            'efflux',
+            '5',
+            '0',
+            '1',
+            'Chip5-10mL-b',
             '9',
             '9'
         ]
@@ -7359,9 +7389,13 @@ def find_the_labels_needed_for_the_indy_omic_table(called_from, find_defaults):
             dict1[each] = list_of_defaults1[index]
             dict2[each] = list_of_defaults2[index]
             dict3[each] = list_of_defaults3[index]
+            dict4[each] = list_of_defaults4[index]
+            dict5[each] = list_of_defaults5[index]
         indy_list_of_dicts_of_table_rows.append(dict1)
         indy_list_of_dicts_of_table_rows.append(dict2)
         indy_list_of_dicts_of_table_rows.append(dict3)
+        indy_list_of_dicts_of_table_rows.append(dict4)
+        indy_list_of_dicts_of_table_rows.append(dict5)
 
     else:
         # todo-sck need to get the data when update or review
@@ -7423,10 +7457,16 @@ def find_the_labels_needed_for_the_indy_omic_table(called_from, find_defaults):
 
     # sort here so that the table does not need to be sorted by default - which makes it rearrange when stuff is replaced
     r_counter = 0
-    new_indy_list_of_dicts_of_table_rows = sorted(indy_list_of_dicts_of_table_rows, key=sortkeypicker([indy_list_of_column_labels[0], indy_list_of_column_labels[1]]))
+    new_indy_list_of_dicts_of_table_rows = sorted(indy_list_of_dicts_of_table_rows,
+                                                  key=sortkeypicker([indy_list_of_column_labels[0],
+                                                                     indy_list_of_column_labels[1],
+                                                                     indy_list_of_column_labels[2],
+                                                                     indy_list_of_column_labels[3],
+                                                                     indy_list_of_column_labels[4]
+                                                                     ]))
     indy_omic_table['indy_list_of_dicts_of_table_rows'] = new_indy_list_of_dicts_of_table_rows
-    print("indy_omic_table")
-    print(indy_omic_table)
+    # print("indy_omic_table")
+    # print(indy_omic_table)
 
     return indy_omic_table
 
