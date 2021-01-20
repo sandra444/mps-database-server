@@ -7279,6 +7279,9 @@ def find_the_labels_needed_for_the_indy_omic_table(called_from, study_id, find_d
     indy_list_of_column_labels = []
     indy_list_of_column_labels_show_hide = []
     indy_list_of_dicts_of_table_rows = []
+    # decide how to do this - maybe if all are zeros when extracted, hide, else, show
+    # for now, day is default on the form DHM 234
+    indy_list_columns_hide_initially = [2,3,4]
 
     # for development, use find_defaults to get a table to work with
     # else, if there is metadata for this study, pull it in the correct format
@@ -7287,19 +7290,16 @@ def find_the_labels_needed_for_the_indy_omic_table(called_from, study_id, find_d
     # note: the ROW for the apply button is completely handled in the js file
     # see the js file for changing the option to add the row of apply to column buttons
     # note: the COLUMN for the apply to row buttons COULD be added here in the column headers
-    # keep it, or remove it here (it was removed....)
-    # no change in the js file should be needed when change here
 
     if find_defaults:
         # get the defaults for testing
         indy_list_of_column_labels = [
-
             'Chip/Well Name',
             'Sample Location',
             'Sample Time (Day)',
             'Sample Time (Hour)',
             'Sample Time (Minute)',
-            'Label',
+            'Sample Label',
             'matrix_item_pk',
             'sample_location_pk',
         ]
@@ -7328,7 +7328,6 @@ def find_the_labels_needed_for_the_indy_omic_table(called_from, study_id, find_d
         dict5 = {}
 
         list_of_defaults1 = [
-
             'chip1',
             'efflux',
             '2',
@@ -7339,7 +7338,6 @@ def find_the_labels_needed_for_the_indy_omic_table(called_from, study_id, find_d
             '6'
         ]
         list_of_defaults2 = [
-
             'chip2',
             'efflux',
             '1',
@@ -7350,7 +7348,6 @@ def find_the_labels_needed_for_the_indy_omic_table(called_from, study_id, find_d
             '9'
         ]
         list_of_defaults3 = [
-
             'chip3',
             'efflux',
             '5',
@@ -7361,7 +7358,6 @@ def find_the_labels_needed_for_the_indy_omic_table(called_from, study_id, find_d
             '9'
         ]
         list_of_defaults4 = [
-
             'chip5',
             'efflux',
             '5',
@@ -7372,7 +7368,6 @@ def find_the_labels_needed_for_the_indy_omic_table(called_from, study_id, find_d
             '9'
         ]
         list_of_defaults5 = [
-
             'chip5',
             'efflux',
             '5',
@@ -7454,6 +7449,7 @@ def find_the_labels_needed_for_the_indy_omic_table(called_from, study_id, find_d
 
     indy_omic_table['indy_list_of_column_labels'] = indy_list_of_column_labels
     indy_omic_table['indy_list_of_column_labels_show_hide'] = indy_list_of_column_labels_show_hide
+    indy_omic_table['indy_list_columns_hide_initially'] = indy_list_columns_hide_initially
 
     # sort here so that the table does not need to be sorted by default - which makes it rearrange when stuff is replaced
     r_counter = 0
@@ -7462,7 +7458,8 @@ def find_the_labels_needed_for_the_indy_omic_table(called_from, study_id, find_d
                                                                      indy_list_of_column_labels[1],
                                                                      indy_list_of_column_labels[2],
                                                                      indy_list_of_column_labels[3],
-                                                                     indy_list_of_column_labels[4]
+                                                                     indy_list_of_column_labels[4],
+                                                                     indy_list_of_column_labels[5]
                                                                      ]))
     indy_omic_table['indy_list_of_dicts_of_table_rows'] = new_indy_list_of_dicts_of_table_rows
     # print("indy_omic_table")

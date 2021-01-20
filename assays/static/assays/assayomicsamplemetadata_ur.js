@@ -1,4 +1,6 @@
 $(document).ready(function () {
+    
+    // START do on load
 
     // todo this whole thing
     // todo - maybe - make it so that the user can overwrite a previous rather than this (this will be complicated)
@@ -17,64 +19,60 @@ $(document).ready(function () {
     $('#form_errors').show()
 
     // there will only be upload and review, not add (add is a special case of update handled by the forms.py!)
-    let page_omic_metadata_called_from_in_js_file = 'update';
     let page_omic_metadata_check_load = $('#check_load').html().trim();
-
 
     // indy sample stuff
     var sample_metadata_table_id = 'sample_metadata_table';
-    // had no default in html page
-    var page_drag_action = null;
-    // has a default in html page
-    var page_change_duplicate_increment = 'duplicate';
-    //the current one
-    var metadata_lod = [];
-    // version number of the current one (should be 1, 2, 3, 4, or 5 after first population)
+
+    var indy_list_of_dicts_of_table_rows = JSON.parse($('#id_indy_list_of_dicts_of_table_rows').val());
+    var indy_list_of_column_labels = JSON.parse($('#id_indy_list_of_column_labels').val());
+    var indy_list_of_column_labels_show_hide = JSON.parse($('#id_indy_list_of_column_labels_show_hide').val());
+    var indy_matrix_item_list = JSON.parse($('#id_indy_matrix_item_list').val());
+    var indy_list_columns_hide = JSON.parse($('#id_indy_list_columns_hide_initially').val());
+
+    findTheUnitsThatShouldBeInTheTable();
+    var page_radio_time_value = $("input[type='radio'][name='radio_time_unit']:checked").val();
+
+
+    // boolean, using the form field - var indy_sample_metadata_table_was_changed = JSON.parse($('#id_indy_sample_metadata_table_was_changed').val());
+
+    // Prepare and build the table on load
+    // the current one
+    var metadata_lod = indy_list_of_dicts_of_table_rows;
+    // version number aka current index - is the current one (should be 1, 2, 3, 4, or 5 after first population)
     var metadata_lod_current_index = 0;
     //for holding versions to allow for undo and redo
     var metadata_lod_cum = [];
+    metadata_lod_cum.push(JSON.parse(JSON.stringify(metadata_lod)));
     //the table info that is highlighted
     var metadata_highlighted = [];
     var list_of_fields_for_replacing_that_are_highlighted = [];
     var icol_last_highlighted_seen = {};
-    var indy_sample_metadata_table_current_row_order = [];
 
     // just working variables, but want in different subs, so just declare here
     var current_pk = 0;
     var current_val = '';
 
     // make sure to update this as needed (to match what comes from utils.py)
-    var indy_well_meta_label = 'Metadata'
-    var indy_row_label = 'Label'
-    var indy_button_label = 'Button'
-    
-    var indy_list_of_dicts_of_table_rows = JSON.parse($('#id_indy_list_of_dicts_of_table_rows').val());
-    var indy_list_of_column_labels = JSON.parse($('#id_indy_list_of_column_labels').val());
-    var indy_list_of_column_labels_show_hide = JSON.parse($('#id_indy_list_of_column_labels_show_hide').val());
+    var indy_row_label = 'Sample Label'
 
     var indy_table_order = [];
-    var indy_table_column_defs = [];
-
-    // a queryset, using the form field - var indy_sample_location = JSON.parse($('#id_indy_sample_location').val());
-    // a queryset, using the form field - var indy_matrix_item = JSON.parse($('#id_indy_matrix_item').val());
-
-    var indy_matrix_item_list = JSON.parse($('#id_indy_matrix_item_list').val());
-    var include_column_in_indy_table = indy_list_of_column_labels_show_hide;
-    var chip_list = indy_matrix_item_list;
-    var indy_column_labels = indy_list_of_column_labels;
-
-    // boolean, using the form field - var indy_sample_metadata_table_was_changed = JSON.parse($('#id_indy_sample_metadata_table_was_changed').val());
-
-    //this is the variable to control if the row of apply to column headers will be added to the indy metadata table
-    var add_apply_row_col_to_indy_table = true;
-    change_indy_increment_visibility();
+    var indy_table_column_defs = [{bSortable: false, targets: [5 ,]},
+        {'targets': indy_list_columns_hide, 'visible': false,},
+    ];
+    // indy_table_column_defs = [{bSortable: false, targets: [1,]}];
+        // { 'width': '20%' },
+        // { width: 200, targets: 0 }
+        // {'targets': [0], 'visible': true,},
+        // {'targets': [1], 'visible': true,},
+        // {responsivePriority: 1, targets: 0},
+        // {responsivePriority: 2, targets: 1},
 
     // make a cross reference to the html dom name of the content box
     // make a cross reference to the html of the content box
     // note: the column header is an attribute of the cells in the indy table
     // and the key of these to dicts is the column header
     // e.g. col-label='Chip or Well Name'
-
     var icol_to_html_outer = {};
     var icol_to_html_element = {};
     // Note that these keys are hardcoded to columns headers or metadata labels
@@ -84,107 +82,28 @@ $(document).ready(function () {
     icol_to_html_element['Sample Location'] = 'sample_location_name';
     icol_to_html_outer['Sample Time'] = 'h_indy_time_in_unit';
     icol_to_html_element['Sample Time'] = 'time_display';
-
-    // START - Tool tips
-
-    // tool tips - two group stuff - all moved to help_text (at least, for now)
-
-    // tool tips - indy-sample stuff
-    // might not want to show these options.... todo decide
-    // let page_drag_action_tooltip = 'Duplicate will put the selected content in the highlighted cells. Increment will put the selected content in the first of the highlighted cells, then add the increment to the next highlighted cell (Sample Location is Duplicate only). ';
-    // $('#drag_action_tooltip').next().html($('#drag_action_tooltip').next().html() + make_escaped_tooltip(page_drag_action_tooltip));
-    // let page_drag_use_tooltip = 'Select what to do to with the highlighted cells.';
-    // $('#drag_use_tooltip').next().html($('#drag_use_tooltip').next().html() + make_escaped_tooltip(page_drag_use_tooltip));
-    //
-
-    //in the replace section - hovertips for the three fields using to replace/update/overwrite
-    let page_sample_matrix_item_tooltip = 'The MPS Model name (chip/well ID).';
-    $('#sample_matrix_item_tooltip').next().html($('#sample_matrix_item_tooltip').next().html() + make_escaped_tooltip(page_sample_matrix_item_tooltip));
-    let page_sample_location_tooltip = 'The location in the MPS Model where the sample was collected.';
-    $('#sample_location_tooltip').next().html($('#sample_location_tooltip').next().html() + make_escaped_tooltip(page_sample_location_tooltip));
-    let page_sample_time_display_tooltip = 'The time, from the start of the experiment, when the sample was collected.';
-    $('#sample_time_display_tooltip').next().html($('#sample_time_display_tooltip').next().html() + make_escaped_tooltip(page_sample_time_display_tooltip));
-
-    // END - Tool tips
-
-    // Some more load things Section
-    changed_something_important('load');
-    change_visibility_of_some_doms();
+    //todo fix this for the D H M
 
     if (page_omic_metadata_check_load === 'review') {
-        page_omic_metadata_called_from_in_js_file = 'load-review';
         // HANDY - to make everything on a page read only (for review page)
         $('.selectized').each(function() { this.selectize.disable() });
         $(':input').attr('disabled', 'disabled');
-    } else {
-        // todo add class to the sample time and sample location to make the box yellow - check to make sure we are not going to time unit and one time before mess with this
-        // todo whenever it shows, PI asked for it to be required
-        // todo build a required check into the form processess
-
-        if (page_omic_metadata_check_load === 'add') {
-            page_omic_metadata_called_from_in_js_file = 'load-add';
-            get_group_sample_info('load-add');
-        } else {
-            page_omic_metadata_called_from_in_js_file = 'load-update';
-            get_group_sample_info('load-update');
-            //do not allow changing of data type after a valid submit and save - user has to delete and then add back
-            $('#id_data_type').selectize.disable();
-        }
     }
 
-    // START - General and two group stuff (written during log2fold change - that is pre indy
-    /**
-     * A function to clear the validation errors on change of any field
-    */
-    function clear_validation_errors() {
-        $('#form_errors').hide();
-    }
+    // has a default in html page
+    var page_radio_duplicate_value = $("input[type='radio'][name='radio_change_duplicate_increment']:checked").val();
+    var page_drag_action = $("input[type='radio'][name='radio_change_drag_action']:checked").val();
 
-    function change_visibility_of_some_doms() {
-        // console.log("$('#id_data_type')[0].selectize.items[0] ",$('#id_data_type')[0].selectize.items[0])
-        $('#omic_preview_compare_button_section').hide();
-        $('#omic_preview_compare_graphs_section').hide();
-        $('#omic_preview_compare_graphs_section2').hide();
+    //set the visibility based on default form selections (as set in the html)
+    radioDuplicateVisibility();
+    radioActionVisibility();
+    radioTimeVisibility();
+    goBuildSampleMetadataTable();
+    postBuildSampleMetadataTable();
+    
+    // END do on load
 
-        $('#log2fc_template_section').hide();
-        $('#normcounts_template_section').hide();
-        $('#rawcounts_template_section').hide();
-        $('#count_extra').hide();
-
-
-        if ($('#id_data_type')[0].selectize.items[0] == 'log2fc') {
-            $('#omic_preview_compare_button_section').show();
-            $('#omic_preview_compare_graphs_section').show();
-            $('#omic_preview_compare_graphs_section2').show();
-            // console.log("should show the log2fc")
-            $('#log2fc_template_section').show();
-
-        } else {
-
-            if ($('#id_data_type')[0].selectize.items[0] == 'rawcounts') {
-               $('#rawcounts_template_section').show();
-            } else {
-               $('#normcounts_template_section').show();
-
-            }
-            $('#count_extra').show();
-        }
-    }
-
-    // START added during indy-sample development click and change etc
-
-    $("input[type='radio'][name='radio_change_duplicate_increment']").click(function () {
-        page_change_duplicate_increment = $(this).val();
-
-        if (page_change_duplicate_increment === 'increment-ttbltr' ||
-            page_change_duplicate_increment === 'increment-ttbrtl' ||
-            page_change_duplicate_increment === 'increment-ttbo') {
-            $('.increment-section').show();
-        } else {
-            $('.increment-section').hide();
-        }
-    });
-
+    // START clicks and changes section
     $(document).on('click', '#undoIndyButton', function() {
         indyClickedToUndoRedoChangeToTable('undo');
     });
@@ -192,67 +111,40 @@ $(document).ready(function () {
         indyClickedToUndoRedoChangeToTable('redo');
     });
     
-    $(document).on('click', '#add_row_to_indy_table', function() {
-        // may want to keep track in the number of samples - thing about how to keep track and redraw the table or add a row to the table...
-    });
-
-    $(document).on('click', '#clear_highlights_indy_table', function() {
+    $(document).on('click', '#clearHighlightingButton', function() {
         $('.special-selected1').removeClass('special-selected1');
         $('.special-selected2').removeClass('special-selected2');
         page_paste_cell_icol = null;
         page_paste_cell_irow = null;
         if (page_drag_action === 'pastes') {
             page_drag_action = null;
-            sample_metadata_replace_show_hide();
+            sampleMetadataReplaceShowHide();
         }
         whatIsCurrentlyHighlightedInTheIndyTable();
     });
 
-    // a default is NOT set in the html file, so, user has to pick one
-    $("input[type='radio'][name='radio_change_drag_action']").click(function () {
-        // check to see if any cells in the table have been highlighted - such a pain....remove for now, but may need to had back a copys radio button
-        // if ($('.special-selected1').length > 0) {
-        //     page_drag_action = $(this).val();
-        //     sample_metadata_replace_show_hide();
-        // } else {
-        //     if ($(this).val() === 'copys') {
-        //         page_drag_action = $(this).val();
-        //         sample_metadata_replace_show_hide();
-        //     } else {
-        //         page_drag_action = null;
-        //         sample_metadata_replace_show_hide();
-        //         alert('Drag over cells to highlight before selecting an Action.\n');
-        //     }
-        // }
-        if ($(this).val() === 'pastes' || $(this).val() === 'empty') {
-            if ($('.special-selected1').length > 0) {
-                page_drag_action = $(this).val();
-                sample_metadata_replace_show_hide();
-            } else {
-                page_drag_action = null;
-                sample_metadata_replace_show_hide();
-                alert('Drag over cells to highlight before selecting this Action.\n');
-            }
-        } else {
-            page_drag_action = $(this).val();
-            sample_metadata_replace_show_hide();
-        }
+    $("input[type='radio'][name='radio_change_duplicate_increment']").click(function () {
+        page_radio_duplicate_value = $(this).val();
+        radioDuplicateVisibility();
     });
-    //
-    // $(document).on('click', '#indy_instructions', function() {
-    //     $('.indy-instructions').toggle();
-    // });
 
-    $(document).on('click', '#replace_in_indy_table', function() {
+    $("input[type='radio'][name='radio_change_drag_action']").click(function () {
+        page_drag_action = $(this).val();
+        radioActionVisibility();
+    });
+
+    $("input[type='radio'][name='radio_time_unit']").click(function () {
+        page_radio_time_value = $(this).val();
+        radioTimeVisibility();
+        changeTheTimesInTable();
+    });
+
+    $(document).on('click', '#replaceInTableButton', function() {
         indyCalledToReplace();
     });
 
     //todo - going to get rid of these, but need to add others (highlight row/column)
     // clicked on an add row button in the indy table
-    $(document).on('click', '.add_indy_row', function () {
-        let add_button_clicked = $(this);
-        indyClickedToAddRow(add_button_clicked);
-    });
     // clicked on an add row button in the indy table
     $(document).on('click', '.delete_indy_row', function () {
         let delete_button_clicked = $(this);
@@ -274,431 +166,138 @@ $(document).ready(function () {
         document.getElementById('sample_location_name').innerHTML = thisText;
         document.getElementById('sample_location_pk').innerHTML = thisValue;
     });
-    // not going to offer this to users - when sure about this, todo, delete this commented out stuff
-    // $(document).on('change', '#id_indy_file_column_header_list', function() {
-    //     var thisText = $('#id_indy_file_column_header_list').children('option:selected').text();
-    //     var thisValue = $('#id_indy_file_column_header_list').children('option:selected').val();
-    //     document.getElementById('file_column_header').innerHTML = thisText;
-    //     document.getElementById('sample_pk').innerHTML = thisValue;
-    // });
+    
+    $(document).on('click', '.apply-row-button', function (e) {
+        e.stopPropagation();
+        let apply_button_that_was_clicked = $(this);
+        // console.log(apply_button_that_was_clicked);
 
-    // END added during indy-sample development click and change etc
+        let this_row_index = this.getAttribute("row-index");
+        //what is the column-index, for each with this column-index
+        $('.indy-data').each(function() {
+            if ($(this).attr('row-index') === this_row_index) {
+                if ($(this).hasClass('special-selected1')) {
+                    $(this).removeClass('special-selected1');
+                } else {
+                    $(this).addClass('special-selected1');
+                }
+            }
+        });
+    });
+
+    // END clicks and changes section
 
 
     // START - All Functions section
 
-    // ##START section for preview page(s)
-    // FIRST, designed for log2 fold change by DESeq2 - phase I omic development fall 2020
-    // To make the preview on this upload page:
-    // NOTE: the upload page has the following elements that are used in getting the data needed
-    // form name='omic_file'
-    // id='id_data_type'
-    // id='id_anaylsis_method'
-    // id='id_omic_data_file'
-    // And, these elements were added to the upload page
-    // id='plots'
-    // id='volcano-plots'
-    // id='ma-plots''
-    // THEN, in early 2021, extended for phase II omic development
-    function get_data_for_this_file_ready_for_preview(called_from) {
-        let data = {
-            call: 'fetch_omics_data_for_upload_preview_prep',
-            csrfmiddlewaretoken: window.COOKIES.csrfmiddlewaretoken
-        };
-        let form = document.omic_file;
-        let serializedData = $('form').serializeArray();
-        let formData = new FormData(form);
-        $.each(serializedData, function(index, field) {
-            formData.append(field.name, field.value);
-        });
-        let study_id = 1;
-        formData.append('study_id', study_id);
-        let file_id = 1;
-        formData.append('file_id', file_id);
-
-        $.each(data, function(index, contents) {
-            formData.append(index, contents);
-        });
-
-        let is_data = true;
-        if (document.getElementById('id_omic_data_file').files.length > 0) {
-            is_data = true;
-        } else {
-            is_data = false;
-        }
-
-        if (is_data) {
-            window.spinner.spin(document.getElementById('spinner'));
-            $.ajax({
-                url: '/assays_ajax/',
-                type: 'POST',
-                dataType: 'json',
-                cache: false,
-                contentType: false,
-                processData: false,
-                data: formData,
-                success: function (json) {
-                    window.spinner.stop();
-                    if (json.errors) {
-                        alert(json.errors);
-                    } else {
-                        let exist = true;
-
-                        window.OMICS.omics_data = JSON.parse(JSON.stringify(json));
-                        omics_file_id_to_name_all = window.OMICS.omics_data['file_id_to_name'];
-                        omics_file_id_to_name = omics_file_id_to_name_all[1];
-
-                        if ($('#id_data_type')[0].selectize.items[0] == 'log2fc') {
-                            // console.log('a DATA', json)
-                            // omics_data = json['data'];
-                            // omics_target_name_to_id = json['target_name_to_id'];
-                            // omics_file_id_to_name = json['file_id_to_name'];
-                            // omics_table = json['table'];
-                            // console.log('b data ', omics_data)
-                            // console.log('c target_name_to_id ', omics_target_name_to_id)
-                            // console.log('d file_id_to_name ', omics_file_id_to_name)
-                            // console.log('e table ', omics_table)
-                            // maxL2FC_a = window.OMICS.omics_data['max_fold_change'];
-                            // maxPval_a = window.OMICS.omics_data['max_pvalue'];
-                            // minL2FC_a = window.OMICS.omics_data['min_fold_change'];
-                            // minPval_a = window.OMICS.omics_data['min_pvalue'];
-                            // console.log('a')
-                            // console.log(maxL2FC_a)
-                            // console.log(maxPval_a)
-                            // console.log(minL2FC_a)
-                            // console.log(minPval_a)
-                            // maxL2FC = -Math.log10(maxL2FC_a);
-                            // maxPval = -Math.log10(maxPval_a);
-                            // minL2FC = -Math.log10(minL2FC_a);
-                            // minPval = -Math.log10(minPval_a);
-                            // console.log('no a')
-                            // console.log(maxL2FC)
-                            // console.log(maxPval)
-                            // console.log(minL2FC)
-                            // console.log(minPval)
-                            // console.log('window.OMICS.omics_data ')
-                            // console.log(window.OMICS.omics_data)
-                            window.OMICS.draw_plots(window.OMICS.omics_data, true, 0, 0, 0, 0, 0, 0, 0, 'upload');
-                            // function(omics_data, firstTime, minPval, maxPval, minL2FC, maxL2FC, minPval_neg, maxPval_neg, L2FC_abs)
-                        }  else {
-                            // todo need to coordinate with Quinn for the counts data
-
-
-                        }
-                        // put here to avoid race errors
-                        if (called_from == 'data_file' || called_from == 'data_type') {
-                            try {
-                                id_omic_data_file = $('#id_omic_data_file').val();
-                                check_file_add_update(id_omic_data_file);
-                            } catch {
-                            }
-                            if ($('#id_data_type')[0].selectize.items[0] == 'log2fc') {
-                            } else {
-                                // to do need to fill the sample names list to use for replace in the list and in the pick box
-                                // todo - changing this so that it won't put in a replace option list, but will
-                                // either write them to a table or a plate - lots of work todo here
-                                var indy_file_headers = window.OMICS.omics_data['indy_file_column_header_list'];
-                                if (indy_file_headers.length === 0) {
-                                    alert('There was no information pulled back from the file selected. This is commonly caused by a named header for the gene reference being missing. Use: gene, gene reference, or name as a column header for the gene field.')
-                                }
-                                //todo modify the utils.py omic_data_file_process_data to pull back what need
-                                //based on plate or sample - pull both so can just switch...
-                                // console.log('indy_file_headers ',indy_file_headers)
-
-                                // todo these could be samples or well names...still working on this
-                                // indy_row_labels = [];
-
-
-                                // todo, load the prefix and number, think about how will use to make a plate looking table
-
-                                // // todo - do not think we will be using this drop down anymore, but keep since might need some of this code for getting what need for plate list(s)
-                                // let $this_dropdown = $(document.getElementById('id_indy_file_column_header_list'));
-
-                                //HANDY-selectize selection clear and refill all
-                                // clear the current selection or it can remain in the list :o
-                                $('#id_indy_file_column_header_list').selectize()[0].selectize.clear()
-
-                                // clear all options and refill
-                                $this_dropdown.selectize()[0].selectize.clearOptions();
-                                let this_dict = $this_dropdown[0].selectize;
-                                // fill the dropdown with what brought back from ajax call
-                                $.each(indy_file_headers, function( pk, text ) {
-                                    // console.log('c '+pk+ '  '+text)
-                                    var in_me = text.indexOf('nnamed');
-                                    if (in_me < 0) {
-                                        lctext = text.toLowerCase();
-                                        if (lctext === 'gene reference' || lctext === 'name' || lctext === 'gene'  || lctext === 'gene id') {
-                                            //    skip it
-                                        } else {
-                                            this_dict.addOption({value: pk, text: text});
-                                            // indy_row_labels.push(text);
-                                        }
-                                    }
-                                });
-                            }
-                        }
-                    }
-                },
-                error: function (xhr, errmsg, err) {
-                    window.spinner.stop();
-                    alert('Encountered an error when trying read the upload file. Check to make sure the Data Type selected matches the file selected.');
-                    console.log(xhr.status + ': ' + xhr.responseText);
-                }
-            });
-        }
-    };
-    // ##END section for preview page(s)
-
-    // Other Functions
-
-    function change_indy_increment_visibility() {
-        $('.header-type-well').addClass('hidden');
-        $('.header-type-not-well').addClass('hidden');
-        if ($('#id_header_type')[0].selectize.items[0] === 'well') {
-            $('.header-type-well').removeClass('hidden');
-        } else {
-            $('.header-type-not-well').removeClass('hidden');
+    function radioDuplicateVisibility() {
+        $('.increment-section').hide();
+        if (page_radio_duplicate_value === 'increment') {
+            $('.increment-section').show();
         }
     }
 
-    // Called from a variety of places, including load, to set the right visibilities based on the data type
-    // and also based on header_type....
-    // and to call all the downstream functions needed depending on data type and how/when called
-    function changed_something_important(called_from) {
-        // console.log("called_from ",called_from)
-
-        change_indy_increment_visibility();
-
-        // todo streamline this
-
-        if ($('#id_data_type')[0].selectize.items[0] == 'log2fc') {
-            $('#id_header_type')[0].selectize.setValue('target');
-        } else {
-            //todo, may need to fix depending on other selections
-            if ($('#id_header_type')[0].selectize.items[0] == 'target') {
-                $('#id_header_type')[0].selectize.setValue('well');
-            }
-        }
-
-
-        // could make this so it only checks if the data_type was changed, but it is okay this way, so leave it
-        if ($('#id_data_type')[0].selectize.items[0] == 'log2fc') {
-
-            $('.compare-group').show();
-            $('.indy-sample').hide();
-
-            //stuff for the indy fields - all model form fields are used for log2fc
-
-        } else {
-
-            $('.compare-group').hide();
-            $('.indy-sample').show();
-
-            // setting some of the inside classes to hidden
-            $('.increment-section').hide();
-
-            //stuff for the two group fields - make sure some fields are empty for the indy upload files
-            //this is so that stuff that is not related to the file is not saved in the upload file table
-            page_make_the_group_change = false;
-            $('#id_group_1')[0].selectize.setValue('not-full');
-            $('#id_group_2')[0].selectize.setValue('not-full');
-            page_make_the_group_change = true;
-
-            $('#id_location_1')[0].selectize.setValue('not-full');
-            $('#id_time_1_display').val(0);
-            page_omic_current_group1 = $('#id_group_1')[0].selectize.items[0];
-
-            $('#id_location_2')[0].selectize.setValue('not-full');
-            $('#id_time_2_display').val(0);
-            page_omic_current_group2 = $('#id_group_2')[0].selectize.items[0];
-
-            sample_metadata_replace_show_hide();
-
-            // do this ONLY for the first time need the metadata_lod, it may be on load, but may not
-            if (!page_metadata_lod_done) {
-                // need to load metadata_lod the first time
-                metadata_lod = indy_list_of_dicts_of_table_rows;
-                // console.log('metadata_lod')
-                // console.log(metadata_lod)
-                metadata_lod_current_index = 0;
-                metadata_lod_cum.push(JSON.parse(JSON.stringify(metadata_lod)));
-                page_metadata_lod_done = true;
-            }
-            indySampleMetadataCallBuildAndPost();
-        }
-
-        // if returning from existing, will be loaded in form, so, only need when CHANGE the data file
-        if (called_from != 'load') {
-            get_data_for_this_file_ready_for_preview(called_from)
-        }
-    }
-
-    // https://www.bitdegree.org/learn/best-code-editor/javascript-download-example-1
-    //todo-change on double quote issue - want or not - all or none??
-    function download_two_group_example(filename, text) {
-      var element = document.createElement('a');
-      element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
-      element.setAttribute('download', filename);
-      element.style.display = 'none';
-      document.body.appendChild(element);
-      element.click();
-      document.body.removeChild(element);
-    }
-
-    function send_user_groups_are_different_message() {
-        if (typeof $('#id_group_1')[0].selectize.items[0] !== 'undefined') {
-            alert('Group 1 and Group 2 must be different or both must be empty.');
-        }
-        //todo, want to change sample time, this may need to be turned off, could have same groups with different sample time or location
-        //todo, need to check in the form qc too
-    }
-
-     /**
-      * When a group is changed, if that group has already been added to the data upload file
-      * get the first occurrence that has sample information.
-    */
-    function get_group_sample_info(called_from) {
-        // console.log('1: '+page_omic_metadata_group_pk_change)
-        // console.log('2: '+page_omic_metadata_group_pk_load_1)
-        // console.log('3: '+page_omic_metadata_group_pk_load_2)
-        // console.log('4: '+page_omic_metadata_called_from_in_js_file)
-
-        // HANDY if using js split time
-        // time_in_minutes = 121
-        // var split_time = window.SPLIT_TIME.get_split_time(time_in_minutes);
-        // $.each(split_time, function(time_name, time_value) {
-        //     console.log(time_name)
-        //     console.log(time_value)
-        // });
-
-        // if changing a group, need to get all the updated info
-        // if an add page, need to call to clear out the location list
-        // if update page, need to get the model location list
-
-        let data = {
-            call: 'fetch_omic_sample_info_first_found_in_upload_file_table',
-            called_from: page_omic_metadata_called_from_in_js_file,
-            group_idc: page_omic_metadata_group_id_change,
-            group_pkc: page_omic_metadata_group_pk_change,
-            group_id1: page_omic_metadata_group_id_load_1,
-            group_pk1: page_omic_metadata_group_pk_load_1,
-            group_id2: page_omic_metadata_group_id_load_2,
-            group_pk2: page_omic_metadata_group_pk_load_2,
-            csrfmiddlewaretoken: window.COOKIES.csrfmiddlewaretoken
-        };
-        window.spinner.spin(document.getElementById('spinner'));
-        $.ajax({
-            url: '/assays_ajax/',
-            type: 'POST',
-            dataType: 'json',
-            data: data,
-            success: function (json) {
-                window.spinner.stop();
-                if (json.errors) {
-                    // Display errors
-                    alert(json.errors);
-                }
-                else {
-                    let exist = true;
-                    get_group_sample_info_ajax(json, exist);
-                }
-            },
-            // error callback
-            error: function (xhr, errmsg, err) {
-                window.spinner.stop();
-                alert('An error has occurred (finding group sample information). ');
-                console.log(xhr.status + ': ' + xhr.responseText);
-            }
-        });
-    }
-    // post processing from ajax call
-    /**
-     * Put the sample data where it needs to go
-    */
-    let get_group_sample_info_ajax = function (json, exist) {
-        // bringing back the D, H, M, and sample location (if found)
-
-        // console.log('--- '+page_omic_metadata_group_id_load_1)
-        // console.log(json.timemess1)
-        // console.log(json.day1)
-        // console.log(json.hour1)
-        // console.log(json.minute1)
-        // console.log(json.locmess1)
-        // console.log(json.sample_location_pk1)
-        // console.log(json.location_dict1)
-        // console.log(json.timemess2)
-        // console.log(json.day2)
-        // console.log(json.hour2)
-        // console.log(json.minute2)
-        // console.log(json.locmess2)
-        // console.log(json.sample_location_pk2)
-        // console.log(json.location_dict2)
-
-        if (page_omic_metadata_called_from_in_js_file == 'load-add') {
-            // just do the location lists
-        } else if (page_omic_metadata_called_from_in_js_file == 'load-update') {
-            // just do the location lists to restrict to the model
-            let pk_loc_1 = $('#id_location_1')[0].selectize.items[0];
-            let pk_loc_2 = $('#id_location_2')[0].selectize.items[0];
-
-            let $this_dropdown1 = $(document.getElementById('id_location_1'));
-            $this_dropdown1.selectize()[0].selectize.clearOptions();
-            let this_dict1 = $this_dropdown1[0].selectize;
-            // fill the dropdown with what brought back from ajax call
-            $.each(json.location_dict1[0], function( pk, text ) {
-                // console.log('1 '+pk+ '  '+text)
-                this_dict1.addOption({value: pk, text: text});
-            });
-
-            let $this_dropdown2 = $(document.getElementById('id_location_2'));
-            $this_dropdown2.selectize()[0].selectize.clearOptions();
-            let this_dict2 = $this_dropdown2[0].selectize;
-            // fill the dropdown with what brought back from ajax call
-            $.each(json.location_dict2[0], function( pk, text ) {
-                // console.log('2 '+pk+ '  '+text)
-                this_dict2.addOption({value: pk, text: text});
-            });
-
-            $('#id_location_1')[0].selectize.setValue(pk_loc_1);
-            $('#id_location_2')[0].selectize.setValue(pk_loc_2);
-        } else {
-            // called from a change of one of the groups
-            $('#id_time_'+page_omic_metadata_group_id_change+'_day').val(json.day1);
-            $('#id_time_'+page_omic_metadata_group_id_change+'_hour').val(json.hour1);
-            $('#id_time_'+page_omic_metadata_group_id_change+'_minute').val(json.minute1);
-
-            // https://github.com/selectize/selectize.js/blob/master/docs/api.md
-            // HANDY to set the options of selectized dropdown
-            let $this_dropdown = $(document.getElementById('id_location_'+page_omic_metadata_group_id_change));
-            $this_dropdown.selectize()[0].selectize.clearOptions();
-            let this_dict = $this_dropdown[0].selectize;
-            // fill the dropdown with what brought back from ajax call
-            //the changed one is always returned as the first
-            $.each(json.location_dict1[0], function( pk, text ) {
-                // console.log('c '+pk+ '  '+text)
-                this_dict.addOption({value: pk, text: text});
-            });
-            $('#id_location_'+page_omic_metadata_group_id_change)[0].selectize.setValue(json.sample_location_pk1);
-        }
-
-        //HANDY get the value from selectized
-        // $('#id_se_block_standard_borrow_string')[0].selectize.items[0];
-        //HANDY set value of selectized
-        //$('#id_ns_blah')[0].selectize.setValue(page_omic_metadata_blah);
-        //HANDY get the text from selectized
-        //page_omic_metadata_aa = $('#id_aa')[0].selectize.options[page_omic_metadata_aa]['text'];
-
-    };
-
-
-    function sample_metadata_replace_show_hide() {
+    function radioActionVisibility() {
         //options are replace, empty, copys, pastes
-        // for now, not using copys, but, keep in case PI wants to go back to something more like plate map app
-        $('.replace-section').hide();
         $('.empty-section').hide();
-        // $('.copys-section').hide();
         $('.pastes-section').hide();
+        $('.delete-section').hide();
+        $('.replace-section').hide();
 
+        if (page_drag_action === 'pastes') {
+            $('.pastes-section').show();
+        } else if (page_drag_action === 'empty') {
+            $('.empty-section').show();
+        } else if (page_drag_action === 'delete') {
+            $('.delete-section').show();
+        } else if (page_drag_action === 'replace') {
+            $('.replace-section').show();
+        }
+    }
+
+    function radioTimeVisibility() {
+        $('#h_indy_time_day').hide();
+        $('#h_indy_time_hour').hide();
+        $('#h_indy_time_minute').hide();
+
+        if (page_radio_time_value === 'day') {
+            $('#h_indy_time_day').show();
+            $('#sample_time_label').text('Sample Time (Day)');
+        } else if (page_radio_time_value === 'hour') {
+            $('#h_indy_time_hour').show();
+            $('#sample_time_label').text('Sample Time (Hour)');
+        } else if (page_radio_time_value === 'minute') {
+            $('#h_indy_time_minute').show();
+            $('#sample_time_label').text('Sample Time (Minute)');
+        } else {
+            $('#sample_time_label').text('?');
+        }
+    }
+
+    function checkUndoRedoButtonVisibility() {
+        var current_length_list = metadata_lod_cum.length;
+        // should a button (undo or redo) show after whatever change brought you here
+        if (metadata_lod_current_index > 0) {
+            // yes, can undo another time
+            $('#undoIndyButton').show();
+        } else {
+            $('#undoIndyButton').hide();
+        }
+
+        if (metadata_lod_current_index < current_length_list-1) {
+            // yes, can undo another time
+            $('#redoIndyButton').show();
+        } else {
+            $('#redoIndyButton').hide();
+        }
+    }
+    
+    function findTheUnitsThatShouldBeInTheTable() {
+        if (indy_list_columns_hide.length === 3) {
+            // leave the default as day (set in html) and show the day column (hide hour and minute)
+            $('#radio_day').prop('checked', true);
+            indy_list_columns_hide = [3, 4];
+        } else if (indy_list_columns_hide.length === 2) {
+            // show the one that is not in the list and make it the default
+            if (JSON.stringify(indy_list_columns_hide) === JSON.stringify([2, 3])) {
+                $('#radio_minute').prop('checked', true);
+            } else if (JSON.stringify(indy_list_columns_hide) === JSON.stringify([3, 4])) {
+                $('#radio_day').prop('checked', true);
+            } else {
+                // [2,4]
+                $('#radio_hour').prop('checked', true);
+            }
+        } else if (indy_list_columns_hide.length === 1) {
+            if (JSON.stringify(indy_list_columns_hide) === JSON.stringify([2])) {
+                $('#radio_hour').prop('checked', true);
+            } else if (JSON.stringify(indy_list_columns_hide) === JSON.stringify([3])) {
+                $('#radio_day').prop('checked', true);
+            } else {
+                // [4]
+                $('#radio_day').prop('checked', true);
+            }
+        }
+        // else none are marked for hiding by default - length is 0
+    }
+    
+    function changeTheTimesInTable () {
+        let num_in_list = 4;
+        if (page_radio_time_value === 'day') {
+            num_in_list = 2;
+        } else if (page_radio_time_value === 'hour') {
+            num_in_list = 3;
+        }
+        // else it is the 4
+        // if it is in the list to hide in the table, remove it
+        const index = indy_list_columns_hide.indexOf(num_in_list);
+        if (index > -1) {
+          indy_list_columns_hide.splice(index, 1);
+        }
+        goBuildSampleMetadataTable();
+        postBuildSampleMetadataTable();
+    }
+
+    function sampleMetadataReplaceShowHide() {
         if (!page_drag_action) {
             $('#radio_replace').prop('checked', false);
             $('#radio_empty').prop('checked', false);
@@ -726,45 +325,10 @@ $(document).ready(function () {
         $('.replace-section').show();
     }
 
-    function indyUndoRedoButtonVisibilityCheck() {
-        var current_length_list = metadata_lod_cum.length;
-        // should a button (undo or redo) show after whatever change brought you here
-        if (metadata_lod_current_index > 0) {
-            // yes, can undo another time
-            $('#undo_button_div').show();
-        } else {
-            $('#undo_button_div').hide();
-        }
-
-        if (metadata_lod_current_index < current_length_list-1) {
-            // yes, can undo another time
-            $('#redo_button_div').show();
-        } else {
-            $('#redo_button_div').hide();
-        }
-    }
-
     function indySampleMetadataCallBuildAndPost() {
-        //do the sort in the utils.py and NOT in the table
-        //do not show sort icon for the highlight row buttons
-        if ($('#id_header_type')[0].selectize.items[0] === 'well') {
-            // indy_table_order = [[0, 'asc'],[1, 'asc']];
-            indy_table_order = [];
-            indy_table_column_defs = [{bSortable: false, targets: [2,]}];
-        } else {
-            // indy_table_order = [[0, 'asc'],];
-            indy_table_order = [];
-            indy_table_column_defs = [{bSortable: false, targets: [1,]}];
-        }
-            // { 'width': '20%' },
-            // { width: 200, targets: 0 }
-            // {'targets': [0], 'visible': true,},
-            // {'targets': [1], 'visible': true,},
-            // {responsivePriority: 1, targets: 0},
-            // {responsivePriority: 2, targets: 1},
-        indyUndoRedoButtonVisibilityCheck();
-        buildSampleMetadataTable();
-        afterBuildSampleMetadataTable();
+        checkUndoRedoButtonVisibility();
+        goBuildSampleMetadataTable();
+        postBuildSampleMetadataTable();
         // do not want strip the highlighting after build table - instead, reapply the highlighting that was there
         // todo fix the reapply highlighting
         //reapplyTheHighlightingToTheIndyTable();
@@ -822,7 +386,7 @@ $(document).ready(function () {
     //         $('#id_indy_sample_metadata_field_header_was_changed').attr('checked', true);
     //     } else {
     //         // check the row to see if the whole row is empty
-    //         $.each(indy_column_labels, function (index, icol) {
+    //         $.each(indy_list_of_column_labels, function (index, icol) {
     //             // do to all in the metadata_lod, not just the ones shown in the table, so, comment this out for now
     //             // if (include_header_in_indy_table[index] === 1) {
     //                 if (dictrow[icol].length > 0) {
@@ -851,7 +415,6 @@ $(document).ready(function () {
     
     function indyCalledToReplace() {
         sameFrontMatterToTableFromEmptyReplaceGoAndPaste();
-        // resort for increment is in the front matter (above)
         indyCalledGutsReplace();
         sameChangesToTableFromEmptyReplaceGoAndPaste();
 
@@ -929,7 +492,7 @@ $(document).ready(function () {
                     }
                 }
             } else {
-                if (page_change_duplicate_increment === 'duplicate') {
+                if (page_radio_duplicate_value === 'duplicate') {
 
                     if (tmeta === 'Sample Time' || tlcol === 'Sample Time') {
                         if (current_display_time.length > 0) {
@@ -970,9 +533,9 @@ $(document).ready(function () {
                         //
                         // var i_current_val = 0;
                         // if (ticol_in_metadata_lod === 'time_display' || ticol_in_metadata_lod === 'time_hour' || ticol_in_metadata_lod === 'time_minute') {
-                        //     if (page_change_duplicate_increment === 'increment-ttbltr' ||
-                        //         page_change_duplicate_increment === 'increment-ttbrtl' ||
-                        //         page_change_duplicate_increment === 'increment-ttbo'
+                        //     if (page_radio_duplicate_value === 'increment-ttbltr' ||
+                        //         page_radio_duplicate_value === 'increment-ttbrtl' ||
+                        //         page_radio_duplicate_value === 'increment-ttbo'
                         //         ) {
                         //         // it is + for both because the holding dict was sorting descending
                         //         i_current_val = parseFloat(current_val) + parseFloat($('#increment_value').val());
@@ -981,10 +544,10 @@ $(document).ready(function () {
                         //     }
                         // } else if (ticol_in_metadata_lod === 'matrix_item_name') {
                         //     // find the index of the last one, increase the index, if not out of range, replace
-                        //     var index_in_chip_list = chip_list.indexOf(current_val);
-                        //     var new_index = index_in_chip_list + parseInt($('#increment_value').val());
-                        //     if (index_in_chip_list >=0 && new_index < chip_list.length) {
-                        //         i_current_val = chip_list[new_index];
+                        //     var index_in_indy_matrix_item_list = indy_matrix_item_list.indexOf(current_val);
+                        //     var new_index = index_in_indy_matrix_item_list + parseInt($('#increment_value').val());
+                        //     if (index_in_indy_matrix_item_list >=0 && new_index < indy_matrix_item_list.length) {
+                        //         i_current_val = indy_matrix_item_list[new_index];
                         //     } else {
                         //         i_current_val = current_val;
                         //     }
@@ -1055,10 +618,10 @@ $(document).ready(function () {
         var metadata_highlighted_temp = [];
         metadata_highlighted_temp = JSON.parse(JSON.stringify(metadata_highlighted));
         if (page_drag_action === 'replace') {
-            if (page_change_duplicate_increment === 'increment-ttbltr' ||
-            page_change_duplicate_increment === 'increment-ttbo') {
+            if (page_radio_duplicate_value === 'increment-ttbltr' ||
+            page_radio_duplicate_value === 'increment-ttbo') {
                 // think should be in the order of the table, so, leave it as is
-            } else if (page_change_duplicate_increment === 'increment-ttbrtl') {
+            } else if (page_radio_duplicate_value === 'increment-ttbrtl') {
                 // index should be from top to bottom
                 metadata_highlighted = [];
                 for (var index = metadata_highlighted_temp.length - 1; index >= 0; index--) {
@@ -1203,7 +766,7 @@ $(document).ready(function () {
         // need for replace and pastes to keep track of last seen during the replace/pastes
         // costs a little extra to put here, but will always be ready
         icol_last_highlighted_seen = {};
-        $.each(indy_column_labels, function (index, icol) {
+        $.each(indy_list_of_column_labels, function (index, icol) {
             icol_last_highlighted_seen[icol] = '99';
             icol_last_highlighted_seen[icol+'_index'] = -99;
         });
@@ -1213,12 +776,13 @@ $(document).ready(function () {
     
     var page_paste_cell_irow = null;
     var page_paste_cell_icol = null;
+    // this is called when drag across the metadata table
     function selectableDragOnSampleMetadataTable() {
         // console.log("dragging")
         if (page_drag_action === 'pastes') {
             if (document.getElementsByClassName('special-selected1').length === 0) {
                 page_drag_action = null;
-                sample_metadata_replace_show_hide();
+                sampleMetadataReplaceShowHide();
                 alert('Select some text to copy before drag to paste');
             } else {
                 $('.special-selected2').removeClass('special-selected2');
@@ -1255,52 +819,11 @@ $(document).ready(function () {
         whatIsCurrentlyHighlightedInTheIndyTable();
     }
 
-
-
-    //may want to move these later todo make these work without the sort...
-    $(document).on('click', '.apply-column-button', function (e) {
-        e.stopPropagation();
-        let apply_button_that_was_clicked = $(this);
-        // console.log(apply_button_that_was_clicked);
-
-        let this_col_index = this.getAttribute("col-index");
-        //what is the column-index, for each with this column-index
-        $('.indy-data').each(function() {
-            if ($(this).attr('col-index') === this_col_index) {
-                if ($(this).hasClass('special-selected1')) {
-                    $(this).removeClass('special-selected1');
-                } else {
-                    $(this).addClass('special-selected1');
-                }
-            }
-        });
-    });
-    $(document).on('click', '.apply-row-button', function (e) {
-        e.stopPropagation();
-        let apply_button_that_was_clicked = $(this);
-        // console.log(apply_button_that_was_clicked);
-
-        let this_row_index = this.getAttribute("row-index");
-        //what is the column-index, for each with this column-index
-        $('.indy-data').each(function() {
-            if ($(this).attr('row-index') === this_row_index) {
-                if ($(this).hasClass('special-selected1')) {
-                    $(this).removeClass('special-selected1');
-                } else {
-                    $(this).addClass('special-selected1');
-                }
-            }
-        });
-    });
-
-    function buildSampleMetadataTable() {
-
-        console.log("Building table  metadata_lod ")
-        console.log(metadata_lod)
-
+    function goBuildSampleMetadataTable() {
         // build a table
+        // set to the table div
         var elem = document.getElementById('div_for_' + sample_metadata_table_id);
-        //remove the table
+        //remove an existing table
         if (elem.childNodes[0]) {
             elem.removeChild(elem.childNodes[0]);
         }
@@ -1319,37 +842,15 @@ $(document).ready(function () {
         $(tr).attr('row-index', rowcounter);
         var colcounter = 0;
 
-        $.each(indy_column_labels, function (i_index, colLabel) {
-            // include in table or not - 1 is for include
-            if (include_column_in_indy_table[i_index] === 1) {
+        $.each(indy_list_of_column_labels, function (i_index, colLabel) {
+            console.log("collable ",colLabel)
+            // include in table or not: 1 is for include
+            if (indy_list_of_column_labels_show_hide[i_index] === 1) {
                 var th = document.createElement('TH');
                 $(th).attr('col-index', colcounter);
                 $(th).attr('row-index', rowcounter);
                 $(th).attr('col-label', colLabel);
-                $(th).attr('row-label', indy_column_labels);
-                $(th).attr('meta-label', indy_column_labels);
-
-                if (colLabel.includes(indy_button_label)) {
-                    let top_button_column = ''
-                        + '<span class="glyphicon glyphicon-option-horizontal" aria-hidden="true"></span>'
-                        + '<span class="glyphicon glyphicon-option-vertical" aria-hidden="true"></span>'
-                    $(th).html(top_button_column);
-                    // th.appendChild(document.createTextNode(''));
-                } else {
-                    th.appendChild(document.createTextNode(colLabel));
-                }
-
-
-                // when put in the header like this, the column sorted
-                // if (colLabel.includes(indy_row_label) || colLabel.includes(indy_well_meta_label) || page_omic_metadata_check_load === 'review') {
-                //    th.appendChild(document.createTextNode(colLabel));
-                // } else {
-                //     let top_label_button = ' <a col-index="' + colcounter
-                //     + '" class="btn btn-sm btn-primary apply-column-button">'
-                //     + '<span class="glyphicon glyphicon-option-vertical" aria-hidden="true"></span></a>'
-                //     $(th).html(colLabel + top_label_button);
-                // }
-
+                th.appendChild(document.createTextNode(colLabel));
                 tr.appendChild(th);
                 colcounter = colcounter + 1;
             }
@@ -1361,114 +862,40 @@ $(document).ready(function () {
         myTable.appendChild(tableHead);
         var tableBody = document.createElement('TBODY');
 
-        // start add arrow down row in body
-        if (add_apply_row_col_to_indy_table && page_omic_metadata_check_load != 'review') {
+        colcounter = 0;
+        let myCellContent = '';
+        $.each(metadata_lod, function (i_index, row) {
             var tr = document.createElement('TR');
-            rowcounter = rowcounter + 1;
             $(tr).attr('row-index', rowcounter);
+            tableBody.appendChild(tr);
 
             colcounter = 0;
-            $.each(indy_column_labels, function (i_index, colLabel) {
-                if (include_column_in_indy_table[i_index] === 1) {
+            let myCellContent = '';
+
+            $.each(indy_list_of_column_labels, function (i_index, colLabel) {
+                myCellContent = row[colLabel];
+
+                // include in table or not - 1 is for include
+                if (indy_list_of_column_labels_show_hide[i_index] === 1) {
                     var td = document.createElement('TD');
-                    if (colLabel.includes(indy_row_label) ||
-                        colLabel.includes(indy_well_meta_label) ||
-                        colLabel.includes(indy_button_label)) {
-                        td.appendChild(document.createTextNode(''));
+                    $(td).attr('col-index', colcounter);
+                    $(td).attr('row-index', rowcounter);
+                    $(td).attr('col-label', colLabel);
+
+                    if (colLabel === indy_row_label) {
+                        console.log("colLabel ",colLabel)
+                        let this_me = '<input type="text" id="sample_row_' + rowcounter
+                            + '" name="' + colLabel + '" value="' + myCellContent + '">';
+                        $(td).html(this_me);
                     } else {
-                        $(td).attr('class', 'apply-column-button');
-                        let top_label_button = ' <a col-index="' + colcounter
-                            + '" class="btn btn-sm btn-primary apply-column-button">'
-                            + '<span class="glyphicon glyphicon-option-vertical" aria-hidden="true"></span></a>'
-                        $(td).html(top_label_button);
+                        td.appendChild(document.createTextNode(myCellContent));
                     }
-                    $(td).attr('class', 'no-edit');
                     tr.appendChild(td);
                     colcounter = colcounter + 1;
                 }
             });
             rowcounter = rowcounter + 1;
-        }
-        tableBody.appendChild(tr);
-        // end add arrow down row in body
 
-        colcounter = 0;
-        let myCellContent = '';
-        $.each(metadata_lod, function (i_index, row) {
-            let rowLabel = row[indy_row_label];
-            let metaLabel = row[indy_row_label];
-            if ($('#id_header_type')[0].selectize.items[0] === 'well') {
-                metaLabel = row[indy_well_meta_label];
-            }
-            // if doing as a well, there are some rows we do not want in the table, but want in our metadata_lod
-            if (
-                $('#id_header_type')[0].selectize.items[0] === 'well'
-                &&
-                (metaLabel === 'matrix_item_pk' ||
-                    metaLabel === 'sample_location_pk' ||
-                    metaLabel === 'sample_metadata_pk')
-                ) {
-                // skip over the rows of metadata_lod that we just do not want (pk rows)
-            } else {
-                var tr = document.createElement('TR');
-                $(tr).attr('row-index', rowcounter);
-                tableBody.appendChild(tr);
-
-                colcounter = 0;
-                let myCellContent = '';
-
-                $.each(indy_column_labels, function (i_index, colLabel) {
-                    myCellContent = row[colLabel];
-
-                    // include in table or not - 1 is for include
-                    if (include_column_in_indy_table[i_index] === 1) {
-
-                        if (colLabel.includes(indy_row_label) ||
-                            colLabel.includes(indy_well_meta_label) ||
-                            colLabel.includes(indy_button_label)) {
-
-                            var th = document.createElement('TH');
-                            $(th).attr('col-index', colcounter);
-                            $(th).attr('row-index', rowcounter);
-                            $(th).attr('col-label', colLabel);
-                            $(th).attr('row-label', 'header');
-                            $(th).attr('meta-label', 'header');
-
-                            if (page_omic_metadata_check_load != 'review' && colLabel.includes(indy_button_label)) {
-                                $(th).attr('class', 'apply-row-button');
-                                let row_label_button = ' <a row-index="' + rowcounter
-                                + '" class="btn btn-sm btn-primary apply-row-button">'
-                                + '<span class="glyphicon glyphicon-option-horizontal" aria-hidden="true"></span></a>'
-                                //$(th).html(myCellContent + row_label_button);
-                                $(th).html(row_label_button);
-                                $(th).attr('class', 'no-edit');
-                            } else {
-                                th.appendChild(document.createTextNode(myCellContent));
-                            }
-                            tr.appendChild(th);
-                        } else {
-                            var td = document.createElement('TD');
-                            $(td).attr('col-index', colcounter);
-                            $(td).attr('row-index', rowcounter);
-                            $(td).attr('col-label', colLabel);
-                            $(td).attr('row-label', rowLabel);
-                            $(td).attr('meta-label', metaLabel);
-                            td.appendChild(document.createTextNode(myCellContent));
-                            let contentLength = myCellContent.trim().length;
-                            //todo think about how to do this - do want empty or some place holder?
-                            // console.log("myCellContent ",myCellContent, " ", contentLength)
-                            if (contentLength == 0 && $('#id_header_type')[0].selectize.items[0] === 'well') {
-                                $(td).attr('class', 'no-edit-data');
-                            } else {
-                                $(td).attr('class', 'indy-data');
-                            }
-                            tr.appendChild(td);
-                        }
-                        colcounter = colcounter + 1;
-                    }
-                });
-                rowcounter = rowcounter + 1;
-            }
         });
 
         myTable.appendChild(tableBody);
@@ -1530,7 +957,7 @@ $(document).ready(function () {
         return myTable;
     }
 
-    function afterBuildSampleMetadataTable() {
+    function postBuildSampleMetadataTable() {
         // allows table to be selectable, must be AFTER table is created - keep
         $('#' + sample_metadata_table_id).selectable({
             filter: 'td',
@@ -1538,6 +965,13 @@ $(document).ready(function () {
             stop: selectableDragOnSampleMetadataTable
         });
     }    
+    
+    /**
+     * A function to clear the validation errors on change of any field
+    */
+    function clearFormValidationErrors() {
+        $('#form_errors').hide();
+    }
 
     // END - All Functions section
 

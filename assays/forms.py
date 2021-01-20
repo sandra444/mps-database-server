@@ -5279,12 +5279,21 @@ class AssayOmicDataFileUploadForm(BootstrapForm):
 
 
 # Start Omic Metadata Collection Section
+
+sample_option_choices = (
+    ('clt', 'Chip/Well - Location - Time'),
+    ('sn1', 'Sample-1 to Sample-99999 etc'),
+    ('sn2', 'Sample-01 to Sample-99'),
+    ('sn3', 'Sample-001 to Sample-999'),
+)
+
 # Form to use to collect the omic sample metadata
 # The actual metadata will be stuffed into a field for performance
 class AssayOmicSampleMetadataAdditionalInfoForm(BootstrapForm):
     """Form for collecting omic sample metadata."""
 
     # todo-sck may need to add more form fields...need to work on this
+    # add the list of sample naming options
 
     # NOTE TO SCK - this will be one record per form (the rest will be crammed in a field...)
     # the form will not have an index page, so, there is a conditional in the call (click to go there) and
@@ -5299,7 +5308,9 @@ class AssayOmicSampleMetadataAdditionalInfoForm(BootstrapForm):
             'indy_sample_location',
             'indy_matrix_item',
             'indy_matrix_item_list',
-            'indy_sample_metadata_table_was_changed')
+            'indy_sample_metadata_table_was_changed',
+            'indy_list_columns_hide_initially',
+        )
 
     def __init__(self, *args, **kwargs):
         super(AssayOmicSampleMetadataAdditionalInfoForm, self).__init__(*args, **kwargs)
@@ -5313,10 +5324,12 @@ class AssayOmicSampleMetadataAdditionalInfoForm(BootstrapForm):
         indy_list_of_column_labels = indy_table_labels.get('indy_list_of_column_labels')
         indy_list_of_column_labels_show_hide = indy_table_labels.get('indy_list_of_column_labels_show_hide')
         indy_list_of_dicts_of_table_rows = indy_table_labels.get('indy_list_of_dicts_of_table_rows')
+        indy_list_columns_hide_initially = indy_table_labels.get('indy_list_columns_hide_initially')
 
         self.fields['indy_list_of_column_labels'].initial = json.dumps(indy_list_of_column_labels)
         self.fields['indy_list_of_column_labels_show_hide'].initial = json.dumps(indy_list_of_column_labels_show_hide)
         self.fields['indy_list_of_dicts_of_table_rows'].initial = json.dumps(indy_list_of_dicts_of_table_rows)
+        self.fields['indy_list_columns_hide_initially'].initial = json.dumps(indy_list_columns_hide_initially)
 
         # get the queryset of matrix items in this study
         matrix_item_queryset = AssayMatrixItem.objects.filter(study_id=self.instance.id).order_by('name', )
@@ -5330,6 +5343,7 @@ class AssayOmicSampleMetadataAdditionalInfoForm(BootstrapForm):
     indy_list_of_dicts_of_table_rows = forms.CharField(widget=forms.TextInput(), required=False,)
     indy_list_of_column_labels = forms.CharField(widget=forms.TextInput(), required=False,)
     indy_list_of_column_labels_show_hide = forms.CharField(widget=forms.TextInput(), required=False, )
+    indy_list_columns_hide_initially = forms.CharField(widget=forms.TextInput(), required=False, )
 
     # nts - the getting of the sub sample locations list is an ajax call (not here in case they change models)
     indy_sample_location = forms.ModelChoiceField(
@@ -5344,6 +5358,11 @@ class AssayOmicSampleMetadataAdditionalInfoForm(BootstrapForm):
     )
     indy_matrix_item_list = forms.CharField(widget=forms.TextInput(), required=False,)
     indy_sample_metadata_table_was_changed = forms.BooleanField()
+
+    indy_sample_label_options = forms.ChoiceField(
+        choices=sample_option_choices,
+        required=False,
+    )
 
     # todo-sck need to fix all this after get buying for design
     # def clean(self):
