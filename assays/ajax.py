@@ -98,7 +98,8 @@ from .utils import (
     this_file_same_as_another_in_this_study,
     get_model_location_dictionary,
     find_the_labels_needed_for_the_indy_omic_table,
-    sandrasGeneralFormatNumberFunction
+    sandrasGeneralFormatNumberFunction,
+
 )
 
 import csv
@@ -7061,19 +7062,19 @@ def fetch_omic_sample_info_first_found_in_upload_file_table(request):
 
         model_row = AssayGroup.objects.only('organ_model').get(pk=group_pkc).organ_model
         this_model_pk = model_row.id
-        location_dict1 = sub_fetch_model_location_dictionary(this_model_pk)
+        location_dict1 = get_model_location_dictionary(this_model_pk)
 
     if called_from == 'load-update' and group_pk1 > 0:
         # loading an update page, get the correct list for group1
         model_row = AssayGroup.objects.only('organ_model').get(pk=group_pk1).organ_model
         this_model_pk = model_row.id
-        location_dict1 = sub_fetch_model_location_dictionary(this_model_pk)
+        location_dict1 = get_model_location_dictionary(this_model_pk)
 
     if called_from == 'load-update' and group_pk2 > 0:
         # loading an update page, get the correct list for group2
         model_row = AssayGroup.objects.only('organ_model').get(pk=group_pk2).organ_model
         this_model_pk = model_row.id
-        location_dict2 = sub_fetch_model_location_dictionary(this_model_pk)
+        location_dict2 = get_model_location_dictionary(this_model_pk)
 
     # print("l1 ",location_dict1)
     # print("l2 ", location_dict2)
@@ -7173,11 +7174,6 @@ def sub_fetch_omic_sample_info_first_found_in_upload_file_table(this_pk):
 
     return [timemess, locmess, day, hour, minute, loc_pk]
 
-
-# sck ajax.py
-def sub_fetch_model_location_dictionary(this_model_pk):
-    location_dict = get_model_location_dictionary(this_model_pk)
-    return [location_dict]
 
 # qkw assaystudy_omics.js
 def fetch_omics_data_for_visualization(request):

@@ -64,7 +64,8 @@ from microdevices.models import (
     MicrophysiologyCenter,
     Microdevice,
     OrganModel,
-    OrganModelProtocol
+    OrganModelProtocol,
+    OrganModelLocation,
 )
 from mps.forms import SignOffMixin, BootstrapForm, tracking
 import string
@@ -86,7 +87,8 @@ from .utils import (
     data_quality_clean_check_for_omic_file_upload,
     find_the_labels_needed_for_the_indy_omic_table,
     convert_time_from_mintues_to_unit_given,
-    convert_time_unit_given_to_minutes
+    convert_time_unit_given_to_minutes,
+    get_model_location_dictionary
 )
 
 from mps.utils import (
@@ -5308,8 +5310,8 @@ class AssayOmicSampleMetadataAdditionalInfoForm(BootstrapForm):
             'indy_sample_location',
             'indy_matrix_item',
             'indy_matrix_item_list',
-            'indy_sample_metadata_table_was_changed',
-            'indy_list_columns_hide_initially',
+            'indy_list_time_units_to_include_initially',
+            'indy_dict_time_units_to_table_column'
         )
 
     def __init__(self, *args, **kwargs):
@@ -5324,12 +5326,14 @@ class AssayOmicSampleMetadataAdditionalInfoForm(BootstrapForm):
         indy_list_of_column_labels = indy_table_labels.get('indy_list_of_column_labels')
         indy_list_of_column_labels_show_hide = indy_table_labels.get('indy_list_of_column_labels_show_hide')
         indy_list_of_dicts_of_table_rows = indy_table_labels.get('indy_list_of_dicts_of_table_rows')
-        indy_list_columns_hide_initially = indy_table_labels.get('indy_list_columns_hide_initially')
+        indy_list_time_units_to_include_initially = indy_table_labels.get('indy_list_time_units_to_include_initially')
+        indy_dict_time_units_to_table_column = indy_table_labels.get('indy_dict_time_units_to_table_column')
 
         self.fields['indy_list_of_column_labels'].initial = json.dumps(indy_list_of_column_labels)
         self.fields['indy_list_of_column_labels_show_hide'].initial = json.dumps(indy_list_of_column_labels_show_hide)
         self.fields['indy_list_of_dicts_of_table_rows'].initial = json.dumps(indy_list_of_dicts_of_table_rows)
-        self.fields['indy_list_columns_hide_initially'].initial = json.dumps(indy_list_columns_hide_initially)
+        self.fields['indy_list_time_units_to_include_initially'].initial = json.dumps(indy_list_time_units_to_include_initially)
+        self.fields['indy_dict_time_units_to_table_column'].initial = json.dumps(indy_dict_time_units_to_table_column)
 
         # get the queryset of matrix items in this study
         matrix_item_queryset = AssayMatrixItem.objects.filter(study_id=self.instance.id).order_by('name', )
@@ -5338,14 +5342,48 @@ class AssayOmicSampleMetadataAdditionalInfoForm(BootstrapForm):
         matrix_item_list = matrix_item_queryset.values_list('name', flat=True)
         self.fields['indy_matrix_item_list'].initial = json.dumps(matrix_item_list)
 
-        self.fields['indy_sample_metadata_table_was_changed'].initial = False
+        # if, the models in the study have locations, pull them
+        organ_models_in_study = AssayGroup.objects.filter(
+            # We will always know the study, this can never be an add page
+            study_id=self.instance,
+        ).prefetch_related(
+            'organ_model',
+        ).distinct().only(
+            'organ_model'
+        ).values_list('organ_model__id', flat=True)
+
+        organ_models_in_study_list = list(organ_models_in_study)
+
+        sample_locations_in_list = OrganModelLocation.objects.filter(
+            organ_model__in=organ_models_in_study_list
+        ).prefetch_related(
+            'sample_location',
+        # ).values('sample_location__id', 'sample_location__name')
+        # < QuerySet[{'sample_location__id': 31, 'sample_location__name': 'Well'}, {'sample_location__id': 30, 'sample_location__name': 'Media'}] >
+        ).values_list('sample_location__id', flat=True)
+
+        sample_locations_queryset = AssaySampleLocation.objects.filter(
+            id__in=sample_locations_in_list
+        ).order_by(
+            'name',
+        )
+
+        # what if the study has more than one model,
+        # and one has locations and one does not,
+        # the queryset len will be > 0,
+        # but not all the locations would be in the sub list
+        # might have to deal with this, (location needed might not be in list) but
+        # for now, if there is a sub list, use it
+        if len(sample_locations_queryset) > 0:
+            self.fields['indy_sample_location'].queryset = sample_locations_queryset
 
     indy_list_of_dicts_of_table_rows = forms.CharField(widget=forms.TextInput(), required=False,)
     indy_list_of_column_labels = forms.CharField(widget=forms.TextInput(), required=False,)
     indy_list_of_column_labels_show_hide = forms.CharField(widget=forms.TextInput(), required=False, )
-    indy_list_columns_hide_initially = forms.CharField(widget=forms.TextInput(), required=False, )
+    indy_list_time_units_to_include_initially = forms.CharField(widget=forms.TextInput(), required=False, )
+    indy_dict_time_units_to_table_column = forms.CharField(widget=forms.TextInput(), required=False, )
 
-    # nts - the getting of the sub sample locations list is an ajax call (not here in case they change models)
+    # this will return all the sample locations
     indy_sample_location = forms.ModelChoiceField(
         queryset=AssaySampleLocation.objects.all().order_by(
             'name'
@@ -5357,7 +5395,6 @@ class AssayOmicSampleMetadataAdditionalInfoForm(BootstrapForm):
         required=False,
     )
     indy_matrix_item_list = forms.CharField(widget=forms.TextInput(), required=False,)
-    indy_sample_metadata_table_was_changed = forms.BooleanField()
 
     indy_sample_label_options = forms.ChoiceField(
         choices=sample_option_choices,

@@ -7281,7 +7281,8 @@ def find_the_labels_needed_for_the_indy_omic_table(called_from, study_id, find_d
     indy_list_of_dicts_of_table_rows = []
     # decide how to do this - maybe if all are zeros when extracted, hide, else, show
     # for now, day is default on the form DHM 234
-    indy_list_columns_hide_initially = [2,3,4]
+    indy_list_time_units_to_include_initially = ['day',]
+    indy_dict_time_units_to_table_column = {'day':2, 'hour':3, 'minute':4}
 
     # for development, use find_defaults to get a table to work with
     # else, if there is metadata for this study, pull it in the correct format
@@ -7449,7 +7450,8 @@ def find_the_labels_needed_for_the_indy_omic_table(called_from, study_id, find_d
 
     indy_omic_table['indy_list_of_column_labels'] = indy_list_of_column_labels
     indy_omic_table['indy_list_of_column_labels_show_hide'] = indy_list_of_column_labels_show_hide
-    indy_omic_table['indy_list_columns_hide_initially'] = indy_list_columns_hide_initially
+    indy_omic_table['indy_list_time_units_to_include_initially'] = indy_list_time_units_to_include_initially
+    indy_omic_table['indy_dict_time_units_to_table_column'] = indy_dict_time_units_to_table_column
 
     # sort here so that the table does not need to be sorted by default - which makes it rearrange when stuff is replaced
     r_counter = 0
@@ -7466,6 +7468,7 @@ def find_the_labels_needed_for_the_indy_omic_table(called_from, study_id, find_d
     # print(indy_omic_table)
 
     return indy_omic_table
+
 
 # sck sub here in utils.py
 def omic_find_sets_of_prefixes_and_numbers_for_well_names(header_list):
@@ -7558,6 +7561,7 @@ def convert_time_unit_given_to_minutes(tvalue, unit_given):
         ctime = tvalue
     return ctime
 
+
 # sck sub in utils.py
 # from https://stackoverflow.com/questions/1143671/how-to-sort-objects-by-multiple-keys-in-python
 # call like this a = sorted(b, key=sortkeypicker(['-Total_Points', 'TOT_PTS_Misc']))
@@ -7575,3 +7579,9 @@ def sortkeypicker(keynames):
                composite[i] = -v
        return composite
     return getit
+
+
+# sck ajax.py and utils.py
+def get_model_location_dictionary(this_model_pk):
+    location_dict = get_model_location_dictionary(this_model_pk)
+    return [location_dict]

@@ -2,21 +2,8 @@ $(document).ready(function () {
     
     // START do on load
 
-    // todo this whole thing
-    // todo - maybe - make it so that the user can overwrite a previous rather than this (this will be complicated)
-    // todo - remove an error for the log2 fold change where group1 can not equal group 2 - this could happen if the times are different - think about....
-    // todo at some point, check to make sure to limit the sample locations to what is listed in models in the study, if listed (location_1, 2 and sample location - three places currently)
-    // todo add a highlight all to columns required
-    // todo make sure form saved are not getting overwritten when come into update or review form
-    
-    //todo what if change the tie unit???? time_unit_instance
-    
-    //todo put the search term back in the search bar
-    //$('#glossary_table_filter :input').val(searchTerm).trigger('input');
-    //$('#glossary_table_filter :input').val(null).trigger('input');    
-
     //show the validation stuff
-    $('#form_errors').show()
+    $('#form_errors').show();
 
     // there will only be upload and review, not add (add is a special case of update handled by the forms.py!)
     let page_omic_metadata_check_load = $('#check_load').html().trim();
@@ -24,17 +11,21 @@ $(document).ready(function () {
     // indy sample stuff
     var sample_metadata_table_id = 'sample_metadata_table';
 
+    // make sure to update this as needed (to match what comes from utils.py)
+    var indy_row_label = 'Sample Label'
+
+    var code_of_the_sample_pattern = '';
+
     var indy_list_of_dicts_of_table_rows = JSON.parse($('#id_indy_list_of_dicts_of_table_rows').val());
     var indy_list_of_column_labels = JSON.parse($('#id_indy_list_of_column_labels').val());
     var indy_list_of_column_labels_show_hide = JSON.parse($('#id_indy_list_of_column_labels_show_hide').val());
     var indy_matrix_item_list = JSON.parse($('#id_indy_matrix_item_list').val());
-    var indy_list_columns_hide = JSON.parse($('#id_indy_list_columns_hide_initially').val());
+    var indy_list_columns_hide = [];
+    var indy_list_time_units_to_include_initially = JSON.parse($('#id_indy_list_time_units_to_include_initially').val());
+    var indy_dict_time_units_to_table_column = JSON.parse($('#id_indy_dict_time_units_to_table_column').val());
 
-    findTheUnitsThatShouldBeInTheTable();
+    findTheTimeUnitsThatShouldBeInTheTableAndAsDefault();
     var page_radio_time_value = $("input[type='radio'][name='radio_time_unit']:checked").val();
-
-
-    // boolean, using the form field - var indy_sample_metadata_table_was_changed = JSON.parse($('#id_indy_sample_metadata_table_was_changed').val());
 
     // Prepare and build the table on load
     // the current one
@@ -52,9 +43,8 @@ $(document).ready(function () {
     // just working variables, but want in different subs, so just declare here
     var current_pk = 0;
     var current_val = '';
-
-    // make sure to update this as needed (to match what comes from utils.py)
-    var indy_row_label = 'Sample Label'
+    var page_paste_cell_irow = null;
+    var page_paste_cell_icol = null;
 
     var indy_table_order = [];
     var indy_table_column_defs = [{bSortable: false, targets: [5 ,]},
@@ -76,13 +66,17 @@ $(document).ready(function () {
     var icol_to_html_outer = {};
     var icol_to_html_element = {};
     // Note that these keys are hardcoded to columns headers or metadata labels
+    // todo check these for new ones...not sure they are correct
     icol_to_html_outer['Chip/Well Name'] = 'h_indy_matrix_item';
     icol_to_html_element['Chip/Well Name'] = 'matrix_item_name';
     icol_to_html_outer['Sample Location'] = 'h_indy_sample_location';
     icol_to_html_element['Sample Location'] = 'sample_location_name';
-    icol_to_html_outer['Sample Time'] = 'h_indy_time_in_unit';
-    icol_to_html_element['Sample Time'] = 'time_display';
-    //todo fix this for the D H M
+    icol_to_html_outer['Sample Time (Day)'] = 'h_indy_time_day';
+    icol_to_html_element['Sample Time (Day)'] = 'time_day';
+    icol_to_html_outer['Sample Time (Hour)'] = 'h_indy_time_hour';
+    icol_to_html_element['Sample Time (Hour)'] = 'time_hour';
+    icol_to_html_outer['Sample Time (Minute)'] = 'h_indy_time_minute';
+    icol_to_html_element['Sample Time (Minute)'] = 'time_minute';
 
     if (page_omic_metadata_check_load === 'review') {
         // HANDY - to make everything on a page read only (for review page)
@@ -113,13 +107,11 @@ $(document).ready(function () {
     
     $(document).on('click', '#clearHighlightingButton', function() {
         $('.special-selected1').removeClass('special-selected1');
-        $('.special-selected2').removeClass('special-selected2');
-        page_paste_cell_icol = null;
-        page_paste_cell_irow = null;
-        if (page_drag_action === 'pastes') {
-            page_drag_action = null;
-            sampleMetadataReplaceShowHide();
-        }
+        whatIsCurrentlyHighlightedInTheIndyTable();
+    });
+
+    $(document).on('click', '#highlightAllSampleLabelsButton', function() {
+        $('.special-label-td').addClass('special-selected1');
         whatIsCurrentlyHighlightedInTheIndyTable();
     });
 
@@ -136,19 +128,22 @@ $(document).ready(function () {
     $("input[type='radio'][name='radio_time_unit']").click(function () {
         page_radio_time_value = $(this).val();
         radioTimeVisibility();
-        changeTheTimesInTable();
+        changeListThatGovernsOmitsForTheTimesInTable();
+        goBuildSampleMetadataTable();
+        postBuildSampleMetadataTable();
     });
 
     $(document).on('click', '#replaceInTableButton', function() {
         indyCalledToReplace();
     });
-
-    //todo - going to get rid of these, but need to add others (highlight row/column)
-    // clicked on an add row button in the indy table
-    // clicked on an add row button in the indy table
-    $(document).on('click', '.delete_indy_row', function () {
-        let delete_button_clicked = $(this);
-        indyClickedToDeleteRow(delete_button_clicked);
+    $(document).on('click', '#clearInTableButton', function() {
+        indyCalledToClear();
+    });
+    $(document).on('click', '#deleteInTableButton', function() {
+        indyCalledToDelete();
+    });
+    $(document).on('click', '#pastesInTableButton', function() {
+        indyCalledToPastes();
     });
 
     // need on change events for chip id and for sample location so can populate the corresponding dom element
@@ -166,23 +161,26 @@ $(document).ready(function () {
         document.getElementById('sample_location_name').innerHTML = thisText;
         document.getElementById('sample_location_pk').innerHTML = thisValue;
     });
-    
-    $(document).on('click', '.apply-row-button', function (e) {
-        e.stopPropagation();
-        let apply_button_that_was_clicked = $(this);
-        // console.log(apply_button_that_was_clicked);
 
-        let this_row_index = this.getAttribute("row-index");
-        //what is the column-index, for each with this column-index
-        $('.indy-data').each(function() {
-            if ($(this).attr('row-index') === this_row_index) {
-                if ($(this).hasClass('special-selected1')) {
-                    $(this).removeClass('special-selected1');
-                } else {
-                    $(this).addClass('special-selected1');
-                }
-            }
-        });
+    // just need the pattern so know how to populate when highlighted and clicked
+    $(document).on('change', '#id_indy_sample_label', function() {
+        code_of_the_sample_pattern = $('#id_indy_sample_label').children('option:selected').val();
+    });
+
+    // when the user changes a sample label using the input instead of a pattern
+    // they would need to do this for replicates to change them
+    $(document).on('focusout', '.special-label', function (e) {
+        let what_cell_changed = $(this);
+        // console.log(what_cell_changed)
+        let this_row_index = what_cell_changed.attr("row-index");
+        let this_col_index = what_cell_changed.attr("col-index");
+        //this assumes all the columns are included in the table - BE CAREFUL with that
+        metadata_lod[this_row_index-1][indy_row_label] = what_cell_changed.val();
+        pushToMetadataLodCum();
+        checkUndoRedoButtonVisibility();
+        // note that, we do NOT need to redraw the table for this
+        // do need to write back to the form field
+        $('#id_indy_list_of_dicts_of_table_rows').val(JSON.stringify(metadata_lod));
     });
 
     // END clicks and changes section
@@ -198,7 +196,6 @@ $(document).ready(function () {
     }
 
     function radioActionVisibility() {
-        //options are replace, empty, copys, pastes
         $('.empty-section').hide();
         $('.pastes-section').hide();
         $('.delete-section').hide();
@@ -251,81 +248,50 @@ $(document).ready(function () {
             $('#redoIndyButton').hide();
         }
     }
-    
-    function findTheUnitsThatShouldBeInTheTable() {
-        if (indy_list_columns_hide.length === 3) {
-            // leave the default as day (set in html) and show the day column (hide hour and minute)
+
+    /**
+     * When this page opens, there is a list sent back that has
+     * units that should be displayed in the table
+     * and a dictionary with the unit and the column number in the table
+     * this pushing both to the utils.py 
+    */
+    function findTheTimeUnitsThatShouldBeInTheTableAndAsDefault() {
+        // set default unit based on what IS in the units initially from utils.py
+        $('#radio_minute').prop('checked', true);
+        if (indy_list_time_units_to_include_initially.indexOf('day') > -1) {
             $('#radio_day').prop('checked', true);
-            indy_list_columns_hide = [3, 4];
-        } else if (indy_list_columns_hide.length === 2) {
-            // show the one that is not in the list and make it the default
-            if (JSON.stringify(indy_list_columns_hide) === JSON.stringify([2, 3])) {
-                $('#radio_minute').prop('checked', true);
-            } else if (JSON.stringify(indy_list_columns_hide) === JSON.stringify([3, 4])) {
-                $('#radio_day').prop('checked', true);
-            } else {
-                // [2,4]
-                $('#radio_hour').prop('checked', true);
-            }
-        } else if (indy_list_columns_hide.length === 1) {
-            if (JSON.stringify(indy_list_columns_hide) === JSON.stringify([2])) {
-                $('#radio_hour').prop('checked', true);
-            } else if (JSON.stringify(indy_list_columns_hide) === JSON.stringify([3])) {
-                $('#radio_day').prop('checked', true);
-            } else {
-                // [4]
-                $('#radio_day').prop('checked', true);
-            }
+        } else if (indy_list_time_units_to_include_initially.indexOf('hour') > -1) {
+            $('#radio_hour').prop('checked', true);
         }
-        // else none are marked for hiding by default - length is 0
+        page_radio_time_value = $("input[type='radio'][name='radio_time_unit']:checked").val();
+
+        let obj = indy_dict_time_units_to_table_column;
+        Object.keys(obj).forEach(function(key) {
+           // console.log(key + " " + obj[key]);
+           if (indy_list_time_units_to_include_initially.indexOf(key) < 0) {
+                indy_list_columns_hide.push(obj[key])
+           }
+        });
     }
     
-    function changeTheTimesInTable () {
-        let num_in_list = 4;
-        if (page_radio_time_value === 'day') {
-            num_in_list = 2;
-        } else if (page_radio_time_value === 'hour') {
-            num_in_list = 3;
-        }
-        // else it is the 4
+    function changeListThatGovernsOmitsForTheTimesInTable () {
+        // this will ONLY make a column visible, it will NOT hide a column
+        // This happens when the user changes the selection of the time unit in the replace content section
+        // get the column number from the unit
+        let obj = indy_dict_time_units_to_table_column;
+        let num_in_list = obj[page_radio_time_value];
         // if it is in the list to hide in the table, remove it
         const index = indy_list_columns_hide.indexOf(num_in_list);
         if (index > -1) {
           indy_list_columns_hide.splice(index, 1);
         }
-        goBuildSampleMetadataTable();
-        postBuildSampleMetadataTable();
     }
 
-    function sampleMetadataReplaceShowHide() {
-        if (!page_drag_action) {
-            $('#radio_replace').prop('checked', false);
-            $('#radio_empty').prop('checked', false);
-            // $('#radio_copys').prop('checked', false);
-            $('#radio_pastes').prop('checked', false);
-        } else if (page_drag_action === 'replace') {
-            $('.special-selected2').removeClass('special-selected2');
-            $('.replace-section').show();
-        } else if (page_drag_action === 'empty') {
-            $('.special-selected2').removeClass('special-selected2');
-            $('.empty-section').show();
-            indyCalledToEmpty();
-        // } else if (page_drag_action === 'copys') {
-        //     $('.special-selected2').removeClass('special-selected2');
-        //     $('.copys-section').show();
-        } else if (page_drag_action === 'pastes') {
-            $('.pastes-section').show();
-        } else {
-            // console.log('no selection');
-        }
-        //todo - figure out if even need the radio button...not sure cut and paste has much value here
-        //for now, treat as only a replace option and hide the radio button in the html
 
 
-        $('.replace-section').show();
-    }
 
-    function indySampleMetadataCallBuildAndPost() {
+
+    function indyCallMultiFunctionUndoBuildPostUpdate() {
         checkUndoRedoButtonVisibility();
         goBuildSampleMetadataTable();
         postBuildSampleMetadataTable();
@@ -358,22 +324,12 @@ $(document).ready(function () {
                 alert('No redo storage at the current time')
             }
         }
-
+        //
         metadata_lod = JSON.parse(JSON.stringify(metadata_lod_cum[metadata_lod_current_index]));
-        // assume that change flags happened when made the, ignore undo - no reversal of flags for undo for now
-        //     $('#id_indy_sample_metadata_table_was_changed').attr('checked',true);
-        //     $('#id_indy_sample_metadata_field_header_was_changed').attr('checked',true);
-        indySampleMetadataCallBuildAndPost();
+
+        indyCallMultiFunctionUndoBuildPostUpdate();
     }
 
-    // ~~ The row-wise buttons - todo plan to delete these, not offer to user
-    // function indyClickedToAddRow(thisButton) {
-    //     indyClickedAddOrDeleteRow(thisButton, 'add');
-    // }
-    //
-    // function indyClickedToDeleteRow(thisButton) {
-    //     indyClickedAddOrDeleteRow(thisButton, 'delete');
-    // }
     //
     // function indyClickedAddOrDeleteRow(thisButton, add_or_delete) {
     //     var thisRow = $(thisButton).attr('row-index');
@@ -382,15 +338,14 @@ $(document).ready(function () {
     //     var dictrow = metadata_lod[thisRowMinusHeader];
     //     if (dictrow['file_column_header'].length > 0) {
     //         // check the row to see if it has a field header
-    //         $('#id_indy_sample_metadata_table_was_changed').attr('checked', true);
-    //         $('#id_indy_sample_metadata_field_header_was_changed').attr('checked', true);
+
     //     } else {
     //         // check the row to see if the whole row is empty
     //         $.each(indy_list_of_column_labels, function (index, icol) {
     //             // do to all in the metadata_lod, not just the ones shown in the table, so, comment this out for now
     //             // if (include_header_in_indy_table[index] === 1) {
     //                 if (dictrow[icol].length > 0) {
-    //                     $('#id_indy_sample_metadata_table_was_changed').attr('checked', true);
+    //
     //                 }
     //             // }
     //         });
@@ -403,20 +358,47 @@ $(document).ready(function () {
     //
     //     metadata_lod_cum.push(JSON.parse(JSON.stringify(metadata_lod)));
     //     metadata_lod_current_index = metadata_lod_cum.length - 1;
-    //     indySampleMetadataCallBuildAndPost();
+    //     indyCallMultiFunctionUndoBuildPostUpdate();
     // }
 
     // ~~ The radio button change or change plus the go button/drag
     function indyCalledToPastes() {
         sameFrontMatterToTableFromEmptyReplaceGoAndPaste();
         indyCalledGutsPastes();
-        sameChangesToTableFromEmptyReplaceGoAndPaste();
+        pushToMetadataLodCum();
+        indyCallMultiFunctionUndoBuildPostUpdate();
     }
-    
+
+    function indyCalledToClear() {
+         // not going to allow this
+        // function indyCalledToEmpty() {
+        //     sameFrontMatterToTableFromEmptyReplaceGoAndPaste();
+        //     // just change the content of the cell
+        //     var index = 0;
+        //     for (index = 0; index < metadata_highlighted.length; index++) {
+        //         var tirow = metadata_highlighted[index]['metadata_highlighted_tirow'];
+        //         var ticol = metadata_highlighted[index]['metadata_highlighted_ticol'];
+        //         // do not forget to subtract the header row
+        //         metadata_lod[tirow-1][ticol] = '';
+        //         if (ticol === 'matrix_item_name') {
+        //             metadata_lod[tirow-1]['matrix_item_pk'] = '';
+        //         } else if (ticol === 'sample_location_name') {
+        //             metadata_lod[tirow-1]['sample_location_pk'] = '';
+        //         }
+        //     }
+        //     pushToMetadataLodCum();
+        // indyCallMultiFunctionUndoBuildPostUpdate();
+        // }
+    }
+
+    function indyCalledToDelete() {
+    }
+
     function indyCalledToReplace() {
         sameFrontMatterToTableFromEmptyReplaceGoAndPaste();
         indyCalledGutsReplace();
-        sameChangesToTableFromEmptyReplaceGoAndPaste();
+        pushToMetadataLodCum();
+        indyCallMultiFunctionUndoBuildPostUpdate();
 
         //todo need to reset the option boxes highlighting (what you are picking to use for the replace)
         //it is not resetting correctly
@@ -431,6 +413,16 @@ $(document).ready(function () {
     }  
 
     function indyCalledGutsReplace() {
+
+        //code_of_the_sample_pattern = $('#id_indy_sample_label').children('option:selected').val();
+        // sample_option_choices = (
+        //     ('clt', 'Chip/Well - Location - Time'),
+        //     ('sn1', 'Sample-1 to Sample-99999 etc'),
+        //     ('sn2', 'Sample-01 to Sample-99'),
+        //     ('sn3', 'Sample-001 to Sample-999'),
+        // )
+
+
         // replace - has the increment option, but always replacing the same cell
         
         // because the pks are not in the table, they will not ever be highlighted
@@ -579,32 +571,10 @@ $(document).ready(function () {
                 }
             }
         }
-        console.log("After Duplicate  metadata_lod ")
-        console.log(metadata_lod)
     }
-
-    // not going to allow this
-    // function indyCalledToEmpty() {
-    //     sameFrontMatterToTableFromEmptyReplaceGoAndPaste();
-    //     // just change the content of the cell
-    //     var index = 0;
-    //     for (index = 0; index < metadata_highlighted.length; index++) {
-    //         var tirow = metadata_highlighted[index]['metadata_highlighted_tirow'];
-    //         var ticol = metadata_highlighted[index]['metadata_highlighted_ticol'];
-    //         // do not forget to subtract the header row
-    //         metadata_lod[tirow-1][ticol] = '';
-    //         if (ticol === 'matrix_item_name') {
-    //             metadata_lod[tirow-1]['matrix_item_pk'] = '';
-    //         } else if (ticol === 'sample_location_name') {
-    //             metadata_lod[tirow-1]['sample_location_pk'] = '';
-    //         }
-    //     }
-    //     sameChangesToTableFromEmptyReplaceGoAndPaste();
-    // }
 
     function sameFrontMatterToTableFromEmptyReplaceGoAndPaste() {
         whatIsCurrentlyHighlightedInTheIndyTable();
-        $('#id_indy_sample_metadata_table_was_changed').attr('checked',true);
 
         //todo not sure need this...check later
         if (list_of_fields_for_replacing_that_are_highlighted.indexOf('file_column_header') >= 0) {
@@ -634,10 +604,9 @@ $(document).ready(function () {
 
     }
 
-    function sameChangesToTableFromEmptyReplaceGoAndPaste() {
+    function pushToMetadataLodCum() {
         metadata_lod_cum.push(JSON.parse(JSON.stringify(metadata_lod)));
         metadata_lod_current_index = metadata_lod_cum.length - 1;
-        indySampleMetadataCallBuildAndPost();
     }
 
     //todo, changed the ikey to col-index - will need to check this later
@@ -666,9 +635,23 @@ $(document).ready(function () {
         }
     }
 
-    //todo check all the attribute labels - adding new ones
+    // this is called when drag across the metadata table
+    function selectableDragOnSampleMetadataTable() {
+                //todo fix this...only allow time in unit showw in replace contetnt to be highlighted!!
+        $('.ui-selected').each(function() {
+            if ($(this).hasClass('special-selected1')) {
+                $(this).removeClass('special-selected1');
+            } else {
+                $(this).addClass('special-selected1');
+            }
+            $(this).removeClass('ui-selected');
+        });
+        // if keep this updated, can turn the fields in the replace content section yellow with every change
+        whatIsCurrentlyHighlightedInTheIndyTable();
+    }
+
     function whatIsCurrentlyHighlightedInTheIndyTable() {
-        // this was a test to see what is considered highlighted vers visible
+        // Made a test to see what is considered highlighted vrs visible
         // Found that, only what is highlighted and visible is changed
         // $(sample_metadata_table_id).DataTable().rows( { filter: 'applied' } ).every( function () {
         //     var row = this.data();
@@ -682,15 +665,12 @@ $(document).ready(function () {
             var dict_highlighted_indy_metadata = {};
             var imetadata_highlighted_tirow = $(this).attr('row-index');
             var imetadata_highlighted_ticol = $(this).attr('col-index');
-            var imetadata_highlighted_tlrow = $(this).attr('row-label');
             var imetadata_highlighted_tlcol = $(this).attr('col-label');
-            var imetadata_highlighted_meta_label = $(this).attr('meta-label');
+            var imetadata_highlighted_content = null;
 
             // since this goes through all the columns, they could be different types
-            // try different ways of pulling and
-            // keep in mind that the content could actually be null, if it is
-            // make it ?
-            var imetadata_highlighted_content = null;
+            // try different ways of pulling the content, and
+            // keep in mind that the content could actually be null
             try {
                 imetadata_highlighted_content = $(this).val();
             } catch {
@@ -717,49 +697,50 @@ $(document).ready(function () {
                 try {
                     imetadata_highlighted_content = $(this).innerHTML.trim();
                 } catch {
-                    imetadata_highlighted_content = 'required';
+                    imetadata_highlighted_content = '';
                 }
             }
-            
-            //at this point, should have 
+
+            //at this point, should have
             // console.log("###index ",index)
-            // console.log("row ",imetadata_highlighted_tirow)
-            // console.log("col ",imetadata_highlighted_ticol)
-            // console.log("row ",imetadata_highlighted_tlrow)
-            // console.log("col ",imetadata_highlighted_tlcol)
-            // console.log("label ",imetadata_highlighted_meta_label)
+            // console.log("row i ",imetadata_highlighted_tirow)
+            // console.log("col i ",imetadata_highlighted_ticol)
+            // console.log("col l ",imetadata_highlighted_tlcol)
             // console.log("content ",imetadata_highlighted_content)
-            
+
+            //store in a dictionary
             dict_highlighted_indy_metadata['metadata_highlighted_tirow'] = imetadata_highlighted_tirow;
             dict_highlighted_indy_metadata['metadata_highlighted_ticol'] = imetadata_highlighted_ticol;
-            dict_highlighted_indy_metadata['metadata_highlighted_tlrow'] = imetadata_highlighted_tlrow;
-            dict_highlighted_indy_metadata['metadata_highlighted_tlcol'] = imetadata_highlighted_tlcol;            
-            dict_highlighted_indy_metadata['metadata_highlighted_meta_label'] = imetadata_highlighted_meta_label; 
+            dict_highlighted_indy_metadata['metadata_highlighted_tlcol'] = imetadata_highlighted_tlcol;
             dict_highlighted_indy_metadata['metadata_highlighted_content'] = imetadata_highlighted_content;
+            //put in a list of dictionaries of what is highlighted
             metadata_highlighted.push(dict_highlighted_indy_metadata);
-
-            if ($('#id_header_type')[0].selectize.items[0] === 'well') {
-                list_of_fields_for_replacing_that_are_highlighted.push(imetadata_highlighted_meta_label);
-            } else {
-                list_of_fields_for_replacing_that_are_highlighted.push(imetadata_highlighted_tlcol);
-            }
-            // console.log("list_of_fields_for_replacing_that_are_highlighted ",list_of_fields_for_replacing_that_are_highlighted)
-
+            list_of_fields_for_replacing_that_are_highlighted.push(imetadata_highlighted_tlcol);
             index = index + 1;
         });
-        // a special check to grey out replace content if field not in the list
-        // e.g. if the user has not highlighted an chips, grey out the option to select a chip/well name
+        // a special check to turn replace content boxes yellow if one or more is highlighted in the table
+        // e.g. if the user has highlighted one or more chips, turn chip/well name in the replace content yellow
         $('#h_indy_sample_location').removeClass('required');
         $('#h_indy_matrix_item').removeClass('required');
-        $('#h_indy_time_in_unit').removeClass('required');
+        $('#h_indy_sample_time').removeClass('required');
+        $('#h_indy_time_day').removeClass('required');
+        $('#h_indy_time_hour').removeClass('required');
+        $('#h_indy_time_minute').removeClass('required');
+        $('#h_indy_sample_name_options').removeClass('required');
+
         $.each(list_of_fields_for_replacing_that_are_highlighted, function (index, e) {
-            // console.log('e ',e)
             if (e.indexOf('ocation') >= 0) {
                 $('#h_indy_sample_location').addClass('required');
             } else if (e.indexOf('hip') >= 0) {
                 $('#h_indy_matrix_item').addClass('required');
-            } else if (e.indexOf('ime') >= 0) {
-                $('#h_indy_time_in_unit').addClass('required');
+            } else if (e.indexOf('ime (D') >= 0) {
+                $('#h_indy_sample_time').addClass('required');
+            } else if (e.indexOf('ime (H') >= 0) {
+                $('#h_indy_sample_time').addClass('required');
+            } else if (e.indexOf('ime (M') >= 0) {
+                $('#h_indy_sample_time').addClass('required');
+            } else if (e.indexOf('abel') >= 0) {
+                $('#h_indy_sample_name_options').addClass('required');
             }
         });
 
@@ -772,54 +753,13 @@ $(document).ready(function () {
         });
     }
 
-    // END - The functions that change the indy table
-    
-    var page_paste_cell_irow = null;
-    var page_paste_cell_icol = null;
-    // this is called when drag across the metadata table
-    function selectableDragOnSampleMetadataTable() {
-        // console.log("dragging")
-        if (page_drag_action === 'pastes') {
-            if (document.getElementsByClassName('special-selected1').length === 0) {
-                page_drag_action = null;
-                sampleMetadataReplaceShowHide();
-                alert('Select some text to copy before drag to paste');
-            } else {
-                $('.special-selected2').removeClass('special-selected2');
-                // want to highlight from the first location, so, want only the first one
-                var icount = 0;
-                $('.ui-selected').each(function () {
-                    if (icount == 0) {
-                        $(this).addClass('special-selected2');
-                        page_paste_cell_irow = $(this).attr('row-index');
-                        page_paste_cell_icol = $(this).attr('col-index');
-                        //todo add others????
-                    }
-                    // $(this).removeClass('ui-selected');
-                    icount = icount + 1;
-                });
-                indyCalledToPastes();
-            }
-        } else {
-            $('.special-selected2').removeClass('special-selected2');
-            $('.ui-selected').each(function() {
-                if ($(this).hasClass('special-selected1')) {
-                    $(this).removeClass('special-selected1');
-                } else {
-                    if ($(this).hasClass('no-edit') || $(this).hasClass('no-edit-data')) {
-                        //skip
-                    } else {
-                        $(this).addClass('special-selected1');
-                    }
-                }
-                $(this).removeClass('ui-selected');
-            });
-        }
-        // if keep this updated, can use to grey out replace fields that are not needed
-        whatIsCurrentlyHighlightedInTheIndyTable();
-    }
-
     function goBuildSampleMetadataTable() {
+        // if there were errors and the user did something to change the table, hide the errors
+        $('#form_errors').hide();
+
+        var table = $('#' + sample_metadata_table_id).DataTable();
+        var searchTerm = table.search();
+
         // build a table
         // set to the table div
         var elem = document.getElementById('div_for_' + sample_metadata_table_id);
@@ -843,7 +783,6 @@ $(document).ready(function () {
         var colcounter = 0;
 
         $.each(indy_list_of_column_labels, function (i_index, colLabel) {
-            console.log("collable ",colLabel)
             // include in table or not: 1 is for include
             if (indy_list_of_column_labels_show_hide[i_index] === 1) {
                 var th = document.createElement('TH');
@@ -856,6 +795,7 @@ $(document).ready(function () {
             }
             // else, do not put in the table and do not increment the header counter
         });
+        rowcounter = rowcounter + 1;
 
         tableHead.appendChild(tr);
 
@@ -883,10 +823,11 @@ $(document).ready(function () {
                     $(td).attr('col-label', colLabel);
 
                     if (colLabel === indy_row_label) {
-                        console.log("colLabel ",colLabel)
-                        let this_me = '<input type="text" id="sample_row_' + rowcounter
-                            + '" name="' + colLabel + '" value="' + myCellContent + '">';
+                        let this_me = '<input type="text" class="special-label" id="sample_row_' + rowcounter
+                            + '" name="' + colLabel + '" value="' + myCellContent
+                            + '" col-index="' + colcounter + '" row-index="' + rowcounter + '">';
                         $(td).html(this_me);
+                        $(td).attr('class', 'special-label-td');
                     } else {
                         td.appendChild(document.createTextNode(myCellContent));
                     }
@@ -900,9 +841,6 @@ $(document).ready(function () {
 
         myTable.appendChild(tableBody);
         myTableDiv.appendChild(myTable);
-
-        // console.log("indy_table_order ",indy_table_order)
-        // console.log("indy_table_column_defs ",indy_table_column_defs)
 
         // When I did not have the var before the variable name, the table headers acted all kinds of crazy
         var sampleDataTable = $('#' + sample_metadata_table_id).removeAttr('width').DataTable({
@@ -920,40 +858,30 @@ $(document).ready(function () {
             'autoWidth': true
         });
 
-        sampleDataTable.rows().every(function () {
-            // this.data() is a list, with the first one being the tags and such
-            // console.log("this row ",this.data());
-            // console.log("this row ",this.data()[0]);
-            // the tags and such look like a long string, so, to find an attribute, must be creative
-            // below is HANDY for looping through, and getting a value.by name, but we do not need that here
-            // var data = this.data();
-            // data.forEach(function (value, index) {
-            //     // if (value.isActive)
-            //     // {
-            //      console.log('value ',value);
-            //https://stackoverflow.com/questions/29077902/how-to-loop-through-all-rows-in-datatables-jquery
-            //      // console.log(value.UserName);
-            //     // }
-            // })
+        // HANDY each row of datatable
+        // Do not need but keep for reference
+        // https://stackoverflow.com/questions/29077902/how-to-loop-through-all-rows-in-datatables-jquery
+        // sampleDataTable.rows().every(function () {
+        //     this.data()
+        //     // is a list, with the first one being the tags and such
+        //     console.log("this row ",this.data());
+        //     console.log("this row ",this.data()[0]);
+        //     // the tags and such look like a long string, so, to find an attribute, must be creative
+        //     // below is HANDY for looping through, and getting a value.by name, but we do not need that here
+        //     var data = this.data();
+        //     data.forEach(function (value, index) {
+        //         // if (value.isActive)
+        //         // {
+        //          console.log('value ',value);
+        //
+        //          // console.log(value.UserName);
+        //         // }
+        //     })
+        // });
 
-            //todo figure out if needthis and correct if needed
-            // var tags_and_such = this.data()[0].replace('=', '"').replace(' ', '"');
-            // var tags_and_such_list = tags_and_such.split('"');
-            // var index_of_row_index_label = -1;
-            // var row_index = -1;
-            // tags_and_such_list.forEach(function (value, index) {
-            //     if (value.indexOf('row-index') >= 0) {
-            //         index_of_row_index_label = index;
-            //     }
-            //     ;
-            // });
-            // if (index_of_row_index_label >= 0) {
-            //     row_index = tags_and_such_list[index_of_row_index_label + 1];
-            //     indy_sample_metadata_table_current_row_order.push(row_index);
-            // } else {
-            //     console.log('The row index should always be found...');
-            // }
-        });
+        //reference $('#glossary_table_filter :input').val(searchTerm).trigger('input');
+        //reference $('#glossary_table_filter :input').val(null).trigger('input');
+        $('#' + sample_metadata_table_id + '_filter :input').val(searchTerm).trigger('input');
         return myTable;
     }
 
@@ -964,13 +892,6 @@ $(document).ready(function () {
             distance: 15,
             stop: selectableDragOnSampleMetadataTable
         });
-    }    
-    
-    /**
-     * A function to clear the validation errors on change of any field
-    */
-    function clearFormValidationErrors() {
-        $('#form_errors').hide();
     }
 
     // END - All Functions section

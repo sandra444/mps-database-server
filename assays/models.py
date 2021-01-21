@@ -5288,6 +5288,7 @@ class AssayOmicDataFileUpload(LockableModel):
 #
 #     class Meta(object):
 #         verbose_name = 'Omic Sample Name and Metadata'
+#         unique_together = [('study', 'sample_name')]
 #
 #     study = models.ForeignKey(
 #         'assays.AssayStudy',
@@ -5372,6 +5373,7 @@ class AssayOmicDataPoint(models.Model):
 #     class Meta(object):
 #         verbose_name = 'Assay Omic Data Point (counts)'
 #         verbose_name_plural = 'Assay Omic Data Points (counts)'
+
 #
 #     study = models.ForeignKey(
 #         'assays.AssayStudy',
