@@ -40,6 +40,7 @@ from .models import (
     AssayOmicDataPoint,
     AssayOmicAnalysisTarget,
     AssayOmicDataFileUpload,
+    AssayOmicSampleMetadata,
 )
 from microdevices.models import (
     OrganModelLocation,
@@ -7274,15 +7275,20 @@ def this_file_name_is_similar_to_another_in_this_study(omic_data_file, study_id,
 
 
 # sck forms.py - will load for previous submit
-def find_the_labels_needed_for_the_indy_omic_table(called_from, study_id, find_defaults):
+def find_the_labels_needed_for_the_indy_omic_table(called_from, study_id):
+    # todo-sck get all this loaded correctly after get the save done
+    # todo-sck for demo, get the add to work correctly (instead of defaults)
+    # todo-sck this will mean autofilling the sample label - use the default pattern, they must fix replicates
+
     indy_omic_table = {}
     indy_list_of_column_labels = []
     indy_list_of_column_labels_show_hide = []
     indy_list_of_dicts_of_table_rows = []
+
     # decide how to do this - maybe if all are zeros when extracted, hide, else, show
     # for now, day is default on the form DHM 234
-    indy_list_time_units_to_include_initially = ['day',]
-    indy_dict_time_units_to_table_column = {'day':2, 'hour':3, 'minute':4}
+    indy_list_time_units_to_include_initially = ['day']
+    indy_dict_time_units_to_table_column = {'day': 2, 'hour': 3, 'minute': 4}
 
     # for development, use find_defaults to get a table to work with
     # else, if there is metadata for this study, pull it in the correct format
@@ -7291,167 +7297,83 @@ def find_the_labels_needed_for_the_indy_omic_table(called_from, study_id, find_d
     # note: the ROW for the apply button is completely handled in the js file
     # see the js file for changing the option to add the row of apply to column buttons
     # note: the COLUMN for the apply to row buttons COULD be added here in the column headers
+    # note: if the sample id (hence, the pk for the record in the study) is in one or more of the data points
+    # if the sample id has been used (the pk is in the data point file), do not allow the user to edit the sample id
+    # but allow the user to change the chip, sample time, and sample location for the sample label
 
-    if find_defaults:
-        # get the defaults for testing
-        indy_list_of_column_labels = [
-            'Chip/Well Name',
-            'Sample Location',
-            'Sample Time (Day)',
-            'Sample Time (Hour)',
-            'Sample Time (Minute)',
-            'Sample Label',
-            'matrix_item_pk',
-            'sample_location_pk',
-        ]
-        indy_list_of_column_labels_show_hide = [
-            1,
-            1,
-            1,
-            1,
-            1,
-            1,
-            0,
-            0
-        ]
-        indy_list_of_dicts_of_table_rows = []
+    indy_list_of_column_labels = [
+        'Chip/Well Name',
+        'Sample Location',
+        'Sample Time (Day)',
+        'Sample Time (Hour)',
+        'Sample Time (Minute)',
+        'Sample Label',
+        'used',
+        'matrix_item_pk',
+        'sample_location_pk',
+    ]
+    indy_list_of_column_labels_show_hide = [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        0,
+        0
+    ]
 
-        list_of_defaults1 = []
-        list_of_defaults2 = []
-        list_of_defaults3 = []
-        list_of_defaults4 = []
-        list_of_defaults5 = []
+    # does this study have any sample metadata in the table
+    sample_metadata_rows = AssayOmicSampleMetadata.objects.filter(study_id=study_id)
+    sample_metadata_row_count = len(sample_metadata_rows)
 
-        dict1 = {}
-        dict2 = {}
-        dict3 = {}
-        dict4 = {}
-        dict5 = {}
+    # set the find_defaults is just for development - it must be True once saves and pulls are working
+    find_defaults = False
 
-        list_of_defaults1 = [
-            'chip1',
-            'efflux',
-            '2',
-            '0',
-            '1',
-            'sample20201105-05',
-            '5',
-            '6'
-        ]
-        list_of_defaults2 = [
-            'chip2',
-            'efflux',
-            '1',
-            '0',
-            '1',
-            'sample20201105-02',
-            '7',
-            '9'
-        ]
-        list_of_defaults3 = [
-            'chip3',
-            'efflux',
-            '5',
-            '0',
-            '1',
-            'sample20201105-03',
-            '9',
-            '9'
-        ]
-        list_of_defaults4 = [
-            'chip5',
-            'efflux',
-            '5',
-            '0',
-            '1',
-            'Chip5-10mL-a',
-            '9',
-            '9'
-        ]
-        list_of_defaults5 = [
-            'chip5',
-            'efflux',
-            '5',
-            '0',
-            '1',
-            'Chip5-10mL-b',
-            '9',
-            '9'
-        ]
+    indy_add_or_update = 'update'
+    if sample_metadata_row_count == 0:
+        indy_add_or_update = 'add'
 
-        # make a default dict
-        # if this is an edit form, these lists will need initialized with what was previously saved
-        for index, each in enumerate(indy_list_of_column_labels):
-            dict1[each] = list_of_defaults1[index]
-            dict2[each] = list_of_defaults2[index]
-            dict3[each] = list_of_defaults3[index]
-            dict4[each] = list_of_defaults4[index]
-            dict5[each] = list_of_defaults5[index]
-        indy_list_of_dicts_of_table_rows.append(dict1)
-        indy_list_of_dicts_of_table_rows.append(dict2)
-        indy_list_of_dicts_of_table_rows.append(dict3)
-        indy_list_of_dicts_of_table_rows.append(dict4)
-        indy_list_of_dicts_of_table_rows.append(dict5)
-
+        if find_defaults:
+            indy_list_of_dicts_of_table_rows = for_development_of_omic_counts_get_some_defaults(indy_list_of_column_labels)
+        else:
+            # get the queryset of matrix items in this study
+            matrix_item_queryset = AssayMatrixItem.objects.filter(study_id=study_id).order_by('name', )
+            for index, each in enumerate(matrix_item_queryset):
+                list_of_defaults1 = []
+                dict1 = {}
+                list_of_defaults1 = [
+                    each.name,
+                    '',
+                    '',
+                    '',
+                    '',
+                    each.name + '-',
+                    'n',
+                    each.id,
+                    ''
+                ]
+                # this is an add form, will give a list of chips in the study
+                for index, each in enumerate(indy_list_of_column_labels):
+                    dict1[each] = list_of_defaults1[index]
+                indy_list_of_dicts_of_table_rows.append(dict1)
     else:
-        # todo-sck need to get the data when update or review
-        pass
+        # need to get from the tables
+        if find_defaults:
+            indy_list_of_dicts_of_table_rows = for_development_of_omic_counts_get_some_defaults(indy_list_of_column_labels)
+        else:
+            # todo-sck need to get the data when update or review, make sure, for update, that sample labels are marked as y if there is a data point assigned to it
+            pass
 
-    # print("header_type")
-    # print(header_type)
-    # print("find_defaults")
-    # print(find_defaults)
     # print("indy_list_of_dicts_of_table_rows")
     # print(indy_list_of_dicts_of_table_rows)
-
-    # use funciton -> omic_find_sets_of_prefixes_and_numbers_for_well_names
-
-
-
-
-
-    # uni_list = copy.deepcopy(data_dicts.get('indy_file_column_header_list'))
-    # for item in df_column_headers_stripped:
-    #     if item not in uni_list:
-    #         uni_list.append(item)
-    #
-    # data_dicts['indy_file_column_header_list'] = copy.deepcopy(uni_list)
-    # prefix_set, number_set = omic_find_sets_of_prefixes_and_numbers_for_well_names(uni_list)
-    # data_dicts['indy_file_column_header_prefix_uni_list'] = prefix_set
-    # data_dicts['indy_file_column_header_number_uni_dict'] = number_set
-    #
-    # print('line 6632ish of utils.py - header_list ', uni_list)
-    # print('prefix_set ', prefix_set)
-    # print('number_set ', number_set)
-
-
-
-        # make sure to leave _pk in the pk fields so they are excluded from the table in the .js file
-        # // todo-sck need to update for the table as a plate
-        # // still need to decide how will nest the table (if well nest the table)
-        # // this will control what gets put in the table, but metadata_lod will have all the indy_column_labels in it
-        # // todo-sck need to get the two extra sample times out and assay well name, but for now, turned them off
-
-
-        # # todo-sck here here - need to get the real list of dicts
-        # # todo-sck get the right list - decide on what is a list and what is a queryset - may need both like need for matrix item...
-        # # file_column_header_queryset = AssayOmicSampleMetadata.objects.filter(study_id=self.study).order_by('cross_reference', )
-        # file_column_header_queryset = AssayMatrixItem.objects.filter(study_id=self.study).order_by('name', )
-        # # self.fields['indy_file_column_header'].queryset = file_column_header_queryset
-        # # file_column_header_list = file_column_header_queryset.values_list('cross_reference', flat=True)
-        # file_column_header_list = file_column_header_queryset.values_list('name', flat=True)
-        # self.fields['indy_file_column_header_list'].initial = json.dumps(file_column_header_list)
-        #
-        # # todo-sck, get these right too
-        # self.fields['indy_file_column_header_prefix_uni_list'].initial = json.dumps(file_column_header_list)
-        # # todo-sck will this be a dict or a list, thing about if one is A1 and another is A02 and another is B01, how sort and put back together (look in utils too)
-        # self.fields['indy_file_column_header_number_uni_dict'].initial = json.dumps(file_column_header_list)
-
 
     indy_omic_table['indy_list_of_column_labels'] = indy_list_of_column_labels
     indy_omic_table['indy_list_of_column_labels_show_hide'] = indy_list_of_column_labels_show_hide
     indy_omic_table['indy_list_time_units_to_include_initially'] = indy_list_time_units_to_include_initially
     indy_omic_table['indy_dict_time_units_to_table_column'] = indy_dict_time_units_to_table_column
+    indy_omic_table['indy_add_or_update'] = indy_add_or_update
 
     # sort here so that the table does not need to be sorted by default - which makes it rearrange when stuff is replaced
     r_counter = 0
@@ -7470,7 +7392,95 @@ def find_the_labels_needed_for_the_indy_omic_table(called_from, study_id, find_d
     return indy_omic_table
 
 
-# sck sub here in utils.py
+def for_development_of_omic_counts_get_some_defaults(indy_list_of_column_labels):
+    indy_list_of_dicts_of_table_rows = []
+
+    list_of_defaults1 = []
+    list_of_defaults2 = []
+    list_of_defaults3 = []
+    list_of_defaults4 = []
+    list_of_defaults5 = []
+
+    dict1 = {}
+    dict2 = {}
+    dict3 = {}
+    dict4 = {}
+    dict5 = {}
+
+    list_of_defaults1 = [
+        'chip1',
+        'efflux',
+        '2',
+        '0',
+        '1',
+        'sample20201105-05',
+        'n',
+        '5',
+        '6'
+    ]
+    list_of_defaults2 = [
+        'chip2',
+        'efflux',
+        '1',
+        '0',
+        '1',
+        'sample20201105-02',
+        'n',
+        '7',
+        '9'
+    ]
+    list_of_defaults3 = [
+        'chip3',
+        'efflux',
+        '5',
+        '0',
+        '1',
+        'sample20201105-03',
+        'n',
+        '9',
+        '9'
+    ]
+    list_of_defaults4 = [
+        'chip5',
+        'efflux',
+        '5',
+        '0',
+        '1',
+        'Chip5-10mL-a',
+        'y',
+        '9',
+        '9'
+    ]
+    list_of_defaults5 = [
+        'chip5',
+        'efflux',
+        '5',
+        '0',
+        '1',
+        'Chip5-10mL-b',
+        'n',
+        '9',
+        '9'
+    ]
+
+    # make a default dict
+    # if this is an edit form, these lists will need initialized with what was previously saved
+    for index, each in enumerate(indy_list_of_column_labels):
+        dict1[each] = list_of_defaults1[index]
+        dict2[each] = list_of_defaults2[index]
+        dict3[each] = list_of_defaults3[index]
+        dict4[each] = list_of_defaults4[index]
+        dict5[each] = list_of_defaults5[index]
+    indy_list_of_dicts_of_table_rows.append(dict1)
+    indy_list_of_dicts_of_table_rows.append(dict2)
+    indy_list_of_dicts_of_table_rows.append(dict3)
+    indy_list_of_dicts_of_table_rows.append(dict4)
+    indy_list_of_dicts_of_table_rows.append(dict5)
+
+    return indy_list_of_dicts_of_table_rows
+
+
+# sck sub here in utils.py - not using right not, but keep in case need later
 def omic_find_sets_of_prefixes_and_numbers_for_well_names(header_list):
     prefix_long = []
     number_long = {}
@@ -7498,6 +7508,12 @@ def omic_find_sets_of_prefixes_and_numbers_for_well_names(header_list):
             else:
                 thisKey = int(thisStr)
                 number_long[thisStr] = thisKey
+
+    # Just stored here for example...used after this function in a different one ...
+    # uni_list = copy.deepcopy(data_dicts.get('indy_file_column_header_list'))
+    # for item in df_column_headers_stripped:
+    #     if item not in uni_list:
+    #         uni_list.append(item)
 
     return [long_list_to_unique_list(prefix_long), number_long]
 

@@ -5282,47 +5282,47 @@ class AssayOmicDataFileUpload(LockableModel):
         return '{}delete/'.format(self.get_absolute_url())
 
 
-#This is for the metadata when need to collect by individual omicsample
-# class AssayOmicSampleMetadata(models.Model):
-#     """Model for omic sample metadata associated to count data."""
-#
-#     class Meta(object):
-#         verbose_name = 'Omic Sample Name and Metadata'
-#         unique_together = [('study', 'sample_name')]
-#
-#     study = models.ForeignKey(
-#         'assays.AssayStudy',
-#         on_delete=models.CASCADE,
-#         verbose_name='Study'
-#     )
-#add unique study and sample name constraint
-#     sample_name = models.CharField(
-#         max_length=255,
-#         default='',
-#         help_text='The sample name - must match EXACTLY the headers found in the omic counts data files',
-#         verbose_name='Cross Reference'
-#     )
-#
-#     matrix_item = models.ForeignKey(
-#         'assays.AssayMatrixItem',
-#         on_delete=models.CASCADE,
-#         verbose_name='Matrix Item'
-#     )
-#
-#     sample_location = models.ForeignKey(
-#         'assays.AssaySampleLocation',
-#         on_delete=models.CASCADE,
-#         verbose_name='Sample Location'
-#     )
-#
-#     # PLEASE NOTE THAT THIS IS IN MINUTES
-#     sample_time = models.FloatField(
-#         default=0,
-#         verbose_name='Time'
-#     )
-#
-#     def __str__(self):
-#         return '{0}'.format(self.id)
+#This is for the metadata when need to collect by individual omic sample (counts data)
+class AssayOmicSampleMetadata(models.Model):
+    """Model for omic sample metadata associated to count data."""
+
+    class Meta(object):
+        verbose_name = 'Omic Sample Name and Metadata'
+        unique_together = [('study', 'sample_name')]
+
+    study = models.ForeignKey(
+        'assays.AssayStudy',
+        on_delete=models.CASCADE,
+        verbose_name='Study'
+    )
+
+    sample_name = models.CharField(
+        max_length=255,
+        default='',
+        help_text='The sample name - must match EXACTLY the headers found in the omic counts data files',
+        verbose_name='Cross Reference'
+    )
+
+    matrix_item = models.ForeignKey(
+        'assays.AssayMatrixItem',
+        on_delete=models.CASCADE,
+        verbose_name='Matrix Item'
+    )
+
+    sample_location = models.ForeignKey(
+        'assays.AssaySampleLocation',
+        on_delete=models.CASCADE,
+        verbose_name='Sample Location'
+    )
+
+    # PLEASE NOTE THAT THIS IS IN MINUTES
+    sample_time = models.FloatField(
+        default=0,
+        verbose_name='Time'
+    )
+
+    def __str__(self):
+        return '{0}'.format(self.id)
 
 # for the two group data points
 class AssayOmicDataPoint(models.Model):

@@ -59,7 +59,7 @@
 {#            <div class="container">   NO CONTAINERs   #}
 {##}
             {# pass to js file need for use in js #}
-            <div class="hidden">
+            <div class="">
                 <div id="check_load">
                     {{ page_called }}
                 </div>
@@ -75,6 +75,7 @@
                 {{ form.indy_matrix_item_list }}
                 {{ form.indy_list_time_units_to_include_initially }}
                 {{ form.indy_dict_time_units_to_table_column }}
+                {{ form.indy_add_or_update }}
             </div>
 
             <br>
@@ -139,6 +140,8 @@
                             <ul>
                                 <li>Select the content to use for replacing in the highlighted cells</li>
                                 <li>Select to Duplicate or Increment (Sample Location will duplicate regardless of selection)</li>
+                                <li>The time unit that can be highlighted is tied to the time unit selection in the replace content section</li>
+                                <li>Recommend that, when added new sample labels, get the Chip/Well Name, the Sample Location, and the Sample Time correct, then click the button to Highlight All Editable Sample Labels, select the pattern to use for sample labels, and Replace Content</li>
                                 <li>Note that, if the Sample Location needed is not in the list, add the missing location to the MPS Model for which the location is needed (if more than one model, and some do not have locations but some do, the list could be incomplete)</li>
                             </ul>
                         </div>
@@ -292,7 +295,6 @@
                         <div class="alert alert-info" role="alert">
                             <ul>
                                 <li>After selections are made, click the Replace Content button</li>
-                                <li>The content will be replaced in visible, highlighted cells only</li>
                             </ul>
                         </div>
                     </div>
@@ -314,7 +316,7 @@
                     </div>
 
                     <br>
-                    <button type="button" class="btn btn-primary" id="clearInTableButton">Clear Highlighted Cells</button>
+                    <button type="button" class="btn btn-primary" id="clearInTableButton">Clear Content in Highlighted Cells</button>
 
                 </div>
 
@@ -323,7 +325,7 @@
                     <div class="collapse large-padding-top inline-help">
                         <div class="alert alert-info" role="alert">
                             <ul>
-                                <li>Select any content in a row, click the Delete Rows button</li>
+                                <li>Select any content in a row, click the Delete Row(s) button</li>
                             </ul>
                         </div>
                     </div>
@@ -338,7 +340,7 @@
                     <div class="collapse large-padding-top inline-help">
                         <div class="alert alert-info" role="alert">
                             <ul>
-                                <li>Select any content in a row, click the Duplicate Rows button</li>
+                                <li>Select any content in a row, click the Duplicate Row(s) button</li>
                             </ul>
                         </div>
                     </div>
@@ -355,11 +357,22 @@
             <div class="h1-level-1"><i>Metadata Table</i></div>
 
             {% if update %}
+
+                <div class="collapse large-padding-top inline-help">
+                    <div class="alert alert-info" role="alert">
+                        <ul>
+                            <li>Sample Labels that have been assigned to data in an upload file cannot be changed</li>
+                            <li>If an incorrect Sample Label was assigned, remove that associated data, correct the Sample Label, and reupload the file</li>
+                            <li>The content will be replaced in visible, highlighted cells only</li>
+                        </ul>
+                    </div>
+                </div>
+
                 <div class="row">
                     <div class="col-sm-4"></div>
                     <div class="col-sm-8">
                         <button type="button" class="btn btn-primary" id="clearHighlightingButton">Clear All Highlighting</button>
-                        <button type="button" class="btn btn-primary" id="highlightAllSampleLabelsButton">Highlight All Sample Labels</button>
+                        <button type="button" class="btn btn-primary" id="highlightAllSampleLabelsButton">Highlight All Editable Sample Labels</button>
                         <button type="button" class="btn btn-primary toggle-display-none" id="undoIndyButton">Undo</button>
                         <button type="button" class="btn btn-primary toggle-display-none" id="redoIndyButton">Redo</button>
                     </div>

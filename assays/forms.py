@@ -5294,9 +5294,6 @@ sample_option_choices = (
 class AssayOmicSampleMetadataAdditionalInfoForm(BootstrapForm):
     """Form for collecting omic sample metadata."""
 
-    # todo-sck may need to add more form fields...need to work on this
-    # add the list of sample naming options
-
     # NOTE TO SCK - this will be one record per form (the rest will be crammed in a field...)
     # the form will not have an index page, so, there is a conditional in the call (click to go there) and
     # this uses the AssayStudy model so that the study id is easily passed in and out
@@ -5311,29 +5308,28 @@ class AssayOmicSampleMetadataAdditionalInfoForm(BootstrapForm):
             'indy_matrix_item',
             'indy_matrix_item_list',
             'indy_list_time_units_to_include_initially',
-            'indy_dict_time_units_to_table_column'
+            'indy_dict_time_units_to_table_column',
+            'indy_add_or_update'
         )
 
     def __init__(self, *args, **kwargs):
         super(AssayOmicSampleMetadataAdditionalInfoForm, self).__init__(*args, **kwargs)
         # self.instance will be the study self.instance.id is the study id
 
-        # this is really only for development to pull in some example data, change to false later
-        # **change-star
-        find_defaults = True
-
-        indy_table_labels = find_the_labels_needed_for_the_indy_omic_table('form', self.instance.id, find_defaults)
+        indy_table_labels = find_the_labels_needed_for_the_indy_omic_table('form', self.instance.id)
         indy_list_of_column_labels = indy_table_labels.get('indy_list_of_column_labels')
         indy_list_of_column_labels_show_hide = indy_table_labels.get('indy_list_of_column_labels_show_hide')
         indy_list_of_dicts_of_table_rows = indy_table_labels.get('indy_list_of_dicts_of_table_rows')
         indy_list_time_units_to_include_initially = indy_table_labels.get('indy_list_time_units_to_include_initially')
         indy_dict_time_units_to_table_column = indy_table_labels.get('indy_dict_time_units_to_table_column')
+        indy_add_or_update = indy_table_labels.get('indy_add_or_update')
 
         self.fields['indy_list_of_column_labels'].initial = json.dumps(indy_list_of_column_labels)
         self.fields['indy_list_of_column_labels_show_hide'].initial = json.dumps(indy_list_of_column_labels_show_hide)
         self.fields['indy_list_of_dicts_of_table_rows'].initial = json.dumps(indy_list_of_dicts_of_table_rows)
         self.fields['indy_list_time_units_to_include_initially'].initial = json.dumps(indy_list_time_units_to_include_initially)
         self.fields['indy_dict_time_units_to_table_column'].initial = json.dumps(indy_dict_time_units_to_table_column)
+        self.fields['indy_add_or_update'].initial = json.dumps(indy_add_or_update)
 
         # get the queryset of matrix items in this study
         matrix_item_queryset = AssayMatrixItem.objects.filter(study_id=self.instance.id).order_by('name', )
@@ -5400,8 +5396,9 @@ class AssayOmicSampleMetadataAdditionalInfoForm(BootstrapForm):
         choices=sample_option_choices,
         required=False,
     )
+    indy_add_or_update = forms.CharField(widget=forms.TextInput(), required=False,)
 
-    # todo-sck need to fix all this after get buying for design
+    # todo-sck need to fix all this after get buy in for design
     # def clean(self):
     #     data = super(AssayOmicSampleMetadataAdditionalInfoForm, self).clean()
     #
