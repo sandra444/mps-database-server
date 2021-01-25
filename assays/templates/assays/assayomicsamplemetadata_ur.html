@@ -59,7 +59,7 @@
 {#            <div class="container">   NO CONTAINERs   #}
 {##}
             {# pass to js file need for use in js #}
-            <div class="">
+            <div class="hidden">
                 <div id="check_load">
                     {{ page_called }}
                 </div>
@@ -86,7 +86,7 @@
 
                 <div class="alert alert-info" role="alert">
                     <button class="btn btn-info" type="button" data-toggle="collapse" data-target=".inline-help" aria-expanded="false" aria-controls="inline-help">
-                        Show/Hide Inline Help
+                        Show/Hide Page Help
                     </button>
                     <div class="collapse large-padding-top inline-help">
                         <p>Tips and Notes:</p>
@@ -100,6 +100,7 @@
                             <li>Use Column visibility, Search, and/or column sorting to expedite highlighting</li>
                             <li>When highlighting is complete, select an Action</li>
                             <li>When Duplicating and/or Deleting Row(s), highlighting in one or more fields in the row will trigger the change</li>
+                            <li>Rows that are attached to data can not be deleted</li>
                         </ul>
                     </div>
                 </div>
@@ -120,7 +121,7 @@
                                 <p class="plate-map-radio-spacing plate-map-no-wrap">Replace Highlighted</p></label>
 
                             <label><input type="radio" class="plate-map-bigger-radio" name="radio_change_drag_action" value="empty" id="radio_empty">
-                                <p class="plate-map-radio-spacing plate-map-no-wrap">Clear Content in Highlighted</p></label>
+                                <p class="plate-map-radio-spacing plate-map-no-wrap">Empty Content in Highlighted</p></label>
 
                             <label><input type="radio" class="plate-map-bigger-radio" name="radio_change_drag_action" value="delete" id="radio_delete">
                                 <p class="plate-map-radio-spacing plate-map-no-wrap">Delete Row(s)</p></label>
@@ -309,14 +310,14 @@
                     <div class="collapse large-padding-top inline-help">
                         <div class="alert alert-info" role="alert">
                             <ul>
-                                <li>Select cells in table to clear</li>
-                                <li>When Submit, empty rows will be removed</li>
+                                <li>Select cells in table to empty/clear</li>
+{#                                <li>When Submit, note that, empty rows will be removed</li>#}
                             </ul>
                         </div>
                     </div>
 
                     <br>
-                    <button type="button" class="btn btn-primary" id="clearInTableButton">Clear Content in Highlighted Cells</button>
+                    <button type="button" class="btn btn-primary" id="emptyInTableButton">Empty/Clear Content in Highlighted Cells</button>
 
                 </div>
 
@@ -341,6 +342,7 @@
                         <div class="alert alert-info" role="alert">
                             <ul>
                                 <li>Select any content in a row, click the Duplicate Row(s) button</li>
+                                <li>Make sure to update the Sample Labels so they are unique</li>
                             </ul>
                         </div>
                     </div>

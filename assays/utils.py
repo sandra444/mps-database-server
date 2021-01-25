@@ -7308,11 +7308,13 @@ def find_the_labels_needed_for_the_indy_omic_table(called_from, study_id):
         'Sample Time (Hour)',
         'Sample Time (Minute)',
         'Sample Label',
-        'used',
+        'Data Attached',
         'matrix_item_pk',
         'sample_location_pk',
+        'sample_metadata_pk'
     ]
     indy_list_of_column_labels_show_hide = [
+        1,
         1,
         1,
         1,
@@ -7346,12 +7348,13 @@ def find_the_labels_needed_for_the_indy_omic_table(called_from, study_id):
                 list_of_defaults1 = [
                     each.name,
                     '',
-                    '',
-                    '',
-                    '',
+                    '0',
+                    '0',
+                    '0',
                     each.name + '-',
-                    'n',
+                    'no',
                     each.id,
+                    '',
                     ''
                 ]
                 # this is an add form, will give a list of chips in the study
@@ -7416,7 +7419,8 @@ def for_development_of_omic_counts_get_some_defaults(indy_list_of_column_labels)
         'sample20201105-05',
         'n',
         '5',
-        '6'
+        '6',
+        '1'
     ]
     list_of_defaults2 = [
         'chip2',
@@ -7427,7 +7431,8 @@ def for_development_of_omic_counts_get_some_defaults(indy_list_of_column_labels)
         'sample20201105-02',
         'n',
         '7',
-        '9'
+        '9',
+        '2'
     ]
     list_of_defaults3 = [
         'chip3',
@@ -7438,7 +7443,8 @@ def for_development_of_omic_counts_get_some_defaults(indy_list_of_column_labels)
         'sample20201105-03',
         'n',
         '9',
-        '9'
+        '9',
+        '3'
     ]
     list_of_defaults4 = [
         'chip5',
@@ -7449,7 +7455,8 @@ def for_development_of_omic_counts_get_some_defaults(indy_list_of_column_labels)
         'Chip5-10mL-a',
         'y',
         '9',
-        '9'
+        '9',
+        '4'
     ]
     list_of_defaults5 = [
         'chip5',
@@ -7460,7 +7467,8 @@ def for_development_of_omic_counts_get_some_defaults(indy_list_of_column_labels)
         'Chip5-10mL-b',
         'n',
         '9',
-        '9'
+        '9',
+        '5'
     ]
 
     # make a default dict

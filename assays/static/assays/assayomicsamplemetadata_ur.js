@@ -14,8 +14,6 @@ $(document).ready(function () {
     // make sure to update this as needed (to match what comes from utils.py)
     var indy_row_label = 'Sample Label'
 
-    var code_of_the_sample_pattern = '';
-
     var indy_list_of_dicts_of_table_rows = JSON.parse($('#id_indy_list_of_dicts_of_table_rows').val());
     var indy_list_of_column_labels = JSON.parse($('#id_indy_list_of_column_labels').val());
     var indy_list_of_column_labels_show_hide = JSON.parse($('#id_indy_list_of_column_labels_show_hide').val());
@@ -23,24 +21,27 @@ $(document).ready(function () {
     var indy_list_columns_hide = [];
     var indy_list_time_units_to_include_initially = JSON.parse($('#id_indy_list_time_units_to_include_initially').val());
     var indy_dict_time_units_to_table_column = JSON.parse($('#id_indy_dict_time_units_to_table_column').val());
+    var indy_add_or_update = JSON.parse($('#id_indy_add_or_update').val());
 
     var indy_input_box_in_out_compare = '';
 
     findTheTimeUnitsThatShouldBeInTheTableAndAsDefault();
     var page_radio_time_unit = $("input[type='radio'][name='radio_time_unit']:checked").val();
+    var current_sample_pattern = 'clt';
 
     // Prepare and build the table on load
     // the current one
     var metadata_lod = indy_list_of_dicts_of_table_rows;
-    // version number aka current index - is the current one (should be 1, 2, 3, 4, or 5 after first population)
-    var metadata_lod_current_index = 0;
     //for holding versions to allow for undo and redo
     var metadata_lod_cum = [];
     metadata_lod_cum.push(JSON.parse(JSON.stringify(metadata_lod)));
+    // version number aka current index - is the current one (should be 1, 2, 3, 4, or 5 after first population)
+    var metadata_lod_last_index = 0;
     //the table info that is highlighted
     var metadata_highlighted = [];
+    var list_of_row_indexs_with_one_or_more_highlighted = [];
     var list_of_fields_for_replacing_that_are_highlighted = [];
-    var icol_last_highlighted_seen = {};
+    var special_tracking = {};
 
     // just working variables, but want in different subs, so just declare here
     var current_pk = 0;
@@ -158,11 +159,6 @@ $(document).ready(function () {
         document.getElementById('sample_location_pk').innerHTML = thisValue;
     });
 
-    // just need the pattern so know how to populate when highlighted and clicked
-    $(document).on('change', '#id_indy_sample_label', function() {
-        code_of_the_sample_pattern = $('#id_indy_sample_label').children('option:selected').val();
-    });
-
     // when the user changes a sample label using the input instead of a pattern
     // they would need to do this for replicates to change them
     $(document).on('focusin', '.special-label', function (e) {
@@ -181,7 +177,8 @@ $(document).ready(function () {
             metadata_lod[this_row_index - 1][indy_row_label] = what_cell_changed.val();
             // update the form variable
             $('#id_indy_list_of_dicts_of_table_rows').val(JSON.stringify(metadata_lod));
-            pushToMetadataLodCum();
+            metadata_lod_cum.push(JSON.parse(JSON.stringify(metadata_lod)));
+            metadata_lod_last_index = metadata_lod_cum.length - 1;
             checkUndoRedoButtonVisibility();
             // NO NEED to redraw the table
         }
@@ -190,12 +187,17 @@ $(document).ready(function () {
     $(document).on('click', '#undoIndyButton', function() {
         indyClickedToUndoRedoChangeToTable('undo');
     });
+    
     $(document).on('click', '#redoIndyButton', function() {
         indyClickedToUndoRedoChangeToTable('redo');
     });
 
-    // END clicks and changes section EXCEPT 4 actions
+    // just need the pattern so know how to populate when highlighted and clicked
+    $(document).on('change', '#id_indy_sample_label_options', function() {
+        current_sample_pattern = $(this).val();
+    });
 
+    // END clicks and changes section EXCEPT 4 actions
 
     // START - Functions EXCEPT 4 actions
 
@@ -205,41 +207,41 @@ $(document).ready(function () {
         // undo goes toward the 0 index, redo towards the length of the index
         // the buttons should only be visible if the undo/redo is possible, but check before add/subtract
         if (which_do === 'undo') {
-            if (metadata_lod_current_index > 0) {
-                metadata_lod_current_index = metadata_lod_current_index - 1;
+            if (metadata_lod_last_index > 0) {
+                metadata_lod_last_index = metadata_lod_last_index - 1;
             } else {
                 alert('No undo storage at the current time')
             }
         } else {
             // which_do === 'redo'
-            if (metadata_lod_current_index < current_length_list-1) {
-                metadata_lod_current_index = metadata_lod_current_index + 1;
+            if (metadata_lod_last_index < current_length_list-1) {
+                metadata_lod_last_index = metadata_lod_last_index + 1;
             } else {
                 alert('No redo storage at the current time')
             }
         }
         // must change the current one to match with what undid or redid
-        metadata_lod = JSON.parse(JSON.stringify(metadata_lod_cum[metadata_lod_current_index]));
+        metadata_lod = JSON.parse(JSON.stringify(metadata_lod_cum[metadata_lod_last_index]));
         // update the form variable
         $('#id_indy_list_of_dicts_of_table_rows').val(JSON.stringify(metadata_lod));
 
         checkUndoRedoButtonVisibility();
         goBuildSampleMetadataTable();
         postBuildSampleMetadataTable();
-        reapplyTheHighlightingToTheIndyTable();
+        // reapplyTheHighlightingToTheIndyTable(); - this is really hard to get right after undo or redo, so do not do it
     }
 
     function checkUndoRedoButtonVisibility() {
         var current_length_list = metadata_lod_cum.length;
         // should a button (undo or redo) show after whatever change brought you here
-        if (metadata_lod_current_index > 0) {
+        if (metadata_lod_last_index > 0) {
             // yes, can undo another time
             $('#undoIndyButton').show();
         } else {
             $('#undoIndyButton').hide();
         }
 
-        if (metadata_lod_current_index < current_length_list-1) {
+        if (metadata_lod_last_index < current_length_list-1) {
             // yes, can undo another time
             $('#redoIndyButton').show();
         } else {
@@ -311,11 +313,6 @@ $(document).ready(function () {
                 indy_list_columns_hide.push(obj[key])
            }
         });
-    }
-
-    function pushToMetadataLodCum() {
-        metadata_lod_cum.push(JSON.parse(JSON.stringify(metadata_lod)));
-        metadata_lod_current_index = metadata_lod_cum.length - 1;
     }
 
     function reapplyTheHighlightingToTheIndyTable() {
@@ -418,6 +415,12 @@ $(document).ready(function () {
 
             //store in a dictionary
             dict_highlighted_indy_metadata['metadata_highlighted_tirow'] = imetadata_highlighted_tirow;
+            if (list_of_row_indexs_with_one_or_more_highlighted.indexOf(imetadata_highlighted_tirow) >= 0) {
+                //already in list
+            } else {
+                list_of_row_indexs_with_one_or_more_highlighted.push(imetadata_highlighted_tirow);
+            }          
+            
             dict_highlighted_indy_metadata['metadata_highlighted_ticol'] = imetadata_highlighted_ticol;
             dict_highlighted_indy_metadata['metadata_highlighted_tlcol'] = imetadata_highlighted_tlcol;
             dict_highlighted_indy_metadata['metadata_highlighted_content'] = imetadata_highlighted_content;
@@ -454,10 +457,11 @@ $(document).ready(function () {
 
         // need for replace and pastes to keep track of last seen during the replace/pastes
         // costs a little extra to put here, but will always be ready
-        icol_last_highlighted_seen = {};
+        // note that, this is a dictionary for each column header, with an index
+        special_tracking = {};
         $.each(indy_list_of_column_labels, function (index, icol) {
-            icol_last_highlighted_seen[icol] = '99';
-            icol_last_highlighted_seen[icol+'_index'] = -99;
+            special_tracking[icol+'_store_value'] = '';
+            special_tracking[icol+'_store_index'] = -1;
         });
     }
 
@@ -531,7 +535,7 @@ $(document).ready(function () {
                     $(td).attr('col-label', colLabel);
 
                     if (colLabel === indy_row_label) {
-                        if (row['used'] === 'y') {
+                        if (row['Data Attached'] === 'y') {
                             // column HARDCODE (utilys.py)
                             // if the sample label (hence the pk if in at least one row of the data point table)
                             // do not allow the sample label to be changed
@@ -559,6 +563,12 @@ $(document).ready(function () {
 
         myTable.appendChild(tableBody);
         myTableDiv.appendChild(myTable);
+
+        // so not as to get mixed up with the unit options, change visibility at the last minute
+        if (indy_add_or_update === 'add') {
+            //HARDCODE column number for that Data Attached/Used indicator
+            indy_list_columns_hide.push(6);
+        }
 
         // When I did not have the var before the variable name, the table headers acted all kinds of crazy
         var sampleDataTable = $('#' + sample_metadata_table_id).removeAttr('width').DataTable({
@@ -617,293 +627,248 @@ $(document).ready(function () {
     // START - the clicks for the 4 actions
 
     $(document).on('click', '#replaceInTableButton', function() {
-        sameFrontMatterForAllActions();
+        functionForAll4Actions('replace');
     });
-    $(document).on('click', '#clearInTableButton', function() {
-       sameFrontMatterForAllActions();
+    
+    $(document).on('click', '#emptyInTableButton', function() {
+       functionForAll4Actions('empty');
     });
+    
     $(document).on('click', '#deleteInTableButton', function() {
-        sameFrontMatterForAllActions();
+        functionForAll4Actions('delete');
     });
+    
     $(document).on('click', '#pastesInTableButton', function() {
-        sameFrontMatterForAllActions();
+        functionForAll4Actions('pastes');
     });
 
     // END - the clicks for the 4 actions
 
     // START - the 4 actions functions
-    //todo - all the 4 action functions
-    function sameFrontMatterForAllActions() {
+
+    function functionForAll4Actions(which_button) {
         // the highlighting should be up to date, but, it will not hurt to run it as a double check
         whatIsCurrentlyHighlightedInTheIndyTable();
+        
         // page_drag_action is replace, empty, delete, or pastes
-        // page_radio_duplicate_value is duplicate or increment (users will need to sort to do bottom up)
-        var metadata_highlighted_temp = [];
-        // get a deep copy
-        metadata_highlighted_temp = JSON.parse(JSON.stringify(metadata_highlighted));
-        if (page_radio_duplicate_value === 'replace') {
-            if (page_radio_duplicate_value === 'increment-ttbltr' ||
-                page_radio_duplicate_value === 'increment-ttbo') {
-                // think should be in the order of the table, so, leave it as is
-            } else if (page_radio_duplicate_value === 'increment-ttbrtl') {
-                // index should be from top to bottom
-                metadata_highlighted = [];
-                for (var index = metadata_highlighted_temp.length - 1; index >= 0; index--) {
-                    metadata_highlighted.push(metadata_highlighted_temp[index]);
-                }
-            } else {
-                // duplicate - index should not matter
-            }
-        }
-    }
+        // page_radio_duplicate_value is duplicate or increment (users will need to sort to do bottom up)        
+        // when delete or paste, doing whole row, so need the row index list: list_of_row_indexs_with_one_or_more_highlighted
 
-    function indyCallMultiFunctionUndoBuildPostUpdate() {
+        if (which_button === 'delete') {
+            subFunctionForAddOrDeleteRows('delete');
+        } else if (which_button === 'pastes') {
+            subFunctionForAddOrDeleteRows('pastes');
+        } else if (which_button === 'replace') {
+            subFunctionForReplaceOrEmptyContent('replace');
+        } else {
+            subFunctionForReplaceOrEmptyContent('empty');
+        }
+
+        // update the form variable
+        $('#id_indy_list_of_dicts_of_table_rows').val(JSON.stringify(metadata_lod));
+        metadata_lod_cum.push(JSON.parse(JSON.stringify(metadata_lod)));
+        metadata_lod_last_index = metadata_lod_cum.length - 1;
         checkUndoRedoButtonVisibility();
         goBuildSampleMetadataTable();
         postBuildSampleMetadataTable();
-        reapplyTheHighlightingToTheIndyTable();
+
+        if (which_button === 'delete') {
+            // highlighting deleted rows makes not sense.....
+        } else {
+            // todo - if want this, make it work right
+            // reapplyTheHighlightingToTheIndyTable();
+        }
     }
 
-    //
-    // function indyClickedAddOrDeleteRow(thisButton, add_or_delete) {
-    //     var thisRow = $(thisButton).attr('row-index');
-    //     var thisRowMinusHeader = thisRow-1;
-    //
-    //     var dictrow = metadata_lod[thisRowMinusHeader];
-    //     if (dictrow['file_column_header'].length > 0) {
-    //         // check the row to see if it has a field header
+    function subFunctionForAddOrDeleteRows(pastes_or_delete) {
+        // sort the list of rows descending so that removal will preserve the correct lower indices
+        var desc_index = list_of_row_indexs_with_one_or_more_highlighted.sort(function(a, b){return b-a});
 
-    //     } else {
-    //         // check the row to see if the whole row is empty
-    //         $.each(indy_list_of_column_labels, function (index, icol) {
-    //             // do to all in the metadata_lod, not just the ones shown in the table, so, comment this out for now
-    //             // if (include_header_in_indy_table[index] === 1) {
-    //                 if (dictrow[icol].length > 0) {
-    //
-    //                 }
-    //             // }
-    //         });
-    //     }
-    //     if (add_or_delete === 'add') {
-    //         metadata_lod.push(dictrow);
-    //     } else {
-    //         metadata_lod.splice(thisRowMinusHeader, 1);
-    //     }
-    //
-    //     metadata_lod_cum.push(JSON.parse(JSON.stringify(metadata_lod)));
-    //     metadata_lod_current_index = metadata_lod_cum.length - 1;
-    //     indyCallMultiFunctionUndoBuildPostUpdate();
-    // }
+        $.each(desc_index, function (index, each_row) {
+            //each_row is in the table, since there is a header row, subtract one to get row in metadata_lod
+            var metadata_lod_row = each_row-1;
 
-    // ~~ The radio button change or change plus the go button/drag
-    function indyCalledToPastes() {
-        sameFrontMatterToTableFromEmptyReplaceGoAndPaste();
-        indyCalledGutsPastes();
-        pushToMetadataLodCum();
-        indyCallMultiFunctionUndoBuildPostUpdate();
-    }
-
-    function indyCalledToClear() {
-         // not going to allow this
-        // function indyCalledToEmpty() {
-        //     sameFrontMatterToTableFromEmptyReplaceGoAndPaste();
-        //     // just change the content of the cell
-        //     var index = 0;
-        //     for (index = 0; index < metadata_highlighted.length; index++) {
-        //         var tirow = metadata_highlighted[index]['metadata_highlighted_tirow'];
-        //         var ticol = metadata_highlighted[index]['metadata_highlighted_ticol'];
-        //         // do not forget to subtract the header row
-        //         metadata_lod[tirow-1][ticol] = '';
-        //         if (ticol === 'matrix_item_name') {
-        //             metadata_lod[tirow-1]['matrix_item_pk'] = '';
-        //         } else if (ticol === 'sample_location_name') {
-        //             metadata_lod[tirow-1]['sample_location_pk'] = '';
-        //         }
-        //     }
-        //     pushToMetadataLodCum();
-        // indyCallMultiFunctionUndoBuildPostUpdate();
-        // }
-    }
-
-    function indyCalledToDelete() {
-    }
-
-    function indyCalledToReplace() {
-        sameFrontMatterToTableFromEmptyReplaceGoAndPaste();
-        indyCalledGutsReplace();
-        pushToMetadataLodCum();
-        indyCallMultiFunctionUndoBuildPostUpdate();
-
-        //todo need to reset the option boxes highlighting (what you are picking to use for the replace)
-        //it is not resetting correctly
-    }
-    
-    function indyCalledGutsPastes() {
-        // pastes - column will stay the same, rows will change, but, remember that, rows might not be in order
-            if (page_drag_action === 'pastes') {
-                $("#radio_duplicate").prop("checked", true).trigger("click");
-                tirow_in_metadata_lod = tirow - 1; //still working on this todo!!
-            }  
-    }  
-
-    function indyCalledGutsReplace() {
-
-        //code_of_the_sample_pattern = $('#id_indy_sample_label').children('option:selected').val();
-        // sample_option_choices = (
-        //     ('clt', 'Chip/Well - Location - Time'),
-        //     ('sn1', 'Sample-1 to Sample-99999 etc'),
-        //     ('sn2', 'Sample-01 to Sample-99'),
-        //     ('sn3', 'Sample-001 to Sample-999'),
-        // )
-
-
-        // replace - has the increment option, but always replacing the same cell
-        
-        // because the pks are not in the table, they will not ever be highlighted
-        // BUT, we want to keep them matching the names selected in the metadata_lod
-        // so that, they are correct in the form field that is sent back
-        // plan to check in the back end to make sure they went together
-        // could remove the pks altogether, but, what if users decide want to see them.....       
-
-        // find content of the replacement fields
-        let current_matrix_item_name = $('#matrix_item_name').text();
-        let current_matrix_item_pk = $('#matrix_item_pk').text();        
-        let current_sample_location_name = $('#sample_location_name').text();
-        let current_sample_location_pk = $('#sample_location_pk').text();
-        let current_display_time = $('#time_display').val();
-
-        // console.log("1 ",current_matrix_item_name)
-        // console.log("1 ",current_matrix_item_pk)
-        // console.log("1 ",current_sample_location_name)
-        // console.log("1 ",current_sample_location_pk)
-        // console.log("1 ",current_display_time)
-        //
-        // console.log("Before Duplicate  metadata_lod ")
-        // console.log(metadata_lod)
-
-        for (var index = 0; index < metadata_highlighted.length; index++) {
-            // this index is the index of the array of highlighted cells
-
-            // what is the row and column number of the attribute of the highlighted cell
-            var tirow = metadata_highlighted[index]['metadata_highlighted_tirow'];
-            var ticol = metadata_highlighted[index]['metadata_highlighted_ticol'];
-            var tmeta = metadata_highlighted[index]['metadata_highlighted_meta_label'];
-            var tlcol = metadata_highlighted[index]['metadata_highlighted_tlcol'];
-
-            // what row of the metadata_lod is being changed?             
-
-            // because we add a header row and, sometimes, an apply button row
-            // depending on how add_apply_row_col_to_indy_table is set above
-            // the index in the metadata_lod (list of dictionaries of each row of the table)
-            // may be one or two less then the attribute of the highlighted cell
-            // e.g. row-index of cell is 2, index in metadata_lod is 0
-            // see utils.py find_the_labels_needed_for_the_indy_omic_table
-            // note that, extra stuff in columns IS IN the metadata_lod
-            // at lease for now, so no subtraction needed
-            var ticol_in_metadata_lod = ticol;
-            var tirow_in_metadata_lod = tirow - 1;
-            if (add_apply_row_col_to_indy_table) {
-                tirow_in_metadata_lod = tirow - 2;
-            }
-
-            // sample location can ONLY be duplicate!
-            if (tmeta === 'Sample Location' || tlcol === 'Sample Location') {
-                if (current_sample_location_name.length > 0) {
-                    if ($('#id_header_type')[0].selectize.items[0] === 'well') {
-                        metadata_lod[tirow_in_metadata_lod][tlcol] = current_sample_location_name;
-                        metadata_lod[tirow_in_metadata_lod+3][tlcol] = current_sample_location_pk;
-                    } else {
-                        metadata_lod[tirow_in_metadata_lod]['Sample Location'] = current_sample_location_name;
-                        metadata_lod[tirow_in_metadata_lod]['sample_location_pk'] = current_sample_location_pk;
-                    }
+            if (pastes_or_delete === 'delete') {
+                if (metadata_lod[metadata_lod_row]['Data Attached'] == 'no') {
+                    metadata_lod.splice(metadata_lod_row, 1);
                 }
             } else {
-                if (page_radio_duplicate_value === 'duplicate') {
+                // a pastes row
+                metadata_lod.push(metadata_lod[metadata_lod_row]);
+                metadata_lod[metadata_lod_row]['sample_metadata_pk'] = '';
+            }
+        });
+    }
 
-                    if (tmeta === 'Sample Time' || tlcol === 'Sample Time') {
-                        if (current_display_time.length > 0) {
-                            if ($('#id_header_type')[0].selectize.items[0] === 'well') {
-                                metadata_lod[tirow_in_metadata_lod][tlcol] = current_display_time;
-                            } else {
-                                metadata_lod[tirow_in_metadata_lod]['Sample Time'] = current_display_time;
+    function subFunctionForReplaceOrEmptyContent(replace_or_empty) {
+        // go through each highlighted and make changes to metadata_lod as needed
+
+        // find content of the replacement fields
+        if (replace_or_empty === 'replace') {
+            special_tracking['Sample Time (Day)_store_value'] = $('#time_day').val();
+            special_tracking['Sample Time (Day)_store_index'] = 1;
+
+            special_tracking['Sample Time (Hour)_store_value'] = $('#time_hour').val();
+            special_tracking['Sample Time (Hour)_store_index'] = 1;
+
+            special_tracking['Sample Time (Minute)_store_value'] = $('#time_minute').val();
+            special_tracking['Sample Time (Minute)_store_index'] = 1;
+
+            special_tracking['Sample Location_store_value'] = $('#sample_location_name').text();
+            special_tracking['sample_location_pk_store_value'] = $('#sample_location_pk').text();
+
+            special_tracking['Matrix Item_store_value'] = $('#matrix_item_name').text();
+            special_tracking['Matrix Item_store_index'] = 1;
+            special_tracking['matrix_item_pk_store_value'] = $('#matrix_item_pk').text();
+            special_tracking['matrix_item_pk_store_index'] = indy_matrix_item_list.indexOf(special_tracking['matrix_item_pk_store_value']);
+        }
+        console.log(special_tracking)
+
+        let current_sample_label = '';
+        let index_sample_counter = 1;
+
+        for (var higlighted_cell_index = 0; higlighted_cell_index < metadata_highlighted.length; higlighted_cell_index++) {
+            // what is the row and column number of the attribute of the highlighted cell in the table
+            var tirow = metadata_highlighted[higlighted_cell_index]['metadata_highlighted_tirow'];
+            var ticol = metadata_highlighted[higlighted_cell_index]['metadata_highlighted_ticol'];
+            var tlcol = metadata_highlighted[higlighted_cell_index]['metadata_highlighted_tlcol'];
+
+            console.log("tlcol ",tlcol)
+
+            // what row of the metadata_lod is being changed?             
+            var ticol_in_metadata_lod = ticol;
+            var tirow_in_metadata_lod = tirow - 1;
+
+            if (replace_or_empty === 'empty') {
+                if (tlcol === 'Sample Label') {
+                    if (metadata_lod[metadata_lod_row]['Data Attached'] == 'no') {
+                         metadata_lod[tirow_in_metadata_lod][tlcol] = '';
+                    }
+                } else {
+                    metadata_lod[tirow_in_metadata_lod][tlcol] = '';
+                }
+            } else {
+                // replace
+
+                // HARDCODE alert
+                if (tlcol === 'Sample Label') {
+                    // choices HARDCODED in forms.py
+                    // sample_option_choices = (
+                    // ('clt', 'Chip/Well - Location - Time'),
+                    // ('sn1', 'Sample-1 to Sample-99999 etc'),
+                    // ('sn2', 'Sample-01 to Sample-99'),
+                    // ('sn3', 'Sample-001 to Sample-999'),
+
+                    if (current_sample_pattern === 'clt') {
+                        current_sample_label = special_tracking['Matrix Item_store_value'] 
+                            + '-' + special_tracking['Sample Location_store_value'] 
+                            + '-D' + special_tracking['Sample Time (Day)_store_value']
+                            + ':H' + special_tracking['Sample Time (Hour)_store_value']
+                            + ':M' + special_tracking['Sample Time (Minute)_store_value'];
+                    } else if (current_sample_pattern === 'sn1') {
+                        current_sample_label = 'Sample-' + index_sample_counter;
+                    } else if (current_sample_pattern === 'sn2') {
+                        if (index_sample_counter < 10) {
+                            current_sample_label = 'Sample-0' + index_sample_counter;
+                        } else {
+                            current_sample_label = 'Sample-' + index_sample_counter;
+                        }
+                    } else {
+                        // sn3
+                        if (index_sample_counter < 10) {
+                            current_sample_label = 'Sample-00' + index_sample_counter;
+                        } else if (index_sample_counter < 100) {
+                            current_sample_label = 'Sample-00' + index_sample_counter;
+                        } else {
+                            current_sample_label = 'Sample-' + index_sample_counter;
+                        }
+                    }
+                    index_sample_counter = index_sample_counter + 1;
+                }
+
+                // when replace, sample location can ONLY be duplicate!
+                // HARDCODE alert
+                if (tlcol === 'Sample Location') {
+                    // only replace if given a new one
+                    if (special_tracking['Sample Location_store_value'].length > 0) {
+                        metadata_lod[tirow_in_metadata_lod][tlcol] = special_tracking['Sample Location_store_value'];
+                        metadata_lod[tirow_in_metadata_lod]['sample_location_pk'] = special_tracking['sample_location_pk_store_value'];
+                    }
+                } else if (tlcol === 'Sample Label') {
+                    if (metadata_lod[tirow_in_metadata_lod]['Data Attached'] == 'no') {
+                        // note that, if the Sample Label is locked (Data Attached), should not have been allowed to be highlighted - but checked in case
+                        metadata_lod[tirow_in_metadata_lod][tlcol] = current_sample_label;
+                    }
+                } else {
+                    // Status - we are replace with the fields that can be duplicate or increment
+                    if (page_radio_duplicate_value === 'duplicate') {
+                        if (tlcol === 'Sample Time (Day)') {
+                            if (special_tracking[tlcol+'_store_value'].length > 0) {
+                                metadata_lod[tirow_in_metadata_lod][tlcol] = special_tracking[tlcol+'_store_value'];
+                            }
+                        } else if (tlcol === 'Sample Time (Hour)') {
+                            if (special_tracking[tlcol+'_store_value'].length > 0) {
+                                metadata_lod[tirow_in_metadata_lod][tlcol] = special_tracking[tlcol+'_store_value'];
+                            }
+                        } else if (tlcol === 'Sample Time (Minute)') {
+                            if (special_tracking[tlcol+'_store_value'].length > 0) {
+                                metadata_lod[tirow_in_metadata_lod][tlcol] = special_tracking[tlcol+'_store_value'];
+                            }
+                        } else if (tlcol === 'Chip/Well Name') {
+                            if (special_tracking[tlcol+'_store_value'].length > 0) {
+                                metadata_lod[tirow_in_metadata_lod][tlcol] = special_tracking[tlcol+'_store_value'];
+                                metadata_lod[tirow_in_metadata_lod]['matrix_item_pk'] = special_tracking['matrix_item_pk_store_value'];
                             }
                         }
-                    } else if (tmeta === 'Chip/Well Name'  || tlcol === 'Chip/Well Name') {
-                        if (current_matrix_item_name.length > 0) {
-                            if ($('#id_header_type')[0].selectize.items[0] === 'well') {
-                                metadata_lod[tirow_in_metadata_lod][tlcol] = current_matrix_item_name;
-                                metadata_lod[tirow_in_metadata_lod+3][tlcol] = current_matrix_item_pk;
-                            } else {
-                                metadata_lod[tirow_in_metadata_lod]['Chip/Well Name'] = current_matrix_item_name;
-                                metadata_lod[tirow_in_metadata_lod]['matrix_item_pk'] = current_matrix_item_pk;
+                    } else {
+                        // increment
+                        // note: the first one (acts as duplicate) or it is duplicate
+                        if (tlcol === 'Sample Time (Day)') {
+                            if (special_tracking[tlcol+'_store_value'].length > 0) {
+                                metadata_lod[tirow_in_metadata_lod][tlcol] = special_tracking[tlcol+'_store_value'];
+                                special_tracking[tlcol+'_store_value'] = parseFloat(special_tracking[tlcol+'_store_value'])+ parseFloat($('#increment_value').val());
+                                special_tracking[tlcol+'_store_index'] = special_tracking[tlcol + '_index'] + 1;
+                            }
+                        } else if (tlcol === 'Sample Time (Hour)') {
+                            if (special_tracking[tlcol+'_store_value'].length > 0) {
+                                metadata_lod[tirow_in_metadata_lod][tlcol] = special_tracking[tlcol+'_store_value'];
+                                special_tracking[tlcol+'_store_value'] = parseFloat(special_tracking[tlcol+'_store_value'])+ parseFloat($('#increment_value').val());
+                                special_tracking[tlcol+'_store_index'] = special_tracking[tlcol + '_index'] + 1;
+                            }
+                        } else if (tlcol === 'Sample Time (Minute)') {
+                            if (special_tracking[tlcol+'_store_value'].length > 0) {
+                                metadata_lod[tirow_in_metadata_lod][tlcol] = special_tracking[tlcol+'_store_value'];
+                                special_tracking[tlcol+'_store_value'] = parseFloat(special_tracking[tlcol+'_store_value'])+ parseFloat($('#increment_value').val());
+                                special_tracking[tlcol+'_store_index'] = special_tracking[tlcol + '_index'] + 1;
+                            }
+                        } else if (tlcol === 'Chip/Well Name') {
+                            if (special_tracking[tlcol+'_store_value'].length > 0) {
+                                metadata_lod[tirow_in_metadata_lod][tlcol] = special_tracking[tlcol+'_store_value'];
+                                metadata_lod[tirow_in_metadata_lod]['matrix_item_pk'] = special_tracking['matrix_item_pk_store_value'];
+
+                                // what is the index of the current one?
+                                var index_in_indy_matrix_item_list = indy_matrix_item_list.indexOf(metadata_lod[tirow_in_metadata_lod][tlcol]);
+                                // what is the index of the new (skip index by increment)
+                                var new_index = index_in_indy_matrix_item_list + parseInt($('#increment_value').val());
+                                if (index_in_indy_matrix_item_list >= 0 && new_index < indy_matrix_item_list.length) {
+                                    $('#id_indy_matrix_item').data('selectize').setValue(special_tracking[tlcol+'_store_value']).onchange();
+                                    // special_tracking[tlcol+'_store_value'] = indy_matrix_item_list[new_index];
+                                    special_tracking[tlcol+'_store_index'] = special_tracking[tlcol + '_index'] + 1;
+
+                                    special_tracking['Matrix Item_store_value'] = $('#matrix_item_name').text();
+                                    // special_tracking['Matrix Item_store_index'] = 1;
+                                    special_tracking['matrix_item_pk_store_value'] = $('#matrix_item_pk').text();
+                                    special_tracking['matrix_item_pk_store_index'] = indy_matrix_item_list.indexOf(special_tracking['matrix_item_pk_store_value']);
+                                } else {
+                                    // no more left in index, just use the current one
+                                    special_tracking[tlcol+'_store_index'] = special_tracking[tlcol + '_index'] + 1;
+                                }
                             }
                         }
                     }
-
-                } else {
-                    // an increment
-                    // var current_index = icol_last_highlighted_seen[ticol_in_metadata_lod+'_index'];
-                    //
-                    // if (current_index === -99) {
-                    //     // on the first one, it is a duplicate and change info for next
-                    //     metadata_lod[tirow_in_metadata_lod][ticol_in_metadata_lod] = current_val;
-                    //     if (ticol_in_metadata_lod === 'matrix_item_name') {
-                    //         metadata_lod[tirow_in_metadata_lod]['matrix_item_pk'] = current_pk;
-                    //     }
-                    //     // update the last found object for next go
-                    //     icol_last_highlighted_seen[ticol_in_metadata_lod] = current_val;
-                    //     icol_last_highlighted_seen[ticol_in_metadata_lod + '_index'] = 0;
-                    // } else {
-                        // // not the first occurrence of this ticol_in_metadata_lod
-                        // current_val = icol_last_highlighted_seen[ticol_in_metadata_lod];
-                        //
-                        // var i_current_val = 0;
-                        // if (ticol_in_metadata_lod === 'time_display' || ticol_in_metadata_lod === 'time_hour' || ticol_in_metadata_lod === 'time_minute') {
-                        //     if (page_radio_duplicate_value === 'increment-ttbltr' ||
-                        //         page_radio_duplicate_value === 'increment-ttbrtl' ||
-                        //         page_radio_duplicate_value === 'increment-ttbo'
-                        //         ) {
-                        //         // it is + for both because the holding dict was sorting descending
-                        //         i_current_val = parseFloat(current_val) + parseFloat($('#increment_value').val());
-                        //     } else {
-                        //         alert('Make sure to select to duplicate or increment');
-                        //     }
-                        // } else if (ticol_in_metadata_lod === 'matrix_item_name') {
-                        //     // find the index of the last one, increase the index, if not out of range, replace
-                        //     var index_in_indy_matrix_item_list = indy_matrix_item_list.indexOf(current_val);
-                        //     var new_index = index_in_indy_matrix_item_list + parseInt($('#increment_value').val());
-                        //     if (index_in_indy_matrix_item_list >=0 && new_index < indy_matrix_item_list.length) {
-                        //         i_current_val = indy_matrix_item_list[new_index];
-                        //     } else {
-                        //         i_current_val = current_val;
-                        //     }
-                        // } else if (ticol_in_metadata_lod === 'file_column_header') {
-                        //     // find the index of the last one, increase the index, if not out of range, replace
-                        //     // var index_in_indy_row_labels = indy_row_labels.indexOf(current_val);
-                        //     // var new_index = index_in_indy_row_labels + parseInt($('#increment_value').val());
-                        //     // if (index_in_indy_row_labels >=0 && new_index < indy_row_labels.length) {
-                        //     //     i_current_val = indy_row_labels[new_index];
-                        //     // } else {
-                        //     //     i_current_val = current_val;
-                        //     // }
-                        // } else {
-                        //     // todo well name still need an increment
-                        //     // could i look from the right until finds first non number and split? - maybe a list? not sure yet..
-                        //     // maybe string split the whole thing and index backards to first non number, then icrement the number
-                        //     // could go back as string, but probably easier to work with list...think about
-                        //         alert('Increment for this field is in development: '+ticol_in_metadata_lod);
-                        //
-                        // }
-                        // var i_current_index = parseInt(icol_last_highlighted_seen[ticol_in_metadata_lod + '_index']) + 1;
-                        // // update the last found object for next go
-                        // icol_last_highlighted_seen[ticol_in_metadata_lod] = i_current_val;
-                        // icol_last_highlighted_seen[ticol_in_metadata_lod + '_index'] = i_current_index;
-                        // // update the correct location in the table metadata
-                        // metadata_lod[tirow_in_metadata_lod][ticol_in_metadata_lod] = i_current_val;
-
-                    // }
                 }
             }
+                    console.log(special_tracking)
         }
     }
 
