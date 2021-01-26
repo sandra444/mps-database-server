@@ -18,6 +18,7 @@ $(document).ready(function () {
     var indy_list_of_column_labels = JSON.parse($('#id_indy_list_of_column_labels').val());
     var indy_list_of_column_labels_show_hide = JSON.parse($('#id_indy_list_of_column_labels_show_hide').val());
     var indy_matrix_item_list = JSON.parse($('#id_indy_matrix_item_list').val());
+    var indy_matrix_item_name_to_pk_dict = JSON.parse($('#id_indy_matrix_item_name_to_pk_dict').val());
     var indy_list_columns_hide = [];
     var indy_list_time_units_to_include_initially = JSON.parse($('#id_indy_list_time_units_to_include_initially').val());
     var indy_dict_time_units_to_table_column = JSON.parse($('#id_indy_dict_time_units_to_table_column').val());
@@ -717,10 +718,10 @@ $(document).ready(function () {
             special_tracking['Sample Location_store_value'] = $('#sample_location_name').text();
             special_tracking['sample_location_pk_store_value'] = $('#sample_location_pk').text();
 
-            special_tracking['Matrix Item_store_value'] = $('#matrix_item_name').text();
-            special_tracking['Matrix Item_store_index'] = 1;
+            special_tracking['Chip/Well Name_store_value'] = $('#matrix_item_name').text();
+            special_tracking['Chip/Well Name_store_index'] = 1;
             special_tracking['matrix_item_pk_store_value'] = $('#matrix_item_pk').text();
-            special_tracking['matrix_item_pk_store_index'] = indy_matrix_item_list.indexOf(special_tracking['matrix_item_pk_store_value']);
+            special_tracking['matrix_item_pk_store_index'] = indy_matrix_item_list.indexOf($('#matrix_item_name').text());
         }
         console.log(special_tracking)
 
@@ -760,11 +761,13 @@ $(document).ready(function () {
                     // ('sn3', 'Sample-001 to Sample-999'),
 
                     if (current_sample_pattern === 'clt') {
-                        current_sample_label = special_tracking['Matrix Item_store_value'] 
-                            + '-' + special_tracking['Sample Location_store_value'] 
-                            + '-D' + special_tracking['Sample Time (Day)_store_value']
-                            + ':H' + special_tracking['Sample Time (Hour)_store_value']
-                            + ':M' + special_tracking['Sample Time (Minute)_store_value'];
+                        // Sample label should always be after the updates to the other metadata because of the order of the columns in the table
+                        // if the order changes, this will break, and will need to redesign!!!!
+                        current_sample_label = metadata_lod[tirow_in_metadata_lod]['Chip/Well Name']
+                            + '-' + metadata_lod[tirow_in_metadata_lod]['Sample Location']
+                            + '-D' + metadata_lod[tirow_in_metadata_lod]['Sample Time (Day)']
+                            + ':H' + metadata_lod[tirow_in_metadata_lod]['Sample Time (Hour)']
+                            + ':M' + metadata_lod[tirow_in_metadata_lod]['Sample Time (Minute)'];
                     } else if (current_sample_pattern === 'sn1') {
                         current_sample_label = 'Sample-' + index_sample_counter;
                     } else if (current_sample_pattern === 'sn2') {
@@ -821,24 +824,27 @@ $(document).ready(function () {
                             }
                         }
                     } else {
-                        // increment
-                        // note: the first one (acts as duplicate) or it is duplicate
+                        // increment - make the change then set up the next one
+                        // note: the first one (acts as duplicate)
                         if (tlcol === 'Sample Time (Day)') {
                             if (special_tracking[tlcol+'_store_value'].length > 0) {
                                 metadata_lod[tirow_in_metadata_lod][tlcol] = special_tracking[tlcol+'_store_value'];
-                                special_tracking[tlcol+'_store_value'] = parseFloat(special_tracking[tlcol+'_store_value'])+ parseFloat($('#increment_value').val());
+                                let numval = parseFloat(special_tracking[tlcol+'_store_value'])+ parseFloat($('#increment_value').val());
+                                special_tracking[tlcol+'_store_value'] = numval.toString();
                                 special_tracking[tlcol+'_store_index'] = special_tracking[tlcol + '_index'] + 1;
                             }
                         } else if (tlcol === 'Sample Time (Hour)') {
                             if (special_tracking[tlcol+'_store_value'].length > 0) {
                                 metadata_lod[tirow_in_metadata_lod][tlcol] = special_tracking[tlcol+'_store_value'];
-                                special_tracking[tlcol+'_store_value'] = parseFloat(special_tracking[tlcol+'_store_value'])+ parseFloat($('#increment_value').val());
+                                let numval = parseFloat(special_tracking[tlcol+'_store_value'])+ parseFloat($('#increment_value').val());
+                                special_tracking[tlcol+'_store_value'] = numval.toString();
                                 special_tracking[tlcol+'_store_index'] = special_tracking[tlcol + '_index'] + 1;
                             }
                         } else if (tlcol === 'Sample Time (Minute)') {
                             if (special_tracking[tlcol+'_store_value'].length > 0) {
                                 metadata_lod[tirow_in_metadata_lod][tlcol] = special_tracking[tlcol+'_store_value'];
-                                special_tracking[tlcol+'_store_value'] = parseFloat(special_tracking[tlcol+'_store_value'])+ parseFloat($('#increment_value').val());
+                                let numval = parseFloat(special_tracking[tlcol+'_store_value'])+ parseFloat($('#increment_value').val());
+                                special_tracking[tlcol+'_store_value'] = numval.toString();
                                 special_tracking[tlcol+'_store_index'] = special_tracking[tlcol + '_index'] + 1;
                             }
                         } else if (tlcol === 'Chip/Well Name') {
@@ -846,21 +852,23 @@ $(document).ready(function () {
                                 metadata_lod[tirow_in_metadata_lod][tlcol] = special_tracking[tlcol+'_store_value'];
                                 metadata_lod[tirow_in_metadata_lod]['matrix_item_pk'] = special_tracking['matrix_item_pk_store_value'];
 
-                                // what is the index of the current one?
+                                // what is the index of the current matrix item name in alphabetical list of names?
                                 var index_in_indy_matrix_item_list = indy_matrix_item_list.indexOf(metadata_lod[tirow_in_metadata_lod][tlcol]);
                                 // what is the index of the new (skip index by increment)
                                 var new_index = index_in_indy_matrix_item_list + parseInt($('#increment_value').val());
+                                // is the new index in the list, or too high a number?
                                 if (index_in_indy_matrix_item_list >= 0 && new_index < indy_matrix_item_list.length) {
-                                    $('#id_indy_matrix_item').data('selectize').setValue(special_tracking[tlcol+'_store_value']).onchange();
-                                    // special_tracking[tlcol+'_store_value'] = indy_matrix_item_list[new_index];
-                                    special_tracking[tlcol+'_store_index'] = special_tracking[tlcol + '_index'] + 1;
+                                    // what is the new matrix item name? and the new pk
+                                    let new_matrix_item_name = indy_matrix_item_list[new_index];
+                                    let new_matrix_item_pk = indy_matrix_item_name_to_pk_dict[new_matrix_item_name];
 
-                                    special_tracking['Matrix Item_store_value'] = $('#matrix_item_name').text();
-                                    // special_tracking['Matrix Item_store_index'] = 1;
-                                    special_tracking['matrix_item_pk_store_value'] = $('#matrix_item_pk').text();
-                                    special_tracking['matrix_item_pk_store_index'] = indy_matrix_item_list.indexOf(special_tracking['matrix_item_pk_store_value']);
+                                    special_tracking['Chip/Well Name_store_value'] = new_matrix_item_name;
+                                    special_tracking['Chip/Well Name_store_index'] = special_tracking[tlcol + '_index'] + 1;
+                                    special_tracking['matrix_item_pk_store_value'] = new_matrix_item_pk;
+                                    special_tracking['matrix_item_pk_store_index'] = indy_matrix_item_list.indexOf(new_matrix_item_name);
+
                                 } else {
-                                    // no more left in index, just use the current one
+                                    // no more left in index, just use the current one, do not need to change anything else
                                     special_tracking[tlcol+'_store_index'] = special_tracking[tlcol + '_index'] + 1;
                                 }
                             }
@@ -868,7 +876,7 @@ $(document).ready(function () {
                     }
                 }
             }
-                    console.log(special_tracking)
+            console.log(special_tracking)
         }
     }
 

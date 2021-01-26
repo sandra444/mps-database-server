@@ -5307,6 +5307,7 @@ class AssayOmicSampleMetadataAdditionalInfoForm(BootstrapForm):
             'indy_sample_location',
             'indy_matrix_item',
             'indy_matrix_item_list',
+            'indy_matrix_item_name_to_pk_dict',
             'indy_list_time_units_to_include_initially',
             'indy_dict_time_units_to_table_column',
             'indy_add_or_update'
@@ -5334,9 +5335,16 @@ class AssayOmicSampleMetadataAdditionalInfoForm(BootstrapForm):
         # get the queryset of matrix items in this study
         matrix_item_queryset = AssayMatrixItem.objects.filter(study_id=self.instance.id).order_by('name', )
         self.fields['indy_matrix_item'].queryset = matrix_item_queryset
+
         # get the matrix items names in this study
         matrix_item_list = matrix_item_queryset.values_list('name', flat=True)
         self.fields['indy_matrix_item_list'].initial = json.dumps(matrix_item_list)
+
+        matrix_item_name_and_pk = {}
+        for index, each in enumerate(matrix_item_queryset):
+            matrix_item_name_and_pk[each.name] = each.id
+
+        self.fields['indy_matrix_item_name_to_pk_dict'].initial = json.dumps(matrix_item_name_and_pk)
 
         # if, the models in the study have locations, pull them
         organ_models_in_study = AssayGroup.objects.filter(
@@ -5391,6 +5399,7 @@ class AssayOmicSampleMetadataAdditionalInfoForm(BootstrapForm):
         required=False,
     )
     indy_matrix_item_list = forms.CharField(widget=forms.TextInput(), required=False,)
+    indy_matrix_item_name_to_pk_dict = forms.CharField(widget=forms.TextInput(), required=False, )
 
     indy_sample_label_options = forms.ChoiceField(
         choices=sample_option_choices,
