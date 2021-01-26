@@ -88,7 +88,7 @@ from .utils import (
     find_the_labels_needed_for_the_indy_omic_table,
     convert_time_from_mintues_to_unit_given,
     convert_time_unit_given_to_minutes,
-    get_model_location_dictionary
+    function_to_make_a_model_location_dictionary
 )
 
 from mps.utils import (

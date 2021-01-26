@@ -466,7 +466,8 @@ $(document).ready(function () {
             $this_dropdown1.selectize()[0].selectize.clearOptions();
             let this_dict1 = $this_dropdown1[0].selectize;
             // fill the dropdown with what brought back from ajax call
-            $.each(json.location_dict1[0], function( pk, text ) {
+            $.each(json.location_dict1, function( pk, text ) {
+                console.log('1 pk, text ',pk, text)
                 this_dict1.addOption({value: pk, text: text});
             });
 
@@ -475,7 +476,8 @@ $(document).ready(function () {
             $this_dropdown2.selectize()[0].selectize.clearOptions();
             let this_dict2 = $this_dropdown2[0].selectize;
             // fill the dropdown with what brought back from ajax call
-            $.each(json.location_dict2[0], function( pk, text ) {
+            $.each(json.location_dict2, function( pk, text ) {
+                console.log('2 pk, text ',pk, text)
                 this_dict2.addOption({value: pk, text: text});
             });
 
@@ -494,7 +496,7 @@ $(document).ready(function () {
             let this_dict = $this_dropdown[0].selectize;
             // fill the dropdown with what brought back from ajax call
             //the changed one is always returned as the first
-            $.each(json.location_dict1[0], function( pk, text ) {
+            $.each(json.location_dict1, function( pk, text ) {
                 this_dict.addOption({value: pk, text: text});
             });
             $('#id_location_'+page_omic_upload_group_id_change)[0].selectize.setValue(json.sample_location_pk1);
