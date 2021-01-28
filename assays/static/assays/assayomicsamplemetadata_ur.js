@@ -366,6 +366,8 @@ $(document).ready(function () {
 
         metadata_highlighted = [];
         list_of_fields_for_replacing_that_are_highlighted = [];
+        list_of_row_indexs_with_one_or_more_highlighted = [];
+
         let index = 0;
         $('.special-selected1').each(function() {
             var dict_highlighted_indy_metadata = {};
@@ -723,7 +725,7 @@ $(document).ready(function () {
             special_tracking['matrix_item_pk_store_value'] = $('#matrix_item_pk').text();
             special_tracking['matrix_item_pk_store_index'] = indy_matrix_item_list.indexOf($('#matrix_item_name').text());
         }
-        console.log(special_tracking)
+        // console.log(special_tracking)
 
         let current_sample_label = '';
         let index_sample_counter = 1;
@@ -734,7 +736,7 @@ $(document).ready(function () {
             var ticol = metadata_highlighted[higlighted_cell_index]['metadata_highlighted_ticol'];
             var tlcol = metadata_highlighted[higlighted_cell_index]['metadata_highlighted_tlcol'];
 
-            console.log("tlcol ",tlcol)
+            // console.log("tlcol ",tlcol)
 
             // what row of the metadata_lod is being changed?             
             var ticol_in_metadata_lod = ticol;
@@ -742,7 +744,7 @@ $(document).ready(function () {
 
             if (replace_or_empty === 'empty') {
                 if (tlcol === 'Sample Label') {
-                    if (metadata_lod[metadata_lod_row]['Data Attached'] == 'no') {
+                    if (metadata_lod[tirow_in_metadata_lod]['Data Attached'] == 'no') {
                          metadata_lod[tirow_in_metadata_lod][tlcol] = '';
                     }
                 } else {
@@ -876,7 +878,7 @@ $(document).ready(function () {
                     }
                 }
             }
-            console.log(special_tracking)
+            // console.log(special_tracking)
         }
     }
 

@@ -88,7 +88,8 @@ from .utils import (
     find_the_labels_needed_for_the_indy_omic_table,
     convert_time_from_mintues_to_unit_given,
     convert_time_unit_given_to_minutes,
-    function_to_make_a_model_location_dictionary
+    function_to_make_a_model_location_dictionary,
+    data_quality_clean_check_for_omic_metadata_gui
 )
 
 from mps.utils import (
@@ -5408,24 +5409,17 @@ class AssayOmicSampleMetadataAdditionalInfoForm(BootstrapForm):
     indy_add_or_update = forms.CharField(widget=forms.TextInput(), required=False,)
 
     # todo-sck need to fix all this after get buy in for design
-    # def clean(self):
-    #     data = super(AssayOmicSampleMetadataAdditionalInfoForm, self).clean()
-    #
-    #     # data are changed here, so NEED to return the data
-    #
-    #     data['sample_time'] = convert_time_unit_given_to_minutes(data.get('time_1_display'), data.get('time_unit'))
-    #     data['sample_time'] = 0
-    #     for time_unit, conversion in list(TIME_CONVERSIONS.items()):
-    #         if data.get('time_1_' + time_unit) is not None:
-    #             int_time = (data.get('time_1_' + time_unit))
-    #             data.update({'time_1': data.get('time_1') + int_time * conversion,})
-    #
-    #     true_to_continue = self.qc_file(save=False, calledme='clean')
-    #     if not true_to_continue:
-    #         validation_message = 'This did not pass QC.'
-    #         raise ValidationError(validation_message, code='invalid')
-    #     self.process_file(save=False, calledme='clean')
-    #     return data
+    def clean(self):
+        true_to_continue = True
+        data = super(AssayOmicSampleMetadataAdditionalInfoForm, self).clean()
+
+        if 'indy_list_of_dicts_of_table_rows' in self.changed_data or data['indy_add_or_update'].replace('"', '') == 'add':
+            true_to_continue = self.qc_file(save=False, calledme='clean')
+            if not true_to_continue:
+                validation_message = 'This did not pass QC.'
+                raise ValidationError(validation_message, code='invalid')
+            # self.process_file(save=False, calledme='clean')
+        return data
     #
     # def save(self, commit=True):
     #     new_file = None
@@ -5433,16 +5427,11 @@ class AssayOmicSampleMetadataAdditionalInfoForm(BootstrapForm):
     #         new_file = super(AssayOmicDataFileUploadForm, self).save(commit=commit)
     #         self.process_file(save=True, calledme='save')
     #     return new_file
-    #
-    # def qc_file(self, save=False, calledme='c'):
-    #     data = self.cleaned_data
-    #     data_file_pk = 0
-    #     # self.instance.id is None for the add form
-    #     if self.instance.id:
-    #         data_file_pk = self.instance.id
-    #
-    #     true_to_continue = data_quality_clean_check_for_omic_file_upload(self, data, data_file_pk)
-    #     return true_to_continue
+
+    def qc_file(self, save=False, calledme='c'):
+        data = self.cleaned_data
+        true_to_continue = data_quality_clean_check_for_omic_metadata_gui(self, data)
+        return true_to_continue
     #
     # def process_file(self, save=False, calledme='c'):
     #     data = self.cleaned_data

@@ -75,6 +75,7 @@ from statsmodels.stats.power import (tt_solve_power, TTestIndPower)
 from collections import Counter
 import operator
 import re
+import json
 import time
 from django.db.models import Q
 from scipy.optimize import leastsq
@@ -7374,6 +7375,31 @@ def this_file_name_is_similar_to_another_in_this_study(omic_data_file, study_id,
 
     return [true_to_continue, message]
 
+omic_metadata_collection_indy_list_of_column_labels = [
+    'Chip/Well Name',
+    'Sample Location',
+    'Sample Time (Day)',
+    'Sample Time (Hour)',
+    'Sample Time (Minute)',
+    'Sample Label',
+    'Data Attached',
+    'matrix_item_pk',
+    'sample_location_pk',
+    'sample_metadata_pk'
+]
+
+omic_metadata_collection_indy_list_of_column_labels_show_hide = [
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    0,
+    0,
+    0
+]
 
 # sck forms.py - will load for previous submit
 def find_the_labels_needed_for_the_indy_omic_table(called_from, study_id):
@@ -7402,30 +7428,8 @@ def find_the_labels_needed_for_the_indy_omic_table(called_from, study_id):
     # if the sample id has been used (the pk is in the data point file), do not allow the user to edit the sample id
     # but allow the user to change the chip, sample time, and sample location for the sample label
 
-    indy_list_of_column_labels = [
-        'Chip/Well Name',
-        'Sample Location',
-        'Sample Time (Day)',
-        'Sample Time (Hour)',
-        'Sample Time (Minute)',
-        'Sample Label',
-        'Data Attached',
-        'matrix_item_pk',
-        'sample_location_pk',
-        'sample_metadata_pk'
-    ]
-    indy_list_of_column_labels_show_hide = [
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        0,
-        0,
-        0
-    ]
+    indy_list_of_column_labels = omic_metadata_collection_indy_list_of_column_labels
+    indy_list_of_column_labels_show_hide = omic_metadata_collection_indy_list_of_column_labels_show_hide
 
     # does this study have any sample metadata in the table
     sample_metadata_rows = AssayOmicSampleMetadata.objects.filter(study_id=study_id)
@@ -7439,7 +7443,7 @@ def find_the_labels_needed_for_the_indy_omic_table(called_from, study_id):
         indy_add_or_update = 'add'
 
         if find_defaults:
-            indy_list_of_dicts_of_table_rows = for_development_of_omic_counts_get_some_defaults(indy_list_of_column_labels)
+            indy_list_of_dicts_of_table_rows = for_development_of_omic_counts_get_some_defaults()
         else:
             # get the queryset of matrix items in this study
             matrix_item_queryset = AssayMatrixItem.objects.filter(study_id=study_id).order_by('name', )
@@ -7469,6 +7473,13 @@ def find_the_labels_needed_for_the_indy_omic_table(called_from, study_id):
         else:
             # todo-sck need to get the data when update or review, make sure, for update, that sample labels are marked as y if there is a data point assigned to it
             pass
+            # need something like this
+            # if self.instance.time_1:
+            #     time_1_instance = self.instance.time_1
+            #     times_1 = get_split_times(time_1_instance)
+            #     self.fields['time_1_day'].initial = times_1.get('day')
+            #     self.fields['time_1_hour'].initial = times_1.get('hour')
+            #     self.fields['time_1_minute'].initial = times_1.get('minute')
 
     # print("indy_list_of_dicts_of_table_rows")
     # print(indy_list_of_dicts_of_table_rows)
@@ -7496,7 +7507,9 @@ def find_the_labels_needed_for_the_indy_omic_table(called_from, study_id):
     return indy_omic_table
 
 
-def for_development_of_omic_counts_get_some_defaults(indy_list_of_column_labels):
+def for_development_of_omic_counts_get_some_defaults():
+    indy_list_of_column_labels = omic_metadata_collection_indy_list_of_column_labels
+
     indy_list_of_dicts_of_table_rows = []
 
     list_of_defaults1 = []
@@ -7705,3 +7718,38 @@ def sortkeypicker(keynames):
                composite[i] = -v
        return composite
     return getit
+
+
+# sck forms.py - qc for indy omic count metadata
+def data_quality_clean_check_for_omic_metadata_gui(self, data):
+    # only comes here if something was changed in the metadata table
+    # print('in qc ')
+    true_to_continue = True
+    study_id = self.instance.id
+    # print('data ', data)
+    list_of_dicts = json.loads(self.data.get('indy_list_of_dicts_of_table_rows', '[]'))
+    # print('list_of_dicts ', list_of_dicts)
+    indy_list_of_column_labels = omic_metadata_collection_indy_list_of_column_labels
+
+    # could be these conditions:
+    # 1 The list - has a dict that has a pk match to the Table (previous save)
+    # 2 The list - has a dict that has a null pk (new rows)
+    # 3 The existing table - has a pk that is not longer in the list of dicts (removed)
+    for dict in list_of_dicts:
+
+        for key, value in dict.items():
+            print(key, '->'+str(value)+'<')
+
+            if key == 'matrix_item_pk' and len(str(value)) == 0:
+                true_to_continue = False
+                validation_message = 'One or more chip or well names is blank in the table.'
+                validation_message = validation_message
+                raise ValidationError(validation_message, code='invalid')
+            if key == 'sample_location_pk' and len(str(value)) == 0:
+                print("here ")
+                true_to_continue = False
+                validation_message = 'One or more sample locations is blank in the table.'
+                validation_message = validation_message
+                raise ValidationError(validation_message, code='invalid')
+
+    return true_to_continue
