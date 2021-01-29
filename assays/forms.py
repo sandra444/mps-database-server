@@ -89,7 +89,8 @@ from .utils import (
     convert_time_from_mintues_to_unit_given,
     convert_time_unit_given_to_minutes,
     function_to_make_a_model_location_dictionary,
-    data_quality_clean_check_for_omic_metadata_gui
+    data_quality_clean_check_for_omic_metadata_gui,
+    process_the_omic_metadata
 )
 
 from mps.utils import (
@@ -5265,6 +5266,7 @@ class AssayOmicDataFileUploadForm(BootstrapForm):
         analysis_method = data['analysis_method']
 
         # HANDY for getting a file object and a file queryset when doing clean vrs save
+        # this has to be different because the file is not saved yet
         if calledme == 'clean':
             # this function is in utils.py
             # print('form clean')
@@ -5408,7 +5410,6 @@ class AssayOmicSampleMetadataAdditionalInfoForm(BootstrapForm):
     )
     indy_add_or_update = forms.CharField(widget=forms.TextInput(), required=False,)
 
-    # todo-sck need to fix all this after get buy in for design
     def clean(self):
         true_to_continue = True
         data = super(AssayOmicSampleMetadataAdditionalInfoForm, self).clean()
@@ -5418,45 +5419,22 @@ class AssayOmicSampleMetadataAdditionalInfoForm(BootstrapForm):
             if not true_to_continue:
                 validation_message = 'This did not pass QC.'
                 raise ValidationError(validation_message, code='invalid')
-            # self.process_file(save=False, calledme='clean')
+            self.process_metadata(save=False, calledme='clean')
         return data
-    #
-    # def save(self, commit=True):
-    #     new_file = None
-    #     if commit:
-    #         new_file = super(AssayOmicDataFileUploadForm, self).save(commit=commit)
-    #         self.process_file(save=True, calledme='save')
-    #     return new_file
+
+    def save(self, commit=True):
+        if commit:
+            self.process_metadata(save=True, calledme='save')
+        return commit
 
     def qc_file(self, save=False, calledme='c'):
         data = self.cleaned_data
         true_to_continue = data_quality_clean_check_for_omic_metadata_gui(self, data)
         return true_to_continue
-    #
-    # def process_file(self, save=False, calledme='c'):
-    #     data = self.cleaned_data
-    #     data_file_pk = 0
-    #     if self.instance.id:
-    #         data_file_pk = self.instance.id
-    #     file_extension = os.path.splitext(data.get('omic_data_file').name)[1]
-    #     data_type = data['data_type']
-    #     header_type = data['header_type']
-    #     time_unit = data['time_unit']
-    #     analysis_method = data['analysis_method']
-    #
-    #     # HANDY for getting a file object and a file queryset when doing clean vrs save
-    #     if calledme == 'clean':
-    #         # this function is in utils.py
-    #         # print('form clean')
-    #         data_file = data.get('omic_data_file')
-    #         a_returned = omic_data_file_process_data(save, self.study.id, data_file_pk, data_file, file_extension, calledme, data_type, header_type, time_unit, analysis_method)
-    #     else:
-    #         # print('form save')
-    #         queryset = AssayOmicDataFileUpload.objects.get(id=data_file_pk)
-    #         data_file = queryset.omic_data_file.open()
-    #         a_returned = omic_data_file_process_data(save, self.study.id, data_file_pk, data_file, file_extension, calledme, data_type, header_type, time_unit, analysis_method)
-    #
-    #     return data
+
+    def process_metadata(self, save=False, calledme='c'):
+        data = self.cleaned_data
+        a_returned = process_the_omic_metadata(self, data)
+        return data
 
 # End omic sample metadata collection section
-

@@ -7507,6 +7507,7 @@ def find_the_labels_needed_for_the_indy_omic_table(called_from, study_id):
     return indy_omic_table
 
 
+# sub to here in utils.py
 def for_development_of_omic_counts_get_some_defaults():
     indy_list_of_column_labels = omic_metadata_collection_indy_list_of_column_labels
 
@@ -7731,6 +7732,47 @@ def data_quality_clean_check_for_omic_metadata_gui(self, data):
     # print('list_of_dicts ', list_of_dicts)
     indy_list_of_column_labels = omic_metadata_collection_indy_list_of_column_labels
 
+    list_of_sample_labels = []
+
+    # could be these conditions:
+    # 1 The list - has a dict that has a pk match to the Table (previous save)
+    # 2 The list - has a dict that has a null pk (new rows)
+    # 3 The existing table - has a pk that is not longer in the list of dicts (removed)
+    for dict in list_of_dicts:
+
+        for key, value in dict.items():
+            # print(key, '->'+str(value)+'<')
+
+            if key == 'matrix_item_pk' and len(str(value)) == 0:
+                true_to_continue = False
+                validation_message = 'One or more chip or well names is blank in the table.'
+                validation_message = validation_message
+                raise ValidationError(validation_message, code='invalid')
+            if key == 'sample_location_pk' and len(str(value)) == 0:
+                true_to_continue = False
+                validation_message = 'One or more sample locations is blank in the table.'
+                validation_message = validation_message
+                raise ValidationError(validation_message, code='invalid')
+            if key == 'Sample Label' and value in list_of_sample_labels:
+                true_to_continue = False
+                validation_message = 'It looks like a Sample Label is used more than once. Make Sample Labels unique.'
+                validation_message = validation_message
+                raise ValidationError(validation_message, code='invalid')
+            else:
+                list_of_sample_labels.append(value)
+
+    return true_to_continue
+
+
+# sck forms.py - qc for indy omic count metadata
+def process_the_omic_metadata(self, data):
+    true_to_continue = True
+    study_id = self.instance.id
+    # print('data ', data)
+    list_of_dicts = json.loads(self.data.get('indy_list_of_dicts_of_table_rows', '[]'))
+    # print('list_of_dicts ', list_of_dicts)
+    indy_list_of_column_labels = omic_metadata_collection_indy_list_of_column_labels
+
     # could be these conditions:
     # 1 The list - has a dict that has a pk match to the Table (previous save)
     # 2 The list - has a dict that has a null pk (new rows)
@@ -7739,17 +7781,16 @@ def data_quality_clean_check_for_omic_metadata_gui(self, data):
 
         for key, value in dict.items():
             print(key, '->'+str(value)+'<')
-
-            if key == 'matrix_item_pk' and len(str(value)) == 0:
-                true_to_continue = False
-                validation_message = 'One or more chip or well names is blank in the table.'
-                validation_message = validation_message
-                raise ValidationError(validation_message, code='invalid')
-            if key == 'sample_location_pk' and len(str(value)) == 0:
-                print("here ")
-                true_to_continue = False
-                validation_message = 'One or more sample locations is blank in the table.'
-                validation_message = validation_message
-                raise ValidationError(validation_message, code='invalid')
+        #     sample_label_queryset = AssayOmicSampleMetadata.objects.filter(
+        #         study_id=study_id,
+        #     )
+        #     sample_to_pk_dictionary = {}
+        #
+        #     for index, each in enumerate(sample_label_queryset):
+        #         sample_to_pk_dictionary[each.name] = each.id
+        #
+        # list_of_sample_labels = AssayOmicSampleMetadata.objects.filter(
+        #     study_id=study_id,
+        # ).values_list('sample_name', flat=True)
 
     return true_to_continue
